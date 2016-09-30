@@ -119,7 +119,6 @@ namespace Esprima.Test
                 options.Tolerant = true;
 
                 var actual = ParseAndFormat(script, options);
-                File.WriteAllText("actual.json", actual);
                 Assert.True(CompareTrees(actual, expected), jsFilePath);
             }
             else

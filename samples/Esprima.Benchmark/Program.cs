@@ -17,7 +17,7 @@ namespace Esprima.Benchmark
                 "jquery-1.9.1",
                 "yui-3.12.0",
                 "jquery.mobile-1.4.2",
-                "angular-1.5.6"
+                "angular-1.2.5"
             };
 
             foreach(var script in scripts)

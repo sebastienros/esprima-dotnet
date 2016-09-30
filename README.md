@@ -63,4 +63,4 @@ compared to the time it took for the same script using the original Esprima in C
 | jquery-1.9.1 | 271 KB | 44.2 ms | 36.2 ms |
 | yui-3.12.0| 341 KB | 27.6 ms | 33.4 ms |
 | jquery.mobile-1.4.2 | 456 K | 65.4 ms | 159.1 ms | 
-| angular-1.5.6 | 1158 KB | 94.9 ms | 98.4 ms |
+| angular-1.2.5 | 721 KB | 56.6 ms | 98.4 ms |
