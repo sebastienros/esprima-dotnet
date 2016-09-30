@@ -1,6 +1,6 @@
 **Esprima .NET** (BSD license) is a .NET port of the [esprima.org](http://esprima.org) project.
 It is a standard-compliant [ECMAScript](http://www.ecma-international.org/publications/standards/Ecma-262.htm)
-ECMAScript parser (also popularly known as
+parser (also popularly known as
 [JavaScript](https://en.wikipedia.org/wiki/JavaScript)).
 
 ### Features
@@ -49,3 +49,18 @@ Will return this when serialized in json:
     "sourceType": "script"
 }
 ```
+
+### Benchmarks
+
+Here is a list of common JavaScript libraries and the time it takes to parse them, 
+compared to the time it took for the same script using the original Esprima in Chrome.
+
+| Script | Size | Esprima .NET | Esprima (Chrome) |
+| --- | --- | --- | --- |
+| underscore-1.5.2 | 43 KB | 3.9 ms | 6.6 ms |
+| backbone-1.1.0 | 60 KB | 4.4 ms | 6.1 ms |
+| mootools-1.4.5 | 163 KB | 33.2 ms | 29.8 ms | 
+| jquery-1.9.1 | 271 KB | 44.2 ms | 36.2 ms |
+| yui-3.12.0| 341 KB | 27.6 ms | 33.4 ms |
+| jquery.mobile-1.4.2 | 456 K | 65.4 ms | 159.1 ms | 
+| angular-1.5.6 | 1158 KB | 94.9 ms | 98.4 ms |
