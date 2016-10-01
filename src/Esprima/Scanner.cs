@@ -28,103 +28,17 @@ namespace Esprima
         public int LineStart;
     }
 
-    public interface IErrorHandler
-    {
-        bool Tolerant { get; set; }
-        void RecordError(Error error);
-        void Tolerate(Error error);
-        void ThrowError(int index, int line, int column, string message);
-        void TolerateError(int index, int line, int column, string message);
-    }
-
-    public class ErrorHandler : IErrorHandler
-    {
-        public List<Error> Errors { get; }
-        public bool Tolerant { get; set; }
-
-        public ErrorHandler()
-        {
-            Errors = new List<Error>();
-            Tolerant = false;
-        }
-
-        public void RecordError(Error error)
-        {
-            Errors.Add(error);
-        }
-
-        public void Tolerate(Error error)
-        {
-            if (Tolerant)
-            {
-                RecordError(error);
-            }
-            else
-            {
-                throw error;
-            }
-        }
-
-        public void ThrowError(int index, int line, int column, string message)
-        {
-            throw this.CreateError(index, line, column, message);
-        }
-
-        public void TolerateError(int index, int line, int col, string description)
-        {
-            var error = this.CreateError(index, line, col, description);
-            if (Tolerant)
-            {
-                this.RecordError(error);
-            }
-            else
-            {
-                throw error;
-            }
-        }
-    }
-
-    public static class ErrorHandlerExtensions
-    {
-        public static Error CreateError(this IErrorHandler handler, int index, int line, int col, string description)
-        {
-            var msg = $"Line {line}': {description}";
-            var error = new Error(msg)
-            {
-                Index = index,
-                Column = col,
-                LineNumber = line,
-                Description = description
-            };
-            return error;
-        }
-    }
-
-    public class Error : Exception
-    {
-        public string Name { get; set; }
-        public int Index { get; set; }
-        public int LineNumber { get; set; }
-        public int Column { get; set; }
-        public string Description { get; set; }
-
-        public Error(string message) : base(message)
-        {
-        }
-    }
-
     public class Scanner
     {
-
-        public string Source;
-        public IErrorHandler ErrorHandler;
-        public bool TrackComment;
+        private IErrorHandler _errorHandler;
+        private bool _trackComment;
 
         public int Length;
+        public string Source;
         public int Index;
         public int LineNumber;
         public int LineStart;
-        public Stack<string> CurlyStack;
+        private Stack<string> _curlyStack;
 
         private StringBuilder strb = new StringBuilder();
 
@@ -188,21 +102,21 @@ namespace Esprima
             return ch - '0';
         }
 
-        public Scanner(string code) : this(code, new ErrorHandler())
+        public Scanner(string code) : this(code, new ErrorHandler(), false)
         {
         }
 
-        public Scanner(string code, IErrorHandler handler)
+        public Scanner(string code, IErrorHandler handler, bool trackComment)
         {
             Source = code;
-            ErrorHandler = handler;
-            TrackComment = false;
+            _errorHandler = handler;
+            _trackComment = trackComment;
 
             Length = code.Length;
             Index = 0;
             LineNumber = (code.Length > 0) ? 1 : 0;
             LineStart = 0;
-            CurlyStack = new Stack<string>();
+            _curlyStack = new Stack<string>();
         }
 
         public bool Eof()
@@ -212,12 +126,12 @@ namespace Esprima
 
         public void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
-            ErrorHandler.ThrowError(Index, LineNumber, Index - LineStart + 1, message);
+            _errorHandler.ThrowError(Index, LineNumber, Index - LineStart + 1, message);
         }
 
         public void TolerateUnexpectedToken()
         {
-            ErrorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, Messages.UnexpectedTokenIllegal);
+            _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, Messages.UnexpectedTokenIllegal);
         }
 
         private StringBuilder GetStringBuilder()
@@ -245,13 +159,8 @@ namespace Esprima
 
         // 7.6.1.1 Keywords
 
-        public bool IsKeyword(string id/*, bool strict*/)
+        public bool IsKeyword(string id)
         {
-            //if (strict && IsStrictModeReservedWord(id))
-            //{
-            //    return true;
-            //}
-
             return Keywords.Contains(id);
         }
 
@@ -263,7 +172,7 @@ namespace Esprima
             int start = 0;
             Loc loc = new Loc();
 
-            if (TrackComment)
+            if (_trackComment)
             {
                 comments = new List<Comment>();
                 start = Index - offset;
@@ -281,7 +190,7 @@ namespace Esprima
                 ++Index;
                 if (Character.IsLineTerminator(ch))
                 {
-                    if (TrackComment)
+                    if (_trackComment)
                     {
                         loc.End.Line = LineNumber;
                         loc.End.Column = Index - LineStart - 1;
@@ -307,7 +216,7 @@ namespace Esprima
                 }
             }
 
-            if (TrackComment) {
+            if (_trackComment) {
                 loc.End.Line = LineNumber;
                 loc.End.Column = Index - LineStart;
                 var entry = new Comment
@@ -331,7 +240,7 @@ namespace Esprima
             int start = 0;
             Loc loc = new Loc();
 
-            if (TrackComment)
+            if (_trackComment)
             {
                 comments = new List<Comment>();
                 start = Index - 2;
@@ -358,7 +267,7 @@ namespace Esprima
                     if (Source.CharCodeAt(Index + 1) == 0x2F)
                     {
                         Index += 2;
-                        if (TrackComment)
+                        if (_trackComment)
                         {
                             loc.End.Line = LineNumber;
                             loc.End.Column = Index - LineStart;
@@ -384,7 +293,7 @@ namespace Esprima
             }
 
             // Ran off the end of the file - the whole thing is a comment
-            if (TrackComment)
+            if (_trackComment)
             {
                 loc.End.Line = LineNumber;
                 loc.End.Column = Index - LineStart;
@@ -406,7 +315,7 @@ namespace Esprima
         public List<Comment> ScanComments()
         {
             List<Comment> comments = null;
-            if (TrackComment)
+            if (_trackComment)
             {
                 comments = new List<Comment>();
             }
@@ -438,7 +347,7 @@ namespace Esprima
                     {
                         Index += 2;
                         var comment = SkipSingleLineComment(2);
-                        if (TrackComment)
+                        if (_trackComment)
                         {
                             comments.AddRange(comment);
                         }
@@ -448,7 +357,7 @@ namespace Esprima
                     {  // U+002A is '*'
                         Index += 2;
                         var comment = SkipMultiLineComment();
-                        if (TrackComment)
+                        if (_trackComment)
                         {
                             comments.AddRange(comment);
                         }
@@ -466,7 +375,7 @@ namespace Esprima
                         // '-->' is a single-line comment
                         Index += 3;
                         var comment = SkipSingleLineComment(3);
-                        if (TrackComment)
+                        if (_trackComment)
                         {
                             comments.AddRange(comment);
                         }
@@ -482,7 +391,7 @@ namespace Esprima
                     {
                         Index += 4; // `<!--`
                         var comment = SkipSingleLineComment(4);
-                        if (TrackComment)
+                        if (_trackComment)
                         {
                             comments.AddRange(comment);
                         }
@@ -763,7 +672,7 @@ namespace Esprima
                 case '{':
                     if (str == '{')
                     {
-                        CurlyStack.Push("{");
+                        _curlyStack.Push("{");
                     }
                     token.Value = str.ToString();
                     ++Index;
@@ -784,7 +693,7 @@ namespace Esprima
 
                 case '}':
                     ++Index;
-                    CurlyStack.Pop();
+                    _curlyStack.Pop();
                     token.Value = str.ToString();
                     break;
 
@@ -1296,7 +1205,7 @@ namespace Esprima
                 {
                     if (Source[Index] == '{')
                     {
-                        CurlyStack.Push("${");
+                        _curlyStack.Push("${");
                         ++Index;
                         terminated = true;
                         break;
@@ -1406,7 +1315,7 @@ namespace Esprima
 
             if (!head)
             {
-                CurlyStack.Pop();
+                _curlyStack.Pop();
             }
 
             return new Token
@@ -1686,7 +1595,7 @@ namespace Esprima
 
             // Template literals start with ` (U+0060) for template head
             // or } (U+007D) for template middle or template tail.
-            if (cp == 0x60 || (cp == 0x7D && CurlyStack.Peek() == "${"))
+            if (cp == 0x60 || (cp == 0x7D && _curlyStack.Peek() == "${"))
             {
                 return ScanTemplate();
             }

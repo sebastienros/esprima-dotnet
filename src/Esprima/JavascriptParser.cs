@@ -1,32 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using Esprima.Ast;
 
 namespace Esprima
 {
     public class JavaScriptParser
     {
-        private Extra _extra;
 
-        private Token _lookahead;
-        private bool _hasLineTerminator;
-
-        private Context _context;
-        public List<Token> Tokens = new List<Token>();
-
-        private Marker _startMarker;
-        private Marker _lastMarker;
-
-        private Scanner _scanner;
-        private IErrorHandler _errorHandler;
-        private SourceType _sourceType = SourceType.Script;
+        private static readonly HashSet<string> AssignmentOperators = new HashSet<string>
+        {
+            "=", "*=", "**=", "/=", "%=","+=", "-=",
+            "<<=", ">>=", ">>>=", "&=", "^=", "|="
+        };
 
         private readonly Stack<IVariableScope> _variableScopes = new Stack<IVariableScope>();
         private readonly Stack<IFunctionScope> _functionScopes = new Stack<IFunctionScope>();
 
+        private Extra _extra;
+        private Token _lookahead;
+        private Context _context;
+        private Marker _startMarker;
+        private Marker _lastMarker;
+        private Scanner _scanner;
+        private IErrorHandler _errorHandler;
+        private SourceType _sourceType = SourceType.Script;
         private ParserOptions _config;
+        private bool _hasLineTerminator;
+
+        public List<Token> Tokens = new List<Token>();
 
         public JavaScriptParser(string code) : this(code, new ParserOptions())
         {
@@ -47,8 +49,7 @@ namespace Esprima
             _config = options;
             _errorHandler = _config.ErrorHandler;
             _errorHandler.Tolerant = _config.Tolerant;
-            _scanner = new Scanner(code, _errorHandler);
-            _scanner.TrackComment = _config.Comment;
+            _scanner = new Scanner(code, _errorHandler, _config.Comment);
 
             _sourceType = _config.SourceType;
 
@@ -92,94 +93,21 @@ namespace Esprima
             };
         }
 
-        // Throw an exception
-        private void ThrowError(string messageFormat, params object[] values)
+        // ECMA-262 15.1 Scripts
+        // ECMA-262 15.2 Modules
+
+        public Program ParseProgram()
         {
-            string msg = String.Format(messageFormat, values);
-
-            int index = _lastMarker.Index;
-            int line = _lastMarker.LineNumber;
-            int column = _lastMarker.Index - _lastMarker.LineStart + 1;
-            throw _errorHandler.CreateError(index, line, column, msg);
-        }
-
-        private void TolerateError(string messageFormat, params object[] values)
-        {
-            string msg = String.Format(messageFormat, values);
-
-            int index = _lastMarker.Index;
-            int line = _lastMarker.LineNumber;
-            int column = _lastMarker.Index - _lastMarker.LineStart + 1;
-            _errorHandler.TolerateError(index, line, column, msg);
-        }
-
-        // Throw an exception because of the token.
-
-        private Error UnexpectedTokenError(Token token, string message = null)
-        {
-            var msg = message ?? Messages.UnexpectedToken;
-            string value;
-
-            if (token != null)
+            var node = CreateNode();
+            var body = ParseDirectivePrologues();
+            while (_startMarker.Index < _scanner.Length)
             {
-                if (message == null)
-                {
-                    msg = (token.Type == TokenType.EOF) ? Messages.UnexpectedEOS :
-                        (token.Type == TokenType.Identifier) ? Messages.UnexpectedIdentifier :
-                            (token.Type == TokenType.NumericLiteral) ? Messages.UnexpectedNumber :
-                                (token.Type == TokenType.StringLiteral) ? Messages.UnexpectedString :
-                                    (token.Type == TokenType.Template) ? Messages.UnexpectedTemplate :
-                                        Messages.UnexpectedToken;
-
-                    if (token.Type == TokenType.Keyword)
-                    {
-                        if (_scanner.IsFutureReservedWord((string)token.Value))
-                        {
-                            msg = Messages.UnexpectedReserved;
-                        }
-                        else if (_context.Strict && _scanner.IsStrictModeReservedWord((string)token.Value))
-                        {
-                            msg = Messages.StrictReservedWord;
-                        }
-                    }
-                }
-
-                value = (token.Type == TokenType.Template) ? token.RawTemplate : Convert.ToString(token.Value);
+                body.Push(ParseStatementListItem());
             }
-            else
-            {
-                value = "ILLEGAL";
-            }
-
-            msg = String.Format(msg, value);
-
-            if (token != null && token.LineNumber > 0)
-            {
-                var index = token.Start;
-                var line = token.LineNumber;
-                var column = token.Start - _lastMarker.LineStart + 1;
-                return _errorHandler.CreateError(index, line, column, msg);
-            }
-            else
-            {
-                var index = _lastMarker.Index;
-                var line = _lastMarker.LineNumber;
-                var column = index - _lastMarker.LineStart + 1;
-                return _errorHandler.CreateError(index, line, column, msg);
-            }
+            return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType));
         }
 
-        public void ThrowUnexpectedToken(Token token = null, string message = null)
-        {
-            throw UnexpectedTokenError(token, message);
-        }
-
-        public void TolerateUnexpectedToken(Token token, string message = null)
-        {
-            _errorHandler.Tolerate(UnexpectedTokenError(token, message));
-        }
-
-        public void CollectComments()
+        private void CollectComments()
         {
             if (!_config.Comment)
             {
@@ -418,19 +346,8 @@ namespace Esprima
                 return false;
             }
             var op = (string)_lookahead.Value;
-            return op == "=" ||
-                   op == "*=" ||
-                   op == "**=" ||
-                   op == "/=" ||
-                   op == "%=" ||
-                   op == "+=" ||
-                   op == "-=" ||
-                   op == "<<=" ||
-                   op == ">>=" ||
-                   op == ">>>=" ||
-                   op == "&=" ||
-                   op == "^=" ||
-                   op == "|=";
+
+            return AssignmentOperators.Contains(op);
         }
 
         // Cover grammar support.
@@ -506,6 +423,7 @@ namespace Esprima
 
             return result;
         }
+
         private void ConsumeSemicolon()
         {
             if (Match(";"))
@@ -661,8 +579,12 @@ namespace Esprima
             return expr;
         }
 
-        // Return true if provided expression is LeftHandSideExpression
 
+        /// <summary>
+        /// Return true if provided expression is LeftHandSideExpression
+        /// </summary>
+        /// <param name="expr"></param>
+        /// <returns></returns>
         private bool IsLeftHandSide(Expression expr)
         {
             return expr.Type == Nodes.Identifier || expr.Type == Nodes.MemberExpression;
@@ -928,23 +850,6 @@ namespace Esprima
 
             return Finalize(node, new Property(kind, key, computed, value, method, shorthand));
         }
-
-        //private FunctionExpression ParsePropertyFunction(Identifier[] parameters, Token first = null)
-        //{
-        //    EnterVariableScope();
-        //    EnterFunctionScope();
-
-        //    bool previousStrict = _strict;
-        //    MarkStart();
-        //    Statement body = ParseFunctionSourceElements();
-        //    if (first != null && _strict && _scanner.IsRestrictedWord(parameters[0].Name))
-        //    {
-        //        ThrowErrorTolerant(first, Messages.StrictParamName);
-        //    }
-        //    bool functionStrict = _strict;
-        //    _strict = previousStrict;
-        //    return MarkEnd(CreateFunctionExpression(null, parameters, new Expression[0], body, functionStrict));
-        //}
 
         private ObjectExpression ParseObjectInitializer()
         {
@@ -1268,7 +1173,7 @@ namespace Esprima
             return args;
         }
 
-        public bool IsIdentifierName(Token token)
+        private bool IsIdentifierName(Token token)
         {
             return token.Type == TokenType.Identifier ||
                 token.Type == TokenType.Keyword ||
@@ -1535,7 +1440,7 @@ namespace Esprima
             return expr;
         }
 
-        public Expression ParseExponentiationExpression()
+        private Expression ParseExponentiationExpression()
         {
             var startToken = _lookahead;
 
@@ -3754,20 +3659,6 @@ namespace Esprima
             return Finalize(node, new ClassExpression(id, superClass.As<PropertyKey>(), classBody));
         }
 
-        // ECMA-262 15.1 Scripts
-        // ECMA-262 15.2 Modules
-
-        public Program ParseProgram()
-        {
-            var node = CreateNode();
-            var body = ParseDirectivePrologues();
-            while (_startMarker.Index < _scanner.Length)
-            {
-                body.Push(ParseStatementListItem());
-            }
-            return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType));
-        }
-
         // ECMA-262 15.2.2 Imports
 
         private Literal ParseModuleSpecifier()
@@ -4061,40 +3952,118 @@ namespace Esprima
 
             return exportDeclaration;
         }
+
+        private void ThrowError(string messageFormat, params object[] values)
+        {
+            string msg = String.Format(messageFormat, values);
+
+            int index = _lastMarker.Index;
+            int line = _lastMarker.LineNumber;
+            int column = _lastMarker.Index - _lastMarker.LineStart + 1;
+            throw _errorHandler.CreateError(index, line, column, msg);
+        }
+
+        private void TolerateError(string messageFormat, params object[] values)
+        {
+            string msg = String.Format(messageFormat, values);
+
+            int index = _lastMarker.Index;
+            int line = _lastMarker.LineNumber;
+            int column = _lastMarker.Index - _lastMarker.LineStart + 1;
+            _errorHandler.TolerateError(index, line, column, msg);
+        }
+
+
+        private Error UnexpectedTokenError(Token token, string message = null)
+        {
+            var msg = message ?? Messages.UnexpectedToken;
+            string value;
+
+            if (token != null)
+            {
+                if (message == null)
+                {
+                    msg = (token.Type == TokenType.EOF) ? Messages.UnexpectedEOS :
+                        (token.Type == TokenType.Identifier) ? Messages.UnexpectedIdentifier :
+                            (token.Type == TokenType.NumericLiteral) ? Messages.UnexpectedNumber :
+                                (token.Type == TokenType.StringLiteral) ? Messages.UnexpectedString :
+                                    (token.Type == TokenType.Template) ? Messages.UnexpectedTemplate :
+                                        Messages.UnexpectedToken;
+
+                    if (token.Type == TokenType.Keyword)
+                    {
+                        if (_scanner.IsFutureReservedWord((string)token.Value))
+                        {
+                            msg = Messages.UnexpectedReserved;
+                        }
+                        else if (_context.Strict && _scanner.IsStrictModeReservedWord((string)token.Value))
+                        {
+                            msg = Messages.StrictReservedWord;
+                        }
+                    }
+                }
+
+                value = (token.Type == TokenType.Template) ? token.RawTemplate : Convert.ToString(token.Value);
+            }
+            else
+            {
+                value = "ILLEGAL";
+            }
+
+            msg = String.Format(msg, value);
+
+            if (token != null && token.LineNumber > 0)
+            {
+                var index = token.Start;
+                var line = token.LineNumber;
+                var column = token.Start - _lastMarker.LineStart + 1;
+                return _errorHandler.CreateError(index, line, column, msg);
+            }
+            else
+            {
+                var index = _lastMarker.Index;
+                var line = _lastMarker.LineNumber;
+                var column = index - _lastMarker.LineStart + 1;
+                return _errorHandler.CreateError(index, line, column, msg);
+            }
+        }
+
+        private void ThrowUnexpectedToken(Token token = null, string message = null)
+        {
+            throw UnexpectedTokenError(token, message);
+        }
+
+        private void TolerateUnexpectedToken(Token token, string message = null)
+        {
+            _errorHandler.Tolerate(UnexpectedTokenError(token, message));
+        }
+
+        private class ParsedParameters
+        {
+            public Token FirstRestricted;
+            public string Message;
+            public List<INode> Parameters = new List<INode>();
+            public Token Stricted;
+            public HashSet<string> ParamSet = new HashSet<string>();
+        }
+
+        private class Extra
+        {
+            public int? Loc;
+            public int[] Range;
+            public string Source;
+
+            public List<Comment> Comments = new List<Comment>();
+        }
+
+        private class DeclarationOptions
+        {
+            public bool inFor { get; set; }
+        }
+
+        public class HasConstructorOptions
+        {
+            public bool Value { get; set; }
+        }
     }
-
-    public class ParsedParameters
-    {
-        public Token FirstRestricted;
-        public string Message;
-        public List<INode> Parameters = new List<INode>();
-        public Token Stricted;
-        public HashSet<string> ParamSet = new HashSet<string>();
-    }
-
-    public enum SourceType
-    {
-        Module,
-        Script
-    }
-
-    public class Extra
-    {
-        public int? Loc;
-        public int[] Range;
-        public string Source;
-
-        public List<Comment> Comments = new List<Comment>();
-    }
-
-    public class DeclarationOptions
-    {
-        public bool inFor { get; set; }
-    }
-
-    public class HasConstructorOptions
-    {
-        public bool Value { get; set; }
-    }
-
 }
