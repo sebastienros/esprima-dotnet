@@ -28,8 +28,8 @@ namespace Esprima.Benchmark
 
         public static void Bench(string script)
         {
-            var repeat = 20;
-            var exclude = 3;
+            var repeat = 120;
+            var exclude = 10;
 
             var filename = $"../../test/Esprima.Tests/Fixtures/3rdparty/{script}.js";
             var content = File.ReadAllText(filename);
