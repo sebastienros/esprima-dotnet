@@ -1,5 +1,20 @@
 {
   "version": "1.0.0-alpha-001",
+  "title": "Esprima .NET",
+  "description": "Standard-compliant ECMAScript 2016 parser (also popularly known as JavaScript).",
+  "language": "en-US",
+  "copyright": "Sebastien Ros",
+  "authors": [ "Sebastien Ros" ],
+  "packOptions": {
+    "projectUrl": "https://github.com/sebastienros/esprima-dotnet",
+    "tags": [ "javascript, parser" ],
+    "licenseUrl": "https://raw.githubusercontent.com/sebastienros/esprima-dotnet/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/sebastienros/esprima-dotnet"
+    }
+  },
+
 
   "dependencies": {
     "NETStandard.Library": "1.6.0",
