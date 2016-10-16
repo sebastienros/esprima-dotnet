@@ -1,3 +1,6 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/bai029h4iajmwcni?svg=true)](https://ci.appveyor.com/project/SebastienRos/esprima-dotnet)
+[![NuGet](https://img.shields.io/nuget/v/esprima.svg)](https://www.nuget.org/packages/esprima)
+
 **Esprima .NET** (BSD license) is a .NET port of the [esprima.org](http://esprima.org) project.
 It is a standard-compliant [ECMAScript](http://www.ecma-international.org/publications/standards/Ecma-262.htm)
 parser (also popularly known as
