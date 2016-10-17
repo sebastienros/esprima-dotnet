@@ -3819,7 +3819,7 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            var local = MatchKeyword("default") ? ParseNonComputedProperty() : ParseVariableIdentifier();
+            var local = ParseNonComputedProperty();
             var exported = local;
             if (MatchContextualKeyword("as"))
             {
