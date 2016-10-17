@@ -1457,13 +1457,15 @@ namespace Esprima
 
             return expr;
         }
-        // ECMA-262 12.6 Multiplicative Operators
-        // ECMA-262 12.7 Additive Operators
-        // ECMA-262 12.8 Bitwise Shift Operators
-        // ECMA-262 12.9 Relational Operators
-        // ECMA-262 12.10 Equality Operators
-        // ECMA-262 12.11 Binary Bitwise Operators
-        // ECMA-262 12.12 Binary Logical Operators
+
+        // ECMA-262 12.6 Exponentiation Operators
+        // ECMA-262 12.7 Multiplicative Operators
+        // ECMA-262 12.8 Additive Operators
+        // ECMA-262 12.9 Bitwise Shift Operators
+        // ECMA-262 12.10 Relational Operators
+        // ECMA-262 12.11 Equality Operators
+        // ECMA-262 12.12 Binary Bitwise Operators
+        // ECMA-262 12.13 Binary Logical Operators
 
         private int BinaryPrecedence(Token token)
         {
@@ -1614,7 +1616,7 @@ namespace Esprima
         }
 
 
-        // ECMA-262 12.13 Conditional Operator
+        // ECMA-262 12.14 Conditional Operator
 
         private Expression ParseConditionalExpression()
         {
@@ -1641,7 +1643,7 @@ namespace Esprima
             return expr;
         }
 
-        // ECMA-262 12.14 Assignment Operators
+        // ECMA-262 12.15 Assignment Operators
 
         private void CheckPatternParam(ParsedParameters options, INode param)
         {
@@ -1847,7 +1849,7 @@ namespace Esprima
             return expr.As<Expression>();
         }
 
-        // ECMA-262 12.15 Comma Operator
+        // ECMA-262 12.16 Comma Operator
 
         private Expression ParseExpression()
         {
@@ -3438,7 +3440,7 @@ namespace Esprima
             return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator));
         }
 
-        // ECMA-262 14.4 Yield expression
+        // ECMA-262 14.4 Generator Function Definitions
 
         private YieldExpression ParseYieldExpression()
         {
