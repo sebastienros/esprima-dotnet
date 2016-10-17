@@ -2414,6 +2414,12 @@ namespace Esprima
 
                     if (declarations.Count == 1 && MatchKeyword("in"))
                     {
+                        var decl = declarations[0];
+                        if (decl.Init != null && (decl.Id.Type == Nodes.ArrayPattern || decl.Id.Type == Nodes.ObjectPattern || _context.Strict))
+                        {
+                            TolerateError(Messages.ForInOfLoopInitializer, "for-in");
+                        }
+
                         left = Finalize(initNode, new VariableDeclaration(declarations, "var"));
                         NextToken();
                         right = ParseExpression();
