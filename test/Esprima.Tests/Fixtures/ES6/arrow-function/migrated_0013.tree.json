@@ -9,7 +9,6 @@
                 "params": [
                     {
                         "type": "AssignmentPattern",
-                        // "operator": "=", sebastienros: Assignment pattern should not have 'operator'
                         "left": {
                             "type": "Identifier",
                             "name": "eval",

@@ -216,7 +216,6 @@
                                     }
                                 },
                                 "type": "AssignmentPattern",
-                                // "operator": "=", should be deleted by esprima during conversion, is not
                                 "left": {
                                     "range": [
                                         25,

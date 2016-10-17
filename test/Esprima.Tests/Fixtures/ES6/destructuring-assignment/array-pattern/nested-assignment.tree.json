@@ -85,7 +85,6 @@
                                 }
                             },
                             "type": "AssignmentPattern",
-                            // "operator": "=", should be deleted by esprima during conversion, is not
                             "left": {
                                 "range": [
                                     3,
@@ -140,7 +139,6 @@
                                 }
                             },
                             "type": "AssignmentPattern",
-                            // "operator": "=", should be deleted by esprima during conversion, is not
                             "left": {
                                 "range": [
                                     7,
