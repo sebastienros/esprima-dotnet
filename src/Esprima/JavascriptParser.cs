@@ -2484,7 +2484,7 @@ namespace Esprima
 
                     if (MatchKeyword("in"))
                     {
-                        if (!_context.IsAssignmentTarget)
+                        if (!_context.IsAssignmentTarget || init.Type == Nodes.AssignmentExpression)
                         {
                             TolerateError(Messages.InvalidLHSInForIn);
                         }
@@ -2497,7 +2497,7 @@ namespace Esprima
                     }
                     else if (MatchContextualKeyword("of"))
                     {
-                        if (!_context.IsAssignmentTarget)
+                        if (!_context.IsAssignmentTarget || init.Type == Nodes.AssignmentExpression)
                         {
                             TolerateError(Messages.InvalidLHSInForLoop);
                         }
