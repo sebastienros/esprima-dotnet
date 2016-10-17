@@ -542,7 +542,7 @@ namespace Esprima
 
                     if (!_context.Strict && _context.AllowYield && MatchKeyword("yield"))
                     {
-                        expr = ParseNonComputedProperty();
+                        expr = ParseIdentifierName();
                     }
                     else if (!_context.Strict && MatchKeyword("let"))
                     {
@@ -1181,7 +1181,7 @@ namespace Esprima
                 token.Type == TokenType.NullLiteral;
         }
 
-        private Identifier ParseNonComputedProperty()
+        private Identifier ParseIdentifierName()
         {
             var node = CreateNode();
 
@@ -1198,7 +1198,7 @@ namespace Esprima
         private Node ParseNewExpression()
         {
             var node = CreateNode();
-            var id = ParseNonComputedProperty();
+            var id = ParseIdentifierName();
 
             // assert(id.name == 'new', 'New expression must start with `new`');
 
@@ -1209,7 +1209,7 @@ namespace Esprima
                 NextToken();
                 if (_lookahead.Type == TokenType.Identifier && _context.InFunctionBody && "target".Equals(_lookahead.Value))
                 {
-                    var property = ParseNonComputedProperty();
+                    var property = ParseIdentifierName();
                     expr = new MetaProperty(id, property);
                 }
                 else
@@ -1258,7 +1258,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     _context.IsAssignmentTarget = true;
                     Expect(".");
-                    var property = ParseNonComputedProperty();
+                    var property = ParseIdentifierName();
                     expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property));
 
                 }
@@ -1337,7 +1337,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     _context.IsAssignmentTarget = true;
                     Expect(".");
-                    var property = ParseNonComputedProperty();
+                    var property = ParseIdentifierName();
                     expr = Finalize(node, new StaticMemberExpression(expr, property));
 
                 }
@@ -3249,7 +3249,7 @@ namespace Esprima
             if (!Match("("))
             {
                 var token = _lookahead;
-                id = (!_context.Strict && !isGenerator && MatchKeyword("yield")) ? ParseNonComputedProperty() : ParseVariableIdentifier();
+                id = (!_context.Strict && !isGenerator && MatchKeyword("yield")) ? ParseIdentifierName() : ParseVariableIdentifier();
                 if (_context.Strict)
                 {
                     if (_scanner.IsRestrictedWord((string)token.Value))
@@ -3687,7 +3687,7 @@ namespace Esprima
             var node = CreateNode();
 
             Identifier local;
-            var imported = ParseNonComputedProperty();
+            var imported = ParseIdentifierName();
             if (MatchContextualKeyword("as"))
             {
                 NextToken();
@@ -3723,7 +3723,7 @@ namespace Esprima
         private ImportDefaultSpecifier ParseImportDefaultSpecifier()
         {
             var node = CreateNode();
-            var local = ParseNonComputedProperty();
+            var local = ParseIdentifierName();
             return Finalize(node, new ImportDefaultSpecifier(local));
         }
 
@@ -3738,7 +3738,7 @@ namespace Esprima
                 ThrowError(Messages.NoAsAfterImportNamespace);
             }
             NextToken();
-            var local = ParseNonComputedProperty();
+            var local = ParseIdentifierName();
 
             return Finalize(node, new ImportNamespaceSpecifier(local));
         }
@@ -3819,12 +3819,12 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            var local = ParseNonComputedProperty();
+            var local = ParseIdentifierName();
             var exported = local;
             if (MatchContextualKeyword("as"))
             {
                 NextToken();
-                exported = ParseNonComputedProperty();
+                exported = ParseIdentifierName();
             }
 
             return Finalize(node, new ExportSpecifier(local, exported));
