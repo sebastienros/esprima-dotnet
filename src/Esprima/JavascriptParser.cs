@@ -3624,7 +3624,7 @@ namespace Esprima
             return Finalize(node, new ClassBody(elementList));
         }
 
-        private ClassDeclaration ParseClassDeclaration()
+        private ClassDeclaration ParseClassDeclaration(bool identifierIsOptional = false)
         {
             var node = CreateNode();
 
@@ -3632,7 +3632,7 @@ namespace Esprima
             _context.Strict = true;
             ExpectKeyword("class");
 
-            var id = ParseVariableIdentifier();
+            var id = (identifierIsOptional && (_lookahead.Type != TokenType.Identifier)) ? null : this.ParseVariableIdentifier();
             Expression superClass = null;
             if (MatchKeyword("extends"))
             {
@@ -3855,12 +3855,12 @@ namespace Esprima
                 else if (MatchKeyword("class"))
                 {
                     // export default class foo {}
-                    var classExpression = ParseClassExpression();
-                    var declaration = new ClassDeclaration(classExpression.Id, classExpression.SuperClass, classExpression.Body)
-                    {
-                        Location = classExpression.Location,
-                        Range = classExpression.Range
-                    };
+                    var declaration = ParseClassDeclaration(true);
+                    //var declaration = new ClassDeclaration(classExpression.Id, classExpression.SuperClass, classExpression.Body)
+                    //{
+                    //    Location = classExpression.Location,
+                    //    Range = classExpression.Range
+                    //};
                     exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
                 }
                 else
