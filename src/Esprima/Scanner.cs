@@ -198,7 +198,7 @@ namespace Esprima
                         Comment entry = new Comment
                         {
                             MultiLine = false,
-                            Slice = new int[start + offset, Index - 1],
+                            Slice = new int[] { start + offset, Index - 1 },
                             Start = start,
                             End = Index - 1,
                             Loc = loc
@@ -222,7 +222,7 @@ namespace Esprima
                 var entry = new Comment
                 {
                     MultiLine = false,
-                    Slice = new int[start + offset, Index],
+                    Slice = new int[] { start + offset, Index },
                     Start = start,
                     End = Index,
                     Loc = loc
@@ -275,7 +275,7 @@ namespace Esprima
                             var entry = new Comment
                             {
                                 MultiLine = true,
-                                Slice = new int[start + 2, Index - 2],
+                                Slice = new int[] { start + 2, Index - 2 },
                                 Start = start,
                                 End = Index,
                                 Loc = loc
@@ -300,7 +300,7 @@ namespace Esprima
                 var entry = new Comment
                 {
                     MultiLine = true,
-                    Slice = new int[start + 2, Index],
+                    Slice = new int[] { start + 2, Index },
                     Start = start,
                     End = Index,
                     Loc = loc

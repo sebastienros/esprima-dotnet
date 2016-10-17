@@ -144,5 +144,16 @@ namespace Esprima.Test
                 .Select(x => new object[] { x })
                 .ToList();
         }
+
+        [Fact]
+        public void CommentsAreParsed()
+        {
+            int count = 0;
+            Action<INode> action = node => count++;
+            var parser = new JavaScriptParser("// this is a comment", new ParserOptions(), action);
+            parser.ParseProgram();
+
+            Assert.Equal(1, count);
+        }
     }
 }

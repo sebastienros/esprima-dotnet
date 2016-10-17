@@ -17,7 +17,6 @@ namespace Esprima
         private readonly Stack<IVariableScope> _variableScopes = new Stack<IVariableScope>();
         private readonly Stack<IFunctionScope> _functionScopes = new Stack<IFunctionScope>();
 
-        private Extra _extra;
         private Token _lookahead;
         private Context _context;
         private Marker _startMarker;
@@ -27,6 +26,7 @@ namespace Esprima
         private SourceType _sourceType = SourceType.Script;
         private ParserOptions _config;
         private bool _hasLineTerminator;
+        private Action<INode> _action;
 
         public List<Token> Tokens = new List<Token>();
 
@@ -34,7 +34,11 @@ namespace Esprima
         {
         }
 
-        public JavaScriptParser(string code, ParserOptions options)
+        public JavaScriptParser(string code, ParserOptions options) : this(code, options, null)
+        {
+        }
+
+        public JavaScriptParser(string code, ParserOptions options, Action<INode> _action)
         {
             if (code == null)
             {
@@ -47,13 +51,12 @@ namespace Esprima
             }
 
             _config = options;
+            this._action = _action;
             _errorHandler = _config.ErrorHandler;
             _errorHandler.Tolerant = _config.Tolerant;
             _scanner = new Scanner(code, _errorHandler, _config.Comment);
 
             _sourceType = _config.SourceType;
-
-            _extra = new Extra();
 
             _context = new Context
             {
@@ -116,7 +119,28 @@ namespace Esprima
             else
             {
                 var comments = _scanner.ScanComments();
-                // TODO: Support comments
+
+                if (comments.Count > 0)
+                {
+                    for (var i = 0; i < comments.Count; ++i)
+                    {
+                        var e = comments[i];
+                        var node = new Comment();
+                        node.Type = e.MultiLine ? CommentType.Block : CommentType.Line;
+                        node.Value = _scanner.Source.Slice(e.Slice[0], e.Slice[1]);
+
+                        if (_config.Range)
+                        {
+                            node.Start = e.Start;
+                            node.End = e.End;
+                        }
+
+                        if (_config.Loc)
+                        {
+                            node.Loc = e.Loc;
+                        }
+                    };
+                }
             }
         }
 
@@ -256,6 +280,8 @@ namespace Esprima
                     node.Location.Source = _config.Source;
                 }
             }
+
+            _action?.Invoke(node);
 
             return node;
         }
@@ -4053,15 +4079,6 @@ namespace Esprima
             public List<INode> Parameters = new List<INode>();
             public Token Stricted;
             public HashSet<string> ParamSet = new HashSet<string>();
-        }
-
-        private class Extra
-        {
-            public int? Loc;
-            public int[] Range;
-            public string Source;
-
-            public List<Comment> Comments = new List<Comment>();
         }
 
         private class DeclarationOptions
