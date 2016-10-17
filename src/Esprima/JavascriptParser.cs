@@ -2155,7 +2155,7 @@ namespace Esprima
             {
                 if (MatchKeyword("let") && (kind == "const" || kind == "let"))
                 {
-                    TolerateUnexpectedToken(_lookahead, Messages.UnexpectedToken);
+                    TolerateUnexpectedToken(_lookahead, Messages.LetInLexicalBinding);
                 }
                 parameters.Push(_lookahead);
                 pattern = ParseVariableIdentifier(kind);

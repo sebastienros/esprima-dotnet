@@ -54,5 +54,6 @@
         public const string IllegalExportDeclaration = "Unexpected token";
         public const string DuplicateBinding = "Duplicate binding {0}";
         public const string DeclarationMissingInitializer = "Missing initializer in {0} declaration";
+        public const string LetInLexicalBinding = "let is disallowed as a lexically bound name";
     };
 }
