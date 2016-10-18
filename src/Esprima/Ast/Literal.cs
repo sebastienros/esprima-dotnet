@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Esprima.Ast
 {
@@ -87,6 +86,11 @@ namespace Esprima.Ast
             Regex = new RegexValue { Pattern = pattern, Flags = flags };
             TokenType = TokenType.RegularExpression;
             Raw = raw;
+        }
+
+        string PropertyKey.GetKey()
+        {
+            return StringValue;
         }
     }
 }

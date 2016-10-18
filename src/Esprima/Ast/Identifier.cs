@@ -12,5 +12,10 @@ namespace Esprima.Ast
             Type = Nodes.Identifier;
             Name = name;
         }
+
+        string PropertyKey.GetKey()
+        {
+            return Name;
+        }
     }
 }

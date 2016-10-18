@@ -2,5 +2,6 @@
 {
     public interface PropertyKey : INode
     {
+        string GetKey();
     }
 }
