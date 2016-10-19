@@ -29,5 +29,23 @@ namespace Esprima.Ast
             //VariableDeclarations = LeaveVariableScope(),
             //FunctionDeclarations = LeaveFunctionScope()
         }
+
+        public bool IsStrict()
+        {
+            foreach (var statement in Body.Body)
+            {
+                // A directive uses Tokens.Expression, so it can't
+                // be detected using Type
+                var directive = statement as Directive;
+                if (directive == null)
+                {
+                    return false;
+                }
+
+                return directive.Directiv == "use strict";
+            }
+
+            return false;
+        }
     }
 }
