@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class BlockStatement : Node, Statement
+    public class BlockStatement : Statement
     {
         public IEnumerable<StatementListItem> Body;
 

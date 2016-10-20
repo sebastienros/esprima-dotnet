@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class ContinueStatement : Node,
-        Statement
+    public class ContinueStatement : Statement
     {
         public Identifier Label;
 

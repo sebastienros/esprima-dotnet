@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class BreakStatement : Node,
-        Statement
+    public class BreakStatement : Statement
     {
         public Identifier Label;
 

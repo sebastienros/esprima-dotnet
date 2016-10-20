@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class ReturnStatement : Node,
-        Statement
+    public class ReturnStatement : Statement
     {
         public Expression Argument;
 

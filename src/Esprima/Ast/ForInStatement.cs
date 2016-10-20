@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class ForInStatement : Node,
-        Statement
+    public class ForInStatement : Statement
     {
         public INode Left;
         public Expression Right;

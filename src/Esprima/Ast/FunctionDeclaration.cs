@@ -1,11 +1,8 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Esprima.Ast
 {
-    public class FunctionDeclaration : Node,
-        Declaration,
-        Statement
+    public class FunctionDeclaration : Statement, Declaration
     {
         public Identifier Id;
         public IEnumerable<INode> Params;

@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ExportSpecifier : Node, Statement
+    public class ExportSpecifier : Statement
     {
         public Identifier Exported;
         public Identifier Local;

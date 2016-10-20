@@ -2,8 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class TryStatement : Node,
-        Statement
+    public class TryStatement : Statement
     {
         public Statement Block;
         public CatchClause Handler;

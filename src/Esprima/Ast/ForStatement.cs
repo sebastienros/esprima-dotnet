@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class ForStatement : Node,
-        Statement
+    public class ForStatement : Statement
     {
         // can be a Statement (var i) or an Expression (i=0)
         public INode Init;

@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class DebuggerStatement: Node,
-        Statement
+    public class DebuggerStatement: Statement
     {
         public DebuggerStatement()
         {

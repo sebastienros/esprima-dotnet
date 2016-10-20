@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class DoWhileStatement : Node,
-        Statement
+    public class DoWhileStatement : Statement
     {
         public Statement Body;
         public Expression Test;
@@ -12,6 +11,5 @@ namespace Esprima.Ast
             Body = body;
             Test = test;
         }
-
     }
 }

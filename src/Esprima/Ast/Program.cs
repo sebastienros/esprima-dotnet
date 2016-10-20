@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Esprima.Ast
 {
-    public class Program : Node, Statement/*, IVariableScope, IFunctionScope*/
+    public class Program : Statement/*, IVariableScope, IFunctionScope*/
     {
         public IEnumerable<StatementListItem> Body;
 

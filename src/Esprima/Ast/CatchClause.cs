@@ -1,6 +1,6 @@
 namespace Esprima.Ast
 {
-    public class CatchClause : Node, Statement
+    public class CatchClause : Statement
     {
         public ArrayPatternElement Param; // BindingIdentifier | BindingPattern;
         public BlockStatement Body;

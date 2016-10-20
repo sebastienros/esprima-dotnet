@@ -2,9 +2,8 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class VariableDeclaration : Node,
-        Declaration,
-        Statement
+    public class VariableDeclaration : Statement,
+        Declaration
     {
         public IEnumerable<VariableDeclarator> Declarations;
         public string Kind;

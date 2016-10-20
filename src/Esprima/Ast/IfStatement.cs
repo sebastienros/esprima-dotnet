@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class IfStatement : Node,
-        Statement
+    public class IfStatement : Statement
     {
         public Expression Test;
         public Statement Consequent;

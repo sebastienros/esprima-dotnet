@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class EmptyStatement : Node,
-        Statement
+    public class EmptyStatement : Statement
     {
         public EmptyStatement()
         {

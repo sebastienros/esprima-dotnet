@@ -1,7 +1,6 @@
 namespace Esprima.Ast
 {
-    public class WhileStatement : Node,
-        Statement
+    public class WhileStatement : Statement
     {
         public Expression Test;
         public Statement Body;

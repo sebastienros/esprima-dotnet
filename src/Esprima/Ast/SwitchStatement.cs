@@ -2,8 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class SwitchStatement : Node,
-        Statement
+    public class SwitchStatement : Statement
     {
         public Expression Discriminant;
         public IEnumerable<SwitchCase> Cases;

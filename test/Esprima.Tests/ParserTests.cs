@@ -53,5 +53,17 @@ namespace Esprima.Tests
 
             Assert.True(function.IsStrict());
         }
+
+        [Fact]
+        public void LabelSetShouldPointToStatement()
+        {
+            var parser = new JavaScriptParser("here: Hello();");
+            var program = parser.ParseProgram();
+            var labeledStatement = program.Body.First().As<LabeledStatement>();
+            var body = labeledStatement.Body;
+
+            Assert.Equal(labeledStatement.Label, body.LabelSet);
+        }
+
     }
 }

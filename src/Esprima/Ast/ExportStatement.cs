@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Ast
 {
-    public class ExportStatement : Node, Statement
+    public class ExportStatement : Statement
     {
         public Expression Expression;
         public ExportStatement(Expression expression)

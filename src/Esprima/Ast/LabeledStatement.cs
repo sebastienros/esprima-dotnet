@@ -1,6 +1,6 @@
 namespace Esprima.Ast
 {
-    public class LabeledStatement : Node, Statement
+    public class LabeledStatement : Statement
     {
         public Identifier Label;
         public Statement Body;
@@ -10,6 +10,7 @@ namespace Esprima.Ast
             Type = Nodes.LabeledStatement;
             Label = label;
             Body = body;
+            body.LabelSet = label;
         }
 
     }
