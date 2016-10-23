@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class FunctionDeclaration : Statement, Declaration
+    public class FunctionDeclaration : Statement, Declaration, IFunction
     {
-        public Identifier Id;
-        public IEnumerable<INode> Params;
-        public BlockStatement Body;
-        public bool Generator;
-        public bool Expression;
+        public Identifier Id { get; set; }
+        public IEnumerable<INode> Params { get; set; }
+        public BlockStatement Body { get; set; }
+        public bool Generator { get; set; }
+        public bool Expression { get; set; }
 
         public FunctionDeclaration(
             Identifier id,
@@ -25,24 +25,6 @@ namespace Esprima.Ast
             Expression = false;
             //VariableDeclarations = LeaveVariableScope(),
             //FunctionDeclarations = LeaveFunctionScope()
-        }
-
-        public bool IsStrict()
-        {
-            foreach (var statement in Body.Body)
-            {
-                // A directive uses Tokens.Expression, so it can't
-                // be detected using Type
-                var directive = statement as Directive;
-                if (directive == null)
-                {
-                    return false;
-                }
-
-                return directive.Directiv == "use strict";
-            }
-
-            return false;
         }
     }
 }
