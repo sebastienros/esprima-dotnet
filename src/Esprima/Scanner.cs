@@ -1400,7 +1400,7 @@ namespace Esprima
                 var options = ParseRegexOptions(flags);
 
                 // Do we need to convert the expression to its .NET equivalent?
-                if (adapt && (options & RegexOptions.Multiline) == RegexOptions.Multiline)
+                if (adapt && options.HasFlag(RegexOptions.Multiline))
                 {
                     // Replace all non-escaped $ occurences by \r?$
                     // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
