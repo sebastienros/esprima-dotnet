@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-alpha-002",
+  "version": "1.0.0-alpha-003",
   "title": "Esprima .NET",
   "description": "Standard-compliant ECMAScript 2016 parser (also popularly known as JavaScript).",
   "language": "en-US",
