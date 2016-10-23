@@ -110,6 +110,11 @@ namespace Esprima
             return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType));
         }
 
+        public Expression ParseJson()
+        {
+            return ParseExpression();
+        }
+
         private void CollectComments()
         {
             if (!_config.Comment)
