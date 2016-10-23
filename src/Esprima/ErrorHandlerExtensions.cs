@@ -2,15 +2,16 @@
 {
     public static class ErrorHandlerExtensions
     {
-        public static Error CreateError(this IErrorHandler handler, int index, int line, int col, string description)
+        public static ParserException CreateError(this IErrorHandler handler, int index, int line, int col, string description)
         {
             var msg = $"Line {line}': {description}";
-            var error = new Error(msg)
+            var error = new ParserException(msg)
             {
                 Index = index,
                 Column = col,
                 LineNumber = line,
-                Description = description
+                Description = description,
+                Source = handler.Source
             };
             return error;
         }

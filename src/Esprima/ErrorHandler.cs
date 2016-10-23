@@ -4,21 +4,23 @@ namespace Esprima
 {
     public class ErrorHandler : IErrorHandler
     {
-        public List<Error> Errors { get; }
+        public List<ParserException> Errors { get; }
         public bool Tolerant { get; set; }
+
+        public string Source { get; set; }
 
         public ErrorHandler()
         {
-            Errors = new List<Error>();
+            Errors = new List<ParserException>();
             Tolerant = false;
         }
 
-        public void RecordError(Error error)
+        public void RecordError(ParserException error)
         {
             Errors.Add(error);
         }
 
-        public void Tolerate(Error error)
+        public void Tolerate(ParserException error)
         {
             if (Tolerant)
             {
@@ -48,5 +50,4 @@ namespace Esprima
             }
         }
     }
-
 }

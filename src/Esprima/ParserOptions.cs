@@ -7,6 +7,11 @@
             ErrorHandler = new ErrorHandler();
         }
 
+        public ParserOptions(string source)
+        {
+            ErrorHandler = new ErrorHandler() { Source = source };
+        }
+
         public ParserOptions(IErrorHandler errorHandler)
         {
             ErrorHandler = errorHandler;
@@ -18,11 +23,6 @@
         /// Gets or sets whether the parsed elements have their location included.
         /// </summary>
         public bool Loc { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets the name of the source code.
-        /// </summary>
-        public string Source { get; set; }
 
         /// <summary>
         /// Gets or sets whether the tokens are included in the parsed tree.

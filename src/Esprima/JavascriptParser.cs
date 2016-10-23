@@ -275,9 +275,9 @@ namespace Esprima
                 node.Location.Start.Column = meta.Column;
                 node.Location.End.Line = _lastMarker.LineNumber;
                 node.Location.End.Column = _lastMarker.Index - _lastMarker.LineStart;
-                if (_config.Source != null)
+                if (_errorHandler.Source != null)
                 {
-                    node.Location.Source = _config.Source;
+                    node.Location.Source = _errorHandler.Source;
                 }
             }
 
@@ -4008,7 +4008,7 @@ namespace Esprima
         }
 
 
-        private Error UnexpectedTokenError(Token token, string message = null)
+        private ParserException UnexpectedTokenError(Token token, string message = null)
         {
             var msg = message ?? Messages.UnexpectedToken;
             string value;

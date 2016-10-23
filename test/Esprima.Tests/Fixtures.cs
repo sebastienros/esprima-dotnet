@@ -126,7 +126,7 @@ namespace Esprima.Test
                 options.Tolerant = false;
 
                 // TODO: check the accuracy of the message and of the location
-                Assert.Throws<Error>(() => ParseAndFormat(script, options));
+                Assert.Throws<ParserException>(() => ParseAndFormat(script, options));
             }
         }
 
