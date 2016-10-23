@@ -12,6 +12,7 @@ namespace Esprima.Ast
         BlockStatement Body { get; set; }
         bool Generator { get; set; }
         bool Expression { get; set; }
+        HoistingScope HoistingScope { get; }
     }
 
     public static class FunctionExtensions

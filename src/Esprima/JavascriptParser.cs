@@ -14,8 +14,7 @@ namespace Esprima
             "<<=", ">>=", ">>>=", "&=", "^=", "|="
         };
 
-        private readonly Stack<IVariableScope> _variableScopes = new Stack<IVariableScope>();
-        private readonly Stack<IFunctionScope> _functionScopes = new Stack<IFunctionScope>();
+        private readonly Stack<HoistingScope> _hoistingScopes = new Stack<HoistingScope>();
 
         private Token _lookahead;
         private Context _context;
@@ -101,13 +100,15 @@ namespace Esprima
 
         public Program ParseProgram()
         {
+            EnterHoistingScope();
+
             var node = CreateNode();
             var body = ParseDirectivePrologues();
             while (_startMarker.Index < _scanner.Length)
             {
                 body.Push(ParseStatementListItem());
             }
-            return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType));
+            return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType, LeaveHoistingScope()));
         }
 
         public Expression ParseJson()
@@ -696,6 +697,8 @@ namespace Esprima
 
         private FunctionExpression ParsePropertyMethodFunction()
         {
+            EnterHoistingScope();
+
             var isGenerator = false;
             var node = CreateNode();
 
@@ -705,7 +708,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator));
+            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope()));
         }
 
         private PropertyKey ParseObjectPropertyKey()
@@ -2307,7 +2310,7 @@ namespace Esprima
             var declarations = ParseVariableDeclarationList(new DeclarationOptions { inFor = false });
             ConsumeSemicolon();
 
-            return Finalize(node, new VariableDeclaration(declarations, "var"));
+            return Hoist(Finalize(node, new VariableDeclaration(declarations, "var")));
         }
 
         // ECMA-262 13.4 Empty Statement
@@ -2453,14 +2456,14 @@ namespace Esprima
                             TolerateError(Messages.ForInOfLoopInitializer, "for-in");
                         }
 
-                        left = Finalize(initNode, new VariableDeclaration(declarations, "var"));
+                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, "var")));
                         NextToken();
                         right = ParseExpression();
                         init = null;
                     }
                     else if (declarations.Count == 1 && declarations[0].Init == null && MatchContextualKeyword("of"))
                     {
-                        left = Finalize(initNode, new VariableDeclaration(declarations, "var"));
+                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, "var")));
                         NextToken();
                         right = ParseAssignmentExpression();
                         init = null;
@@ -2468,7 +2471,7 @@ namespace Esprima
                     }
                     else
                     {
-                        init = Finalize(initNode, new VariableDeclaration(declarations, "var"));
+                        init = Hoist(Finalize(initNode, new VariableDeclaration(declarations, "var")));
                         Expect(";");
                     }
                 }
@@ -2493,14 +2496,14 @@ namespace Esprima
 
                         if (declarations.Count == 1 && declarations[0].Init == null && MatchKeyword("in"))
                         {
-                            left = Finalize(initNode, new VariableDeclaration(declarations, (string)kind));
+                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, (string)kind)));
                             NextToken();
                             right = ParseExpression();
                             init = null;
                         }
                         else if (declarations.Count == 1 && declarations[0].Init == null && MatchContextualKeyword("of"))
                         {
-                            left = Finalize(initNode, new VariableDeclaration(declarations, (string)kind));
+                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, (string)kind)));
                             NextToken();
                             right = ParseAssignmentExpression();
                             init = null;
@@ -3193,6 +3196,8 @@ namespace Esprima
 
         private FunctionDeclaration ParseFunctionDeclaration(bool identifierIsOptional = false)
         {
+            EnterHoistingScope();
+
             var node = CreateNode();
             ExpectKeyword("function");
 
@@ -3258,11 +3263,16 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator));
+            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, LeaveHoistingScope()));
+            _hoistingScopes.Peek().FunctionDeclarations.Add(functionDeclaration);
+
+            return functionDeclaration;
         }
 
         private FunctionExpression ParseFunctionExpression()
         {
+            EnterHoistingScope();
+
             var node = CreateNode();
             ExpectKeyword("function");
 
@@ -3327,7 +3337,7 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression((Identifier)id, parameters, body, isGenerator));
+            return Finalize(node, new FunctionExpression((Identifier)id, parameters, body, isGenerator, LeaveHoistingScope()));
         }
 
         // ECMA-262 14.1.1 Directive Prologues
@@ -3413,6 +3423,8 @@ namespace Esprima
 
         private FunctionExpression ParseGetterMethod()
         {
+            EnterHoistingScope();
+
             var node = CreateNode();
             Expect("(");
             Expect(")");
@@ -3425,11 +3437,13 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator));
+            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseSetterMethod()
         {
+            EnterHoistingScope();
+
             var node = CreateNode();
 
             var options = new ParsedParameters();
@@ -3452,11 +3466,13 @@ namespace Esprima
             var method = ParsePropertyMethod(options);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, options.Parameters, method, isGenerator));
+            return Finalize(node, new FunctionExpression(null, options.Parameters, method, isGenerator, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseGeneratorMethod()
         {
+            EnterHoistingScope();
+
             var node = CreateNode();
 
             var isGenerator = true;
@@ -3468,7 +3484,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator));
+            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope()));
         }
 
         // ECMA-262 14.4 Generator Function Definitions
@@ -4094,6 +4110,26 @@ namespace Esprima
         public class HasConstructorOptions
         {
             public bool Value { get; set; }
+        }
+
+        private void EnterHoistingScope()
+        {
+            _hoistingScopes.Push(new HoistingScope());
+        }
+
+        private HoistingScope LeaveHoistingScope()
+        {
+            return _hoistingScopes.Pop();
+        }
+
+        private VariableDeclaration Hoist(VariableDeclaration variableDeclaration)
+        {
+            if (variableDeclaration.Kind == "var")
+            {
+                _hoistingScopes.Peek().VariableDeclarations.Add(variableDeclaration);
+            }
+
+            return variableDeclaration;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Esprima.Ast
 {
@@ -10,11 +11,15 @@ namespace Esprima.Ast
         public bool Generator { get; set; }
         public bool Expression { get; set; }
 
+        [JsonIgnore]
+        public HoistingScope HoistingScope { get; }
+
         public FunctionDeclaration(
             Identifier id,
             IEnumerable<INode> parameters,
             BlockStatement body,
-            bool generator
+            bool generator,
+            HoistingScope hoistingScope
             )
         {
             Type = Nodes.FunctionDeclaration;
@@ -23,8 +28,7 @@ namespace Esprima.Ast
             Body = body;
             Generator = generator;
             Expression = false;
-            //VariableDeclarations = LeaveVariableScope(),
-            //FunctionDeclarations = LeaveFunctionScope()
+            HoistingScope = hoistingScope;
         }
     }
 }
