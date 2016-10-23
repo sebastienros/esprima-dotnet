@@ -1334,7 +1334,7 @@ namespace Esprima
 
         // ECMA-262 11.8.5 Regular Expression Literals
 
-        public Regex TestRegExp(string pattern, string flags)
+        public Regex TestRegExp(string pattern, string flags, bool adapt)
         {
             // The BMP character to use as a replacement for astral symbols when
             // translating an ES6 "u"-flagged pattern to an ES5-compatible
@@ -1397,8 +1397,29 @@ namespace Esprima
             // uses.
             try
             {
-                // TODO: Apply flags
-                return new Regex(pattern);
+                var options = ParseRegexOptions(flags);
+
+                // Do we need to convert the expression to its .NET equivalent?
+                if (adapt && (options & RegexOptions.Multiline) == RegexOptions.Multiline)
+                {
+                    // Replace all non-escaped $ occurences by \r?$
+                    // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
+
+                    int index = 0;
+                    var newPattern = pattern;
+                    while ((index = newPattern.IndexOf("$", index)) != -1)
+                    {
+                        if (index > 0 && newPattern[index - 1] != '\\')
+                        {
+                            newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
+                            index += 4;
+                        }
+                    }
+
+                    pattern = newPattern;
+                }
+
+                return new Regex(pattern, options);
             }
             catch
             {
@@ -1530,7 +1551,7 @@ namespace Esprima
 
             var body = this.ScanRegExpBody();
             var flags = this.ScanRegExpFlags();
-            var value = TestRegExp((string)body.Value, (string)flags.Value);
+            var value = TestRegExp((string)body.Value, (string)flags.Value, false);
 
             return new Token {
                 Type = TokenType.RegularExpression,
@@ -1612,6 +1633,60 @@ namespace Esprima
             return ScanPunctuator();
         }
 
+        public RegexOptions ParseRegexOptions(string flags)
+        {
+            bool isGlobal = false, multiline = false, ignoreCase = false;
+
+            for (int k = 0; k < flags.Length; k++)
+            {
+                var c = flags[k];
+                if (c == 'g')
+                {
+                    if (isGlobal)
+                    {
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
+                    }
+
+                    isGlobal = true;
+                }
+                else if (c == 'i')
+                {
+                    if (ignoreCase)
+                    {
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
+                    }
+
+                    ignoreCase = true;
+                }
+                else if (c == 'm')
+                {
+                    if (multiline)
+                    {
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
+                    }
+
+                    multiline = true;
+                }
+                else
+                {
+                    ThrowUnexpectedToken(Messages.InvalidRegExp);
+                }
+            }
+
+            var options = RegexOptions.ECMAScript;
+
+            if (multiline)
+            {
+                options = options | RegexOptions.Multiline;
+            }
+
+            if (ignoreCase)
+            {
+                options = options | RegexOptions.IgnoreCase;
+            }
+
+            return options;
+        }
     }
 
     public struct OctalValue
