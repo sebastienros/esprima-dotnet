@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
@@ -90,7 +91,7 @@ namespace Esprima.Ast
 
         string PropertyKey.GetKey()
         {
-            return StringValue;
+            return Convert.ToString(Value);
         }
     }
 }
