@@ -498,6 +498,11 @@ namespace Esprima
                     expr = Finalize(node, new Identifier((string)NextToken().Value));
                     break;
                 case TokenType.StringLiteral:
+                    if (_context.Strict && _lookahead.Octal)
+                    {
+                        TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
+                    }
+
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
