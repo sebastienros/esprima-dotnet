@@ -53,7 +53,7 @@ namespace Esprima
             this._action = _action;
             _errorHandler = _config.ErrorHandler;
             _errorHandler.Tolerant = _config.Tolerant;
-            _scanner = new Scanner(code, _errorHandler, _config.Comment);
+            _scanner = new Scanner(code, _config);
 
             _sourceType = _config.SourceType;
 

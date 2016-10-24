@@ -32,6 +32,7 @@ namespace Esprima
     {
         private IErrorHandler _errorHandler;
         private bool _trackComment;
+        private bool _adaptRegexp;
 
         public int Length;
         public string Source;
@@ -102,15 +103,16 @@ namespace Esprima
             return ch - '0';
         }
 
-        public Scanner(string code) : this(code, new ErrorHandler(), false)
+        public Scanner(string code) : this(code, new ParserOptions())
         {
         }
 
-        public Scanner(string code, IErrorHandler handler, bool trackComment)
+        public Scanner(string code, ParserOptions options)
         {
             Source = code;
-            _errorHandler = handler;
-            _trackComment = trackComment;
+            _adaptRegexp = options.AdaptRegexp;
+            _errorHandler = options.ErrorHandler;
+            _trackComment = options.Comment;
 
             Length = code.Length;
             Index = 0;
@@ -1334,7 +1336,7 @@ namespace Esprima
 
         // ECMA-262 11.8.5 Regular Expression Literals
 
-        public Regex TestRegExp(string pattern, string flags, bool adapt)
+        public Regex TestRegExp(string pattern, string flags)
         {
             // The BMP character to use as a replacement for astral symbols when
             // translating an ES6 "u"-flagged pattern to an ES5-compatible
@@ -1400,7 +1402,7 @@ namespace Esprima
                 var options = ParseRegexOptions(flags);
 
                 // Do we need to convert the expression to its .NET equivalent?
-                if (adapt && options.HasFlag(RegexOptions.Multiline))
+                if (_adaptRegexp && options.HasFlag(RegexOptions.Multiline))
                 {
                     // Replace all non-escaped $ occurences by \r?$
                     // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
@@ -1551,7 +1553,7 @@ namespace Esprima
 
             var body = this.ScanRegExpBody();
             var flags = this.ScanRegExpFlags();
-            var value = TestRegExp((string)body.Value, (string)flags.Value, false);
+            var value = TestRegExp((string)body.Value, (string)flags.Value);
 
             return new Token {
                 Type = TokenType.RegularExpression,
