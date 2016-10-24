@@ -53,5 +53,10 @@
         /// Gets or sets wheter the Regular Expression syntax should be converted to a .NET compatible one.
         /// </summary>
         public bool AdaptRegexp { get; set; }
+
+        /// <summary>
+        /// Gets or sets wheter the program must be parsed in strict mode.
+        /// </summary>
+        public bool Strict { get; set; }
     }
 }

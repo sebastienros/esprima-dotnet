@@ -68,7 +68,7 @@ namespace Esprima
                 InIteration = false,
                 InSwitch = false,
                 LabelSet = new HashSet<string>(),
-                Strict = (_sourceType == SourceType.Module),
+                Strict = (_sourceType == SourceType.Module) || _config.Strict,
             };
 
             _startMarker = new Marker
