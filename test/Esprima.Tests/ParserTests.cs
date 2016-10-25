@@ -12,7 +12,7 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("'use strict'; function p() {}");
             var program = parser.ParseProgram();
 
-            Assert.True(program.IsStrict());
+            Assert.True(program.Strict);
         }
 
         [Fact]
@@ -21,7 +21,7 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("function p() {}");
             var program = parser.ParseProgram();
 
-            Assert.False(program.IsStrict());
+            Assert.False(program.Strict);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
             var function = program.Body.First().As<FunctionDeclaration>();
 
-            Assert.False(function.IsStrict());
+            Assert.False(function.Strict);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
             var function = program.Body.Skip(1).First().As<FunctionDeclaration>();
 
-            Assert.False(function.IsStrict());
+            Assert.False(function.Strict);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
             var function = program.Body.First().As<FunctionDeclaration>();
 
-            Assert.True(function.IsStrict());
+            Assert.True(function.Strict);
         }
 
         [Fact]

@@ -13,11 +13,12 @@ namespace Esprima.Ast
         bool Generator { get; set; }
         bool Expression { get; set; }
         HoistingScope HoistingScope { get; }
+        bool Strict { get; }
     }
 
-    public static class FunctionExtensions
+    internal static class FunctionExtensions
     {
-        public static bool IsStrict(this IFunction function)
+        internal static bool IsStrict(this IFunction function)
         {
             foreach (var statement in function.Body.Body)
             {

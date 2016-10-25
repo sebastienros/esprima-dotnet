@@ -14,15 +14,19 @@ namespace Esprima.Ast
         [JsonIgnore]
         public HoistingScope HoistingScope { get; }
 
+        [JsonIgnore]
+        public bool Strict { get; set; }
+
         public Program(IEnumerable<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope)
         {
             Type = Nodes.Program;
             Body = body;
             SourceType = sourceType;
             HoistingScope = hoistingScope;
+            Strict = IsStrict();
         }
 
-        public bool IsStrict()
+        private bool IsStrict()
         {
             foreach(var statement in Body)
             {

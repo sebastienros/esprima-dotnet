@@ -17,6 +17,9 @@ namespace Esprima.Ast
         [JsonIgnore]
         public HoistingScope HoistingScope { get; }
 
+        [JsonIgnore]
+        public bool Strict { get; }
+
         public FunctionExpression(
             Identifier id,
             IEnumerable<INode> parameters,
@@ -32,7 +35,7 @@ namespace Esprima.Ast
             Generator = generator;
             Expression = false;
             HoistingScope = hoistingScope;
-
+            Strict = this.IsStrict();
         }
     }
 }

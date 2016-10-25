@@ -68,7 +68,7 @@ namespace Esprima
                 InIteration = false,
                 InSwitch = false,
                 LabelSet = new HashSet<string>(),
-                Strict = (_sourceType == SourceType.Module) || _config.Strict,
+                Strict = (_sourceType == SourceType.Module),
             };
 
             _startMarker = new Marker
@@ -98,8 +98,13 @@ namespace Esprima
         // ECMA-262 15.1 Scripts
         // ECMA-262 15.2 Modules
 
-        public Program ParseProgram()
+        public Program ParseProgram(bool strict = false)
         {
+            if (strict)
+            {
+                _context.Strict = true;
+            }
+
             EnterHoistingScope();
 
             var node = CreateNode();
@@ -108,7 +113,11 @@ namespace Esprima
             {
                 body.Push(ParseStatementListItem());
             }
-            return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType, LeaveHoistingScope()));
+
+            var program = new Program(body.Cast<StatementListItem>(), _sourceType, LeaveHoistingScope());
+            program.Strict |= _context.Strict;
+
+            return Finalize(node, program);
         }
 
         public Expression ParseJson()
@@ -2249,7 +2258,8 @@ namespace Esprima
                 }
                 else
                 {
-                    if (_context.Strict || (string)token.Value != "let" || kind != "var")
+                    var stringValue = token.Value as string;
+                    if (_context.Strict || stringValue == null || stringValue != "let" || kind != "var")
                     {
                         ThrowUnexpectedToken(token);
                     }
@@ -3146,7 +3156,8 @@ namespace Esprima
             var parameters = new List<Token>();
 
             var token = _lookahead;
-            if ((string)token.Value == "...")
+            var stringValue = token.Value as string;
+            if (stringValue == "...")
             {
                 param = ParseRestElement(parameters);
                 var restElement = param.As<RestElement>();
