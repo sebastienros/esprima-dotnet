@@ -218,7 +218,8 @@ namespace Esprima
                 }
             }
 
-            if (_trackComment) {
+            if (_trackComment)
+            {
                 loc.End.Line = LineNumber;
                 loc.End.Column = Index - LineStart;
                 var entry = new Comment
@@ -251,7 +252,8 @@ namespace Esprima
             }
 
 
-            while (!Eof()) {
+            while (!Eof())
+            {
                 var ch = Source.CharCodeAt(Index);
                 if (Character.IsLineTerminator(ch))
                 {
@@ -481,7 +483,8 @@ namespace Esprima
             return Character.FromCodePoint(code);
         }
 
-        public string GetIdentifier() {
+        public string GetIdentifier()
+        {
             var start = Index++;
             while (!Eof())
             {
@@ -519,7 +522,8 @@ namespace Esprima
 
             // '\u' (U+005C, U+0075) denotes an escaped character.
             string ch;
-            if (cp == 0x5C) {
+            if (cp == 0x5C)
+            {
                 if (Source.CharCodeAt(Index) != 0x75)
                 {
                     ThrowUnexpectedToken();
@@ -542,7 +546,8 @@ namespace Esprima
                 id = ch;
             }
 
-            while (!Eof()) {
+            while (!Eof())
+            {
                 cp = CodePointAt(Index);
                 ch = Character.FromCodePoint(cp);
                 if (!Character.IsIdentifierPart(ch))
@@ -601,7 +606,8 @@ namespace Esprima
                 }
             }
 
-            return new OctalValue {
+            return new OctalValue
+            {
                 Code = code,
                 Octal = octal
             };
@@ -668,7 +674,8 @@ namespace Esprima
             // Check for most common single-character punctuators.
             var str = Source[Index];
 
-            switch (str) {
+            switch (str)
+            {
 
                 case '(':
                 case '{':
@@ -682,7 +689,8 @@ namespace Esprima
 
                 case '.':
                     ++Index;
-                    if (Source[Index] == '.' && Source[Index + 1] == '.') {
+                    if (Source[Index] == '.' && Source[Index + 1] == '.')
+                    {
                         // Spread operator: ...
                         Index += 2;
                         token.Value = "...";
@@ -725,7 +733,8 @@ namespace Esprima
                         Index += 4;
                         token.Value = str4;
                     }
-                    else {
+                    else
+                    {
 
                         // 3-character punctuators.
                         string str3 = null;
@@ -774,7 +783,8 @@ namespace Esprima
                     break;
             }
 
-            if (Index == token.Start) {
+            if (Index == token.Start)
+            {
                 ThrowUnexpectedToken();
             }
 
@@ -851,7 +861,8 @@ namespace Esprima
                 }
             }
 
-            return new Token {
+            return new Token
+            {
                 Type = TokenType.NumericLiteral,
                 IntegerValue = Convert.ToInt32(number, 2),
                 Value = number,
@@ -898,7 +909,8 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
-            return new Token {
+            return new Token
+            {
                 Type = TokenType.NumericLiteral,
                 IntegerValue = Convert.ToInt32(number, 8),
                 Value = number,
@@ -1168,7 +1180,8 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
-            return new Token {
+            return new Token
+            {
                 Type = TokenType.StringLiteral,
                 Value = str.ToString(),
                 Octal = octal,
@@ -1541,7 +1554,8 @@ namespace Esprima
                 }
             }
 
-            return new Token {
+            return new Token
+            {
                 Value = flags,
                 Literal = str
             };
@@ -1555,7 +1569,8 @@ namespace Esprima
             var flags = this.ScanRegExpFlags();
             var value = TestRegExp((string)body.Value, (string)flags.Value);
 
-            return new Token {
+            return new Token
+            {
                 Type = TokenType.RegularExpression,
                 Value = value,
                 Literal = body.Literal + flags.Literal,
