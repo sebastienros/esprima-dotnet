@@ -1637,7 +1637,8 @@ namespace Esprima
 
         public RegexOptions ParseRegexOptions(string flags)
         {
-            bool isGlobal = false, multiline = false, ignoreCase = false;
+            bool isGlobal = false, multiline = false, ignoreCase = false,
+                unicode = false, sticky = false;
 
             for (int k = 0; k < flags.Length; k++)
             {
@@ -1668,6 +1669,24 @@ namespace Esprima
                     }
 
                     multiline = true;
+                }
+                else if (c == 'u')
+                {
+                    if (unicode)
+                    {
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
+                    }
+
+                    unicode = true;
+                }
+                else if (c == 'y')
+                {
+                    if (sticky)
+                    {
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
+                    }
+
+                    sticky = true;
                 }
                 else
                 {
