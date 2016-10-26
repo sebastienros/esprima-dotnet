@@ -15,25 +15,4 @@ namespace Esprima.Ast
         HoistingScope HoistingScope { get; }
         bool Strict { get; }
     }
-
-    internal static class FunctionExtensions
-    {
-        internal static bool IsStrict(this IFunction function)
-        {
-            foreach (var statement in function.Body.Body)
-            {
-                // A directive uses Tokens.Expression, so it can't
-                // be detected using Type
-                var directive = statement as Directive;
-                if (directive == null)
-                {
-                    return false;
-                }
-
-                return directive.Directiv == "use strict";
-            }
-
-            return false;
-        }
-    }
 }

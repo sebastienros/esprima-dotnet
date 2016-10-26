@@ -17,31 +17,13 @@ namespace Esprima.Ast
         [JsonIgnore]
         public bool Strict { get; set; }
 
-        public Program(IEnumerable<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope)
+        public Program(IEnumerable<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict)
         {
             Type = Nodes.Program;
             Body = body;
             SourceType = sourceType;
             HoistingScope = hoistingScope;
-            Strict = IsStrict();
-        }
-
-        private bool IsStrict()
-        {
-            foreach(var statement in Body)
-            {
-                // A directive uses Tokens.Expression, so it can't
-                // be detected using Type
-                var directive = statement as Directive;
-                if (directive == null)
-                {
-                    return false;
-                }
-
-                return directive.Directiv == "use strict";
-            }
-
-            return false;
+            Strict = strict;
         }
     }
 }

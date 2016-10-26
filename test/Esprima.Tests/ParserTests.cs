@@ -35,13 +35,23 @@ namespace Esprima.Tests
         }
 
         [Fact]
+        public void FunctionWithUseStrictShouldBeStrict()
+        {
+            var parser = new JavaScriptParser("function p() { 'use strict'; }");
+            var program = parser.ParseProgram();
+            var function = program.Body.First().As<FunctionDeclaration>();
+
+            Assert.True(function.Strict);
+        }
+
+        [Fact]
         public void FunctionShouldBeStrictInProgramStrict()
         {
             var parser = new JavaScriptParser("'use strict'; function p() {}");
             var program = parser.ParseProgram();
             var function = program.Body.Skip(1).First().As<FunctionDeclaration>();
 
-            Assert.False(function.Strict);
+            Assert.True(function.Strict);
         }
 
         [Fact]
@@ -52,6 +62,21 @@ namespace Esprima.Tests
             var function = program.Body.First().As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
+        }
+
+        [Fact]
+        public void FunctionShouldBeStrictInStrictFunction()
+        {
+            var parser = new JavaScriptParser("function p() {'use strict'; function q() { return; } return; }");
+            var program = parser.ParseProgram();
+            var p = program.Body.First().As<FunctionDeclaration>();
+            var q = p.Body.Body.Skip(1).First().As<FunctionDeclaration>();
+
+            Assert.Equal("p", p.Id.Name);
+            Assert.Equal("q", q.Id.Name);
+
+            Assert.True(p.Strict);
+            Assert.True(q.Strict);
         }
 
         [Fact]

@@ -25,7 +25,8 @@ namespace Esprima.Ast
             IEnumerable<INode> parameters,
             BlockStatement body,
             bool generator,
-            HoistingScope hoistingScope
+            HoistingScope hoistingScope,
+            bool strict
             )
         {
             Type = Nodes.FunctionExpression;
@@ -35,7 +36,7 @@ namespace Esprima.Ast
             Generator = generator;
             Expression = false;
             HoistingScope = hoistingScope;
-            Strict = this.IsStrict();
+            Strict = strict;
         }
     }
 }

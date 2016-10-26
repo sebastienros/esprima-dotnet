@@ -114,10 +114,7 @@ namespace Esprima
                 body.Push(ParseStatementListItem());
             }
 
-            var program = new Program(body.Cast<StatementListItem>(), _sourceType, LeaveHoistingScope());
-            program.Strict |= _context.Strict;
-
-            return Finalize(node, program);
+            return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType, LeaveHoistingScope(), _context.Strict));
         }
 
         public Expression ParseJson()
@@ -722,7 +719,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope(), _context.Strict));
         }
 
         private PropertyKey ParseObjectPropertyKey()
@@ -3276,10 +3273,11 @@ namespace Esprima
                 TolerateUnexpectedToken(stricted, message);
             }
 
+            var hasStrictDirective = _context.Strict;
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
 
-            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, LeaveHoistingScope()));
+            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
             _hoistingScopes.Peek().FunctionDeclarations.Add(functionDeclaration);
 
             return functionDeclaration;
@@ -3350,10 +3348,12 @@ namespace Esprima
             {
                 TolerateUnexpectedToken(stricted, message);
             }
+
+            var hasStrictDirective = _context.Strict;
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression((Identifier)id, parameters, body, isGenerator, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression((Identifier)id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
         }
 
         // ECMA-262 14.1.1 Directive Prologues
@@ -3453,7 +3453,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope(), _context.Strict));
         }
 
         private FunctionExpression ParseSetterMethod()
@@ -3482,7 +3482,7 @@ namespace Esprima
             var method = ParsePropertyMethod(options);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, options.Parameters, method, isGenerator, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, options.Parameters, method, isGenerator, LeaveHoistingScope(), _context.Strict));
         }
 
         private FunctionExpression ParseGeneratorMethod()
@@ -3500,7 +3500,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope(), _context.Strict));
         }
 
         // ECMA-262 14.4 Generator Function Definitions
