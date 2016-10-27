@@ -35,6 +35,8 @@ namespace Esprima.Ast
 
         [JsonIgnore]
         public bool Cached;
+
+        //[JsonIgnore]
         //public JsValue CachedValue;
 
         public Literal(string value, string raw)

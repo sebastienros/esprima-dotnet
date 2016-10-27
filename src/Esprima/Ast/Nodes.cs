@@ -22,7 +22,6 @@
         Identifier,
         IfStatement,
         Literal,
-        RegularExpressionLiteral,
         LabeledStatement,
         LogicalExpression,
         MemberExpression,
