@@ -1,20 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26531.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{71570FFF-0BEA-4AF7-8288-9E46627EA676}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Esprima.Sample", "samples\Esprima.Sample\Esprima.Sample.xproj", "{5FD90FD9-BF45-407A-94D1-9B4360AFF9F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Sample", "samples\Esprima.Sample\Esprima.Sample.csproj", "{5FD90FD9-BF45-407A-94D1-9B4360AFF9F7}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Esprima", "src\Esprima\Esprima.xproj", "{C9C93BFD-D276-4537-8724-4268520BF3C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima", "src\Esprima\Esprima.csproj", "{C9C93BFD-D276-4537-8724-4268520BF3C6}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Esprima.Tests", "test\Esprima.Tests\Esprima.Tests.xproj", "{4BCC2A35-C58B-4AD0-8DA2-48A686C203CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Tests", "test\Esprima.Tests\Esprima.Tests.csproj", "{4BCC2A35-C58B-4AD0-8DA2-48A686C203CE}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Esprima.Benchmark", "samples\Esprima.Benchmark\Esprima.Benchmark.xproj", "{0E05EB4C-CEE3-4D68-90B8-1F0FCE0D2DCE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Benchmark", "samples\Esprima.Benchmark\Esprima.Benchmark.csproj", "{0E05EB4C-CEE3-4D68-90B8-1F0FCE0D2DCE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
