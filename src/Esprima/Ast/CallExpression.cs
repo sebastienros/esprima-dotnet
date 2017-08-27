@@ -8,9 +8,9 @@ namespace Esprima.Ast
         public Expression Callee;
         public List<ArgumentListElement> Arguments;
 
-        //public bool Cached;
-        //public bool CanBeCached = true;
-        //public JsValue[] CachedArguments;
+        public bool Cached;
+        public bool CanBeCached = true;
+        public object CachedArguments;
 
         public CallExpression(Expression callee, List<ArgumentListElement> args)
         {
