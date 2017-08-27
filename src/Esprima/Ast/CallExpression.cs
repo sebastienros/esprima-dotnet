@@ -11,6 +11,8 @@ namespace Esprima.Ast
 
         [JsonIgnore]
         public bool Cached;
+        public bool CanBeCached = true;
+        public object CachedArguments;
 
         [JsonIgnore]
         public bool CanBeCached = true;
