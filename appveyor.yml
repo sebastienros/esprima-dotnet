@@ -1,11 +1,32 @@
 image: Visual Studio 2017
 init:
   - git config --global core.autocrlf true
-clone_depth: 1
+install:
+  - ps: $env:BuildNumber= $env:APPVEYOR_BUILD_NUMBER
+  - ps: $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = true
+  - ps: $env:NUGET_XMLDOC_MODE = "skip"
+  - ps: $env:DOTNET_CLI_TELEMETRY_OPTOUT = 1
 build_script:
   - dotnet --version
   - dotnet pack -c Release
+test_script:
+  - dotnet test .\test\Esprima.Tests\Esprima.Tests.csproj -c Release -f netcoreapp2.0
 artifacts:
-  - path: 'Jint\**\*.nupkg'
-test: off
-deploy: off
+  - path: 'src\**\*.nupkg'
+deploy:  
+  - provider: NuGet
+    on:
+      branch: dev
+    server: https://www.myget.org/F/esprimadotnet/api/v2/package
+    api_key:
+      secure: 7PQvuxXn5P39X5QDlDKWbNpOKJKivpqkq7umakIirAZ12CSTAiCwjtJhSBGVboPm
+    skip_symbols: true
+    artifact: /.*\.nupkg/
+  - provider: NuGet
+    on:
+      branch: master
+    server: https://www.nuget.org/api/v2/package
+    api_key:
+      secure: uSwY6pjuXvfqDxmODdEjabmByaHFCibtCGhEbjmDbEBx2TG5/zRYW8E+6qts+NX5
+    skip_symbols: true
+    artifact: /.*\.nupkg/  
