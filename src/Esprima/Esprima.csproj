@@ -3,26 +3,25 @@
   <PropertyGroup>
     <Description>Standard-compliant ECMAScript 2016 parser (also popularly known as JavaScript or ES6).</Description>
     <Copyright>Sebastien Ros</Copyright>
+    <AssemblyName>Esprima</AssemblyName>
     <AssemblyTitle>Esprima .NET</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>1.0.0-beta-002</VersionPrefix>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
     <Authors>Sebastien Ros</Authors>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AssemblyName>Esprima</AssemblyName>
     <AssemblyOriginatorKeyFile>../Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>Esprima</PackageId>
     <PackageTags>javascript, parser</PackageTags>
     <PackageProjectUrl>https://github.com/sebastienros/esprima-dotnet</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/sebastienros/esprima-dotnet/master/LICENSE.txt</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/sebastienros/esprima-dotnet</RepositoryUrl>
-    <Version>1.0.0-beta-002</Version>
+    <Version>1.0.0-beta-$(BuildNumber)</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
 </Project>
