@@ -40,7 +40,6 @@ namespace Esprima
 
         // For NumericLiteral
         public bool Octal;
-        public bool IsIntegral;
 
         // For templates
         public bool Head;
@@ -49,7 +48,6 @@ namespace Esprima
 
         public bool BooleanValue;
         public double NumericValue;
-        public long IntegerValue;
         public object Value;
         public RegexValue RegexValue;
 

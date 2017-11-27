@@ -13,8 +13,6 @@ namespace Esprima.Ast
         [JsonIgnore]
         public double NumericValue;
         [JsonIgnore]
-        public long IntegerValue;
-        [JsonIgnore]
         public bool BooleanValue;
         [JsonIgnore()]
         public Regex RegexValue;
@@ -52,15 +50,6 @@ namespace Esprima.Ast
             Type = Nodes.Literal;
             Value = BooleanValue = value;
             TokenType = TokenType.BooleanLiteral;
-            Raw = raw;
-        }
-
-        public Literal(long value, string raw)
-        {
-            Type = Nodes.Literal;
-            Value = IntegerValue = value;
-            Integral = true;
-            TokenType = TokenType.NumericLiteral;
             Raw = raw;
         }
 

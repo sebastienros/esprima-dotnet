@@ -117,11 +117,6 @@ namespace Esprima
             return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType, LeaveHoistingScope(), _context.Strict));
         }
 
-        public Expression ParseJson()
-        {
-            return ParseExpression();
-        }
-
         private void CollectComments()
         {
             if (!_config.Comment)
@@ -526,10 +521,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = token.IsIntegral
-                        ? Finalize(node, new Literal(token.IntegerValue, raw))
-                        : Finalize(node, new Literal(token.NumericValue, raw))
-                        ;
+                    expr = Finalize(node, new Literal(token.NumericValue, raw));
                     break;
                 case TokenType.BooleanLiteral:
 
@@ -740,10 +732,7 @@ namespace Esprima
                         TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
                     }
                     raw = GetTokenRaw(token);
-                    key = token.IsIntegral
-                            ? Finalize(node, new Literal(token.IntegerValue, raw))
-                            : Finalize(node, new Literal(token.NumericValue, raw))
-                            ;
+                    key = Finalize(node, new Literal(token.NumericValue, raw));
                     break;
 
                 case TokenType.Identifier:
@@ -1896,7 +1885,7 @@ namespace Esprima
 
         // ECMA-262 12.16 Comma Operator
 
-        private Expression ParseExpression()
+        public Expression ParseExpression()
         {
             var startToken = _lookahead;
             var expr = IsolateCoverGrammar(ParseAssignmentExpression);

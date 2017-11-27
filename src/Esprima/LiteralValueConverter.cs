@@ -18,10 +18,21 @@ namespace Esprima
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            if(value is Regex)
+            if (value is Regex)
             {
                 writer.WriteStartObject();
                 writer.WriteEndObject();
+            }
+            else if (value is double d && d % 1 < double.Epsilon)
+            {
+                try
+                {
+                    serializer.Serialize(writer, Convert.ToUInt64(d));
+                }
+                catch
+                {
+                    serializer.Serialize(writer, d);
+                }
             }
             else
             {

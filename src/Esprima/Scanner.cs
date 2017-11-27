@@ -517,6 +517,7 @@ namespace Esprima
         public string GetComplexIdentifier()
         {
             var cp = CodePointAt(Index);
+            var sb = GetStringBuilder();
             var id = Character.FromCodePoint(cp);
             Index += id.Length;
 
@@ -796,7 +797,7 @@ namespace Esprima
 
         public Token ScanHexLiteral(int start)
         {
-            var number = "";
+            var index = Index;
 
             while (!Eof())
             {
@@ -804,8 +805,11 @@ namespace Esprima
                 {
                     break;
                 }
-                number += Source[Index++];
+
+                Index++;
             }
+
+            var number = Source.Substring(index, Index - index);
 
             if (number.Length == 0)
             {
@@ -817,12 +821,42 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
+            double value = 0;
+
+            if (number.Length < 16)
+            {
+                value = Convert.ToInt64(number, 16);
+            }
+            else if (number.Length > 255)
+            {
+                value = double.PositiveInfinity;
+            }
+            else
+            {
+                double modulo = 1;
+                var literal = number.ToLowerInvariant();
+                for (var i = literal.Length - 1; i >= 0; i--)
+                {
+                    var c = literal[i];
+
+                    if (c <= '9')
+                    {
+                        value += modulo * (c - '0');
+                    }
+                    else
+                    {
+                        value += modulo * (c - 'a' + 10);
+                    }
+
+                    modulo *= 16;
+                }
+            }
+
             return new Token
             {
                 Type = TokenType.NumericLiteral,
-                IntegerValue = Convert.ToInt64(number, 16),
-                IsIntegral = true,
-                Value = number,
+                NumericValue = value,
+                Value = value,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -832,8 +866,8 @@ namespace Esprima
 
         public Token ScanBinaryLiteral(int start)
         {
-            var number = "";
             char ch;
+            var index = Index;
 
             while (!Eof())
             {
@@ -842,8 +876,11 @@ namespace Esprima
                 {
                     break;
                 }
-                number += Source[Index++];
+
+                Index++;
             }
+
+            var number = Source.Substring(index, Index - index);
 
             if (number.Length == 0)
             {
@@ -864,9 +901,8 @@ namespace Esprima
             return new Token
             {
                 Type = TokenType.NumericLiteral,
-                IntegerValue = Convert.ToInt32(number, 2),
+                NumericValue = Convert.ToUInt32(number, 2),
                 Value = number,
-                IsIntegral = true,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -876,13 +912,13 @@ namespace Esprima
 
         public Token ScanOctalLiteral(char prefix, int start)
         {
-            var number = "";
+            var sb = GetStringBuilder();
             var octal = false;
 
             if (Character.IsOctalDigit(prefix))
             {
                 octal = true;
-                number = "0" + Source[Index++];
+                sb.Append("0").Append(Source[Index++]);
             }
             else
             {
@@ -895,8 +931,11 @@ namespace Esprima
                 {
                     break;
                 }
-                number += Source[Index++];
+                
+                sb.Append(Source[Index++]);
             }
+
+            var number = sb.ToString();
 
             if (!octal && number.Length == 0)
             {
@@ -912,10 +951,9 @@ namespace Esprima
             return new Token
             {
                 Type = TokenType.NumericLiteral,
-                IntegerValue = Convert.ToInt32(number, 8),
+                NumericValue = Convert.ToUInt32(number, 8),
                 Value = number,
                 Octal = octal,
-                IsIntegral = true,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -945,22 +983,23 @@ namespace Esprima
 
         public Token ScanNumericLiteral()
         {
+            var sb = GetStringBuilder();
             var start = Index;
             var ch = Source[start];
             //assert(Character.IsDecimalDigit(ch) || (ch == '.'),
             //    'Numeric literal must start with a decimal digit or a decimal point');
 
-            var number = "";
             if (ch != '.')
             {
-                number = Source[Index++].ToString();
+                var first = Source[Index++];
+                sb.Append(first);
                 ch = Source.CharCodeAt(Index);
 
                 // Hex number starts with '0x'.
                 // Octal number starts with '0'.
                 // Octal number in ES6 starts with '0o'.
                 // Binary number in ES6 starts with '0b'.
-                if (number == "0")
+                if (first == '0')
                 {
                     if (ch == 'x' || ch == 'X')
                     {
@@ -988,35 +1027,35 @@ namespace Esprima
 
                 while (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
-                    number += Source[Index++];
+                    sb.Append(Source[Index++]);
                 }
                 ch = Source.CharCodeAt(Index);
             }
 
             if (ch == '.')
             {
-                number += Source[Index++];
+                sb.Append(Source[Index++]);
                 while (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
-                    number += Source[Index++];
+                    sb.Append(Source[Index++]);
                 }
                 ch = Source.CharCodeAt(Index);
             }
 
             if (ch == 'e' || ch == 'E')
             {
-                number += Source[Index++];
+                sb.Append(Source[Index++]);
 
                 ch = Source.CharCodeAt(Index);
                 if (ch == '+' || ch == '-')
                 {
-                    number += Source[Index++];
+                    sb.Append(Source[Index++]);
                 }
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
                     while (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                     {
-                        number += Source[Index++];
+                        sb.Append(Source[Index++]);
                     }
                 }
                 else
@@ -1039,13 +1078,14 @@ namespace Esprima
                 End = Index
             };
 
+            var number = sb.ToString();
+
             try
             {
                 var l = long.Parse(number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
 
-                token.IntegerValue = l;
+                token.NumericValue = l;
                 token.Value = l;
-                token.IsIntegral = true;
             }
             catch (OverflowException)
             {
