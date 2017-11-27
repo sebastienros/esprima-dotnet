@@ -1,7 +1,11 @@
+image: Visual Studio 2017
 init:
   - git config --global core.autocrlf true
-build_script:
-  - build.cmd --quiet verify
 clone_depth: 1
+build_script:
+  - dotnet --version
+  - dotnet pack -c Release
+artifacts:
+  - path: 'Jint\**\*.nupkg'
 test: off
 deploy: off
