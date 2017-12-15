@@ -1,14 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Esprima.Benchmark</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>Esprima.Benchmark</PackageId>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
-
+  <ItemGroup>
+    <None Include="..\..\test\Esprima.Tests\Fixtures\3rdparty\**" CopyToOutputDirectory="PreserveNewest" LinkBase="3rdparty" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.10.11" />
   </ItemGroup>
-
 </Project>
