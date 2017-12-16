@@ -18,8 +18,6 @@ namespace Esprima
 
     public class Token
     {
-        public static Token Empty = new Token();
-
         public TokenType Type;
         public string Literal;
 
@@ -27,14 +25,9 @@ namespace Esprima
         public int End; // Range[1]
         public int LineNumber;
         public int LineStart;
+
         private Location _location;
-        public Location Location
-        {
-            get
-            {
-                return _location ?? (_location = new Location());
-            }
-        }
+        public Location Location => _location ?? (_location = new Location());
 
         public int Precedence;
 
@@ -51,8 +44,24 @@ namespace Esprima
         public object Value;
         public RegexValue RegexValue;
 
-        public Token()
+        public void Clear()
         {
+            Type = TokenType.BooleanLiteral;
+            Literal = null;
+            Start = 0;
+            End = 0;
+            LineNumber = 0;
+            LineStart = 0;
+            _location = null;
+            Precedence = 0;
+            Octal = false;
+            Head = false;
+            Tail = false;
+            RawTemplate = null;
+            BooleanValue = false;
+            NumericValue = 0;
+            Value = null;
+            RegexValue = null;
         }
     }
 }

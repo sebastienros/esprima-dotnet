@@ -75,7 +75,8 @@ namespace Esprima.Ast
 
         string PropertyKey.GetKey()
         {
-            return Convert.ToString(Value);
+            var s = Value as string;
+            return s ?? Convert.ToString(Value);
         }
     }
 }
