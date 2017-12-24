@@ -28,3 +28,5 @@ project.lock.json
 .vs
 .build/
 .testPublish/
+.idea
+BenchmarkDotNet.Artifacts*

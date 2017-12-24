@@ -51,7 +51,7 @@ namespace Esprima
                    (ch >= 'A' && ch <= 'Z') ||
                    (ch >= 'a' && ch <= 'z') ||
                    (ch == '\\') ||
-                   ((ch >= 0x80) && NonAsciiIdentifierStart.IsMatch(ch.ToString()));
+                   ((ch >= 0x80) && NonAsciiIdentifierStart.IsMatch(ParserExtensions.CharToString(ch)));
         }
 
         public static bool IsIdentifierPart(char ch)
@@ -61,7 +61,7 @@ namespace Esprima
                    (ch >= 'a' && ch <= 'z') ||
                    (ch >= '0' && ch <= '9') ||
                    (ch == '\\') ||
-                   ((ch >= 0x80) && NonAsciiIdentifierPart.IsMatch(ch.ToString()));
+                   ((ch >= 0x80) && NonAsciiIdentifierPart.IsMatch(ParserExtensions.CharToString(ch)));
         }
 
         public static bool IsIdentifierStart(string ch)

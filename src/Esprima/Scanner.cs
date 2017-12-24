@@ -1,24 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
 
 namespace Esprima
 {
-
     public class Loc
     {
         public MetaNode Start;
         public MetaNode End;
     }
 
-    public class MetaNode
+    public struct MetaNode
     {
-        public int Index;
-        public int Line;
-        public int Column;
+        public readonly int Index;
+        public readonly int Line;
+        public readonly int Column;
+
+        public MetaNode(int index, int line, int column)
+        {
+            Index = index;
+            Line = line;
+            Column = column;
+        }
     }
 
     public class Marker
@@ -74,6 +81,40 @@ namespace Esprima
             "super"
         };
 
+        private static readonly string[] threeCharacterPunctutors =
+        {
+            "===",
+            "!==",
+            ">>>",
+            "<<=",
+            ">>=",
+            "**="
+        };
+
+        private static readonly string[] twoCharacterPunctuators =
+        {
+            "&&" ,
+            "||" ,
+            "==" ,
+            "!=" ,
+            "+=" ,
+            "-=" ,
+            "*=" ,
+            "/=" ,
+            "++" ,
+            "--" ,
+            "<<" ,
+            ">>" ,
+            "&=" ,
+            "|=" ,
+            "^=" ,
+            "%=" ,
+            "<=" ,
+            ">=" ,
+            "=>" ,
+            "**"
+        };
+
         private int HexValue(char ch)
         {
             if (ch >= 'A')
@@ -118,9 +159,10 @@ namespace Esprima
             Index = 0;
             LineNumber = (code.Length > 0) ? 1 : 0;
             LineStart = 0;
-            _curlyStack = new Stack<string>();
+            _curlyStack = new Stack<string>(20);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Eof()
         {
             return Index >= Length;
@@ -144,24 +186,28 @@ namespace Esprima
 
         // 7.6.1.2 Future Reserved Words
 
-        public bool IsFutureReservedWord(string id)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsFutureReservedWord(string id)
         {
             return FutureReservedWords.Contains(id);
         }
 
-        public bool IsStrictModeReservedWord(string id)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsStrictModeReservedWord(string id)
         {
             return StrictModeReservedWords.Contains(id);
         }
 
-        public bool IsRestrictedWord(string id)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsRestrictedWord(string id)
         {
             return "eval".Equals(id) || "arguments".Equals(id);
         }
 
         // 7.6.1.1 Keywords
 
-        public bool IsKeyword(string id)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsKeyword(string id)
         {
             return Keywords.Contains(id);
         }
@@ -178,11 +224,7 @@ namespace Esprima
             {
                 comments = new List<Comment>();
                 start = Index - offset;
-                loc.Start = new MetaNode
-                {
-                    Line = LineNumber,
-                    Column = Index - LineStart - offset
-                };
+                loc.Start = new MetaNode(0, LineNumber, Index - LineStart - offset);
                 loc.End = new MetaNode();
             }
 
@@ -194,8 +236,7 @@ namespace Esprima
                 {
                     if (_trackComment)
                     {
-                        loc.End.Line = LineNumber;
-                        loc.End.Column = Index - LineStart - 1;
+                        loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart - 1);
 
                         Comment entry = new Comment
                         {
@@ -220,8 +261,7 @@ namespace Esprima
 
             if (_trackComment)
             {
-                loc.End.Line = LineNumber;
-                loc.End.Column = Index - LineStart;
+                loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart);
                 var entry = new Comment
                 {
                     MultiLine = false,
@@ -247,8 +287,7 @@ namespace Esprima
             {
                 comments = new List<Comment>();
                 start = Index - 2;
-                loc.Start.Line = LineNumber;
-                loc.Start.Column = Index - LineStart - 2;
+                loc.Start = new MetaNode(loc.Start.Index, LineNumber, Index - LineStart - 2);
             }
 
 
@@ -273,9 +312,7 @@ namespace Esprima
                         Index += 2;
                         if (_trackComment)
                         {
-                            loc.End.Line = LineNumber;
-                            loc.End.Column = Index - LineStart;
-
+                            loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart);
                             var entry = new Comment
                             {
                                 MultiLine = true,
@@ -299,8 +336,7 @@ namespace Esprima
             // Ran off the end of the file - the whole thing is a comment
             if (_trackComment)
             {
-                loc.End.Line = LineNumber;
-                loc.End.Column = Index - LineStart;
+                loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart);
                 var entry = new Comment
                 {
                     MultiLine = true,
@@ -390,8 +426,11 @@ namespace Esprima
                     }
                 }
                 else if (ch == 0x3C)
-                { // U+003C is '<'
-                    if (Source.Slice(Index + 1, Index + 4) == "!--")
+                {
+                    // U+003C is '<'
+                    if (Source[Index + 1] == '!'
+                        && Source[Index + 2] == '-'
+                        && Source[Index + 3] == '-')
                     {
                         Index += 4; // `<!--`
                         var comment = SkipSingleLineComment(4);
@@ -517,7 +556,6 @@ namespace Esprima
         public string GetComplexIdentifier()
         {
             var cp = CodePointAt(Index);
-            var sb = GetStringBuilder();
             var id = Character.FromCodePoint(cp);
             Index += id.Length;
 
@@ -542,7 +580,7 @@ namespace Esprima
                     {
                         ThrowUnexpectedToken();
                     }
-                    ch = ch1.ToString();
+                    ch = ParserExtensions.CharToString(ch1);
                 }
                 id = ch;
             }
@@ -579,7 +617,7 @@ namespace Esprima
                         {
                             ThrowUnexpectedToken();
                         }
-                        ch = ch1.ToString();
+                        ch = ParserExtensions.CharToString(ch1);
                     }
                     id += ch;
                 }
@@ -607,11 +645,7 @@ namespace Esprima
                 }
             }
 
-            return new OctalValue
-            {
-                Code = code,
-                Octal = octal
-            };
+            return new OctalValue(code, octal);
         }
 
         // ECMA-262 11.6 Names and Keywords
@@ -684,7 +718,7 @@ namespace Esprima
                     {
                         _curlyStack.Push("{");
                     }
-                    token.Value = str.ToString();
+                    token.Value = ParserExtensions.CharToString(str);
                     ++Index;
                     break;
 
@@ -705,7 +739,7 @@ namespace Esprima
                 case '}':
                     ++Index;
                     _curlyStack.Pop();
-                    token.Value = str.ToString();
+                    token.Value = ParserExtensions.CharToString(str);
                     break;
 
                 case ')':
@@ -717,63 +751,48 @@ namespace Esprima
                 case '?':
                 case '~':
                     ++Index;
-                    token.Value = str.ToString();
+                    token.Value = ParserExtensions.CharToString(str);
                     break;
 
                 default:
 
                     // 4-character punctuator.
-                    string str4 = null;
-                    if (Source.Length >= Index + 4)
-                    {
-                        str4 = Source.Substring(Index, 4);
-                    }
-
-                    if (">>>=".Equals(str4))
+                    if (Source.Length >= Index + 4
+                        && Source[Index] == '>'
+                        && Source[Index + 1] == '>'
+                        && Source[Index + 2] == '>'
+                        && Source[Index + 3] == '=')
                     {
                         Index += 4;
-                        token.Value = str4;
+                        token.Value = ">>>=";
                     }
                     else
                     {
 
                         // 3-character punctuators.
-                        string str3 = null;
-                        if (Source.Length >= Index + 3)
+                        string s;
+                        if (Source.Length >= Index + 3
+                            && (s = FindThreeCharEqual(Source, Index, threeCharacterPunctutors)) != null)
                         {
-                            str3 = Source.Substring(Index, 3);
-                        }
-
-                        if ("===".Equals(str3) || "!==".Equals(str3) || ">>>".Equals(str3) ||
-                            "<<=".Equals(str3) || ">>=".Equals(str3) || "**=".Equals(str3))
-                        {
-                            token.Value = str3;
+                            token.Value = s;
                             Index += 3;
                         }
                         else
                         {
                             // 2-character punctuators.
-                            string str2 = null;
-                            if (Source.Length >= Index + 2)
+                            if (Source.Length >= Index + 2
+                                && (s = FindTwoCharEqual(Source, Index, twoCharacterPunctuators)) != null)
                             {
-                                str2 = Source.Substring(Index, 2);
-                            }
-
-                            if ("&&".Equals(str2) || "||".Equals(str2) || "==".Equals(str2) || "!=".Equals(str2) ||
-                                "+=".Equals(str2) || "-=".Equals(str2) || "*=".Equals(str2) || "/=".Equals(str2) ||
-                                "++".Equals(str2) || "--".Equals(str2) || "<<".Equals(str2) || ">>".Equals(str2) ||
-                                "&=".Equals(str2) || "|=".Equals(str2) || "^=".Equals(str2) || "%=".Equals(str2) ||
-                                "<=".Equals(str2) || ">=".Equals(str2) || "=>".Equals(str2) || "**".Equals(str2))
-                            {
-                                token.Value = str2;
+                                token.Value = s;
                                 Index += 2;
                             }
                             else
                             {
 
                                 // 1-character punctuators.
-                                token.Value = Source[Index].ToString();
-                                if ("<>=!+-*%&|^/".IndexOf(str) >= 0)
+                                token.Value = ParserExtensions.CharToString(Source[Index]);
+                                if ('<' == str || '>' == str || '=' == str || '!' == str || '+' == str || '-' == str ||
+                                    '*' == str || '%' == str || '&' == str || '|' == str || '^' == str || '/' == str)
                                 {
                                     ++Index;
                                 }
@@ -835,7 +854,8 @@ namespace Esprima
             {
                 double modulo = 1;
                 var literal = number.ToLowerInvariant();
-                for (var i = literal.Length - 1; i >= 0; i--)
+                var length = literal.Length - 1;
+                for (var i = length; i >= 0; i--)
                 {
                     var c = literal[i];
 
@@ -1426,7 +1446,7 @@ namespace Esprima
                         }
                         if (codePoint <= 0xFFFF)
                         {
-                            return ((char)codePoint).ToString();
+                            return ParserExtensions.CharToString((char)codePoint);
                         }
                         return astralSubstitute;
                     });
@@ -1614,16 +1634,17 @@ namespace Esprima
         {
             var start = Index;
 
-            var body = this.ScanRegExpBody();
-            var flags = this.ScanRegExpFlags();
-            var value = TestRegExp((string)body.Value, (string)flags.Value);
+            var body = ScanRegExpBody();
+            var flags = ScanRegExpFlags();
+            var flagsValue = (string) flags.Value;
+            var value = TestRegExp((string) body.Value, flagsValue);
 
             return new Token
             {
                 Type = TokenType.RegularExpression,
                 Value = value,
                 Literal = body.Literal + flags.Literal,
-                RegexValue = new RegexValue((string) body.Value, (string) flags.Value),
+                RegexValue = new RegexValue((string) body.Value, flagsValue),
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -1772,12 +1793,59 @@ namespace Esprima
 
             return options;
         }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string FindTwoCharEqual(string input, int startIndex, string[] alternatives)
+        {
+            var c1 = input[startIndex + 0];
+            var c2 = input[startIndex + 1];
+            var length = alternatives.Length;
+            for (int i = 0; i < length; ++i)
+            {
+                var s = alternatives[i];
+                if (c1 == s[0]
+                    && c2 == s[1])
+                {
+                    return s;
+                }
+            }
+
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string FindThreeCharEqual(string input, int startIndex, string[] alternatives)
+        {
+            var c1 = input[startIndex + 0];
+            var c2 = input[startIndex + 1];
+            var c3 = input[startIndex + 2];
+            var length = alternatives.Length;
+            for (int i = 0; i < length; ++i)
+            {
+                var s = alternatives[i];
+                if (c1 == s[0]
+                    && c2 == s[1]
+                    && c3 == s[2])
+                {
+                    return alternatives[i];
+                }
+            }
+
+            return null;
+        }
     }
 
     public struct OctalValue
     {
-        public int Code;
-        public bool Octal;
+        public readonly int Code;
+        public readonly bool Octal;
+
+        public OctalValue(int code, bool octal)
+        {
+            Code = code;
+            Octal = octal;
+        }
     }
 }
 
