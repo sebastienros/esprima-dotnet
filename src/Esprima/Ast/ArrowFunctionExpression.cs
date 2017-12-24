@@ -4,13 +4,13 @@ namespace Esprima.Ast
 {
     public class ArrowFunctionExpression : Node, Expression
     {
-        public Identifier Id;
-        public IEnumerable<INode> Params;
-        public INode Body; // : BlockStatement | Expression;
-        public bool Generator;
-        public bool Expression;
+        public readonly Identifier Id;
+        public readonly List<INode> Params;
+        public readonly INode Body; // : BlockStatement | Expression;
+        public readonly bool Generator;
+        public readonly bool Expression;
 
-        public ArrowFunctionExpression(IEnumerable<INode> parameters, INode body, bool expression)
+        public ArrowFunctionExpression(List<INode> parameters, INode body, bool expression)
         {
             Type = Nodes.ArrowFunctionExpression;
             Id = null;

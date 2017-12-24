@@ -2,8 +2,8 @@ namespace Esprima.Ast
 {
     public class LabeledStatement : Statement
     {
-        public Identifier Label;
-        public Statement Body;
+        public readonly Identifier Label;
+        public readonly Statement Body;
 
         public LabeledStatement(Identifier label, Statement body)
         {
@@ -12,6 +12,5 @@ namespace Esprima.Ast
             Body = body;
             body.LabelSet = label;
         }
-
     }
 }

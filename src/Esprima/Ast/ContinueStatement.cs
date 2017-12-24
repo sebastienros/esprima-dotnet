@@ -2,7 +2,7 @@ namespace Esprima.Ast
 {
     public class ContinueStatement : Statement
     {
-        public Identifier Label;
+        public readonly Identifier Label;
 
         public ContinueStatement(Identifier label)
         {

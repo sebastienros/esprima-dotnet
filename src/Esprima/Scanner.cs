@@ -168,7 +168,7 @@ namespace Esprima
 
         // ECMA-262 11.4 Comments
 
-        public IEnumerable<Comment> SkipSingleLineComment(int offset)
+        public List<Comment> SkipSingleLineComment(int offset)
         {
             List<Comment> comments = null;
             int start = 0;
@@ -237,7 +237,7 @@ namespace Esprima
             return comments;
         }
 
-        public IEnumerable<Comment> SkipMultiLineComment()
+        public List<Comment> SkipMultiLineComment()
         {
             List<Comment> comments = null;
             int start = 0;
@@ -931,7 +931,7 @@ namespace Esprima
                 {
                     break;
                 }
-                
+
                 sb.Append(Source[Index++]);
             }
 
@@ -1623,7 +1623,7 @@ namespace Esprima
                 Type = TokenType.RegularExpression,
                 Value = value,
                 Literal = body.Literal + flags.Literal,
-                RegexValue = new RegexValue { Pattern = (string)body.Value, Flags = (string)flags.Value },
+                RegexValue = new RegexValue((string) body.Value, (string) flags.Value),
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,

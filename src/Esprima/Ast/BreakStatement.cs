@@ -2,7 +2,7 @@ namespace Esprima.Ast
 {
     public class BreakStatement : Statement
     {
-        public Identifier Label;
+        public readonly Identifier Label;
 
         public BreakStatement(Identifier label)
         {

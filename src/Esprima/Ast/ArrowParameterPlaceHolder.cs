@@ -4,9 +4,11 @@ namespace Esprima.Ast
 {
     public class ArrowParameterPlaceHolder : Node, Expression
     {
-        public IEnumerable<INode> Params;
+        public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new List<INode>());
 
-        public ArrowParameterPlaceHolder(IEnumerable<INode> parameters)
+        public readonly List<INode> Params;
+
+        public ArrowParameterPlaceHolder(List<INode> parameters)
         {
             Type = Nodes.ArrowParameterPlaceHolder;
             Params = parameters;

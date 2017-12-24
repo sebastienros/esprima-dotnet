@@ -5,7 +5,8 @@
         ArrayExpressionElement,
         Expression
     {
-        public Expression Argument;
+        public readonly Expression Argument;
+
         public SpreadElement(Expression argument)
         {
             Type = Nodes.SpreadElement;

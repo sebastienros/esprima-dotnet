@@ -8,31 +8,24 @@ namespace Esprima.Ast
         Expression,
         PropertyKey
     {
-        [JsonIgnore]
-        public string StringValue;
-        [JsonIgnore]
-        public double NumericValue;
-        [JsonIgnore]
-        public bool BooleanValue;
-        [JsonIgnore()]
-        public Regex RegexValue;
+        [JsonIgnore] public readonly string StringValue;
+        [JsonIgnore] public readonly double NumericValue;
+        [JsonIgnore] public readonly bool BooleanValue;
+        [JsonIgnore] public readonly Regex RegexValue;
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public RegexValue Regex;
+        public readonly RegexValue Regex;
 
         [JsonConverter(typeof(LiteralValueConverter))]
-        public object Value;
+        public readonly object Value;
 
-        public string Raw;
+        public readonly string Raw;
 
-        [JsonIgnore]
-        public TokenType TokenType;
+        [JsonIgnore] public readonly TokenType TokenType;
 
-        [JsonIgnore]
-        public bool Integral;
+        [JsonIgnore] public readonly bool Integral;
 
-        [JsonIgnore]
-        public bool Cached;
+        [JsonIgnore] public readonly bool Cached;
 
         //[JsonIgnore]
         //public JsValue CachedValue;
@@ -74,8 +67,8 @@ namespace Esprima.Ast
             Type = Nodes.Literal;
             // value is null if a Regex object couldn't be created out of the pattern or options
             Value = value;
-            RegexValue = (Regex)value;
-            Regex = new RegexValue { Pattern = pattern, Flags = flags };
+            RegexValue = (Regex) value;
+            Regex = new RegexValue(pattern, flags);
             TokenType = TokenType.RegularExpression;
             Raw = raw;
         }

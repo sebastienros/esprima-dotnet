@@ -1,10 +1,10 @@
 ﻿namespace Esprima.Ast
 {
-    public class ImportSpecifier : Node,
-        ImportDeclarationSpecifier
+    public class ImportSpecifier : Node, ImportDeclarationSpecifier
     {
-        public Identifier Local;
-        public Identifier Imported;
+        public readonly Identifier Local;
+        public readonly Identifier Imported;
+
         public ImportSpecifier(Identifier local, Identifier imported)
         {
             Type = Nodes.ImportSpecifier;

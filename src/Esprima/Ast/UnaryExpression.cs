@@ -31,9 +31,9 @@ namespace Esprima.Ast
         Expression
     {
         [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
-        public UnaryOperator Operator;
-        public Expression Argument;
-        public bool Prefix;
+        public readonly UnaryOperator Operator;
+        public readonly Expression Argument;
+        public bool Prefix { get; protected set; }
 
         public static UnaryOperator ParseUnaryOperator(string op)
         {

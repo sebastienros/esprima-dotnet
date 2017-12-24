@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
     public class BlockStatement : Statement
     {
-        public IEnumerable<StatementListItem> Body;
+        public readonly List<StatementListItem> Body;
 
-        public BlockStatement(IEnumerable<StatementListItem> body)
+        public BlockStatement(List<StatementListItem> body)
         {
             Type = Nodes.BlockStatement;
             Body = body;

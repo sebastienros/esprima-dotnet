@@ -2,7 +2,8 @@
 {
     public class ExportStatement : Statement
     {
-        public Expression Expression;
+        public readonly Expression Expression;
+
         public ExportStatement(Expression expression)
         {
             Type = Nodes.ExpressionStatement;

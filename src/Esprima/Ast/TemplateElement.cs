@@ -1,10 +1,9 @@
 ﻿namespace Esprima.Ast
 {
-
     public class TemplateElement : Node
     {
-        public TemplateElementValue Value;
-        public bool Tail;
+        public readonly TemplateElementValue Value;
+        public readonly bool Tail;
 
         public TemplateElement(TemplateElementValue value, bool tail)
         {

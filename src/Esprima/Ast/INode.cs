@@ -2,7 +2,8 @@
 
 namespace Esprima.Ast
 {
-    public interface INode
+    public interface
+        INode
     {
         Nodes Type { get; }
         int[] Range { get; set; }
@@ -14,7 +15,7 @@ namespace Esprima.Ast
         [DebuggerStepThrough]
         public static T As<T>(this object node) where T : class
         {
-            return (T)node;
+            return (T) node;
         }
     }
 }

@@ -59,9 +59,9 @@ namespace Esprima.Ast
         Expression
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public BinaryOperator Operator;
-        public Expression Left;
-        public Expression Right;
+        public readonly BinaryOperator Operator;
+        public readonly Expression Left;
+        public readonly Expression Right;
 
         public BinaryExpression(string op, Expression left, Expression right)
         {

@@ -114,7 +114,7 @@ namespace Esprima
                 body.Push(ParseStatementListItem());
             }
 
-            return Finalize(node, new Program(body.Cast<StatementListItem>(), _sourceType, LeaveHoistingScope(), _context.Strict));
+            return Finalize(node, new Program(body, _sourceType, LeaveHoistingScope(), _context.Strict));
         }
 
         private void CollectComments()
@@ -1053,7 +1053,7 @@ namespace Esprima
                 {
                     Expect("=>");
                 }
-                expr = new ArrowParameterPlaceHolder(new List<INode>());
+                expr = ArrowParameterPlaceHolder.Empty;
             }
             else
             {
@@ -1067,7 +1067,7 @@ namespace Esprima
                     {
                         Expect("=>");
                     }
-                    expr = new ArrowParameterPlaceHolder(new List<INode>() { rest });
+                    expr = new ArrowParameterPlaceHolder(new List<INode>(1) { rest });
                 }
                 else
                 {
@@ -1077,7 +1077,7 @@ namespace Esprima
 
                     if (Match(","))
                     {
-                        var expressions = new List<Expression>();
+                        var expressions = new List<INode>();
 
                         _context.IsAssignmentTarget = false;
                         expressions.Add(expr.As<Expression>());
@@ -1102,7 +1102,7 @@ namespace Esprima
                                     Expect("=>");
                                 }
                                 _context.IsBindingElement = false;
-                                var reinterpretedExpressions = new List<Expression>();
+                                var reinterpretedExpressions = new List<INode>();
                                 foreach (var expression in expressions)
                                 {
                                     reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
@@ -1134,7 +1134,7 @@ namespace Esprima
                             if (expr.Type == Nodes.Identifier && ((Identifier)expr).Name == "yield")
                             {
                                 arrow = true;
-                                expr = new ArrowParameterPlaceHolder(new List<INode>() { expr });
+                                expr = new ArrowParameterPlaceHolder(new List<INode>(1) { expr });
                             }
                             if (!arrow)
                             {
@@ -1146,7 +1146,7 @@ namespace Esprima
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
                                     var sequenceExpression = expr.As<SequenceExpression>();
-                                    var reinterpretedExpressions = new List<Expression>();
+                                    var reinterpretedExpressions = new List<INode>();
                                     foreach (var expression in sequenceExpression.Expressions)
                                     {
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
@@ -1164,7 +1164,7 @@ namespace Esprima
                                 }
                                 else
                                 {
-                                    expr = new ArrowParameterPlaceHolder(new List<INode>() { expr });
+                                    expr = new ArrowParameterPlaceHolder(new List<INode>(1) { expr });
                                 }
 
                             }
@@ -1713,9 +1713,9 @@ namespace Esprima
             }
         }
 
-        private ParsedParameters ReinterpretAsCoverFormalsList(Expression expr)
+        private ParsedParameters ReinterpretAsCoverFormalsList(INode expr)
         {
-            var parameters = new List<INode>() { expr };
+            var parameters = new List<INode>(1) { expr };
             ParsedParameters options;
 
             switch (expr.Type)
@@ -1723,7 +1723,7 @@ namespace Esprima
                 case Nodes.Identifier:
                     break;
                 case Nodes.ArrowParameterPlaceHolder:
-                    parameters = expr.As<ArrowParameterPlaceHolder>().Params.ToList();
+                    parameters = expr.As<ArrowParameterPlaceHolder>().Params.Cast<INode>().ToList();
                     break;
                 default:
                     return null;
@@ -1892,7 +1892,7 @@ namespace Esprima
 
             if (Match(","))
             {
-                var expressions = new List<Expression>();
+                var expressions = new List<INode>();
                 expressions.Push(expr);
                 while (_startMarker.Index < _scanner.Length)
                 {
@@ -2556,7 +2556,7 @@ namespace Esprima
                     {
                         if (Match(","))
                         {
-                            var initSeq = new List<Expression> { (Expression)init };
+                            var initSeq = new List<INode>(1) { (Expression)init };
                             while (Match(","))
                             {
                                 NextToken();
@@ -3756,7 +3756,7 @@ namespace Esprima
         }
 
         // {foo, bar as bas}
-        private IEnumerable<ImportSpecifier> ParseNamedImports()
+        private List<ImportSpecifier> ParseNamedImports()
         {
             Expect("{");
             var specifiers = new List<ImportSpecifier>();

@@ -5,12 +5,11 @@ namespace Esprima.Ast
     public class TemplateLiteral : Node,
         Expression
     {
-        public IEnumerable<TemplateElement> Quasis;
-        public IEnumerable<Expression> Expressions;
+        public readonly List<TemplateElement> Quasis;
+        public readonly List<Expression> Expressions;
 
-        public TemplateLiteral(IEnumerable<TemplateElement> quasis, IEnumerable<Expression> expressions)
+        public TemplateLiteral(List<TemplateElement> quasis, List<Expression> expressions)
         {
-
             Type = Nodes.TemplateLiteral;
             Quasis = quasis;
             Expressions = expressions;

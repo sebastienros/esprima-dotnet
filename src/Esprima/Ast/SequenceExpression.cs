@@ -2,12 +2,11 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class SequenceExpression : Node,
-        Expression
+    public class SequenceExpression : Node, Expression
     {
-        public IList<Expression> Expressions;
+        public List<INode> Expressions { get; internal set; }
 
-        public SequenceExpression(IList<Expression> expressions)
+        public SequenceExpression(List<INode> expressions)
         {
             Type = Nodes.SequenceExpression;
             Expressions = expressions;

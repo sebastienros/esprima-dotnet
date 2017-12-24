@@ -4,10 +4,10 @@ namespace Esprima.Ast
 {
     public class SwitchStatement : Statement
     {
-        public Expression Discriminant;
-        public IEnumerable<SwitchCase> Cases;
+        public readonly Expression Discriminant;
+        public readonly List<SwitchCase> Cases;
 
-        public SwitchStatement(Expression discriminant, IEnumerable<SwitchCase> cases)
+        public SwitchStatement(Expression discriminant, List<SwitchCase> cases)
         {
             Type = Nodes.SwitchStatement;
             Discriminant = discriminant;

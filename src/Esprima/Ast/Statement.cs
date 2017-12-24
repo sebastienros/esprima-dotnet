@@ -2,10 +2,9 @@ using Newtonsoft.Json;
 
 namespace Esprima.Ast
 {
-    public class Statement : Node, INode,
-        StatementListItem
+    public class Statement : Node, INode, StatementListItem
     {
         [JsonIgnore]
-        public Identifier LabelSet { get; set; }
+        public Identifier LabelSet { get; internal set; }
     }
 }

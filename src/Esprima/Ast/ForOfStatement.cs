@@ -2,9 +2,10 @@
 {
     public class ForOfStatement : Statement
     {
-        public INode Left;
-        public Expression Right;
-        public Statement Body;
+        public readonly INode Left;
+        public readonly Expression Right;
+        public readonly Statement Body;
+
         public ForOfStatement(INode left, Expression right, Statement body)
         {
             Type = Nodes.ForOfStatement;
