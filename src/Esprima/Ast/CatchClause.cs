@@ -2,8 +2,8 @@ namespace Esprima.Ast
 {
     public class CatchClause : Statement
     {
-        public ArrayPatternElement Param; // BindingIdentifier | BindingPattern;
-        public BlockStatement Body;
+        public readonly ArrayPatternElement Param; // BindingIdentifier | BindingPattern;
+        public readonly BlockStatement Body;
 
         public CatchClause(ArrayPatternElement param, BlockStatement body)
         {

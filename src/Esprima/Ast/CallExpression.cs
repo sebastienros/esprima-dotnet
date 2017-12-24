@@ -6,8 +6,8 @@ namespace Esprima.Ast
     public class CallExpression : Node,
         Expression
     {
-        public Expression Callee;
-        public List<ArgumentListElement> Arguments;
+        public readonly Expression Callee;
+        public readonly List<ArgumentListElement> Arguments;
 
         [JsonIgnore]
         public bool Cached;

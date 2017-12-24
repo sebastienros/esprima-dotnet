@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public class RegexValue
     {
-        public string Pattern;
-        public string Flags;
+        public readonly string Pattern;
+        public readonly string Flags;
+
+        public RegexValue(string pattern, string flags)
+        {
+            Pattern = pattern;
+            Flags = flags;
+        }
     }
 }

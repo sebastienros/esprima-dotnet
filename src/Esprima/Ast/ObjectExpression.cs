@@ -2,12 +2,11 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class ObjectExpression : Node,
-        Expression
+    public class ObjectExpression : Node, Expression
     {
-        public IEnumerable<Property> Properties;
+        public readonly List<Property> Properties;
 
-        public ObjectExpression(IEnumerable<Property> properties)
+        public ObjectExpression(List<Property> properties)
         {
             Type = Nodes.ObjectExpression;
             Properties = properties;

@@ -5,10 +5,10 @@ namespace Esprima.Ast
     public class VariableDeclaration : Statement,
         Declaration
     {
-        public IEnumerable<VariableDeclarator> Declarations;
-        public string Kind;
+        public readonly List<VariableDeclarator> Declarations;
+        public readonly string Kind;
 
-        public VariableDeclaration(IEnumerable<VariableDeclarator> declarations, string kind)
+        public VariableDeclaration(List<VariableDeclarator> declarations, string kind)
         {
             Type = Nodes.VariableDeclaration;
             Declarations = declarations;

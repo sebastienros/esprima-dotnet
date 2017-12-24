@@ -5,7 +5,7 @@ namespace Esprima.Ast
         PropertyKey,
         Expression
     {
-        public string Name;
+        public readonly string Name;
 
         public Identifier(string name)
         {

@@ -1,9 +1,9 @@
 ﻿namespace Esprima.Ast
 {
-    public class ExportAllDeclaration : Node,
-        ExportDeclaration
+    public class ExportAllDeclaration : Node, ExportDeclaration
     {
-        public Literal Source;
+        public readonly Literal Source;
+
         public ExportAllDeclaration(Literal source)
         {
             Type = Nodes.ExportAllDeclaration;

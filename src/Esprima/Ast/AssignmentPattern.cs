@@ -7,10 +7,10 @@
         FunctionParameter,
         PropertyValue
     {
-        public INode Left;
-        public Expression Right;
+        public readonly INode Left;
+        public INode Right;
 
-        public AssignmentPattern(INode left, Expression right)
+        public AssignmentPattern(INode left, INode right)
         {
             Type = Nodes.AssignmentPattern;
             Left = left;

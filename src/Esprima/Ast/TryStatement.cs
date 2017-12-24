@@ -1,12 +1,10 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public class TryStatement : Statement
     {
-        public Statement Block;
-        public CatchClause Handler;
-        public Statement Finalizer;
+        public readonly Statement Block;
+        public readonly CatchClause Handler;
+        public readonly Statement Finalizer;
 
         public TryStatement(
             Statement block,

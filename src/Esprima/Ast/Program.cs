@@ -6,18 +6,18 @@ namespace Esprima.Ast
 {
     public class Program : Statement
     {
-        public IEnumerable<StatementListItem> Body;
+        public readonly List<StatementListItem> Body;
 
         [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
-        public SourceType SourceType;
+        public readonly SourceType SourceType;
 
         [JsonIgnore]
         public HoistingScope HoistingScope { get; }
 
         [JsonIgnore]
-        public bool Strict { get; set; }
+        public bool Strict { get; }
 
-        public Program(IEnumerable<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict)
+        public Program(List<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict)
         {
             Type = Nodes.Program;
             Body = body;

@@ -37,11 +37,11 @@ namespace Esprima.Ast
         Expression
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public AssignmentOperator Operator;
+        public readonly AssignmentOperator Operator;
 
         // Can be something else than Expression (ObjectPattern, ArrayPattern) in case of destructuring assignment
-        public INode Left;
-        public Expression Right;
+        public readonly INode Left;
+        public readonly Expression Right;
 
         public AssignmentExpression(string op, INode left, Expression right)
         {

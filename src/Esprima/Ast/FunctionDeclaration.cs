@@ -5,11 +5,11 @@ namespace Esprima.Ast
 {
     public class FunctionDeclaration : Statement, Declaration, IFunction
     {
-        public Identifier Id { get; set; }
-        public IEnumerable<INode> Params { get; set; }
-        public BlockStatement Body { get; set; }
-        public bool Generator { get; set; }
-        public bool Expression { get; set; }
+        public Identifier Id { get; }
+        public List<INode> Params { get; }
+        public BlockStatement Body { get; }
+        public bool Generator { get; }
+        public bool Expression { get; }
 
         [JsonIgnore]
         public HoistingScope HoistingScope { get; }
@@ -19,7 +19,7 @@ namespace Esprima.Ast
 
         public FunctionDeclaration(
             Identifier id,
-            IEnumerable<INode> parameters,
+            List<INode> parameters,
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,

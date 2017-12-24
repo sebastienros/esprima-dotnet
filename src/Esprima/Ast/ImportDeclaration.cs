@@ -2,11 +2,11 @@
 
 namespace Esprima.Ast
 {
-    public class ImportDeclaration : Node,
-        Declaration
+    public class ImportDeclaration : Node, Declaration
     {
-        public List<ImportDeclarationSpecifier> Specifiers;
-        public Literal Source;
+        public readonly List<ImportDeclarationSpecifier> Specifiers;
+        public readonly Literal Source;
+
         public ImportDeclaration(List<ImportDeclarationSpecifier> specifiers, Literal source)
         {
             Type = Nodes.ImportDeclaration;

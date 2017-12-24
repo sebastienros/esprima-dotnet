@@ -7,7 +7,7 @@ namespace Esprima.Ast
     {
         [JsonProperty(Order = -100)]
         [JsonConverter(typeof(StringEnumConverter))]
-        public Nodes Type { get; protected set; }
+        public Nodes Type { get; set; }
 
         public int[] Range { get; set; }
 

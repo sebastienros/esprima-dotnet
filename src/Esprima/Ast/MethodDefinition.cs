@@ -2,7 +2,7 @@
 {
     public class MethodDefinition : ClassProperty
     {
-        public bool Static;
+        public readonly bool Static;
 
         public MethodDefinition(PropertyKey key, bool computed, FunctionExpression value, PropertyKind kind, bool isStatic)
         {

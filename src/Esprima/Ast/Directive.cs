@@ -5,7 +5,7 @@ namespace Esprima.Ast
     public class Directive : ExpressionStatement
     {
         [JsonProperty("directive")]
-        public string Directiv;
+        public readonly string Directiv;
 
         public Directive(Expression expression, string directive)
             :base(expression)

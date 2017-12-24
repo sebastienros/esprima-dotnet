@@ -7,11 +7,11 @@ namespace Esprima.Ast
     /// </summary>
     public interface IFunction
     {
-        Identifier Id { get; set; }
-        IEnumerable<INode> Params { get; set; }
-        BlockStatement Body { get; set; }
-        bool Generator { get; set; }
-        bool Expression { get; set; }
+        Identifier Id { get; }
+        List<INode> Params { get; }
+        BlockStatement Body { get; }
+        bool Generator { get; }
+        bool Expression { get; }
         HoistingScope HoistingScope { get; }
         bool Strict { get; }
     }

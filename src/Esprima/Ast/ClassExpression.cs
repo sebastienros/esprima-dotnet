@@ -1,18 +1,17 @@
 ﻿namespace Esprima.Ast
 {
-    public class ClassExpression : Node,
-        Expression
+    public class ClassExpression : Node, Expression
     {
-        public Identifier Id;
-        public PropertyKey SuperClass;
-        public ClassBody Body;
+        public readonly Identifier Id;
+        public readonly PropertyKey SuperClass;
+        public readonly ClassBody Body;
 
         public ClassExpression(Identifier id, PropertyKey superClass, ClassBody body)
-            {
-                Type = Nodes.ClassExpression;
-                Id = id;
-                SuperClass = superClass;
-                Body = body;
-            }
+        {
+            Type = Nodes.ClassExpression;
+            Id = id;
+            SuperClass = superClass;
+            Body = body;
+        }
     }
 }

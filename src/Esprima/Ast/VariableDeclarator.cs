@@ -2,8 +2,8 @@ namespace Esprima.Ast
 {
     public class VariableDeclarator : Node
     {
-        public ArrayPatternElement Id; // BindingIdentifier | BindingPattern;
-        public Expression Init;
+        public readonly ArrayPatternElement Id; // BindingIdentifier | BindingPattern;
+        public readonly Expression Init;
 
         public VariableDeclarator(ArrayPatternElement id, Expression init)
         {
