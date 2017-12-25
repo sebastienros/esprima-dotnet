@@ -2,8 +2,8 @@ namespace Esprima.Ast
 {
     public class WithStatement : Statement
     {
-        public readonly Expression Object;
-        public readonly Statement Body;
+        public Expression Object { get; }
+        public Statement Body { get; }
 
         public WithStatement(Expression obj, Statement body)
         {

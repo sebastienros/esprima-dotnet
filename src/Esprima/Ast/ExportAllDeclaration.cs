@@ -2,7 +2,7 @@
 {
     public class ExportAllDeclaration : Node, ExportDeclaration
     {
-        public readonly Literal Source;
+        public Literal Source { get; }
 
         public ExportAllDeclaration(Literal source)
         {

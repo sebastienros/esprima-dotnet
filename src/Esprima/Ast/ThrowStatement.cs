@@ -2,7 +2,7 @@ namespace Esprima.Ast
 {
     public class ThrowStatement : Statement
     {
-        public readonly Expression Argument;
+        public Expression Argument { get; }
 
         public ThrowStatement(Expression argument)
         {

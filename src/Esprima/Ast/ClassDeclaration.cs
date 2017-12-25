@@ -3,9 +3,9 @@
     public class ClassDeclaration : Node,
         Declaration
     {
-        public readonly Identifier Id;
-        public readonly PropertyKey SuperClass;
-        public readonly ClassBody Body;
+        public Identifier Id { get; }
+        public PropertyKey SuperClass { get; }
+        public ClassBody Body { get; }
 
         public ClassDeclaration(Identifier id, PropertyKey superClass, ClassBody body)
         {

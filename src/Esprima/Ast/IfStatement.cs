@@ -2,9 +2,9 @@ namespace Esprima.Ast
 {
     public class IfStatement : Statement
     {
-        public readonly Expression Test;
-        public readonly Statement Consequent;
-        public readonly Statement Alternate;
+        public Expression Test { get; }
+        public Statement Consequent { get; }
+        public Statement Alternate { get; }
 
         public IfStatement(Expression test, Statement consequent, Statement alternate)
         {

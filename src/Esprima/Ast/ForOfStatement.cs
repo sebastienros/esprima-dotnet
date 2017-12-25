@@ -2,9 +2,9 @@
 {
     public class ForOfStatement : Statement
     {
-        public readonly INode Left;
-        public readonly Expression Right;
-        public readonly Statement Body;
+        public INode Left { get; }
+        public Expression Right { get; }
+        public Statement Body { get; }
 
         public ForOfStatement(INode left, Expression right, Statement body)
         {

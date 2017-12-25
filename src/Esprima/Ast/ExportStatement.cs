@@ -2,7 +2,7 @@
 {
     public class ExportStatement : Statement
     {
-        public readonly Expression Expression;
+        public Expression Expression { get; }
 
         public ExportStatement(Expression expression)
         {

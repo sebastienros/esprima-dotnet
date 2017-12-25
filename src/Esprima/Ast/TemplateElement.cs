@@ -2,8 +2,8 @@
 {
     public class TemplateElement : Node
     {
-        public readonly TemplateElementValue Value;
-        public readonly bool Tail;
+        public TemplateElementValue Value { get; }
+        public bool Tail { get; }
 
         public TemplateElement(TemplateElementValue value, bool tail)
         {

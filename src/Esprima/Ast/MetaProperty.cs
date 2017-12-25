@@ -2,8 +2,8 @@
 {
     public class MetaProperty : Node, Expression
     {
-        public readonly Identifier Meta;
-        public readonly Identifier Property;
+        public Identifier Meta { get; }
+        public Identifier Property { get; }
 
         public MetaProperty(Identifier meta, Identifier property)
         {

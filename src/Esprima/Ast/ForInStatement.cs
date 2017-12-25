@@ -2,10 +2,10 @@ namespace Esprima.Ast
 {
     public class ForInStatement : Statement
     {
-        public readonly INode Left;
-        public readonly Expression Right;
-        public readonly Statement Body;
-        public readonly bool Each;
+        public INode Left { get; }
+        public Expression Right { get; }
+        public Statement Body { get; }
+        public bool Each { get; }
 
         public ForInStatement(INode left, Expression right, Statement body)
         {

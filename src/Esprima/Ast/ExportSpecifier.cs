@@ -2,8 +2,8 @@
 {
     public class ExportSpecifier : Statement
     {
-        public readonly Identifier Exported;
-        public readonly Identifier Local;
+        public Identifier Exported { get; }
+        public Identifier Local { get; }
 
         public ExportSpecifier(Identifier local, Identifier exported)
         {

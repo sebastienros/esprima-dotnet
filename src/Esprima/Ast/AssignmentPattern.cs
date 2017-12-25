@@ -7,8 +7,8 @@
         FunctionParameter,
         PropertyValue
     {
-        public readonly INode Left;
-        public INode Right;
+        public INode Left { get; }
+        public INode Right { get; internal set; }
 
         public AssignmentPattern(INode left, INode right)
         {

@@ -4,9 +4,9 @@ namespace Esprima.Ast
 {
     public class ExportNamedDeclaration : Node, ExportDeclaration
     {
-        public readonly StatementListItem Declaration;
-        public readonly List<ExportSpecifier> Specifiers;
-        public readonly Literal Source;
+        public StatementListItem Declaration { get; }
+        public List<ExportSpecifier> Specifiers { get; }
+        public Literal Source { get; }
 
         public ExportNamedDeclaration(StatementListItem declaration, List<ExportSpecifier> specifiers, Literal source)
         {

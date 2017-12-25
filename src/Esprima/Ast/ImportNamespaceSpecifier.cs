@@ -2,7 +2,7 @@
 {
     public class ImportNamespaceSpecifier : Node, ImportDeclarationSpecifier
     {
-        public readonly Identifier Local;
+        public Identifier Local { get; }
 
         public ImportNamespaceSpecifier(Identifier local)
         {

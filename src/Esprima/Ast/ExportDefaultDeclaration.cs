@@ -2,7 +2,7 @@
 {
     public class ExportDefaultDeclaration : Node, ExportDeclaration
     {
-        public readonly Declaration Declaration; //: BindingIdentifier | BindingPattern | ClassDeclaration | Expression | FunctionDeclaration;
+        public Declaration Declaration { get; } //: BindingIdentifier | BindingPattern | ClassDeclaration | Expression | FunctionDeclaration;
 
         public ExportDefaultDeclaration(Declaration declaration)
         {

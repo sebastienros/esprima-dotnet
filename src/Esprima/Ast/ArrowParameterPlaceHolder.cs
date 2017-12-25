@@ -6,7 +6,7 @@ namespace Esprima.Ast
     {
         public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new List<INode>());
 
-        public readonly List<INode> Params;
+        public List<INode> Params { get; }
 
         public ArrowParameterPlaceHolder(List<INode> parameters)
         {

@@ -10,8 +10,8 @@ namespace Esprima
 {
     public class Loc
     {
-        public MetaNode Start;
-        public MetaNode End;
+        public MetaNode Start { get; internal set; }
+        public MetaNode End { get; internal set; }
     }
 
     public struct MetaNode
@@ -30,25 +30,25 @@ namespace Esprima
 
     public class Marker
     {
-        public int Index;
-        public int LineNumber;
-        public int LineStart;
+        public int Index { get; internal set;}
+        public int LineNumber { get; internal set;}
+        public int LineStart { get; internal set;}
     }
 
     public class Scanner
     {
-        private IErrorHandler _errorHandler;
-        private bool _trackComment;
-        private bool _adaptRegexp;
+        private readonly IErrorHandler _errorHandler;
+        private readonly bool _trackComment;
+        private readonly bool _adaptRegexp;
 
-        public int Length;
-        public string Source;
-        public int Index;
-        public int LineNumber;
-        public int LineStart;
-        private Stack<string> _curlyStack;
+        public int Length { get; }
+        public string Source { get; }
+        public int Index { get; internal set; }
+        public int LineNumber { get; internal set; }
+        public int LineStart { get; internal set; }
+        private readonly Stack<string> _curlyStack;
 
-        private StringBuilder strb = new StringBuilder();
+        private readonly StringBuilder strb = new StringBuilder();
 
         private static readonly HashSet<string> Keywords = new HashSet<string>
         {

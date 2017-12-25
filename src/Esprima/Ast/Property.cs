@@ -2,8 +2,8 @@ namespace Esprima.Ast
 {
     public class Property : ClassProperty
     {
-        public readonly bool Method;
-        public readonly bool Shorthand;
+        public bool Method { get; }
+        public bool Shorthand { get; }
 
         public Property(PropertyKind kind, PropertyKey key, bool computed, PropertyValue value, bool method, bool shorthand)
         {

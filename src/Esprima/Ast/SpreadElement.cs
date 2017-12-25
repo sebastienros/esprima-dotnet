@@ -5,7 +5,7 @@
         ArrayExpressionElement,
         Expression
     {
-        public readonly Expression Argument;
+        public Expression Argument { get; }
 
         public SpreadElement(Expression argument)
         {

@@ -27,7 +27,7 @@ namespace Esprima
         private bool _hasLineTerminator;
         private Action<INode> _action;
 
-        public List<Token> Tokens = new List<Token>();
+        public List<Token> Tokens { get; } = new List<Token>();
 
         // cache frequently called funcs so we don't need to build Func<T> intances all the time
         private readonly Func<Expression> parseAssignmentExpression;
@@ -206,11 +206,16 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                t.Location.Start.Line = _startMarker.LineNumber;
-                t.Location.Start.Column = _startMarker.Index - _startMarker.LineStart;
-
-                t.Location.End.Line = _scanner.LineNumber;
-                t.Location.End.Column = _scanner.Index - _scanner.LineStart;
+                t.Location.Start = new Position
+                {
+                    Line = _startMarker.LineNumber,
+                    Column = _startMarker.Index - _startMarker.LineStart
+                };
+                t.Location.End = new Position
+                {
+                    Line = _scanner.LineNumber,
+                    Column = _scanner.Index - _scanner.LineStart
+                };
             }
 
             if (token.RegexValue != null)
@@ -300,10 +305,16 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                node.Location.Start.Line = meta.Line;
-                node.Location.Start.Column = meta.Column;
-                node.Location.End.Line = _lastMarker.LineNumber;
-                node.Location.End.Column = _lastMarker.Index - _lastMarker.LineStart;
+                node.Location.Start = new Position
+                {
+                    Line = meta.Line,
+                    Column = meta.Column
+                };
+                node.Location.End = new Position
+                {
+                    Line = _lastMarker.LineNumber,
+                    Column = _lastMarker.Index - _lastMarker.LineStart
+                };
                 if (_errorHandler.Source != null)
                 {
                     node.Location.Source = _errorHandler.Source;
@@ -1162,7 +1173,12 @@ namespace Esprima
                         }
                         if (!arrow)
                         {
-                            expr = Finalize(StartNode(startToken), new SequenceExpression(expressions));
+                            var reinterpretedExpressions = new List<Expression>(expressions.Count);
+                            foreach (var expression in expressions)
+                            {
+                                reinterpretedExpressions.Add((Expression) expression);
+                            }
+                            expr = Finalize(StartNode(startToken), new SequenceExpression(reinterpretedExpressions));
                         }
                     }
 
@@ -1186,7 +1202,7 @@ namespace Esprima
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
                                     var sequenceExpression = expr.As<SequenceExpression>();
-                                    var reinterpretedExpressions = new List<INode>();
+                                    var reinterpretedExpressions = new List<Expression>(sequenceExpression.Expressions.Count);
                                     foreach (var expression in sequenceExpression.Expressions)
                                     {
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
@@ -1200,7 +1216,13 @@ namespace Esprima
 
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
-                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>().Expressions);
+                                    var sequenceExpression = expr.As<SequenceExpression>();
+                                    var reinterpretedExpressions = new List<INode>(sequenceExpression.Expressions.Count);
+                                    foreach (var expression in expr.As<SequenceExpression>().Expressions)
+                                    {
+                                        reinterpretedExpressions.Add(expression);
+                                    }
+                                    expr = new ArrowParameterPlaceHolder(reinterpretedExpressions);
                                 }
                                 else
                                 {
@@ -1931,7 +1953,7 @@ namespace Esprima
 
             if (Match(","))
             {
-                var expressions = new List<INode>();
+                var expressions = new List<Expression>();
                 expressions.Push(expr);
                 while (_startMarker.Index < _scanner.Length)
                 {
@@ -2595,7 +2617,7 @@ namespace Esprima
                     {
                         if (Match(","))
                         {
-                            var initSeq = new List<INode>(1) { (Expression)init };
+                            var initSeq = new List<Expression>(1) { (Expression)init };
                             while (Match(","))
                             {
                                 NextToken();

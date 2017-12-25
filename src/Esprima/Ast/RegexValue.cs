@@ -2,8 +2,8 @@
 {
     public class RegexValue
     {
-        public readonly string Pattern;
-        public readonly string Flags;
+        public string Pattern { get; }
+        public string Flags { get; }
 
         public RegexValue(string pattern, string flags)
         {

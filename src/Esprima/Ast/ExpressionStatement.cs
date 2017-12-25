@@ -2,7 +2,7 @@ namespace Esprima.Ast
 {
     public class ExpressionStatement : Statement
     {
-        public readonly Expression Expression;
+        public Expression Expression { get; }
 
         public ExpressionStatement(Expression expression)
         {

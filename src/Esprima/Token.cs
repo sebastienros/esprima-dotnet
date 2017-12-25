@@ -18,31 +18,31 @@ namespace Esprima
 
     public class Token
     {
-        public TokenType Type;
-        public string Literal;
+        public TokenType Type { get; internal set; }
+        public string Literal { get; internal set; }
 
-        public int Start; // Range[0]
-        public int End; // Range[1]
-        public int LineNumber;
-        public int LineStart;
+        public int Start { get; internal set; } // Range[0]
+        public int End { get; internal set; } // Range[1]
+        public int LineNumber { get; internal set; }
+        public int LineStart { get; internal set; }
 
         private Location _location;
         public Location Location => _location ?? (_location = new Location());
 
-        public int Precedence;
+        public int Precedence { get; internal set; }
 
         // For NumericLiteral
-        public bool Octal;
+        public bool Octal { get; internal set; }
 
         // For templates
-        public bool Head;
-        public bool Tail;
-        public string RawTemplate;
+        public bool Head { get; internal set; }
+        public bool Tail { get; internal set; }
+        public string RawTemplate { get; internal set; }
 
-        public bool BooleanValue;
-        public double NumericValue;
-        public object Value;
-        public RegexValue RegexValue;
+        public bool BooleanValue { get; internal set; }
+        public double NumericValue { get; internal set; }
+        public object Value { get; internal set; }
+        public RegexValue RegexValue { get; internal set;}
 
         public void Clear()
         {

@@ -2,8 +2,8 @@
 {
     public class YieldExpression : Node, Expression
     {
-        public readonly Expression Argument;
-        public readonly bool Delegate;
+        public Expression Argument { get; }
+        public bool Delegate { get; }
 
         public YieldExpression(Expression argument, bool delgate)
         {
