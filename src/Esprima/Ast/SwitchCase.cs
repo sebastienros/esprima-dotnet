@@ -4,8 +4,8 @@ namespace Esprima.Ast
 {
     public class SwitchCase : Node
     {
-        public readonly Expression Test;
-        public readonly List<StatementListItem> Consequent;
+        public Expression Test { get; }
+        public List<StatementListItem> Consequent { get; }
 
         public SwitchCase(Expression test, List<StatementListItem> consequent)
         {

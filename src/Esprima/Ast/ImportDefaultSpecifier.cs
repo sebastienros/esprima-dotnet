@@ -2,7 +2,7 @@
 {
     public class ImportDefaultSpecifier : Node, ImportDeclarationSpecifier
     {
-        public readonly Identifier Local;
+        public Identifier Local { get; }
 
         public ImportDefaultSpecifier(Identifier local)
         {

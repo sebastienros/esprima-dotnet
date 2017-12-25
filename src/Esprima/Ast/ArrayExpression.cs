@@ -4,7 +4,7 @@ namespace Esprima.Ast
 {
     public class ArrayExpression : Node, Expression
     {
-        public readonly List<ArrayExpressionElement> Elements;
+        public List<ArrayExpressionElement> Elements { get; }
 
         public ArrayExpression(List<ArrayExpressionElement> elements)
         {

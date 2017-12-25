@@ -4,7 +4,7 @@ namespace Esprima.Ast
 {
     public class ObjectExpression : Node, Expression
     {
-        public readonly List<Property> Properties;
+        public List<Property> Properties { get; }
 
         public ObjectExpression(List<Property> properties)
         {

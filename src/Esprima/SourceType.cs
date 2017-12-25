@@ -1,5 +1,8 @@
-﻿public enum SourceType
+﻿namespace Esprima
 {
-    Module,
-    Script
+    public enum SourceType
+    {
+        Module,
+        Script
+    }
 }

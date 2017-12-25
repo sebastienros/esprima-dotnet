@@ -20,10 +20,10 @@ namespace Esprima.Ast
     public abstract class ClassProperty : Node
     {
         [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
-        public PropertyKind Kind;
+        public PropertyKind Kind { get; protected set; }
 
-        public PropertyKey Key;
-        public bool Computed;
-        public PropertyValue Value;
+        public PropertyKey Key { get; protected set; }
+        public bool Computed { get; protected set; }
+        public PropertyValue Value { get; internal set; }
     }
 }

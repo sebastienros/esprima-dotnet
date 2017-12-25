@@ -2,8 +2,8 @@ namespace Esprima.Ast
 {
     public class WhileStatement : Statement
     {
-        public readonly Expression Test;
-        public readonly Statement Body;
+        public Expression Test { get; }
+        public Statement Body { get; }
 
         public WhileStatement(Expression test, Statement body)
         {

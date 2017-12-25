@@ -3,9 +3,9 @@ namespace Esprima.Ast
     public class ConditionalExpression : Node,
         Expression
     {
-        public readonly Expression Test;
-        public readonly Expression Consequent;
-        public readonly Expression Alternate;
+        public Expression Test { get; }
+        public Expression Consequent { get; }
+        public Expression Alternate { get; }
 
         public ConditionalExpression(Expression test, Expression consequent, Expression alternate)
         {

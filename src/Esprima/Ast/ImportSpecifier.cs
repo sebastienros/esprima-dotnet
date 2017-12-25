@@ -2,8 +2,8 @@
 {
     public class ImportSpecifier : Node, ImportDeclarationSpecifier
     {
-        public readonly Identifier Local;
-        public readonly Identifier Imported;
+        public Identifier Local { get; }
+        public Identifier Imported { get; }
 
         public ImportSpecifier(Identifier local, Identifier imported)
         {

@@ -2,9 +2,9 @@ namespace Esprima.Ast
 {
     public class TryStatement : Statement
     {
-        public readonly Statement Block;
-        public readonly CatchClause Handler;
-        public readonly Statement Finalizer;
+        public Statement Block { get; }
+        public CatchClause Handler { get; }
+        public Statement Finalizer { get; }
 
         public TryStatement(
             Statement block,

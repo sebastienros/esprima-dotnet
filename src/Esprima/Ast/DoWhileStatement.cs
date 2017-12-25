@@ -2,8 +2,8 @@ namespace Esprima.Ast
 {
     public class DoWhileStatement : Statement
     {
-        public readonly Statement Body;
-        public readonly Expression Test;
+        public Statement Body { get; }
+        public Expression Test { get; }
 
         public DoWhileStatement(Statement body, Expression test)
         {

@@ -27,12 +27,11 @@ namespace Esprima.Ast
         Decrement,
     }
 
-    public class UnaryExpression : Node,
-        Expression
+    public class UnaryExpression : Node, Expression
     {
         [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
-        public readonly UnaryOperator Operator;
-        public readonly Expression Argument;
+        public UnaryOperator Operator { get; }
+        public Expression Argument { get; }
         public bool Prefix { get; protected set; }
 
         public static UnaryOperator ParseUnaryOperator(string op)

@@ -7,7 +7,7 @@
         // for instance ...i[0] is a SpreadElement
         // which is reinterpreted to RestElement with a ComputerMemberExpression
 
-        public readonly Expression Argument;
+        public Expression Argument { get; }
 
         public RestElement(Expression argument)
         {

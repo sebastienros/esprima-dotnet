@@ -4,7 +4,7 @@ namespace Esprima.Ast
 {
     public class ArrayPattern : Node, BindingPattern
     {
-        public readonly List<ArrayPatternElement> Elements;
+        public List<ArrayPatternElement> Elements { get; }
 
         public ArrayPattern(List<ArrayPatternElement> elements)
         {

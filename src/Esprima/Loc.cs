@@ -4,10 +4,10 @@ namespace Esprima
 {
     public class Location
     {
-        public Position Start;
-        public Position End;
+        public Position Start { get; set; }
+        public Position End { get; set; }
 
         [JsonIgnore]
-        public string Source;
+        public string Source { get; set; }
     }
 }

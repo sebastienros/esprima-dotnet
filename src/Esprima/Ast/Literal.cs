@@ -8,24 +8,24 @@ namespace Esprima.Ast
         Expression,
         PropertyKey
     {
-        [JsonIgnore] public readonly string StringValue;
-        [JsonIgnore] public readonly double NumericValue;
-        [JsonIgnore] public readonly bool BooleanValue;
-        [JsonIgnore] public readonly Regex RegexValue;
+        [JsonIgnore] public string StringValue { get; }
+        [JsonIgnore] public double NumericValue { get; }
+        [JsonIgnore] public bool BooleanValue { get; }
+        [JsonIgnore] public Regex RegexValue { get; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public readonly RegexValue Regex;
+        public RegexValue Regex { get; }
 
         [JsonConverter(typeof(LiteralValueConverter))]
-        public readonly object Value;
+        public object Value { get; }
 
-        public readonly string Raw;
+        public string Raw { get; }
 
-        [JsonIgnore] public readonly TokenType TokenType;
+        [JsonIgnore] public TokenType TokenType { get; }
 
-        [JsonIgnore] public readonly bool Integral;
+        [JsonIgnore] public bool Integral { get; }
 
-        [JsonIgnore] public readonly bool Cached;
+        [JsonIgnore] public bool Cached { get; }
 
         //[JsonIgnore]
         //public JsValue CachedValue;

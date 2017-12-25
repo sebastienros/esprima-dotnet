@@ -2,8 +2,8 @@
 {
     public class TaggedTemplateExpression : Node, Expression
     {
-        public readonly Expression Tag;
-        public readonly TemplateLiteral Quasi;
+        public Expression Tag { get; }
+        public TemplateLiteral Quasi { get; }
 
         public TaggedTemplateExpression(Expression tag, TemplateLiteral quasi)
         {

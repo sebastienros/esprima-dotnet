@@ -4,11 +4,11 @@ namespace Esprima.Ast
         Expression,
         ArrayPatternElement
     {
-        public readonly Expression Object;
-        public readonly Expression Property;
+        public Expression Object { get; }
+        public Expression Property { get; }
 
         // true if an indexer is used and the property to be evaluated
-        public readonly bool Computed;
+        public bool Computed { get; }
 
         protected MemberExpression(Expression obj, Expression property, bool computed)
         {

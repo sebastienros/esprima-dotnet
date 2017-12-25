@@ -6,10 +6,10 @@ namespace Esprima.Ast
 {
     public class Program : Statement
     {
-        public readonly List<StatementListItem> Body;
+        public List<StatementListItem> Body { get; }
 
         [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
-        public readonly SourceType SourceType;
+        public SourceType SourceType { get; }
 
         [JsonIgnore]
         public HoistingScope HoistingScope { get; }

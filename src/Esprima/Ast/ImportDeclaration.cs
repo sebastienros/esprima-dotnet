@@ -4,8 +4,8 @@ namespace Esprima.Ast
 {
     public class ImportDeclaration : Node, Declaration
     {
-        public readonly List<ImportDeclarationSpecifier> Specifiers;
-        public readonly Literal Source;
+        public List<ImportDeclarationSpecifier> Specifiers { get; }
+        public Literal Source { get; }
 
         public ImportDeclaration(List<ImportDeclarationSpecifier> specifiers, Literal source)
         {

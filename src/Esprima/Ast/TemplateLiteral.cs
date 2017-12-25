@@ -5,8 +5,8 @@ namespace Esprima.Ast
     public class TemplateLiteral : Node,
         Expression
     {
-        public readonly List<TemplateElement> Quasis;
-        public readonly List<Expression> Expressions;
+        public List<TemplateElement> Quasis { get; }
+        public List<Expression> Expressions { get; }
 
         public TemplateLiteral(List<TemplateElement> quasis, List<Expression> expressions)
         {
