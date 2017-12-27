@@ -318,6 +318,7 @@ namespace Esprima
         /// <summary>
         /// Expect the next token to match the specified punctuator.
         /// If not, an exception will be thrown.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Expect(string value)
         {
             Token token = NextToken();
@@ -359,6 +360,7 @@ namespace Esprima
         /// Expect the next token to match the specified keyword.
         /// If not, an exception will be thrown.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ExpectKeyword(string keyword)
         {
             Token token = NextToken();
@@ -371,6 +373,7 @@ namespace Esprima
         /// <summary>
         /// Return true if the next token matches the specified punctuator.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool Match(string value)
         {
             return _lookahead.Type == TokenType.Punctuator && value.Equals(_lookahead.Value);
@@ -379,6 +382,7 @@ namespace Esprima
         /// <summary>
         /// Return true if the next token matches the specified keyword
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool MatchKeyword(string keyword)
         {
             return _lookahead.Type == TokenType.Keyword && keyword.Equals(_lookahead.Value);
@@ -387,6 +391,7 @@ namespace Esprima
         // Return true if the next token matches the specified contextual keyword
         // (where an identifier is sometimes a keyword depending on the context)
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool MatchContextualKeyword(string keyword)
         {
             return _lookahead.Type == TokenType.Identifier && keyword.Equals(_lookahead.Value);
@@ -394,6 +399,7 @@ namespace Esprima
 
         // Return true if the next token is an assignment operator
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool MatchAssign()
         {
             if (_lookahead.Type != TokenType.Punctuator)
@@ -1117,7 +1123,7 @@ namespace Esprima
 
                     if (Match(","))
                     {
-                        var expressions = new List<INode>();
+                        var expressions = new List<Expression>();
 
                         _context.IsAssignmentTarget = false;
                         expressions.Add(expr.As<Expression>());
@@ -1142,14 +1148,14 @@ namespace Esprima
                                     Expect("=>");
                                 }
                                 _context.IsBindingElement = false;
-                                var reinterpretedExpressions = new List<INode>();
+                                var reinterpretedExpressions = new List<Expression>();
                                 foreach (var expression in expressions)
                                 {
                                     reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
                                 }
                                 expressions = reinterpretedExpressions;
                                 arrow = true;
-                                expr = new ArrowParameterPlaceHolder(expressions);
+                                expr = new ArrowParameterPlaceHolder(new List<INode>(expressions));
                             }
                             else
                             {
@@ -1186,7 +1192,7 @@ namespace Esprima
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
                                     var sequenceExpression = expr.As<SequenceExpression>();
-                                    var reinterpretedExpressions = new List<INode>();
+                                    var reinterpretedExpressions = new List<Expression>();
                                     foreach (var expression in sequenceExpression.Expressions)
                                     {
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
@@ -1200,7 +1206,7 @@ namespace Esprima
 
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
-                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>().Expressions);
+                                    expr = new ArrowParameterPlaceHolder(new List<INode>(expr.As<SequenceExpression>().Expressions));
                                 }
                                 else
                                 {
@@ -1931,7 +1937,7 @@ namespace Esprima
 
             if (Match(","))
             {
-                var expressions = new List<INode>();
+                var expressions = new List<Expression>();
                 expressions.Push(expr);
                 while (_startMarker.Index < _scanner.Length)
                 {
@@ -2595,7 +2601,7 @@ namespace Esprima
                     {
                         if (Match(","))
                         {
-                            var initSeq = new List<INode>(1) { (Expression)init };
+                            var initSeq = new List<Expression>(1) {(Expression) init};
                             while (Match(","))
                             {
                                 NextToken();
