@@ -8,9 +8,9 @@ namespace Esprima.Ast
         Expression,
         PropertyKey
     {
-        [JsonIgnore] public readonly string StringValue;
+        [JsonIgnore] public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
         [JsonIgnore] public readonly double NumericValue;
-        [JsonIgnore] public readonly bool BooleanValue;
+        [JsonIgnore] public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
         [JsonIgnore] public readonly Regex RegexValue;
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
@@ -23,17 +23,10 @@ namespace Esprima.Ast
 
         [JsonIgnore] public readonly TokenType TokenType;
 
-        [JsonIgnore] public readonly bool Integral;
-
-        [JsonIgnore] public readonly bool Cached;
-
-        //[JsonIgnore]
-        //public JsValue CachedValue;
-
         public Literal(string value, string raw)
         {
             Type = Nodes.Literal;
-            Value = StringValue = value;
+            Value = value;
             TokenType = TokenType.StringLiteral;
             Raw = raw;
         }
@@ -41,7 +34,8 @@ namespace Esprima.Ast
         public Literal(bool value, string raw)
         {
             Type = Nodes.Literal;
-            Value = BooleanValue = value;
+            Value = value;
+            NumericValue = value ? 1 : 0;
             TokenType = TokenType.BooleanLiteral;
             Raw = raw;
         }
