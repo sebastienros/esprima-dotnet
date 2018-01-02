@@ -530,7 +530,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal((string)token.Value, raw));
+                    expr = Finalize(node, Literal.CreateStringLiteral((string)token.Value, raw));
                     break;
                 case TokenType.NumericLiteral:
 
@@ -543,16 +543,15 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(token.NumericValue, raw));
+                    expr = Finalize(node, Literal.CreateNumericLiteral(token.NumericValue, raw));
                     break;
                 case TokenType.BooleanLiteral:
 
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
-                    token.BooleanValue = ("true".Equals(token.Value));
-                    raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(token.BooleanValue, raw));
+                    token.BooleanValue = "true".Equals(token.Value);
+                    expr = Finalize(node, token.BooleanValue ? Literal.BooleanTrue : Literal.BooleanFalse);
                     break;
                 case TokenType.NullLiteral:
 
@@ -560,8 +559,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     token.Value = null;
-                    raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(raw));
+                    expr = Finalize(node, Literal.Null);
                     break;
                 case TokenType.Template:
 
@@ -746,7 +744,7 @@ namespace Esprima
             {
                 case TokenType.StringLiteral:
                     var raw = GetTokenRaw(token);
-                    key = Finalize(node, new Literal((string)token.Value, raw));
+                    key = Finalize(node, Literal.CreateStringLiteral((string)token.Value, raw));
                     break;
                 case TokenType.NumericLiteral:
                     if (_context.Strict && token.Octal)
@@ -754,7 +752,7 @@ namespace Esprima
                         TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
                     }
                     raw = GetTokenRaw(token);
-                    key = Finalize(node, new Literal(token.NumericValue, raw));
+                    key = Finalize(node, Literal.CreateNumericLiteral(token.NumericValue, raw));
                     break;
 
                 case TokenType.Identifier:
@@ -3771,7 +3769,7 @@ namespace Esprima
 
             var token = NextToken();
             var raw = GetTokenRaw(token);
-            return Finalize(node, new Literal((string)token.Value, raw));
+            return Finalize(node, Literal.CreateStringLiteral((string)token.Value, raw));
         }
 
         // import {<foo as bar>} ...;
