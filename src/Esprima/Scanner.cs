@@ -1026,11 +1026,13 @@ namespace Esprima
                         ++Index;
                         return ScanHexLiteral(start);
                     }
+
                     if (ch == 'b' || ch == 'B')
                     {
                         ++Index;
                         return ScanBinaryLiteral(start);
                     }
+
                     if (ch == 'o' || ch == 'O')
                     {
                         return ScanOctalLiteral(ch, start);
@@ -1049,6 +1051,7 @@ namespace Esprima
                 {
                     sb.Append(Source[Index++]);
                 }
+
                 ch = Source.CharCodeAt(Index);
             }
 
@@ -1059,6 +1062,7 @@ namespace Esprima
                 {
                     sb.Append(Source[Index++]);
                 }
+
                 ch = Source.CharCodeAt(Index);
             }
 
@@ -1071,6 +1075,7 @@ namespace Esprima
                 {
                     sb.Append(Source[Index++]);
                 }
+
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
                     while (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
@@ -1100,30 +1105,31 @@ namespace Esprima
 
             var number = sb.ToString();
 
-            try
+            if (long.TryParse(
+                number,
+                NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture,
+                out var l))
             {
-                var l = long.Parse(number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
-
                 token.NumericValue = l;
                 token.Value = l;
             }
-            catch (OverflowException)
+            else if (double.TryParse(
+                number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture,
+                out var d))
             {
-                try
-                {
-                    var d = double.Parse(number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
+                token.NumericValue = d;
+                token.Value = d;
+            }
+            else
+            {
+                d = number.TrimStart().StartsWith("-")
+                    ? double.NegativeInfinity
+                    : double.PositiveInfinity;
 
-                    token.NumericValue = d;
-                    token.Value = d;
-
-                }
-                catch (OverflowException)
-                {
-                    var d = number.TrimStart().StartsWith("-") ? double.NegativeInfinity : double.PositiveInfinity;
-
-                    token.NumericValue = d;
-                    token.Value = d;
-                }
+                token.NumericValue = d;
+                token.Value = d;
             }
 
             return token;
