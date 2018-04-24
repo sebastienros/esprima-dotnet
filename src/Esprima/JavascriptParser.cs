@@ -1846,6 +1846,7 @@ namespace Esprima
                 {
 
                     // ECMA-262 14.2 Arrow Function Definitions
+                    EnterHoistingScope();
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     var list = ReinterpretAsCoverFormalsList(expr.As<Expression>());
@@ -1878,8 +1879,7 @@ namespace Esprima
                         {
                             TolerateUnexpectedToken(list.Stricted, list.Message);
                         }
-                        expr = Finalize(node, new ArrowFunctionExpression(list.Parameters, body, expression));
-
+                        expr = Finalize(node, new ArrowFunctionExpression(list.Parameters, body, expression, LeaveHoistingScope()));                        
                         _context.Strict = previousStrict;
                         _context.AllowYield = previousAllowYield;
                     }
