@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net452;netcoreapp2.1</TargetFrameworks>
     <AssemblyName>Esprima.Tests</AssemblyName>
     <PackageId>Esprima.Tests</PackageId>
   </PropertyGroup>

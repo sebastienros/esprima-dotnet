@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net451;netstandard2.0</TargetFrameworks>
     <AssemblyName>Esprima.Sample</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>Esprima.Sample</PackageId>
