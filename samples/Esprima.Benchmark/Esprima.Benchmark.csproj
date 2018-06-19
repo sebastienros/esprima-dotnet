@@ -3,7 +3,7 @@
     <AssemblyName>Esprima.Benchmark</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>Esprima.Benchmark</PackageId>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net46;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\test\Esprima.Tests\Fixtures\3rdparty\**" CopyToOutputDirectory="PreserveNewest" LinkBase="3rdparty" />
