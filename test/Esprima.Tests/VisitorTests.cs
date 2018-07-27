@@ -42,5 +42,15 @@ namespace Esprima.Tests
             EsprimaVisitor visitor = new EsprimaVisitor();
             visitor.VisitProgram(program);
         }
+        
+        [Fact]
+        public void CanVisitForWithNoTest()
+        {
+            var parser = new JavaScriptParser(@"for (var a = []; ; ) { }");
+            var program = parser.ParseProgram();
+
+            EsprimaVisitor visitor = new EsprimaVisitor();
+            visitor.VisitProgram(program);
+        }
     }
 }
