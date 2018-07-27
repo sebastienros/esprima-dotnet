@@ -226,7 +226,10 @@ namespace Esprima.Utils
                     VisitExpression(forStatement.Init.As<Expression>());
                 }
             }
-            VisitExpression(forStatement.Test);
+            if (forStatement.Test != null)
+            {
+                VisitExpression(forStatement.Test);
+            }
             VisitStatement(forStatement.Body);
             if (forStatement.Update != null)
             {
