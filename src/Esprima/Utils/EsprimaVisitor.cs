@@ -48,6 +48,9 @@ namespace Esprima.Utils
                 case Nodes.ForInStatement:
                     VisitForInStatement(statement.As<ForInStatement>());
                     break;
+                case Nodes.ForOfStatement:
+                    VisitForOfStatement(statement.As<ForOfStatement>());
+                    break;
                 case Nodes.FunctionDeclaration:
                     VisitFunctionDeclaration(statement.As<FunctionDeclaration>());
                     break;
