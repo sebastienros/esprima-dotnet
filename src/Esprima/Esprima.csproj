@@ -7,7 +7,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
     <Authors>Sebastien Ros</Authors>
-    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.3;netstandard2.0</TargetFrameworks>
     <AssemblyOriginatorKeyFile>../Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PackageId>Esprima</PackageId>
