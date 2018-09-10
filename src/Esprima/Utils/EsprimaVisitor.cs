@@ -13,11 +13,11 @@ namespace Esprima.Utils
         {
             foreach (var statment in program.Body)
             {
-                VisitStatment((Statement)statment);
+                VisitStatement((Statement)statment);
             }
         }
 
-        public virtual void VisitStatment(Statement statement)
+        public virtual void VisitStatement(Statement statement)
         {
             switch (statement.Type)
             {
@@ -47,6 +47,9 @@ namespace Esprima.Utils
                     break;
                 case Nodes.ForInStatement:
                     VisitForInStatement(statement.As<ForInStatement>());
+                    break;
+                case Nodes.ForOfStatement:
+                    VisitForOfStatement(statement.As<ForOfStatement>());
                     break;
                 case Nodes.FunctionDeclaration:
                     VisitFunctionDeclaration(statement.As<FunctionDeclaration>());
@@ -98,7 +101,7 @@ namespace Esprima.Utils
         private void VisitCatchClause(CatchClause catchClause)
         {
             VisitIdentifier(catchClause.Param.As<Identifier>());
-            VisitStatment(catchClause.Body);
+            VisitStatement(catchClause.Body);
         }
 
         public virtual void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
@@ -114,13 +117,13 @@ namespace Esprima.Utils
         public virtual void VisitWithStatement(WithStatement withStatement)
         {
             VisitExpression(withStatement.Object);
-            VisitStatment(withStatement.Body);
+            VisitStatement(withStatement.Body);
         }
 
         public virtual void VisitWhileStatement(WhileStatement whileStatement)
         {
             VisitExpression(whileStatement.Test);
-            VisitStatment(whileStatement.Body);
+            VisitStatement(whileStatement.Body);
         }
 
         public virtual void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
@@ -137,7 +140,7 @@ namespace Esprima.Utils
 
         public virtual void VisitTryStatement(TryStatement tryStatement)
         {
-            VisitStatment(tryStatement.Block);
+            VisitStatement(tryStatement.Block);
             if (tryStatement.Handler != null)
             {
                 VisitCatchClause(tryStatement.Handler);
@@ -145,7 +148,7 @@ namespace Esprima.Utils
 
             if (tryStatement.Finalizer != null)
             {
-                VisitStatment(tryStatement.Finalizer);
+                VisitStatement(tryStatement.Finalizer);
             }
 
 
@@ -167,10 +170,14 @@ namespace Esprima.Utils
 
         public virtual void VisitSwitchCase(SwitchCase switchCase)
         {
-            VisitExpression(switchCase.Test);
+            if (switchCase.Test != null)
+            {
+                VisitExpression(switchCase.Test);                
+            }
+            
             foreach (var s in switchCase.Consequent)
             {
-                VisitStatment(switchCase.Consequent.As<Statement>());
+                VisitStatement(s.As<Statement>());
             }
         }
 
@@ -183,14 +190,17 @@ namespace Esprima.Utils
 
         public virtual void VisitLabeledStatement(LabeledStatement labeledStatement)
         {
-            VisitStatment(labeledStatement.Body);
+            VisitStatement(labeledStatement.Body);
         }
 
         public virtual void VisitIfStatement(IfStatement ifStatement)
         {
             VisitExpression(ifStatement.Test);
-            VisitStatment(ifStatement.Consequent);
-            VisitStatment(ifStatement.Alternate);
+            VisitStatement(ifStatement.Consequent);
+            if (ifStatement.Alternate != null)
+            {
+                VisitStatement(ifStatement.Alternate);                
+            }
         }
 
         public virtual void VisitEmptyStatement(EmptyStatement emptyStatement)
@@ -212,15 +222,18 @@ namespace Esprima.Utils
             {
                 if (forStatement.Init.Type == Nodes.VariableDeclaration)
                 {
-                    VisitStatment(forStatement.Init.As<Statement>());
+                    VisitStatement(forStatement.Init.As<Statement>());
                 }
                 else
                 {
                     VisitExpression(forStatement.Init.As<Expression>());
                 }
             }
-            VisitExpression(forStatement.Test);
-            VisitStatment(forStatement.Body);
+            if (forStatement.Test != null)
+            {
+                VisitExpression(forStatement.Test);
+            }
+            VisitStatement(forStatement.Body);
             if (forStatement.Update != null)
             {
                 VisitExpression(forStatement.Update);
@@ -234,12 +247,12 @@ namespace Esprima.Utils
                 : forInStatement.Left.As<Identifier>();
             VisitExpression(identifier);
             VisitExpression(forInStatement.Right);
-            VisitStatment(forInStatement.Body);
+            VisitStatement(forInStatement.Body);
         }
 
         public virtual void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
-            VisitStatment(doWhileStatement.Body.As<Statement>());
+            VisitStatement(doWhileStatement.Body.As<Statement>());
             VisitExpression(doWhileStatement.Test);
         }
 
@@ -637,7 +650,7 @@ namespace Esprima.Utils
         {
             VisitExpression(forOfStatement.Right);
             Visit(forOfStatement.Left);
-            VisitStatment(forOfStatement.Body);
+            VisitStatement(forOfStatement.Body);
         }
 
         public virtual void VisitClassDeclaration(ClassDeclaration classDeclaration)
@@ -774,7 +787,7 @@ namespace Esprima.Utils
         {
             foreach (var statment in BlockStatement.Body)
             {
-                VisitStatment(statment.As<Statement>());
+                VisitStatement(statment.As<Statement>());
             }
         }
     }
