@@ -2116,9 +2116,10 @@ namespace Esprima
         private RestElement ParseBindingRestElement(List<Token> parameters, string kind)
         {
             var node = CreateNode();
+
             Expect("...");
-            parameters.Push(_lookahead);
-            var arg = ParseVariableIdentifier(kind);
+            var arg = ParsePattern(parameters, kind);
+
             return Finalize(node, new RestElement(arg));
         }
 
@@ -3162,14 +3163,9 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            NextToken();
-            if (Match("{"))
-            {
-                ThrowError(Messages.ObjectPatternAsRestParameter);
-            }
-            parameters.Push(_lookahead);
 
-            var param = ParseVariableIdentifier();
+            Expect("...");
+            var arg = ParsePattern(parameters);
             if (Match("="))
             {
                 ThrowError(Messages.DefaultRestParameter);
@@ -3179,29 +3175,15 @@ namespace Esprima
                 ThrowError(Messages.ParameterAfterRestParameter);
             }
 
-            return Finalize(node, new RestElement(param));
+            return Finalize(node, new RestElement(arg));
         }
 
         private bool ParseFormalParameter(ParsedParameters options)
         {
-            INode param;
             var parameters = new List<Token>();
 
-            var token = _lookahead;
-            var stringValue = token.Value as string;
-            if (stringValue == "...")
-            {
-                param = ParseRestElement(parameters);
-                var restElement = param.As<RestElement>();
-                if (restElement.Argument.Type == Nodes.Identifier)
-                {
-                    ValidateParam(options, restElement.Argument, restElement.Argument.As<Identifier>().Name);
-                }
-                options.Parameters.Push(restElement);
-                return false;
-            }
+            INode param = Match("...") ? ParseRestElement(parameters) : ParsePatternWithDefault(parameters);
 
-            param = ParsePatternWithDefault(parameters);
             for (var i = 0; i < parameters.Count; i++)
             {
                 ValidateParam2(options, parameters[i], (string)parameters[i].Value);

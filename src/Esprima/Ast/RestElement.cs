@@ -7,9 +7,9 @@
         // for instance ...i[0] is a SpreadElement
         // which is reinterpreted to RestElement with a ComputerMemberExpression
 
-        public readonly Expression Argument;
+        public readonly INode Argument; // BindingIdentifier | BindingPattern
 
-        public RestElement(Expression argument)
+        public RestElement(INode argument)
         {
             Type = Nodes.RestElement;
             Argument = argument;

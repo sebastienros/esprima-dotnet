@@ -42,7 +42,6 @@
         public const string TemplateOctalLiteral = "Octal literals are not allowed in template strings.";
         public const string ParameterAfterRestParameter = "Rest parameter must be last formal parameter";
         public const string DefaultRestParameter = "Unexpected token =";
-        public const string ObjectPatternAsRestParameter = "Unexpected token {";
         public const string DuplicateProtoProperty = "Duplicate __proto__ fields are not allowed in object literals";
         public const string ConstructorSpecialMethod = "Class constructor may not be an accessor";
         public const string DuplicateConstructor = "A class may only have one constructor";
