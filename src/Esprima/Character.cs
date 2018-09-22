@@ -100,8 +100,8 @@ namespace Esprima
         public static bool IsHexDigit(char cp)
         {
             return (cp >= '0' && cp <= '9') ||
-                (cp >= 'A' && cp <= 'H') ||
-                (cp >= 'a' && cp <= 'h');
+                (cp >= 'A' && cp <= 'F') ||
+                (cp >= 'a' && cp <= 'f');
         }
 
         public static bool IsOctalDigit(char cp)
