@@ -3786,16 +3786,31 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            Identifier local;
-            var imported = ParseIdentifierName();
-            if (MatchContextualKeyword("as"))
+            Identifier local, imported;
+
+            if (_lookahead.Type == TokenType.Identifier)
             {
-                NextToken();
-                local = ParseVariableIdentifier();
+                imported = ParseVariableIdentifier();
+                local = imported;
+                if (MatchContextualKeyword("as"))
+                {
+                    NextToken();
+                    local = ParseVariableIdentifier();
+                }
             }
             else
             {
+                imported = ParseIdentifierName();
                 local = imported;
+                if (MatchContextualKeyword("as"))
+                {
+                    NextToken();
+                    local = ParseVariableIdentifier();
+                }
+                else
+                {
+                    ThrowUnexpectedToken(NextToken());
+                }
             }
 
             return Finalize(node, new ImportSpecifier(local, imported));
