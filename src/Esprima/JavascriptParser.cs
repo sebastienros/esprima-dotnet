@@ -1960,6 +1960,10 @@ namespace Esprima
         private StatementListItem ParseStatementListItem()
         {
             StatementListItem statement = null;
+
+            _context.IsAssignmentTarget = true;
+            _context.IsBindingElement = true;
+
             if (_lookahead.Type == TokenType.Keyword)
             {
                 switch ((string)_lookahead.Value)
@@ -2945,9 +2949,6 @@ namespace Esprima
 
         private Statement ParseStatement()
         {
-            _context.IsAssignmentTarget = true;
-            _context.IsBindingElement = true;
-
             Statement statement = null;
             switch (_lookahead.Type)
             {
