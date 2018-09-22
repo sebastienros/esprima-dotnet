@@ -184,7 +184,7 @@ namespace Esprima
             return strb;
         }
 
-        // 7.6.1.2 Future Reserved Words
+        // https://tc39.github.io/ecma262/#sec-future-reserved-words
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsFutureReservedWord(string id)
@@ -204,7 +204,7 @@ namespace Esprima
             return "eval".Equals(id) || "arguments".Equals(id);
         }
 
-        // 7.6.1.1 Keywords
+        // https://tc39.github.io/ecma262/#sec-keywords
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsKeyword(string id)
@@ -212,7 +212,7 @@ namespace Esprima
             return Keywords.Contains(id);
         }
 
-        // ECMA-262 11.4 Comments
+        // https://tc39.github.io/ecma262/#sec-comments
 
         public List<Comment> SkipSingleLineComment(int offset)
         {
@@ -648,7 +648,7 @@ namespace Esprima
             return new OctalValue(code, octal);
         }
 
-        // ECMA-262 11.6 Names and Keywords
+        // https://tc39.github.io/ecma262/#sec-names-and-keywords
 
         public Token ScanIdentifier()
         {
@@ -692,7 +692,7 @@ namespace Esprima
             };
         }
 
-        // ECMA-262 11.7 Punctuators
+        // https://tc39.github.io/ecma262/#sec-punctuators
 
         public Token ScanPunctuator()
         {
@@ -812,7 +812,7 @@ namespace Esprima
             return token;
         }
 
-        // ECMA-262 11.8.3 Numeric Literals
+        // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
 
         public Token ScanHexLiteral(int start)
         {
@@ -1135,7 +1135,7 @@ namespace Esprima
             return token;
         }
 
-        // ECMA-262 11.8.4 String Literals
+        // https://tc39.github.io/ecma262/#sec-literals-string-literals
 
         public Token ScanStringLiteral()
         {
@@ -1258,7 +1258,7 @@ namespace Esprima
             };
         }
 
-        // ECMA-262 11.8.6 Template Literal Lexical Components
+        // https://tc39.github.io/ecma262/#sec-template-literal-lexical-components
 
         public Token ScanTemplate()
         {
@@ -1413,7 +1413,7 @@ namespace Esprima
             };
         }
 
-        // ECMA-262 11.8.5 Regular Expression Literals
+        // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
 
         public Regex TestRegExp(string pattern, string flags)
         {
@@ -1534,7 +1534,7 @@ namespace Esprima
                 if (ch == '\\')
                 {
                     ch = Source[Index++];
-                    // ECMA-262 7.8.5
+                    // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
                     if (Character.IsLineTerminator(ch))
                     {
                         ThrowUnexpectedToken(Messages.UnterminatedRegExp);

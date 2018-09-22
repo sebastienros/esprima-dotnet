@@ -124,8 +124,8 @@ namespace Esprima
             };
         }
 
-        // ECMA-262 15.1 Scripts
-        // ECMA-262 15.2 Modules
+        // https://tc39.github.io/ecma262/#sec-scripts
+        // https://tc39.github.io/ecma262/#sec-modules
 
         public Program ParseProgram(bool strict = false)
         {
@@ -505,7 +505,7 @@ namespace Esprima
 
         }
 
-        // ECMA-262 12.2 Primary Expressions
+        // https://tc39.github.io/ecma262/#sec-primary-expression
 
         private Expression ParsePrimaryExpression()
         {
@@ -653,7 +653,7 @@ namespace Esprima
             return expr.Type == Nodes.Identifier || expr.Type == Nodes.MemberExpression;
         }
 
-        // 11.1.4 Array Initialiser
+        // https://tc39.github.io/ecma262/#sec-array-initializer
 
         private SpreadElement ParseSpreadElement()
         {
@@ -704,7 +704,7 @@ namespace Esprima
             return Finalize(node, new ArrayExpression(elements));
         }
 
-        // ECMA-262 12.2.6 Object Initializer
+        // https://tc39.github.io/ecma262/#sec-object-initializer
 
         private BlockStatement ParsePropertyMethod(ParsedParameters parameters)
         {
@@ -959,7 +959,7 @@ namespace Esprima
             cacheToken = t;
         }
 
-        // ECMA-262 12.2.9 Template Literals
+        // https://tc39.github.io/ecma262/#sec-template-literals
 
         private TemplateElement ParseTemplateHead()
         {
@@ -1013,7 +1013,7 @@ namespace Esprima
             return Finalize(node, new TemplateLiteral(quasis, expressions));
         }
 
-        // ECMA-262 12.2.10 The Grouping Operator
+        // https://tc39.github.io/ecma262/#sec-grouping-operator
 
         private INode ReinterpretExpressionAsPattern(INode expr)
         {
@@ -1223,7 +1223,7 @@ namespace Esprima
             return expr;
         }
 
-        // ECMA-262 12.3 Left-Hand-Side Expressions
+        // https://tc39.github.io/ecma262/#sec-left-hand-side-expressions
 
         private List<ArgumentListElement> ParseArguments()
         {
@@ -1436,9 +1436,7 @@ namespace Esprima
             return expr;
         }
 
-        // ECMA-262 12.4 Postfix Expressions
-
-        // ECMA-262 12.4 Update Expressions
+        // https://tc39.github.io/ecma262/#sec-update-expressions
 
         private Expression ParseUpdateExpression()
         {
@@ -1490,7 +1488,7 @@ namespace Esprima
             return expr;
         }
 
-        // ECMA-262 12.5 Unary Operators
+        // https://tc39.github.io/ecma262/#sec-unary-operators
 
         private Expression ParseUnaryExpression()
         {
@@ -1538,14 +1536,14 @@ namespace Esprima
             return expr;
         }
 
-        // ECMA-262 12.6 Exponentiation Operators
-        // ECMA-262 12.7 Multiplicative Operators
-        // ECMA-262 12.8 Additive Operators
-        // ECMA-262 12.9 Bitwise Shift Operators
-        // ECMA-262 12.10 Relational Operators
-        // ECMA-262 12.11 Equality Operators
-        // ECMA-262 12.12 Binary Bitwise Operators
-        // ECMA-262 12.13 Binary Logical Operators
+        // https://tc39.github.io/ecma262/#sec-exp-operator
+        // https://tc39.github.io/ecma262/#sec-multiplicative-operators
+        // https://tc39.github.io/ecma262/#sec-additive-operators
+        // https://tc39.github.io/ecma262/#sec-bitwise-shift-operators
+        // https://tc39.github.io/ecma262/#sec-relational-operators
+        // https://tc39.github.io/ecma262/#sec-equality-operators
+        // https://tc39.github.io/ecma262/#sec-binary-bitwise-operators
+        // https://tc39.github.io/ecma262/#sec-binary-logical-operators
 
         private int BinaryPrecedence(Token token)
         {
@@ -1696,7 +1694,7 @@ namespace Esprima
         }
 
 
-        // ECMA-262 12.14 Conditional Operator
+        // https://tc39.github.io/ecma262/#sec-conditional-operator
 
         private Expression ParseConditionalExpression()
         {
@@ -1723,7 +1721,7 @@ namespace Esprima
             return expr;
         }
 
-        // ECMA-262 12.15 Assignment Operators
+        // https://tc39.github.io/ecma262/#sec-assignment-operators
 
         private void CheckPatternParam(ParsedParameters options, INode param)
         {
@@ -1845,7 +1843,7 @@ namespace Esprima
                 if (expr.Type == Nodes.ArrowParameterPlaceHolder || Match("=>"))
                 {
 
-                    // ECMA-262 14.2 Arrow Function Definitions
+                    // https://tc39.github.io/ecma262/#sec-arrow-function-definitions
                     EnterHoistingScope();
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
@@ -1928,7 +1926,7 @@ namespace Esprima
             return expr.As<Expression>();
         }
 
-        // ECMA-262 12.16 Comma Operator
+        // https://tc39.github.io/ecma262/#sec-comma-operator
 
         public Expression ParseExpression()
         {
@@ -1955,7 +1953,7 @@ namespace Esprima
             return expr;
         }
 
-        // ECMA-262 13.2 Block
+        // https://tc39.github.io/ecma262/#sec-block
 
         private StatementListItem ParseStatementListItem()
         {
@@ -2026,7 +2024,7 @@ namespace Esprima
             return Finalize(node, new BlockStatement(block));
         }
 
-        // ECMA-262 13.3.1 var and var Declarations
+        // https://tc39.github.io/ecma262/#sec-let-and-const-declarations
 
         private VariableDeclarator ParseLexicalBinding(string kind, DeclarationOptions options)
         {
@@ -2034,7 +2032,6 @@ namespace Esprima
             var parameters = new List<Token>();
             var id = ParsePattern(parameters, kind);
 
-            // ECMA-262 12.2.1
             if (_context.Strict && id.Type == Nodes.Identifier)
             {
                 if (Scanner.IsRestrictedWord((id.As<Identifier>().Name)))
@@ -2111,7 +2108,7 @@ namespace Esprima
             return Finalize(node, new VariableDeclaration(declarations, kind));
         }
 
-        // ECMA-262 13.3.3 Destructuring Binding Patterns
+        // https://tc39.github.io/ecma262/#sec-destructuring-binding-patterns
 
         private RestElement ParseBindingRestElement(List<Token> parameters, string kind)
         {
@@ -2268,7 +2265,7 @@ namespace Esprima
             return pattern;
         }
 
-        // ECMA-262 13.3.2 Variable Statement
+        // https://tc39.github.io/ecma262/#sec-variable-statement
 
         private Identifier ParseVariableIdentifier(string kind = null)
         {
@@ -2316,7 +2313,6 @@ namespace Esprima
             var parameters = new List<Token>();
             var id = ParsePattern(parameters, "var");
 
-            // ECMA-262 12.2.1
             if (_context.Strict && id.Type == Nodes.Identifier)
             {
                 if (Scanner.IsRestrictedWord(id.As<Identifier>().Name))
@@ -2364,7 +2360,7 @@ namespace Esprima
             return Hoist(Finalize(node, new VariableDeclaration(declarations, "var")));
         }
 
-        // ECMA-262 13.4 Empty Statement
+        // https://tc39.github.io/ecma262/#sec-empty-statement
 
         private EmptyStatement ParseEmptyStatement()
         {
@@ -2373,7 +2369,7 @@ namespace Esprima
             return Finalize(node, new EmptyStatement());
         }
 
-        // ECMA-262 13.5 Expression Statement
+        // https://tc39.github.io/ecma262/#sec-expression-statement
 
         private ExpressionStatement ParseExpressionStatement()
         {
@@ -2383,7 +2379,7 @@ namespace Esprima
             return Finalize(node, new ExpressionStatement(expr));
         }
 
-        // ECMA-262 13.6 If statement
+        // https://tc39.github.io/ecma262/#sec-if-statement
 
         private IfStatement ParseIfStatement()
         {
@@ -2414,7 +2410,7 @@ namespace Esprima
             return Finalize(node, new IfStatement(test, consequent, alternate));
         }
 
-        // ECMA-262 13.7.2 The do-while Statement
+        // https://tc39.github.io/ecma262/#sec-do-while-statement
 
         private DoWhileStatement ParseDoWhileStatement()
         {
@@ -2438,7 +2434,7 @@ namespace Esprima
             return Finalize(node, new DoWhileStatement(body, test));
         }
 
-        // ECMA-262 13.7.3 The while Statement
+        // https://tc39.github.io/ecma262/#sec-while-statement
 
         private WhileStatement ParseWhileStatement()
         {
@@ -2467,8 +2463,8 @@ namespace Esprima
             return Finalize(node, new WhileStatement(test, body));
         }
 
-        // ECMA-262 13.7.4 The for Statement
-        // ECMA-262 13.7.5 The for-in and for-of Statements
+        // https://tc39.github.io/ecma262/#sec-for-statement
+        // https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements
 
         private Statement ParseForStatement()
         {
@@ -2654,7 +2650,7 @@ namespace Esprima
                     Finalize(node, new ForOfStatement(left, right, body));
         }
 
-        // ECMA-262 13.8 The continue statement
+        // https://tc39.github.io/ecma262/#sec-continue-statement
 
         private ContinueStatement ParseContinueStatement()
         {
@@ -2682,7 +2678,7 @@ namespace Esprima
             return Finalize(node, new ContinueStatement(label));
         }
 
-        // ECMA-262 13.9 The break statement
+        // https://tc39.github.io/ecma262/#sec-break-statement
 
         private BreakStatement ParseBreakStatement()
         {
@@ -2710,7 +2706,7 @@ namespace Esprima
             return Finalize(node, new BreakStatement(label));
         }
 
-        // ECMA-262 13.10 The return statement
+        // https://tc39.github.io/ecma262/#sec-return-statement
 
         private ReturnStatement ParseReturnStatement()
         {
@@ -2730,7 +2726,7 @@ namespace Esprima
             return Finalize(node, new ReturnStatement(argument));
         }
 
-        // ECMA-262 13.11 The with statement
+        // https://tc39.github.io/ecma262/#sec-with-statement
 
         private WithStatement ParseWithStatement()
         {
@@ -2749,7 +2745,7 @@ namespace Esprima
             return Finalize(node, new WithStatement(obj, body));
         }
 
-        // ECMA-262 13.12 The switch statement
+        // https://tc39.github.io/ecma262/#sec-switch-statement
 
         private SwitchCase ParseSwitchCase()
         {
@@ -2820,7 +2816,7 @@ namespace Esprima
             return Finalize(node, new SwitchStatement(discriminant, cases));
         }
 
-        // ECMA-262 13.13 Labelled Statements
+        // https://tc39.github.io/ecma262/#sec-labelled-statements
 
         private Statement ParseLabelledStatement()
         {
@@ -2854,7 +2850,7 @@ namespace Esprima
             return Finalize(node, statement);
         }
 
-        // ECMA-262 13.14 The throw statement
+        // https://tc39.github.io/ecma262/#sec-throw-statement
 
         private ThrowStatement ParseThrowStatement()
         {
@@ -2872,7 +2868,7 @@ namespace Esprima
             return Finalize(node, new ThrowStatement(argument));
         }
 
-        // ECMA-262 13.15 The try statement
+        // https://tc39.github.io/ecma262/#sec-try-statement
 
         private CatchClause ParseCatchClause()
         {
@@ -2936,7 +2932,7 @@ namespace Esprima
             return Finalize(node, new TryStatement(block, handler, finalizer));
         }
 
-        // ECMA-262 13.16 The debugger statement
+        // https://tc39.github.io/ecma262/#sec-debugger-statement
 
         private DebuggerStatement ParseDebuggerStatement()
         {
@@ -2946,7 +2942,7 @@ namespace Esprima
             return Finalize(node, new DebuggerStatement());
         }
 
-        // ECMA-262 13 Statements
+        // https://tc39.github.io/ecma262/#sec-ecmascript-language-statements-and-declarations
 
         private Statement ParseStatement()
         {
@@ -3045,7 +3041,7 @@ namespace Esprima
             return statement;
         }
 
-        // ECMA-262 14.1 Function Definition
+        // https://tc39.github.io/ecma262/#sec-function-definitions
 
         private BlockStatement ParseFunctionSourceElements()
         {
@@ -3373,7 +3369,7 @@ namespace Esprima
             return Finalize(node, new FunctionExpression((Identifier)id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
         }
 
-        // ECMA-262 14.1.1 Directive Prologues
+        // https://tc39.github.io/ecma262/#sec-directive-prologues-and-the-use-strict-directive
 
         private ExpressionStatement ParseDirective()
         {
@@ -3435,7 +3431,7 @@ namespace Esprima
             return body;
         }
 
-        // ECMA-262 14.3 Method Definitions
+        // https://tc39.github.io/ecma262/#sec-method-definitions
 
         private bool QualifiedPropertyName(Token token)
         {
@@ -3520,7 +3516,7 @@ namespace Esprima
             return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope(), _context.Strict));
         }
 
-        // ECMA-262 14.4 Generator Function Definitions
+        // https://tc39.github.io/ecma262/#sec-generator-function-definitions
 
         private static readonly HashSet<string> PunctuatorExpressionStart = new HashSet<string>
         {
@@ -3587,7 +3583,7 @@ namespace Esprima
             return Finalize(node, new YieldExpression(argument, delegat));
         }
 
-        // ECMA-262 14.5 Class Definitions
+        // https://tc39.github.io/ecma262/#sec-class-definitions
 
         private ClassProperty ParseClassElement(HasConstructorOptions hasConstructor)
         {
@@ -3782,7 +3778,7 @@ namespace Esprima
             return Finalize(node, new ClassExpression(id, superClass.As<PropertyKey>(), classBody));
         }
 
-        // ECMA-262 15.2.2 Imports
+        // https://tc39.github.io/ecma262/#sec-imports
 
         private Literal ParseModuleSpecifier()
         {
@@ -3945,7 +3941,7 @@ namespace Esprima
             return Finalize(node, new ImportDeclaration(specifiers, src));
         }
 
-        // ECMA-262 15.2.3 Exports
+        // https://tc39.github.io/ecma262/#sec-exports
 
         private ExportSpecifier ParseExportSpecifier()
         {
