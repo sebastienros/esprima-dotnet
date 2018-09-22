@@ -3755,7 +3755,7 @@ namespace Esprima
             var classBody = ParseClassBody();
             _context.Strict = previousStrict;
 
-            return Finalize(node, new ClassDeclaration(id, superClass.As<PropertyKey>(), classBody));
+            return Finalize(node, new ClassDeclaration(id, superClass, classBody));
         }
 
         private ClassExpression ParseClassExpression()

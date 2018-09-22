@@ -105,5 +105,11 @@ namespace Esprima.Tests
             
         }
 
+        [Fact]
+        public void ShouldParseClassInheritance()
+        {
+            var parser = new JavaScriptParser("class Rectangle extends aggregation(Shape, Colored, ZCoord) { }");
+            var program = parser.ParseProgram();
+        }
     }
 }
