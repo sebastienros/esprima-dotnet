@@ -3540,6 +3540,44 @@ namespace Esprima
 
         // ECMA-262 14.4 Generator Function Definitions
 
+        private static readonly HashSet<string> PunctuatorExpressionStart = new HashSet<string>
+        {
+            "[", "(", "{", "+", "-", "!", "~", "++",
+            "--", "/", "/="
+        };
+
+        private static readonly HashSet<string> KeywordExpressionStart = new HashSet<string>
+        {
+            "class", "delete", "function", "let", "new",
+            "super", "this", "typeof", "void", "yield"
+        };
+
+        private bool IsStartOfExpression()
+        {
+            var start = true;
+
+            if (!(_lookahead.Value is string value))
+            {
+                return start;
+            }
+
+            switch (_lookahead.Type)
+            {
+                case TokenType.Punctuator:
+                    start = PunctuatorExpressionStart.Contains(value);
+                    break;
+
+                case TokenType.Keyword:
+                    start = KeywordExpressionStart.Contains(value);
+                    break;
+
+                default:
+                    break;
+            }
+
+            return start;
+        }
+
         private YieldExpression ParseYieldExpression()
         {
             var node = CreateNode();
@@ -3557,12 +3595,9 @@ namespace Esprima
                     NextToken();
                     argument = ParseAssignmentExpression();
                 }
-                else
+                else if (IsStartOfExpression())
                 {
-                    if (!Match(";") && !Match("}") && !Match(")") && _lookahead.Type != TokenType.EOF)
-                    {
-                        argument = ParseAssignmentExpression();
-                    }
+                    argument = ParseAssignmentExpression();
                 }
                 _context.AllowYield = previousAllowYield;
             }
