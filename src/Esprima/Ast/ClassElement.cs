@@ -22,7 +22,7 @@ namespace Esprima.Ast
         [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
         public PropertyKind Kind;
 
-        public PropertyKey Key;
+        public Expression Key;
         public bool Computed;
         public PropertyValue Value;
     }

@@ -742,12 +742,12 @@ namespace Esprima
             return Finalize(node, new FunctionExpression(null, parameters.Parameters, method, isGenerator, LeaveHoistingScope(), _context.Strict));
         }
 
-        private PropertyKey ParseObjectPropertyKey()
+        private Expression ParseObjectPropertyKey()
         {
             var node = CreateNode();
             var token = NextToken();
 
-            PropertyKey key = null;
+            Expression key = null;
             switch (token.Type)
             {
                 case TokenType.StringLiteral:
@@ -773,7 +773,7 @@ namespace Esprima
                 case TokenType.Punctuator:
                     if ("[".Equals(token.Value))
                     {
-                        key = IsolateCoverGrammar(parseAssignmentExpression).As<PropertyKey>();
+                        key = IsolateCoverGrammar(parseAssignmentExpression);
                         Expect("]");
                     }
                     else
@@ -809,7 +809,7 @@ namespace Esprima
             var node = CreateNode();
             Token token = _lookahead;
 
-            PropertyKey key = null;
+            Expression key = null;
             PropertyValue value = null;
 
             PropertyKind kind;
@@ -2164,7 +2164,7 @@ namespace Esprima
             var shorthand = false;
             var method = false;
 
-            PropertyKey key;
+            Expression key;
             PropertyValue value;
 
             if (_lookahead.Type == TokenType.Identifier)
@@ -3591,7 +3591,7 @@ namespace Esprima
             var node = CreateNode();
 
             PropertyKind kind = PropertyKind.None;
-            PropertyKey key = null;
+            Expression key = null;
             FunctionExpression value = null;
             var computed = false;
             var method = false;
