@@ -111,5 +111,12 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("class Rectangle extends aggregation(Shape, Colored, ZCoord) { }");
             var program = parser.ParseProgram();
         }
+
+        [Fact]
+        public void ShouldParseExpressionAsObjectPropertyKey()
+        {
+            var parser = new JavaScriptParser("let obj = { [ \"baz\" + quux() ]: 42 }");
+            var program = parser.ParseProgram();
+        }
     }
 }

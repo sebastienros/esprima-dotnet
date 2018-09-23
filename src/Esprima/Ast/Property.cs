@@ -5,7 +5,7 @@ namespace Esprima.Ast
         public readonly bool Method;
         public readonly bool Shorthand;
 
-        public Property(PropertyKind kind, PropertyKey key, bool computed, PropertyValue value, bool method, bool shorthand)
+        public Property(PropertyKind kind, Expression key, bool computed, PropertyValue value, bool method, bool shorthand)
         {
             Type = Nodes.Property;
             Key = key;
