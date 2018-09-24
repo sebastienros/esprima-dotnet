@@ -111,5 +111,12 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("class Rectangle extends aggregation(Shape, Colored, ZCoord) { }");
             var program = parser.ParseProgram();
         }
+
+        [Fact]
+        public void ShouldSymbolPropertyKey()
+        {
+            var parser = new JavaScriptParser("var a = { [Symbol.iterator]: undefined }");
+            var program = parser.ParseProgram();
+        }
     }
 }

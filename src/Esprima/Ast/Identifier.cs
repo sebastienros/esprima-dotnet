@@ -2,7 +2,6 @@ namespace Esprima.Ast
 {
     public class Identifier : Node,
         BindingIdentifier,
-        PropertyKey,
         Expression
     {
         public readonly string Name;
@@ -11,11 +10,6 @@ namespace Esprima.Ast
         {
             Type = Nodes.Identifier;
             Name = name;
-        }
-
-        string PropertyKey.GetKey()
-        {
-            return Name;
         }
     }
 }
