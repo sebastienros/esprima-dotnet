@@ -90,6 +90,28 @@ namespace Esprima.Tests
             Assert.Equal(labeledStatement.Label, body.LabelSet);
         }
 
+        [Fact]
+        public void CanBuildObjectWithSymbolIteratorMember()
+        {
+            var parser = new JavaScriptParser("var iterable  = { [Symbol.iterator]: undefined };");
+            var program = parser.ParseProgram();
+            var variableDeclaration = program.Body.First().As<VariableDeclaration>();
+            var declarations = variableDeclaration.Declarations;
+
+            Assert.Single(declarations);
+
+            var oe = declarations[0].Init as ObjectExpression;
+            Assert.NotNull(oe);
+            Assert.Single(oe.Properties);
+
+            var property = oe.Properties[0];
+            Assert.Equal("Symbol.iterator", property.Key.GetKey());
+            
+            var identifier = property.Value as Identifier;
+            Assert.NotNull(identifier);
+            Assert.Equal("undefined", identifier.Name);
+        }
+
         [Theory]
         [InlineData(1.189008226412092e+38, "0x5973772948c653ac1971f1576e03c4d4")]
         [InlineData(18446744073709552000d, "0xffffffffffffffff")]
