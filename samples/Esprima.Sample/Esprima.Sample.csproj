@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
     <AssemblyName>Esprima.Sample</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>Esprima.Sample</PackageId>
