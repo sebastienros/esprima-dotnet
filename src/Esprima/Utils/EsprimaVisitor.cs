@@ -128,13 +128,9 @@ namespace Esprima.Utils
 
         public virtual void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
         {
-            foreach (var declaration in variableDeclaration.Declarations)
+            foreach (var declarator in variableDeclaration.Declarations)
             {
-                VisitIdentifier(declaration.Id.As<Identifier>());
-                if (declaration.Init != null)
-                {
-                    VisitExpression(declaration.Init);
-                }
+                Visit(declarator);
             }
         }
 
@@ -699,6 +695,11 @@ namespace Esprima.Utils
 
         public virtual void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
         {
+            VisitIdentifier(variableDeclarator.Id.As<Identifier>());
+            if (variableDeclarator.Init != null)
+            {
+                VisitExpression(variableDeclarator.Init);
+            }
         }
 
         public virtual void VisitTemplateLiteral(TemplateLiteral templateLiteral)
