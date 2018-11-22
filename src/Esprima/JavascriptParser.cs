@@ -1646,7 +1646,7 @@ namespace Esprima
 
                 var markers = new Stack<Token>(new[] { startToken, _lookahead });
                 var left = expr;
-                var right = IsolateCoverGrammar(parseUnaryExpression);
+                var right = IsolateCoverGrammar(parseExponentiationExpression);
 
                 var stack = new List<object> { left, token, right };
                 while (true)
@@ -1675,7 +1675,7 @@ namespace Esprima
                     token.Precedence = prec;
                     stack.Push(token);
                     markers.Push(_lookahead);
-                    stack.Push(IsolateCoverGrammar(parseUnaryExpression));
+                    stack.Push(IsolateCoverGrammar(parseExponentiationExpression));
                 }
 
                 // Final reduce to clean-up the stack.
