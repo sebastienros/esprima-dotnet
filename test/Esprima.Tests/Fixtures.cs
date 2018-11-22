@@ -20,7 +20,7 @@ namespace Esprima.Test
 
             var program = parser.ParseProgram();
 
-            var settings = new JsonSerializerSettings()
+            var settings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
             };
@@ -45,7 +45,7 @@ namespace Esprima.Test
 
         [Theory]
         [MemberData(nameof(SourceFiles), "Fixtures")]
-        public void ExecuteTestCase(string jsFilePath)
+        public void ExecuteTestCase(string fixture)
         {
             var options = new ParserOptions
             {
@@ -56,6 +56,7 @@ namespace Esprima.Test
             };
 
             string treeFilePath, failureFilePath, moduleFilePath;
+            var jsFilePath = Path.Combine(GetFixturesPath(), "Fixtures", fixture);
             if (jsFilePath.EndsWith(".source.js"))
             {
                 treeFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath)))) + ".tree.json";
@@ -132,17 +133,22 @@ namespace Esprima.Test
 
         public static IEnumerable<object[]> SourceFiles(string relativePath)
         {
-            var assemblyPath = new Uri(typeof(Fixtures).GetTypeInfo().Assembly.CodeBase).LocalPath;
-            var assemblyDirectory = new FileInfo(assemblyPath).Directory;
-
-            var root = assemblyDirectory.Parent.Parent.Parent.FullName;
-            var fixturesPath = Path.Combine(root, relativePath);
+            var fixturesPath = Path.Combine(GetFixturesPath(), relativePath);
 
             var files = Directory.GetFiles(fixturesPath, "*.js", SearchOption.AllDirectories);
 
             return files
-                .Select(x => new object[] { x })
+                .Select(x => new object[] { x.Substring(fixturesPath.Length + 1) })
                 .ToList();
+        }
+
+        private static string GetFixturesPath()
+        {
+            var assemblyPath = new Uri(typeof(Fixtures).GetTypeInfo().Assembly.CodeBase).LocalPath;
+            var assemblyDirectory = new FileInfo(assemblyPath).Directory;
+
+            var root = assemblyDirectory.Parent.Parent.Parent.FullName;
+            return root;
         }
 
         [Fact]
