@@ -3,10 +3,10 @@
     public class ClassExpression : Node, Expression
     {
         public readonly Identifier Id;
-        public readonly PropertyKey SuperClass;
+        public readonly Expression SuperClass;
         public readonly ClassBody Body;
 
-        public ClassExpression(Identifier id, PropertyKey superClass, ClassBody body)
+        public ClassExpression(Identifier id, Expression superClass, ClassBody body)
         {
             Type = Nodes.ClassExpression;
             Id = id;

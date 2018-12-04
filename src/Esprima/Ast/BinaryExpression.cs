@@ -53,6 +53,8 @@ namespace Esprima.Ast
         LogicalAnd,
         [EnumMember(Value = "||")]
         LogicalOr,
+        [EnumMember(Value = "**")]
+        Exponentiation,
     }
 
     public class BinaryExpression : Node,
@@ -122,6 +124,8 @@ namespace Esprima.Ast
                     return BinaryOperator.LogicalAnd;
                 case "||":
                     return BinaryOperator.LogicalOr;
+                case "**":
+                    return BinaryOperator.Exponentiation;
                 default:
                     throw new ArgumentOutOfRangeException("Invalid binary operator: " + op);
             }

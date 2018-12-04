@@ -1,12 +1,10 @@
-using System;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
 {
     public class Literal : Node,
-        Expression,
-        PropertyKey
+        Expression
     {
         [JsonIgnore] public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
         [JsonIgnore] public readonly double NumericValue;
@@ -66,12 +64,6 @@ namespace Esprima.Ast
             Regex = new RegexValue(pattern, flags);
             TokenType = TokenType.RegularExpression;
             Raw = raw;
-        }
-
-        string PropertyKey.GetKey()
-        {
-            var s = Value as string;
-            return s ?? Convert.ToString(Value);
         }
     }
 }

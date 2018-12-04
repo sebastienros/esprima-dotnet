@@ -4,10 +4,10 @@
         Declaration
     {
         public readonly Identifier Id;
-        public readonly PropertyKey SuperClass;
+        public readonly Expression SuperClass; // Identifier || CallExpression
         public readonly ClassBody Body;
 
-        public ClassDeclaration(Identifier id, PropertyKey superClass, ClassBody body)
+        public ClassDeclaration(Identifier id, Expression superClass, ClassBody body)
         {
             Type = Nodes.ClassDeclaration;
             Id = id;
