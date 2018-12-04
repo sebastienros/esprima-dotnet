@@ -466,7 +466,7 @@ namespace Esprima
             return result;
         }
 
-        private T InheritCoverGrammar<T>(Func<T> parseFunction)
+        private T InheritCoverGrammar<T>(Func<T> parseFunction) where T : class, INode
         {
             var previousIsBindingElement = _context.IsBindingElement;
             var previousIsAssignmentTarget = _context.IsAssignmentTarget;
