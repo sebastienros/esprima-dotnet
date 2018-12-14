@@ -11,7 +11,7 @@ namespace Esprima.Ast
         [JsonConverter(typeof(StringEnumConverter))]
         public Nodes Type { get; set; }
 
-        public int[] Range { get; set; }
+        public Range Range { get; set; }
 
         [JsonProperty(PropertyName = "Loc")]
         public Location Location

@@ -6,7 +6,7 @@ namespace Esprima.Ast
         INode
     {
         Nodes Type { get; }
-        int[] Range { get; set; }
+        Range Range { get; set; }
         Location Location { get; set; }
     }
 

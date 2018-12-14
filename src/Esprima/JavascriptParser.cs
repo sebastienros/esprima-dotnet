@@ -295,7 +295,7 @@ namespace Esprima
         {
             if (_config.Range)
             {
-                node.Range = new[] { meta.Index, _lastMarker.Index };
+                node.Range = new Range(meta.Index, _lastMarker.Index);
             }
 
             if (_config.Loc)
@@ -1877,7 +1877,7 @@ namespace Esprima
                         {
                             TolerateUnexpectedToken(list.Stricted, list.Message);
                         }
-                        expr = Finalize(node, new ArrowFunctionExpression(list.Parameters, body, expression, LeaveHoistingScope()));                        
+                        expr = Finalize(node, new ArrowFunctionExpression(list.Parameters, body, expression, LeaveHoistingScope()));
                         _context.Strict = previousStrict;
                         _context.AllowYield = previousAllowYield;
                     }

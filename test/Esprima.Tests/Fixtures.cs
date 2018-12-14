@@ -4,10 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Esprima.Ast;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Esprima.Utils;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using Xunit;
 
 namespace Esprima.Test
@@ -17,17 +15,8 @@ namespace Esprima.Test
         public string ParseAndFormat(string source, ParserOptions options)
         {
             var parser = new JavaScriptParser(source, options);
-
             var program = parser.ParseProgram();
-
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            };
-
-            settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
-
-            return JsonConvert.SerializeObject(program, Formatting.Indented, settings);
+            return program.ToJsonString(AstJson.Options.Default.WithLocation(LocationMembersPlacement.End), "  ");
         }
 
         public bool CompareTrees(string actual, string expected)
