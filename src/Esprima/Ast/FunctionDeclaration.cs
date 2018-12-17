@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Esprima.Ast
 {
@@ -11,10 +10,7 @@ namespace Esprima.Ast
         public bool Generator { get; }
         public bool Expression { get; }
 
-        [JsonIgnore]
         public HoistingScope HoistingScope { get; }
-
-        [JsonIgnore]
         public bool Strict { get; }
 
         public FunctionDeclaration(

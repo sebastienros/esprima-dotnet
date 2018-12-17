@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
 
@@ -210,8 +209,8 @@ namespace Esprima.Utils
                         t => t.GetRuntimeFields()
                               .Where(f => f.IsStatic)
                               .ToDictionary(f => (T) f.GetValue(null),
-                                            f => f.GetCustomAttribute<EnumMemberAttribute>()?.Value
-                                                 ?? f.Name.ToLowerInvariant()));
+                                            f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
+                                               ? a.Value : f.Name.ToLowerInvariant()));
                 Member(name, map[value]);
             }
 

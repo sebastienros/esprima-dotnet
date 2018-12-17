@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
@@ -11,7 +10,6 @@ namespace Esprima.Ast
         public readonly bool Generator;
         public readonly bool Expression;
 
-        [JsonIgnore]
         public HoistingScope HoistingScope;
 
         public ArrowFunctionExpression(List<INode> parameters, INode body, bool expression, HoistingScope hoistingScope)

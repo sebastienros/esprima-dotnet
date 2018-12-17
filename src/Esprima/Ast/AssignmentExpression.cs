@@ -1,7 +1,5 @@
 using System;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -38,7 +36,6 @@ namespace Esprima.Ast
     public class AssignmentExpression : Node,
         Expression
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public readonly AssignmentOperator Operator;
 
         // Can be something else than Expression (ObjectPattern, ArrayPattern) in case of destructuring assignment

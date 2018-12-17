@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Esprima.Ast
 {
@@ -9,13 +8,8 @@ namespace Esprima.Ast
         public readonly Expression Callee;
         public readonly List<ArgumentListElement> Arguments;
 
-        [JsonIgnore]
         public bool Cached;
-
-        [JsonIgnore]
         public bool CanBeCached = true;
-
-        [JsonIgnore]
         public object CachedArguments;
 
         public CallExpression(Expression callee, List<ArgumentListElement> args)

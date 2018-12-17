@@ -1,6 +1,4 @@
 using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Esprima.Ast
 {
@@ -19,7 +17,6 @@ namespace Esprima.Ast
 
     public abstract class ClassProperty : Node
     {
-        [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
         public PropertyKind Kind;
 
         public Expression Key; // Identifier, Literal, '[' Expression ']'
