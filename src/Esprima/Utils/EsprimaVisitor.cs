@@ -638,7 +638,7 @@ namespace Esprima.Utils
         {
         }
 
-        public virtual void VisitMethodDefinition(MethodDefinition methodDefinitionas)
+        public virtual void VisitMethodDefinition(MethodDefinition methodDefinitions)
         {
         }
 
