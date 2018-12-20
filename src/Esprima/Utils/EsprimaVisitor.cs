@@ -558,7 +558,7 @@ namespace Esprima.Utils
                     VisitArrowFunctionExpression(node.As<ArrowFunctionExpression>());
                     break;
                 case Nodes.ClassBody:
-                    VistClassBody(node.As<ClassBody>());
+                    VisitClassBody(node.As<ClassBody>());
                     break;
                 case Nodes.ClassDeclaration:
                     VisitClassDeclaration(node.As<ClassDeclaration>());
@@ -653,7 +653,7 @@ namespace Esprima.Utils
         {
         }
 
-        public virtual void VistClassBody(ClassBody classBody)
+        public virtual void VisitClassBody(ClassBody classBody)
         {
         }
 
