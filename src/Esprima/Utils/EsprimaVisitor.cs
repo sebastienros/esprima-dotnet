@@ -128,9 +128,9 @@ namespace Esprima.Utils
 
         public virtual void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
         {
-            foreach (var declarator in variableDeclaration.Declarations)
+            foreach (var declaration in variableDeclaration.Declarations)
             {
-                Visit(declarator);
+                Visit(declaration);
             }
         }
 
