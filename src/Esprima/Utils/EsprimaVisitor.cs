@@ -11,9 +11,9 @@ namespace Esprima.Utils
 
         public virtual void VisitProgram(Program program)
         {
-            foreach (var statment in program.Body)
+            foreach (var statement in program.Body)
             {
-                VisitStatement((Statement)statment);
+                VisitStatement((Statement)statement);
             }
         }
 
@@ -786,9 +786,9 @@ namespace Esprima.Utils
 
         public virtual void VisitBlockStatement(BlockStatement blockStatement)
         {
-            foreach (var statment in blockStatement.Body)
+            foreach (var statement in blockStatement.Body)
             {
-                VisitStatement(statment.As<Statement>());
+                VisitStatement(statement.As<Statement>());
             }
         }
     }
