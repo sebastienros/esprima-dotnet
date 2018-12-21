@@ -168,9 +168,9 @@ namespace Esprima.Utils
         {
             if (switchCase.Test != null)
             {
-                VisitExpression(switchCase.Test);                
+                VisitExpression(switchCase.Test);
             }
-            
+
             foreach (var s in switchCase.Consequent)
             {
                 VisitStatement(s.As<Statement>());
@@ -195,7 +195,7 @@ namespace Esprima.Utils
             VisitStatement(ifStatement.Consequent);
             if (ifStatement.Alternate != null)
             {
-                VisitStatement(ifStatement.Alternate);                
+                VisitStatement(ifStatement.Alternate);
             }
         }
 
@@ -784,9 +784,9 @@ namespace Esprima.Utils
         {
         }
 
-        public virtual void VisitBlockStatement(BlockStatement BlockStatement)
+        public virtual void VisitBlockStatement(BlockStatement blockStatement)
         {
-            foreach (var statment in BlockStatement.Body)
+            foreach (var statment in blockStatement.Body)
             {
                 VisitStatement(statment.As<Statement>());
             }
