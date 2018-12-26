@@ -11,7 +11,7 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("if (true) { p(); }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
+            AstVisitor visitor = new AstVisitor();
             visitor.VisitProgram(program);
         }
         
@@ -25,7 +25,7 @@ namespace Esprima.Tests
 }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
+            AstVisitor visitor = new AstVisitor();
             visitor.VisitProgram(program);
         }
         
@@ -39,7 +39,7 @@ namespace Esprima.Tests
 }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
+            AstVisitor visitor = new AstVisitor();
             visitor.VisitProgram(program);
         }
         
@@ -49,7 +49,7 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser(@"for (var a = []; ; ) { }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
+            AstVisitor visitor = new AstVisitor();
             visitor.VisitProgram(program);
         }
         
@@ -59,7 +59,7 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser(@"for (var elem of list) { }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
+            AstVisitor visitor = new AstVisitor();
             visitor.VisitProgram(program);
         }
     }

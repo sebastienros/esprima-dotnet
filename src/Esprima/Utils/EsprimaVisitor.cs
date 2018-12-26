@@ -5,7 +5,7 @@ using Esprima.Ast;
 
 namespace Esprima.Utils
 {
-    public class EsprimaVisitor
+    public class AstVisitor
     {
         public bool IsStrictMode { get; set; } = false;
 
@@ -168,9 +168,9 @@ namespace Esprima.Utils
         {
             if (switchCase.Test != null)
             {
-                VisitExpression(switchCase.Test);                
+                VisitExpression(switchCase.Test);
             }
-            
+
             foreach (var s in switchCase.Consequent)
             {
                 VisitStatement(s.As<Statement>());
@@ -195,7 +195,7 @@ namespace Esprima.Utils
             VisitStatement(ifStatement.Consequent);
             if (ifStatement.Alternate != null)
             {
-                VisitStatement(ifStatement.Alternate);                
+                VisitStatement(ifStatement.Alternate);
             }
         }
 
