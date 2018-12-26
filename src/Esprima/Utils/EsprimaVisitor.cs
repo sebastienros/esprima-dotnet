@@ -11,9 +11,9 @@ namespace Esprima.Utils
 
         public virtual void VisitProgram(Program program)
         {
-            foreach (var statment in program.Body)
+            foreach (var statement in program.Body)
             {
-                VisitStatement((Statement)statment);
+                VisitStatement((Statement)statement);
             }
         }
 
@@ -95,7 +95,7 @@ namespace Esprima.Utils
 
         public virtual void VisitUnknownNode(INode node)
         {
-            throw new NotImplementedException($"ESprima visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
+            throw new NotImplementedException($"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
         }
 
         private void VisitCatchClause(CatchClause catchClause)
@@ -128,9 +128,9 @@ namespace Esprima.Utils
 
         public virtual void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
         {
-            foreach (var declarator in variableDeclaration.Declarations)
+            foreach (var declaration in variableDeclaration.Declarations)
             {
-                Visit(declarator);
+                Visit(declaration);
             }
         }
 
@@ -784,11 +784,11 @@ namespace Esprima.Utils
         {
         }
 
-        public virtual void VisitBlockStatement(BlockStatement BlockStatement)
+        public virtual void VisitBlockStatement(BlockStatement blockStatement)
         {
-            foreach (var statment in BlockStatement.Body)
+            foreach (var statement in blockStatement.Body)
             {
-                VisitStatement(statment.As<Statement>());
+                VisitStatement(statement.As<Statement>());
             }
         }
     }
