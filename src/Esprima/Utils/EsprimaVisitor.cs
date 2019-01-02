@@ -98,7 +98,7 @@ namespace Esprima.Utils
             throw new NotImplementedException($"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
         }
 
-        private void VisitCatchClause(CatchClause catchClause)
+        public virtual void VisitCatchClause(CatchClause catchClause)
         {
             VisitIdentifier(catchClause.Param.As<Identifier>());
             VisitStatement(catchClause.Body);
