@@ -6,9 +6,9 @@ namespace Esprima.Ast
         Declaration
     {
         public readonly List<VariableDeclarator> Declarations;
-        public readonly string Kind;
+        public readonly VariableDeclarationKind Kind;
 
-        public VariableDeclaration(List<VariableDeclarator> declarations, string kind)
+        public VariableDeclaration(List<VariableDeclarator> declarations, VariableDeclarationKind kind)
         {
             Type = Nodes.VariableDeclaration;
             Declarations = declarations;

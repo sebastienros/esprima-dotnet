@@ -2026,7 +2026,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-let-and-const-declarations
 
-        private VariableDeclarator ParseLexicalBinding(string kind, DeclarationOptions options)
+        private VariableDeclarator ParseLexicalBinding(VariableDeclarationKind kind, DeclarationOptions options)
         {
             var node = CreateNode();
             var parameters = new List<Token>();
@@ -2041,7 +2041,7 @@ namespace Esprima
             }
 
             Expression init = null;
-            if (kind == "const")
+            if (kind == VariableDeclarationKind.Const)
             {
                 if (!MatchKeyword("in") && !MatchContextualKeyword("of"))
                 {
@@ -2065,7 +2065,7 @@ namespace Esprima
             return Finalize(node, new VariableDeclarator(id, init));
         }
 
-        private List<VariableDeclarator> ParseBindingList(string kind, DeclarationOptions options)
+        private List<VariableDeclarator> ParseBindingList(VariableDeclarationKind kind, DeclarationOptions options)
         {
             var list = new List<VariableDeclarator> { ParseLexicalBinding(kind, options) };
 
@@ -2099,7 +2099,8 @@ namespace Esprima
         private VariableDeclaration ParseLexicalDeclaration(DeclarationOptions options)
         {
             var node = CreateNode();
-            string kind = (string)NextToken().Value;
+            string kindString = (string) NextToken().Value;
+            var kind = ParseVariableDeclarationKind(kindString);
             //assert(kind == "let" || kind == "const", 'Lexical declaration must be either var or const');
 
             var declarations = ParseBindingList(kind, options);
@@ -2108,9 +2109,33 @@ namespace Esprima
             return Finalize(node, new VariableDeclaration(declarations, kind));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private VariableDeclarationKind ParseVariableDeclarationKind(string kindString)
+        {
+            VariableDeclarationKind kind;
+            switch (kindString)
+            {
+                case "const":
+                    kind = VariableDeclarationKind.Const;
+                    break;
+                case "let":
+                    kind = VariableDeclarationKind.Let;
+                    break;
+                case "var":
+                    kind = VariableDeclarationKind.Var;
+                    break;
+                default:
+                    ThrowError("Unknown declaration kind '{0}'", kindString);
+                    kind = VariableDeclarationKind.Let;
+                    break;
+            }
+
+            return kind;
+        }
+
         // https://tc39.github.io/ecma262/#sec-destructuring-binding-patterns
 
-        private RestElement ParseBindingRestElement(List<Token> parameters, string kind)
+        private RestElement ParseBindingRestElement(List<Token> parameters, VariableDeclarationKind kind)
         {
             var node = CreateNode();
 
@@ -2120,7 +2145,7 @@ namespace Esprima
             return Finalize(node, new RestElement(arg));
         }
 
-        private ArrayPattern ParseArrayPattern(List<Token> parameters, string kind)
+        private ArrayPattern ParseArrayPattern(List<Token> parameters, VariableDeclarationKind kind)
         {
             var node = CreateNode();
 
@@ -2156,7 +2181,7 @@ namespace Esprima
             return Finalize(node, new ArrayPattern(elements));
         }
 
-        private Property ParsePropertyPattern(List<Token> parameters, string kind)
+        private Property ParsePropertyPattern(List<Token> parameters, VariableDeclarationKind kind)
         {
             var node = CreateNode();
 
@@ -2203,7 +2228,7 @@ namespace Esprima
             return Finalize(node, new Property(PropertyKind.Init, key, computed, value, method, shorthand));
         }
 
-        private ObjectPattern ParseObjectPattern(List<Token> parameters, string kind)
+        private ObjectPattern ParseObjectPattern(List<Token> parameters, VariableDeclarationKind kind)
         {
             var node = CreateNode();
             var properties = new List<Property>();
@@ -2222,7 +2247,7 @@ namespace Esprima
             return Finalize(node, new ObjectPattern(properties));
         }
 
-        private ArrayPatternElement ParsePattern(List<Token> parameters, string kind = null)
+        private ArrayPatternElement ParsePattern(List<Token> parameters, VariableDeclarationKind kind)
         {
             ArrayPatternElement pattern;
 
@@ -2236,7 +2261,7 @@ namespace Esprima
             }
             else
             {
-                if (MatchKeyword("let") && (kind == "const" || kind == "let"))
+                if (MatchKeyword("let") && (kind == VariableDeclarationKind.Const || kind == VariableDeclarationKind.Let))
                 {
                     TolerateUnexpectedToken(_lookahead, Messages.LetInLexicalBinding);
                 }
@@ -2247,7 +2272,7 @@ namespace Esprima
             return pattern;
         }
 
-        private ArrayPatternElement ParsePatternWithDefault(List<Token> parameters, string kind = null)
+        private ArrayPatternElement ParsePatternWithDefault(List<Token> parameters, VariableDeclarationKind kind)
         {
             var startToken = _lookahead;
 
@@ -2267,7 +2292,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-variable-statement
 
-        private Identifier ParseVariableIdentifier(string kind = null)
+        private Identifier ParseVariableIdentifier(VariableDeclarationKind kind = VariableDeclarationKind.None)
         {
             var node = CreateNode();
 
@@ -2292,7 +2317,7 @@ namespace Esprima
                 else
                 {
                     var stringValue = token.Value as string;
-                    if (_context.Strict || stringValue == null || stringValue != "let" || kind != "var")
+                    if (_context.Strict || stringValue == null || stringValue != "let" || kind != VariableDeclarationKind.Var)
                     {
                         ThrowUnexpectedToken(token);
                     }
@@ -2311,7 +2336,7 @@ namespace Esprima
             var node = CreateNode();
 
             var parameters = new List<Token>();
-            var id = ParsePattern(parameters, "var");
+            var id = ParsePattern(parameters, VariableDeclarationKind.Var);
 
             if (_context.Strict && id.Type == Nodes.Identifier)
             {
@@ -2357,7 +2382,7 @@ namespace Esprima
             var declarations = ParseVariableDeclarationList(new DeclarationOptions { inFor = false });
             ConsumeSemicolon();
 
-            return Hoist(Finalize(node, new VariableDeclaration(declarations, "var")));
+            return Hoist(Finalize(node, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
         }
 
         // https://tc39.github.io/ecma262/#sec-empty-statement
@@ -2503,14 +2528,14 @@ namespace Esprima
                             TolerateError(Messages.ForInOfLoopInitializer, "for-in");
                         }
 
-                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, "var")));
+                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
                         NextToken();
                         right = ParseExpression();
                         init = null;
                     }
                     else if (declarations.Count == 1 && declarations[0].Init == null && MatchContextualKeyword("of"))
                     {
-                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, "var")));
+                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
                         NextToken();
                         right = ParseAssignmentExpression();
                         init = null;
@@ -2518,18 +2543,18 @@ namespace Esprima
                     }
                     else
                     {
-                        init = Hoist(Finalize(initNode, new VariableDeclaration(declarations, "var")));
+                        init = Hoist(Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
                         Expect(";");
                     }
                 }
                 else if (MatchKeyword("const") || MatchKeyword("let"))
                 {
                     var initNode = CreateNode();
-                    var kind = NextToken().Value;
-
+                    var kindString = (string) NextToken().Value;
+                    var kind = ParseVariableDeclarationKind(kindString);
                     if (!_context.Strict && (string)_lookahead.Value == "in")
                     {
-                        left = Finalize(initNode, new Identifier((string)kind));
+                        left = Finalize(initNode, new Identifier(kindString));
                         NextToken();
                         right = ParseExpression();
                         init = null;
@@ -2538,19 +2563,19 @@ namespace Esprima
                     {
                         var previousAllowIn = _context.AllowIn;
                         _context.AllowIn = false;
-                        var declarations = ParseBindingList((string)kind, new DeclarationOptions { inFor = true });
+                        var declarations = ParseBindingList(kind, new DeclarationOptions { inFor = true });
                         _context.AllowIn = previousAllowIn;
 
                         if (declarations.Count == 1 && declarations[0].Init == null && MatchKeyword("in"))
                         {
-                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, (string)kind)));
+                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, kind)));
                             NextToken();
                             right = ParseExpression();
                             init = null;
                         }
                         else if (declarations.Count == 1 && declarations[0].Init == null && MatchContextualKeyword("of"))
                         {
-                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, (string)kind)));
+                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, kind)));
                             NextToken();
                             right = ParseAssignmentExpression();
                             init = null;
@@ -2559,7 +2584,7 @@ namespace Esprima
                         else
                         {
                             ConsumeSemicolon();
-                            init = Finalize(initNode, new VariableDeclaration(declarations, (string)kind));
+                            init = Finalize(initNode, new VariableDeclaration(declarations, kind));
                         }
                     }
                 }
@@ -2883,7 +2908,7 @@ namespace Esprima
             }
 
             var parameters = new List<Token>();
-            var param = ParsePattern(parameters);
+            var param = ParsePattern(parameters, VariableDeclarationKind.None);
             var paramMap = new Dictionary<string, bool>();
             for (var i = 0; i < parameters.Count; i++)
             {
@@ -3161,7 +3186,7 @@ namespace Esprima
 
 
             Expect("...");
-            var arg = ParsePattern(parameters);
+            var arg = ParsePattern(parameters, VariableDeclarationKind.None);
             if (Match("="))
             {
                 ThrowError(Messages.DefaultRestParameter);
@@ -3178,7 +3203,7 @@ namespace Esprima
         {
             var parameters = new List<Token>();
 
-            INode param = Match("...") ? ParseRestElement(parameters) : ParsePatternWithDefault(parameters);
+            INode param = Match("...") ? ParseRestElement(parameters) : ParsePatternWithDefault(parameters, VariableDeclarationKind.None);
 
             for (var i = 0; i < parameters.Count; i++)
             {
@@ -3319,7 +3344,10 @@ namespace Esprima
             if (!Match("("))
             {
                 var token = _lookahead;
-                id = (!_context.Strict && !isGenerator && MatchKeyword("yield")) ? ParseIdentifierName() : ParseVariableIdentifier();
+                id = (!_context.Strict && !isGenerator && MatchKeyword("yield"))
+                    ? ParseIdentifierName()
+                    : ParseVariableIdentifier();
+
                 if (_context.Strict)
                 {
                     if (Scanner.IsRestrictedWord((string)token.Value))
@@ -3745,7 +3773,10 @@ namespace Esprima
             _context.Strict = true;
             ExpectKeyword("class");
 
-            var id = (identifierIsOptional && (_lookahead.Type != TokenType.Identifier)) ? null : this.ParseVariableIdentifier();
+            var id = (identifierIsOptional && (_lookahead.Type != TokenType.Identifier))
+                ? null 
+                : ParseVariableIdentifier();
+            
             Expression superClass = null;
             if (MatchKeyword("extends"))
             {
@@ -3765,7 +3796,10 @@ namespace Esprima
             var previousStrict = _context.Strict;
             _context.Strict = true;
             ExpectKeyword("class");
-            var id = (_lookahead.Type == TokenType.Identifier) ? ParseVariableIdentifier() : null;
+            var id = (_lookahead.Type == TokenType.Identifier)
+                ? ParseVariableIdentifier() 
+                : null;
+
             Expression superClass = null;
             if (MatchKeyword("extends"))
             {
@@ -4089,7 +4123,7 @@ namespace Esprima
 
         private void ThrowError(string messageFormat, params object[] values)
         {
-            string msg = String.Format(messageFormat, values);
+            string msg = string.Format(messageFormat, values);
 
             int index = _lastMarker.Index;
             int line = _lastMarker.LineNumber;
@@ -4099,14 +4133,13 @@ namespace Esprima
 
         private void TolerateError(string messageFormat, params object[] values)
         {
-            string msg = String.Format(messageFormat, values);
+            string msg = string.Format(messageFormat, values);
 
             int index = _lastMarker.Index;
             int line = _lastMarker.LineNumber;
             int column = _lastMarker.Index - _lastMarker.LineStart + 1;
             _errorHandler.TolerateError(index, line, column, msg);
         }
-
 
         private ParserException UnexpectedTokenError(Token token, string message = null)
         {
@@ -4213,7 +4246,7 @@ namespace Esprima
 
         private VariableDeclaration Hoist(VariableDeclaration variableDeclaration)
         {
-            if (variableDeclaration.Kind == "var")
+            if (variableDeclaration.Kind == VariableDeclarationKind.Var)
             {
                 _hoistingScopes.Peek().VariableDeclarations.Add(variableDeclaration);
             }
