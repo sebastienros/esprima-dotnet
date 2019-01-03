@@ -75,9 +75,20 @@ namespace Esprima.Utils
 
         public static void WriteJson(this INode node, TextWriter writer, Options options, string indent)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
-            if (writer == null) throw new ArgumentNullException(nameof(writer));
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
             var visitor = new Visitor(new JsonTextWriter(writer, indent),
                                       options.IncludingLineColumn, options.IncludingRange,
@@ -88,9 +99,20 @@ namespace Esprima.Utils
 
         public static void WriteJson(this INode node, JsonWriter writer, Options options)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
-            if (writer == null) throw new ArgumentNullException(nameof(writer));
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
             var visitor = new Visitor(writer,
                                       options.IncludingLineColumn, options.IncludingRange,
@@ -116,14 +138,21 @@ namespace Esprima.Utils
                     _stack.Pushed += node =>
                     {
                         writer.StartObject();
+                        
                         if (locationMembersPlacement == LocationMembersPlacement.Start)
+                        {
                             WriteLocationInfo(node);
+                        }
+
                         Member("type", node.Type.ToString());
                     };
                     _stack.Popped += node =>
                     {
                         if (locationMembersPlacement == LocationMembersPlacement.End)
+                        {
                             WriteLocationInfo(node);
+                        }
+
                         writer.EndObject();
                     };
                 }
@@ -245,9 +274,13 @@ namespace Esprima.Utils
             public override void Visit(INode node)
             {
                 if (node != null)
+                {
                     base.Visit(node);
+                }
                 else
+                {
                     _writer.Null();
+                }
             }
 
             public override void VisitProgram(Program program)
@@ -380,7 +413,10 @@ namespace Esprima.Utils
                 using (StartNodeObject(expressionStatement))
                 {
                     if (expressionStatement is Directive d)
+                    {
                         Member("directive", d.Directiv);
+                    }
+
                     Member("expression", expressionStatement.Expression);
                 }
             }
@@ -503,7 +539,9 @@ namespace Esprima.Utils
                             _writer.String(Convert.ToString(value, CultureInfo.InvariantCulture));
                             break;
                     }
+                    
                     Member("raw", literal.Raw);
+                    
                     if (literal.Regex != null)
                     {
                         _writer.Member("regex");
@@ -773,8 +811,11 @@ namespace Esprima.Utils
                 using (StartNodeObject(callExpression))
                 {
                     Member("callee", callExpression.Callee);
+                    
                     if (!callExpression.Cached)
+                    {
                         Member("arguments", callExpression.Arguments, e => (Expression) e);
+                    }
                 }
             }
 

@@ -66,13 +66,20 @@ namespace Esprima.Utils
 
         public override void Member(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
 
             if (Depth == 0 || _structures.Top != StructureKind.Object)
+            {
                 throw new InvalidOperationException("Member must be within an object.");
+            }
 
             if (_memberName != null)
+            {
                 throw new InvalidOperationException("Missing value for member: " + _memberName);
+            }
 
             _memberName = name;
         }
@@ -80,9 +87,13 @@ namespace Esprima.Utils
         public override void String(string str)
         {
             if (str == null)
+            {
                 Null();
+            }
             else
+            {
                 Write(str, TokenKind.String);
+            }
         }
 
         public override void Null() => Write("null", TokenKind.Scalar);
@@ -99,7 +110,10 @@ namespace Esprima.Utils
         public override void Number(double n)
         {
             if (double.IsNaN(n) || double.IsInfinity(n))
+            {
                 throw new ArgumentOutOfRangeException(nameof(n), n, null);
+            }
+
             Write(n.ToString(CultureInfo.InvariantCulture), TokenKind.Scalar);
         }
 
@@ -108,14 +122,20 @@ namespace Esprima.Utils
         private void Eol()
         {
             if (!Pretty)
+            {
                 return;
+            }
+
             _writer.WriteLine();
         }
 
         private void Indent(int? depth = null)
         {
             if (!Pretty)
+            {
                 return;
+            }
+
             var n = depth ?? Depth;
             for (var i = 0; i < n; i++)
                 _writer.Write(_indent);
@@ -131,10 +151,14 @@ namespace Esprima.Utils
         private void EndStructured()
         {
             if (Depth == 0)
+            {
                 throw new InvalidOperationException("No JSON structure in effect.");
+            }
 
             if (_memberName != null)
+            {
                 throw new InvalidOperationException("Missing value for member: " + _memberName);
+            }
 
             if (_counters.Top > 0)
             {
@@ -153,16 +177,24 @@ namespace Esprima.Utils
             Debug.Assert(kind == TokenKind.String || !string.IsNullOrEmpty(token));
 
             if (Depth == 0 && kind == TokenKind.Scalar)
+            {
                 throw new InvalidOperationException("JSON text must start with an object or an array.");
+            }
 
             var writer = _writer;
 
             if (Depth > 0)
             {
                 if (_structures.Top == StructureKind.Object && _memberName == null)
+                {
                     throw new InvalidOperationException("JSON object member name is undefined.");
+                }
+
                 if (_counters.Top > 0)
+                {
                     writer.Write(',');
+                }
+
                 Eol();
             }
 
@@ -177,15 +209,23 @@ namespace Esprima.Utils
             }
 
             if (Depth > 0 && _structures.Top == StructureKind.Array)
+            {
                 Indent();
+            }
 
             if (kind == TokenKind.String)
+            {
                 Enquote(token, writer);
+            }
             else
+            {
                 writer.Write(token);
+            }
 
             if (Depth > 0)
+            {
                 _counters.Top += 1;
+            }
         }
 
         private static void Enquote(string s, TextWriter writer)
@@ -257,7 +297,10 @@ namespace Esprima.Utils
                 get
                 {
                     if (Count <= 0)
+                    {
                         throw new InvalidOperationException();
+                    }
+
                     return ref _items[Count - 1];
                 }
             }
@@ -274,7 +317,10 @@ namespace Esprima.Utils
             {
                 var capacity = Capacity;
                 if (Count == capacity)
+                {
                     SysArray.Resize(ref _items, Math.Max(capacity * 2, 4));
+                }
+
                 Debug.Assert(_items != null);
                 _items[Count] = item;
                 Count++;
@@ -283,7 +329,10 @@ namespace Esprima.Utils
             public T Pop()
             {
                 if (Count == 0)
+                {
                     throw new InvalidOperationException();
+                }
+
                 var top = Top;
                 Top = default;
                 Count--;
