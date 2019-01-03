@@ -59,10 +59,10 @@ namespace Esprima.Utils
 
         public int Depth => _structures.Count;
 
-        public override void Object() => StartStructured(StructureKind.Object);
+        public override void StartObject() => StartStructured(StructureKind.Object);
         public override void EndObject() => EndStructured();
 
-        public override void Array() => StartStructured(StructureKind.Array);
+        public override void StartArray() => StartStructured(StructureKind.Array);
         public override void EndArray() => EndStructured();
 
         public override void Member(string name)

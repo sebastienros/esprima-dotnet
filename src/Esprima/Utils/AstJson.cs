@@ -122,7 +122,7 @@ namespace Esprima.Utils
                 {
                     _stack.Pushed += node =>
                     {
-                        writer.Object();
+                        writer.StartObject();
                         if (locationMembersPlacement == LocationMembersPlacement.Start)
                             WriteLocationInfo(node);
                         Member("type", node.Type.ToString());
@@ -140,7 +140,7 @@ namespace Esprima.Utils
                     if (includeRange)
                     {
                         writer.Member("range");
-                        writer.Array();
+                        writer.StartArray();
                         writer.Number(node.Range.Start);
                         writer.Number(node.Range.End);
                         writer.EndArray();
@@ -149,7 +149,7 @@ namespace Esprima.Utils
                     if (includeLineColumn)
                     {
                         writer.Member("loc");
-                        writer.Object();
+                        writer.StartObject();
                         writer.Member("start");
                         Write(node.Location.Start);
                         writer.Member("end");
@@ -159,7 +159,7 @@ namespace Esprima.Utils
 
                     void Write(Position position)
                     {
-                        writer.Object();
+                        writer.StartObject();
                         Member("line", position.Line);
                         Member("column", position.Column);
                         writer.EndObject();
@@ -219,7 +219,7 @@ namespace Esprima.Utils
             void Member<T>(string name, IEnumerable<T> nodes) where T : INode
             {
                 Member(name);
-                _writer.Array();
+                _writer.StartArray();
                 foreach (var node in nodes)
                     Visit(node);
                 _writer.EndArray();
@@ -502,7 +502,7 @@ namespace Esprima.Utils
                             _writer.Boolean(b);
                             break;
                         case Regex _:
-                            _writer.Object();
+                            _writer.StartObject();
                             _writer.EndObject();
                             break;
                         case double d:
@@ -516,7 +516,7 @@ namespace Esprima.Utils
                     if (literal.Regex != null)
                     {
                         _writer.Member("regex");
-                        _writer.Object();
+                        _writer.StartObject();
                         Member("pattern", literal.Regex.Pattern);
                         Member("flags", literal.Regex.Flags);
                         _writer.EndObject();
@@ -737,7 +737,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(templateElement))
                 {
                     _writer.Member("value");
-                    _writer.Object();
+                    _writer.StartObject();
                     Member("raw", templateElement.Value.Raw);
                     Member("cooked", templateElement.Value.Cooked);
                     _writer.EndObject();
