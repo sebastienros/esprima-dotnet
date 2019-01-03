@@ -23,30 +23,30 @@ namespace Esprima.Utils
         {
             public static readonly Options Default = new Options();
 
-            public bool IncludeLineColumn { get; private set; }
-            public bool IncludeRange { get; private set; }
+            public bool IncludingLineColumn { get; private set; }
+            public bool IncludingRange { get; private set; }
             public LocationMembersPlacement LocationMembersPlacement { get; private set; }
 
             public Options() {}
 
             private Options(Options options)
             {
-                IncludeLineColumn = options.IncludeLineColumn;
-                IncludeRange = options.IncludeRange;
+                IncludingLineColumn = options.IncludingLineColumn;
+                IncludingRange = options.IncludingRange;
                 LocationMembersPlacement = options.LocationMembersPlacement;
             }
 
-            public Options WithIncludeLineColumn(bool value) =>
-                value == IncludeLineColumn ? this : new Options(this) { IncludeLineColumn = value };
+            public Options WithIncludingLineColumn(bool value) =>
+                value == IncludingLineColumn ? this : new Options(this) { IncludingLineColumn = value };
 
-            public Options WithIncludeRange(bool value) =>
-                value == IncludeRange ? this : new Options(this) { IncludeRange = value };
+            public Options WithIncludingRange(bool value) =>
+                value == IncludingRange ? this : new Options(this) { IncludingRange = value };
 
             public Options WithLocationMembersPlacement(LocationMembersPlacement value) =>
                 value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
 
-            public Options WithLineColumn() => WithIncludeLineColumn(true);
-            public Options WithRange()      => WithIncludeRange(true);
+            public Options WithLineColumn() => WithIncludingLineColumn(true);
+            public Options WithRange()      => WithIncludingRange(true);
             public Options WithLocation()   => WithLineColumn().WithRange();
 
             public Options WithLocation(LocationMembersPlacement placement) =>
@@ -87,7 +87,7 @@ namespace Esprima.Utils
             if (options == null) throw new ArgumentNullException(nameof(options));
 
             var visitor = new Visitor(new JsonTextWriter(writer, indent),
-                                      options.IncludeLineColumn, options.IncludeRange,
+                                      options.IncludingLineColumn, options.IncludingRange,
                                       options.LocationMembersPlacement);
 
             visitor.Visit(node);
@@ -100,7 +100,7 @@ namespace Esprima.Utils
             if (options == null) throw new ArgumentNullException(nameof(options));
 
             var visitor = new Visitor(writer,
-                                      options.IncludeLineColumn, options.IncludeRange,
+                                      options.IncludingLineColumn, options.IncludingRange,
                                       options.LocationMembersPlacement);
 
             visitor.Visit(node);
