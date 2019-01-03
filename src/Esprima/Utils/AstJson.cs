@@ -681,8 +681,11 @@ namespace Esprima.Utils
 
             public override void VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
             {
-                // TODO
-                _writer.String(arrowParameterPlaceHolder.ToString());
+                // Seems that ArrowParameterPlaceHolder nodes never appear
+                // in the final tree and only used during the construction of
+                // a tree. If this assumption is wrong then best to just fail.
+
+                throw new NotImplementedException();
             }
 
             public override void VisitObjectPattern(ObjectPattern objectPattern)
