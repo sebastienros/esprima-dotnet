@@ -44,13 +44,6 @@ namespace Esprima.Utils
 
             public Options WithLocationMembersPlacement(LocationMembersPlacement value) =>
                 value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
-
-            public Options WithLineColumn() => WithIncludingLineColumn(true);
-            public Options WithRange()      => WithIncludingRange(true);
-            public Options WithLocation()   => WithLineColumn().WithRange();
-
-            public Options WithLocation(LocationMembersPlacement placement) =>
-                WithLocation().WithLocationMembersPlacement(placement);
         }
 
         public static string ToJsonString(this INode node) =>

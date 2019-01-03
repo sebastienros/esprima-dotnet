@@ -16,7 +16,11 @@ namespace Esprima.Test
         {
             var parser = new JavaScriptParser(source, options);
             var program = parser.ParseProgram();
-            return program.ToJsonString(AstJson.Options.Default.WithLocation(LocationMembersPlacement.End), "  ");
+            const string indent = "  ";
+            return program.ToJsonString(AstJson.Options.Default
+                                                       .WithIncludingLineColumn(true)
+                                                       .WithIncludingRange(true),
+                                        indent);
         }
 
         public bool CompareTrees(string actual, string expected)
