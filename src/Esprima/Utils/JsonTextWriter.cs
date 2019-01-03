@@ -14,16 +14,16 @@
 //
 #endregion
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using SysArray = System.Array;
+
 namespace Esprima.Utils
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
-    using SysArray = System.Array;
-
     /// <summary>
     /// Represents a writer that provides a fast, non-cached, forward-only
     /// way of generating streams or files containing JSON Text according
