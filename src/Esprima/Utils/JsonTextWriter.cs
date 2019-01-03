@@ -16,8 +16,6 @@
 
 namespace Esprima.Utils
 {
-    #region Imports
-
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -25,8 +23,6 @@ namespace Esprima.Utils
     using System.Globalization;
     using System.IO;
     using SysArray = System.Array;
-
-    #endregion
 
     /// <summary>
     /// Represents a writer that provides a fast, non-cached, forward-only
