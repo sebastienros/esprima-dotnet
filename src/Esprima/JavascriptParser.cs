@@ -2135,7 +2135,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-destructuring-binding-patterns
 
-        private RestElement ParseBindingRestElement(List<Token> parameters, VariableDeclarationKind kind)
+        private RestElement ParseBindingRestElement(List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2145,7 +2145,7 @@ namespace Esprima
             return Finalize(node, new RestElement(arg));
         }
 
-        private ArrayPattern ParseArrayPattern(List<Token> parameters, VariableDeclarationKind kind)
+        private ArrayPattern ParseArrayPattern(List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2181,7 +2181,7 @@ namespace Esprima
             return Finalize(node, new ArrayPattern(elements));
         }
 
-        private Property ParsePropertyPattern(List<Token> parameters, VariableDeclarationKind kind)
+        private Property ParsePropertyPattern(List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2228,7 +2228,7 @@ namespace Esprima
             return Finalize(node, new Property(PropertyKind.Init, key, computed, value, method, shorthand));
         }
 
-        private ObjectPattern ParseObjectPattern(List<Token> parameters, VariableDeclarationKind kind)
+        private ObjectPattern ParseObjectPattern(List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
             var properties = new List<Property>();
@@ -2247,7 +2247,7 @@ namespace Esprima
             return Finalize(node, new ObjectPattern(properties));
         }
 
-        private ArrayPatternElement ParsePattern(List<Token> parameters, VariableDeclarationKind kind)
+        private ArrayPatternElement ParsePattern(List<Token> parameters, VariableDeclarationKind? kind = null)
         {
             ArrayPatternElement pattern;
 
@@ -2272,7 +2272,7 @@ namespace Esprima
             return pattern;
         }
 
-        private ArrayPatternElement ParsePatternWithDefault(List<Token> parameters, VariableDeclarationKind kind)
+        private ArrayPatternElement ParsePatternWithDefault(List<Token> parameters, VariableDeclarationKind? kind = null)
         {
             var startToken = _lookahead;
 
@@ -2292,7 +2292,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-variable-statement
 
-        private Identifier ParseVariableIdentifier(VariableDeclarationKind kind = VariableDeclarationKind.None)
+        private Identifier ParseVariableIdentifier(VariableDeclarationKind? kind = null)
         {
             var node = CreateNode();
 
@@ -2908,7 +2908,7 @@ namespace Esprima
             }
 
             var parameters = new List<Token>();
-            var param = ParsePattern(parameters, VariableDeclarationKind.None);
+            var param = ParsePattern(parameters);
             var paramMap = new Dictionary<string, bool>();
             for (var i = 0; i < parameters.Count; i++)
             {
@@ -3186,7 +3186,7 @@ namespace Esprima
 
 
             Expect("...");
-            var arg = ParsePattern(parameters, VariableDeclarationKind.None);
+            var arg = ParsePattern(parameters);
             if (Match("="))
             {
                 ThrowError(Messages.DefaultRestParameter);
@@ -3203,7 +3203,9 @@ namespace Esprima
         {
             var parameters = new List<Token>();
 
-            INode param = Match("...") ? ParseRestElement(parameters) : ParsePatternWithDefault(parameters, VariableDeclarationKind.None);
+            INode param = Match("...")
+                ? ParseRestElement(parameters) 
+                : ParsePatternWithDefault(parameters);
 
             for (var i = 0; i < parameters.Count; i++)
             {
