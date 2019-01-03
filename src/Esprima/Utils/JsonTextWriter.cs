@@ -36,7 +36,7 @@ namespace Esprima.Utils
     //   [Jayrock]: https://github.com/atifaziz/Jayrock
     //   [ELMAH]: https://elmah.github.io/
 
-    public sealed class JsonTextWriter : JsonWriter
+    sealed class JsonTextWriter : JsonWriter
     {
         enum StructureKind : byte { Array, Object }
 
