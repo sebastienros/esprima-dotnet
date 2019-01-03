@@ -216,12 +216,15 @@ namespace Esprima.Utils
                 Member(name, map[value]);
             }
 
-            void Member<T>(string name, IEnumerable<T> nodes) where T : INode
+            void Member<T>(string name, List<T> nodes) where T : INode =>
+                Member(name, nodes, node => node);
+
+            void Member<T>(string name, List<T> list, Func<T, INode> nodeSelector)
             {
                 Member(name);
                 _writer.StartArray();
-                foreach (var node in nodes)
-                    Visit(node);
+                foreach (var item in list)
+                    Visit(nodeSelector(item));
                 _writer.EndArray();
             }
 
@@ -258,7 +261,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(program))
                 {
-                    Member("body", program.Body.Cast<INode>());
+                    Member("body", program.Body, e => (INode) e);
                     Member("sourceType", program.SourceType);
                 }
             }
@@ -344,7 +347,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(switchCase))
                 {
                     Member("test", switchCase.Test);
-                    Member("consequent", switchCase.Consequent.Cast<INode>());
+                    Member("consequent", switchCase.Consequent, e => (INode) e);
                 }
             }
 
@@ -470,7 +473,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(newExpression))
                 {
                     Member("callee", newExpression.Callee);
-                    Member("arguments", newExpression.Arguments.Cast<INode>());
+                    Member("arguments", newExpression.Arguments, e => (INode) e);
                 }
             }
 
@@ -587,7 +590,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(importDeclaration))
                 {
-                    Member("specifiers", importDeclaration.Specifiers.Cast<INode>());
+                    Member("specifiers", importDeclaration.Specifiers, e => (INode) e);
                     Member("source", importDeclaration.Source);
                 }
             }
@@ -780,7 +783,7 @@ namespace Esprima.Utils
                 {
                     Member("callee", callExpression.Callee);
                     if (!callExpression.Cached)
-                        Member("arguments", callExpression.Arguments.Cast<Expression>());
+                        Member("arguments", callExpression.Arguments, e => (Expression) e);
                 }
             }
 
@@ -825,7 +828,7 @@ namespace Esprima.Utils
             public override void VisitBlockStatement(BlockStatement blockStatement)
             {
                 using (StartNodeObject(blockStatement))
-                    Member("body", blockStatement.Body.Cast<Statement>());
+                    Member("body", blockStatement.Body, e => (Statement) e);
            }
         }
     }
