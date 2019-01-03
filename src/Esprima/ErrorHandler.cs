@@ -32,9 +32,18 @@ namespace Esprima
             }
         }
 
-        public void ThrowError(int index, int line, int column, string message)
+        public ParserException CreateError(int index, int line, int col, string description)
         {
-            throw this.CreateError(index, line, column, message);
+            var msg = $"Line {line}': {description}";
+            var error = new ParserException(msg)
+            {
+                Index = index,
+                Column = col,
+                LineNumber = line,
+                Description = description,
+                Source = Source
+            };
+            return error;
         }
 
         public void TolerateError(int index, int line, int col, string description)
