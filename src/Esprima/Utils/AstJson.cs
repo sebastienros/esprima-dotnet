@@ -29,7 +29,7 @@ namespace Esprima.Utils
 
             public Options() {}
 
-            Options(Options options)
+            private Options(Options options)
             {
                 IncludeLineColumn = options.IncludeLineColumn;
                 IncludeRange = options.IncludeRange;
@@ -106,10 +106,10 @@ namespace Esprima.Utils
             visitor.Visit(node);
         }
 
-        sealed class Visitor : AstVisitor
+        private sealed class Visitor : AstVisitor
         {
-            readonly JsonWriter _writer;
-            readonly ObservableStack<INode> _stack;
+            private readonly JsonWriter _writer;
+            private readonly ObservableStack<INode> _stack;
 
             public Visitor(JsonWriter writer,
                            bool includeLineColumn, bool includeRange,
@@ -167,44 +167,44 @@ namespace Esprima.Utils
                 }
             }
 
-            IDisposable StartNodeObject(INode node) =>
+            private IDisposable StartNodeObject(INode node) =>
                 _stack.Push(node);
 
-            void EmptyNodeObject(INode node)
+            private void EmptyNodeObject(INode node)
             {
                 using (StartNodeObject(node)) {}
             }
 
-            void Member(string name) =>
+            private void Member(string name) =>
                 _writer.Member(name);
 
-            void Member(string name, INode node)
+            private void Member(string name, INode node)
             {
                 Member(name);
                 Visit(node);
             }
 
-            void Member(string name, string value)
+            private void Member(string name, string value)
             {
                 Member(name);
                 _writer.String(value);
             }
 
-            void Member(string name, bool value)
+            private void Member(string name, bool value)
             {
                 Member(name);
                 _writer.Boolean(value);
             }
 
-            void Member(string name, int value)
+            private void Member(string name, int value)
             {
                 Member(name);
                 _writer.Number(value);
             }
 
-            static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new ConditionalWeakTable<Type, IDictionary>();
+            private static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new ConditionalWeakTable<Type, IDictionary>();
 
-            void Member<T>(string name, T value) where T : Enum
+            private void Member<T>(string name, T value) where T : Enum
             {
                 var map = (Dictionary<T, string>)
                     EnumMap.GetValue(value.GetType(),
@@ -216,10 +216,10 @@ namespace Esprima.Utils
                 Member(name, map[value]);
             }
 
-            void Member<T>(string name, List<T> nodes) where T : INode =>
+            private void Member<T>(string name, List<T> nodes) where T : INode =>
                 Member(name, nodes, node => node);
 
-            void Member<T>(string name, List<T> list, Func<T, INode> nodeSelector)
+            private void Member<T>(string name, List<T> list, Func<T, INode> nodeSelector)
             {
                 Member(name);
                 _writer.StartArray();
@@ -228,9 +228,9 @@ namespace Esprima.Utils
                 _writer.EndArray();
             }
 
-            sealed class ObservableStack<T> : IDisposable
+            private sealed class ObservableStack<T> : IDisposable
             {
-                readonly Stack<T> _stack = new Stack<T>();
+                private readonly Stack<T> _stack = new Stack<T>();
 
                 public event Action<T> Pushed;
                 public event Action<T> Popped;

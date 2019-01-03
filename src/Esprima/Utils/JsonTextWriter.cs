@@ -35,16 +35,15 @@ namespace Esprima.Utils
     //
     //   [Jayrock]: https://github.com/atifaziz/Jayrock
     //   [ELMAH]: https://elmah.github.io/
-
-    sealed class JsonTextWriter : JsonWriter
+    internal sealed class JsonTextWriter : JsonWriter
     {
-        enum StructureKind : byte { Array, Object }
+        private enum StructureKind : byte { Array, Object }
 
-        readonly TextWriter _writer;
-        readonly string _indent;
-        Stack<StructureKind> _structures;
-        Stack<int> _counters;
-        string _memberName;
+        private readonly TextWriter _writer;
+        private readonly string _indent;
+        private Stack<StructureKind> _structures;
+        private Stack<int> _counters;
+        private string _memberName;
 
         public JsonTextWriter(TextWriter writer) :
             this(writer, null) {}
@@ -104,16 +103,16 @@ namespace Esprima.Utils
             Write(n.ToString(CultureInfo.InvariantCulture), TokenKind.Scalar);
         }
 
-        bool Pretty => !string.IsNullOrEmpty(_indent);
+        private bool Pretty => !string.IsNullOrEmpty(_indent);
 
-        void Eol()
+        private void Eol()
         {
             if (!Pretty)
                 return;
             _writer.WriteLine();
         }
 
-        void Indent(int? depth = null)
+        private void Indent(int? depth = null)
         {
             if (!Pretty)
                 return;
@@ -122,14 +121,14 @@ namespace Esprima.Utils
                 _writer.Write(_indent);
         }
 
-        void StartStructured(StructureKind kind)
+        private void StartStructured(StructureKind kind)
         {
             Write(kind == StructureKind.Array ? "[" : "{", TokenKind.Structure);
             _counters.Push(0);
             _structures.Push(kind);
         }
 
-        void EndStructured()
+        private void EndStructured()
         {
             if (Depth == 0)
                 throw new InvalidOperationException("No JSON structure in effect.");
@@ -147,9 +146,9 @@ namespace Esprima.Utils
             _counters.Pop();
         }
 
-        enum TokenKind { Scalar, String, Structure }
+        private enum TokenKind { Scalar, String, Structure }
 
-        void Write(string token, TokenKind kind)
+        private void Write(string token, TokenKind kind)
         {
             Debug.Assert(kind == TokenKind.String || !string.IsNullOrEmpty(token));
 
@@ -189,7 +188,7 @@ namespace Esprima.Utils
                 _counters.Top += 1;
         }
 
-        static void Enquote(string s, TextWriter writer)
+        private static void Enquote(string s, TextWriter writer)
         {
             Debug.Assert(writer != null);
 
@@ -239,9 +238,9 @@ namespace Esprima.Utils
         }
 
         [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-        struct Stack<T> : IEnumerable<T>
+        private struct Stack<T> : IEnumerable<T>
         {
-            T[] _items;
+            private T[] _items;
 
             public Stack(int capacity)
             {
@@ -249,7 +248,7 @@ namespace Esprima.Utils
                 Count = 0;
             }
 
-            int Capacity => _items?.Length ?? 0;
+            private int Capacity => _items?.Length ?? 0;
 
             public int Count { get; private set; }
 
