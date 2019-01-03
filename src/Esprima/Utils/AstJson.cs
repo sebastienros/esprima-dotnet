@@ -423,11 +423,6 @@ namespace Esprima.Utils
                 }
             }
 
-            //public override void VisitExpression(Expression expression)
-            //{
-            //    _writer.String(expression.ToString());
-            //}
-
             public override void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
             {
                 using (StartNodeObject(arrowFunctionExpression))
