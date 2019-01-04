@@ -138,7 +138,7 @@ namespace Esprima.Utils
                     _stack.Pushed += node =>
                     {
                         writer.StartObject();
-                        
+
                         if (locationMembersPlacement == LocationMembersPlacement.Start)
                         {
                             WriteLocationInfo(node);
@@ -539,9 +539,9 @@ namespace Esprima.Utils
                             _writer.String(Convert.ToString(value, CultureInfo.InvariantCulture));
                             break;
                     }
-                    
+
                     Member("raw", literal.Raw);
-                    
+
                     if (literal.Regex != null)
                     {
                         _writer.Member("regex");
@@ -861,7 +861,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(blockStatement))
                     Member("body", blockStatement.Body, e => (Statement) e);
-           }
+            }
         }
     }
 }
