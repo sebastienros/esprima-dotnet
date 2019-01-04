@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
@@ -6,22 +5,16 @@ namespace Esprima.Ast
     public class Literal : Node,
         Expression
     {
-        [JsonIgnore] public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
-        [JsonIgnore] public readonly double NumericValue;
-        [JsonIgnore] public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
-        [JsonIgnore] public Regex RegexValue => TokenType == TokenType.RegularExpression ? (Regex) Value : null;
+        public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
+        public readonly double NumericValue;
+        public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
+        public Regex RegexValue => TokenType == TokenType.RegularExpression ? (Regex) Value : null;
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public readonly RegexValue Regex;
-
-        [JsonConverter(typeof(LiteralValueConverter))]
         public readonly object Value;
-
         public readonly string Raw;
-
-        [JsonIgnore] public readonly TokenType TokenType;
-
-        [JsonIgnore] public object CachedValue;
+        public readonly TokenType TokenType;
+        public object CachedValue;
 
         public Literal(string value, string raw)
         {

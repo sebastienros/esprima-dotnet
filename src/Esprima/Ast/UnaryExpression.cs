@@ -1,7 +1,5 @@
 using System;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -30,7 +28,6 @@ namespace Esprima.Ast
     public class UnaryExpression : Node,
         Expression
     {
-        [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
         public readonly UnaryOperator Operator;
         public readonly Expression Argument;
         public bool Prefix { get; protected set; }

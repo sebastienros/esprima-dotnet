@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Newtonsoft.Json;
+using Esprima.Utils;
 
 namespace Esprima.Sample
 {
@@ -32,12 +34,13 @@ try { } catch (evil) { }
             Console.WriteLine(JsonConvert.SerializeObject(tokens, Formatting.Indented));
         }
 
-        private static void Parse(string source)
+        private static void Parse(string source, TextWriter output)
         {
             var parser = new JavaScriptParser(source);
             var program = parser.ParseProgram();
 
-            Console.WriteLine(JsonConvert.SerializeObject(program, Formatting.Indented));
+            program.WriteJson(output);
+            Console.WriteLine();
         }
     }
 }

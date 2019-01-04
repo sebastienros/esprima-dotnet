@@ -1,7 +1,5 @@
 using System;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -60,7 +58,6 @@ namespace Esprima.Ast
     public class BinaryExpression : Node,
         Expression
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public readonly BinaryOperator Operator;
         public readonly Expression Left;
         public readonly Expression Right;
