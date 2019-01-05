@@ -168,8 +168,10 @@ namespace Esprima
             return Index >= Length;
         }
 
-        private ParserException CreateUnexpectedTokenError(string message = Messages.UnexpectedTokenIllegal) =>
-            _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+        public void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
+        {
+            _errorHandler.ThrowError(Index, LineNumber, Index - LineStart + 1, message);
+        }
 
         public void TolerateUnexpectedToken()
         {
@@ -499,7 +501,7 @@ namespace Esprima
             // At least, one hex digit is required.
             if (ch == '}')
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             while (!Eof())
@@ -514,7 +516,7 @@ namespace Esprima
 
             if (code > 0x10FFFF || ch != '}')
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             return Character.FromCodePoint(code);
@@ -563,7 +565,7 @@ namespace Esprima
             {
                 if (Source.CharCodeAt(Index) != 0x75)
                 {
-                    throw CreateUnexpectedTokenError();
+                    ThrowUnexpectedToken();
                 }
                 ++Index;
                 if (Source[Index] == '{')
@@ -576,7 +578,7 @@ namespace Esprima
                     char ch1;
                     if (!ScanHexEscape('u', out ch1) || ch1 == '\\' || !Character.IsIdentifierStart(ch1))
                     {
-                        throw CreateUnexpectedTokenError();
+                        ThrowUnexpectedToken();
                     }
                     ch = ParserExtensions.CharToString(ch1);
                 }
@@ -600,7 +602,7 @@ namespace Esprima
                     id = id.Substring(0, id.Length - 1);
                     if (Source.CharCodeAt(Index) != 0x75)
                     {
-                        throw CreateUnexpectedTokenError();
+                        ThrowUnexpectedToken();
                     }
                     ++Index;
                     if (Source[Index] == '{')
@@ -613,7 +615,7 @@ namespace Esprima
                         char ch1;
                         if (!ScanHexEscape('u', out ch1) || ch1 == '\\' || !Character.IsIdentifierPart(ch1))
                         {
-                            throw CreateUnexpectedTokenError();
+                            ThrowUnexpectedToken();
                         }
                         ch = ParserExtensions.CharToString(ch1);
                     }
@@ -803,7 +805,7 @@ namespace Esprima
 
             if (Index == token.Start)
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             token.End = Index;
@@ -830,12 +832,12 @@ namespace Esprima
 
             if (number.Length == 0)
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             double value = 0;
@@ -903,7 +905,7 @@ namespace Esprima
             if (number.Length == 0)
             {
                 // only 0b or 0B
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             if (!Eof())
@@ -912,7 +914,7 @@ namespace Esprima
                 /* istanbul ignore else */
                 if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
                 {
-                    throw CreateUnexpectedTokenError();
+                    ThrowUnexpectedToken();
                 }
             }
 
@@ -958,12 +960,12 @@ namespace Esprima
             if (!octal && number.Length == 0)
             {
                 // only 0o or 0O
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             if (Character.IsIdentifierStart(Source.CharCodeAt(Index)) || Character.IsDecimalDigit(Source.CharCodeAt(Index)))
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             return new Token
@@ -1083,13 +1085,13 @@ namespace Esprima
                 }
                 else
                 {
-                    throw CreateUnexpectedTokenError();
+                    ThrowUnexpectedToken();
                 }
             }
 
             if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             var token = new Token
@@ -1174,7 +1176,7 @@ namespace Esprima
                                     char unescaped;
                                     if (!ScanHexEscape(ch, out unescaped))
                                     {
-                                        throw CreateUnexpectedTokenError();
+                                        ThrowUnexpectedToken();
                                     }
                                     str.Append(unescaped);
                                 }
@@ -1241,7 +1243,7 @@ namespace Esprima
             if (quote != char.MinValue)
             {
                 Index = start;
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             return new Token
@@ -1345,14 +1347,14 @@ namespace Esprima
                                     if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                                     {
                                         // Illegal: \01 \02 and so on
-                                        throw CreateUnexpectedTokenError(Messages.TemplateOctalLiteral);
+                                        ThrowUnexpectedToken(Messages.TemplateOctalLiteral);
                                     }
                                     cooked.Append("\0");
                                 }
                                 else if (Character.IsOctalDigit(ch))
                                 {
                                     // Illegal: \1 \2
-                                    throw CreateUnexpectedTokenError(Messages.TemplateOctalLiteral);
+                                    ThrowUnexpectedToken(Messages.TemplateOctalLiteral);
                                 }
                                 else
                                 {
@@ -1389,7 +1391,7 @@ namespace Esprima
 
             if (!terminated)
             {
-                throw CreateUnexpectedTokenError();
+                ThrowUnexpectedToken();
             }
 
             if (!head)
@@ -1446,7 +1448,7 @@ namespace Esprima
 
                         if (codePoint > 0x10FFFF)
                         {
-                            throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                            ThrowUnexpectedToken(Messages.InvalidRegExp);
                         }
                         if (codePoint <= 0xFFFF)
                         {
@@ -1479,7 +1481,7 @@ namespace Esprima
             }
             catch
             {
-                throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                ThrowUnexpectedToken(Messages.InvalidRegExp);
             }
 
             // Return a regular expression object for this pattern-flag pair, or
@@ -1535,13 +1537,13 @@ namespace Esprima
                     // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
                     if (Character.IsLineTerminator(ch))
                     {
-                        throw CreateUnexpectedTokenError(Messages.UnterminatedRegExp);
+                        ThrowUnexpectedToken(Messages.UnterminatedRegExp);
                     }
                     str.Append(ch);
                 }
                 else if (Character.IsLineTerminator(ch))
                 {
-                    throw CreateUnexpectedTokenError(Messages.UnterminatedRegExp);
+                    ThrowUnexpectedToken(Messages.UnterminatedRegExp);
                 }
                 else if (classMarker)
                 {
@@ -1566,7 +1568,7 @@ namespace Esprima
 
             if (!terminated)
             {
-                throw CreateUnexpectedTokenError(Messages.UnterminatedRegExp);
+                ThrowUnexpectedToken(Messages.UnterminatedRegExp);
             }
 
             // Exclude leading and trailing slash.
@@ -1736,7 +1738,7 @@ namespace Esprima
                 {
                     if (isGlobal)
                     {
-                        throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
                     }
 
                     isGlobal = true;
@@ -1745,7 +1747,7 @@ namespace Esprima
                 {
                     if (ignoreCase)
                     {
-                        throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
                     }
 
                     ignoreCase = true;
@@ -1754,7 +1756,7 @@ namespace Esprima
                 {
                     if (multiline)
                     {
-                        throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
                     }
 
                     multiline = true;
@@ -1763,7 +1765,7 @@ namespace Esprima
                 {
                     if (unicode)
                     {
-                        throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
                     }
 
                     unicode = true;
@@ -1772,14 +1774,14 @@ namespace Esprima
                 {
                     if (sticky)
                     {
-                        throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
                     }
 
                     sticky = true;
                 }
                 else
                 {
-                    throw CreateUnexpectedTokenError(Messages.InvalidRegExp);
+                    ThrowUnexpectedToken(Messages.InvalidRegExp);
                 }
             }
 

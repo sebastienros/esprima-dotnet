@@ -2052,7 +2052,7 @@ namespace Esprima
                     }
                     else
                     {
-                        throw CreateError(Messages.DeclarationMissingInitializer, "const");
+                        ThrowError(Messages.DeclarationMissingInitializer, "const");
                     }
                 }
             }
@@ -2678,14 +2678,14 @@ namespace Esprima
                 var key = '$' + label.Name;
                 if (!_context.LabelSet.Contains(key))
                 {
-                    throw CreateError(Messages.UnknownLabel, label.Name);
+                    ThrowError(Messages.UnknownLabel, label.Name);
                 }
             }
 
             ConsumeSemicolon();
             if (label == null && !_context.InIteration)
             {
-                throw CreateError(Messages.IllegalContinue);
+                ThrowError(Messages.IllegalContinue);
             }
 
             return Finalize(node, new ContinueStatement(label));
@@ -2706,14 +2706,14 @@ namespace Esprima
                 var key = '$' + label.Name;
                 if (!_context.LabelSet.Contains(key))
                 {
-                    throw CreateError(Messages.UnknownLabel, label.Name);
+                    ThrowError(Messages.UnknownLabel, label.Name);
                 }
             }
 
             ConsumeSemicolon();
             if (label == null && !_context.InIteration && !_context.InSwitch)
             {
-                throw CreateError(Messages.IllegalBreak);
+                ThrowError(Messages.IllegalBreak);
             }
 
             return Finalize(node, new BreakStatement(label));
@@ -2816,7 +2816,7 @@ namespace Esprima
                 {
                     if (defaultFound)
                     {
-                        throw CreateError(Messages.MultipleDefaultsInSwitch);
+                        ThrowError(Messages.MultipleDefaultsInSwitch);
                     }
                     defaultFound = true;
                 }
@@ -2845,7 +2845,7 @@ namespace Esprima
                 var key = '$' + id.Name;
                 if (_context.LabelSet.Contains(key))
                 {
-                    throw CreateError(Messages.Redeclaration, "Label", id.Name);
+                    ThrowError(Messages.Redeclaration, "Label", id.Name);
                 }
 
                 _context.LabelSet.Add(key);
@@ -2872,7 +2872,7 @@ namespace Esprima
 
             if (_hasLineTerminator)
             {
-                throw CreateError(Messages.NewlineAfterThrow);
+                ThrowError(Messages.NewlineAfterThrow);
             }
 
             var argument = ParseExpression();
@@ -2939,7 +2939,7 @@ namespace Esprima
 
             if (handler == null && finalizer == null)
             {
-                throw CreateError(Messages.NoCatchOrFinally);
+                ThrowError(Messages.NoCatchOrFinally);
             }
 
             return Finalize(node, new TryStatement(block, handler, finalizer));
@@ -3177,11 +3177,11 @@ namespace Esprima
             var arg = ParsePattern(parameters);
             if (Match("="))
             {
-                throw CreateError(Messages.DefaultRestParameter);
+                ThrowError(Messages.DefaultRestParameter);
             }
             if (!Match(")"))
             {
-                throw CreateError(Messages.ParameterAfterRestParameter);
+                ThrowError(Messages.ParameterAfterRestParameter);
             }
 
             return Finalize(node, new RestElement(arg));
@@ -3810,7 +3810,7 @@ namespace Esprima
 
             if (_lookahead.Type != TokenType.StringLiteral)
             {
-                throw CreateError(Messages.InvalidModuleSpecifier);
+                ThrowError(Messages.InvalidModuleSpecifier);
             }
 
             var token = NextToken();
@@ -3887,7 +3887,7 @@ namespace Esprima
             Expect("*");
             if (!MatchContextualKeyword("as"))
             {
-                throw CreateError(Messages.NoAsAfterImportNamespace);
+                ThrowError(Messages.NoAsAfterImportNamespace);
             }
             NextToken();
             var local = ParseIdentifierName();
@@ -3899,7 +3899,7 @@ namespace Esprima
         {
             if (_context.InFunctionBody)
             {
-                throw CreateError(Messages.IllegalImportDeclaration);
+                ThrowError(Messages.IllegalImportDeclaration);
             }
 
             var node = CreateNode();
@@ -3955,7 +3955,7 @@ namespace Esprima
                 if (!MatchContextualKeyword("from"))
                 {
                     var message = _lookahead.Value != null ? Messages.UnexpectedToken : Messages.MissingFromClause;
-                    throw CreateError(message, _lookahead.Value);
+                    ThrowError(message, _lookahead.Value);
                 }
                 NextToken();
                 src = ParseModuleSpecifier();
@@ -3986,7 +3986,7 @@ namespace Esprima
         {
             if (_context.InFunctionBody)
             {
-                throw CreateError(Messages.IllegalExportDeclaration);
+                ThrowError(Messages.IllegalExportDeclaration);
             }
 
             var node = CreateNode();
@@ -4019,7 +4019,7 @@ namespace Esprima
                 {
                     if (MatchContextualKeyword("from"))
                     {
-                        throw CreateError(Messages.UnexpectedToken, _lookahead.Value);
+                        ThrowError(Messages.UnexpectedToken, _lookahead.Value);
                     }
                     // export default {};
                     // export default [];
@@ -4038,7 +4038,7 @@ namespace Esprima
                 if (!MatchContextualKeyword("from"))
                 {
                     var message = _lookahead.Value != null ? Messages.UnexpectedToken : Messages.MissingFromClause;
-                    throw CreateError(message, _lookahead.Value);
+                    ThrowError(message, _lookahead.Value);
                 }
                 NextToken();
                 var src = ParseModuleSpecifier();
@@ -4098,7 +4098,7 @@ namespace Esprima
                 {
                     // export {default}; // missing fromClause
                     var message = _lookahead.Value != null ? Messages.UnexpectedToken : Messages.MissingFromClause;
-                    throw CreateError(message, _lookahead.Value);
+                    ThrowError(message, _lookahead.Value);
                 }
                 else
                 {
@@ -4109,6 +4109,11 @@ namespace Esprima
             }
 
             return exportDeclaration;
+        }
+
+        private void ThrowError(string messageFormat, params object[] values)
+        {
+            throw CreateError(messageFormat, values);
         }
 
         private ParserException CreateError(string messageFormat, params object[] values)
