@@ -2112,25 +2112,13 @@ namespace Esprima
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private VariableDeclarationKind ParseVariableDeclarationKind(string kindString)
         {
-            VariableDeclarationKind kind;
             switch (kindString)
             {
-                case "const":
-                    kind = VariableDeclarationKind.Const;
-                    break;
-                case "let":
-                    kind = VariableDeclarationKind.Let;
-                    break;
-                case "var":
-                    kind = VariableDeclarationKind.Var;
-                    break;
-                default:
-                    ThrowError("Unknown declaration kind '{0}'", kindString);
-                    kind = VariableDeclarationKind.Let;
-                    break;
+                case "const": return VariableDeclarationKind.Const;
+                case "let"  : return VariableDeclarationKind.Let;
+                case "var"  : return VariableDeclarationKind.Var;
+                default     : throw CreateError("Unknown declaration kind '{0}'", kindString);
             }
-
-            return kind;
         }
 
         // https://tc39.github.io/ecma262/#sec-destructuring-binding-patterns
@@ -4125,12 +4113,17 @@ namespace Esprima
 
         private void ThrowError(string messageFormat, params object[] values)
         {
+            throw CreateError(messageFormat, values);
+        }
+
+        private ParserException CreateError(string messageFormat, params object[] values)
+        {
             string msg = string.Format(messageFormat, values);
 
             int index = _lastMarker.Index;
             int line = _lastMarker.LineNumber;
             int column = _lastMarker.Index - _lastMarker.LineStart + 1;
-            throw _errorHandler.CreateError(index, line, column, msg);
+            return _errorHandler.CreateError(index, line, column, msg);
         }
 
         private void TolerateError(string messageFormat, params object[] values)
