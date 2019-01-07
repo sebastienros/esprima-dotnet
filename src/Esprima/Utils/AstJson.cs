@@ -133,12 +133,12 @@ namespace Esprima.Utils
                 _writer = writer ?? throw new ArgumentNullException(nameof(writer));
                 _stack = new ObservableStack<INode>();
 
+                _stack.Pushed += _ => _writer.StartObject();
+
                 if (includeLineColumn || includeRange)
                 {
                     _stack.Pushed += node =>
                     {
-                        writer.StartObject();
-
                         if (locationMembersPlacement == LocationMembersPlacement.Start)
                         {
                             WriteLocationInfo(node);
@@ -146,16 +146,17 @@ namespace Esprima.Utils
 
                         Member("type", node.Type.ToString());
                     };
+
                     _stack.Popped += node =>
                     {
                         if (locationMembersPlacement == LocationMembersPlacement.End)
                         {
                             WriteLocationInfo(node);
                         }
-
-                        writer.EndObject();
                     };
                 }
+
+                _stack.Popped += _ => _writer.EndObject();
 
                 void WriteLocationInfo(INode node)
                 {
@@ -811,7 +812,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(callExpression))
                 {
                     Member("callee", callExpression.Callee);
-                    
+
                     if (!callExpression.Cached)
                     {
                         Member("arguments", callExpression.Arguments, e => (Expression) e);
