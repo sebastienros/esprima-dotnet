@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Esprima
+namespace Esprima.Ast
 {
     // This structure is like List<> from the BCL except it is designed
     // to be modifiable by this library during the construction of the AST
