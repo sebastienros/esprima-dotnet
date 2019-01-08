@@ -20,7 +20,7 @@ namespace Esprima.Ast
 
         internal List(int capacity)
         {
-            _items = new T[capacity];
+            _items = capacity == 0 ? null : new T[capacity];
             Count = 0;
         }
 
