@@ -286,7 +286,7 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private MetaNode StartNode(Token token)
+        private static MetaNode StartNode(Token token)
         {
             return new MetaNode(token.Start, token.LineNumber, token.Start - token.LineStart);
         }
@@ -790,7 +790,7 @@ namespace Esprima
             return key;
         }
 
-        private bool IsPropertyKey(INode key, string value)
+        private static bool IsPropertyKey(INode key, string value)
         {
             if (key.Type == Nodes.Identifier)
             {
@@ -1253,7 +1253,7 @@ namespace Esprima
             return args;
         }
 
-        private bool IsIdentifierName(Token token)
+        private static bool IsIdentifierName(Token token)
         {
             return token.Type == TokenType.Identifier ||
                 token.Type == TokenType.Keyword ||
@@ -3451,7 +3451,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-method-definitions
 
-        private bool QualifiedPropertyName(Token token)
+        private static bool QualifiedPropertyName(Token token)
         {
             switch (token.Type)
             {
