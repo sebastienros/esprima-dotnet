@@ -17,7 +17,7 @@ namespace Esprima.Ast
     {
         T[] _items;
 
-        public List(int capacity)
+        internal List(int capacity)
         {
             _items = new T[capacity];
             Count = 0;
