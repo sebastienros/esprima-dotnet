@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using static Esprima.JitHelper;
 
 namespace Esprima.Ast
 {
@@ -123,9 +124,10 @@ namespace Esprima.Ast
 
         public T this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => index >= 0 && index < Count
                  ? _items[index]
-                 : throw new IndexOutOfRangeException();
+                 : Throw<T>(new IndexOutOfRangeException());
 
             internal set
             {
