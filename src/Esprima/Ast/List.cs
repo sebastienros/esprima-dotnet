@@ -118,16 +118,6 @@ namespace Esprima.Ast
             Array.Copy(_items, index + 1, _items, index, Count - index);
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            for (var i = 0; i < Count; i++)
-            {
-                yield return _items[i];
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,6 +146,83 @@ namespace Esprima.Ast
             var last = this[lastIndex];
             RemoveAt(lastIndex);
             return last;
+        }
+
+        public Enumerator GetEnumerator() => new Enumerator(_items, Count);
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <remarks>
+        /// This implementation does not detect changes to the list
+        /// during iteration and therefore the behaviour is undefined
+        /// under those conditions.
+        /// </remarks>
+
+        public struct Enumerator : IEnumerator<T>
+        {
+            private int _index;
+            private T[] _items; // Usually null when count is zero
+            private int _count;
+
+            internal Enumerator(T[] items, int count) : this()
+            {
+                _index = -1;
+                _items = items;
+                _count = count;
+            }
+
+            // Since the items can be null when count is zero, a negative
+            // count is used to designate the disposed state.
+
+            private bool IsDisposed => _count < 0;
+
+            public void Dispose()
+            {
+                _items = null;
+                _count = -1;
+            }
+
+            public bool MoveNext()
+            {
+                ThrowIfDisposed();
+
+                if (_index + 1 == _count)
+                {
+                    return false;
+                }
+
+                _index++;
+                return true;
+            }
+
+            public void Reset()
+            {
+                ThrowIfDisposed();
+                _index = -1;
+            }
+
+            public T Current
+            {
+                get
+                {
+                    ThrowIfDisposed();
+                    return _index >= 0
+                         ? _items[_index]
+                         : Throw<T>(new InvalidOperationException());
+                }
+            }
+
+            object IEnumerator.Current => Current;
+
+            private void ThrowIfDisposed()
+            {
+                if (IsDisposed)
+                {
+                    Throw<T>(new ObjectDisposedException(GetType().Name));
+                }
+            }
         }
     }
 }
