@@ -1107,7 +1107,7 @@ namespace Esprima
                 var parameters = new List<Token>();
                 if (Match("..."))
                 {
-                    var rest = ParseRestElement(parameters);
+                    var rest = ParseRestElement(ref parameters);
                     Expect(")");
                     if (!Match("=>"))
                     {
@@ -1141,7 +1141,7 @@ namespace Esprima
                                 {
                                     ThrowUnexpectedToken(_lookahead);
                                 }
-                                expressions.Add(ParseRestElement(parameters).As<Expression>());
+                                expressions.Add(ParseRestElement(ref parameters).As<Expression>());
                                 Expect(")");
                                 if (!Match("=>"))
                                 {
@@ -1155,7 +1155,7 @@ namespace Esprima
                                 }
                                 expressions = reinterpretedExpressions;
                                 arrow = true;
-                                expr = new ArrowParameterPlaceHolder(new List<INode>(expressions));
+                                expr = new ArrowParameterPlaceHolder(expressions.Select(e => (INode) e));
                             }
                             else
                             {
@@ -1206,7 +1206,7 @@ namespace Esprima
 
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
-                                    expr = new ArrowParameterPlaceHolder(new List<INode>(expr.As<SequenceExpression>().Expressions));
+                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>().Expressions.Select(e => (INode) e));
                                 }
                                 else
                                 {
@@ -1766,7 +1766,7 @@ namespace Esprima
                 case Nodes.Identifier:
                     break;
                 case Nodes.ArrowParameterPlaceHolder:
-                    parameters = expr.As<ArrowParameterPlaceHolder>().Params.Cast<INode>().ToList();
+                    parameters = new List<INode>(expr.As<ArrowParameterPlaceHolder>().Params);
                     break;
                 default:
                     return null;
@@ -2030,7 +2030,7 @@ namespace Esprima
         {
             var node = CreateNode();
             var parameters = new List<Token>();
-            var id = ParsePattern(parameters, kind);
+            var id = ParsePattern(ref parameters, kind);
 
             if (_context.Strict && id.Type == Nodes.Identifier)
             {
@@ -2123,17 +2123,17 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-destructuring-binding-patterns
 
-        private RestElement ParseBindingRestElement(List<Token> parameters, VariableDeclarationKind? kind)
+        private RestElement ParseBindingRestElement(ref List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
             Expect("...");
-            var arg = ParsePattern(parameters, kind);
+            var arg = ParsePattern(ref parameters, kind);
 
             return Finalize(node, new RestElement(arg));
         }
 
-        private ArrayPattern ParseArrayPattern(List<Token> parameters, VariableDeclarationKind? kind)
+        private ArrayPattern ParseArrayPattern(ref List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2150,12 +2150,12 @@ namespace Esprima
                 {
                     if (Match("..."))
                     {
-                        elements.Push(ParseBindingRestElement(parameters, kind));
+                        elements.Push(ParseBindingRestElement(ref parameters, kind));
                         break;
                     }
                     else
                     {
-                        elements.Push(ParsePatternWithDefault(parameters, kind));
+                        elements.Push(ParsePatternWithDefault(ref parameters, kind));
                     }
                     if (!Match("]"))
                     {
@@ -2202,7 +2202,7 @@ namespace Esprima
                 else
                 {
                     Expect(":");
-                    value = (PropertyValue)ParsePatternWithDefault(parameters, kind);
+                    value = (PropertyValue)ParsePatternWithDefault(ref parameters, kind);
                 }
             }
             else
@@ -2210,13 +2210,13 @@ namespace Esprima
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
                 Expect(":");
-                value = (PropertyValue)ParsePatternWithDefault(parameters, kind);
+                value = (PropertyValue)ParsePatternWithDefault(ref parameters, kind);
             }
 
             return Finalize(node, new Property(PropertyKind.Init, key, computed, value, method, shorthand));
         }
 
-        private ObjectPattern ParseObjectPattern(List<Token> parameters, VariableDeclarationKind? kind)
+        private ObjectPattern ParseObjectPattern(ref List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
             var properties = new List<Property>();
@@ -2235,17 +2235,17 @@ namespace Esprima
             return Finalize(node, new ObjectPattern(properties));
         }
 
-        private ArrayPatternElement ParsePattern(List<Token> parameters, VariableDeclarationKind? kind = null)
+        private ArrayPatternElement ParsePattern(ref List<Token> parameters, VariableDeclarationKind? kind = null)
         {
             ArrayPatternElement pattern;
 
             if (Match("["))
             {
-                pattern = ParseArrayPattern(parameters, kind);
+                pattern = ParseArrayPattern(ref parameters, kind);
             }
             else if (Match("{"))
             {
-                pattern = ParseObjectPattern(parameters, kind);
+                pattern = ParseObjectPattern(ref parameters, kind);
             }
             else
             {
@@ -2260,11 +2260,11 @@ namespace Esprima
             return pattern;
         }
 
-        private ArrayPatternElement ParsePatternWithDefault(List<Token> parameters, VariableDeclarationKind? kind = null)
+        private ArrayPatternElement ParsePatternWithDefault(ref List<Token> parameters, VariableDeclarationKind? kind = null)
         {
             var startToken = _lookahead;
 
-            var pattern = ParsePattern(parameters, kind);
+            var pattern = ParsePattern(ref parameters, kind);
             if (Match("="))
             {
                 NextToken();
@@ -2324,7 +2324,7 @@ namespace Esprima
             var node = CreateNode();
 
             var parameters = new List<Token>();
-            var id = ParsePattern(parameters, VariableDeclarationKind.Var);
+            var id = ParsePattern(ref parameters, VariableDeclarationKind.Var);
 
             if (_context.Strict && id.Type == Nodes.Identifier)
             {
@@ -2896,7 +2896,7 @@ namespace Esprima
             }
 
             var parameters = new List<Token>();
-            var param = ParsePattern(parameters);
+            var param = ParsePattern(ref parameters);
             var paramMap = new Dictionary<string, bool>();
             for (var i = 0; i < parameters.Count; i++)
             {
@@ -3168,13 +3168,13 @@ namespace Esprima
             options.ParamSetAdd(key);
         }
 
-        private RestElement ParseRestElement(List<Token> parameters)
+        private RestElement ParseRestElement(ref List<Token> parameters)
         {
             var node = CreateNode();
 
 
             Expect("...");
-            var arg = ParsePattern(parameters);
+            var arg = ParsePattern(ref parameters);
             if (Match("="))
             {
                 ThrowError(Messages.DefaultRestParameter);
@@ -3192,8 +3192,8 @@ namespace Esprima
             var parameters = new List<Token>();
 
             INode param = Match("...")
-                ? ParseRestElement(parameters) 
-                : ParsePatternWithDefault(parameters);
+                ? ParseRestElement(ref parameters) 
+                : ParsePatternWithDefault(ref parameters);
 
             for (var i = 0; i < parameters.Count; i++)
             {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Esprima
@@ -564,21 +563,6 @@ namespace Esprima
             }
 
             return source[index];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Pop<T>(this List<T> list)
-        {
-            var lastIndex = list.Count - 1;
-            var last = list[lastIndex];
-            list.RemoveAt(lastIndex);
-            return last;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Push<T>(this List<T> list, T item)
-        {
-            list.Add(item);
         }
     }
 }

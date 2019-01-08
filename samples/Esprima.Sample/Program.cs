@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Esprima.Utils;
@@ -21,7 +20,7 @@ try { } catch (evil) { }
 
         private static void Tokenize(Scanner scanner)
         {
-            var tokens = new List<Token>();
+            var tokens = new System.Collections.Generic.List<Token>();
             Token token;
 
             do

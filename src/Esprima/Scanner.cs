@@ -216,13 +216,12 @@ namespace Esprima
 
         public List<Comment> SkipSingleLineComment(int offset)
         {
-            List<Comment> comments = null;
+            var comments = new List<Comment>();
             int start = 0;
             Loc loc = new Loc();
 
             if (_trackComment)
             {
-                comments = new List<Comment>();
                 start = Index - offset;
                 loc.Start = new MetaNode(0, LineNumber, Index - LineStart - offset);
                 loc.End = new MetaNode();
@@ -279,13 +278,12 @@ namespace Esprima
 
         public List<Comment> SkipMultiLineComment()
         {
-            List<Comment> comments = null;
+            var comments = new List<Comment>();
             int start = 0;
             Loc loc = new Loc();
 
             if (_trackComment)
             {
-                comments = new List<Comment>();
                 start = Index - 2;
                 loc.Start = new MetaNode(loc.Start.Index, LineNumber, Index - LineStart - 2);
             }
@@ -354,11 +352,7 @@ namespace Esprima
 
         public List<Comment> ScanComments()
         {
-            List<Comment> comments = null;
-            if (_trackComment)
-            {
-                comments = new List<Comment>();
-            }
+            var comments = new List<Comment>();
 
             var start = (Index == 0);
             while (!Eof())
