@@ -17,11 +17,12 @@ namespace Esprima.Ast
     public struct List<T> : IReadOnlyList<T>
     {
         T[] _items;
+        int _count;
 
         internal List(int capacity)
         {
             _items = capacity == 0 ? null : new T[capacity];
-            Count = 0;
+            _count = 0;
         }
 
         public List(List<T> list) : this()
@@ -33,12 +34,16 @@ namespace Esprima.Ast
 
             _items = new T[list.Count];
             list._items.CopyTo(_items, 0);
-            Count = list.Count;
+            _count = list.Count;
         }
 
         int Capacity => _items?.Length ?? 0;
 
-        public int Count { get; private set; }
+        public int Count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _count;
+        }
 
         internal List<TResult> Select<TResult>(Func<T, TResult> selector)
         {
@@ -49,7 +54,7 @@ namespace Esprima.Ast
 
             var list = new List<TResult>
             {
-                Count  = Count,
+                _count = Count,
                 _items = new TResult[Count]
             };
 
@@ -68,7 +73,8 @@ namespace Esprima.Ast
                 return;
             }
 
-            var newCount = Count + list.Count;
+            var oldCount = Count;
+            var newCount = oldCount + list.Count;
 
             if (Capacity < newCount)
             {
@@ -76,8 +82,8 @@ namespace Esprima.Ast
             }
 
             Debug.Assert(_items != null);
-            Array.Copy(list._items, 0, _items, Count, list.Count);
-            Count = newCount;
+            Array.Copy(list._items, 0, _items, oldCount, list.Count);
+            _count = newCount;
         }
 
         internal void Add(T item)
@@ -91,7 +97,7 @@ namespace Esprima.Ast
 
             Debug.Assert(_items != null);
             _items[Count] = item;
-            Count++;
+            _count++;
         }
 
         internal void RemoveAt(int index)
@@ -102,7 +108,7 @@ namespace Esprima.Ast
             }
 
             _items[index] = default;
-            Count--;
+            _count--;
 
             if (index == Count)
             {
