@@ -1,8 +1,8 @@
-﻿namespace Esprima.Ast
-{
-    using System;
-    using System.Globalization;
+﻿using System;
+using System.Globalization;
 
+namespace Esprima.Ast
+{
     public readonly struct Range : IEquatable<Range>
     {
         public readonly int Start;
