@@ -24,7 +24,7 @@ namespace Esprima.Ast
             unchecked((Start * 397) ^ End);
 
         public override string ToString() =>
-            string.Format(CultureInfo.InvariantCulture, "{0}...{1}", Start, End);
+            string.Format(CultureInfo.InvariantCulture, "[{0}..{1})", Start, End);
 
         public static bool operator ==(Range left, Range right) => left.Equals(right);
         public static bool operator !=(Range left, Range right) => !left.Equals(right);
