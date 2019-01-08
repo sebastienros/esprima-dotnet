@@ -16,8 +16,8 @@ namespace Esprima.Ast
 
     public struct List<T> : IReadOnlyList<T>
     {
-        T[] _items;
-        int _count;
+        private T[] _items;
+        private int _count;
 
         internal List(int capacity)
         {
@@ -37,7 +37,7 @@ namespace Esprima.Ast
             _count = list.Count;
         }
 
-        int Capacity => _items?.Length ?? 0;
+        private int Capacity => _items?.Length ?? 0;
 
         public int Count
         {
