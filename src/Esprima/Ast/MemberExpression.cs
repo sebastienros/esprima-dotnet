@@ -10,10 +10,9 @@ namespace Esprima.Ast
         // true if an indexer is used and the property to be evaluated
         public readonly bool Computed;
 
-        protected MemberExpression(Expression obj, Expression property, bool computed)
+        protected MemberExpression(Expression obj, Expression property, bool computed) :
+            base(Nodes.MemberExpression)
         {
-            Type = Nodes.MemberExpression;
-
             Object = obj;
             Property = property;
             Computed = computed;

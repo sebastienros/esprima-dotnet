@@ -2,9 +2,7 @@
 {
     public class Super : Node, Expression
     {
-        public Super()
-        {
-            Type = Nodes.Super;
-        }
+        public Super() :
+            base(Nodes.Super) {}
     }
 }

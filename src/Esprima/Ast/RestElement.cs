@@ -9,9 +9,9 @@
 
         public readonly INode Argument; // BindingIdentifier | BindingPattern
 
-        public RestElement(INode argument)
+        public RestElement(INode argument) :
+            base(Nodes.RestElement)
         {
-            Type = Nodes.RestElement;
             Argument = argument;
         }
     }

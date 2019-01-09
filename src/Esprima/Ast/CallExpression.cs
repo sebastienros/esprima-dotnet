@@ -12,9 +12,9 @@ namespace Esprima.Ast
         public bool CanBeCached = true;
         public object CachedArguments;
 
-        public CallExpression(Expression callee, List<ArgumentListElement> args)
+        public CallExpression(Expression callee, List<ArgumentListElement> args) :
+            base(Nodes.CallExpression)
         {
-            Type = Nodes.CallExpression;
             Callee = callee;
             Arguments = args;
         }
