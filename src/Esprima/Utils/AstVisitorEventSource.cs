@@ -114,8 +114,6 @@ namespace Esprima.Utils
         public event EventHandler<Super> VisitedSuper;
         public event EventHandler<MetaProperty> VisitingMetaProperty;
         public event EventHandler<MetaProperty> VisitedMetaProperty;
-        public event EventHandler<ArrowParameterPlaceHolder> VisitingArrowParameterPlaceHolder;
-        public event EventHandler<ArrowParameterPlaceHolder> VisitedArrowParameterPlaceHolder;
         public event EventHandler<ObjectPattern> VisitingObjectPattern;
         public event EventHandler<ObjectPattern> VisitedObjectPattern;
         public event EventHandler<SpreadElement> VisitingSpreadElement;
@@ -513,13 +511,6 @@ namespace Esprima.Utils
             VisitingMetaProperty?.Invoke(this, metaProperty);
             base.VisitMetaProperty(metaProperty);
             VisitedMetaProperty?.Invoke(this, metaProperty);
-        }
-
-        public override void VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-        {
-            VisitingArrowParameterPlaceHolder?.Invoke(this, arrowParameterPlaceHolder);
-            base.VisitArrowParameterPlaceHolder(arrowParameterPlaceHolder);
-            VisitedArrowParameterPlaceHolder?.Invoke(this, arrowParameterPlaceHolder);
         }
 
         public override void VisitObjectPattern(ObjectPattern objectPattern)
