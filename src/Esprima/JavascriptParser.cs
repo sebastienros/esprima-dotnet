@@ -206,11 +206,13 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                t.Location.Start = new Position(_startMarker.LineNumber,
-                                                _startMarker.Index - _startMarker.LineStart);
+                var start = new Position(_startMarker.LineNumber,
+                                         _startMarker.Index - _startMarker.LineStart);
 
-                t.Location.End = new Position(_scanner.LineNumber,
-                                              _scanner.Index - _scanner.LineStart);
+                var end   = new Position(_scanner.LineNumber,
+                                         _scanner.Index - _scanner.LineStart);
+
+                t.Location = t.Location.WithPosition(start, end);
             }
 
             if (token.RegexValue != null)
@@ -300,14 +302,11 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                node.Location.Start = new Position(meta.Line, meta.Column);
-                node.Location.End = new Position(_lastMarker.LineNumber,
-                                                 _lastMarker.Index - _lastMarker.LineStart);
+                var start = new Position(meta.Line, meta.Column);
+                var end   = new Position(_lastMarker.LineNumber,
+                                         _lastMarker.Index - _lastMarker.LineStart);
 
-                if (_errorHandler.Source != null)
-                {
-                    node.Location.Source = _errorHandler.Source;
-                }
+                node.Location = new Location(start, end, _errorHandler.Source);
             }
 
             _action?.Invoke(node);
@@ -1035,7 +1034,7 @@ namespace Esprima
                     var newArgument = ReinterpretExpressionAsPattern(expr.As<SpreadElement>().Argument);
                     node = new RestElement(newArgument.As<Expression>());
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 case Nodes.ArrayExpression:
@@ -1056,7 +1055,7 @@ namespace Esprima
 
                     node = new ArrayPattern(elements);
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 case Nodes.ObjectExpression:
@@ -1069,14 +1068,14 @@ namespace Esprima
                     }
                     node = new ObjectPattern(properties);
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 case Nodes.AssignmentExpression:
                     var assignmentExpression = expr.As<AssignmentExpression>();
                     node = new AssignmentPattern(assignmentExpression.Left, assignmentExpression.Right);
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 default:
@@ -1790,7 +1789,7 @@ namespace Esprima
 
                         assignment.Right = new Identifier("yield")
                         {
-                            Location = _config.Loc ? assignment.Right.Location : null,
+                            Location = _config.Loc ? assignment.Right.Location : default,
                             Range = assignment.Right.Range
                         };
                     }
