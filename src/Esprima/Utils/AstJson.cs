@@ -284,7 +284,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitProgram(Program program)
+            protected override void VisitProgram(Program program)
             {
                 using (StartNodeObject(program))
                 {
@@ -293,10 +293,10 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitUnknownNode(INode node) =>
+            protected override void VisitUnknownNode(INode node) =>
                 throw new NotSupportedException("Unknown node type: " + node.Type);
 
-            public override void VisitCatchClause(CatchClause catchClause)
+            protected override void VisitCatchClause(CatchClause catchClause)
             {
                 using (StartNodeObject(catchClause))
                 {
@@ -305,7 +305,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+            protected override void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
             {
                 using (StartNodeObject(functionDeclaration))
                 {
@@ -317,7 +317,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitWithStatement(WithStatement withStatement)
+            protected override void VisitWithStatement(WithStatement withStatement)
             {
                 using (StartNodeObject(withStatement))
                 {
@@ -326,7 +326,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitWhileStatement(WhileStatement whileStatement)
+            protected override void VisitWhileStatement(WhileStatement whileStatement)
             {
                 using (StartNodeObject(whileStatement))
                 {
@@ -335,7 +335,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+            protected override void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
             {
                 using (StartNodeObject(variableDeclaration))
                 {
@@ -344,7 +344,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitTryStatement(TryStatement tryStatement)
+            protected override void VisitTryStatement(TryStatement tryStatement)
             {
                 using (StartNodeObject(tryStatement))
                 {
@@ -354,13 +354,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitThrowStatement(ThrowStatement throwStatement)
+            protected override void VisitThrowStatement(ThrowStatement throwStatement)
             {
                 using (StartNodeObject(throwStatement))
                     Member("argument", throwStatement.Argument);
             }
 
-            public override void VisitSwitchStatement(SwitchStatement switchStatement)
+            protected override void VisitSwitchStatement(SwitchStatement switchStatement)
             {
                 using (StartNodeObject(switchStatement))
                 {
@@ -369,7 +369,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitSwitchCase(SwitchCase switchCase)
+            protected override void VisitSwitchCase(SwitchCase switchCase)
             {
                 using (StartNodeObject(switchCase))
                 {
@@ -378,13 +378,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitReturnStatement(ReturnStatement returnStatement)
+            protected override void VisitReturnStatement(ReturnStatement returnStatement)
             {
                 using (StartNodeObject(returnStatement))
                     Member("argument", returnStatement.Argument);
             }
 
-            public override void VisitLabeledStatement(LabeledStatement labeledStatement)
+            protected override void VisitLabeledStatement(LabeledStatement labeledStatement)
             {
                 using (StartNodeObject(labeledStatement))
                 {
@@ -393,7 +393,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitIfStatement(IfStatement ifStatement)
+            protected override void VisitIfStatement(IfStatement ifStatement)
             {
                 using (StartNodeObject(ifStatement))
                 {
@@ -403,13 +403,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitEmptyStatement(EmptyStatement emptyStatement) =>
+            protected override void VisitEmptyStatement(EmptyStatement emptyStatement) =>
                 EmptyNodeObject(emptyStatement);
 
-            public override void VisitDebuggerStatement(DebuggerStatement debuggerStatement) =>
+            protected override void VisitDebuggerStatement(DebuggerStatement debuggerStatement) =>
                 EmptyNodeObject(debuggerStatement);
 
-            public override void VisitExpressionStatement(ExpressionStatement expressionStatement)
+            protected override void VisitExpressionStatement(ExpressionStatement expressionStatement)
             {
                 using (StartNodeObject(expressionStatement))
                 {
@@ -422,7 +422,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitForStatement(ForStatement forStatement)
+            protected override void VisitForStatement(ForStatement forStatement)
             {
                 using (StartNodeObject(forStatement))
                 {
@@ -433,7 +433,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitForInStatement(ForInStatement forInStatement)
+            protected override void VisitForInStatement(ForInStatement forInStatement)
             {
                 using (StartNodeObject(forInStatement))
                 {
@@ -444,7 +444,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+            protected override void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
             {
                 using (StartNodeObject(doWhileStatement))
                 {
@@ -453,7 +453,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+            protected override void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
             {
                 using (StartNodeObject(arrowFunctionExpression))
                 {
@@ -465,7 +465,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitUnaryExpression(UnaryExpression unaryExpression)
+            protected override void VisitUnaryExpression(UnaryExpression unaryExpression)
             {
                 using (StartNodeObject(unaryExpression))
                 {
@@ -475,25 +475,25 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitUpdateExpression(UpdateExpression updateExpression) =>
+            protected override void VisitUpdateExpression(UpdateExpression updateExpression) =>
                 VisitUnaryExpression(updateExpression);
 
-            public override void VisitThisExpression(ThisExpression thisExpression) =>
+            protected override void VisitThisExpression(ThisExpression thisExpression) =>
                 EmptyNodeObject(thisExpression);
 
-            public override void VisitSequenceExpression(SequenceExpression sequenceExpression)
+            protected override void VisitSequenceExpression(SequenceExpression sequenceExpression)
             {
                 using (StartNodeObject(sequenceExpression))
                     Member("expressions", sequenceExpression.Expressions);
             }
 
-            public override void VisitObjectExpression(ObjectExpression objectExpression)
+            protected override void VisitObjectExpression(ObjectExpression objectExpression)
             {
                 using (StartNodeObject(objectExpression))
                     Member("properties", objectExpression.Properties);
             }
 
-            public override void VisitNewExpression(NewExpression newExpression)
+            protected override void VisitNewExpression(NewExpression newExpression)
             {
                 using (StartNodeObject(newExpression))
                 {
@@ -502,7 +502,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitMemberExpression(MemberExpression memberExpression)
+            protected override void VisitMemberExpression(MemberExpression memberExpression)
             {
                 using (StartNodeObject(memberExpression))
                 {
@@ -512,10 +512,10 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitLogicalExpression(BinaryExpression binaryExpression) =>
+            protected override void VisitLogicalExpression(BinaryExpression binaryExpression) =>
                 VisitBinaryExpression(binaryExpression);
 
-            public override void VisitLiteral(Literal literal)
+            protected override void VisitLiteral(Literal literal)
             {
                 using (StartNodeObject(literal))
                 {
@@ -554,13 +554,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitIdentifier(Identifier identifier)
+            protected override void VisitIdentifier(Identifier identifier)
             {
                 using (StartNodeObject(identifier))
                     Member("name", identifier.Name);
             }
 
-            public override void VisitFunctionExpression(IFunction function)
+            protected override void VisitFunctionExpression(IFunction function)
             {
                 using (StartNodeObject((Node) function))
                 {
@@ -572,7 +572,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitClassExpression(ClassExpression classExpression)
+            protected override void VisitClassExpression(ClassExpression classExpression)
             {
                 using (StartNodeObject(classExpression))
                 {
@@ -582,19 +582,19 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+            protected override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
             {
                 using (StartNodeObject(exportDefaultDeclaration))
                     Member("declaration", exportDefaultDeclaration.Declaration.As<INode>());
             }
 
-            public override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+            protected override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
             {
                 using (StartNodeObject(exportAllDeclaration))
                     Member("source", exportAllDeclaration.Source);
             }
 
-            public override void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+            protected override void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
             {
                 using (StartNodeObject(exportNamedDeclaration))
                 {
@@ -604,7 +604,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitExportSpecifier(ExportSpecifier exportSpecifier)
+            protected override void VisitExportSpecifier(ExportSpecifier exportSpecifier)
             {
                 using (StartNodeObject(exportSpecifier))
                 {
@@ -613,7 +613,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitImportDeclaration(ImportDeclaration importDeclaration)
+            protected override void VisitImportDeclaration(ImportDeclaration importDeclaration)
             {
                 using (StartNodeObject(importDeclaration))
                 {
@@ -622,19 +622,19 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+            protected override void VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
             {
                 using (StartNodeObject(importNamespaceSpecifier))
                     Member("local", importNamespaceSpecifier.Local);
             }
 
-            public override void VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+            protected override void VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
             {
                 using (StartNodeObject(importDefaultSpecifier))
                     Member("local", importDefaultSpecifier.Local);
             }
 
-            public override void VisitImportSpecifier(ImportSpecifier importSpecifier)
+            protected override void VisitImportSpecifier(ImportSpecifier importSpecifier)
             {
                 using (StartNodeObject(importSpecifier))
                 {
@@ -643,7 +643,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitMethodDefinition(MethodDefinition methodDefinition)
+            protected override void VisitMethodDefinition(MethodDefinition methodDefinition)
             {
                 using (StartNodeObject(methodDefinition))
                 {
@@ -655,7 +655,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitForOfStatement(ForOfStatement forOfStatement)
+            protected override void VisitForOfStatement(ForOfStatement forOfStatement)
             {
                 using (StartNodeObject(forOfStatement))
                 {
@@ -665,7 +665,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitClassDeclaration(ClassDeclaration classDeclaration)
+            protected override void VisitClassDeclaration(ClassDeclaration classDeclaration)
             {
                 using (StartNodeObject(classDeclaration))
                 {
@@ -675,13 +675,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitClassBody(ClassBody classBody)
+            protected override void VisitClassBody(ClassBody classBody)
             {
                 using (StartNodeObject(classBody))
                     Member("body", classBody.Body);
             }
 
-            public override void VisitYieldExpression(YieldExpression yieldExpression)
+            protected override void VisitYieldExpression(YieldExpression yieldExpression)
             {
                 using (StartNodeObject(yieldExpression))
                 {
@@ -690,7 +690,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+            protected override void VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
             {
                 using (StartNodeObject(taggedTemplateExpression))
                 {
@@ -699,10 +699,10 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitSuper(Super super) =>
+            protected override void VisitSuper(Super super) =>
                 EmptyNodeObject(super);
 
-            public override void VisitMetaProperty(MetaProperty metaProperty)
+            protected override void VisitMetaProperty(MetaProperty metaProperty)
             {
                 using (StartNodeObject(metaProperty))
                 {
@@ -711,7 +711,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
+            protected override void VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
             {
                 // Seems that ArrowParameterPlaceHolder nodes never appear
                 // in the final tree and only used during the construction of
@@ -720,19 +720,19 @@ namespace Esprima.Utils
                 throw new NotImplementedException();
             }
 
-            public override void VisitObjectPattern(ObjectPattern objectPattern)
+            protected override void VisitObjectPattern(ObjectPattern objectPattern)
             {
                 using (StartNodeObject(objectPattern))
                     Member("properties", objectPattern.Properties);
             }
 
-            public override void VisitSpreadElement(SpreadElement spreadElement)
+            protected override void VisitSpreadElement(SpreadElement spreadElement)
             {
                 using (StartNodeObject(spreadElement))
                     Member("argument", spreadElement.Argument);
             }
 
-            public override void VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+            protected override void VisitAssignmentPattern(AssignmentPattern assignmentPattern)
             {
                 using (StartNodeObject(assignmentPattern))
                 {
@@ -741,13 +741,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitArrayPattern(ArrayPattern arrayPattern)
+            protected override void VisitArrayPattern(ArrayPattern arrayPattern)
             {
                 using (StartNodeObject(arrayPattern))
                     Member("elements", arrayPattern.Elements);
             }
 
-            public override void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+            protected override void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
             {
                 using (StartNodeObject(variableDeclarator))
                 {
@@ -756,7 +756,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitTemplateLiteral(TemplateLiteral templateLiteral)
+            protected override void VisitTemplateLiteral(TemplateLiteral templateLiteral)
             {
                 using (StartNodeObject(templateLiteral))
                 {
@@ -765,7 +765,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitTemplateElement(TemplateElement templateElement)
+            protected override void VisitTemplateElement(TemplateElement templateElement)
             {
                 using (StartNodeObject(templateElement))
                 {
@@ -778,13 +778,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitRestElement(RestElement restElement)
+            protected override void VisitRestElement(RestElement restElement)
             {
                 using (StartNodeObject(restElement))
                     Member("argument", restElement.Argument);
             }
 
-            public override void VisitProperty(Property property)
+            protected override void VisitProperty(Property property)
             {
                 using (StartNodeObject(property))
                 {
@@ -797,7 +797,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitConditionalExpression(ConditionalExpression conditionalExpression)
+            protected override void VisitConditionalExpression(ConditionalExpression conditionalExpression)
             {
                 using (StartNodeObject(conditionalExpression))
                 {
@@ -807,7 +807,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitCallExpression(CallExpression callExpression)
+            protected override void VisitCallExpression(CallExpression callExpression)
             {
                 using (StartNodeObject(callExpression))
                 {
@@ -820,7 +820,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitBinaryExpression(BinaryExpression binaryExpression)
+            protected override void VisitBinaryExpression(BinaryExpression binaryExpression)
             {
                 using (StartNodeObject(binaryExpression))
                 {
@@ -830,13 +830,13 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitArrayExpression(ArrayExpression arrayExpression)
+            protected override void VisitArrayExpression(ArrayExpression arrayExpression)
             {
                 using (StartNodeObject(arrayExpression))
                     Member("elements", arrayExpression.Elements);
             }
 
-            public override void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+            protected override void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
             {
                 using (StartNodeObject(assignmentExpression))
                 {
@@ -846,19 +846,19 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void VisitContinueStatement(ContinueStatement continueStatement)
+            protected override void VisitContinueStatement(ContinueStatement continueStatement)
             {
                 using (StartNodeObject(continueStatement))
                     Member("label", continueStatement.Label);
             }
 
-            public override void VisitBreakStatement(BreakStatement breakStatement)
+            protected override void VisitBreakStatement(BreakStatement breakStatement)
             {
                 using (StartNodeObject(breakStatement))
                     Member("label", breakStatement.Label);
             }
 
-            public override void VisitBlockStatement(BlockStatement blockStatement)
+            protected override void VisitBlockStatement(BlockStatement blockStatement)
             {
                 using (StartNodeObject(blockStatement))
                     Member("body", blockStatement.Body, e => (Statement) e);
