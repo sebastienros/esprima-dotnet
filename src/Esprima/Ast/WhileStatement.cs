@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class WhileStatement : Statement
@@ -11,5 +13,8 @@ namespace Esprima.Ast
             Test = test;
             Body = body;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Test, Body);
     }
 }

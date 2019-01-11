@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class DebuggerStatement: Statement
@@ -6,5 +8,7 @@ namespace Esprima.Ast
         {
             Type = Nodes.DebuggerStatement;
         }
-    }
+
+        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
+   }
 }

@@ -13,5 +13,8 @@ namespace Esprima.Ast
             Test = test;
             Consequent = consequent;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Test, Consequent);
     }
 }

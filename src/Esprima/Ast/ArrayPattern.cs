@@ -11,5 +11,8 @@ namespace Esprima.Ast
             Type = Nodes.ArrayPattern;
             Elements = elements;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Elements);
     }
 }

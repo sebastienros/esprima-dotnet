@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Esprima.Ast
 {
     public class Identifier : Node,
@@ -11,5 +14,7 @@ namespace Esprima.Ast
             Type = Nodes.Identifier;
             Name = name;
         }
+
+        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
     }
 }

@@ -15,5 +15,8 @@ namespace Esprima.Ast
             Specifiers = specifiers;
             Source = source;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield((INode) Declaration, Specifiers, Source);
     }
 }

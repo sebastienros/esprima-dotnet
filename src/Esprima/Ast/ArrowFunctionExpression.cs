@@ -21,6 +21,9 @@ namespace Esprima.Ast
             Generator = false;
             Expression = expression;
             HoistingScope = hoistingScope;
-        }        
+        }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Params, Body);
     }
 }

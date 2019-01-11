@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class EmptyStatement : Statement
@@ -6,5 +8,7 @@ namespace Esprima.Ast
         {
             Type = Nodes.EmptyStatement;
         }
+
+        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
     }
 }

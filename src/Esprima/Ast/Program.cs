@@ -18,5 +18,8 @@ namespace Esprima.Ast
             HoistingScope = hoistingScope;
             Strict = strict;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Body);
     }
 }

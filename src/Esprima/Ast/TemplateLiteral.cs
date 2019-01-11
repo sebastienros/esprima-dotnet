@@ -14,5 +14,8 @@ namespace Esprima.Ast
             Quasis = quasis;
             Expressions = expressions;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Quasis, Expressions);
     }
 }

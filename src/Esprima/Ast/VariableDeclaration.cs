@@ -15,5 +15,7 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Declarations);
     }
 }

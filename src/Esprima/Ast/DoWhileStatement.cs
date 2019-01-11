@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class DoWhileStatement : Statement
@@ -11,5 +13,8 @@ namespace Esprima.Ast
             Body = body;
             Test = test;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Body, Test);
     }
 }

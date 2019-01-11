@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class RestElement : Node,
         ArrayPatternElement, Expression
@@ -14,5 +16,8 @@
             Type = Nodes.RestElement;
             Argument = argument;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Argument);
     }
 }

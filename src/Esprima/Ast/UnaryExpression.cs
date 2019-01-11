@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Esprima.Utils;
 
 namespace Esprima.Ast
@@ -69,5 +70,8 @@ namespace Esprima.Ast
             Argument = arg;
             Prefix = true;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Argument);
     }
 }

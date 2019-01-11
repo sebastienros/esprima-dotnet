@@ -11,5 +11,8 @@ namespace Esprima.Ast
             Type = Nodes.ObjectExpression;
             Properties = properties;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Properties);
     }
 }

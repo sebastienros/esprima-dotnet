@@ -18,5 +18,8 @@ namespace Esprima.Ast
             Callee = callee;
             Arguments = args;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Callee, Arguments);
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
@@ -58,5 +60,8 @@ namespace Esprima.Ast
             TokenType = TokenType.RegularExpression;
             Raw = raw;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            Enumerable.Empty<INode>();
     }
 }

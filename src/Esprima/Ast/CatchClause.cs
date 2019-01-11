@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class CatchClause : Statement
@@ -11,5 +13,8 @@ namespace Esprima.Ast
             Param = param;
             Body = body;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Param, Body);
     }
 }

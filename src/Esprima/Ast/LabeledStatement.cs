@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class LabeledStatement : Statement
@@ -12,5 +14,8 @@ namespace Esprima.Ast
             Body = body;
             body.LabelSet = label;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Label, Body);
     }
 }

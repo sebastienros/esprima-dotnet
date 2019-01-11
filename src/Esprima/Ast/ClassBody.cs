@@ -11,5 +11,8 @@ namespace Esprima.Ast
             Type = Nodes.ClassBody;
             Body = body;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Body);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class MethodDefinition : ClassProperty
     {

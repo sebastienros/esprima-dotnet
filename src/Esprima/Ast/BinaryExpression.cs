@@ -3,6 +3,8 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
+    using System.Collections.Generic;
+
     public enum BinaryOperator
     {
         [EnumMember(Value = "+")]
@@ -127,5 +129,8 @@ namespace Esprima.Ast
                     throw new ArgumentOutOfRangeException("Invalid binary operator: " + op);
             }
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right);
     }
 }

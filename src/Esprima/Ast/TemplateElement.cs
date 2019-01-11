@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class TemplateElement : Node
     {
@@ -17,5 +19,7 @@
             public string Cooked;
             public string Raw;
         }
+
+        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
     }
 }

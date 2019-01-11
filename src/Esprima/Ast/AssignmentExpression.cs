@@ -3,6 +3,8 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
+    using System.Collections.Generic;
+
     public enum AssignmentOperator
     {
         [EnumMember(Value = "=")]
@@ -85,5 +87,8 @@ namespace Esprima.Ast
                     throw new ArgumentOutOfRangeException("Invalid assignment operator: " + op);
             }
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right);
     }
 }

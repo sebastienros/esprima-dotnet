@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
@@ -11,5 +11,8 @@ namespace Esprima.Ast
             Type = Nodes.BlockStatement;
             Body = body;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Body);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
@@ -22,5 +23,8 @@ namespace Esprima.Ast
         public Expression Key; // Identifier, Literal, '[' Expression ']'
         public bool Computed;
         public PropertyValue Value;
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Key, Value);
     }
 }

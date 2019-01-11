@@ -11,5 +11,8 @@ namespace Esprima.Ast
             Type = Nodes.SequenceExpression;
             Expressions = expressions;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Expressions);
     }
 }

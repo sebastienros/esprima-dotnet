@@ -13,5 +13,8 @@ namespace Esprima.Ast
             Type = Nodes.ArrowParameterPlaceHolder;
             Params = parameters;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Params);
     }
 }

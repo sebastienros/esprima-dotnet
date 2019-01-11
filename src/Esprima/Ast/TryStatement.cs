@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class TryStatement : Statement
@@ -16,5 +18,8 @@ namespace Esprima.Ast
             Handler = handler;
             Finalizer = finalizer;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Block, Handler, Finalizer);
     }
 }

@@ -13,5 +13,8 @@ namespace Esprima.Ast
             Discriminant = discriminant;
             Cases = cases;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Discriminant, Cases);
     }
 }

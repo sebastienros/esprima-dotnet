@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class BreakStatement : Statement
@@ -9,5 +11,8 @@ namespace Esprima.Ast
             Type = Nodes.BreakStatement;
             Label = label;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Label);
     }
 }
