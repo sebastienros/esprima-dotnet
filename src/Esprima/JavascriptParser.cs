@@ -206,11 +206,11 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                t.Location.Start.Line = _startMarker.LineNumber;
-                t.Location.Start.Column = _startMarker.Index - _startMarker.LineStart;
+                t.Location.Start = new Position(_startMarker.LineNumber,
+                                                _startMarker.Index - _startMarker.LineStart);
 
-                t.Location.End.Line = _scanner.LineNumber;
-                t.Location.End.Column = _scanner.Index - _scanner.LineStart;
+                t.Location.End = new Position(_scanner.LineNumber,
+                                              _scanner.Index - _scanner.LineStart);
             }
 
             if (token.RegexValue != null)
@@ -300,10 +300,10 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                node.Location.Start.Line = meta.Line;
-                node.Location.Start.Column = meta.Column;
-                node.Location.End.Line = _lastMarker.LineNumber;
-                node.Location.End.Column = _lastMarker.Index - _lastMarker.LineStart;
+                node.Location.Start = new Position(meta.Line, meta.Column);
+                node.Location.End = new Position(_lastMarker.LineNumber,
+                                                 _lastMarker.Index - _lastMarker.LineStart);
+
                 if (_errorHandler.Source != null)
                 {
                     node.Location.Source = _errorHandler.Source;
@@ -3192,7 +3192,7 @@ namespace Esprima
             var parameters = new List<Token>();
 
             INode param = Match("...")
-                ? ParseRestElement(parameters) 
+                ? ParseRestElement(parameters)
                 : ParsePatternWithDefault(parameters);
 
             for (var i = 0; i < parameters.Count; i++)
@@ -3764,9 +3764,9 @@ namespace Esprima
             ExpectKeyword("class");
 
             var id = (identifierIsOptional && (_lookahead.Type != TokenType.Identifier))
-                ? null 
+                ? null
                 : ParseVariableIdentifier();
-            
+
             Expression superClass = null;
             if (MatchKeyword("extends"))
             {
@@ -3787,7 +3787,7 @@ namespace Esprima
             _context.Strict = true;
             ExpectKeyword("class");
             var id = (_lookahead.Type == TokenType.Identifier)
-                ? ParseVariableIdentifier() 
+                ? ParseVariableIdentifier()
                 : null;
 
             Expression superClass = null;
