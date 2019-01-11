@@ -9,11 +9,211 @@ namespace Esprima.Utils
     {
         public bool IsStrictMode { get; set; } = false;
 
-        protected virtual void VisitProgram(Program program)
+        public virtual void Visit(INode node)
         {
-            foreach (var statement in program.Body)
+            switch (node.Type)
             {
-                VisitStatement((Statement)statement);
+                case Nodes.AssignmentExpression:
+                    VisitAssignmentExpression(node.As<AssignmentExpression>());
+                    break;
+                case Nodes.ArrayExpression:
+                    VisitArrayExpression(node.As<ArrayExpression>());
+                    break;
+                case Nodes.BlockStatement:
+                    VisitBlockStatement(node.As<BlockStatement>());
+                    break;
+                case Nodes.BinaryExpression:
+                    VisitBinaryExpression(node.As<BinaryExpression>());
+                    break;
+                case Nodes.BreakStatement:
+                    VisitBreakStatement(node.As<BreakStatement>());
+                    break;
+                case Nodes.CallExpression:
+                    VisitCallExpression(node.As<CallExpression>());
+                    break;
+                case Nodes.CatchClause:
+                    VisitCatchClause(node.As<CatchClause>());
+                    break;
+                case Nodes.ConditionalExpression:
+                    VisitConditionalExpression(node.As<ConditionalExpression>());
+                    break;
+                case Nodes.ContinueStatement:
+                    VisitContinueStatement(node.As<ContinueStatement>());
+                    break;
+                case Nodes.DoWhileStatement:
+                    VisitDoWhileStatement(node.As<DoWhileStatement>());
+                    break;
+                case Nodes.DebuggerStatement:
+                    VisitDebuggerStatement(node.As<DebuggerStatement>());
+                    break;
+                case Nodes.EmptyStatement:
+                    VisitEmptyStatement(node.As<EmptyStatement>());
+                    break;
+                case Nodes.ExpressionStatement:
+                    VisitExpressionStatement(node.As<ExpressionStatement>());
+                    break;
+                case Nodes.ForStatement:
+                    VisitForStatement(node.As<ForStatement>());
+                    break;
+                case Nodes.ForInStatement:
+                    VisitForInStatement(node.As<ForInStatement>());
+                    break;
+                case Nodes.FunctionDeclaration:
+                    VisitFunctionDeclaration(node.As<FunctionDeclaration>());
+                    break;
+                case Nodes.FunctionExpression:
+                    VisitFunctionExpression(node.As<FunctionExpression>());
+                    break;
+                case Nodes.Identifier:
+                    VisitIdentifier(node.As<Identifier>());
+                    break;
+                case Nodes.IfStatement:
+                    VisitIfStatement(node.As<IfStatement>());
+                    break;
+                case Nodes.Literal:
+                    VisitLiteral(node.As<Literal>());
+                    break;
+                case Nodes.LabeledStatement:
+                    VisitLabeledStatement(node.As<LabeledStatement>());
+                    break;
+                case Nodes.LogicalExpression:
+                    VisitLogicalExpression(node.As<BinaryExpression>());
+                    break;
+                case Nodes.MemberExpression:
+                    VisitMemberExpression(node.As<MemberExpression>());
+                    break;
+                case Nodes.NewExpression:
+                    VisitNewExpression(node.As<NewExpression>());
+                    break;
+                case Nodes.ObjectExpression:
+                    VisitObjectExpression(node.As<ObjectExpression>());
+                    break;
+                case Nodes.Program:
+                    VisitProgram(node.As<Esprima.Ast.Program>());
+                    break;
+                case Nodes.Property:
+                    VisitProperty(node.As<Property>());
+                    break;
+                case Nodes.RestElement:
+                    VisitRestElement(node.As<RestElement>());
+                    break;
+                case Nodes.ReturnStatement:
+                    VisitReturnStatement(node.As<ReturnStatement>());
+                    break;
+                case Nodes.SequenceExpression:
+                    VisitSequenceExpression(node.As<SequenceExpression>());
+                    break;
+                case Nodes.SwitchStatement:
+                    VisitSwitchStatement(node.As<SwitchStatement>());
+                    break;
+                case Nodes.SwitchCase:
+                    VisitSwitchCase(node.As<SwitchCase>());
+                    break;
+                case Nodes.TemplateElement:
+                    VisitTemplateElement(node.As<TemplateElement>());
+                    break;
+                case Nodes.TemplateLiteral:
+                    VisitTemplateLiteral(node.As<TemplateLiteral>());
+                    break;
+                case Nodes.ThisExpression:
+                    VisitThisExpression(node.As<ThisExpression>());
+                    break;
+                case Nodes.ThrowStatement:
+                    VisitThrowStatement(node.As<ThrowStatement>());
+                    break;
+                case Nodes.TryStatement:
+                    VisitTryStatement(node.As<TryStatement>());
+                    break;
+                case Nodes.UnaryExpression:
+                    VisitUnaryExpression(node.As<UnaryExpression>());
+                    break;
+                case Nodes.UpdateExpression:
+                    VisitUpdateExpression(node.As<UpdateExpression>());
+                    break;
+                case Nodes.VariableDeclaration:
+                    VisitVariableDeclaration(node.As<VariableDeclaration>());
+                    break;
+                case Nodes.VariableDeclarator:
+                    VisitVariableDeclarator(node.As<VariableDeclarator>());
+                    break;
+                case Nodes.WhileStatement:
+                    VisitWhileStatement(node.As<WhileStatement>());
+                    break;
+                case Nodes.WithStatement:
+                    VisitWithStatement(node.As<WithStatement>());
+                    break;
+                case Nodes.ArrayPattern:
+                    VisitArrayPattern(node.As<ArrayPattern>());
+                    break;
+                case Nodes.AssignmentPattern:
+                    VisitAssignmentPattern(node.As<AssignmentPattern>());
+                    break;
+                case Nodes.SpreadElement:
+                    VisitSpreadElement(node.As<SpreadElement>());
+                    break;
+                case Nodes.ObjectPattern:
+                    VisitObjectPattern(node.As<ObjectPattern>());
+                    break;
+                case Nodes.ArrowParameterPlaceHolder:
+                    VisitArrowParameterPlaceHolder(node.As<ArrowParameterPlaceHolder>());
+                    break;
+                case Nodes.MetaProperty:
+                    VisitMetaProperty(node.As<MetaProperty>());
+                    break;
+                case Nodes.Super:
+                    VisitSuper(node.As<Super>());
+                    break;
+                case Nodes.TaggedTemplateExpression:
+                    VisitTaggedTemplateExpression(node.As<TaggedTemplateExpression>());
+                    break;
+                case Nodes.YieldExpression:
+                    VisitYieldExpression(node.As<YieldExpression>());
+                    break;
+                case Nodes.ArrowFunctionExpression:
+                    VisitArrowFunctionExpression(node.As<ArrowFunctionExpression>());
+                    break;
+                case Nodes.ClassBody:
+                    VisitClassBody(node.As<ClassBody>());
+                    break;
+                case Nodes.ClassDeclaration:
+                    VisitClassDeclaration(node.As<ClassDeclaration>());
+                    break;
+                case Nodes.ForOfStatement:
+                    VisitForOfStatement(node.As<ForOfStatement>());
+                    break;
+                case Nodes.MethodDefinition:
+                    VisitMethodDefinition(node.As<MethodDefinition>());
+                    break;
+                case Nodes.ImportSpecifier:
+                    VisitImportSpecifier(node.As<ImportSpecifier>());
+                    break;
+                case Nodes.ImportDefaultSpecifier:
+                    VisitImportDefaultSpecifier(node.As<ImportDefaultSpecifier>());
+                    break;
+                case Nodes.ImportNamespaceSpecifier:
+                    VisitImportNamespaceSpecifier(node.As<ImportNamespaceSpecifier>());
+                    break;
+                case Nodes.ImportDeclaration:
+                    VisitImportDeclaration(node.As<ImportDeclaration>());
+                    break;
+                case Nodes.ExportSpecifier:
+                    VisitExportSpecifier(node.As<ExportSpecifier>());
+                    break;
+                case Nodes.ExportNamedDeclaration:
+                    VisitExportNamedDeclaration(node.As<ExportNamedDeclaration>());
+                    break;
+                case Nodes.ExportAllDeclaration:
+                    VisitExportAllDeclaration(node.As<ExportAllDeclaration>());
+                    break;
+                case Nodes.ExportDefaultDeclaration:
+                    VisitExportDefaultDeclaration(node.As<ExportDefaultDeclaration>());
+                    break;
+                case Nodes.ClassExpression:
+                    VisitClassExpression(node.As<ClassExpression>());
+                    break;
+                default:
+                    VisitUnknownNode(node);
+                    break;
             }
         }
 
@@ -90,6 +290,14 @@ namespace Esprima.Utils
                 default:
                     VisitUnknownNode(statement);
                     break;
+            }
+        }
+
+        protected virtual void VisitProgram(Program program)
+        {
+            foreach (var statement in program.Body)
+            {
+                VisitStatement((Statement)statement);
             }
         }
 
@@ -392,214 +600,6 @@ namespace Esprima.Utils
                 Visit(param);
             }
             VisitBlockStatement(function.Body);
-        }
-
-        public virtual void Visit(INode node)
-        {
-            switch (node.Type)
-            {
-                case Nodes.AssignmentExpression:
-                    VisitAssignmentExpression(node.As<AssignmentExpression>());
-                    break;
-                case Nodes.ArrayExpression:
-                    VisitArrayExpression(node.As<ArrayExpression>());
-                    break;
-                case Nodes.BlockStatement:
-                    VisitBlockStatement(node.As<BlockStatement>());
-                    break;
-                case Nodes.BinaryExpression:
-                    VisitBinaryExpression(node.As<BinaryExpression>());
-                    break;
-                case Nodes.BreakStatement:
-                    VisitBreakStatement(node.As<BreakStatement>());
-                    break;
-                case Nodes.CallExpression:
-                    VisitCallExpression(node.As<CallExpression>());
-                    break;
-                case Nodes.CatchClause:
-                    VisitCatchClause(node.As<CatchClause>());
-                    break;
-                case Nodes.ConditionalExpression:
-                    VisitConditionalExpression(node.As<ConditionalExpression>());
-                    break;
-                case Nodes.ContinueStatement:
-                    VisitContinueStatement(node.As<ContinueStatement>());
-                    break;
-                case Nodes.DoWhileStatement:
-                    VisitDoWhileStatement(node.As<DoWhileStatement>());
-                    break;
-                case Nodes.DebuggerStatement:
-                    VisitDebuggerStatement(node.As<DebuggerStatement>());
-                    break;
-                case Nodes.EmptyStatement:
-                    VisitEmptyStatement(node.As<EmptyStatement>());
-                    break;
-                case Nodes.ExpressionStatement:
-                    VisitExpressionStatement(node.As<ExpressionStatement>());
-                    break;
-                case Nodes.ForStatement:
-                    VisitForStatement(node.As<ForStatement>());
-                    break;
-                case Nodes.ForInStatement:
-                    VisitForInStatement(node.As<ForInStatement>());
-                    break;
-                case Nodes.FunctionDeclaration:
-                    VisitFunctionDeclaration(node.As<FunctionDeclaration>());
-                    break;
-                case Nodes.FunctionExpression:
-                    VisitFunctionExpression(node.As<FunctionExpression>());
-                    break;
-                case Nodes.Identifier:
-                    VisitIdentifier(node.As<Identifier>());
-                    break;
-                case Nodes.IfStatement:
-                    VisitIfStatement(node.As<IfStatement>());
-                    break;
-                case Nodes.Literal:
-                    VisitLiteral(node.As<Literal>());
-                    break;
-                case Nodes.LabeledStatement:
-                    VisitLabeledStatement(node.As<LabeledStatement>());
-                    break;
-                case Nodes.LogicalExpression:
-                    VisitLogicalExpression(node.As<BinaryExpression>());
-                    break;
-                case Nodes.MemberExpression:
-                    VisitMemberExpression(node.As<MemberExpression>());
-                    break;
-                case Nodes.NewExpression:
-                    VisitNewExpression(node.As<NewExpression>());
-                    break;
-                case Nodes.ObjectExpression:
-                    VisitObjectExpression(node.As<ObjectExpression>());
-                    break;
-                case Nodes.Program:
-                    VisitProgram(node.As<Esprima.Ast.Program>());
-                    break;
-                case Nodes.Property:
-                    VisitProperty(node.As<Property>());
-                    break;
-                case Nodes.RestElement:
-                    VisitRestElement(node.As<RestElement>());
-                    break;
-                case Nodes.ReturnStatement:
-                    VisitReturnStatement(node.As<ReturnStatement>());
-                    break;
-                case Nodes.SequenceExpression:
-                    VisitSequenceExpression(node.As<SequenceExpression>());
-                    break;
-                case Nodes.SwitchStatement:
-                    VisitSwitchStatement(node.As<SwitchStatement>());
-                    break;
-                case Nodes.SwitchCase:
-                    VisitSwitchCase(node.As<SwitchCase>());
-                    break;
-                case Nodes.TemplateElement:
-                    VisitTemplateElement(node.As<TemplateElement>());
-                    break;
-                case Nodes.TemplateLiteral:
-                    VisitTemplateLiteral(node.As<TemplateLiteral>());
-                    break;
-                case Nodes.ThisExpression:
-                    VisitThisExpression(node.As<ThisExpression>());
-                    break;
-                case Nodes.ThrowStatement:
-                    VisitThrowStatement(node.As<ThrowStatement>());
-                    break;
-                case Nodes.TryStatement:
-                    VisitTryStatement(node.As<TryStatement>());
-                    break;
-                case Nodes.UnaryExpression:
-                    VisitUnaryExpression(node.As<UnaryExpression>());
-                    break;
-                case Nodes.UpdateExpression:
-                    VisitUpdateExpression(node.As<UpdateExpression>());
-                    break;
-                case Nodes.VariableDeclaration:
-                    VisitVariableDeclaration(node.As<VariableDeclaration>());
-                    break;
-                case Nodes.VariableDeclarator:
-                    VisitVariableDeclarator(node.As<VariableDeclarator>());
-                    break;
-                case Nodes.WhileStatement:
-                    VisitWhileStatement(node.As<WhileStatement>());
-                    break;
-                case Nodes.WithStatement:
-                    VisitWithStatement(node.As<WithStatement>());
-                    break;
-                case Nodes.ArrayPattern:
-                    VisitArrayPattern(node.As<ArrayPattern>());
-                    break;
-                case Nodes.AssignmentPattern:
-                    VisitAssignmentPattern(node.As<AssignmentPattern>());
-                    break;
-                case Nodes.SpreadElement:
-                    VisitSpreadElement(node.As<SpreadElement>());
-                    break;
-                case Nodes.ObjectPattern:
-                    VisitObjectPattern(node.As<ObjectPattern>());
-                    break;
-                case Nodes.ArrowParameterPlaceHolder:
-                    VisitArrowParameterPlaceHolder(node.As<ArrowParameterPlaceHolder>());
-                    break;
-                case Nodes.MetaProperty:
-                    VisitMetaProperty(node.As<MetaProperty>());
-                    break;
-                case Nodes.Super:
-                    VisitSuper(node.As<Super>());
-                    break;
-                case Nodes.TaggedTemplateExpression:
-                    VisitTaggedTemplateExpression(node.As<TaggedTemplateExpression>());
-                    break;
-                case Nodes.YieldExpression:
-                    VisitYieldExpression(node.As<YieldExpression>());
-                    break;
-                case Nodes.ArrowFunctionExpression:
-                    VisitArrowFunctionExpression(node.As<ArrowFunctionExpression>());
-                    break;
-                case Nodes.ClassBody:
-                    VisitClassBody(node.As<ClassBody>());
-                    break;
-                case Nodes.ClassDeclaration:
-                    VisitClassDeclaration(node.As<ClassDeclaration>());
-                    break;
-                case Nodes.ForOfStatement:
-                    VisitForOfStatement(node.As<ForOfStatement>());
-                    break;
-                case Nodes.MethodDefinition:
-                    VisitMethodDefinition(node.As<MethodDefinition>());
-                    break;
-                case Nodes.ImportSpecifier:
-                    VisitImportSpecifier(node.As<ImportSpecifier>());
-                    break;
-                case Nodes.ImportDefaultSpecifier:
-                    VisitImportDefaultSpecifier(node.As<ImportDefaultSpecifier>());
-                    break;
-                case Nodes.ImportNamespaceSpecifier:
-                    VisitImportNamespaceSpecifier(node.As<ImportNamespaceSpecifier>());
-                    break;
-                case Nodes.ImportDeclaration:
-                    VisitImportDeclaration(node.As<ImportDeclaration>());
-                    break;
-                case Nodes.ExportSpecifier:
-                    VisitExportSpecifier(node.As<ExportSpecifier>());
-                    break;
-                case Nodes.ExportNamedDeclaration:
-                    VisitExportNamedDeclaration(node.As<ExportNamedDeclaration>());
-                    break;
-                case Nodes.ExportAllDeclaration:
-                    VisitExportAllDeclaration(node.As<ExportAllDeclaration>());
-                    break;
-                case Nodes.ExportDefaultDeclaration:
-                    VisitExportDefaultDeclaration(node.As<ExportDefaultDeclaration>());
-                    break;
-                case Nodes.ClassExpression:
-                    VisitClassExpression(node.As<ClassExpression>());
-                    break;
-                default:
-                    VisitUnknownNode(node);
-                    break;
-            }
         }
 
         protected virtual void VisitClassExpression(ClassExpression classExpression)
