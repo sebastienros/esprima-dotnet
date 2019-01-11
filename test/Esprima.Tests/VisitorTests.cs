@@ -12,9 +12,9 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
 
             AstVisitor visitor = new AstVisitor();
-            visitor.VisitProgram(program);
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitSwitchCase()
         {
@@ -26,9 +26,9 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
 
             AstVisitor visitor = new AstVisitor();
-            visitor.VisitProgram(program);
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitDefaultSwitchCase()
         {
@@ -40,9 +40,9 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
 
             AstVisitor visitor = new AstVisitor();
-            visitor.VisitProgram(program);
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitForWithNoTest()
         {
@@ -50,9 +50,9 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
 
             AstVisitor visitor = new AstVisitor();
-            visitor.VisitProgram(program);
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitForOfStatement()
         {
@@ -60,7 +60,7 @@ namespace Esprima.Tests
             var program = parser.ParseProgram();
 
             AstVisitor visitor = new AstVisitor();
-            visitor.VisitProgram(program);
+            visitor.Visit(program);
         }
     }
 }
