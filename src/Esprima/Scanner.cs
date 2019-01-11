@@ -115,7 +115,7 @@ namespace Esprima
             "**"
         };
 
-        private int HexValue(char ch)
+        private static int HexValue(char ch)
         {
             if (ch >= 'A')
             {
@@ -139,7 +139,7 @@ namespace Esprima
             return 0;
         }
 
-        private int OctalValue(char ch)
+        private static int OctalValue(char ch)
         {
             return ch - '0';
         }
