@@ -206,11 +206,13 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                t.Location.Start.Line = _startMarker.LineNumber;
-                t.Location.Start.Column = _startMarker.Index - _startMarker.LineStart;
+                var start = new Position(_startMarker.LineNumber,
+                                         _startMarker.Index - _startMarker.LineStart);
 
-                t.Location.End.Line = _scanner.LineNumber;
-                t.Location.End.Column = _scanner.Index - _scanner.LineStart;
+                var end   = new Position(_scanner.LineNumber,
+                                         _scanner.Index - _scanner.LineStart);
+
+                t.Location = t.Location.WithPosition(start, end);
             }
 
             if (token.RegexValue != null)
@@ -286,7 +288,7 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private MetaNode StartNode(Token token)
+        private static MetaNode StartNode(Token token)
         {
             return new MetaNode(token.Start, token.LineNumber, token.Start - token.LineStart);
         }
@@ -300,14 +302,11 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                node.Location.Start.Line = meta.Line;
-                node.Location.Start.Column = meta.Column;
-                node.Location.End.Line = _lastMarker.LineNumber;
-                node.Location.End.Column = _lastMarker.Index - _lastMarker.LineStart;
-                if (_errorHandler.Source != null)
-                {
-                    node.Location.Source = _errorHandler.Source;
-                }
+                var start = new Position(meta.Line, meta.Column);
+                var end   = new Position(_lastMarker.LineNumber,
+                                         _lastMarker.Index - _lastMarker.LineStart);
+
+                node.Location = new Location(start, end, _errorHandler.Source);
             }
 
             _action?.Invoke(node);
@@ -790,7 +789,7 @@ namespace Esprima
             return key;
         }
 
-        private bool IsPropertyKey(INode key, string value)
+        private static bool IsPropertyKey(INode key, string value)
         {
             if (key.Type == Nodes.Identifier)
             {
@@ -1035,7 +1034,7 @@ namespace Esprima
                     var newArgument = ReinterpretExpressionAsPattern(expr.As<SpreadElement>().Argument);
                     node = new RestElement(newArgument.As<Expression>());
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 case Nodes.ArrayExpression:
@@ -1056,7 +1055,7 @@ namespace Esprima
 
                     node = new ArrayPattern(elements);
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 case Nodes.ObjectExpression:
@@ -1069,14 +1068,14 @@ namespace Esprima
                     }
                     node = new ObjectPattern(properties);
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 case Nodes.AssignmentExpression:
                     var assignmentExpression = expr.As<AssignmentExpression>();
                     node = new AssignmentPattern(assignmentExpression.Left, assignmentExpression.Right);
                     node.Range = expr.Range;
-                    node.Location = _config.Loc ? expr.Location : null;
+                    node.Location = _config.Loc ? expr.Location : default;
 
                     break;
                 default:
@@ -1253,7 +1252,7 @@ namespace Esprima
             return args;
         }
 
-        private bool IsIdentifierName(Token token)
+        private static bool IsIdentifierName(Token token)
         {
             return token.Type == TokenType.Identifier ||
                 token.Type == TokenType.Keyword ||
@@ -1790,7 +1789,7 @@ namespace Esprima
 
                         assignment.Right = new Identifier("yield")
                         {
-                            Location = _config.Loc ? assignment.Right.Location : null,
+                            Location = _config.Loc ? assignment.Right.Location : default,
                             Range = assignment.Right.Range
                         };
                     }
@@ -3451,7 +3450,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-method-definitions
 
-        private bool QualifiedPropertyName(Token token)
+        private static bool QualifiedPropertyName(Token token)
         {
             switch (token.Type)
             {
@@ -3764,9 +3763,9 @@ namespace Esprima
             ExpectKeyword("class");
 
             var id = (identifierIsOptional && (_lookahead.Type != TokenType.Identifier))
-                ? null 
+                ? null
                 : ParseVariableIdentifier();
-            
+
             Expression superClass = null;
             if (MatchKeyword("extends"))
             {
@@ -3787,7 +3786,7 @@ namespace Esprima
             _context.Strict = true;
             ExpectKeyword("class");
             var id = (_lookahead.Type == TokenType.Identifier)
-                ? ParseVariableIdentifier() 
+                ? ParseVariableIdentifier()
                 : null;
 
             Expression superClass = null;
