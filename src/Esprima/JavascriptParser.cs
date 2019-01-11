@@ -17,15 +17,15 @@ namespace Esprima
         private readonly Stack<HoistingScope> _hoistingScopes = new Stack<HoistingScope>();
 
         private Token _lookahead;
-        private Context _context;
-        private Marker _startMarker;
-        private Marker _lastMarker;
-        private Scanner _scanner;
-        private IErrorHandler _errorHandler;
-        private SourceType _sourceType = SourceType.Script;
-        private ParserOptions _config;
+        private readonly Context _context;
+        private readonly Marker _startMarker;
+        private readonly Marker _lastMarker;
+        private readonly Scanner _scanner;
+        private readonly IErrorHandler _errorHandler;
+        private readonly SourceType _sourceType = SourceType.Script;
+        private readonly ParserOptions _config;
         private bool _hasLineTerminator;
-        private Action<INode> _action;
+        private readonly Action<INode> _action;
 
         public List<Token> Tokens = new List<Token>();
 
