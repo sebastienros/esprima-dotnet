@@ -718,6 +718,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitProperty(Property property)
         {
+            VisitExpression(property.Key);
+
             switch (property.Kind)
             {
                 case PropertyKind.Init:
