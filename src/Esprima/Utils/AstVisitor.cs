@@ -579,6 +579,7 @@ namespace Esprima.Utils
         protected virtual void VisitMemberExpression(MemberExpression memberExpression)
         {
             VisitExpression(memberExpression.Object);
+            VisitExpression(memberExpression.Property);
         }
 
         protected virtual void VisitLogicalExpression(BinaryExpression binaryExpression)
