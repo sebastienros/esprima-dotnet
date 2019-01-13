@@ -544,6 +544,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitUpdateExpression(UpdateExpression updateExpression)
         {
+            VisitExpression(updateExpression.Argument);
         }
 
         protected virtual void VisitThisExpression(ThisExpression thisExpression)
