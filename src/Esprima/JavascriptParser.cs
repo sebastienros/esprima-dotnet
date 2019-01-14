@@ -1980,7 +1980,8 @@ namespace Esprima
                         statement = ParseImportDeclaration();
                         break;
                     case "const":
-                        statement = ParseLexicalDeclaration(new DeclarationOptions { inFor = false });
+                        var inFor = false;
+                        statement = ParseLexicalDeclaration(ref inFor);
                         break;
                     case "function":
                         statement = ParseFunctionDeclaration();
@@ -1989,7 +1990,8 @@ namespace Esprima
                         statement = ParseClassDeclaration();
                         break;
                     case "let":
-                        statement = IsLexicalDeclaration() ? ParseLexicalDeclaration(new DeclarationOptions { inFor = false }) : ParseStatement();
+                        inFor = false;
+                        statement = IsLexicalDeclaration() ? ParseLexicalDeclaration(ref inFor) : ParseStatement();
                         break;
                     default:
                         statement = ParseStatement();
@@ -2025,7 +2027,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-let-and-const-declarations
 
-        private VariableDeclarator ParseLexicalBinding(VariableDeclarationKind kind, DeclarationOptions options)
+        private VariableDeclarator ParseLexicalBinding(VariableDeclarationKind kind, ref bool inFor)
         {
             var node = CreateNode();
             var parameters = new List<Token>();
@@ -2055,7 +2057,7 @@ namespace Esprima
                     }
                 }
             }
-            else if ((!options.inFor && id.Type != Nodes.Identifier) || Match("="))
+            else if ((!inFor && id.Type != Nodes.Identifier) || Match("="))
             {
                 Expect("=");
                 init = IsolateCoverGrammar(parseAssignmentExpression);
@@ -2064,14 +2066,14 @@ namespace Esprima
             return Finalize(node, new VariableDeclarator(id, init));
         }
 
-        private List<VariableDeclarator> ParseBindingList(VariableDeclarationKind kind, DeclarationOptions options)
+        private List<VariableDeclarator> ParseBindingList(VariableDeclarationKind kind, ref bool inFor)
         {
-            var list = new List<VariableDeclarator> { ParseLexicalBinding(kind, options) };
+            var list = new List<VariableDeclarator> { ParseLexicalBinding(kind, ref inFor) };
 
             while (Match(","))
             {
                 NextToken();
-                list.Add(ParseLexicalBinding(kind, options));
+                list.Add(ParseLexicalBinding(kind, ref inFor));
             }
 
             return list;
@@ -2095,14 +2097,14 @@ namespace Esprima
                 (next.Type == TokenType.Keyword && (string)next.Value == "yield");
         }
 
-        private VariableDeclaration ParseLexicalDeclaration(DeclarationOptions options)
+        private VariableDeclaration ParseLexicalDeclaration(ref bool inFor)
         {
             var node = CreateNode();
             string kindString = (string) NextToken().Value;
             var kind = ParseVariableDeclarationKind(kindString);
             //assert(kind == "let" || kind == "const", 'Lexical declaration must be either var or const');
 
-            var declarations = ParseBindingList(kind, options);
+            var declarations = ParseBindingList(kind, ref inFor);
             ConsumeSemicolon();
 
             return Finalize(node, new VariableDeclaration(declarations, kind));
@@ -2318,7 +2320,7 @@ namespace Esprima
             return Finalize(node, new Identifier((string)token.Value));
         }
 
-        private VariableDeclarator ParseVariableDeclaration(DeclarationOptions options)
+        private VariableDeclarator ParseVariableDeclaration(ref bool inFor)
         {
             var node = CreateNode();
 
@@ -2339,7 +2341,7 @@ namespace Esprima
                 NextToken();
                 init = IsolateCoverGrammar(parseAssignmentExpression);
             }
-            else if (id.Type != Nodes.Identifier && !options.inFor)
+            else if (id.Type != Nodes.Identifier && !inFor)
             {
                 Expect("=");
             }
@@ -2347,16 +2349,16 @@ namespace Esprima
             return Finalize(node, new VariableDeclarator(id, init));
         }
 
-        private List<VariableDeclarator> ParseVariableDeclarationList(DeclarationOptions options)
+        private List<VariableDeclarator> ParseVariableDeclarationList(ref bool inFor)
         {
-            var opt = new DeclarationOptions { inFor = options.inFor };
+            var inFor2 = inFor;
 
             var list = new List<VariableDeclarator>();
-            list.Push(ParseVariableDeclaration(opt));
+            list.Push(ParseVariableDeclaration(ref inFor2));
             while (Match(","))
             {
                 NextToken();
-                list.Push(ParseVariableDeclaration(opt));
+                list.Push(ParseVariableDeclaration(ref inFor2));
             }
 
             return list;
@@ -2366,7 +2368,8 @@ namespace Esprima
         {
             var node = CreateNode();
             ExpectKeyword("var");
-            var declarations = ParseVariableDeclarationList(new DeclarationOptions { inFor = false });
+            var inFor = false;
+            var declarations = ParseVariableDeclarationList(ref inFor);
             ConsumeSemicolon();
 
             return Hoist(Finalize(node, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
@@ -2504,7 +2507,8 @@ namespace Esprima
 
                     var previousAllowIn = _context.AllowIn;
                     _context.AllowIn = false;
-                    var declarations = ParseVariableDeclarationList(new DeclarationOptions { inFor = true });
+                    var inFor = true;
+                    var declarations = ParseVariableDeclarationList(ref inFor);
                     _context.AllowIn = previousAllowIn;
 
                     if (declarations.Count == 1 && MatchKeyword("in"))
@@ -2550,7 +2554,8 @@ namespace Esprima
                     {
                         var previousAllowIn = _context.AllowIn;
                         _context.AllowIn = false;
-                        var declarations = ParseBindingList(kind, new DeclarationOptions { inFor = true });
+                        var inFor = true;
+                        var declarations = ParseBindingList(kind, ref inFor);
                         _context.AllowIn = previousAllowIn;
 
                         if (declarations.Count == 1 && declarations[0].Init == null && MatchKeyword("in"))
@@ -3602,7 +3607,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-class-definitions
 
-        private ClassProperty ParseClassElement(HasConstructorOptions hasConstructor)
+        private ClassProperty ParseClassElement(ref bool hasConstructor)
         {
             var token = _lookahead;
             var node = CreateNode();
@@ -3708,13 +3713,13 @@ namespace Esprima
                     {
                         ThrowUnexpectedToken(token, Messages.ConstructorSpecialMethod);
                     }
-                    if (hasConstructor.Value)
+                    if (hasConstructor)
                     {
                         ThrowUnexpectedToken(token, Messages.DuplicateConstructor);
                     }
                     else
                     {
-                        hasConstructor.Value = true;
+                        hasConstructor = true;
                     }
                     kind = PropertyKind.Constructor;
                 }
@@ -3727,7 +3732,7 @@ namespace Esprima
         private List<ClassProperty> ParseClassElementList()
         {
             var body = new List<ClassProperty>();
-            var hasConstructor = new HasConstructorOptions { Value = false };
+            var hasConstructor = false;
 
             Expect("{");
             while (!Match("}"))
@@ -3738,7 +3743,7 @@ namespace Esprima
                 }
                 else
                 {
-                    body.Push(ParseClassElement(hasConstructor));
+                    body.Push(ParseClassElement(ref hasConstructor));
                 }
             }
             Expect("}");
@@ -4053,7 +4058,8 @@ namespace Esprima
                 {
                     case "let":
                     case "const":
-                        declaration = ParseLexicalDeclaration(new DeclarationOptions { inFor = false });
+                        var inFor = false;
+                        declaration = ParseLexicalDeclaration(ref inFor);
                         break;
                     case "var":
                     case "class":
@@ -4216,16 +4222,6 @@ namespace Esprima
             {
                 (paramSet = paramSet ?? new HashSet<string>()).Add(key);
             }
-        }
-
-        private class DeclarationOptions
-        {
-            public bool inFor { get; set; }
-        }
-
-        public class HasConstructorOptions
-        {
-            public bool Value { get; set; }
         }
 
         private void EnterHoistingScope()
