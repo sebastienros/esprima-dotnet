@@ -2,15 +2,11 @@
 {
     public class ParserOptions
     {
-        public ParserOptions()
-        {
-            ErrorHandler = new ErrorHandler();
-        }
+        public ParserOptions() :
+            this(new ErrorHandler()) {}
 
-        public ParserOptions(string source)
-        {
-            ErrorHandler = new ErrorHandler() { Source = source };
-        }
+        public ParserOptions(string source) :
+            this(new ErrorHandler { Source = source }) {}
 
         public ParserOptions(IErrorHandler errorHandler)
         {
