@@ -50,7 +50,7 @@
         public IErrorHandler ErrorHandler { get; set; }
 
         /// <summary>
-        /// Gets or sets wheter the Regular Expression syntax should be converted to a .NET compatible one.
+        /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one.
         /// </summary>
         public bool AdaptRegexp { get; set; }
     }
