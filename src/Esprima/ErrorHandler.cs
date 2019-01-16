@@ -2,6 +2,8 @@
 
 namespace Esprima
 {
+    using Ast;
+
     public class ErrorHandler : IErrorHandler
     {
         public List<ParserException> Errors { get; }
