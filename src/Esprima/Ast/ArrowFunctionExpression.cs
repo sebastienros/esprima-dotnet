@@ -12,9 +12,9 @@ namespace Esprima.Ast
 
         public HoistingScope HoistingScope;
 
-        public ArrowFunctionExpression(List<INode> parameters, INode body, bool expression, HoistingScope hoistingScope)
+        public ArrowFunctionExpression(List<INode> parameters, INode body, bool expression, HoistingScope hoistingScope) :
+            base(Nodes.ArrowFunctionExpression)
         {
-            Type = Nodes.ArrowFunctionExpression;
             Id = null;
             Params = parameters;
             Body = body;

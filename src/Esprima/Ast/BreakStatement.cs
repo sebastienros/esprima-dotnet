@@ -4,9 +4,9 @@ namespace Esprima.Ast
     {
         public readonly Identifier Label;
 
-        public BreakStatement(Identifier label)
+        public BreakStatement(Identifier label) :
+            base(Nodes.BreakStatement)
         {
-            Type = Nodes.BreakStatement;
             Label = label;
         }
     }

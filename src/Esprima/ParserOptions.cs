@@ -2,15 +2,11 @@
 {
     public class ParserOptions
     {
-        public ParserOptions()
-        {
-            ErrorHandler = new ErrorHandler();
-        }
+        public ParserOptions() :
+            this(new ErrorHandler()) {}
 
-        public ParserOptions(string source)
-        {
-            ErrorHandler = new ErrorHandler() { Source = source };
-        }
+        public ParserOptions(string source) :
+            this(new ErrorHandler { Source = source }) {}
 
         public ParserOptions(IErrorHandler errorHandler)
         {
@@ -50,7 +46,7 @@
         public IErrorHandler ErrorHandler { get; set; }
 
         /// <summary>
-        /// Gets or sets wheter the Regular Expression syntax should be converted to a .NET compatible one.
+        /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one.
         /// </summary>
         public bool AdaptRegexp { get; set; }
     }

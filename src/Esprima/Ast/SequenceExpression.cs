@@ -6,9 +6,9 @@ namespace Esprima.Ast
     {
         public List<Expression> Expressions { get; internal set; }
 
-        public SequenceExpression(List<Expression> expressions)
+        public SequenceExpression(List<Expression> expressions) :
+            base(Nodes.SequenceExpression)
         {
-            Type = Nodes.SequenceExpression;
             Expressions = expressions;
         }
     }

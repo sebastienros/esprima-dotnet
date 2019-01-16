@@ -4,9 +4,9 @@ namespace Esprima.Ast
     {
         public readonly Expression Argument;
 
-        public ThrowStatement(Expression argument)
+        public ThrowStatement(Expression argument) :
+            base(Nodes.ThrowStatement)
         {
-            Type = Nodes.ThrowStatement;
             Argument = argument;
         }
     }

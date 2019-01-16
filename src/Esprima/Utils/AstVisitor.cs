@@ -526,7 +526,7 @@ namespace Esprima.Utils
             //Here we construct the function so if we iterate only functions we will be able to iterate ArrowFunctions too
             var statement =
                 arrowFunctionExpression.Expression
-                    ? new BlockStatement(new List<StatementListItem> {new ReturnStatement(arrowFunctionExpression.Body.As<Expression>())})
+                    ? new BlockStatement(new Ast.List<StatementListItem> {new ReturnStatement(arrowFunctionExpression.Body.As<Expression>())})
                     : arrowFunctionExpression.Body.As<BlockStatement>();
             var func = new FunctionExpression(new Identifier(null),
                 arrowFunctionExpression.Params,
@@ -544,6 +544,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitUpdateExpression(UpdateExpression updateExpression)
         {
+            VisitExpression(updateExpression.Argument);
         }
 
         protected virtual void VisitThisExpression(ThisExpression thisExpression)
@@ -578,6 +579,7 @@ namespace Esprima.Utils
         protected virtual void VisitMemberExpression(MemberExpression memberExpression)
         {
             VisitExpression(memberExpression.Object);
+            VisitExpression(memberExpression.Property);
         }
 
         protected virtual void VisitLogicalExpression(BinaryExpression binaryExpression)
@@ -716,6 +718,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitProperty(Property property)
         {
+            VisitExpression(property.Key);
+
             switch (property.Kind)
             {
                 case PropertyKind.Init:

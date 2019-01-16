@@ -4,9 +4,9 @@
     {
         public readonly Identifier Local;
 
-        public ImportNamespaceSpecifier(Identifier local)
+        public ImportNamespaceSpecifier(Identifier local) :
+            base(Nodes.ImportNamespaceSpecifier)
         {
-            Type = Nodes.ImportNamespaceSpecifier;
             Local = local;
         }
     }

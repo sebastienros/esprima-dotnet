@@ -10,9 +10,9 @@
         public readonly INode Left;
         public INode Right;
 
-        public AssignmentPattern(INode left, INode right)
+        public AssignmentPattern(INode left, INode right) :
+            base(Nodes.AssignmentPattern)
         {
-            Type = Nodes.AssignmentPattern;
             Left = left;
             Right = right;
         }
