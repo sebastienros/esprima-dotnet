@@ -6,9 +6,9 @@ namespace Esprima.Ast
     {
         public readonly Literal Source;
 
-        public ExportAllDeclaration(Literal source)
+        public ExportAllDeclaration(Literal source) :
+            base(Nodes.ExportAllDeclaration)
         {
-            Type = Nodes.ExportAllDeclaration;
             Source = source;
         }
 

@@ -22,10 +22,9 @@ namespace Esprima.Ast
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,
-            bool strict
-            )
+            bool strict) :
+            base(Nodes.FunctionExpression)
         {
-            Type = Nodes.FunctionExpression;
             Id = id;
             Params = parameters;
             Body = body;

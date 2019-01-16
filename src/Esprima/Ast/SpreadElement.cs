@@ -9,9 +9,9 @@ namespace Esprima.Ast
     {
         public readonly Expression Argument;
 
-        public SpreadElement(Expression argument)
+        public SpreadElement(Expression argument) :
+            base(Nodes.SpreadElement)
         {
-            Type = Nodes.SpreadElement;
             Argument = argument;
         }
 

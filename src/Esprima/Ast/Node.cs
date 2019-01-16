@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public abstract class Node : INode
     {
-        public Nodes Type { get; set; }
+        public Nodes Type { get; }
         public Range Range { get; set; }
 
         public Location Location { get; set; }
@@ -13,5 +13,8 @@ namespace Esprima.Ast
         public abstract IEnumerable<INode> ChildNodes { get; }
 
         protected static IEnumerable<INode> ZeroChildNodes = Enumerable.Empty<INode>();
+
+        protected Node(Nodes type) =>
+            Type = type;
     }
 }

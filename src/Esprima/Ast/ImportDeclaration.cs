@@ -7,9 +7,9 @@ namespace Esprima.Ast
         public readonly List<ImportDeclarationSpecifier> Specifiers;
         public readonly Literal Source;
 
-        public ImportDeclaration(List<ImportDeclarationSpecifier> specifiers, Literal source)
+        public ImportDeclaration(List<ImportDeclarationSpecifier> specifiers, Literal source) :
+            base(Nodes.ImportDeclaration)
         {
-            Type = Nodes.ImportDeclaration;
             Specifiers = specifiers;
             Source = source;
         }

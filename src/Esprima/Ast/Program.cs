@@ -10,9 +10,9 @@ namespace Esprima.Ast
         public HoistingScope HoistingScope { get; }
         public bool Strict { get; }
 
-        public Program(List<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict)
+        public Program(List<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict) :
+            base(Nodes.Program)
         {
-            Type = Nodes.Program;
             Body = body;
             SourceType = sourceType;
             HoistingScope = hoistingScope;

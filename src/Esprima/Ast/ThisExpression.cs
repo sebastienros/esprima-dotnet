@@ -6,10 +6,8 @@ namespace Esprima.Ast
     public class ThisExpression : Node,
         Expression
     {
-        public ThisExpression()
-        {
-            Type = Nodes.ThisExpression;
-        }
+        public ThisExpression() :
+            base(Nodes.ThisExpression) {}
 
         public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
     }

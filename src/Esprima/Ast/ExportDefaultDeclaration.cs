@@ -6,9 +6,9 @@ namespace Esprima.Ast
     {
         public readonly Declaration Declaration; //: BindingIdentifier | BindingPattern | ClassDeclaration | Expression | FunctionDeclaration;
 
-        public ExportDefaultDeclaration(Declaration declaration)
+        public ExportDefaultDeclaration(Declaration declaration) :
+            base(Nodes.ExportDefaultDeclaration)
         {
-            Type = Nodes.ExportDefaultDeclaration;
             Declaration = declaration;
         }
 

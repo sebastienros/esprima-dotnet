@@ -44,9 +44,9 @@ namespace Esprima.Ast
         public readonly INode Left;
         public readonly Expression Right;
 
-        public AssignmentExpression(string op, INode left, Expression right)
+        public AssignmentExpression(string op, INode left, Expression right) :
+            base(Nodes.AssignmentExpression)
         {
-            Type = Nodes.AssignmentExpression;
             Operator = AssignmentExpression.ParseAssignmentOperator(op);
             Left = left;
             Right = right;

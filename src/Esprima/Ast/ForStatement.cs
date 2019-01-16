@@ -10,9 +10,9 @@ namespace Esprima.Ast
         public readonly Expression Update;
         public readonly Statement Body;
 
-        public ForStatement(INode init, Expression test, Expression update, Statement body)
+        public ForStatement(INode init, Expression test, Expression update, Statement body) :
+            base(Nodes.ForStatement)
         {
-            Type = Nodes.ForStatement;
             Init = init;
             Test = test;
             Update = update;

@@ -64,11 +64,13 @@ namespace Esprima.Ast
         public readonly Expression Left;
         public readonly Expression Right;
 
-        public BinaryExpression(string op, Expression left, Expression right)
+        public BinaryExpression(string op, Expression left, Expression right) :
+            this(ParseBinaryOperator(op), left, right) {}
+
+        private BinaryExpression(BinaryOperator op, Expression left, Expression right) :
+            base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr ? Nodes.LogicalExpression : Nodes.BinaryExpression)
         {
-            Operator = ParseBinaryOperator(op);
-            var logical = Operator == BinaryOperator.LogicalAnd || Operator == BinaryOperator.LogicalOr;
-            Type = logical ? Nodes.LogicalExpression : Nodes.BinaryExpression;
+            Operator = op;
             Left = left;
             Right = right;
         }

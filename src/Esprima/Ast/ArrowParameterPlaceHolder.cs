@@ -8,9 +8,9 @@ namespace Esprima.Ast
 
         public readonly List<INode> Params;
 
-        public ArrowParameterPlaceHolder(List<INode> parameters)
+        public ArrowParameterPlaceHolder(List<INode> parameters) :
+            base(Nodes.ArrowParameterPlaceHolder)
         {
-            Type = Nodes.ArrowParameterPlaceHolder;
             Params = parameters;
         }
 

@@ -6,9 +6,9 @@ namespace Esprima.Ast
     {
         public readonly Expression Expression;
 
-        public ExportStatement(Expression expression)
+        public ExportStatement(Expression expression) :
+            base(Nodes.ExpressionStatement)
         {
-            Type = Nodes.ExpressionStatement;
             Expression = expression;
         }
 

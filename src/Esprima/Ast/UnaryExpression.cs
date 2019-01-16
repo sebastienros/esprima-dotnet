@@ -60,12 +60,14 @@ namespace Esprima.Ast
                     throw new ArgumentOutOfRangeException("Invalid unary operator: " + op);
 
             }
-
-
         }
-        public UnaryExpression(string op, Expression arg)
+
+        public UnaryExpression(string op, Expression arg) :
+            this(Nodes.UnaryExpression, op, arg) {}
+
+        protected UnaryExpression(Nodes type, string op, Expression arg) :
+            base(type)
         {
-            Type = Nodes.UnaryExpression;
             Operator = ParseUnaryOperator(op);
             Argument = arg;
             Prefix = true;

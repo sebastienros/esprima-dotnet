@@ -7,9 +7,9 @@ namespace Esprima.Ast
         public readonly TemplateElementValue Value;
         public readonly bool Tail;
 
-        public TemplateElement(TemplateElementValue value, bool tail)
+        public TemplateElement(TemplateElementValue value, bool tail) :
+            base(Nodes.TemplateElement)
         {
-            Type = Nodes.TemplateElement;
             Value = value;
             Tail = tail;
         }

@@ -19,10 +19,9 @@ namespace Esprima.Ast
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,
-            bool strict
-            )
+            bool strict) :
+            base(Nodes.FunctionDeclaration)
         {
-            Type = Nodes.FunctionDeclaration;
             Id = id;
             Params = parameters;
             Body = body;

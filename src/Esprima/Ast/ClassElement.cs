@@ -24,6 +24,8 @@ namespace Esprima.Ast
         public bool Computed;
         public PropertyValue Value;
 
+        protected ClassProperty(Nodes type) : base(type) {}
+
         public override IEnumerable<INode> ChildNodes =>
             ChildNodeYielder.Yield(Key, Value);
     }

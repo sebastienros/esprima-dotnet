@@ -8,9 +8,9 @@ namespace Esprima.Ast
         public readonly List<ExportSpecifier> Specifiers;
         public readonly Literal Source;
 
-        public ExportNamedDeclaration(StatementListItem declaration, List<ExportSpecifier> specifiers, Literal source)
+        public ExportNamedDeclaration(StatementListItem declaration, List<ExportSpecifier> specifiers, Literal source) :
+            base(Nodes.ExportNamedDeclaration)
         {
-            Type = Nodes.ExportNamedDeclaration;
             Declaration = declaration;
             Specifiers = specifiers;
             Source = source;
