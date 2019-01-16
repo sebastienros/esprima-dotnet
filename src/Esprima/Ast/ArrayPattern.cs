@@ -6,9 +6,9 @@ namespace Esprima.Ast
     {
         public readonly List<ArrayPatternElement> Elements;
 
-        public ArrayPattern(List<ArrayPatternElement> elements)
+        public ArrayPattern(List<ArrayPatternElement> elements) :
+            base(Nodes.ArrayPattern)
         {
-            Type = Nodes.ArrayPattern;
             Elements = elements;
         }
     }

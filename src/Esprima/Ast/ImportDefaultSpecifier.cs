@@ -4,9 +4,9 @@
     {
         public readonly Identifier Local;
 
-        public ImportDefaultSpecifier(Identifier local)
+        public ImportDefaultSpecifier(Identifier local) :
+            base(Nodes.ImportDefaultSpecifier)
         {
-            Type = Nodes.ImportDefaultSpecifier;
             Local = local;
         }
     }

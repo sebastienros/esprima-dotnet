@@ -5,9 +5,9 @@
         public readonly Identifier Meta;
         public readonly Identifier Property;
 
-        public MetaProperty(Identifier meta, Identifier property)
+        public MetaProperty(Identifier meta, Identifier property) :
+            base(Nodes.MetaProperty)
         {
-            Type = Nodes.MetaProperty;
             Meta = meta;
             Property = property;
         }

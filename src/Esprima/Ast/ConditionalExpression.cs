@@ -7,9 +7,9 @@ namespace Esprima.Ast
         public readonly Expression Consequent;
         public readonly Expression Alternate;
 
-        public ConditionalExpression(Expression test, Expression consequent, Expression alternate)
+        public ConditionalExpression(Expression test, Expression consequent, Expression alternate) :
+            base(Nodes.ConditionalExpression)
         {
-            Type = Nodes.ConditionalExpression;
             Test = test;
             Consequent = consequent;
             Alternate = alternate;
