@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using NodeSysList = System.Collections.Generic.List<Esprima.Ast.INode>;
 
 namespace Esprima.Ast
 {
@@ -28,7 +29,7 @@ namespace Esprima.Ast
                 throw new ArgumentNullException(nameof(node));
             }
 
-            return DescendantNodes(new List<INode> {node});
+            return DescendantNodes(new NodeSysList { node });
         }
 
         public static IEnumerable<INode> DescendantNodes(this INode node)
@@ -38,10 +39,10 @@ namespace Esprima.Ast
                 throw new ArgumentNullException(nameof(node));
             }
 
-            return DescendantNodes(new List<INode>(node.ChildNodes));
+            return DescendantNodes(new NodeSysList(node.ChildNodes));
         }
 
-        private static IEnumerable<INode> DescendantNodes(List<INode> nodes)
+        private static IEnumerable<INode> DescendantNodes(NodeSysList nodes)
         {
             while (nodes.Count > 0)
             {

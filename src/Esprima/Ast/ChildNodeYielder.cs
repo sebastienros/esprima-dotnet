@@ -34,11 +34,8 @@ namespace Esprima.Ast
         public static IEnumerable<INode> Yield<T>(
             List<T> first, INode second = null)
         {
-            if (first != null)
-            {
-                foreach (INode node in first)
-                    yield return node;
-            }
+            foreach (INode node in first)
+                yield return node;
 
             if (second != null)
             {
@@ -54,17 +51,11 @@ namespace Esprima.Ast
         public static IEnumerable<INode> Yield<T1, T2>(
             List<T1> first, List<T2> second)
         {
-            if (first != null)
-            {
-                foreach (INode node in first)
-                    yield return node;
-            }
+            foreach (INode node in first)
+                yield return node;
 
-            if (second != null)
-            {
-                foreach (INode node in second)
-                    yield return node;
-            }
+            foreach (INode node in second)
+                yield return node;
         }
 
         /// <summary>
@@ -81,11 +72,8 @@ namespace Esprima.Ast
                 yield return first;
             }
 
-            if (second != null)
-            {
-                foreach (INode node in second)
-                    yield return node;
-            }
+            foreach (INode node in second)
+                yield return node;
 
             if (third != null)
             {
