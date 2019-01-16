@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Esprima.Ast;
 using Esprima.Utils;
@@ -18,7 +17,7 @@ namespace Esprima.Tests
 
             var visitor = new AstVisitorEventSource();
             MemberExpression memberExpression = null;
-            var identifiers = new List<Identifier>();
+            var identifiers = new System.Collections.Generic.List<Identifier>();
             visitor.VisitingMemberExpression += (_, arg) => memberExpression = arg;
             visitor.VisitedIdentifier += (_, arg) => identifiers.Add(arg);
             visitor.Visit(expression);
