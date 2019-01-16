@@ -544,6 +544,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitUpdateExpression(UpdateExpression updateExpression)
         {
+            VisitExpression(updateExpression.Argument);
         }
 
         protected virtual void VisitThisExpression(ThisExpression thisExpression)
@@ -578,6 +579,7 @@ namespace Esprima.Utils
         protected virtual void VisitMemberExpression(MemberExpression memberExpression)
         {
             VisitExpression(memberExpression.Object);
+            VisitExpression(memberExpression.Property);
         }
 
         protected virtual void VisitLogicalExpression(BinaryExpression binaryExpression)
@@ -716,6 +718,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitProperty(Property property)
         {
+            VisitExpression(property.Key);
+
             switch (property.Kind)
             {
                 case PropertyKind.Init:
