@@ -4,7 +4,7 @@
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
     <AssemblyName>Esprima.Sample</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>Esprima.Sample</PackageId>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
