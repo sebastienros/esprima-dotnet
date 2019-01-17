@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public class FunctionExpression : Node,

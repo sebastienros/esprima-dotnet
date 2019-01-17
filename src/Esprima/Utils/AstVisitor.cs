@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Esprima.Ast;
 
@@ -526,7 +525,7 @@ namespace Esprima.Utils
             //Here we construct the function so if we iterate only functions we will be able to iterate ArrowFunctions too
             var statement =
                 arrowFunctionExpression.Expression
-                    ? new BlockStatement(new Ast.List<StatementListItem> {new ReturnStatement(arrowFunctionExpression.Body.As<Expression>())})
+                    ? new BlockStatement(new List<StatementListItem> {new ReturnStatement(arrowFunctionExpression.Body.As<Expression>())})
                     : arrowFunctionExpression.Body.As<BlockStatement>();
             var func = new FunctionExpression(new Identifier(null),
                 arrowFunctionExpression.Params,
