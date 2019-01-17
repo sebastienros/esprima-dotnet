@@ -16,7 +16,6 @@ namespace Esprima
 
         private sealed class Context
         {
-            public int LastCommentStart;
             public bool AllowIn;
             public bool AllowYield;
             public Token FirstCoverInitializedNameError;
@@ -27,7 +26,6 @@ namespace Esprima
             public bool InSwitch;
             public bool Strict;
             public HashSet<string> LabelSet;
-            public Stack<int> MarkerStack;
         }
 
         private readonly Stack<HoistingScope> _hoistingScopes = new Stack<HoistingScope>();
