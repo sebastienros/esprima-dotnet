@@ -19,9 +19,9 @@ namespace Esprima.Ast
         private T[] _items;
         private int _count;
 
-        internal List(int capacity)
+        internal List(int initialCapacity)
         {
-            _items = capacity == 0 ? null : new T[capacity];
+            _items = initialCapacity == 0 ? null : new T[initialCapacity];
             _count = 0;
         }
 
@@ -35,6 +35,13 @@ namespace Esprima.Ast
             _items = new T[list.Count];
             list._items.CopyTo(_items, 0);
             _count = list.Count;
+        }
+
+        internal List(ICollection<T> collection) :
+            this((collection ?? throw new ArgumentNullException(nameof(collection))).Count)
+        {
+            collection.CopyTo(_items, 0);
+            _count = collection.Count;
         }
 
         private int Capacity => _items?.Length ?? 0;
@@ -221,6 +228,73 @@ namespace Esprima.Ast
                 if (IsDisposed)
                 {
                     Throw<T>(new ObjectDisposedException(GetType().Name));
+                }
+            }
+        }
+    }
+
+    public static class List
+    {
+        public static List<T> Create<T>(List<T> source) =>
+            source;
+
+        public static List<T> Create<T>(IEnumerable<T> source)
+        {
+            switch (source)
+            {
+                case null:
+                {
+                    throw new ArgumentNullException(nameof(source));
+                }
+
+                case List<T> list:
+                {
+                    return Create(list);
+                }
+
+                case ICollection<T> collection:
+                {
+                    return collection.Count > 0
+                         ? new List<T>(collection)
+                         : default;
+                }
+
+                case IReadOnlyList<T> sourceList:
+                {
+                    if (sourceList.Count == 0)
+                    {
+                        return default;
+                    }
+
+                    var list = new List<T>(sourceList.Count);
+                    for (var i = 0; i < sourceList.Count; i++)
+                    {
+                        list.Add(sourceList[i]);
+                    }
+
+                    return list;
+                }
+
+                default:
+                {
+                    var count
+                        = source is IReadOnlyCollection<T> collection
+                        ? collection.Count
+                        : (int?)null;
+
+                    var list = count is int initialCapacity
+                             ? new List<T>(initialCapacity)
+                             : new List<T>();
+
+                    if (count == null || count > 0)
+                    {
+                        foreach (var item in source)
+                        {
+                            list.Add(item);
+                        }
+                    }
+
+                    return list;
                 }
             }
         }
