@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     /// <summary>
     /// Represents either a <see cref="FunctionDeclaration"/> or a <see cref="FunctionExpression"/>
