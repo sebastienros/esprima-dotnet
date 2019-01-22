@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class ExportAllDeclaration : Node, ExportDeclaration
     {
@@ -9,5 +11,8 @@
         {
             Source = source;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Source);
     }
 }

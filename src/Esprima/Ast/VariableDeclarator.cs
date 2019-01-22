@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class VariableDeclarator : Node
@@ -11,5 +13,8 @@ namespace Esprima.Ast
             Id = id;
             Init = init;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Id, Init);
     }
 }

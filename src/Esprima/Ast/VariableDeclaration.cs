@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class VariableDeclaration : Statement,
@@ -13,5 +15,7 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Declarations);
     }
 }

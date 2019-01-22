@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class NewExpression : Node,
@@ -13,5 +15,7 @@ namespace Esprima.Ast
             Arguments = args;
         }
 
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Callee, Arguments);
     }
 }

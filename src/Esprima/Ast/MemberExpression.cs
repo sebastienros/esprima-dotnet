@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public abstract class MemberExpression : Node,
@@ -17,5 +19,8 @@ namespace Esprima.Ast
             Property = property;
             Computed = computed;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Object, Property);
     }
 }

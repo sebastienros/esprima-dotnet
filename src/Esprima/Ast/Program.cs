@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class Program : Statement
@@ -16,5 +18,8 @@ namespace Esprima.Ast
             HoistingScope = hoistingScope;
             Strict = strict;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Body);
     }
 }

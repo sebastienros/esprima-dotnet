@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class ContinueStatement : Statement
@@ -9,5 +11,8 @@ namespace Esprima.Ast
         {
             Label = label;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Label);
     }
 }

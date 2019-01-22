@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class ImportNamespaceSpecifier : Node, ImportDeclarationSpecifier
     {
@@ -9,5 +11,8 @@
         {
             Local = local;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Local);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class ClassDeclaration : Node,
         Declaration
@@ -14,5 +16,8 @@
             SuperClass = superClass;
             Body = body;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Id, SuperClass, Body);
     }
 }

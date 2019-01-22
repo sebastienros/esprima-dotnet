@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class ArrayExpression : Node, Expression
@@ -9,5 +11,8 @@ namespace Esprima.Ast
         {
             Elements = elements;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Elements);
     }
 }

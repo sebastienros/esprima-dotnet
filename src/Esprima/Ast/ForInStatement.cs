@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class ForInStatement : Statement
@@ -15,5 +17,8 @@ namespace Esprima.Ast
             Body = body;
             Each = false;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right, Body);
     }
 }

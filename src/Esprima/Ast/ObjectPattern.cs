@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class ObjectPattern : Node, BindingPattern
     {
@@ -9,5 +11,8 @@
         {
             Properties = properties;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Properties);
     }
 }

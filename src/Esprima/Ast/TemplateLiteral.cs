@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class TemplateLiteral : Node,
         Expression
@@ -12,5 +14,8 @@
             Quasis = quasis;
             Expressions = expressions;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Quasis, Expressions);
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class FunctionDeclaration : Statement, Declaration, IFunction
@@ -28,5 +30,8 @@ namespace Esprima.Ast
             HoistingScope = hoistingScope;
             Strict = strict;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Id, Params, Body);
     }
 }

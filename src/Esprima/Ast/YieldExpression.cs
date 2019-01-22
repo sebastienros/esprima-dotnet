@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class YieldExpression : Node, Expression
     {
@@ -11,5 +13,8 @@
             Argument = argument;
             Delegate = delgate;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Argument);
     }
 }

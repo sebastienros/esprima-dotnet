@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class AssignmentPattern :
         Node,
@@ -16,5 +18,8 @@
             Left = left;
             Right = right;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right);
     }
 }

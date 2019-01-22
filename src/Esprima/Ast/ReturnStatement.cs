@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class ReturnStatement : Statement
@@ -10,5 +12,7 @@ namespace Esprima.Ast
             Argument = argument;
         }
 
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Argument);
     }
 }

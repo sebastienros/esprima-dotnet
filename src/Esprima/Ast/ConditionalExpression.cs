@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class ConditionalExpression : Node,
@@ -14,5 +16,8 @@ namespace Esprima.Ast
             Consequent = consequent;
             Alternate = alternate;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Test, Consequent, Alternate);
     }
 }

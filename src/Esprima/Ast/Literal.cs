@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
@@ -48,5 +50,8 @@ namespace Esprima.Ast
             // value is null if a Regex object couldn't be created out of the pattern or options
             Regex = new RegexValue(pattern, flags);
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            Enumerable.Empty<INode>();
     }
 }

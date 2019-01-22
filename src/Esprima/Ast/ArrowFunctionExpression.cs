@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class ArrowFunctionExpression : Node, Expression
     {
@@ -19,6 +21,9 @@
             Generator = false;
             Expression = expression;
             HoistingScope = hoistingScope;
-        }        
+        }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Params, Body);
     }
 }

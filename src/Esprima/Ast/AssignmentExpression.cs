@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Esprima.Utils;
 
 namespace Esprima.Ast
@@ -85,5 +86,8 @@ namespace Esprima.Ast
                     throw new ArgumentOutOfRangeException("Invalid assignment operator: " + op);
             }
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right);
     }
 }
