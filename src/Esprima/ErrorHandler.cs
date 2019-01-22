@@ -1,10 +1,10 @@
-﻿namespace Esprima
-{
-    using Ast;
+﻿using System.Collections.Generic;
 
+namespace Esprima
+{
     public class ErrorHandler : IErrorHandler
     {
-        public List<ParserException> Errors { get; }
+        public IList<ParserException> Errors { get; }
         public bool Tolerant { get; set; }
 
         public string Source { get; set; }
