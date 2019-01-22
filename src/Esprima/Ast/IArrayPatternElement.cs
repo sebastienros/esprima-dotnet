@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Ast
 {
-    public interface IArrayPatternElement
+    public interface IArrayPatternElement : INode
     {
     }
 }

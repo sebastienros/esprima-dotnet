@@ -2,9 +2,9 @@
 {
     public class ArrayPattern : Node, BindingPattern
     {
-        public readonly List<ArrayPatternElement> Elements;
+        public readonly List<IArrayPatternElement> Elements;
 
-        public ArrayPattern(List<ArrayPatternElement> elements) :
+        public ArrayPattern(List<IArrayPatternElement> elements) :
             base(Nodes.ArrayPattern)
         {
             Elements = elements;
