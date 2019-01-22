@@ -3,7 +3,7 @@
     public class AssignmentPattern :
         Node,
         Expression,
-        ArrayPatternElement,
+        IArrayPatternElement,
         FunctionParameter,
         PropertyValue
     {

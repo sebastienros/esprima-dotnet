@@ -1051,13 +1051,13 @@ namespace Esprima
 
                     break;
                 case Nodes.ArrayExpression:
-                    var elements = new Ast.List<ArrayPatternElement>();
+                    var elements = new Ast.List<IArrayPatternElement>();
 
                     foreach (var element in expr.As<ArrayExpression>().Elements)
                     {
                         if (element != null)
                         {
-                            elements.Add(ReinterpretExpressionAsPattern(element).As<ArrayPatternElement>());
+                            elements.Add(ReinterpretExpressionAsPattern(element).As<IArrayPatternElement>());
                         }
                         else
                         {
@@ -2152,7 +2152,7 @@ namespace Esprima
             var node = CreateNode();
 
             Expect("[");
-            var elements = new Ast.List<ArrayPatternElement>();
+            var elements = new Ast.List<IArrayPatternElement>();
             while (!Match("]"))
             {
                 if (Match(","))
@@ -2249,9 +2249,9 @@ namespace Esprima
             return Finalize(node, new ObjectPattern(properties));
         }
 
-        private ArrayPatternElement ParsePattern(ref Ast.List<Token> parameters, VariableDeclarationKind? kind = null)
+        private IArrayPatternElement ParsePattern(ref Ast.List<Token> parameters, VariableDeclarationKind? kind = null)
         {
-            ArrayPatternElement pattern;
+            IArrayPatternElement pattern;
 
             if (Match("["))
             {
@@ -2274,7 +2274,7 @@ namespace Esprima
             return pattern;
         }
 
-        private ArrayPatternElement ParsePatternWithDefault(ref Ast.List<Token> parameters, VariableDeclarationKind? kind = null)
+        private IArrayPatternElement ParsePatternWithDefault(ref Ast.List<Token> parameters, VariableDeclarationKind? kind = null)
         {
             var startToken = _lookahead;
 
@@ -2937,7 +2937,7 @@ namespace Esprima
             Expect(")");
             var body = ParseBlock();
 
-            return Finalize(node, new CatchClause(param.As<ArrayPatternElement>(), body));
+            return Finalize(node, new CatchClause(param.As<IArrayPatternElement>(), body));
         }
 
         private BlockStatement ParseFinallyClause()
