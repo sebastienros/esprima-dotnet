@@ -4,7 +4,7 @@ namespace Esprima.Ast
 {
     public abstract class MemberExpression : Node,
         Expression,
-        ArrayPatternElement
+        IArrayPatternElement
     {
         public readonly Expression Object;
         public readonly Expression Property;

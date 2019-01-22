@@ -5,7 +5,7 @@ namespace Esprima.Ast
     public class AssignmentPattern :
         Node,
         Expression,
-        ArrayPatternElement,
+        IArrayPatternElement,
         FunctionParameter,
         PropertyValue
     {

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>Esprima.Benchmark</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>Esprima.Benchmark</PackageId>
+    <IsPackable>false</IsPackable>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>

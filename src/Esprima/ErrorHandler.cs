@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima
+﻿namespace Esprima
 {
     using Ast;
 
