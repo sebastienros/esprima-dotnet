@@ -1,10 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    using System.Collections.Generic;
-
     public enum BinaryOperator
     {
         [EnumMember(Value = "+")]
