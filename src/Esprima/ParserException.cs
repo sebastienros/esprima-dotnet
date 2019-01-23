@@ -8,6 +8,7 @@ namespace Esprima
         public string Description;
         public int Index;
         public int LineNumber;
+        public string SourceText;
 
         public ParserException(string message) : base(message)
         {

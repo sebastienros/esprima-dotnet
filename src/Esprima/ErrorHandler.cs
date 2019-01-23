@@ -41,7 +41,7 @@ namespace Esprima
                 Column = col,
                 LineNumber = line,
                 Description = description,
-                Source = Source
+                SourceText = Source
             };
             return error;
         }
