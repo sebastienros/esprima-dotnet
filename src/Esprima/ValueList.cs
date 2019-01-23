@@ -12,58 +12,12 @@ namespace Esprima
         private T[] _items;
         private int _count;
 
-        internal ValueList(int initialCapacity)
-        {
-            _items = initialCapacity == 0 ? null : new T[initialCapacity];
-            _count = 0;
-        }
-
-        public ValueList(ValueList<T> list) : this()
-        {
-            if (list.Count <= 0)
-            {
-                return;
-            }
-
-            _items = new T[list.Count];
-            list._items.CopyTo(_items, 0);
-            _count = list.Count;
-        }
-
-        internal ValueList(ICollection<T> collection) :
-            this((collection ?? throw new ArgumentNullException(nameof(collection))).Count)
-        {
-            collection.CopyTo(_items, 0);
-            _count = collection.Count;
-        }
-
         private int Capacity => _items?.Length ?? 0;
 
         public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _count;
-        }
-
-        internal ValueList<TResult> Select<TResult>(Func<T, TResult> selector)
-        {
-            if (selector == null)
-            {
-                throw new ArgumentNullException(nameof(selector));
-            }
-
-            var list = new ValueList<TResult>
-            {
-                _count = Count,
-                _items = new TResult[Count]
-            };
-
-            for (var i = 0; i < Count; i++)
-            {
-                list._items[i] = selector(_items[i]);
-            }
-
-            return list;
         }
 
         internal void AddRange<TSource>(ValueList<TSource> list) where TSource : T
@@ -124,16 +78,6 @@ namespace Esprima
             get => index >= 0 && index < Count
                  ? _items[index]
                  : Throw<T>(new IndexOutOfRangeException());
-
-            internal set
-            {
-                if (index < 0 || index >= Count)
-                {
-                    throw new IndexOutOfRangeException();
-                }
-
-                _items[index] = value;
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
