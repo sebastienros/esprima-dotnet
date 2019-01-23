@@ -34,7 +34,7 @@ namespace Esprima
 
         public ParserException CreateError(int index, int line, int col, string description)
         {
-            return new ParserException(description, Source, index, line, col);
+            return new ParserException(new ParseError(description, Source, index, new Position(line, col)));
         }
 
         public void TolerateError(int index, int line, int col, string description)

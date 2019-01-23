@@ -4,41 +4,33 @@ namespace Esprima
 {
     public class ParserException : Exception
     {
-        public string Description { get; }
-        public string SourceText  { get; }
-        public int Index          { get; }
-        public int LineNumber     { get; }
-        public int Column         { get; }
+        public ParseError Error  { get; }
+
+        public string Description => Error?.Description;
+        public string SourceText  => Error?.Source;
+        public int Index          => Error?.Index ?? -1;
+        public int LineNumber     => Error?.LineNumber ?? 0;
+        public int Column         => Error?.Column ?? 0;
 
         public ParserException() :
-            this(null) {}
+            this(null, null, null) {}
 
         public ParserException(string message) :
-            this(message, null) {}
+            this(message, null, null) {}
 
-        public ParserException(string description,
-            string sourceText, int index, int lineNumber, int column) :
-            this(null, description, sourceText, index, lineNumber, column) {}
+        public ParserException(string message, Exception innerException) :
+            this(message, null, innerException) {}
 
-        public ParserException(string message, string description) :
-            this(message, description, null, 0, 0, 0) {}
+        public ParserException(ParseError error) :
+            this(null, error) {}
 
-        public ParserException(string message, string description,
-            string sourceText, int index, int lineNumber, int column) :
-            base(message ?? FormatDefaultMessage(description, lineNumber))
+        public ParserException(string message, ParseError error) :
+            this(message, error, null) {}
+
+        public ParserException(string message, ParseError error, Exception innerException) :
+            base(message ?? error?.ToString(), innerException)
         {
-            Description = description;
-            SourceText  = sourceText;
-            Index       = index;
-            LineNumber  = lineNumber;
-            Column      = column;
+            Error = error;
         }
-
-        static string FormatDefaultMessage(string description, int lineNumber)
-            => description is string desc
-             ? lineNumber > 0
-             ? $"Line {lineNumber}: {desc}"
-             : desc
-             : null;
     }
 }
