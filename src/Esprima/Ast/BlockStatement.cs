@@ -4,9 +4,9 @@ namespace Esprima.Ast
 {
     public class BlockStatement : Statement
     {
-        public readonly List<IStatementListItem> Body;
+        public readonly NodeList<IStatementListItem> Body;
 
-        public BlockStatement(List<IStatementListItem> body) :
+        public BlockStatement(NodeList<IStatementListItem> body) :
             base(Nodes.BlockStatement)
         {
             Body = body;

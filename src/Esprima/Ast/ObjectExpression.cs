@@ -4,9 +4,9 @@ namespace Esprima.Ast
 {
     public class ObjectExpression : Node, Expression
     {
-        public readonly List<Property> Properties;
+        public readonly NodeList<Property> Properties;
 
-        public ObjectExpression(List<Property> properties) :
+        public ObjectExpression(NodeList<Property> properties) :
             base(Nodes.ObjectExpression)
         {
             Properties = properties;

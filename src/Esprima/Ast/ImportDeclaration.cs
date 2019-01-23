@@ -4,10 +4,10 @@ namespace Esprima.Ast
 {
     public class ImportDeclaration : Node, IDeclaration
     {
-        public readonly List<ImportDeclarationSpecifier> Specifiers;
+        public readonly NodeList<ImportDeclarationSpecifier> Specifiers;
         public readonly Literal Source;
 
-        public ImportDeclaration(List<ImportDeclarationSpecifier> specifiers, Literal source) :
+        public ImportDeclaration(NodeList<ImportDeclarationSpecifier> specifiers, Literal source) :
             base(Nodes.ImportDeclaration)
         {
             Specifiers = specifiers;

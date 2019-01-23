@@ -6,7 +6,7 @@
     public interface IFunction : INode
     {
         Identifier Id { get; }
-        List<INode> Params { get; }
+        NodeList<INode> Params { get; }
         BlockStatement Body { get; }
         bool Generator { get; }
         bool Expression { get; }

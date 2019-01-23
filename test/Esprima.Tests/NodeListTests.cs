@@ -6,9 +6,9 @@ using Xunit;
 
 namespace Esprima.Tests
 {
-    public class ListTests
+    public class NodeListTests
     {
-        public static TheoryData<int, int, Lazy<List<Literal>>>
+        public static TheoryData<int, int, Lazy<NodeList<Literal>>>
             CreateTestData(int start, int count)
         {
             var array =
@@ -17,11 +17,11 @@ namespace Esprima.Tests
                     .Select(x => new Literal(x, x.ToString(CultureInfo.InvariantCulture)))
                     .ToArray();
 
-            return new TheoryData<int, int, Lazy<List<Literal>>>
+            return new TheoryData<int, int, Lazy<NodeList<Literal>>>
             {
-                { start, count, Lazy.Create("Sequence"    , () => List.Create(array.Select(x => x))) },
-                { start, count, Lazy.Create("Collection"  , () => List.Create(new BreakingCollection<Literal>(array))) },
-                { start, count, Lazy.Create("ReadOnlyList", () => List.Create(new BreakingReadOnlyList<Literal>(array))) },
+                { start, count, Lazy.Create("Sequence"    , () => NodeList.Create(array.Select(x => x))) },
+                { start, count, Lazy.Create("Collection"  , () => NodeList.Create(new BreakingCollection<Literal>(array))) },
+                { start, count, Lazy.Create("ReadOnlyList", () => NodeList.Create(new BreakingReadOnlyList<Literal>(array))) },
             };
         }
 
@@ -32,7 +32,7 @@ namespace Esprima.Tests
         [MemberData(nameof(CreateTestData), 1, 7)]
         [MemberData(nameof(CreateTestData), 1, 10)]
         [MemberData(nameof(CreateTestData), 1, 22)]
-        public void Create(int start, int count, Lazy<List<Literal>> xs)
+        public void Create(int start, int count, Lazy<NodeList<Literal>> xs)
         {
             var list = xs.Value;
 

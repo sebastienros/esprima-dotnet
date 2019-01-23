@@ -14,18 +14,18 @@ namespace Esprima.Ast
     // however causes no heap allocation; that is, the array is allocated
     // on first addition.
 
-    public struct List<T> : IReadOnlyList<T> where T : INode
+    public struct NodeList<T> : IReadOnlyList<T> where T : INode
     {
         private T[] _items;
         private int _count;
 
-        internal List(int initialCapacity)
+        internal NodeList(int initialCapacity)
         {
             _items = initialCapacity == 0 ? null : new T[initialCapacity];
             _count = 0;
         }
 
-        public List(List<T> list) : this()
+        public NodeList(NodeList<T> list) : this()
         {
             if (list.Count <= 0)
             {
@@ -37,7 +37,7 @@ namespace Esprima.Ast
             _count = list.Count;
         }
 
-        internal List(ICollection<T> collection) :
+        internal NodeList(ICollection<T> collection) :
             this((collection ?? throw new ArgumentNullException(nameof(collection))).Count)
         {
             collection.CopyTo(_items, 0);
@@ -52,14 +52,14 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        internal List<TResult> Select<TResult>(Func<T, TResult> selector) where TResult : INode
+        internal NodeList<TResult> Select<TResult>(Func<T, TResult> selector) where TResult : INode
         {
             if (selector == null)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
 
-            var list = new List<TResult>
+            var list = new NodeList<TResult>
             {
                 _count = Count,
                 _items = new TResult[Count]
@@ -73,7 +73,7 @@ namespace Esprima.Ast
             return list;
         }
 
-        internal void AddRange<TSource>(List<TSource> list) where TSource : T
+        internal void AddRange<TSource>(NodeList<TSource> list) where TSource : T
         {
             if (list.Count == 0)
             {
@@ -233,12 +233,12 @@ namespace Esprima.Ast
         }
     }
 
-    public static class List
+    public static class NodeList
     {
-        public static List<T> Create<T>(List<T> source) where T : INode =>
+        public static NodeList<T> Create<T>(NodeList<T> source) where T : INode =>
             source;
 
-        public static List<T> Create<T>(IEnumerable<T> source) where T : INode
+        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : INode
         {
             switch (source)
             {
@@ -247,7 +247,7 @@ namespace Esprima.Ast
                     throw new ArgumentNullException(nameof(source));
                 }
 
-                case List<T> list:
+                case NodeList<T> list:
                 {
                     return Create(list);
                 }
@@ -255,7 +255,7 @@ namespace Esprima.Ast
                 case ICollection<T> collection:
                 {
                     return collection.Count > 0
-                         ? new List<T>(collection)
+                         ? new NodeList<T>(collection)
                          : default;
                 }
 
@@ -266,7 +266,7 @@ namespace Esprima.Ast
                         return default;
                     }
 
-                    var list = new List<T>(sourceList.Count);
+                    var list = new NodeList<T>(sourceList.Count);
                     for (var i = 0; i < sourceList.Count; i++)
                     {
                         list.Add(sourceList[i]);
@@ -283,8 +283,8 @@ namespace Esprima.Ast
                         : (int?)null;
 
                     var list = count is int initialCapacity
-                             ? new List<T>(initialCapacity)
-                             : new List<T>();
+                             ? new NodeList<T>(initialCapacity)
+                             : new NodeList<T>();
 
                     if (count == null || count > 0)
                     {

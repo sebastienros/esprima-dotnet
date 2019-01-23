@@ -32,7 +32,7 @@ namespace Esprima.Ast
         /// </summary>
 
         public static IEnumerable<INode> Yield<T>(
-            List<T> first, INode second = null)
+            NodeList<T> first, INode second = null)
             where T : INode
         {
             foreach (INode node in first)
@@ -50,7 +50,7 @@ namespace Esprima.Ast
         /// </summary>
 
         public static IEnumerable<INode> Yield<T1, T2>(
-            List<T1> first, List<T2> second)
+            NodeList<T1> first, NodeList<T2> second)
             where T1 : INode
             where T2 : INode
         {
@@ -68,7 +68,7 @@ namespace Esprima.Ast
         /// </summary>
 
         public static IEnumerable<INode> Yield<T>(
-            INode first, List<T> second, INode third = null)
+            INode first, NodeList<T> second, INode third = null)
             where T : INode
         {
             if (first != null)

@@ -4,9 +4,9 @@ namespace Esprima.Ast
 {
     public class SequenceExpression : Node, Expression
     {
-        public List<Expression> Expressions { get; internal set; }
+        public NodeList<Expression> Expressions { get; internal set; }
 
-        public SequenceExpression(List<Expression> expressions) :
+        public SequenceExpression(NodeList<Expression> expressions) :
             base(Nodes.SequenceExpression)
         {
             Expressions = expressions;

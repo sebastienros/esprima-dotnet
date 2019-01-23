@@ -6,13 +6,13 @@ namespace Esprima.Ast
         Expression
     {
         public readonly Expression Callee;
-        public readonly List<ArgumentListElement> Arguments;
+        public readonly NodeList<ArgumentListElement> Arguments;
 
         public bool Cached;
         public bool CanBeCached = true;
         public object CachedArguments;
 
-        public CallExpression(Expression callee, List<ArgumentListElement> args) :
+        public CallExpression(Expression callee, NodeList<ArgumentListElement> args) :
             base(Nodes.CallExpression)
         {
             Callee = callee;

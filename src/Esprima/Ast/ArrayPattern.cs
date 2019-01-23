@@ -4,9 +4,9 @@ namespace Esprima.Ast
 {
     public class ArrayPattern : Node, BindingPattern
     {
-        public readonly List<IArrayPatternElement> Elements;
+        public readonly NodeList<IArrayPatternElement> Elements;
 
-        public ArrayPattern(List<IArrayPatternElement> elements) :
+        public ArrayPattern(NodeList<IArrayPatternElement> elements) :
             base(Nodes.ArrayPattern)
         {
             Elements = elements;
