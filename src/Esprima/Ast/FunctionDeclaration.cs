@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class FunctionDeclaration : Statement, Declaration, IFunction
+    public class FunctionDeclaration : Statement, IDeclaration, IFunction
     {
         public Identifier Id { get; }
         public List<INode> Params { get; }

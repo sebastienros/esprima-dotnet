@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Ast
 {
-    public interface StatementListItem
+    public interface IStatementListItem : INode
     {
     }
 }

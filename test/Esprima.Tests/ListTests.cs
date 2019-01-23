@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using Esprima.Ast;
 using Xunit;
@@ -7,17 +8,20 @@ namespace Esprima.Tests
 {
     public class ListTests
     {
-        public static TheoryData<int, int, Lazy<List<int>>>
+        public static TheoryData<int, int, Lazy<List<Literal>>>
             CreateTestData(int start, int count)
         {
-            var sequence = Enumerable.Range(start, count);
-            var array = sequence.ToArray();
+            var array =
+                Enumerable
+                    .Range(start, count)
+                    .Select(x => new Literal(x, x.ToString(CultureInfo.InvariantCulture)))
+                    .ToArray();
 
-            return new TheoryData<int, int, Lazy<List<int>>>
+            return new TheoryData<int, int, Lazy<List<Literal>>>
             {
-                { start, count, Lazy.Create("Sequence"    , () => List.Create(sequence.AsEnumerable())) },
-                { start, count, Lazy.Create("Collection"  , () => List.Create(new BreakingCollection<int>(array))) },
-                { start, count, Lazy.Create("ReadOnlyList", () => List.Create(new BreakingReadOnlyList<int>(array))) },
+                { start, count, Lazy.Create("Sequence"    , () => List.Create(array.Select(x => x))) },
+                { start, count, Lazy.Create("Collection"  , () => List.Create(new BreakingCollection<Literal>(array))) },
+                { start, count, Lazy.Create("ReadOnlyList", () => List.Create(new BreakingReadOnlyList<Literal>(array))) },
             };
         }
 
@@ -28,7 +32,7 @@ namespace Esprima.Tests
         [MemberData(nameof(CreateTestData), 1, 7)]
         [MemberData(nameof(CreateTestData), 1, 10)]
         [MemberData(nameof(CreateTestData), 1, 22)]
-        public void Create(int start, int count, Lazy<List<int>> xs)
+        public void Create(int start, int count, Lazy<List<Literal>> xs)
         {
             var list = xs.Value;
 
@@ -36,7 +40,7 @@ namespace Esprima.Tests
 
             for (var i = 0; i < count; i++)
             {
-                Assert.Equal(start + i, list[i]);
+                Assert.Equal(start + i, list[i].NumericValue);
             }
 
             using (var e = list.GetEnumerator())
@@ -44,7 +48,7 @@ namespace Esprima.Tests
                 for (var i = 0; i < count; i++)
                 {
                     Assert.True(e.MoveNext());
-                    Assert.Equal(start + i, e.Current);
+                    Assert.Equal(start + i, e.Current.NumericValue);
                 }
 
                 Assert.False(e.MoveNext());

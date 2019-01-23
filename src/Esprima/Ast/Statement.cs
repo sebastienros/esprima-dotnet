@@ -1,6 +1,6 @@
 namespace Esprima.Ast
 {
-    public abstract class Statement : Node, INode, StatementListItem
+    public abstract class Statement : Node, INode, IStatementListItem
     {
         protected Statement(Nodes type) : base(type) {}
 

@@ -5,27 +5,20 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using static Esprima.JitHelper;
 
-namespace Esprima.Ast
+namespace Esprima
 {
-    // This structure is like List<> from the BCL except it is designed
-    // to be modifiable by this library during the construction of the AST
-    // but publicly read-only thereafter. The only allocation required on the
-    // heap is the backing array storage for the element. An empty list,
-    // however causes no heap allocation; that is, the array is allocated
-    // on first addition.
-
-    public struct List<T> : IReadOnlyList<T> where T : INode
+    internal struct ValueList<T> : IReadOnlyList<T>
     {
         private T[] _items;
         private int _count;
 
-        internal List(int initialCapacity)
+        internal ValueList(int initialCapacity)
         {
             _items = initialCapacity == 0 ? null : new T[initialCapacity];
             _count = 0;
         }
 
-        public List(List<T> list) : this()
+        public ValueList(ValueList<T> list) : this()
         {
             if (list.Count <= 0)
             {
@@ -37,7 +30,7 @@ namespace Esprima.Ast
             _count = list.Count;
         }
 
-        internal List(ICollection<T> collection) :
+        internal ValueList(ICollection<T> collection) :
             this((collection ?? throw new ArgumentNullException(nameof(collection))).Count)
         {
             collection.CopyTo(_items, 0);
@@ -52,14 +45,14 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        internal List<TResult> Select<TResult>(Func<T, TResult> selector) where TResult : INode
+        internal ValueList<TResult> Select<TResult>(Func<T, TResult> selector)
         {
             if (selector == null)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
 
-            var list = new List<TResult>
+            var list = new ValueList<TResult>
             {
                 _count = Count,
                 _items = new TResult[Count]
@@ -73,7 +66,7 @@ namespace Esprima.Ast
             return list;
         }
 
-        internal void AddRange<TSource>(List<TSource> list) where TSource : T
+        internal void AddRange<TSource>(ValueList<TSource> list) where TSource : T
         {
             if (list.Count == 0)
             {
@@ -228,73 +221,6 @@ namespace Esprima.Ast
                 if (IsDisposed)
                 {
                     Throw<T>(new ObjectDisposedException(GetType().Name));
-                }
-            }
-        }
-    }
-
-    public static class List
-    {
-        public static List<T> Create<T>(List<T> source) where T : INode =>
-            source;
-
-        public static List<T> Create<T>(IEnumerable<T> source) where T : INode
-        {
-            switch (source)
-            {
-                case null:
-                {
-                    throw new ArgumentNullException(nameof(source));
-                }
-
-                case List<T> list:
-                {
-                    return Create(list);
-                }
-
-                case ICollection<T> collection:
-                {
-                    return collection.Count > 0
-                         ? new List<T>(collection)
-                         : default;
-                }
-
-                case IReadOnlyList<T> sourceList:
-                {
-                    if (sourceList.Count == 0)
-                    {
-                        return default;
-                    }
-
-                    var list = new List<T>(sourceList.Count);
-                    for (var i = 0; i < sourceList.Count; i++)
-                    {
-                        list.Add(sourceList[i]);
-                    }
-
-                    return list;
-                }
-
-                default:
-                {
-                    var count
-                        = source is IReadOnlyCollection<T> collection
-                        ? collection.Count
-                        : (int?)null;
-
-                    var list = count is int initialCapacity
-                             ? new List<T>(initialCapacity)
-                             : new List<T>();
-
-                    if (count == null || count > 0)
-                    {
-                        foreach (var item in source)
-                        {
-                            list.Add(item);
-                        }
-                    }
-
-                    return list;
                 }
             }
         }

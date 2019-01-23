@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents either a <see cref="FunctionDeclaration"/> or a <see cref="FunctionExpression"/>
     /// </summary>
-    public interface IFunction
+    public interface IFunction : INode
     {
         Identifier Id { get; }
         List<INode> Params { get; }

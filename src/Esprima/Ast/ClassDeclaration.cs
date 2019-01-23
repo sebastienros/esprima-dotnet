@@ -3,7 +3,7 @@
 namespace Esprima.Ast
 {
     public class ClassDeclaration : Node,
-        Declaration
+        IDeclaration
     {
         public readonly Identifier Id;
         public readonly Expression SuperClass; // Identifier || CallExpression

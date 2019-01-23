@@ -242,6 +242,7 @@ namespace Esprima.Utils
                 Member(name, nodes, node => node);
 
             private void Member<T>(string name, Ast.List<T> list, Func<T, INode> nodeSelector)
+                where T : INode
             {
                 Member(name);
                 _writer.StartArray();

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Esprima.Ast
 {
     public class VariableDeclaration : Statement,
-        Declaration
+        IDeclaration
     {
         public readonly List<VariableDeclarator> Declarations;
         public readonly VariableDeclarationKind Kind;
