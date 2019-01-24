@@ -678,7 +678,7 @@ namespace Esprima
         private ArrayExpression ParseArrayInitializer()
         {
             var node = CreateNode();
-            var elements = new Ast.NodeList<ArrayExpressionElement>();
+            var elements = new NodeList<ArrayExpressionElement>();
 
             Expect("[");
 
@@ -929,7 +929,7 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            var properties = new Ast.NodeList<Property>();
+            var properties = new NodeList<Property>();
             var hasProto = RentToken();
             hasProto.Value = "false";
             hasProto.BooleanValue = false;
@@ -1010,8 +1010,8 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            var expressions = new Ast.NodeList<Expression>();
-            var quasis = new Ast.NodeList<TemplateElement>();
+            var expressions = new NodeList<Expression>();
+            var quasis = new NodeList<TemplateElement>();
 
             var quasi = ParseTemplateHead();
             quasis.Add(quasi);
@@ -1051,7 +1051,7 @@ namespace Esprima
 
                     break;
                 case Nodes.ArrayExpression:
-                    var elements = new Ast.NodeList<IArrayPatternElement>();
+                    var elements = new NodeList<IArrayPatternElement>();
 
                     foreach (var element in expr.As<ArrayExpression>().Elements)
                     {
@@ -1072,7 +1072,7 @@ namespace Esprima
 
                     break;
                 case Nodes.ObjectExpression:
-                    var properties = new Ast.NodeList<Property>();
+                    var properties = new NodeList<Property>();
 
                     foreach (var property in (expr.As<ObjectExpression>()).Properties)
                     {
@@ -1125,7 +1125,7 @@ namespace Esprima
                     {
                         Expect("=>");
                     }
-                    expr = new ArrowParameterPlaceHolder(new Ast.NodeList<INode>(1) { rest });
+                    expr = new ArrowParameterPlaceHolder(new NodeList<INode>(1) { rest });
                 }
                 else
                 {
@@ -1135,7 +1135,7 @@ namespace Esprima
 
                     if (Match(","))
                     {
-                        var expressions = new Ast.NodeList<Expression>();
+                        var expressions = new NodeList<Expression>();
 
                         _context.IsAssignmentTarget = false;
                         expressions.Add(expr.As<Expression>());
@@ -1160,7 +1160,7 @@ namespace Esprima
                                     Expect("=>");
                                 }
                                 _context.IsBindingElement = false;
-                                var reinterpretedExpressions = new Ast.NodeList<Expression>();
+                                var reinterpretedExpressions = new NodeList<Expression>();
                                 foreach (var expression in expressions)
                                 {
                                     reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
@@ -1192,7 +1192,7 @@ namespace Esprima
                             if (expr.Type == Nodes.Identifier && ((Identifier)expr).Name == "yield")
                             {
                                 arrow = true;
-                                expr = new ArrowParameterPlaceHolder(new Ast.NodeList<INode>(1) { expr });
+                                expr = new ArrowParameterPlaceHolder(new NodeList<INode>(1) { expr });
                             }
                             if (!arrow)
                             {
@@ -1204,7 +1204,7 @@ namespace Esprima
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
                                     var sequenceExpression = expr.As<SequenceExpression>();
-                                    var reinterpretedExpressions = new Ast.NodeList<Expression>();
+                                    var reinterpretedExpressions = new NodeList<Expression>();
                                     foreach (var expression in sequenceExpression.Expressions)
                                     {
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
@@ -1222,7 +1222,7 @@ namespace Esprima
                                 }
                                 else
                                 {
-                                    expr = new ArrowParameterPlaceHolder(new Ast.NodeList<INode>(1) { expr });
+                                    expr = new ArrowParameterPlaceHolder(new NodeList<INode>(1) { expr });
                                 }
 
                             }
@@ -1237,9 +1237,9 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-left-hand-side-expressions
 
-        private Ast.NodeList<ArgumentListElement> ParseArguments()
+        private NodeList<ArgumentListElement> ParseArguments()
         {
-            var args = new Ast.NodeList<ArgumentListElement>();
+            var args = new NodeList<ArgumentListElement>();
 
             Expect("(");
 
@@ -1312,7 +1312,7 @@ namespace Esprima
             else
             {
                 var callee = IsolateCoverGrammar(parseLeftHandSideExpression);
-                var args = Match("(") ? ParseArguments() : new Ast.NodeList<ArgumentListElement>();
+                var args = Match("(") ? ParseArguments() : new NodeList<ArgumentListElement>();
                 expr = new NewExpression(callee, args);
                 _context.IsAssignmentTarget = false;
                 _context.IsBindingElement = false;
@@ -1771,14 +1771,14 @@ namespace Esprima
 
         private ParsedParameters ReinterpretAsCoverFormalsList(INode expr)
         {
-            var parameters = new Ast.NodeList<INode>(1) { expr };
+            var parameters = new NodeList<INode>(1) { expr };
 
             switch (expr.Type)
             {
                 case Nodes.Identifier:
                     break;
                 case Nodes.ArrowParameterPlaceHolder:
-                    parameters = new Ast.NodeList<INode>(expr.As<ArrowParameterPlaceHolder>().Params);
+                    parameters = new NodeList<INode>(expr.As<ArrowParameterPlaceHolder>().Params);
                     break;
                 default:
                     return null;
@@ -1947,7 +1947,7 @@ namespace Esprima
 
             if (Match(","))
             {
-                var expressions = new Ast.NodeList<Expression>();
+                var expressions = new NodeList<Expression>();
                 expressions.Push(expr);
                 while (_startMarker.Index < _scanner.Length)
                 {
@@ -2024,7 +2024,7 @@ namespace Esprima
             var node = CreateNode();
 
             Expect("{");
-            var block = new Ast.NodeList<IStatementListItem>();
+            var block = new NodeList<IStatementListItem>();
             while (true)
             {
                 if (Match("}"))
@@ -2079,9 +2079,9 @@ namespace Esprima
             return Finalize(node, new VariableDeclarator(id, init));
         }
 
-        private Ast.NodeList<VariableDeclarator> ParseBindingList(VariableDeclarationKind kind, ref bool inFor)
+        private NodeList<VariableDeclarator> ParseBindingList(VariableDeclarationKind kind, ref bool inFor)
         {
-            var list = new Ast.NodeList<VariableDeclarator> { ParseLexicalBinding(kind, ref inFor) };
+            var list = new NodeList<VariableDeclarator> { ParseLexicalBinding(kind, ref inFor) };
 
             while (Match(","))
             {
@@ -2152,7 +2152,7 @@ namespace Esprima
             var node = CreateNode();
 
             Expect("[");
-            var elements = new Ast.NodeList<IArrayPatternElement>();
+            var elements = new NodeList<IArrayPatternElement>();
             while (!Match("]"))
             {
                 if (Match(","))
@@ -2233,7 +2233,7 @@ namespace Esprima
         private ObjectPattern ParseObjectPattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
-            var properties = new Ast.NodeList<Property>();
+            var properties = new NodeList<Property>();
 
             Expect("{");
             while (!Match("}"))
@@ -2362,11 +2362,11 @@ namespace Esprima
             return Finalize(node, new VariableDeclarator(id, init));
         }
 
-        private Ast.NodeList<VariableDeclarator> ParseVariableDeclarationList(ref bool inFor)
+        private NodeList<VariableDeclarator> ParseVariableDeclarationList(ref bool inFor)
         {
             var inFor2 = inFor;
 
-            var list = new Ast.NodeList<VariableDeclarator>();
+            var list = new NodeList<VariableDeclarator>();
             list.Push(ParseVariableDeclaration(ref inFor2));
 
             while (Match(","))
@@ -2633,7 +2633,7 @@ namespace Esprima
                     {
                         if (Match(","))
                         {
-                            var initSeq = new Ast.NodeList<Expression>(1) {(Expression) init};
+                            var initSeq = new NodeList<Expression>(1) {(Expression) init};
                             while (Match(","))
                             {
                                 NextToken();
@@ -2795,7 +2795,7 @@ namespace Esprima
             }
             Expect(":");
 
-            var consequent = new Ast.NodeList<IStatementListItem>();
+            var consequent = new NodeList<IStatementListItem>();
             while (true)
             {
                 if (Match("}") || MatchKeyword("default") || MatchKeyword("case"))
@@ -2820,7 +2820,7 @@ namespace Esprima
             var previousInSwitch = _context.InSwitch;
             _context.InSwitch = true;
 
-            var cases = new Ast.NodeList<SwitchCase>();
+            var cases = new NodeList<SwitchCase>();
             var defaultFound = false;
             Expect("{");
             while (true)
@@ -3232,7 +3232,7 @@ namespace Esprima
             Expect("(");
             if (!Match(")"))
             {
-                options.Parameters = new Ast.NodeList<INode>();
+                options.Parameters = new NodeList<INode>();
                 while (_startMarker.Index < _scanner.Length)
                 {
                     if (!ParseFormalParameter(options))
@@ -3424,11 +3424,11 @@ namespace Esprima
                 new ExpressionStatement(expr));
         }
 
-        private Ast.NodeList<IStatementListItem> ParseDirectivePrologues()
+        private NodeList<IStatementListItem> ParseDirectivePrologues()
         {
             Token firstRestricted = null;
 
-            var body = new Ast.NodeList<IStatementListItem>();
+            var body = new NodeList<IStatementListItem>();
             while (true)
             {
                 var token = _lookahead;
@@ -3743,9 +3743,9 @@ namespace Esprima
             return Finalize(node, new MethodDefinition(key, computed, value, kind, isStatic));
         }
 
-        private Ast.NodeList<ClassProperty> ParseClassElementList()
+        private NodeList<ClassProperty> ParseClassElementList()
         {
-            var body = new Ast.NodeList<ClassProperty>();
+            var body = new NodeList<ClassProperty>();
             var hasConstructor = false;
 
             Expect("{");
@@ -3872,10 +3872,10 @@ namespace Esprima
         }
 
         // {foo, bar as bas}
-        private Ast.NodeList<ImportSpecifier> ParseNamedImports()
+        private NodeList<ImportSpecifier> ParseNamedImports()
         {
             Expect("{");
-            var specifiers = new Ast.NodeList<ImportSpecifier>();
+            var specifiers = new NodeList<ImportSpecifier>();
             while (!Match("}"))
             {
                 specifiers.Push(ParseImportSpecifier());
@@ -3924,7 +3924,7 @@ namespace Esprima
             ExpectKeyword("import");
 
             Literal src;
-            var specifiers = new Ast.NodeList<ImportDeclarationSpecifier>();
+            var specifiers = new NodeList<ImportDeclarationSpecifier>();
             if (_lookahead.Type == TokenType.StringLiteral)
             {
                 // import 'foo';
@@ -4084,12 +4084,12 @@ namespace Esprima
                         ThrowUnexpectedToken(_lookahead);
                         break;
                 }
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new Ast.NodeList<ExportSpecifier>(), null));
+                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null));
 
             }
             else
             {
-                var specifiers = new Ast.NodeList<ExportSpecifier>();
+                var specifiers = new NodeList<ExportSpecifier>();
                 Literal source = null;
                 var isExportFromIdentifier = false;
 
@@ -4224,7 +4224,7 @@ namespace Esprima
             private HashSet<string> paramSet = null;
             public Token FirstRestricted;
             public string Message;
-            public Ast.NodeList<INode> Parameters = new Ast.NodeList<INode>();
+            public NodeList<INode> Parameters = new NodeList<INode>();
             public Token Stricted;
 
             public bool ParamSetContains(string key)
