@@ -7,7 +7,7 @@ using static Esprima.JitHelper;
 
 namespace Esprima
 {
-    internal struct ValueList<T> : IReadOnlyList<T>
+    internal struct ArrayList<T> : IReadOnlyList<T>
     {
         private T[] _items;
         private int _count;
@@ -20,7 +20,7 @@ namespace Esprima
             get => _count;
         }
 
-        internal void AddRange<TSource>(ValueList<TSource> list) where TSource : T
+        internal void AddRange<TSource>(ArrayList<TSource> list) where TSource : T
         {
             if (list.Count == 0)
             {

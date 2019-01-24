@@ -214,9 +214,9 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-comments
 
-        private ValueList<Comment> SkipSingleLineComment(int offset)
+        private ArrayList<Comment> SkipSingleLineComment(int offset)
         {
-            var comments = new ValueList<Comment>();
+            var comments = new ArrayList<Comment>();
             int start = 0;
             Loc loc = new Loc();
 
@@ -276,9 +276,9 @@ namespace Esprima
             return comments;
         }
 
-        private ValueList<Comment> SkipMultiLineComment()
+        private ArrayList<Comment> SkipMultiLineComment()
         {
-            var comments = new ValueList<Comment>();
+            var comments = new ArrayList<Comment>();
             int start = 0;
             Loc loc = new Loc();
 
@@ -353,9 +353,9 @@ namespace Esprima
         public IReadOnlyList<Comment> ScanComments() =>
             ScanCommentsInternal();
 
-        internal ValueList<Comment> ScanCommentsInternal()
+        internal ArrayList<Comment> ScanCommentsInternal()
         {
-            var comments = new ValueList<Comment>();
+            var comments = new ArrayList<Comment>();
 
             var start = (Index == 0);
             while (!Eof())

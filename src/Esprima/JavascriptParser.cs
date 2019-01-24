@@ -40,7 +40,7 @@ namespace Esprima
         private bool _hasLineTerminator;
         private readonly Action<INode> _action;
 
-        internal ValueList<Token> Tokens = new ValueList<Token>();
+        internal ArrayList<Token> Tokens = new ArrayList<Token>();
 
         // cache frequently called funcs so we don't need to build Func<T> intances all the time
         private readonly Func<Expression> parseAssignmentExpression;
@@ -1116,7 +1116,7 @@ namespace Esprima
             else
             {
                 var startToken = _lookahead;
-                var parameters = new ValueList<Token>();
+                var parameters = new ArrayList<Token>();
                 if (Match("..."))
                 {
                     var rest = ParseRestElement(ref parameters);
@@ -1660,7 +1660,7 @@ namespace Esprima
                 var left = expr;
                 var right = IsolateCoverGrammar(parseExponentiationExpression);
 
-                var stack = new ValueList<object> { left, token, right };
+                var stack = new ArrayList<object> { left, token, right };
                 while (true)
                 {
                     prec = BinaryPrecedence(_lookahead);
@@ -2043,7 +2043,7 @@ namespace Esprima
         private VariableDeclarator ParseLexicalBinding(VariableDeclarationKind kind, ref bool inFor)
         {
             var node = CreateNode();
-            var parameters = new ValueList<Token>();
+            var parameters = new ArrayList<Token>();
             var id = ParsePattern(ref parameters, kind);
 
             if (_context.Strict && id.Type == Nodes.Identifier)
@@ -2137,7 +2137,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-destructuring-binding-patterns
 
-        private RestElement ParseBindingRestElement(ref ValueList<Token> parameters, VariableDeclarationKind? kind)
+        private RestElement ParseBindingRestElement(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2147,7 +2147,7 @@ namespace Esprima
             return Finalize(node, new RestElement(arg));
         }
 
-        private ArrayPattern ParseArrayPattern(ref ValueList<Token> parameters, VariableDeclarationKind? kind)
+        private ArrayPattern ParseArrayPattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2183,7 +2183,7 @@ namespace Esprima
             return Finalize(node, new ArrayPattern(elements));
         }
 
-        private Property ParsePropertyPattern(ValueList<Token> parameters, VariableDeclarationKind? kind)
+        private Property ParsePropertyPattern(ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2230,7 +2230,7 @@ namespace Esprima
             return Finalize(node, new Property(PropertyKind.Init, key, computed, value, method, shorthand));
         }
 
-        private ObjectPattern ParseObjectPattern(ref ValueList<Token> parameters, VariableDeclarationKind? kind)
+        private ObjectPattern ParseObjectPattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
             var properties = new Ast.NodeList<Property>();
@@ -2249,7 +2249,7 @@ namespace Esprima
             return Finalize(node, new ObjectPattern(properties));
         }
 
-        private IArrayPatternElement ParsePattern(ref ValueList<Token> parameters, VariableDeclarationKind? kind = null)
+        private IArrayPatternElement ParsePattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
         {
             IArrayPatternElement pattern;
 
@@ -2274,7 +2274,7 @@ namespace Esprima
             return pattern;
         }
 
-        private IArrayPatternElement ParsePatternWithDefault(ref ValueList<Token> parameters, VariableDeclarationKind? kind = null)
+        private IArrayPatternElement ParsePatternWithDefault(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
         {
             var startToken = _lookahead;
 
@@ -2337,7 +2337,7 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            var parameters = new ValueList<Token>();
+            var parameters = new ArrayList<Token>();
             var id = ParsePattern(ref parameters, VariableDeclarationKind.Var);
 
             if (_context.Strict && id.Type == Nodes.Identifier)
@@ -2913,7 +2913,7 @@ namespace Esprima
                 ThrowUnexpectedToken(_lookahead);
             }
 
-            var parameters = new ValueList<Token>();
+            var parameters = new ArrayList<Token>();
             var param = ParsePattern(ref parameters);
             var paramMap = new Dictionary<string, bool>();
             for (var i = 0; i < parameters.Count; i++)
@@ -3186,7 +3186,7 @@ namespace Esprima
             options.ParamSetAdd(key);
         }
 
-        private RestElement ParseRestElement(ref ValueList<Token> parameters)
+        private RestElement ParseRestElement(ref ArrayList<Token> parameters)
         {
             var node = CreateNode();
 
@@ -3207,7 +3207,7 @@ namespace Esprima
 
         private bool ParseFormalParameter(ParsedParameters options)
         {
-            var parameters = new ValueList<Token>();
+            var parameters = new ArrayList<Token>();
 
             INode param = Match("...")
                 ? ParseRestElement(ref parameters)
