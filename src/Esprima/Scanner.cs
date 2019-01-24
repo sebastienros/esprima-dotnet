@@ -214,7 +214,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-comments
 
-        internal ValueList<Comment> SkipSingleLineComment(int offset)
+        private ValueList<Comment> SkipSingleLineComment(int offset)
         {
             var comments = new ValueList<Comment>();
             int start = 0;
@@ -276,7 +276,7 @@ namespace Esprima
             return comments;
         }
 
-        internal ValueList<Comment> SkipMultiLineComment()
+        private ValueList<Comment> SkipMultiLineComment()
         {
             var comments = new ValueList<Comment>();
             int start = 0;
