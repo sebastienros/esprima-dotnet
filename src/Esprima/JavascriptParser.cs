@@ -40,7 +40,7 @@ namespace Esprima
         private bool _hasLineTerminator;
         private readonly Action<INode> _action;
 
-        internal ArrayList<Token> Tokens = new ArrayList<Token>();
+        internal List<Token> Tokens = new List<Token>();
 
         // cache frequently called funcs so we don't need to build Func<T> intances all the time
         private readonly Func<Expression> parseAssignmentExpression;
