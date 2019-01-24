@@ -2183,7 +2183,7 @@ namespace Esprima
             return Finalize(node, new ArrayPattern(elements));
         }
 
-        private Property ParsePropertyPattern(Ast.List<Token> parameters, VariableDeclarationKind? kind)
+        private Property ParsePropertyPattern(ref Ast.List<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
 
@@ -2238,7 +2238,7 @@ namespace Esprima
             Expect("{");
             while (!Match("}"))
             {
-                properties.Push(ParsePropertyPattern(parameters, kind));
+                properties.Push(ParsePropertyPattern(ref parameters, kind));
                 if (!Match("}"))
                 {
                     Expect(",");
