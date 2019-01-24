@@ -12,23 +12,33 @@ namespace Esprima
         private T[] _items;
         private int _count;
 
+        private int[] _sharedVersion;
+        private int _localVersion;
+
         private int Capacity => _items?.Length ?? 0;
 
         public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _count;
+            get
+            {
+                AssertUnchanged();
+                return _count;
+            }
         }
 
         internal void AddRange<TSource>(ArrayList<TSource> list) where TSource : T
         {
-            if (list.Count == 0)
+            AssertUnchanged();
+
+            var listCount = list.Count;
+            if (listCount == 0)
             {
                 return;
             }
 
-            var oldCount = Count;
-            var newCount = oldCount + list.Count;
+            var oldCount = _count;
+            var newCount = oldCount + listCount;
 
             if (Capacity < newCount)
             {
@@ -36,27 +46,55 @@ namespace Esprima
             }
 
             Debug.Assert(_items != null);
-            Array.Copy(list._items, 0, _items, oldCount, list.Count);
+            Array.Copy(list._items, 0, _items, oldCount, listCount);
             _count = newCount;
+
+            OnChanged();
         }
 
         internal void Add(T item)
         {
+            AssertUnchanged();
+
             var capacity = Capacity;
 
-            if (Count == capacity)
+            if (_count == capacity)
             {
+                if (_sharedVersion == null)
+                {
+                    _sharedVersion = new[] { 1 };
+                }
+
                 Array.Resize(ref _items, Math.Max(capacity * 2, 4));
             }
 
             Debug.Assert(_items != null);
-            _items[Count] = item;
+            _items[_count] = item;
             _count++;
+
+            OnChanged();
+        }
+
+        private void AssertUnchanged()
+        {
+            if (_localVersion != (_sharedVersion?[0] ?? 0))
+            {
+                throw new InvalidOperationException();
+            }
+        }
+
+        private void OnChanged()
+        {
+            ref var version = ref _sharedVersion[0];
+            version++;
+            _localVersion = version;
         }
 
         internal void RemoveAt(int index)
         {
-            if (index < 0 || index >= Count)
+            AssertUnchanged();
+
+            if (index < 0 || index >= _count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, null);
             }
@@ -64,20 +102,27 @@ namespace Esprima
             _items[index] = default;
             _count--;
 
-            if (index == Count)
+            if (index < _count - 1)
             {
-                return;
+                Array.Copy(_items, index + 1, _items, index, Count - index);
             }
 
-            Array.Copy(_items, index + 1, _items, index, Count - index);
+            OnChanged();
         }
 
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => index >= 0 && index < Count
-                 ? _items[index]
-                 : Throw<T>(new IndexOutOfRangeException());
+            get
+            {
+                if (index < 0 || index >= _count)
+                {
+                    return Throw<T>(new IndexOutOfRangeException());
+                }
+
+                AssertUnchanged();
+                return _items[index];
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,13 +131,17 @@ namespace Esprima
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal T Pop()
         {
-            var lastIndex = Count - 1;
+            var lastIndex = _count - 1;
             var last = this[lastIndex];
             RemoveAt(lastIndex);
             return last;
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(_items, Count);
+        public Enumerator GetEnumerator()
+        {
+            AssertUnchanged();
+            return new Enumerator(_items, _count);
+        }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
 
