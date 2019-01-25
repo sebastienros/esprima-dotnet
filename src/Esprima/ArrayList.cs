@@ -13,6 +13,7 @@ namespace Esprima
     // An empty list, however causes no heap allocation; that is, the array is
     // allocated on first addition.
 
+    [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}, Version = {_localVersion}")]
     internal struct ArrayList<T> : IReadOnlyList<T>
     {
         private T[] _items;
