@@ -19,8 +19,59 @@ namespace Esprima
         private T[] _items;
         private int _count;
 
+        // Having a struct intended for modification can introduce some very
+        // subtle and ugly bugs if not used carefully. For example, two copies
+        // of the struct start with the same base array and modifying either
+        // list may also modify the other. Consider the following:
+        //
+        //     var a = new ArrayList<int>();
+        //     a.Add(1);
+        //     a.Add(2);
+        //     a.Add(3);
+        //     var b = a;
+        //     b.Add(4);
+        //     b.RemoveAt(0);
+        //
+        // Both `a` and `b` will see the same changes. However, they'll appear
+        // to change independently if the example is changed as follows:
+        //
+        //     var a = new ArrayList<int>();
+        //     a.Add(1);
+        //     a.Add(2);
+        //     a.Add(3);
+        //     var b = a;
+        //     b.Add(4);
+        //     b.Add(5);        // <-- only new change
+        //     b.RemoveAt(0);
+        //
+        // When 5 is added to `b`, `b` re-allocates its array to make space
+        // and consequently further changes are only visible in `b`. To help
+        // avoid these subtle bugs, the debug version of this implementation
+        // tracks changes. It maintains a local and a boxed version number.
+        // The boxed version gets shared by all copies of the struct. If a
+        // modification is made via any copy then the boxed version number is
+        // updated. Any subsequent use (even if for reading only) of other
+        // copies check that their local version numbers haven't diverged from
+        // the shared one. In effect, if a copy is made and modified then the
+        // original will throw if ever used. For the example above, this
+        // means while it's safe to continue to use copy `b` after
+        // modification, `a` will become useless:
+        //
+        //     var a = new ArrayList<int>();
+        //     a.Add(1);
+        //     a.Add(2);
+        //     a.Add(3);
+        //     var b = a;
+        //     b.Add(4);
+        //     b.Add(5);
+        //     b.RemoveAt(0);
+        //     Console.WriteLine(b.Count); // safe to continue to use
+        //     Console.WriteLine(a.Count); // will throw
+
+#if DEBUG
         private int[] _sharedVersion;
         private int _localVersion;
+#endif
 
         public ArrayList(int initialCapacity)
         {
@@ -31,8 +82,11 @@ namespace Esprima
 
             _items = initialCapacity > 0 ? new T[initialCapacity] : null;
             _count = 0;
+
+#if DEBUG
             _localVersion = 0;
             _sharedVersion = initialCapacity > 0 ? new[] { _localVersion } : null;
+#endif
         }
 
         private int Capacity => _items?.Length ?? 0;
@@ -62,12 +116,7 @@ namespace Esprima
 
             if (Capacity < newCount)
             {
-                if (_sharedVersion == null)
-                {
-                    _sharedVersion = new[] { 1 };
-                }
-
-                Array.Resize(ref _items, newCount);
+                Resize(newCount);
             }
 
             Debug.Assert(_items != null);
@@ -85,12 +134,7 @@ namespace Esprima
 
             if (_count == capacity)
             {
-                if (_sharedVersion == null)
-                {
-                    _sharedVersion = new[] { 1 };
-                }
-
-                Array.Resize(ref _items, Math.Max(capacity * 2, 4));
+                Resize(Math.Max(capacity * 2, 4));
             }
 
             Debug.Assert(_items != null);
@@ -100,19 +144,37 @@ namespace Esprima
             OnChanged();
         }
 
+        internal void Resize(int size)
+        {
+            #if DEBUG
+            if (_sharedVersion == null)
+            {
+                _sharedVersion = new[] { 1 };
+            }
+            #endif
+
+            Array.Resize(ref _items, size);
+        }
+
+        [Conditional("DEBUG")]
         private void AssertUnchanged()
         {
+#if DEBUG
             if (_localVersion != (_sharedVersion?[0] ?? 0))
             {
                 throw new InvalidOperationException();
             }
+#endif
         }
 
+        [Conditional("DEBUG")]
         private void OnChanged()
         {
+#if DEBUG
             ref var version = ref _sharedVersion[0];
             version++;
             _localVersion = version;
+#endif
         }
 
         internal void RemoveAt(int index)
