@@ -7,7 +7,17 @@ namespace Esprima
     /// </summary>
     public class HoistingScope
     {
-        public NodeList<FunctionDeclaration> FunctionDeclarations = new NodeList<FunctionDeclaration>();
-        public NodeList<VariableDeclaration> VariableDeclarations = new NodeList<VariableDeclaration>();
+        public NodeList<FunctionDeclaration> FunctionDeclarations { get; }
+        public NodeList<VariableDeclaration> VariableDeclarations { get; }
+
+        public HoistingScope() :
+            this(default, default) {}
+
+        public HoistingScope(NodeList<FunctionDeclaration> functionDeclarations,
+                             NodeList<VariableDeclaration> variableDeclarations)
+        {
+            FunctionDeclarations = functionDeclarations;
+            VariableDeclarations = variableDeclarations;
+        }
     }
 }

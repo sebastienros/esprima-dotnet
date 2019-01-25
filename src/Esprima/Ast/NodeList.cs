@@ -1,50 +1,35 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using static Esprima.JitHelper;
 
 namespace Esprima.Ast
 {
-    // This structure is like List<> from the BCL except it is designed
-    // to be modifiable by this library during the construction of the AST
-    // but publicly read-only thereafter. The only allocation required on the
-    // heap is the backing array storage for the element. An empty list,
-    // however causes no heap allocation; that is, the array is allocated
-    // on first addition.
-
     public struct NodeList<T> : IReadOnlyList<T> where T : INode
     {
         private T[] _items;
         private int _count;
 
-        internal NodeList(int initialCapacity)
+        internal NodeList(ICollection<T> collection)
         {
-            _items = initialCapacity == 0 ? null : new T[initialCapacity];
-            _count = 0;
-        }
-
-        public NodeList(NodeList<T> list) : this()
-        {
-            if (list.Count <= 0)
+            if (collection == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(collection));
             }
 
-            _items = new T[list.Count];
-            list._items.CopyTo(_items, 0);
-            _count = list.Count;
+            var count = _count = collection.Count;
+            if ((_items = count == 0 ? null : new T[count]) != null)
+            {
+                collection.CopyTo(_items, 0);
+            }
         }
 
-        internal NodeList(ICollection<T> collection) :
-            this((collection ?? throw new ArgumentNullException(nameof(collection))).Count)
+        internal NodeList(T[] items, int count)
         {
-            collection.CopyTo(_items, 0);
-            _count = collection.Count;
+            _items = items;
+            _count = count;
         }
-
-        private int Capacity => _items?.Length ?? 0;
 
         public int Count
         {
@@ -73,86 +58,12 @@ namespace Esprima.Ast
             return list;
         }
 
-        internal void AddRange<TSource>(NodeList<TSource> list) where TSource : T
-        {
-            if (list.Count == 0)
-            {
-                return;
-            }
-
-            var oldCount = Count;
-            var newCount = oldCount + list.Count;
-
-            if (Capacity < newCount)
-            {
-                Array.Resize(ref _items, newCount);
-            }
-
-            Debug.Assert(_items != null);
-            Array.Copy(list._items, 0, _items, oldCount, list.Count);
-            _count = newCount;
-        }
-
-        internal void Add(T item)
-        {
-            var capacity = Capacity;
-
-            if (Count == capacity)
-            {
-                Array.Resize(ref _items, Math.Max(capacity * 2, 4));
-            }
-
-            Debug.Assert(_items != null);
-            _items[Count] = item;
-            _count++;
-        }
-
-        internal void RemoveAt(int index)
-        {
-            if (index < 0 || index >= Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index), index, null);
-            }
-
-            _items[index] = default;
-            _count--;
-
-            if (index == Count)
-            {
-                return;
-            }
-
-            Array.Copy(_items, index + 1, _items, index, Count - index);
-        }
-
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => index >= 0 && index < Count
                  ? _items[index]
                  : Throw<T>(new IndexOutOfRangeException());
-
-            internal set
-            {
-                if (index < 0 || index >= Count)
-                {
-                    throw new IndexOutOfRangeException();
-                }
-
-                _items[index] = value;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Push(T item) => Add(item);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T Pop()
-        {
-            var lastIndex = Count - 1;
-            var last = this[lastIndex];
-            RemoveAt(lastIndex);
-            return last;
         }
 
         public Enumerator GetEnumerator() => new Enumerator(_items, Count);
@@ -235,6 +146,14 @@ namespace Esprima.Ast
 
     public static class NodeList
     {
+        internal static NodeList<T> From<T>(ref ArrayList<T> arrayList)
+            where T : INode
+        {
+            arrayList.Yield(out var items, out var count);
+            arrayList = default;
+            return new NodeList<T>(items, count);
+        }
+
         public static NodeList<T> Create<T>(NodeList<T> source) where T : INode =>
             source;
 
@@ -266,13 +185,13 @@ namespace Esprima.Ast
                         return default;
                     }
 
-                    var list = new NodeList<T>(sourceList.Count);
+                    var list = new ArrayList<T>(sourceList.Count);
                     for (var i = 0; i < sourceList.Count; i++)
                     {
                         list.Add(sourceList[i]);
                     }
 
-                    return list;
+                    return From(ref list);
                 }
 
                 default:
@@ -283,8 +202,8 @@ namespace Esprima.Ast
                         : (int?)null;
 
                     var list = count is int initialCapacity
-                             ? new NodeList<T>(initialCapacity)
-                             : new NodeList<T>();
+                             ? new ArrayList<T>(initialCapacity)
+                             : new ArrayList<T>();
 
                     if (count == null || count > 0)
                     {
@@ -294,7 +213,7 @@ namespace Esprima.Ast
                         }
                     }
 
-                    return list;
+                    return From(ref list);
                 }
             }
         }

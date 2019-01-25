@@ -3,10 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Esprima.Ast;
 using static Esprima.JitHelper;
 
 namespace Esprima
 {
+    // This structure is like List<> from the BCL except the only allocation
+    // required on the heap is the backing array storage for the elements.
+    // An empty list, however causes no heap allocation; that is, the array is
+    // allocated on first addition.
+
     internal struct ArrayList<T> : IReadOnlyList<T>
     {
         private T[] _items;
@@ -14,6 +20,19 @@ namespace Esprima
 
         private int[] _sharedVersion;
         private int _localVersion;
+
+        public ArrayList(int initialCapacity)
+        {
+            if (initialCapacity < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(initialCapacity));
+            }
+
+            _items = initialCapacity > 0 ? new T[initialCapacity] : null;
+            _count = 0;
+            _localVersion = 0;
+            _sharedVersion = initialCapacity > 0 ? new[] { _localVersion } : null;
+        }
 
         private int Capacity => _items?.Length ?? 0;
 
@@ -42,6 +61,11 @@ namespace Esprima
 
             if (Capacity < newCount)
             {
+                if (_sharedVersion == null)
+                {
+                    _sharedVersion = new[] { 1 };
+                }
+
                 Array.Resize(ref _items, newCount);
             }
 
@@ -123,6 +147,18 @@ namespace Esprima
                 AssertUnchanged();
                 return _items[index];
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                if (index < 0 || index >= _count)
+                {
+                    Throw<T>(new IndexOutOfRangeException());
+                }
+
+                AssertUnchanged();
+                _items[index] = value;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,6 +171,34 @@ namespace Esprima
             var last = this[lastIndex];
             RemoveAt(lastIndex);
             return last;
+        }
+
+        public void Yield(out T[] items, out int count)
+        {
+            items = _items;
+            count = _count;
+            this = default;
+        }
+
+        internal ArrayList<TResult> Select<TResult>(Func<T, TResult> selector)
+        {
+            if (selector == null)
+            {
+                throw new ArgumentNullException(nameof(selector));
+            }
+
+            var list = new ArrayList<TResult>
+            {
+                _count = Count,
+                _items = new TResult[Count]
+            };
+
+            for (var i = 0; i < Count; i++)
+            {
+                list._items[i] = selector(_items[i]);
+            }
+
+            return list;
         }
 
         public Enumerator GetEnumerator()
@@ -216,6 +280,16 @@ namespace Esprima
                     Throw<T>(new ObjectDisposedException(GetType().Name));
                 }
             }
+        }
+    }
+
+    internal static class ArrayListExtensions
+    {
+        public static void AddRange<T>(this ref ArrayList<T> destination, NodeList<T> source)
+            where T: INode
+        {
+            foreach (var item in source)
+                destination.Add(item);
         }
     }
 }
