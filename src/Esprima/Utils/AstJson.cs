@@ -238,11 +238,11 @@ namespace Esprima.Utils
                 Member(name, map[value]);
             }
 
-            private void Member<T>(string name, NodeList<T> nodes) where T : INode =>
+            private void Member<T>(string name, NodeList<T> nodes) where T : class, INode =>
                 Member(name, nodes, node => node);
 
             private void Member<T>(string name, NodeList<T> list, Func<T, INode> nodeSelector)
-                where T : INode
+                where T : class, INode
             {
                 Member(name);
                 _writer.StartArray();

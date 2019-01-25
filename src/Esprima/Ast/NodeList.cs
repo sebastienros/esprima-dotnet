@@ -6,7 +6,7 @@ using static Esprima.JitHelper;
 
 namespace Esprima.Ast
 {
-    public struct NodeList<T> : IReadOnlyList<T> where T : INode
+    public struct NodeList<T> : IReadOnlyList<T> where T : class, INode
     {
         private T[] _items;
         private int _count;
@@ -37,26 +37,12 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        internal NodeList<TResult> Select<TResult>(Func<T, TResult> selector) where TResult : INode
-        {
-            if (selector == null)
+        public NodeList<INode> AsNodes() =>
+            new NodeList<INode>
             {
-                throw new ArgumentNullException(nameof(selector));
-            }
-
-            var list = new NodeList<TResult>
-            {
-                _count = Count,
-                _items = new TResult[Count]
+                _items = _items, // Conversion by co-variance!
+                _count = _count,
             };
-
-            for (var i = 0; i < Count; i++)
-            {
-                list._items[i] = selector(_items[i]);
-            }
-
-            return list;
-        }
 
         public T this[int index]
         {
@@ -147,17 +133,17 @@ namespace Esprima.Ast
     public static class NodeList
     {
         internal static NodeList<T> From<T>(ref ArrayList<T> arrayList)
-            where T : INode
+            where T : class, INode
         {
             arrayList.Yield(out var items, out var count);
             arrayList = default;
             return new NodeList<T>(items, count);
         }
 
-        public static NodeList<T> Create<T>(NodeList<T> source) where T : INode =>
+        public static NodeList<T> Create<T>(NodeList<T> source) where T : class, INode =>
             source;
 
-        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : INode
+        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : class, INode
         {
             switch (source)
             {

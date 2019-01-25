@@ -1226,7 +1226,7 @@ namespace Esprima
 
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
-                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>().Expressions.Select(e => (INode) e));
+                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>().Expressions.AsNodes());
                                 }
                                 else
                                 {
