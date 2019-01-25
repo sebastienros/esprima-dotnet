@@ -34,16 +34,7 @@ namespace Esprima
 
         public ParserException CreateError(int index, int line, int col, string description)
         {
-            var msg = $"Line {line}: {description}";
-            var error = new ParserException(msg)
-            {
-                Index = index,
-                Column = col,
-                LineNumber = line,
-                Description = description,
-                SourceText = Source
-            };
-            return error;
+            return new ParserException(new ParseError(description, Source, index, new Position(line, col)));
         }
 
         public void TolerateError(int index, int line, int col, string description)
