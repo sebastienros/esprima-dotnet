@@ -4,7 +4,7 @@ namespace Esprima
 {
     public class ErrorHandler : IErrorHandler
     {
-        public List<ParserException> Errors { get; }
+        public IList<ParserException> Errors { get; }
         public bool Tolerant { get; set; }
 
         public string Source { get; set; }
@@ -32,9 +32,9 @@ namespace Esprima
             }
         }
 
-        public void ThrowError(int index, int line, int column, string message)
+        public ParserException CreateError(int index, int line, int col, string description)
         {
-            throw this.CreateError(index, line, column, message);
+            return new ParserException(new ParseError(description, Source, index, new Position(line, col)));
         }
 
         public void TolerateError(int index, int line, int col, string description)

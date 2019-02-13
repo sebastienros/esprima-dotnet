@@ -6,10 +6,13 @@ namespace Esprima.Ast
     {
         public readonly List<StatementListItem> Body;
 
-        public BlockStatement(List<StatementListItem> body)
+        public BlockStatement(List<StatementListItem> body) :
+            base(Nodes.BlockStatement)
         {
-            Type = Nodes.BlockStatement;
             Body = body;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Body);
     }
 }

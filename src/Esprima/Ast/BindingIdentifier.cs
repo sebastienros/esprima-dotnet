@@ -1,7 +1,7 @@
 ﻿namespace Esprima.Ast
 {
     public interface BindingIdentifier :
-        ArrayPatternElement,
+        IArrayPatternElement,
         FunctionParameter,
         PropertyValue
     {

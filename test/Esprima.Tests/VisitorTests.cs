@@ -11,10 +11,10 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("if (true) { p(); }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
-            visitor.VisitProgram(program);
+            AstVisitor visitor = new AstVisitor();
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitSwitchCase()
         {
@@ -25,10 +25,10 @@ namespace Esprima.Tests
 }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
-            visitor.VisitProgram(program);
+            AstVisitor visitor = new AstVisitor();
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitDefaultSwitchCase()
         {
@@ -39,28 +39,28 @@ namespace Esprima.Tests
 }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
-            visitor.VisitProgram(program);
+            AstVisitor visitor = new AstVisitor();
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitForWithNoTest()
         {
             var parser = new JavaScriptParser(@"for (var a = []; ; ) { }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
-            visitor.VisitProgram(program);
+            AstVisitor visitor = new AstVisitor();
+            visitor.Visit(program);
         }
-        
+
         [Fact]
         public void CanVisitForOfStatement()
         {
             var parser = new JavaScriptParser(@"for (var elem of list) { }");
             var program = parser.ParseProgram();
 
-            EsprimaVisitor visitor = new EsprimaVisitor();
-            visitor.VisitProgram(program);
+            AstVisitor visitor = new AstVisitor();
+            visitor.Visit(program);
         }
     }
 }

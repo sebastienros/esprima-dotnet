@@ -26,8 +26,7 @@ namespace Esprima
         public int LineNumber;
         public int LineStart;
 
-        private Location _location;
-        public Location Location => _location ?? (_location = new Location());
+        public Location Location;
 
         public int Precedence;
 
@@ -52,7 +51,7 @@ namespace Esprima
             End = 0;
             LineNumber = 0;
             LineStart = 0;
-            _location = null;
+            Location = default;
             Precedence = 0;
             Octal = false;
             Head = false;

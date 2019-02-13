@@ -1,10 +1,9 @@
-using Newtonsoft.Json;
-
 namespace Esprima.Ast
 {
-    public class Statement : Node, INode, StatementListItem
+    public abstract class Statement : Node, INode, StatementListItem
     {
-        [JsonIgnore]
+        protected Statement(Nodes type) : base(type) {}
+
         public Identifier LabelSet { get; internal set; }
     }
 }

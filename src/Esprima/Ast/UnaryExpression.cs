@@ -1,7 +1,6 @@
 using System;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Collections.Generic;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -30,7 +29,6 @@ namespace Esprima.Ast
     public class UnaryExpression : Node,
         Expression
     {
-        [JsonConverter(typeof(StringEnumConverter), new object[] { true })]
         public readonly UnaryOperator Operator;
         public readonly Expression Argument;
         public bool Prefix { get; protected set; }
@@ -62,15 +60,20 @@ namespace Esprima.Ast
                     throw new ArgumentOutOfRangeException("Invalid unary operator: " + op);
 
             }
-
-
         }
-        public UnaryExpression(string op, Expression arg)
+
+        public UnaryExpression(string op, Expression arg) :
+            this(Nodes.UnaryExpression, op, arg) {}
+
+        protected UnaryExpression(Nodes type, string op, Expression arg) :
+            base(type)
         {
-            Type = Nodes.UnaryExpression;
             Operator = ParseUnaryOperator(op);
             Argument = arg;
             Prefix = true;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Argument);
     }
 }

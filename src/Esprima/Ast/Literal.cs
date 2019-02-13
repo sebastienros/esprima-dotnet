@@ -1,4 +1,5 @@
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
@@ -6,64 +7,51 @@ namespace Esprima.Ast
     public class Literal : Node,
         Expression
     {
-        [JsonIgnore] public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
-        [JsonIgnore] public readonly double NumericValue;
-        [JsonIgnore] public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
-        [JsonIgnore] public Regex RegexValue => TokenType == TokenType.RegularExpression ? (Regex) Value : null;
+        public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
+        public readonly double NumericValue;
+        public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
+        public Regex RegexValue => TokenType == TokenType.RegularExpression ? (Regex) Value : null;
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public readonly RegexValue Regex;
-
-        [JsonConverter(typeof(LiteralValueConverter))]
         public readonly object Value;
-
         public readonly string Raw;
+        public readonly TokenType TokenType;
+        public object CachedValue;
 
-        [JsonIgnore] public readonly TokenType TokenType;
-
-        [JsonIgnore] public object CachedValue;
-
-        public Literal(string value, string raw)
+        private Literal(TokenType tokenType, object value, string raw) :
+            base(Nodes.Literal)
         {
-            Type = Nodes.Literal;
+            TokenType = tokenType;
             Value = value;
-            TokenType = TokenType.StringLiteral;
             Raw = raw;
         }
 
-        public Literal(bool value, string raw)
+        public Literal(string value, string raw) :
+            this(TokenType.StringLiteral, value, raw) {}
+
+        public Literal(bool value, string raw) :
+            this(TokenType.BooleanLiteral, value, raw)
         {
-            Type = Nodes.Literal;
-            Value = value;
             NumericValue = value ? 1 : 0;
-            TokenType = TokenType.BooleanLiteral;
-            Raw = raw;
         }
 
-        public Literal(double value, string raw)
+        public Literal(double value, string raw) :
+            this(TokenType.NumericLiteral, value, raw)
         {
-            Type = Nodes.Literal;
-            Value = NumericValue = value;
-            TokenType = TokenType.NumericLiteral;
-            Raw = raw;
+            NumericValue = value;
         }
 
-        public Literal(string raw)
-        {
-            Type = Nodes.Literal;
-            Value = null;
-            TokenType = TokenType.NullLiteral;
-            Raw = raw;
-        }
+        public Literal(string raw) :
+            this(TokenType.NullLiteral, null, raw) {}
 
-        public Literal(string pattern, string flags, object value, string raw)
+        public Literal(string pattern, string flags, object value, string raw) :
+            this(TokenType.RegularExpression, value, raw)
         {
-            Type = Nodes.Literal;
             // value is null if a Regex object couldn't be created out of the pattern or options
-            Value = value;
             Regex = new RegexValue(pattern, flags);
-            TokenType = TokenType.RegularExpression;
-            Raw = raw;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            Enumerable.Empty<INode>();
     }
 }

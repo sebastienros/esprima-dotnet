@@ -1,12 +1,14 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class MethodDefinition : ClassProperty
     {
         public readonly bool Static;
 
-        public MethodDefinition(Expression key, bool computed, FunctionExpression value, PropertyKind kind, bool isStatic)
+        public MethodDefinition(Expression key, bool computed, FunctionExpression value, PropertyKind kind, bool isStatic) :
+            base(Nodes.MethodDefinition)
         {
-            Type = Nodes.MethodDefinition;
             Static = isStatic;
             Key = key;
             Computed = computed;

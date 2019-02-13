@@ -6,10 +6,13 @@ namespace Esprima.Ast
     {
         public readonly List<Property> Properties;
 
-        public ObjectPattern(List<Property> properties)
+        public ObjectPattern(List<Property> properties) :
+            base(Nodes.ObjectPattern)
         {
-            Type = Nodes.ObjectPattern;
             Properties = properties;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Properties);
     }
 }

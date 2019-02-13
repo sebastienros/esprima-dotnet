@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Esprima.Ast
 {
     public class ForInStatement : Statement
@@ -7,13 +9,16 @@ namespace Esprima.Ast
         public readonly Statement Body;
         public readonly bool Each;
 
-        public ForInStatement(INode left, Expression right, Statement body)
+        public ForInStatement(INode left, Expression right, Statement body) :
+            base(Nodes.ForInStatement)
         {
-            Type = Nodes.ForInStatement;
             Left = left;
             Right = right;
             Body = body;
             Each = false;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right, Body);
     }
 }

@@ -6,10 +6,13 @@ namespace Esprima.Ast
     {
         public readonly List<ClassProperty> Body;
 
-        public ClassBody(List<ClassProperty> body)
+        public ClassBody(List<ClassProperty> body) :
+            base(Nodes.ClassBody)
         {
-            Type = Nodes.ClassBody;
             Body = body;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Body);
     }
 }

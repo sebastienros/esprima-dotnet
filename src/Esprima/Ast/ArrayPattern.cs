@@ -4,12 +4,15 @@ namespace Esprima.Ast
 {
     public class ArrayPattern : Node, BindingPattern
     {
-        public readonly List<ArrayPatternElement> Elements;
+        public readonly List<IArrayPatternElement> Elements;
 
-        public ArrayPattern(List<ArrayPatternElement> elements)
+        public ArrayPattern(List<IArrayPatternElement> elements) :
+            base(Nodes.ArrayPattern)
         {
-            Type = Nodes.ArrayPattern;
             Elements = elements;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Elements);
     }
 }

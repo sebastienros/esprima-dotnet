@@ -2,9 +2,9 @@ namespace Esprima.Ast
 {
     public class UpdateExpression : UnaryExpression
     {
-        public UpdateExpression(string op, Expression arg, bool prefix) : base(op, arg)
+        public UpdateExpression(string op, Expression arg, bool prefix) :
+            base(Nodes.UpdateExpression, op, arg)
         {
-            Type = Nodes.UpdateExpression;
             Prefix = prefix;
         }
     }

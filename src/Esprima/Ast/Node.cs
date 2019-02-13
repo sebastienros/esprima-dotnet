@@ -1,23 +1,20 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Esprima.Ast
 {
-    public class Node : INode
+    public abstract class Node : INode
     {
-        private Location _location;
+        public Nodes Type { get; }
+        public Range Range { get; set; }
 
-        [JsonProperty(Order = -100)]
-        [JsonConverter(typeof(StringEnumConverter))]
-        public Nodes Type { get; set; }
+        public Location Location { get; set; }
 
-        public int[] Range { get; set; }
+        public abstract IEnumerable<INode> ChildNodes { get; }
 
-        [JsonProperty(PropertyName = "Loc")]
-        public Location Location
-        {
-            get => _location  = _location ?? new Location();
-            set => _location = value;
-        }
+        protected static IEnumerable<INode> ZeroChildNodes = Enumerable.Empty<INode>();
+
+        protected Node(Nodes type) =>
+            Type = type;
     }
 }

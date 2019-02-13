@@ -8,11 +8,14 @@ namespace Esprima.Ast
         public readonly List<TemplateElement> Quasis;
         public readonly List<Expression> Expressions;
 
-        public TemplateLiteral(List<TemplateElement> quasis, List<Expression> expressions)
+        public TemplateLiteral(List<TemplateElement> quasis, List<Expression> expressions) :
+            base(Nodes.TemplateLiteral)
         {
-            Type = Nodes.TemplateLiteral;
             Quasis = quasis;
             Expressions = expressions;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Quasis, Expressions);
     }
 }

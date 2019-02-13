@@ -1,7 +1,6 @@
 using System;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Collections.Generic;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -38,16 +37,15 @@ namespace Esprima.Ast
     public class AssignmentExpression : Node,
         Expression
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public readonly AssignmentOperator Operator;
 
         // Can be something else than Expression (ObjectPattern, ArrayPattern) in case of destructuring assignment
         public readonly INode Left;
         public readonly Expression Right;
 
-        public AssignmentExpression(string op, INode left, Expression right)
+        public AssignmentExpression(string op, INode left, Expression right) :
+            base(Nodes.AssignmentExpression)
         {
-            Type = Nodes.AssignmentExpression;
             Operator = AssignmentExpression.ParseAssignmentOperator(op);
             Left = left;
             Right = right;
@@ -88,5 +86,8 @@ namespace Esprima.Ast
                     throw new ArgumentOutOfRangeException("Invalid assignment operator: " + op);
             }
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right);
     }
 }

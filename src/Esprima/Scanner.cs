@@ -115,7 +115,7 @@ namespace Esprima
             "**"
         };
 
-        private int HexValue(char ch)
+        private static int HexValue(char ch)
         {
             if (ch >= 'A')
             {
@@ -139,7 +139,7 @@ namespace Esprima
             return 0;
         }
 
-        private int OctalValue(char ch)
+        private static int OctalValue(char ch)
         {
             return ch - '0';
         }
@@ -214,15 +214,14 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-comments
 
-        public List<Comment> SkipSingleLineComment(int offset)
+        public Ast.List<Comment> SkipSingleLineComment(int offset)
         {
-            List<Comment> comments = null;
+            var comments = new Ast.List<Comment>();
             int start = 0;
             Loc loc = new Loc();
 
             if (_trackComment)
             {
-                comments = new List<Comment>();
                 start = Index - offset;
                 loc.Start = new MetaNode(0, LineNumber, Index - LineStart - offset);
                 loc.End = new MetaNode();
@@ -277,15 +276,14 @@ namespace Esprima
             return comments;
         }
 
-        public List<Comment> SkipMultiLineComment()
+        public Ast.List<Comment> SkipMultiLineComment()
         {
-            List<Comment> comments = null;
+            var comments = new Ast.List<Comment>();
             int start = 0;
             Loc loc = new Loc();
 
             if (_trackComment)
             {
-                comments = new List<Comment>();
                 start = Index - 2;
                 loc.Start = new MetaNode(loc.Start.Index, LineNumber, Index - LineStart - 2);
             }
@@ -352,13 +350,9 @@ namespace Esprima
             return comments;
         }
 
-        public List<Comment> ScanComments()
+        public Ast.List<Comment> ScanComments()
         {
-            List<Comment> comments = null;
-            if (_trackComment)
-            {
-                comments = new List<Comment>();
-            }
+            var comments = new Ast.List<Comment>();
 
             var start = (Index == 0);
             while (!Eof())

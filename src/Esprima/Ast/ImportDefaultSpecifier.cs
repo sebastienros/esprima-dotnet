@@ -1,13 +1,18 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class ImportDefaultSpecifier : Node, ImportDeclarationSpecifier
     {
         public readonly Identifier Local;
 
-        public ImportDefaultSpecifier(Identifier local)
+        public ImportDefaultSpecifier(Identifier local) :
+            base(Nodes.ImportDefaultSpecifier)
         {
-            Type = Nodes.ImportDefaultSpecifier;
             Local = local;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Local);
     }
 }

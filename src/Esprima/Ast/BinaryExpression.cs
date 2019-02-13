@@ -1,7 +1,6 @@
 using System;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Collections.Generic;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -60,16 +59,17 @@ namespace Esprima.Ast
     public class BinaryExpression : Node,
         Expression
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public readonly BinaryOperator Operator;
         public readonly Expression Left;
         public readonly Expression Right;
 
-        public BinaryExpression(string op, Expression left, Expression right)
+        public BinaryExpression(string op, Expression left, Expression right) :
+            this(ParseBinaryOperator(op), left, right) {}
+
+        private BinaryExpression(BinaryOperator op, Expression left, Expression right) :
+            base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr ? Nodes.LogicalExpression : Nodes.BinaryExpression)
         {
-            Operator = ParseBinaryOperator(op);
-            var logical = Operator == BinaryOperator.LogicalAnd || Operator == BinaryOperator.LogicalOr;
-            Type = logical ? Nodes.LogicalExpression : Nodes.BinaryExpression;
+            Operator = op;
             Left = left;
             Right = right;
         }
@@ -130,5 +130,8 @@ namespace Esprima.Ast
                     throw new ArgumentOutOfRangeException("Invalid binary operator: " + op);
             }
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Left, Right);
     }
 }

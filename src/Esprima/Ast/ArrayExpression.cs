@@ -6,10 +6,13 @@ namespace Esprima.Ast
     {
         public readonly List<ArrayExpressionElement> Elements;
 
-        public ArrayExpression(List<ArrayExpressionElement> elements)
+        public ArrayExpression(List<ArrayExpressionElement> elements) :
+            base(Nodes.ArrayExpression)
         {
-            Type = Nodes.ArrayExpression;
             Elements = elements;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Elements);
     }
 }

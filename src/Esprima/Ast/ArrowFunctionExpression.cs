@@ -1,28 +1,35 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class ArrowFunctionExpression : Node, Expression
+    public class ArrowFunctionExpression : Node, Expression, IFunction
     {
-        public readonly Identifier Id;
-        public readonly List<INode> Params;
-        public readonly INode Body; // : BlockStatement | Expression;
-        public readonly bool Generator;
-        public readonly bool Expression;
+        public bool Strict { get; }
 
-        [JsonIgnore]
-        public HoistingScope HoistingScope;
+        public Identifier Id { get; }
 
-        public ArrowFunctionExpression(List<INode> parameters, INode body, bool expression, HoistingScope hoistingScope)
+        public List<INode> Params { get; }
+
+        public INode Body { get; } // : BlockStatement | Expression;
+
+        public bool Generator { get; }
+
+        public bool Expression { get; }
+
+        public HoistingScope HoistingScope { get; }
+
+        public ArrowFunctionExpression(List<INode> parameters, INode body, bool expression, HoistingScope hoistingScope) :
+            base(Nodes.ArrowFunctionExpression)
         {
-            Type = Nodes.ArrowFunctionExpression;
             Id = null;
             Params = parameters;
             Body = body;
             Generator = false;
             Expression = expression;
             HoistingScope = hoistingScope;
-        }        
+        }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Params, Body);
     }
 }

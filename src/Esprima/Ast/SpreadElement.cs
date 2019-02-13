@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using System.Collections.Generic;
+
+namespace Esprima.Ast
 {
     public class SpreadElement : Node,
         ArgumentListElement,
@@ -7,10 +9,13 @@
     {
         public readonly Expression Argument;
 
-        public SpreadElement(Expression argument)
+        public SpreadElement(Expression argument) :
+            base(Nodes.SpreadElement)
         {
-            Type = Nodes.SpreadElement;
             Argument = argument;
         }
+
+        public override IEnumerable<INode> ChildNodes =>
+            ChildNodeYielder.Yield(Argument);
     }
 }
