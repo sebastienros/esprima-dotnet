@@ -18,7 +18,7 @@
             End    = start == default && end != default
                      || end == default && start != default
                      || end.Line < start.Line
-                     || start.Line > 0 && start.Line == end.Line && end.Column <= start.Column
+                     || start.Line > 0 && start.Line == end.Line && end.Column < start.Column
                    ? throw new ArgumentOutOfRangeException(nameof(end), end,
                          Exception<ArgumentOutOfRangeException>.DefaultMessage)
                    : end;
