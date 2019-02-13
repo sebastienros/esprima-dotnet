@@ -118,5 +118,17 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("var a = { [Symbol.iterator]: undefined }");
             var program = parser.ParseProgram();
         }
+
+        [Fact]
+        public void ShouldParseLocation()
+        {
+            var options = new ParserOptions
+            {
+                Loc = true
+            };
+            var parser = new JavaScriptParser("// End on second line\r\n", options);
+
+            var program = parser.ParseProgram();
+        }
     }
 }
