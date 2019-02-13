@@ -7,7 +7,7 @@
     {
         Identifier Id { get; }
         List<INode> Params { get; }
-        BlockStatement Body { get; }
+        INode Body { get; }
         bool Generator { get; }
         bool Expression { get; }
         HoistingScope HoistingScope { get; }

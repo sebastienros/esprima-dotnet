@@ -318,7 +318,7 @@ namespace Esprima.Utils
                 Visit(p);
             }
 
-            VisitBlockStatement(functionDeclaration.Body);
+            Visit(functionDeclaration.Body);
         }
 
         protected virtual void VisitWithStatement(WithStatement withStatement)
@@ -600,7 +600,7 @@ namespace Esprima.Utils
             {
                 Visit(param);
             }
-            VisitBlockStatement(function.Body);
+            Visit(function.Body);
         }
 
         protected virtual void VisitClassExpression(ClassExpression classExpression)
