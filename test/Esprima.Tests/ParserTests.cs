@@ -70,7 +70,7 @@ namespace Esprima.Tests
             var parser = new JavaScriptParser("function p() {'use strict'; function q() { return; } return; }");
             var program = parser.ParseProgram();
             var p = program.Body.First().As<FunctionDeclaration>();
-            var q = p.Body.Body.Skip(1).First().As<FunctionDeclaration>();
+            var q = p.Body.As<BlockStatement>().Body.Skip(1).First().As<FunctionDeclaration>();
 
             Assert.Equal("p", p.Id.Name);
             Assert.Equal("q", q.Id.Name);
@@ -116,6 +116,18 @@ namespace Esprima.Tests
         public void ShouldSymbolPropertyKey()
         {
             var parser = new JavaScriptParser("var a = { [Symbol.iterator]: undefined }");
+            var program = parser.ParseProgram();
+        }
+
+        [Fact]
+        public void ShouldParseLocation()
+        {
+            var options = new ParserOptions
+            {
+                Loc = true
+            };
+            var parser = new JavaScriptParser("// End on second line\r\n", options);
+
             var program = parser.ParseProgram();
         }
     }

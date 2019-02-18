@@ -6,7 +6,7 @@ namespace Esprima.Ast
     {
         public Identifier Id { get; }
         public NodeList<INode> Params { get; }
-        public BlockStatement Body { get; }
+        public INode Body { get; }
         public bool Generator { get; }
         public bool Expression { get; }
 

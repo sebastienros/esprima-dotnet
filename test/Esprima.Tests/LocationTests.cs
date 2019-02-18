@@ -9,6 +9,7 @@ namespace Esprima.Tests
     {
         [Theory]
         [InlineData(0, 0, 0, 0)]
+        [InlineData(1, 0, 1, 0)]
         [InlineData(1, 0, 2, 0)]
         [InlineData(1, 4, 2, 0)]
         [InlineData(1, 4, 2, 5)]
@@ -22,7 +23,8 @@ namespace Esprima.Tests
         }
 
         [Theory]
-        [InlineData(1, 0, 1, 0)]
+        [InlineData(0, 0, 1, 0)]
+        [InlineData(1, 0, 0, 0)]
         [InlineData(2, 0, 1, 0)]
         [InlineData(1, 1, 1, 0)]
         public void InvalidStartAndEnd(int startLine, int startColumn, int endLine, int endColumn)

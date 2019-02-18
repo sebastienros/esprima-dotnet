@@ -1683,7 +1683,6 @@ namespace Esprima
                         right = (Expression)stack.Pop();
                         var op = ((Token)stack.Pop()).Value;
                         left = (Expression)stack.Pop();
-                        expr = new BinaryExpression((string)op, left, right);
 
                         markers.Pop();
                         var node = StartNode(markers.Peek());
