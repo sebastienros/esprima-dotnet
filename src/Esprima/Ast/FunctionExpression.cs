@@ -8,7 +8,7 @@ namespace Esprima.Ast
         PropertyValue
     {
         public Identifier Id { get; }
-        public List<INode> Params { get; }
+        public NodeList<INode> Params { get; }
         public INode Body { get; }
         public bool Generator { get; }
         public bool Expression { get; }
@@ -18,7 +18,7 @@ namespace Esprima.Ast
 
         public FunctionExpression(
             Identifier id,
-            List<INode> parameters,
+            NodeList<INode> parameters,
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,

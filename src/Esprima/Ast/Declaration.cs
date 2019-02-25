@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Ast
 {
-    public interface Declaration : StatementListItem
+    public interface IDeclaration : IStatementListItem
     {
     }
 }

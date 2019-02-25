@@ -4,9 +4,9 @@ namespace Esprima.Ast
 {
     public class ClassBody : Node
     {
-        public readonly List<ClassProperty> Body;
+        public readonly NodeList<ClassProperty> Body;
 
-        public ClassBody(List<ClassProperty> body) :
+        public ClassBody(NodeList<ClassProperty> body) :
             base(Nodes.ClassBody)
         {
             Body = body;

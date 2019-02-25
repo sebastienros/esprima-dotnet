@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class FunctionDeclaration : Statement, Declaration, IFunction
+    public class FunctionDeclaration : Statement, IDeclaration, IFunction
     {
         public Identifier Id { get; }
-        public List<INode> Params { get; }
+        public NodeList<INode> Params { get; }
         public INode Body { get; }
         public bool Generator { get; }
         public bool Expression { get; }
@@ -15,7 +15,7 @@ namespace Esprima.Ast
 
         public FunctionDeclaration(
             Identifier id,
-            List<INode> parameters,
+            NodeList<INode> parameters,
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,

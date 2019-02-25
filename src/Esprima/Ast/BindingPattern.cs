@@ -2,7 +2,7 @@
 {
     public interface BindingPattern :
         IArrayPatternElement,
-        FunctionParameter,
+        IFunctionParameter,
         PropertyValue
     {
     }

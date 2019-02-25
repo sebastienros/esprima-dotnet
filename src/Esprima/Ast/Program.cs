@@ -4,13 +4,13 @@ namespace Esprima.Ast
 {
     public class Program : Statement
     {
-        public readonly List<StatementListItem> Body;
+        public readonly NodeList<IStatementListItem> Body;
         public readonly SourceType SourceType;
 
         public HoistingScope HoistingScope { get; }
         public bool Strict { get; }
 
-        public Program(List<StatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict) :
+        public Program(NodeList<IStatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict) :
             base(Nodes.Program)
         {
             Body = body;
