@@ -27,7 +27,7 @@ namespace Esprima
             public HashSet<string> LabelSet;
         }
 
-        private class HoistingScopeLists
+        private struct HoistingScopeLists
         {
             public ArrayList<FunctionDeclaration> FunctionDeclarations;
             public ArrayList<VariableDeclaration> VariableDeclarations;
@@ -3333,9 +3333,10 @@ namespace Esprima
             _context.AllowYield = previousAllowYield;
 
             var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
-            var lists = _hoistingScopes.Peek();
+            var lists = _hoistingScopes.Pop();
             ref var functionDeclarations = ref lists.FunctionDeclarations;
             functionDeclarations.Add(functionDeclaration);
+            _hoistingScopes.Push(lists);
 
             return functionDeclaration;
         }
@@ -4265,9 +4266,10 @@ namespace Esprima
         {
             if (variableDeclaration.Kind == VariableDeclarationKind.Var)
             {
-                var scopeLists = _hoistingScopes.Peek();
+                var scopeLists = _hoistingScopes.Pop();
                 ref var variableDeclarations = ref scopeLists.VariableDeclarations;
                 variableDeclarations.Add(variableDeclaration);
+                _hoistingScopes.Push(scopeLists);
             }
 
             return variableDeclaration;

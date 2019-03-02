@@ -12,6 +12,17 @@ namespace Esprima.Test
 {
     public class Fixtures
     {
+        [Fact]
+        public void HoistingScopeShouldWork()
+        {
+            var parser = new JavaScriptParser(@"
+                function p() {}
+                var x;");
+            var program = parser.ParseProgram();
+            Assert.NotEmpty(program.HoistingScope.FunctionDeclarations);
+            Assert.NotEmpty(program.HoistingScope.VariableDeclarations);
+        }
+
         public string ParseAndFormat(string source, ParserOptions options)
         {
             var parser = new JavaScriptParser(source, options);
