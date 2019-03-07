@@ -130,5 +130,25 @@ namespace Esprima.Tests
 
             var program = parser.ParseProgram();
         }
+
+
+        [Fact]
+        public void ShouldParseArrayPattern()
+        {
+            var parser = new JavaScriptParser(@"
+var values = [1, 2, 3];
+
+var callCount = 0;
+var f;
+f = ([...[...x]]) => {
+    callCount = callCount + 1;
+};
+
+f(values);
+
+");
+
+            var program = parser.ParseProgram();
+        }
     }
 }

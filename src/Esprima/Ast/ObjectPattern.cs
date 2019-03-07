@@ -4,9 +4,9 @@ namespace Esprima.Ast
 {
     public class ObjectPattern : Node, BindingPattern
     {
-        public readonly List<Property> Properties;
+        public readonly NodeList<Property> Properties;
 
-        public ObjectPattern(List<Property> properties) :
+        public ObjectPattern(NodeList<Property> properties) :
             base(Nodes.ObjectPattern)
         {
             Properties = properties;

@@ -3,7 +3,7 @@ namespace Esprima.Ast
     public interface Expression :
         INode,
         PropertyValue,
-        Declaration,
+        IDeclaration,
         ArgumentListElement,
         ArrayExpressionElement
     {

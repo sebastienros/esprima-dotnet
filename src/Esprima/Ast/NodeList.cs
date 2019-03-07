@@ -1,50 +1,35 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using static Esprima.JitHelper;
 
 namespace Esprima.Ast
 {
-    // This structure is like List<> from the BCL except it is designed
-    // to be modifiable by this library during the construction of the AST
-    // but publicly read-only thereafter. The only allocation required on the
-    // heap is the backing array storage for the element. An empty list,
-    // however causes no heap allocation; that is, the array is allocated
-    // on first addition.
-
-    public struct List<T> : IReadOnlyList<T>
+    public struct NodeList<T> : IReadOnlyList<T> where T : class, INode
     {
         private T[] _items;
         private int _count;
 
-        internal List(int initialCapacity)
+        internal NodeList(ICollection<T> collection)
         {
-            _items = initialCapacity == 0 ? null : new T[initialCapacity];
-            _count = 0;
-        }
-
-        public List(List<T> list) : this()
-        {
-            if (list.Count <= 0)
+            if (collection == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(collection));
             }
 
-            _items = new T[list.Count];
-            list._items.CopyTo(_items, 0);
-            _count = list.Count;
+            var count = _count = collection.Count;
+            if ((_items = count == 0 ? null : new T[count]) != null)
+            {
+                collection.CopyTo(_items, 0);
+            }
         }
 
-        internal List(ICollection<T> collection) :
-            this((collection ?? throw new ArgumentNullException(nameof(collection))).Count)
+        internal NodeList(T[] items, int count)
         {
-            collection.CopyTo(_items, 0);
-            _count = collection.Count;
+            _items = items;
+            _count = count;
         }
-
-        private int Capacity => _items?.Length ?? 0;
 
         public int Count
         {
@@ -52,78 +37,12 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        internal List<TResult> Select<TResult>(Func<T, TResult> selector)
-        {
-            if (selector == null)
+        public NodeList<INode> AsNodes() =>
+            new NodeList<INode>
             {
-                throw new ArgumentNullException(nameof(selector));
-            }
-
-            var list = new List<TResult>
-            {
-                _count = Count,
-                _items = new TResult[Count]
+                _items = _items, // Conversion by co-variance!
+                _count = _count,
             };
-
-            for (var i = 0; i < Count; i++)
-            {
-                list._items[i] = selector(_items[i]);
-            }
-
-            return list;
-        }
-
-        internal void AddRange<TSource>(List<TSource> list) where TSource : T
-        {
-            if (list.Count == 0)
-            {
-                return;
-            }
-
-            var oldCount = Count;
-            var newCount = oldCount + list.Count;
-
-            if (Capacity < newCount)
-            {
-                Array.Resize(ref _items, newCount);
-            }
-
-            Debug.Assert(_items != null);
-            Array.Copy(list._items, 0, _items, oldCount, list.Count);
-            _count = newCount;
-        }
-
-        internal void Add(T item)
-        {
-            var capacity = Capacity;
-
-            if (Count == capacity)
-            {
-                Array.Resize(ref _items, Math.Max(capacity * 2, 4));
-            }
-
-            Debug.Assert(_items != null);
-            _items[Count] = item;
-            _count++;
-        }
-
-        internal void RemoveAt(int index)
-        {
-            if (index < 0 || index >= Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index), index, null);
-            }
-
-            _items[index] = default;
-            _count--;
-
-            if (index == Count)
-            {
-                return;
-            }
-
-            Array.Copy(_items, index + 1, _items, index, Count - index);
-        }
 
         public T this[int index]
         {
@@ -131,28 +50,6 @@ namespace Esprima.Ast
             get => index >= 0 && index < Count
                  ? _items[index]
                  : Throw<T>(new IndexOutOfRangeException());
-
-            internal set
-            {
-                if (index < 0 || index >= Count)
-                {
-                    throw new IndexOutOfRangeException();
-                }
-
-                _items[index] = value;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Push(T item) => Add(item);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T Pop()
-        {
-            var lastIndex = Count - 1;
-            var last = this[lastIndex];
-            RemoveAt(lastIndex);
-            return last;
         }
 
         public Enumerator GetEnumerator() => new Enumerator(_items, Count);
@@ -233,12 +130,20 @@ namespace Esprima.Ast
         }
     }
 
-    public static class List
+    public static class NodeList
     {
-        public static List<T> Create<T>(List<T> source) =>
+        internal static NodeList<T> From<T>(ref ArrayList<T> arrayList)
+            where T : class, INode
+        {
+            arrayList.Yield(out var items, out var count);
+            arrayList = default;
+            return new NodeList<T>(items, count);
+        }
+
+        public static NodeList<T> Create<T>(NodeList<T> source) where T : class, INode =>
             source;
 
-        public static List<T> Create<T>(IEnumerable<T> source)
+        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : class, INode
         {
             switch (source)
             {
@@ -247,7 +152,7 @@ namespace Esprima.Ast
                     throw new ArgumentNullException(nameof(source));
                 }
 
-                case List<T> list:
+                case NodeList<T> list:
                 {
                     return Create(list);
                 }
@@ -255,7 +160,7 @@ namespace Esprima.Ast
                 case ICollection<T> collection:
                 {
                     return collection.Count > 0
-                         ? new List<T>(collection)
+                         ? new NodeList<T>(collection)
                          : default;
                 }
 
@@ -266,13 +171,13 @@ namespace Esprima.Ast
                         return default;
                     }
 
-                    var list = new List<T>(sourceList.Count);
+                    var list = new ArrayList<T>(sourceList.Count);
                     for (var i = 0; i < sourceList.Count; i++)
                     {
                         list.Add(sourceList[i]);
                     }
 
-                    return list;
+                    return From(ref list);
                 }
 
                 default:
@@ -283,8 +188,8 @@ namespace Esprima.Ast
                         : (int?)null;
 
                     var list = count is int initialCapacity
-                             ? new List<T>(initialCapacity)
-                             : new List<T>();
+                             ? new ArrayList<T>(initialCapacity)
+                             : new ArrayList<T>();
 
                     if (count == null || count > 0)
                     {
@@ -294,7 +199,7 @@ namespace Esprima.Ast
                         }
                     }
 
-                    return list;
+                    return From(ref list);
                 }
             }
         }

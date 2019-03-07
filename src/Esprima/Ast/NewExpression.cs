@@ -6,9 +6,9 @@ namespace Esprima.Ast
         Expression
     {
         public readonly Expression Callee;
-        public readonly List<ArgumentListElement> Arguments;
+        public readonly NodeList<ArgumentListElement> Arguments;
 
-        public NewExpression(Expression callee, List<ArgumentListElement> args) :
+        public NewExpression(Expression callee, NodeList<ArgumentListElement> args) :
             base(Nodes.NewExpression)
         {
             Callee = callee;

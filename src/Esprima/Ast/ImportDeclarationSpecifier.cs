@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Ast
 {
-    public interface ImportDeclarationSpecifier
+    public interface ImportDeclarationSpecifier : INode
     {
     }
 }

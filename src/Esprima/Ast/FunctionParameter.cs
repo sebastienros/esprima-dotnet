@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Ast
 {
-    public interface FunctionParameter
+    public interface IFunctionParameter : INode
     {
     }
 }

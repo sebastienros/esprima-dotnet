@@ -4,11 +4,11 @@ namespace Esprima.Ast
 {
     public class ArrowParameterPlaceHolder : Node, Expression
     {
-        public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new List<INode>());
+        public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new NodeList<INode>());
 
-        public readonly List<INode> Params;
+        public readonly NodeList<INode> Params;
 
-        public ArrowParameterPlaceHolder(List<INode> parameters) :
+        public ArrowParameterPlaceHolder(NodeList<INode> parameters) :
             base(Nodes.ArrowParameterPlaceHolder)
         {
             Params = parameters;

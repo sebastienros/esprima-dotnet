@@ -6,7 +6,7 @@ namespace Esprima.Ast
         Node,
         Expression,
         IArrayPatternElement,
-        FunctionParameter,
+        IFunctionParameter,
         PropertyValue
     {
         public readonly INode Left;
