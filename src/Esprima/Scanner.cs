@@ -735,7 +735,10 @@ namespace Esprima
 
                 case '}':
                     ++Index;
-                    _curlyStack.Pop();
+                    if (_curlyStack.Count > 0)
+                    {
+                        _curlyStack.Pop();
+                    }
                     token.Value = ParserExtensions.CharToString(str);
                     break;
 
@@ -965,10 +968,21 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
+            ulong numericValue;
+            try
+            {
+                numericValue = Convert.ToUInt64(number, 8);
+            }
+            catch (OverflowException)
+            {
+                ThrowUnexpectedToken($"Value {number} was either too large or too small for a UInt64.");
+                return null;
+            }
+
             return new Token
             {
                 Type = TokenType.NumericLiteral,
-                NumericValue = Convert.ToUInt32(number, 8),
+                NumericValue = numericValue,
                 Value = number,
                 Octal = octal,
                 LineNumber = LineNumber,
@@ -1706,7 +1720,7 @@ namespace Esprima
 
             // Template literals start with ` (U+0060) for template head
             // or } (U+007D) for template middle or template tail.
-            if (cp == 0x60 || (cp == 0x7D && _curlyStack.Peek() == "${"))
+            if (cp == 0x60 || (cp == 0x7D && _curlyStack.Count > 0 && _curlyStack.Peek() == "${"))
             {
                 return ScanTemplate();
             }
