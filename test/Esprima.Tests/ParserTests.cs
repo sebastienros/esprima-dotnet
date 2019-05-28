@@ -163,5 +163,15 @@ f(values);
         {
             Assert.Throws<ParserException>(() => new JavaScriptParser("066666666666666666666666666666"));
         }
+
+        [Theory]
+        [InlineData(".")]
+        [InlineData("..")]
+        [InlineData("...")]
+        public void CanParseDot(string script)
+        {
+            var parser = new JavaScriptParser(script);
+            Assert.Throws<ParserException>(() => parser.ParseProgram());
+        }
     }
 }
