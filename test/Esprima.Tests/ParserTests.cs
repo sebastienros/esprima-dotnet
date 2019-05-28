@@ -173,5 +173,12 @@ f(values);
             var parser = new JavaScriptParser(script);
             Assert.Throws<ParserException>(() => parser.ParseProgram());
         }
+
+        [Fact]
+        public void ThrowsErrorForInvalidRegExFlags()
+        {
+            var parser = new JavaScriptParser("/'/o//'///C//ÿ");
+            Assert.Throws<ParserException>(() => parser.ParseProgram());
+        }
     }
 }

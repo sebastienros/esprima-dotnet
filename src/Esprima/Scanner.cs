@@ -1474,17 +1474,8 @@ namespace Esprima
                 tmp = Regex.Replace(tmp, "[\uD800-\uDBFF][\uDC00-\uDFFF]", astralSubstitute);
             }
 
-            RegexOptions options = RegexOptions.ECMAScript;
-
             // First, detect invalid regular expressions.
-            try
-            {
-                options = ParseRegexOptions(flags);
-            }
-            catch
-            {
-                return null;
-            }
+            var options = ParseRegexOptions(flags);
 
             try
             {
