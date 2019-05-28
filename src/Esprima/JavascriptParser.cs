@@ -1847,9 +1847,17 @@ namespace Esprima
             };
         }
 
+        private const int MaxAssignmentDepth = 100;
+        private int _assignmentDepth = 0;
+
         private Expression ParseAssignmentExpression()
         {
             INode expr;
+
+            if (_assignmentDepth++ > MaxAssignmentDepth)
+            {
+                ThrowUnexpectedToken(_lookahead, "Maximum statements depth reached");
+            }
 
             if (!_context.AllowYield && MatchKeyword("yield"))
             {
@@ -1905,7 +1913,6 @@ namespace Esprima
                 }
                 else
                 {
-
                     if (MatchAssign())
                     {
                         if (!_context.IsAssignmentTarget)
@@ -1944,6 +1951,8 @@ namespace Esprima
                 }
             }
 
+            _assignmentDepth--;
+            
             return expr.As<Expression>();
         }
 
