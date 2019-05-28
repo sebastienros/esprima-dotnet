@@ -1856,7 +1856,7 @@ namespace Esprima
 
             if (_assignmentDepth++ > MaxAssignmentDepth)
             {
-                ThrowUnexpectedToken(_lookahead, "Maxinimum statements depth reached");
+                ThrowUnexpectedToken(_lookahead, "Maximum statements depth reached");
             }
 
             if (!_context.AllowYield && MatchKeyword("yield"))
