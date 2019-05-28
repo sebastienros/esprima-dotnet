@@ -102,7 +102,7 @@ namespace Esprima.Tests
 
             Assert.NotNull(literal);
             Assert.Equal(expected, literal.NumericValue);
-            
+
         }
 
         [Fact]
@@ -150,5 +150,42 @@ f(values);
 
             var program = parser.ParseProgram();
         }
+
+        [Fact]
+        public void CanParseInvalidCurly()
+        {
+            var parser = new JavaScriptParser("if (1}=1) eval('1');");
+            Assert.Throws<ParserException>(() => parser.ParseProgram());
+        }
+
+        [Fact]
+        public void CanReportProblemWithLargeNumber()
+        {
+            Assert.Throws<ParserException>(() => new JavaScriptParser("066666666666666666666666666666"));
+        }
+
+        [Theory]
+        [InlineData(".")]
+        [InlineData("..")]
+        [InlineData("...")]
+        public void CanParseDot(string script)
+        {
+            var parser = new JavaScriptParser(script);
+            Assert.Throws<ParserException>(() => parser.ParseProgram());
+        }
+
+        [Fact]
+        public void ThrowsErrorForInvalidRegExFlags()
+        {
+            var parser = new JavaScriptParser("/'/o//'///C//ÿ");
+            Assert.Throws<ParserException>(() => parser.ParseProgram());
+        }
+
+        [Fact]
+        public void ThrowsErrorForDeepRecursionParsing()
+        {
+            var parser = new JavaScriptParser("if ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((true)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) { } ");
+            Assert.Throws<ParserException>(() => parser.ParseProgram());
+        }        
     }
 }
