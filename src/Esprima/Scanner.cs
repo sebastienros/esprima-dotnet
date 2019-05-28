@@ -721,7 +721,7 @@ namespace Esprima
 
                 case '.':
                     ++Index;
-                    if (Source[Index] == '.' && Source[Index + 1] == '.')
+                    if (Source.Length >= Index + 2 && Source[Index] == '.' && Source[Index + 1] == '.')
                     {
                         // Spread operator: ...
                         Index += 2;
