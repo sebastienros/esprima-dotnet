@@ -5,7 +5,6 @@ namespace Esprima.Ast
     public class VariableDeclaration : Statement, IDeclaration
     {
         public readonly VariableDeclarationKind Kind;
-        private readonly NodeList<VariableDeclarator> _declarations;
 
         public VariableDeclaration(
             in NodeList<VariableDeclarator> declarations,
