@@ -341,7 +341,7 @@ namespace Esprima
             {
                 if (IsDisposed)
                 {
-                    ThrowObjectDisposedException(GetType().Name);
+                    ThrowObjectDisposedException(nameof(Enumerator));
                 }
             }
         }
