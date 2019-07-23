@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using static Esprima.JitHelper;
+using static Esprima.ExceptionHelper;
 
 namespace Esprima.Ast
 {
@@ -44,9 +44,16 @@ namespace Esprima.Ast
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => index >= 0 && index < Count
-                 ? _items[index]
-                 : Throw<T>(new IndexOutOfRangeException());
+            get
+            {
+                // Following trick can reduce the range check by one
+                if ((uint) index >= (uint) _count)
+                {
+                    ThrowIndexOutOfRangeException();
+                }
+
+                return _items[index];
+            }
         }
 
         public Enumerator GetEnumerator() => new Enumerator(_items, Count);
@@ -111,7 +118,7 @@ namespace Esprima.Ast
                     ThrowIfDisposed();
                     return _index >= 0
                          ? _items[_index]
-                         : Throw<T>(new InvalidOperationException());
+                         : ThrowInvalidOperationException<T>();
                 }
             }
 
@@ -121,7 +128,7 @@ namespace Esprima.Ast
             {
                 if (IsDisposed)
                 {
-                    Throw<T>(new ObjectDisposedException(GetType().Name));
+                    ThrowObjectDisposedException(GetType().Name);
                 }
             }
         }
