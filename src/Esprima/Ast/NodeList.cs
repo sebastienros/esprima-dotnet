@@ -6,10 +6,10 @@ using static Esprima.JitHelper;
 
 namespace Esprima.Ast
 {
-    public struct NodeList<T> : IReadOnlyList<T> where T : class, INode
+    public readonly struct NodeList<T> : IReadOnlyList<T> where T : class, INode
     {
-        private T[] _items;
-        private int _count;
+        private readonly T[] _items;
+        private readonly int _count;
 
         internal NodeList(ICollection<T> collection)
         {
@@ -38,11 +38,8 @@ namespace Esprima.Ast
         }
 
         public NodeList<INode> AsNodes() =>
-            new NodeList<INode>
-            {
-                _items = _items, // Conversion by co-variance!
-                _count = _count,
-            };
+            // Conversion by co-variance!
+            new NodeList<INode>(_items, _count);
 
         public T this[int index]
         {
@@ -140,9 +137,6 @@ namespace Esprima.Ast
             return new NodeList<T>(items, count);
         }
 
-        public static NodeList<T> Create<T>(NodeList<T> source) where T : class, INode =>
-            source;
-
         public static NodeList<T> Create<T>(IEnumerable<T> source) where T : class, INode
         {
             switch (source)
@@ -154,7 +148,7 @@ namespace Esprima.Ast
 
                 case NodeList<T> list:
                 {
-                    return Create(list);
+                    return list;
                 }
 
                 case ICollection<T> collection:

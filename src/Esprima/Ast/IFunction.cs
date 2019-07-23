@@ -6,7 +6,7 @@
     public interface IFunction : INode
     {
         Identifier Id { get; }
-        NodeList<INode> Params { get; }
+        ref readonly NodeList<INode> Params { get; }
         INode Body { get; }
         bool Generator { get; }
         bool Expression { get; }

@@ -348,7 +348,9 @@ namespace Esprima
 
     internal static class ArrayListExtensions
     {
-        public static void AddRange<T>(this ref ArrayList<T> destination, NodeList<T> source)
+        public static void AddRange<T>(
+            ref this ArrayList<T> destination,
+            in NodeList<T> source)
             where T: class, INode
         {
             foreach (var item in source)

@@ -4,20 +4,27 @@ namespace Esprima.Ast
 {
     public class Program : Statement
     {
-        public readonly NodeList<IStatementListItem> Body;
+        private readonly NodeList<IStatementListItem> _body;
+
         public readonly SourceType SourceType;
 
         public HoistingScope HoistingScope { get; }
         public bool Strict { get; }
 
-        public Program(NodeList<IStatementListItem> body, SourceType sourceType, HoistingScope hoistingScope, bool strict) :
+        public Program(
+            in NodeList<IStatementListItem> body,
+            SourceType sourceType,
+            HoistingScope hoistingScope,
+            bool strict) :
             base(Nodes.Program)
         {
-            Body = body;
+            _body = body;
             SourceType = sourceType;
             HoistingScope = hoistingScope;
             Strict = strict;
         }
+
+        public ref readonly NodeList<IStatementListItem> Body => ref _body;
 
         public override IEnumerable<INode> ChildNodes =>
             ChildNodeYielder.Yield(Body);

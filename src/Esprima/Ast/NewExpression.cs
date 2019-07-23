@@ -6,14 +6,18 @@ namespace Esprima.Ast
         Expression
     {
         public readonly Expression Callee;
-        public readonly NodeList<ArgumentListElement> Arguments;
+        private readonly NodeList<ArgumentListElement> _arguments;
 
-        public NewExpression(Expression callee, NodeList<ArgumentListElement> args) :
+        public NewExpression(
+            Expression callee,
+            in NodeList<ArgumentListElement> args) :
             base(Nodes.NewExpression)
         {
             Callee = callee;
-            Arguments = args;
+            _arguments = args;
         }
+
+        public ref readonly NodeList<ArgumentListElement> Arguments => ref _arguments;
 
         public override IEnumerable<INode> ChildNodes =>
             ChildNodeYielder.Yield(Callee, Arguments);
