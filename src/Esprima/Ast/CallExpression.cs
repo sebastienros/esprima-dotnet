@@ -6,6 +6,7 @@ namespace Esprima.Ast
         Expression
     {
         private readonly NodeList<ArgumentListElement> _arguments;
+
         public readonly Expression Callee;
         public bool Cached;
         public bool CanBeCached = true;
