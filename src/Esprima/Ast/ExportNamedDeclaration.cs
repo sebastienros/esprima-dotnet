@@ -5,6 +5,7 @@ namespace Esprima.Ast
     public class ExportNamedDeclaration : Node, ExportDeclaration
     {
         private readonly NodeList<ExportSpecifier> _specifiers;
+
         public readonly IStatementListItem Declaration;
         public readonly Literal Source;
 
