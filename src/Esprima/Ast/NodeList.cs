@@ -128,7 +128,7 @@ namespace Esprima.Ast
             {
                 if (IsDisposed)
                 {
-                    ThrowObjectDisposedException(GetType().Name);
+                    ThrowObjectDisposedException(nameof(Enumerator));
                 }
             }
         }
