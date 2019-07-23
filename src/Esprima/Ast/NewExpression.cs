@@ -5,6 +5,8 @@ namespace Esprima.Ast
     public class NewExpression : Node,
         Expression
     {
+        private readonly NodeList<ArgumentListElement> _arguments;
+
         public readonly Expression Callee;
 
         public NewExpression(
