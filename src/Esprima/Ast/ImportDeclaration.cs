@@ -5,6 +5,7 @@ namespace Esprima.Ast
     public class ImportDeclaration : Node, IDeclaration
     {
         private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
+
         public readonly Literal Source;
 
         public ImportDeclaration(
