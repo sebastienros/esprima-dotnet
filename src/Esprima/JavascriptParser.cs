@@ -1217,7 +1217,7 @@ namespace Esprima
                                     {
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
                                     }
-                                    sequenceExpression._expressions = NodeList.From(ref reinterpretedExpressions);
+                                    sequenceExpression.UpdateExpressions(NodeList.From(ref reinterpretedExpressions));
                                 }
                                 else
                                 {

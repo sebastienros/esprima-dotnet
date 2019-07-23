@@ -4,7 +4,7 @@ namespace Esprima.Ast
 {
     public class SequenceExpression : Node, Expression
     {
-        internal NodeList<Expression> _expressions;
+        private NodeList<Expression> _expressions;
 
         public SequenceExpression(in NodeList<Expression> expressions) :
             base(Nodes.SequenceExpression)
@@ -13,6 +13,9 @@ namespace Esprima.Ast
         }
 
         public ref readonly NodeList<Expression> Expressions => ref _expressions;
+
+        internal void UpdateExpressions(in NodeList<Expression> value) =>
+            _expressions = value;
 
         public override IEnumerable<INode> ChildNodes =>
             ChildNodeYielder.Yield(Expressions);
