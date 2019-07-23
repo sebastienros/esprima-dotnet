@@ -4,6 +4,8 @@ namespace Esprima.Ast
 {
     public class VariableDeclaration : Statement, IDeclaration
     {
+        private readonly NodeList<VariableDeclarator> _declarations;
+
         public readonly VariableDeclarationKind Kind;
 
         public VariableDeclaration(
