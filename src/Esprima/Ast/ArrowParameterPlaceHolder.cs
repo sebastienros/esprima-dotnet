@@ -5,6 +5,7 @@ namespace Esprima.Ast
     public class ArrowParameterPlaceHolder : Node, Expression
     {
         public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new NodeList<INode>());
+
         private readonly NodeList<INode> _params;
 
         public ArrowParameterPlaceHolder(in NodeList<INode> parameters) :
