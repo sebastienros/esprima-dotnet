@@ -39,7 +39,7 @@ namespace Esprima.Ast
 
         public NodeList<INode> AsNodes() =>
             // Conversion by co-variance!
-            new NodeList<INode>(_items, _count);
+            new NodeList<INode>(_items /* conversion by co-variance! */, _count);
 
         public T this[int index]
         {
