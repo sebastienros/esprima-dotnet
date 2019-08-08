@@ -13,6 +13,6 @@ namespace Esprima.Ast
         }
 
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield((INode) Declaration);
+            ChildNodeYielder.Yield(Declaration);
     }
 }

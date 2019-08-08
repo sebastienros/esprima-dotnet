@@ -35,7 +35,7 @@ namespace Esprima.Ast
             NodeList<T> first, INode second = null)
             where T : class, INode
         {
-            foreach (INode node in first)
+            foreach (var node in first)
                 yield return node;
 
             if (second != null)
@@ -54,10 +54,10 @@ namespace Esprima.Ast
             where T1 : class, INode
             where T2 : class, INode
         {
-            foreach (INode node in first)
+            foreach (var node in first)
                 yield return node;
 
-            foreach (INode node in second)
+            foreach (var node in second)
                 yield return node;
         }
 
@@ -76,7 +76,7 @@ namespace Esprima.Ast
                 yield return first;
             }
 
-            foreach (INode node in second)
+            foreach (var node in second)
                 yield return node;
 
             if (third != null)

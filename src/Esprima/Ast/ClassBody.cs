@@ -4,15 +4,17 @@ namespace Esprima.Ast
 {
     public class ClassBody : Node
     {
-        public readonly NodeList<ClassProperty> Body;
+        private readonly NodeList<ClassProperty> _body;
 
-        public ClassBody(NodeList<ClassProperty> body) :
+        public ClassBody(in NodeList<ClassProperty> body) :
             base(Nodes.ClassBody)
         {
-            Body = body;
+            _body = body;
         }
 
+        public ref readonly NodeList<ClassProperty> Body => ref _body;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Body);
+            ChildNodeYielder.Yield(_body);
     }
 }

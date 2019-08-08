@@ -4,15 +4,17 @@ namespace Esprima.Ast
 {
     public class ArrayExpression : Node, Expression
     {
-        public readonly NodeList<ArrayExpressionElement> Elements;
+        private readonly NodeList<ArrayExpressionElement> _elements;
 
-        public ArrayExpression(NodeList<ArrayExpressionElement> elements) :
+        public ArrayExpression(in NodeList<ArrayExpressionElement> elements) :
             base(Nodes.ArrayExpression)
         {
-            Elements = elements;
+            _elements = elements;
         }
 
+        public ref readonly NodeList<ArrayExpressionElement> Elements => ref _elements;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Elements);
+            ChildNodeYielder.Yield(_elements);
     }
 }

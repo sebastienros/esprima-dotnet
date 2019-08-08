@@ -5,17 +5,22 @@ namespace Esprima.Ast
     public class TemplateLiteral : Node,
         Expression
     {
-        public readonly NodeList<TemplateElement> Quasis;
-        public readonly NodeList<Expression> Expressions;
+        private readonly NodeList<TemplateElement> _quasis;
+        private readonly NodeList<Expression> _expressions;
 
-        public TemplateLiteral(NodeList<TemplateElement> quasis, NodeList<Expression> expressions) :
+        public TemplateLiteral(
+            in NodeList<TemplateElement> quasis,
+            in NodeList<Expression> expressions) :
             base(Nodes.TemplateLiteral)
         {
-            Quasis = quasis;
-            Expressions = expressions;
+            _quasis = quasis;
+            _expressions = expressions;
         }
 
+        public ref readonly NodeList<TemplateElement> Quasis => ref _quasis;
+        public ref readonly NodeList<Expression> Expressions => ref _expressions;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Quasis, Expressions);
+            ChildNodeYielder.Yield(_quasis,  _expressions);
     }
 }

@@ -4,15 +4,17 @@ namespace Esprima.Ast
 {
     public class ObjectExpression : Node, Expression
     {
-        public readonly NodeList<Property> Properties;
+        private readonly NodeList<Property> _properties;
 
-        public ObjectExpression(NodeList<Property> properties) :
+        public ObjectExpression(in NodeList<Property> properties) :
             base(Nodes.ObjectExpression)
         {
-            Properties = properties;
+            _properties = properties;
         }
 
+        public ref readonly NodeList<Property> Properties => ref _properties;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Properties);
+            ChildNodeYielder.Yield(_properties);
     }
 }

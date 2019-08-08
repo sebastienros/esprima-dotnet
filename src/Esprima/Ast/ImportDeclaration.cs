@@ -4,17 +4,22 @@ namespace Esprima.Ast
 {
     public class ImportDeclaration : Node, IDeclaration
     {
-        public readonly NodeList<ImportDeclarationSpecifier> Specifiers;
+        private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
+
         public readonly Literal Source;
 
-        public ImportDeclaration(NodeList<ImportDeclarationSpecifier> specifiers, Literal source) :
+        public ImportDeclaration(
+            in NodeList<ImportDeclarationSpecifier> specifiers,
+            Literal source) :
             base(Nodes.ImportDeclaration)
         {
-            Specifiers = specifiers;
+            _specifiers = specifiers;
             Source = source;
         }
 
+        public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers => ref _specifiers;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Specifiers, Source);
+            ChildNodeYielder.Yield(_specifiers, Source);
     }
 }

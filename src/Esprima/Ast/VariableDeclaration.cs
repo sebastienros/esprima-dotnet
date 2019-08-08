@@ -2,20 +2,24 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class VariableDeclaration : Statement,
-        IDeclaration
+    public class VariableDeclaration : Statement, IDeclaration
     {
-        public readonly NodeList<VariableDeclarator> Declarations;
+        private readonly NodeList<VariableDeclarator> _declarations;
+
         public readonly VariableDeclarationKind Kind;
 
-        public VariableDeclaration(NodeList<VariableDeclarator> declarations, VariableDeclarationKind kind) :
+        public VariableDeclaration(
+            in NodeList<VariableDeclarator> declarations,
+            VariableDeclarationKind kind) :
             base(Nodes.VariableDeclaration)
         {
-            Declarations = declarations;
+            _declarations = declarations;
             Kind = kind;
         }
 
+        public ref readonly NodeList<VariableDeclarator> Declarations => ref _declarations;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Declarations);
+            ChildNodeYielder.Yield(_declarations);
     }
 }

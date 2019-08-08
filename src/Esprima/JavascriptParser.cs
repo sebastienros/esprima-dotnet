@@ -1217,7 +1217,7 @@ namespace Esprima
                                     {
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
                                     }
-                                    sequenceExpression.Expressions = NodeList.From(ref reinterpretedExpressions);
+                                    sequenceExpression.UpdateExpressions(NodeList.From(ref reinterpretedExpressions));
                                 }
                                 else
                                 {
@@ -1256,7 +1256,7 @@ namespace Esprima
                 while (true)
                 {
                     var expr = Match("...")
-                        ? (Expression)ParseSpreadElement()
+                        ? ParseSpreadElement()
                         : IsolateCoverGrammar(parseAssignmentExpression);
 
                     args.Add(expr);
@@ -1415,7 +1415,7 @@ namespace Esprima
 
             var node = StartNode(_lookahead);
             var expr = (MatchKeyword("super") && _context.InFunctionBody)
-                ? (Expression)ParseSuper()
+                ? ParseSuper()
                 : MatchKeyword("new")
                     ? (Expression)InheritCoverGrammar(parseNewExpression)
                     : InheritCoverGrammar(parsePrimaryExpression);

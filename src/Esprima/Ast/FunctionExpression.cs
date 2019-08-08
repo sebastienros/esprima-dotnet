@@ -7,18 +7,11 @@ namespace Esprima.Ast
         Expression,
         PropertyValue
     {
-        public Identifier Id { get; }
-        public NodeList<INode> Params { get; }
-        public INode Body { get; }
-        public bool Generator { get; }
-        public bool Expression { get; }
-
-        public HoistingScope HoistingScope { get; }
-        public bool Strict { get; }
+        private readonly NodeList<INode> _parameters;
 
         public FunctionExpression(
             Identifier id,
-            NodeList<INode> parameters,
+            in NodeList<INode> parameters,
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,
@@ -26,7 +19,7 @@ namespace Esprima.Ast
             base(Nodes.FunctionExpression)
         {
             Id = id;
-            Params = parameters;
+            _parameters = parameters;
             Body = body;
             Generator = generator;
             Expression = false;
@@ -34,7 +27,16 @@ namespace Esprima.Ast
             Strict = strict;
         }
 
+        public Identifier Id { get; }
+        public ref readonly NodeList<INode> Params => ref _parameters;
+        public INode Body { get; }
+        public bool Generator { get; }
+        public bool Expression { get; }
+
+        public HoistingScope HoistingScope { get; }
+        public bool Strict { get; }
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Id, Params, Body);
+            ChildNodeYielder.Yield(Id, _parameters, Body);
     }
 }

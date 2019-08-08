@@ -2,14 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using static Esprima.JitHelper;
+using static Esprima.ExceptionHelper;
 
 namespace Esprima.Ast
 {
-    public struct NodeList<T> : IReadOnlyList<T> where T : class, INode
+    public readonly struct NodeList<T> : IReadOnlyList<T> where T : class, INode
     {
-        private T[] _items;
-        private int _count;
+        private readonly T[] _items;
+        private readonly int _count;
 
         internal NodeList(ICollection<T> collection)
         {
@@ -38,18 +38,21 @@ namespace Esprima.Ast
         }
 
         public NodeList<INode> AsNodes() =>
-            new NodeList<INode>
-            {
-                _items = _items, // Conversion by co-variance!
-                _count = _count,
-            };
+            new NodeList<INode>(_items /* conversion by co-variance! */, _count);
 
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => index >= 0 && index < Count
-                 ? _items[index]
-                 : Throw<T>(new IndexOutOfRangeException());
+            get
+            {
+                // Following trick can reduce the range check by one
+                if ((uint) index >= (uint) _count)
+                {
+                    ThrowIndexOutOfRangeException();
+                }
+
+                return _items[index];
+            }
         }
 
         public Enumerator GetEnumerator() => new Enumerator(_items, Count);
@@ -114,7 +117,7 @@ namespace Esprima.Ast
                     ThrowIfDisposed();
                     return _index >= 0
                          ? _items[_index]
-                         : Throw<T>(new InvalidOperationException());
+                         : ThrowInvalidOperationException<T>();
                 }
             }
 
@@ -124,7 +127,7 @@ namespace Esprima.Ast
             {
                 if (IsDisposed)
                 {
-                    Throw<T>(new ObjectDisposedException(GetType().Name));
+                    ThrowObjectDisposedException(nameof(Enumerator));
                 }
             }
         }
@@ -140,9 +143,6 @@ namespace Esprima.Ast
             return new NodeList<T>(items, count);
         }
 
-        public static NodeList<T> Create<T>(NodeList<T> source) where T : class, INode =>
-            source;
-
         public static NodeList<T> Create<T>(IEnumerable<T> source) where T : class, INode
         {
             switch (source)
@@ -154,7 +154,7 @@ namespace Esprima.Ast
 
                 case NodeList<T> list:
                 {
-                    return Create(list);
+                    return list;
                 }
 
                 case ICollection<T> collection:

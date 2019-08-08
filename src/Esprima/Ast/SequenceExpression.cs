@@ -4,13 +4,18 @@ namespace Esprima.Ast
 {
     public class SequenceExpression : Node, Expression
     {
-        public NodeList<Expression> Expressions { get; internal set; }
+        private NodeList<Expression> _expressions;
 
-        public SequenceExpression(NodeList<Expression> expressions) :
+        public SequenceExpression(in NodeList<Expression> expressions) :
             base(Nodes.SequenceExpression)
         {
-            Expressions = expressions;
+            _expressions = expressions;
         }
+
+        public ref readonly NodeList<Expression> Expressions => ref _expressions;
+
+        internal void UpdateExpressions(in NodeList<Expression> value) =>
+            _expressions = value;
 
         public override IEnumerable<INode> ChildNodes =>
             ChildNodeYielder.Yield(Expressions);
