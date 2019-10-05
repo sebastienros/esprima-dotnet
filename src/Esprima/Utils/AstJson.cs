@@ -812,11 +812,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(callExpression))
                 {
                     Member("callee", callExpression.Callee);
-
-                    if (!callExpression.Cached)
-                    {
-                        Member("arguments", callExpression.Arguments, e => (Expression) e);
-                    }
+                    Member("arguments", callExpression.Arguments, e => (Expression) e);
                 }
             }
 

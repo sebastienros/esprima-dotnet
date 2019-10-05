@@ -16,7 +16,6 @@ namespace Esprima.Ast
         public readonly object Value;
         public readonly string Raw;
         public readonly TokenType TokenType;
-        public object CachedValue;
 
         private Literal(TokenType tokenType, object value, string raw) :
             base(Nodes.Literal)
