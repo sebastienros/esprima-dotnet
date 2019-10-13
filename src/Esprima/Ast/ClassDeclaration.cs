@@ -2,8 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ClassDeclaration : Node,
-        IDeclaration
+    public class ClassDeclaration : Statement, IDeclaration
     {
         public readonly Identifier Id;
         public readonly Expression SuperClass; // Identifier || CallExpression
