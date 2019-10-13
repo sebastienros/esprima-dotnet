@@ -2865,7 +2865,7 @@ namespace Esprima
             return Finalize(node, new SwitchStatement(discriminant, NodeList.From(ref cases)));
         }
 
-        // https://tc39.github.io/ecma262/#sec-labelled-statements
+        // ECMA-262 13.13 Labelled Statements
 
         private Statement ParseLabelledStatement()
         {
@@ -2885,10 +2885,32 @@ namespace Esprima
                 }
 
                 _context.LabelSet.Add(key);
-                var labeledBody = ParseStatement();
+                Statement body;
+                if (MatchKeyword("class"))
+                {
+                    TolerateUnexpectedToken(_lookahead);
+                    body = ParseClassDeclaration();
+                } 
+                else if (MatchKeyword("function")) 
+                {
+                    var token = _lookahead;
+                    var declaration = ParseFunctionDeclaration();
+                    if (_context.Strict) 
+                    {
+                        TolerateUnexpectedToken(token, Messages.StrictFunction);
+                    }
+                    else if (declaration.Generator) 
+                    {
+                        TolerateUnexpectedToken(token, Messages.GeneratorInLegacyContext);
+                    }
+                    body = declaration;
+                } else 
+                {
+                    body = ParseStatement();
+                }
                 _context.LabelSet.Remove(key);
 
-                statement = new LabeledStatement(id, labeledBody);
+                statement = new LabeledStatement(id, body);
             }
             else
             {
@@ -3099,12 +3121,13 @@ namespace Esprima
             Expect("{");
             var body = ParseDirectivePrologues();
 
+            var previousLabelSetEmpty = _context.LabelSet.Count == 0;
             var previousLabelSet = _context.LabelSet;
             var previousInIteration = _context.InIteration;
             var previousInSwitch = _context.InSwitch;
             var previousInFunctionBody = _context.InFunctionBody;
 
-            _context.LabelSet.Clear();
+            _context.LabelSet = previousLabelSetEmpty ? previousLabelSet : new HashSet<string>();
             _context.InIteration = false;
             _context.InSwitch = false;
             _context.InFunctionBody = true;
@@ -3121,6 +3144,10 @@ namespace Esprima
             Expect("}");
 
             _context.LabelSet = previousLabelSet;
+            if (previousLabelSetEmpty)
+            {
+                _context.LabelSet.Clear();
+            }
             _context.InIteration = previousInIteration;
             _context.InSwitch = previousInSwitch;
             _context.InFunctionBody = previousInFunctionBody;
