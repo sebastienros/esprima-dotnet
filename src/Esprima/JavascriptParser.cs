@@ -1778,11 +1778,11 @@ namespace Esprima
 
         private ParsedParameters ReinterpretAsCoverFormalsList(INode expr)
         {
-            var parameters = new ArrayList<INode>(1) { expr };
-
+            ArrayList<INode> parameters;
             switch (expr.Type)
             {
                 case Nodes.Identifier:
+                    parameters = new ArrayList<INode>(1) { expr };
                     break;
                 case Nodes.ArrowParameterPlaceHolder:
                     // TODO clean-up
@@ -2711,7 +2711,7 @@ namespace Esprima
             {
                 label = ParseVariableIdentifier();
 
-                var key = '$' + label.Name;
+                var key = label.Name;
                 if (!_context.LabelSet.Contains(key))
                 {
                     ThrowError(Messages.UnknownLabel, label.Name);
@@ -2739,7 +2739,7 @@ namespace Esprima
             {
                 label = ParseVariableIdentifier();
 
-                var key = '$' + label.Name;
+                var key = label.Name;
                 if (!_context.LabelSet.Contains(key))
                 {
                     ThrowError(Messages.UnknownLabel, label.Name);
@@ -2878,7 +2878,7 @@ namespace Esprima
                 NextToken();
 
                 var id = expr.As<Identifier>();
-                var key = '$' + id.Name;
+                var key = id.Name;
                 if (_context.LabelSet.Contains(key))
                 {
                     ThrowError(Messages.Redeclaration, "Label", id.Name);
@@ -2958,7 +2958,7 @@ namespace Esprima
             var paramMap = new Dictionary<string, bool>();
             for (var i = 0; i < parameters.Count; i++)
             {
-                var key = '$' + (string)parameters[i].Value;
+                var key = (string)parameters[i].Value;
                 if (paramMap.ContainsKey(key))
                 {
                     TolerateError(Messages.DuplicateBinding, parameters[i].Value);
@@ -3157,7 +3157,7 @@ namespace Esprima
 
         private void ValidateParam(ParsedParameters options, INode param, string name)
         {
-            var key = '$' + name;
+            var key = name;
             if (_context.Strict)
             {
                 if (Scanner.IsRestrictedWord(name))
@@ -3195,7 +3195,7 @@ namespace Esprima
 
         private void ValidateParam2(ParsedParameters options, Token param, string name)
         {
-            var key = '$' + name;
+            var key = name;
             if (_context.Strict)
             {
                 if (Scanner.IsRestrictedWord(name))
