@@ -4,17 +4,20 @@ namespace Esprima.Ast
 {
     public class SwitchCase : Node
     {
-        public readonly Expression Test;
-        public readonly NodeList<IStatementListItem> Consequent;
+        private readonly NodeList<IStatementListItem> _consequent;
 
-        public SwitchCase(Expression test, NodeList<IStatementListItem> consequent) :
+        public readonly Expression Test;
+
+        public SwitchCase(Expression test, in NodeList<IStatementListItem> consequent) :
             base(Nodes.SwitchCase)
         {
             Test = test;
-            Consequent = consequent;
+            _consequent = consequent;
         }
 
+        public ref readonly NodeList<IStatementListItem> Consequent => ref _consequent;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Test, Consequent);
+            ChildNodeYielder.Yield(Test, _consequent);
     }
 }

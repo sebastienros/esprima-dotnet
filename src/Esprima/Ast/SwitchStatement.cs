@@ -4,17 +4,20 @@ namespace Esprima.Ast
 {
     public class SwitchStatement : Statement
     {
-        public readonly Expression Discriminant;
-        public readonly NodeList<SwitchCase> Cases;
+        private readonly NodeList<SwitchCase> _cases;
 
-        public SwitchStatement(Expression discriminant, NodeList<SwitchCase> cases) :
+        public readonly Expression Discriminant;
+
+        public SwitchStatement(Expression discriminant, in NodeList<SwitchCase> cases) :
             base(Nodes.SwitchStatement)
         {
             Discriminant = discriminant;
-            Cases = cases;
+            _cases = cases;
         }
 
+        public ref readonly NodeList<SwitchCase> Cases => ref _cases;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Discriminant, Cases);
+            ChildNodeYielder.Yield(Discriminant, _cases);
     }
 }

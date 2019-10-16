@@ -4,15 +4,17 @@ namespace Esprima.Ast
 {
     public class BlockStatement : Statement
     {
-        public readonly NodeList<IStatementListItem> Body;
+        private readonly NodeList<IStatementListItem> _body;
 
-        public BlockStatement(NodeList<IStatementListItem> body) :
+        public BlockStatement(in NodeList<IStatementListItem> body) :
             base(Nodes.BlockStatement)
         {
-            Body = body;
+            _body = body;
         }
 
+        public ref readonly NodeList<IStatementListItem> Body => ref _body;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Body);
+            ChildNodeYielder.Yield(_body);
     }
 }

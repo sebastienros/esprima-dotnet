@@ -39,6 +39,8 @@
         public const string StrictLHSPostfix = "Postfix increment/decrement may not have eval or arguments operand in strict mode";
         public const string StrictLHSPrefix = "Prefix increment/decrement may not have eval or arguments operand in strict mode";
         public const string StrictReservedWord = "Use of future reserved word in strict mode";
+        public const string StrictFunction = "In strict mode code, functions can only be declared at top level or inside a block";
+        public const string GeneratorInLegacyContext = "Generator declarations are not allowed in legacy contexts";
         public const string TemplateOctalLiteral = "Octal literals are not allowed in template strings.";
         public const string ParameterAfterRestParameter = "Rest parameter must be last formal parameter";
         public const string DefaultRestParameter = "Unexpected token =";

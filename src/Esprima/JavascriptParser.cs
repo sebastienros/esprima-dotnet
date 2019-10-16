@@ -1217,7 +1217,7 @@ namespace Esprima
                                     {
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression).As<Expression>());
                                     }
-                                    sequenceExpression.Expressions = NodeList.From(ref reinterpretedExpressions);
+                                    sequenceExpression.UpdateExpressions(NodeList.From(ref reinterpretedExpressions));
                                 }
                                 else
                                 {
@@ -1256,7 +1256,7 @@ namespace Esprima
                 while (true)
                 {
                     var expr = Match("...")
-                        ? (Expression)ParseSpreadElement()
+                        ? ParseSpreadElement()
                         : IsolateCoverGrammar(parseAssignmentExpression);
 
                     args.Add(expr);
@@ -1415,7 +1415,7 @@ namespace Esprima
 
             var node = StartNode(_lookahead);
             var expr = (MatchKeyword("super") && _context.InFunctionBody)
-                ? (Expression)ParseSuper()
+                ? ParseSuper()
                 : MatchKeyword("new")
                     ? (Expression)InheritCoverGrammar(parseNewExpression)
                     : InheritCoverGrammar(parsePrimaryExpression);
@@ -1778,11 +1778,11 @@ namespace Esprima
 
         private ParsedParameters ReinterpretAsCoverFormalsList(INode expr)
         {
-            var parameters = new ArrayList<INode>(1) { expr };
-
+            ArrayList<INode> parameters;
             switch (expr.Type)
             {
                 case Nodes.Identifier:
+                    parameters = new ArrayList<INode>(1) { expr };
                     break;
                 case Nodes.ArrowParameterPlaceHolder:
                     // TODO clean-up
@@ -2711,7 +2711,7 @@ namespace Esprima
             {
                 label = ParseVariableIdentifier();
 
-                var key = '$' + label.Name;
+                var key = label.Name;
                 if (!_context.LabelSet.Contains(key))
                 {
                     ThrowError(Messages.UnknownLabel, label.Name);
@@ -2739,7 +2739,7 @@ namespace Esprima
             {
                 label = ParseVariableIdentifier();
 
-                var key = '$' + label.Name;
+                var key = label.Name;
                 if (!_context.LabelSet.Contains(key))
                 {
                     ThrowError(Messages.UnknownLabel, label.Name);
@@ -2865,7 +2865,7 @@ namespace Esprima
             return Finalize(node, new SwitchStatement(discriminant, NodeList.From(ref cases)));
         }
 
-        // https://tc39.github.io/ecma262/#sec-labelled-statements
+        // ECMA-262 13.13 Labelled Statements
 
         private Statement ParseLabelledStatement()
         {
@@ -2878,17 +2878,39 @@ namespace Esprima
                 NextToken();
 
                 var id = expr.As<Identifier>();
-                var key = '$' + id.Name;
+                var key = id.Name;
                 if (_context.LabelSet.Contains(key))
                 {
                     ThrowError(Messages.Redeclaration, "Label", id.Name);
                 }
 
                 _context.LabelSet.Add(key);
-                var labeledBody = ParseStatement();
+                Statement body;
+                if (MatchKeyword("class"))
+                {
+                    TolerateUnexpectedToken(_lookahead);
+                    body = ParseClassDeclaration();
+                } 
+                else if (MatchKeyword("function")) 
+                {
+                    var token = _lookahead;
+                    var declaration = ParseFunctionDeclaration();
+                    if (_context.Strict) 
+                    {
+                        TolerateUnexpectedToken(token, Messages.StrictFunction);
+                    }
+                    else if (declaration.Generator) 
+                    {
+                        TolerateUnexpectedToken(token, Messages.GeneratorInLegacyContext);
+                    }
+                    body = declaration;
+                } else 
+                {
+                    body = ParseStatement();
+                }
                 _context.LabelSet.Remove(key);
 
-                statement = new LabeledStatement(id, labeledBody);
+                statement = new LabeledStatement(id, body);
             }
             else
             {
@@ -2936,7 +2958,7 @@ namespace Esprima
             var paramMap = new Dictionary<string, bool>();
             for (var i = 0; i < parameters.Count; i++)
             {
-                var key = '$' + (string)parameters[i].Value;
+                var key = (string)parameters[i].Value;
                 if (paramMap.ContainsKey(key))
                 {
                     TolerateError(Messages.DuplicateBinding, parameters[i].Value);
@@ -3099,12 +3121,13 @@ namespace Esprima
             Expect("{");
             var body = ParseDirectivePrologues();
 
+            var previousLabelSetEmpty = _context.LabelSet.Count == 0;
             var previousLabelSet = _context.LabelSet;
             var previousInIteration = _context.InIteration;
             var previousInSwitch = _context.InSwitch;
             var previousInFunctionBody = _context.InFunctionBody;
 
-            _context.LabelSet.Clear();
+            _context.LabelSet = previousLabelSetEmpty ? previousLabelSet : new HashSet<string>();
             _context.InIteration = false;
             _context.InSwitch = false;
             _context.InFunctionBody = true;
@@ -3121,6 +3144,10 @@ namespace Esprima
             Expect("}");
 
             _context.LabelSet = previousLabelSet;
+            if (previousLabelSetEmpty)
+            {
+                _context.LabelSet.Clear();
+            }
             _context.InIteration = previousInIteration;
             _context.InSwitch = previousInSwitch;
             _context.InFunctionBody = previousInFunctionBody;
@@ -3130,7 +3157,7 @@ namespace Esprima
 
         private void ValidateParam(ParsedParameters options, INode param, string name)
         {
-            var key = '$' + name;
+            var key = name;
             if (_context.Strict)
             {
                 if (Scanner.IsRestrictedWord(name))
@@ -3168,7 +3195,7 @@ namespace Esprima
 
         private void ValidateParam2(ParsedParameters options, Token param, string name)
         {
-            var key = '$' + name;
+            var key = name;
             if (_context.Strict)
             {
                 if (Scanner.IsRestrictedWord(name))

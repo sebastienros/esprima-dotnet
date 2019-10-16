@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
-using static Esprima.JitHelper;
+using static Esprima.ExceptionHelper;
 
 namespace Esprima
 {
@@ -202,9 +202,10 @@ namespace Esprima
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (index < 0 || index >= _count)
+                // Following trick can reduce the range check by one
+                if ((uint) index >= (uint) _count)
                 {
-                    return Throw<T>(new IndexOutOfRangeException());
+                    ThrowIndexOutOfRangeException();
                 }
 
                 AssertUnchanged();
@@ -216,7 +217,7 @@ namespace Esprima
             {
                 if (index < 0 || index >= _count)
                 {
-                    Throw<T>(new IndexOutOfRangeException());
+                    ThrowIndexOutOfRangeException();
                 }
 
                 AssertUnchanged();
@@ -330,7 +331,7 @@ namespace Esprima
                     ThrowIfDisposed();
                     return _index >= 0
                          ? _items[_index]
-                         : Throw<T>(new InvalidOperationException());
+                         : ThrowInvalidOperationException<T>();
                 }
             }
 
@@ -340,7 +341,7 @@ namespace Esprima
             {
                 if (IsDisposed)
                 {
-                    Throw<T>(new ObjectDisposedException(GetType().Name));
+                    ThrowObjectDisposedException(nameof(Enumerator));
                 }
             }
         }
@@ -348,7 +349,9 @@ namespace Esprima
 
     internal static class ArrayListExtensions
     {
-        public static void AddRange<T>(this ref ArrayList<T> destination, NodeList<T> source)
+        public static void AddRange<T>(
+            ref this ArrayList<T> destination,
+            in NodeList<T> source)
             where T: class, INode
         {
             foreach (var item in source)

@@ -4,15 +4,17 @@ namespace Esprima.Ast
 {
     public class ObjectPattern : Node, BindingPattern
     {
-        public readonly NodeList<Property> Properties;
+        private NodeList<Property> _properties;
 
-        public ObjectPattern(NodeList<Property> properties) :
+        public ObjectPattern(in NodeList<Property> properties) :
             base(Nodes.ObjectPattern)
         {
-            Properties = properties;
+            _properties = properties;
         }
 
+        public ref readonly NodeList<Property> Properties => ref _properties;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Properties);
+            ChildNodeYielder.Yield(_properties);
     }
 }

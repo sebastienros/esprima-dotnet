@@ -4,18 +4,11 @@ namespace Esprima.Ast
 {
     public class FunctionDeclaration : Statement, IDeclaration, IFunction
     {
-        public Identifier Id { get; }
-        public NodeList<INode> Params { get; }
-        public INode Body { get; }
-        public bool Generator { get; }
-        public bool Expression { get; }
-
-        public HoistingScope HoistingScope { get; }
-        public bool Strict { get; }
+        private readonly NodeList<INode> _parameters;
 
         public FunctionDeclaration(
             Identifier id,
-            NodeList<INode> parameters,
+            in NodeList<INode> parameters,
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,
@@ -23,7 +16,7 @@ namespace Esprima.Ast
             base(Nodes.FunctionDeclaration)
         {
             Id = id;
-            Params = parameters;
+            _parameters = parameters;
             Body = body;
             Generator = generator;
             Expression = false;
@@ -31,7 +24,16 @@ namespace Esprima.Ast
             Strict = strict;
         }
 
+        public Identifier Id { get; }
+        public INode Body { get; }
+        public bool Generator { get; }
+        public bool Expression { get; }
+
+        public HoistingScope HoistingScope { get; }
+        public bool Strict { get; }
+        public ref readonly NodeList<INode> Params => ref _parameters;
+
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Id, Params, Body);
+            ChildNodeYielder.Yield(Id, _parameters, Body);
     }
 }

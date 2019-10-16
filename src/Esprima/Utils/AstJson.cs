@@ -238,10 +238,10 @@ namespace Esprima.Utils
                 Member(name, map[value]);
             }
 
-            private void Member<T>(string name, NodeList<T> nodes) where T : class, INode =>
+            private void Member<T>(string name, in NodeList<T> nodes) where T : class, INode =>
                 Member(name, nodes, node => node);
 
-            private void Member<T>(string name, NodeList<T> list, Func<T, INode> nodeSelector)
+            private void Member<T>(string name, in NodeList<T> list, Func<T, INode> nodeSelector)
                 where T : class, INode
             {
                 Member(name);
@@ -812,11 +812,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(callExpression))
                 {
                     Member("callee", callExpression.Callee);
-
-                    if (!callExpression.Cached)
-                    {
-                        Member("arguments", callExpression.Arguments, e => (Expression) e);
-                    }
+                    Member("arguments", callExpression.Arguments, e => (Expression) e);
                 }
             }
 
