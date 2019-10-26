@@ -1,4 +1,6 @@
-﻿namespace Esprima
+﻿using System.Runtime.CompilerServices;
+
+namespace Esprima
 {
     using System;
     using System.Globalization;
@@ -21,12 +23,18 @@
         public Position(int line, int column)
         {
             Line = line >= 0 ? line
-                 : throw new ArgumentOutOfRangeException(nameof(line), line, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+                 : ThrowArgumentOutOfRangeException(nameof(line), line);
 
             Column = line > 0 && column >= 0
                      || line == 0 && column == 0 // if line is 0 then column MUST BE 0!
                    ? column
-                   : throw new ArgumentOutOfRangeException(nameof(column), column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+                   : ThrowArgumentOutOfRangeException(nameof(column), column);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static int ThrowArgumentOutOfRangeException(string name, int column)
+        {
+            throw new ArgumentOutOfRangeException(name, column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
         }
 
         public override bool Equals(object obj) =>
