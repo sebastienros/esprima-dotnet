@@ -307,9 +307,16 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static MetaNode StartNode(Token token)
+        private static MetaNode StartNode(Token token, int lastLineStart = 0)
         {
-            return new MetaNode(token.Start, token.LineNumber, token.Start - token.LineStart);
+            var column = token.Start - token.LineStart;
+            var line = token.LineNumber;
+            if (column < 0)
+            {
+                column += lastLineStart;
+                line--;
+            }
+            return new MetaNode(token.Start, line, column);
         }
 
         private T Finalize<T>(MetaNode meta, T node) where T : INode
@@ -336,6 +343,7 @@ namespace Esprima
         /// <summary>
         /// Expect the next token to match the specified punctuator.
         /// If not, an exception will be thrown.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Expect(string value)
         {
@@ -1699,13 +1707,17 @@ namespace Esprima
 
                 // Final reduce to clean-up the stack.
                 var i = stack.Count - 1;
-                expr = (Expression)stack[i];
-                markers.Pop();
+                expr = (Expression) stack[i];
+
+                var lastMarker = markers.Pop();
                 while (i > 1)
                 {
-                    var node = StartNode(markers.Pop());
-                    expr = Finalize(node, new BinaryExpression((string)((Token)stack[i - 1]).Value, (Expression)stack[i - 2], expr));
+                    var marker = markers.Pop();
+                    var lastLineStart = lastMarker?.LineStart ?? 0;
+                    var node = StartNode(marker, lastLineStart);
+                    expr = Finalize(node, new BinaryExpression((string) ((Token) stack[i - 1]).Value, (Expression) stack[i - 2], expr));
                     i -= 2;
+                    lastMarker = marker;
                 }
             }
 
