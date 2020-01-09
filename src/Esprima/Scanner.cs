@@ -1499,7 +1499,7 @@ namespace Esprima
 
                     int index = 0;
                     var newPattern = pattern;
-                    while ((index = newPattern.IndexOf("$", index)) != -1)
+                    while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                     {
                         if (index > 0 && newPattern[index - 1] != '\\')
                         {
@@ -1730,8 +1730,12 @@ namespace Esprima
 
         public RegexOptions ParseRegexOptions(string flags)
         {
-            bool isGlobal = false, multiline = false, ignoreCase = false,
-                unicode = false, sticky = false;
+            var isGlobal = false;
+            var multiline = false;
+            var ignoreCase = false;
+            var unicode = false;
+            var sticky = false;
+            var dotAll = false;
 
             for (int k = 0; k < flags.Length; k++)
             {
@@ -1781,6 +1785,15 @@ namespace Esprima
 
                     sticky = true;
                 }
+                else if (c == 's')
+                {
+                    if (dotAll)
+                    {
+                        ThrowUnexpectedToken(Messages.InvalidRegExp);
+                    }
+
+                    dotAll = true;
+                }
                 else
                 {
                     ThrowUnexpectedToken(Messages.InvalidRegExp);
@@ -1791,12 +1804,19 @@ namespace Esprima
 
             if (multiline)
             {
-                options = options | RegexOptions.Multiline;
+                options |= RegexOptions.Multiline;
+            }
+
+            if (dotAll)
+            {
+                // cannot use ECMA mode with singline
+                options |= RegexOptions.Singleline;
+                options &= ~RegexOptions.ECMAScript;
             }
 
             if (ignoreCase)
             {
-                options = options | RegexOptions.IgnoreCase;
+                options |= RegexOptions.IgnoreCase;
             }
 
             return options;
