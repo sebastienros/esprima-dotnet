@@ -1160,8 +1160,19 @@ namespace Esprima
                                 break;
                             }
                             NextToken();
-
-                            if (Match("..."))
+                            if (Match(")"))
+                            {
+                                NextToken();
+                                for (var i = 0; i < expressions.Count; i++) 
+                                {
+                                    ReinterpretExpressionAsPattern(expressions[i]);
+                                }
+                                arrow = true;
+                                // TODO clean-up
+                                var x = expressions.Select(e => (INode) e);
+                                expr = new ArrowParameterPlaceHolder(NodeList.From(ref x));
+                            } 
+                            else if (Match("..."))
                             {
                                 if (!_context.IsBindingElement)
                                 {
@@ -1273,6 +1284,10 @@ namespace Esprima
                         break;
                     }
                     ExpectCommaSeparator();
+                    if (Match(")"))
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -3262,7 +3277,7 @@ namespace Esprima
             return Finalize(node, new RestElement(arg));
         }
 
-        private bool ParseFormalParameter(ParsedParameters options)
+        private void ParseFormalParameter(ParsedParameters options)
         {
             var parameters = new ArrayList<Token>();
 
@@ -3275,8 +3290,6 @@ namespace Esprima
                 ValidateParam2(options, parameters[i], (string)parameters[i].Value);
             }
             options.Parameters.Push(param);
-
-            return !Match(")");
         }
 
         private ParsedParameters ParseFormalParameters(Token firstRestricted = null)
@@ -3292,11 +3305,16 @@ namespace Esprima
                 options.Parameters = new ArrayList<INode>();
                 while (_startMarker.Index < _scanner.Length)
                 {
-                    if (!ParseFormalParameter(options))
+                    ParseFormalParameter(options);
+                    if (Match(")"))
                     {
                         break;
                     }
                     Expect(",");
+                    if (Match(")")) 
+                    {
+                        break;
+                    }
                 }
             }
             Expect(")");
