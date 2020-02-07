@@ -1,0 +1,1 @@
+async function name(){return 42;}
