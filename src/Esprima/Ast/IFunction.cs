@@ -12,5 +12,6 @@
         bool Expression { get; }
         HoistingScope HoistingScope { get; }
         bool Strict { get; }
+        bool Async { get; }
     }
 }

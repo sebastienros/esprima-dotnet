@@ -12,7 +12,8 @@ namespace Esprima.Ast
             BlockStatement body,
             bool generator,
             HoistingScope hoistingScope,
-            bool strict) :
+            bool strict,
+            bool async) :
             base(Nodes.FunctionDeclaration)
         {
             Id = id;
@@ -22,12 +23,14 @@ namespace Esprima.Ast
             Expression = false;
             HoistingScope = hoistingScope;
             Strict = strict;
+            Async = async;
         }
 
         public Identifier Id { get; }
         public INode Body { get; }
         public bool Generator { get; }
         public bool Expression { get; }
+        public bool Async { get; }
 
         public HoistingScope HoistingScope { get; }
         public bool Strict { get; }

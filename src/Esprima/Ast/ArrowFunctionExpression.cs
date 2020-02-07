@@ -12,12 +12,14 @@ namespace Esprima.Ast
         public bool Expression { get; }
         public HoistingScope HoistingScope { get; }
         public bool Strict { get; }
+        public bool Async { get; }
 
         public ArrowFunctionExpression(
             in NodeList<INode> parameters,
             INode body,
             bool expression,
-            HoistingScope hoistingScope) :
+            HoistingScope hoistingScope,
+            bool async) :
             base(Nodes.ArrowFunctionExpression)
         {
             Id = null;
@@ -26,11 +28,12 @@ namespace Esprima.Ast
             Generator = false;
             Expression = expression;
             HoistingScope = hoistingScope;
+            Async = async;
         }
 
         public ref readonly NodeList<INode> Params => ref _params;
 
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Params, Body);
+            ChildNodeYielder.Yield(Params, Body);        
     }
 }
