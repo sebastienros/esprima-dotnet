@@ -57,7 +57,7 @@ namespace Esprima
             "while", "break", "catch", "throw", "const", "yield",
             "class", "super", "return", "typeof", "delete",
             "switch", "export", "import", "default", "finally", "extends",
-            "function", "continue", "debugger", "instanceof"
+            "function", "continue", "debugger", "instanceof", "async"
         };
 
         private static readonly HashSet<string> StrictModeReservedWords = new HashSet<string>

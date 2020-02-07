@@ -645,6 +645,10 @@ namespace Esprima
                         {
                             expr = ParseFunctionExpression();
                         }
+                        else if (MatchKeyword("async"))
+                        {
+                            expr = ParseFunctionExpression();
+                        }
                         else if (MatchKeyword("this"))
                         {
                             NextToken();
@@ -2044,6 +2048,9 @@ namespace Esprima
                     case "function":
                         statement = ParseFunctionDeclaration();
                         break;
+                    case "async":
+                        statement = ParseFunctionDeclaration();
+                        break;
                     case "class":
                         statement = ParseClassDeclaration();
                         break;
@@ -2918,7 +2925,7 @@ namespace Esprima
                     TolerateUnexpectedToken(_lookahead);
                     body = ParseClassDeclaration();
                 } 
-                else if (MatchKeyword("function")) 
+                else if (MatchKeyword("function") || MatchKeyword("async")) 
                 {
                     var token = _lookahead;
                     var declaration = ParseFunctionDeclaration();
@@ -3333,6 +3340,11 @@ namespace Esprima
             EnterHoistingScope();
 
             var node = CreateNode();
+            if (MatchKeyword("async"))
+            {
+                ExpectKeyword("async");
+            }
+
             ExpectKeyword("function");
 
             var isGenerator = Match("*");
@@ -3412,6 +3424,12 @@ namespace Esprima
             EnterHoistingScope();
 
             var node = CreateNode();
+            
+            if (MatchKeyword("async"))
+            {
+                ExpectKeyword("async");
+            }
+
             ExpectKeyword("function");
 
             var isGenerator = Match("*");
@@ -4093,7 +4111,7 @@ namespace Esprima
             {
                 // export default ...
                 NextToken();
-                if (MatchKeyword("function"))
+                if (MatchKeyword("function") || MatchKeyword("async"))
                 {
                     // export default function foo () {}
                     // export default function () {}
