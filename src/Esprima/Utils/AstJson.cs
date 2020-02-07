@@ -314,6 +314,7 @@ namespace Esprima.Utils
                     Member("body", functionDeclaration.Body);
                     Member("generator", functionDeclaration.Generator);
                     Member("expression", functionDeclaration.Expression);
+                    Member("async", functionDeclaration.Async);
                 }
             }
 
@@ -462,6 +463,7 @@ namespace Esprima.Utils
                     Member("body", arrowFunctionExpression.Body);
                     Member("generator", arrowFunctionExpression.Generator);
                     Member("expression", arrowFunctionExpression.Expression);
+                    Member("async", arrowFunctionExpression.Async);
                 }
             }
 
@@ -569,6 +571,7 @@ namespace Esprima.Utils
                     Member("body", function.Body);
                     Member("generator", function.Generator);
                     Member("expression", function.Expression);
+                    Member("async", function.Async);
                 }
             }
 
