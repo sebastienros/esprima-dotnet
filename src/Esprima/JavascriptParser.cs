@@ -24,6 +24,8 @@ namespace Esprima
             public bool InIteration;
             public bool InSwitch;
             public bool Strict;
+            public bool Async;
+
             public HashSet<string> LabelSet;
         }
 
@@ -647,7 +649,11 @@ namespace Esprima
                         }
                         else if (MatchKeyword("async"))
                         {
-                            expr = ParseFunctionExpression();
+                            var previousAsync = _context.Async;
+                            _context.Async = true;
+                            ExpectKeyword("async");
+                            expr = ParseExpression();
+                            _context.Async = previousAsync;
                         }
                         else if (MatchKeyword("this"))
                         {
@@ -1937,7 +1943,7 @@ namespace Esprima
                         {
                             TolerateUnexpectedToken(list.Stricted, list.Message);
                         }
-                        expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, LeaveHoistingScope()));
+                        expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, LeaveHoistingScope(), _context.Async));
                         _context.Strict = previousStrict;
                         _context.AllowYield = previousAllowYield;
                     }
@@ -3340,9 +3346,12 @@ namespace Esprima
             EnterHoistingScope();
 
             var node = CreateNode();
+            bool isAsync = false;
+
             if (MatchKeyword("async"))
             {
                 ExpectKeyword("async");
+                isAsync = true;
             }
 
             ExpectKeyword("function");
@@ -3410,7 +3419,7 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
 
-            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
+            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective, isAsync));
             var lists = _hoistingScopes.Pop();
             ref var functionDeclarations = ref lists.FunctionDeclarations;
             functionDeclarations.Add(functionDeclaration);
@@ -3424,11 +3433,6 @@ namespace Esprima
             EnterHoistingScope();
 
             var node = CreateNode();
-            
-            if (MatchKeyword("async"))
-            {
-                ExpectKeyword("async");
-            }
 
             ExpectKeyword("function");
 
@@ -3498,7 +3502,7 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression((Identifier)id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
+            return Finalize(node, new FunctionExpression((Identifier)id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective, _context.Async));
         }
 
         // https://tc39.github.io/ecma262/#sec-directive-prologues-and-the-use-strict-directive
@@ -3645,7 +3649,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, LeaveHoistingScope(), _context.Strict));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, LeaveHoistingScope(), _context.Strict, _context.Async));
         }
 
         // https://tc39.github.io/ecma262/#sec-generator-function-definitions
