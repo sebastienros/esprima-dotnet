@@ -2064,7 +2064,7 @@ var jqCache = JQLite.cache = {},
 function jqNextId() { return ++jqId; }
 
 
-var SPECIAL_CHARS_REGEXP = /([\:\-__]+(.))/g;
+var SPECIAL_CHARS_REGEXP = /([\:\-\_]+(.))/g;
 var MOZ_HACK_REGEXP = /^moz([A-Z])/;
 var jqLiteMinErr = minErr('jqLite');
 

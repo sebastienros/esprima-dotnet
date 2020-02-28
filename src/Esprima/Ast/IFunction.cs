@@ -10,7 +10,8 @@
         INode Body { get; }
         bool Generator { get; }
         bool Expression { get; }
-        HoistingScope HoistingScope { get; }
         bool Strict { get; }
+        bool Async { get; }
+        HoistingScope HoistingScope { get; }
     }
 }

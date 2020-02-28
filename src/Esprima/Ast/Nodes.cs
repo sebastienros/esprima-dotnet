@@ -55,6 +55,7 @@
         TaggedTemplateExpression,
         YieldExpression,
         ArrowFunctionExpression,
+        AwaitExpression,
         ClassBody,
         ClassDeclaration,
         ForOfStatement,

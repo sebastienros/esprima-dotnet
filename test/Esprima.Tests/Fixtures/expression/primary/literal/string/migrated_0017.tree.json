@@ -6,10 +6,10 @@
             "expression": {
                 "type": "Literal",
                 "value": "Helloworld",
-                "raw": "\"Hello\\\nworld\"",
+                "raw": "\"Hello\\\r\nworld\"",
                 "range": [
                     0,
-                    14
+                    15
                 ],
                 "loc": {
                     "start": {
@@ -22,10 +22,10 @@
                     }
                 }
             },
-            "directive": "Hello\\\nworld",
+            "directive": "Hello\\\r\nworld",
             "range": [
                 0,
-                14
+                15
             ],
             "loc": {
                 "start": {
@@ -40,9 +40,29 @@
         }
     ],
     "sourceType": "script",
+    "tokens": [
+        {
+            "type": "String",
+            "value": "\"Hello\\\r\nworld\"",
+            "range": [
+                0,
+                15
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 2,
+                    "column": 6
+                }
+            }
+        }
+    ],
     "range": [
         0,
-        14
+        15
     ],
     "loc": {
         "start": {
