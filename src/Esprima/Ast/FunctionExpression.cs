@@ -2,10 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class FunctionExpression : Node,
-        IFunction,
-        Expression,
-        PropertyValue
+    public class FunctionExpression : Node, IFunctionExpression, PropertyValue
     {
         private readonly NodeList<INode> _parameters;
 
@@ -32,7 +29,7 @@ namespace Esprima.Ast
         public INode Body { get; }
         public bool Generator { get; }
         public bool Expression { get; }
-
+        public bool Async => false;
         public HoistingScope HoistingScope { get; }
         public bool Strict { get; }
 

@@ -6,13 +6,6 @@ namespace Esprima.Ast
     {
         private readonly NodeList<INode> _params;
 
-        public Identifier Id { get; }
-        public INode Body { get; } // : BlockStatement | Expression;
-        public bool Generator { get; }
-        public bool Expression { get; }
-        public HoistingScope HoistingScope { get; }
-        public bool Strict { get; }
-
         public ArrowFunctionExpression(
             in NodeList<INode> parameters,
             INode body,
@@ -28,9 +21,17 @@ namespace Esprima.Ast
             HoistingScope = hoistingScope;
         }
 
+        public Identifier Id { get; }
+        public INode Body { get; } // : BlockStatement | Expression;
+        public bool Generator { get; }
+        public bool Expression { get; }
+        public bool Strict => true;
+        public bool Async => false;
+        public HoistingScope HoistingScope { get; }
+
         public ref readonly NodeList<INode> Params => ref _params;
 
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Params, Body);
+            ChildNodeYielder.Yield(Params, Body);        
     }
 }
