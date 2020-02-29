@@ -874,32 +874,10 @@ namespace Esprima
             {
                 var id = (string) token.Value;
                 NextToken();
-                if (id == "async" && !_hasLineTerminator)
-                {
-                    computed = Match("[");
-                    if (computed)
-                    {
-                        isAsync = true;
-                        key = ParseObjectPropertyKey();
-                    }
-                    else
-                    {
-                        var punctuator = (string) _lookahead.Value;
-                        if (punctuator != ":" && punctuator != "(" && punctuator != "*")
-                        {
-                            isAsync = true;
-                            token = _lookahead;
-                            id = (string) token.Value;
-                            NextToken();
-                        }
-
-                        key = Finalize(node, new Identifier(id));
-                    }
-                }
-                else
-                {
-                    key = Finalize(node, new Identifier(id));
-                }
+                computed = Match("[");
+                isAsync = !_hasLineTerminator && (id == "async") &&
+                          !Match(":") && !Match("(") && !Match("*");
+                key = isAsync ? ParseObjectPropertyKey() : Finalize(node, new Identifier(id));
             }
             else if (Match("*"))
             {
