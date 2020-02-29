@@ -1460,6 +1460,10 @@ namespace Esprima
                     expr = Finalize(StartNode(startToken), new CallExpression(expr, NodeList.From(ref args)));
                     if (asyncArrow && Match("=>"))
                     {
+                        for (var i = 0; i < args.Count; ++i)
+                        {
+                            ReinterpretExpressionAsPattern(args[i]);
+                        }
                         expr = new ArrowParameterPlaceHolder(NodeList.Create(args.Select(x => (INode) x)), true);
                     }
                 }
@@ -1986,8 +1990,10 @@ namespace Esprima
 
                 if (token.Type == TokenType.Identifier && (token.LineNumber == _lookahead.LineNumber) && (string) token.Value == "async" && (_lookahead.Type == TokenType.Identifier))
                 {
-                    var arg = new INode[] { ParsePrimaryExpression() };
-                    expr = new ArrowParameterPlaceHolder(new NodeList<INode>(arg, 1), true);
+                    var arg = ParsePrimaryExpression();
+                    ReinterpretExpressionAsPattern(arg);
+                    var args = new INode[] { arg };
+                    expr = new ArrowParameterPlaceHolder(new NodeList<INode>(args, 1), true);
                 }
 
                 if (expr.Type == Nodes.ArrowParameterPlaceHolder || Match("=>"))
