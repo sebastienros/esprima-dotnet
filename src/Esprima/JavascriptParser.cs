@@ -872,19 +872,34 @@ namespace Esprima
 
             if (token.Type == TokenType.Identifier)
             {
-                var id = token.Value;
+                var id = (string) token.Value;
                 NextToken();
-                if ((string) id == "async")
+                if (id == "async" && !_hasLineTerminator)
                 {
-                    isAsync = !_hasLineTerminator && (_lookahead.Type == TokenType.Identifier);
-                    if (isAsync)
+                    computed = Match("[");
+                    if (computed)
                     {
-                        token = this._lookahead;
-                        id = token.Value;
-                        NextToken();
+                        isAsync = true;
+                        key = ParseObjectPropertyKey();
+                    }
+                    else
+                    {
+                        var punctuator = (string) _lookahead.Value;
+                        if (punctuator != ":" && punctuator != "(" && punctuator != "*")
+                        {
+                            isAsync = true;
+                            token = _lookahead;
+                            id = (string) token.Value;
+                            NextToken();
+                        }
+
+                        key = Finalize(node, new Identifier(id));
                     }
                 }
-                key = Finalize(node, new Identifier((string) id));
+                else
+                {
+                    key = Finalize(node, new Identifier(id));
+                }
             }
             else if (Match("*"))
             {
@@ -930,7 +945,7 @@ namespace Esprima
                 }
 
                 kind = PropertyKind.Init;
-                if (Match(":"))
+                if (Match(":") && !isAsync)
                 {
                     if (!computed && IsPropertyKey(key, "__proto__"))
                     {
