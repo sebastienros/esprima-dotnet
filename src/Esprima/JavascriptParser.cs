@@ -876,7 +876,7 @@ namespace Esprima
                 NextToken();
                 computed = Match("[");
                 isAsync = !_hasLineTerminator && (id == "async") &&
-                          !Match(":") && !Match("(") && !Match("*");
+                          !Match(":") && !Match("(") && !Match("*") && !Match(",");
                 key = isAsync ? ParseObjectPropertyKey() : Finalize(node, new Identifier(id));
             }
             else if (Match("*"))
