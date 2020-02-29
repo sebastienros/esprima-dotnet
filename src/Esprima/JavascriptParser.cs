@@ -25,7 +25,6 @@ namespace Esprima
             public bool InIteration;
             public bool InSwitch;
             public bool Strict;
-            public bool Async;
 
             public HashSet<string> LabelSet;
         }
@@ -647,14 +646,6 @@ namespace Esprima
                         {
                             expr = ParseFunctionExpression();
                         }
-                        else if (MatchKeyword("async"))
-                        {
-                            var previousAsync = _context.Async;
-                            _context.Async = true;
-                            ExpectKeyword("async");
-                            expr = ParseExpression();
-                            _context.Async = previousAsync;
-                        }
                         else if (MatchKeyword("this"))
                         {
                             NextToken();
@@ -762,11 +753,10 @@ namespace Esprima
             return body;
         }
 
-        private IFunctionExpression ParsePropertyMethodFunction()
+        private FunctionExpression ParsePropertyMethodFunction()
         {
             EnterHoistingScope();
 
-            var isGenerator = false;
             var node = CreateNode();
 
             var previousAllowYield = _context.AllowYield;
@@ -775,11 +765,13 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, LeaveHoistingScope(), _context.Strict));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
-        private IFunctionExpression ParsePropertyMethodAsyncFunction()
+        private FunctionExpression ParsePropertyMethodAsyncFunction()
         {
+            EnterHoistingScope();
+
             var node = CreateNode();
 
             var previousAllowYield = _context.AllowYield;
@@ -791,7 +783,7 @@ namespace Esprima
             _context.AllowYield = previousAllowYield;
             _context.Await = previousAwait;
 
-            return Finalize(node, new AsyncFunctionExpression(null, NodeList.From(ref parameters.Parameters), method, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, strict: true, async: true, LeaveHoistingScope()));
         }
 
         private Expression ParseObjectPropertyKey()
@@ -2007,9 +1999,8 @@ namespace Esprima
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
 
-                    var arrowFunction = expr.As<ArrowParameterPlaceHolder>();
-                    var isAsync = arrowFunction.Async;
-                    var list = ReinterpretAsCoverFormalsList(arrowFunction);
+                    var isAsync = expr is ArrowParameterPlaceHolder arrow && arrow.Async;
+                    var list = ReinterpretAsCoverFormalsList(expr);
 
                     if (list != null)
                     {
@@ -2042,9 +2033,7 @@ namespace Esprima
                             TolerateUnexpectedToken(list.Stricted, list.Message);
                         }
 
-                        expr = isAsync
-                            ? (INode) Finalize(node, new AsyncArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, LeaveHoistingScope()))
-                            : Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, LeaveHoistingScope()));
+                        expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, isAsync, LeaveHoistingScope()));
 
                         _context.Strict = previousStrict;
                         _context.AllowYield = previousAllowYield;
@@ -2155,9 +2144,6 @@ namespace Esprima
                         statement = ParseLexicalDeclaration(ref inFor);
                         break;
                     case "function":
-                        statement = ParseFunctionDeclaration();
-                        break;
-                    case "async":
                         statement = ParseFunctionDeclaration();
                         break;
                     case "class":
@@ -3034,7 +3020,7 @@ namespace Esprima
                     TolerateUnexpectedToken(_lookahead);
                     body = ParseClassDeclaration();
                 } 
-                else if (MatchKeyword("function") || MatchKeyword("async")) 
+                else if (MatchKeyword("function"))
                 {
                     var token = _lookahead;
                     var declaration = ParseFunctionDeclaration();
@@ -3475,12 +3461,6 @@ namespace Esprima
                 NextToken();
             }
 
-            if (MatchKeyword("async"))
-            {
-                ExpectKeyword("async");
-                isAsync = true;
-            }
-
             ExpectKeyword("function");
 
             var isGenerator = isAsync ? false : Match("*");
@@ -3549,9 +3529,7 @@ namespace Esprima
             _context.Await = previousAllowAwait;
             _context.AllowYield = previousAllowYield;
 
-            var functionDeclaration = isAsync
-                ? (IFunctionDeclaration) Finalize(node, new AsyncFunctionDeclaration(id, parameters, body, LeaveHoistingScope()))
-                : Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
+            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync, LeaveHoistingScope()));
 
             var lists = _hoistingScopes.Pop();
             ref var functionDeclarations = ref lists.FunctionDeclarations;
@@ -3561,7 +3539,7 @@ namespace Esprima
             return functionDeclaration;
         }
 
-        private IFunctionExpression ParseFunctionExpression()
+        private FunctionExpression ParseFunctionExpression()
         {
             EnterHoistingScope();
 
@@ -3644,9 +3622,7 @@ namespace Esprima
             _context.Await = previousAllowAwait;
             _context.AllowYield = previousAllowYield;
 
-            return isAsync
-                ? (IFunctionExpression) Finalize(node, new AsyncFunctionExpression((Identifier) id, parameters, body, LeaveHoistingScope()))
-                : Finalize(node, new FunctionExpression((Identifier) id, parameters, body, isGenerator, LeaveHoistingScope(), hasStrictDirective));
+            return Finalize(node, new FunctionExpression((Identifier) id, parameters, body, isGenerator, hasStrictDirective, isAsync, LeaveHoistingScope()));
         }
 
         // https://tc39.github.io/ecma262/#sec-directive-prologues-and-the-use-strict-directive
@@ -3738,7 +3714,6 @@ namespace Esprima
             Expect("(");
             Expect(")");
 
-            var isGenerator = false;
             var parameters = new ParsedParameters();
 
             var previousAllowYield = _context.AllowYield;
@@ -3746,7 +3721,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, LeaveHoistingScope(), _context.Strict));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseSetterMethod()
@@ -3757,7 +3732,6 @@ namespace Esprima
 
             var options = new ParsedParameters();
 
-            var isGenerator = false;
             var previousAllowYield = _context.AllowYield;
             _context.AllowYield = false;
 
@@ -3775,7 +3749,7 @@ namespace Esprima
             var method = ParsePropertyMethod(options);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref options.Parameters), method, isGenerator, LeaveHoistingScope(), _context.Strict));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref options.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseGeneratorMethod()
@@ -3784,7 +3758,6 @@ namespace Esprima
 
             var node = CreateNode();
 
-            var isGenerator = true;
             var previousAllowYield = _context.AllowYield;
 
             _context.AllowYield = true;
@@ -3793,7 +3766,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, LeaveHoistingScope(), _context.Strict));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: true, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
         // https://tc39.github.io/ecma262/#sec-generator-function-definitions
@@ -3872,7 +3845,7 @@ namespace Esprima
 
             PropertyKind kind = PropertyKind.None;
             Expression key = null;
-            IFunctionExpression value = null;
+            FunctionExpression value = null;
             var computed = false;
             var method = false;
             var isStatic = false;
@@ -4274,7 +4247,7 @@ namespace Esprima
             {
                 // export default ...
                 NextToken();
-                if (MatchKeyword("function") || MatchKeyword("async"))
+                if (MatchKeyword("function"))
                 {
                     // export default function foo () {}
                     // export default function () {}

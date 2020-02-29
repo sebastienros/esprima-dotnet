@@ -4,14 +4,14 @@ namespace Esprima.Ast
 {
     public sealed class AwaitExpression : Node, Expression
     {
-        private readonly Expression _argument;
+        public readonly Expression Argument;
 
         public AwaitExpression(Expression argument) : base(Nodes.AwaitExpression)
         {
-            _argument = argument;
+            Argument = argument;
         }
 
         public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(_argument);
+            ChildNodeYielder.Yield(Argument);
     }
 }
