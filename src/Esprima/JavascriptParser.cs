@@ -4313,6 +4313,14 @@ namespace Esprima
                     //};
                     exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
                 }
+                else if (MatchContextualKeyword("async"))
+                {
+                    // export default async function f () {}
+                    // export default async function () {}
+                    // export default async x => x
+                    var declaration = MatchAsyncFunction() ? (IDeclaration) ParseFunctionDeclaration(true) : ParseAssignmentExpression();
+                    exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
+                }
                 else
                 {
                     if (MatchContextualKeyword("from"))
