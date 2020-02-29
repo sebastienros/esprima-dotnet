@@ -57,5 +57,6 @@
         public const string ForInOfLoopInitializer = "'{0} loop variable declaration may not have an initializer";
         public const string DeclarationMissingInitializer = "Missing initializer in {0} declaration";
         public const string LetInLexicalBinding = "let is disallowed as a lexically bound name";
+        public const string ConstructorIsAsync = "Class constructor may not be an async method";
     };
 }
