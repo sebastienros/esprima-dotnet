@@ -11,8 +11,9 @@ namespace Esprima.Ast
             in NodeList<INode> parameters,
             BlockStatement body,
             bool generator,
-            HoistingScope hoistingScope,
-            bool strict) :
+            bool strict,
+            bool async,
+            HoistingScope hoistingScope) :
             base(Nodes.FunctionDeclaration)
         {
             Id = id;
@@ -20,18 +21,20 @@ namespace Esprima.Ast
             Body = body;
             Generator = generator;
             Expression = false;
-            HoistingScope = hoistingScope;
             Strict = strict;
+            Async = async;
+            HoistingScope = hoistingScope;
         }
 
         public Identifier Id { get; }
+
         public INode Body { get; }
         public bool Generator { get; }
         public bool Expression { get; }
-        public bool Async => false;
+        public bool Async { get; }
+        public bool Strict { get; }
 
         public HoistingScope HoistingScope { get; }
-        public bool Strict { get; }
         public ref readonly NodeList<INode> Params => ref _parameters;
 
         public override IEnumerable<INode> ChildNodes =>

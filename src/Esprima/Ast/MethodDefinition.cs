@@ -4,7 +4,7 @@
     {
         public readonly bool Static;
 
-        public MethodDefinition(Expression key, bool computed, IFunctionExpression value, PropertyKind kind, bool isStatic) :
+        public MethodDefinition(Expression key, bool computed, FunctionExpression value, PropertyKind kind, bool isStatic) :
             base(Nodes.MethodDefinition)
         {
             Static = isStatic;

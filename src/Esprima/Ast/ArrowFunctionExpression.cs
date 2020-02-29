@@ -10,6 +10,7 @@ namespace Esprima.Ast
             in NodeList<INode> parameters,
             INode body,
             bool expression,
+            bool async,
             HoistingScope hoistingScope) :
             base(Nodes.ArrowFunctionExpression)
         {
@@ -18,6 +19,7 @@ namespace Esprima.Ast
             Body = body;
             Generator = false;
             Expression = expression;
+            Async = async;
             HoistingScope = hoistingScope;
         }
 
@@ -25,8 +27,8 @@ namespace Esprima.Ast
         public INode Body { get; } // : BlockStatement | Expression;
         public bool Generator { get; }
         public bool Expression { get; }
-        public bool Strict => true;
-        public bool Async => false;
+        public bool Strict { get; }
+        public bool Async { get; }
         public HoistingScope HoistingScope { get; }
 
         public ref readonly NodeList<INode> Params => ref _params;

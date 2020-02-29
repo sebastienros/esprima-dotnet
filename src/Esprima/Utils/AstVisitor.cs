@@ -523,16 +523,18 @@ namespace Esprima.Utils
         protected virtual void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
         {
             //Here we construct the function so if we iterate only functions we will be able to iterate ArrowFunctions too
-            var statement =
-                arrowFunctionExpression.Expression
-                    ? new BlockStatement(new NodeList<IStatementListItem>(new IStatementListItem[] { new ReturnStatement(arrowFunctionExpression.Body.As<Expression>()) }, 1))
-                    : arrowFunctionExpression.Body.As<BlockStatement>();
+            var statement = arrowFunctionExpression.Expression
+                ? new BlockStatement(new NodeList<IStatementListItem>(new IStatementListItem[] {new ReturnStatement(arrowFunctionExpression.Body.As<Expression>())}, 1))
+                : arrowFunctionExpression.Body.As<BlockStatement>();
+
             var func = new FunctionExpression(new Identifier(null),
                 arrowFunctionExpression.Params,
                 statement,
-                false,
-                new HoistingScope(),
-                IsStrictMode);
+                generator: false,
+                IsStrictMode,
+                async: false,
+                new HoistingScope());
+
             VisitFunctionExpression(func);
         }
 
