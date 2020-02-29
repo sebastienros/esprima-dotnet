@@ -3934,9 +3934,17 @@ namespace Esprima
                         isAsync = true;
                         token = _lookahead;
                         key = ParseObjectPropertyKey();
-                        if (token.Type == TokenType.Identifier && ((string) token.Value == "get" || (string) token.Value == "set" || (string) token.Value == "constructor"))
+                        if (token.Type == TokenType.Identifier)
                         {
-                            TolerateUnexpectedToken(token);
+                            var tokenValue = (string) token.Value;
+                            if (tokenValue == "get" || tokenValue == "set")
+                            {
+                                TolerateUnexpectedToken(token);
+                            }
+                            else if (tokenValue == "constructor")
+                            {
+                                TolerateUnexpectedToken(token, Messages.ConstructorIsAsync);
+                            }
                         }
                     }
                 }
