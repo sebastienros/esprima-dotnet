@@ -3926,14 +3926,18 @@ namespace Esprima
                         key = ParseObjectPropertyKey();
                     }
                 }
-                isAsync = (token.Type == TokenType.Identifier) && !_hasLineTerminator && (_lookahead.Type == TokenType.Identifier) && ((string) token.Value == "async");
-                if (isAsync)
+                if ((token.Type == TokenType.Identifier) && !_hasLineTerminator && ((string) token.Value == "async"))
                 {
-                    token = _lookahead;
-                    key = ParseObjectPropertyKey();
-                    if (token.Type == TokenType.Identifier && ((string) token.Value == "get" || (string) token.Value == "set" || (string) token.Value == "constructor"))
+                    var punctuator = (string) _lookahead.Value;
+                    if (punctuator != ":" && punctuator != "(" && punctuator != "*")
                     {
-                        TolerateUnexpectedToken(token);
+                        isAsync = true;
+                        token = _lookahead;
+                        key = ParseObjectPropertyKey();
+                        if (token.Type == TokenType.Identifier && ((string) token.Value == "get" || (string) token.Value == "set" || (string) token.Value == "constructor"))
+                        {
+                            TolerateUnexpectedToken(token);
+                        }
                     }
                 }
             }
