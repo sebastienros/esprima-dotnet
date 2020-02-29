@@ -1988,12 +1988,15 @@ namespace Esprima
                 var token = startToken;
                 expr = ParseConditionalExpression();
 
-                if (token.Type == TokenType.Identifier && (token.LineNumber == _lookahead.LineNumber) && (string) token.Value == "async" && (_lookahead.Type == TokenType.Identifier))
+                if (token.Type == TokenType.Identifier && (token.LineNumber == _lookahead.LineNumber) && (string) token.Value == "async")
                 {
-                    var arg = ParsePrimaryExpression();
-                    ReinterpretExpressionAsPattern(arg);
-                    var args = new INode[] { arg };
-                    expr = new ArrowParameterPlaceHolder(new NodeList<INode>(args, 1), true);
+                    if (_lookahead.Type == TokenType.Identifier || MatchKeyword("yield"))
+                    {
+                        var arg = ParsePrimaryExpression();
+                        ReinterpretExpressionAsPattern(arg);
+                        var args = new INode[] { arg };
+                        expr = new ArrowParameterPlaceHolder(new NodeList<INode>(args, 1), true);
+                    }
                 }
 
                 if (expr.Type == Nodes.ArrowParameterPlaceHolder || Match("=>"))
