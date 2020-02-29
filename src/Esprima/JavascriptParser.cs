@@ -3471,7 +3471,7 @@ namespace Esprima
                 _scanner.LineNumber = previousLineNumber;
                 _scanner.LineStart = previousLineStart;
 
-                match = (previousLineNumber == next.LineNumber) && ((next.Type == TokenType.Keyword) || ((string) next.Value == "function"));
+                match = (previousLineNumber == next.LineNumber) && (next.Type == TokenType.Keyword) && ((string) next.Value == "function");
             }
 
             return match;
