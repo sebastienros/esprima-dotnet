@@ -18,6 +18,9 @@ namespace Esprima.Utils
                 case Nodes.ArrayExpression:
                     VisitArrayExpression(node.As<ArrayExpression>());
                     break;
+                case Nodes.AwaitExpression:
+                    VisitAwaitExpression(node.As<AwaitExpression>());
+                    break;
                 case Nodes.BlockStatement:
                     VisitBlockStatement(node.As<BlockStatement>());
                     break;
@@ -353,8 +356,6 @@ namespace Esprima.Utils
             {
                 VisitStatement(tryStatement.Finalizer);
             }
-
-
         }
 
         protected virtual void VisitThrowStatement(ThrowStatement throwStatement)
@@ -740,6 +741,11 @@ namespace Esprima.Utils
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        protected virtual void VisitAwaitExpression(AwaitExpression awaitExpression)
+        {
+            VisitExpression(awaitExpression.Argument);
         }
 
         protected virtual void VisitConditionalExpression(ConditionalExpression conditionalExpression)

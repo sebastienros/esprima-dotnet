@@ -22,7 +22,7 @@ namespace Esprima.Ast
 
         public Expression Key; // Identifier, Literal, '[' Expression ']'
         public bool Computed;
-        public PropertyValue Value;
+        public PropertyValue Value { get; protected set; }
 
         protected ClassProperty(Nodes type) : base(type) {}
 
