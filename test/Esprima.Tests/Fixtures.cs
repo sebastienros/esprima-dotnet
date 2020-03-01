@@ -74,9 +74,12 @@ namespace Esprima.Test
                 moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".module.json";
             }
 
-            // Convert to LF to match the number of chars the parser finds
+            // Convert to LF to match the number of chars the parser finds, but some tests expect to check Windows
             var script = File.ReadAllText(jsFilePath);
-            script = script.Replace(Environment.NewLine, "\n");
+            if (!jsFilePath.EndsWith("primary\\literal\\string\\migrated_0017.js"))
+            {
+                script = script.Replace(Environment.NewLine, "\n");
+            }
 
             if (jsFilePath.EndsWith(".source.js"))
             {
