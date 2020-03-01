@@ -1,6 +1,6 @@
 namespace Esprima.Ast
 {
-    public class Property : ClassProperty, ObjectExpressionProperty
+    public class Property : ClassProperty, ObjectExpressionProperty, ObjectPatternProperty
     {
         public readonly bool Method;
         public readonly bool Shorthand;

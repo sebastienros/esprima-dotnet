@@ -565,7 +565,14 @@ namespace Esprima.Utils
         {
             foreach (var p in objectExpression.Properties)
             {
-                VisitProperty(p);
+                if (p is SpreadElement spreadElement)
+                {
+                    VisitSpreadElement(spreadElement);
+                }
+                else
+                {
+                    VisitProperty((Property) p);
+                }
             }
         }
 

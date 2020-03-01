@@ -314,6 +314,7 @@ namespace Esprima.Utils
                     Member("body", functionDeclaration.Body);
                     Member("generator", functionDeclaration.Generator);
                     Member("expression", functionDeclaration.Expression);
+                    Member("async", functionDeclaration.Async);
                 }
             }
 
@@ -472,6 +473,7 @@ namespace Esprima.Utils
                     Member("body", arrowFunctionExpression.Body);
                     Member("generator", arrowFunctionExpression.Generator);
                     Member("expression", arrowFunctionExpression.Expression);
+                    Member("async", arrowFunctionExpression.Async);
                 }
             }
 
@@ -579,6 +581,7 @@ namespace Esprima.Utils
                     Member("body", function.Body);
                     Member("generator", function.Generator);
                     Member("expression", function.Expression);
+                    Member("async", function.Async);
                 }
             }
 
@@ -733,13 +736,17 @@ namespace Esprima.Utils
             protected override void VisitObjectPattern(ObjectPattern objectPattern)
             {
                 using (StartNodeObject(objectPattern))
+                {
                     Member("properties", objectPattern.Properties);
+                }
             }
 
             protected override void VisitSpreadElement(SpreadElement spreadElement)
             {
                 using (StartNodeObject(spreadElement))
+                {
                     Member("argument", spreadElement.Argument);
+                }
             }
 
             protected override void VisitAssignmentPattern(AssignmentPattern assignmentPattern)
@@ -754,7 +761,9 @@ namespace Esprima.Utils
             protected override void VisitArrayPattern(ArrayPattern arrayPattern)
             {
                 using (StartNodeObject(arrayPattern))
+                {
                     Member("elements", arrayPattern.Elements);
+                }
             }
 
             protected override void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
@@ -791,7 +800,9 @@ namespace Esprima.Utils
             protected override void VisitRestElement(RestElement restElement)
             {
                 using (StartNodeObject(restElement))
+                {
                     Member("argument", restElement.Argument);
+                }
             }
 
             protected override void VisitProperty(Property property)
