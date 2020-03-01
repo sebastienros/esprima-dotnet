@@ -42,7 +42,7 @@ namespace Esprima.Tests
             visitor.VisitedLiteral += (_, arg) => value = arg;
             visitor.Visit(expression);
 
-            var expectedProperty = expression.Properties.Single();
+            var expectedProperty = expression.Properties.Single().As<Property>();
             Assert.Same(expectedProperty, property);
             Assert.Same(expectedProperty.Key, key);
             Assert.Same(expectedProperty.Value, value);

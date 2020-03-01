@@ -960,15 +960,7 @@ namespace Esprima
 
             return Finalize(node, new Property(kind, key, computed, value, method, shorthand));
         }
-
-        private SpreadProperty ParseSpreadProperty()
-        {
-            var node = CreateNode();
-            Expect("...");
-            var arg = InheritCoverGrammar(parseAssignmentExpression);
-            return Finalize(node, new SpreadProperty(arg));
-        }
-
+        
         private ObjectExpression ParseObjectInitializer()
         {
             var node = CreateNode();
@@ -982,7 +974,7 @@ namespace Esprima
 
             while (!Match("}"))
             {
-                ObjectExpressionProperty property = this.Match("...") ? this.ParseSpreadProperty() : ParseObjectProperty(hasProto);
+                ObjectExpressionProperty property = Match("...") ? (ObjectExpressionProperty) ParseSpreadElement() : ParseObjectProperty(hasProto);
                 properties.Add(property);
 
                 if (!Match("}"))
@@ -1093,10 +1085,6 @@ namespace Esprima
                     node.Range = expr.Range;
                     node.Location = _config.Loc ? expr.Location : default;
                     break;
-                case Nodes.SpreadProperty:
-                    expr.Type = Nodes.RestProperty;
-                    this.reinterpretExpressionAsPattern(expr.argument);
-                    break;
                 case Nodes.ArrayExpression:
                     var elements = new ArrayList<IArrayPatternElement>();
 
@@ -1119,11 +1107,18 @@ namespace Esprima
 
                     break;
                 case Nodes.ObjectExpression:
-                    var properties = new ArrayList<ObjectPatternProperty>();
+                    var properties = new ArrayList<INode>();
                     foreach (var property in expr.As<ObjectExpression>().Properties)
                     {
-                        property.Value = ReinterpretExpressionAsPattern(property.Value).As<PropertyValue>();
-                        properties.Add(property.Type == Nodes.SpreadProperty ? property : property.Value);
+                        if (property is Property p)
+                        {
+                            p.Value = ReinterpretExpressionAsPattern(p.Value).As<PropertyValue>();
+                            properties.Add(p);
+                        }
+                        else
+                        {
+                            properties.Add(ReinterpretExpressionAsPattern(property));
+                        }
                     }
                     node = new ObjectPattern(NodeList.From(ref properties));
                     node.Range = expr.Range;
@@ -1465,8 +1460,7 @@ namespace Esprima
                         var nodeArguments = new ArrayList<INode>();
                         for (var i = 0; i < args.Count; ++i)
                         {
-                            ReinterpretExpressionAsPattern(args[i]);
-                            nodeArguments.Add(args[i]);
+                            nodeArguments.Add(ReinterpretExpressionAsPattern(args[i]));
                         }
                         expr = new ArrowParameterPlaceHolder(NodeList.From(ref nodeArguments), true);
                     }
@@ -1866,7 +1860,6 @@ namespace Esprima
                     ValidateParam(options, param, param.As<Identifier>().Name);
                     break;
                 case Nodes.RestElement:
-                case Nodes.RestProperty:
                     CheckPatternParam(options, param.As<RestElement>().Argument);
                     break;
                 case Nodes.AssignmentPattern:
@@ -1884,7 +1877,7 @@ namespace Esprima
                 case Nodes.ObjectPattern:
                     foreach (var property in param.As<ObjectPattern>().Properties)
                     {
-                        CheckPatternParam(options, property.Type == Nodes.RestProperty ? property : property.Value);
+                        CheckPatternParam(options, property is Property p ? p.Value : property);
                     }
                     break;
                 default:
@@ -2390,7 +2383,7 @@ namespace Esprima
             return Finalize(node, new Property(PropertyKind.Init, key, computed, value, method, shorthand));
         }
 
-        private RestProperty ParseRestProperty(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
+        private RestElement ParseRestProperty(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
             Expect("...");
@@ -2403,18 +2396,18 @@ namespace Esprima
             {
                 ThrowError(Messages.PropertyAfterRestProperty);
             }
-            return Finalize(node, new RestProperty(arg));
+            return Finalize(node, new RestElement(arg));
         }
 
         private ObjectPattern ParseObjectPattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
-            var properties = new ArrayList<ObjectPatternProperty>();
+            var properties = new ArrayList<INode>();
 
             Expect("{");
             while (!Match("}"))
             {
-                properties.Push(Match("...") ? this.ParseRestProperty(ref parameters, kind) : ParsePropertyPattern(ref parameters, kind));
+                properties.Push(Match("...") ? (INode) ParseRestProperty(ref parameters, kind) : ParsePropertyPattern(ref parameters, kind));
                 if (!Match("}"))
                 {
                     Expect(",");

@@ -5,6 +5,7 @@ namespace Esprima.Ast
     public class SpreadElement : Node,
         ArgumentListElement,
         ArrayExpressionElement,
+        ObjectExpressionProperty,
         Expression
     {
         public readonly Expression Argument;

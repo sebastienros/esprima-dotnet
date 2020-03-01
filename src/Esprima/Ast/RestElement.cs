@@ -3,7 +3,7 @@
 namespace Esprima.Ast
 {
     public class RestElement : Node,
-        IArrayPatternElement, Expression
+        IArrayPatternElement, Expression, ObjectPatternProperty
     {
         // Identifier in esprima but not forced and
         // for instance ...i[0] is a SpreadElement
