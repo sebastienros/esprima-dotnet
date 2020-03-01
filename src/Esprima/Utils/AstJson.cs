@@ -357,7 +357,17 @@ namespace Esprima.Utils
             protected override void VisitThrowStatement(ThrowStatement throwStatement)
             {
                 using (StartNodeObject(throwStatement))
+                {
                     Member("argument", throwStatement.Argument);
+                }
+            }
+
+            protected override void VisitAwaitExpression(AwaitExpression awaitExpression)
+            {
+                using (StartNodeObject(awaitExpression))
+                {
+                    Member("argument", awaitExpression.Argument);
+                }
             }
 
             protected override void VisitSwitchStatement(SwitchStatement switchStatement)

@@ -961,11 +961,19 @@ namespace Esprima
             return Finalize(node, new Property(kind, key, computed, value, method, shorthand));
         }
 
+        private SpreadProperty ParseSpreadProperty()
+        {
+            var node = CreateNode();
+            Expect("...");
+            var arg = InheritCoverGrammar(parseAssignmentExpression);
+            return Finalize(node, new SpreadProperty(arg));
+        }
+
         private ObjectExpression ParseObjectInitializer()
         {
             var node = CreateNode();
 
-            var properties = new ArrayList<Property>();
+            var properties = new ArrayList<ObjectExpressionProperty>();
             var hasProto = RentToken();
             hasProto.Value = "false";
             hasProto.BooleanValue = false;
@@ -974,7 +982,7 @@ namespace Esprima
 
             while (!Match("}"))
             {
-                Property property = ParseObjectProperty(hasProto);
+                ObjectExpressionProperty property = this.Match("...") ? this.ParseSpreadProperty() : ParseObjectProperty(hasProto);
                 properties.Add(property);
 
                 if (!Match("}"))
@@ -1084,7 +1092,10 @@ namespace Esprima
                     node = new RestElement(newArgument.As<IArrayPatternElement>());
                     node.Range = expr.Range;
                     node.Location = _config.Loc ? expr.Location : default;
-
+                    break;
+                case Nodes.SpreadProperty:
+                    expr.Type = Nodes.RestProperty;
+                    this.reinterpretExpressionAsPattern(expr.argument);
                     break;
                 case Nodes.ArrayExpression:
                     var elements = new ArrayList<IArrayPatternElement>();
@@ -1108,12 +1119,11 @@ namespace Esprima
 
                     break;
                 case Nodes.ObjectExpression:
-                    var properties = new ArrayList<Property>();
-
-                    foreach (var property in (expr.As<ObjectExpression>()).Properties)
+                    var properties = new ArrayList<ObjectPatternProperty>();
+                    foreach (var property in expr.As<ObjectExpression>().Properties)
                     {
                         property.Value = ReinterpretExpressionAsPattern(property.Value).As<PropertyValue>();
-                        properties.Add(property);
+                        properties.Add(property.Type == Nodes.SpreadProperty ? property : property.Value);
                     }
                     node = new ObjectPattern(NodeList.From(ref properties));
                     node.Range = expr.Range;
@@ -1286,7 +1296,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-left-hand-side-expressions
 
-        private ArrayList<ArgumentListElement> ParseArguments()
+        private NodeList<ArgumentListElement> ParseArguments()
         {
             var args = new ArrayList<ArgumentListElement>();
 
@@ -1315,7 +1325,7 @@ namespace Esprima
 
             Expect(")");
 
-            return args;
+            return NodeList.From(ref args);
         }
 
         private static bool IsIdentifierName(Token token)
@@ -1365,8 +1375,8 @@ namespace Esprima
             else
             {
                 var callee = IsolateCoverGrammar(parseLeftHandSideExpression);
-                var args = Match("(") ? ParseArguments() : new ArrayList<ArgumentListElement>();
-                expr = new NewExpression(callee, NodeList.From(ref args));
+                var args = Match("(") ? ParseArguments() : new NodeList<ArgumentListElement>();
+                expr = new NewExpression(callee, args);
                 _context.IsAssignmentTarget = false;
                 _context.IsBindingElement = false;
             }
@@ -1381,7 +1391,7 @@ namespace Esprima
             return arg;
         }
 
-        private ArrayList<ArgumentListElement> ParseAsyncArguments()
+        private NodeList<ArgumentListElement> ParseAsyncArguments()
         {
             Expect("(");
             var args = new ArrayList<ArgumentListElement>();
@@ -1405,7 +1415,7 @@ namespace Esprima
             }
             Expect(")");
 
-            return args;
+            return NodeList.From(ref args);
         }
 
         private Expression ParseLeftHandSideExpressionAllowCall()
@@ -1449,14 +1459,16 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     _context.IsAssignmentTarget = false;
                     var args = asyncArrow ? ParseAsyncArguments() : ParseArguments();
-                    expr = Finalize(StartNode(startToken), new CallExpression(expr, NodeList.From(ref args)));
+                    expr = Finalize(StartNode(startToken), new CallExpression(expr, args));
                     if (asyncArrow && Match("=>"))
                     {
+                        var nodeArguments = new ArrayList<INode>();
                         for (var i = 0; i < args.Count; ++i)
                         {
                             ReinterpretExpressionAsPattern(args[i]);
+                            nodeArguments.Add(args[i]);
                         }
-                        expr = new ArrowParameterPlaceHolder(NodeList.Create(args.Select(x => (INode) x)), true);
+                        expr = new ArrowParameterPlaceHolder(NodeList.From(ref nodeArguments), true);
                     }
                 }
                 else if (Match("["))
@@ -1854,6 +1866,7 @@ namespace Esprima
                     ValidateParam(options, param, param.As<Identifier>().Name);
                     break;
                 case Nodes.RestElement:
+                case Nodes.RestProperty:
                     CheckPatternParam(options, param.As<RestElement>().Argument);
                     break;
                 case Nodes.AssignmentPattern:
@@ -1871,7 +1884,7 @@ namespace Esprima
                 case Nodes.ObjectPattern:
                     foreach (var property in param.As<ObjectPattern>().Properties)
                     {
-                        CheckPatternParam(options, property.Value);
+                        CheckPatternParam(options, property.Type == Nodes.RestProperty ? property : property.Value);
                     }
                     break;
                 default:
@@ -1892,7 +1905,7 @@ namespace Esprima
                 case Nodes.ArrowParameterPlaceHolder:
                     // TODO clean-up
                     var arrowParameterPlaceHolder = expr.As<ArrowParameterPlaceHolder>();
-                    parameters = new ArrayList<INode>();
+                    parameters = new ArrayList<INode>(arrowParameterPlaceHolder.Params.Count);
                     parameters.AddRange(arrowParameterPlaceHolder.Params);
                     asyncArrow = arrowParameterPlaceHolder.Async;
                     break;
@@ -2377,15 +2390,31 @@ namespace Esprima
             return Finalize(node, new Property(PropertyKind.Init, key, computed, value, method, shorthand));
         }
 
+        private RestProperty ParseRestProperty(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
+        {
+            var node = CreateNode();
+            Expect("...");
+            var arg = ParsePattern(ref parameters);
+            if (Match("="))
+            {
+                ThrowError(Messages.DefaultRestProperty);
+            }
+            if (!Match("}"))
+            {
+                ThrowError(Messages.PropertyAfterRestProperty);
+            }
+            return Finalize(node, new RestProperty(arg));
+        }
+
         private ObjectPattern ParseObjectPattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
             var node = CreateNode();
-            var properties = new ArrayList<Property>();
+            var properties = new ArrayList<ObjectPatternProperty>();
 
             Expect("{");
             while (!Match("}"))
             {
-                properties.Push(ParsePropertyPattern(ref parameters, kind));
+                properties.Push(Match("...") ? this.ParseRestProperty(ref parameters, kind) : ParsePropertyPattern(ref parameters, kind));
                 if (!Match("}"))
                 {
                     Expect(",");
@@ -3888,8 +3917,7 @@ namespace Esprima
                 }
                 if ((token.Type == TokenType.Identifier) && !_hasLineTerminator && ((string) token.Value == "async"))
                 {
-                    var punctuator = (string) _lookahead.Value;
-                    if (punctuator != ":" && punctuator != "(" && punctuator != "*")
+                    if (!(_lookahead.Value is string punctuator) || (punctuator != ":" && punctuator != "(" && punctuator != "*"))
                     {
                         isAsync = true;
                         token = _lookahead;
