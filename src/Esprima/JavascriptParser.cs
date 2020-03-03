@@ -16,6 +16,7 @@ namespace Esprima
         private sealed class Context
         {
             public bool AllowIn;
+            public bool AllowStrictDirective;
             public bool AllowYield;
             public bool Await;
             public Token FirstCoverInitializedNameError;
@@ -109,8 +110,10 @@ namespace Esprima
 
             _context = new Context
             {
+                Await = false,
                 AllowIn = true,
                 AllowYield = true,
+                AllowStrictDirective = true,
                 FirstCoverInitializedNameError = null,
                 IsAssignmentTarget = false,
                 IsBindingElement = false,
@@ -739,6 +742,8 @@ namespace Esprima
             _context.IsBindingElement = false;
 
             var previousStrict = _context.Strict;
+            var previousAllowStrictDirective = _context.AllowStrictDirective;
+            _context.AllowStrictDirective = parameters.Simple;
             var body = IsolateCoverGrammar(ParseFunctionSourceElements);
             if (_context.Strict && parameters.FirstRestricted != null)
             {
@@ -749,6 +754,7 @@ namespace Esprima
                 TolerateUnexpectedToken(parameters.Stricted, parameters.Message);
             }
             _context.Strict = previousStrict;
+            _context.AllowStrictDirective = previousAllowStrictDirective;
 
             return body;
         }
@@ -1883,6 +1889,8 @@ namespace Esprima
                 default:
                     break;
             }
+
+            options.Simple = options.Simple && (param is Identifier);
         }
 
         private ParsedParameters ReinterpretAsCoverFormalsList(INode expr)
@@ -1906,7 +1914,10 @@ namespace Esprima
                     return null;
             }
 
-            var options = new ParsedParameters();
+            var options = new ParsedParameters
+            {
+                Simple = true
+            };
 
             for (var i = 0; i < parameters.Count; ++i)
             {
@@ -1957,6 +1968,7 @@ namespace Esprima
 
             return new ParsedParameters
             {
+                Simple = options.Simple,
                 Parameters = parameters,
                 Stricted = options.Stricted,
                 FirstRestricted = options.FirstRestricted,
@@ -2017,6 +2029,9 @@ namespace Esprima
                         _context.FirstCoverInitializedNameError = null;
 
                         var previousStrict = _context.Strict;
+                        var previousAllowStrictDirective = _context.AllowStrictDirective;
+                        _context.AllowStrictDirective = list.Simple;
+
                         var previousAllowYield = _context.AllowYield;
                         var previousAwait = _context.Await;
                         _context.AllowYield = true;
@@ -2042,6 +2057,7 @@ namespace Esprima
                         expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, isAsync, LeaveHoistingScope()));
 
                         _context.Strict = previousStrict;
+                        _context.AllowStrictDirective = previousAllowStrictDirective;
                         _context.AllowYield = previousAllowYield;
                         _context.Await = previousAwait;
                     }
@@ -3413,6 +3429,8 @@ namespace Esprima
             {
                 ValidateParam2(options, parameters[i], (string) parameters[i].Value);
             }
+
+            options.Simple = options.Simple && (param is Identifier);
             options.Parameters.Push(param);
         }
 
@@ -3420,6 +3438,7 @@ namespace Esprima
         {
             var options = new ParsedParameters
             {
+                Simple = true,
                 FirstRestricted = firstRestricted
             };
 
@@ -3445,6 +3464,7 @@ namespace Esprima
 
             return new ParsedParameters
             {
+                Simple = options.Simple,
                 Parameters = options.Parameters,
                 Stricted = options.Stricted,
                 FirstRestricted = options.FirstRestricted,
@@ -3536,6 +3556,8 @@ namespace Esprima
             }
 
             var previousStrict = _context.Strict;
+            var previousAllowStrictDirective = _context.AllowStrictDirective;
+            _context.AllowStrictDirective = formalParameters.Simple;
             var body = ParseFunctionSourceElements();
             if (_context.Strict && firstRestricted != null)
             {
@@ -3547,6 +3569,7 @@ namespace Esprima
             }
 
             var hasStrictDirective = _context.Strict;
+            _context.AllowStrictDirective = previousAllowStrictDirective;
             _context.Strict = previousStrict;
             _context.Await = previousAllowAwait;
             _context.AllowYield = previousAllowYield;
@@ -3629,6 +3652,8 @@ namespace Esprima
             }
 
             var previousStrict = _context.Strict;
+            var previousAllowStrictDirective = _context.AllowStrictDirective;
+            _context.AllowStrictDirective = formalParameters.Simple;
             var body = ParseFunctionSourceElements();
             if (_context.Strict && firstRestricted != null)
             {
@@ -3641,6 +3666,7 @@ namespace Esprima
 
             var hasStrictDirective = _context.Strict;
             _context.Strict = previousStrict;
+            _context.AllowStrictDirective = previousAllowStrictDirective;
             _context.Await = previousAllowAwait;
             _context.AllowYield = previousAllowYield;
 
@@ -3696,6 +3722,10 @@ namespace Esprima
                     {
                         TolerateUnexpectedToken(firstRestricted, Messages.StrictOctalLiteral);
                     }
+                    if (!_context.AllowStrictDirective)
+                    {
+                        this.TolerateUnexpectedToken(token, Messages.IllegalLanguageModeDirective);
+                    }
                 }
                 else
                 {
@@ -3736,7 +3766,10 @@ namespace Esprima
             Expect("(");
             Expect(")");
 
-            var parameters = new ParsedParameters();
+            var parameters = new ParsedParameters
+            {
+                Simple = true
+            };
 
             var previousAllowYield = _context.AllowYield;
             _context.AllowYield = false;
@@ -3752,7 +3785,10 @@ namespace Esprima
 
             var node = CreateNode();
 
-            var options = new ParsedParameters();
+            var options = new ParsedParameters
+            {
+                Simple = true
+            };
 
             var previousAllowYield = _context.AllowYield;
             _context.AllowYield = false;
@@ -4491,6 +4527,7 @@ namespace Esprima
             public string Message;
             public ArrayList<INode> Parameters = new ArrayList<INode>();
             public Token Stricted;
+            public bool Simple;
 
             public bool ParamSetContains(string key)
             {

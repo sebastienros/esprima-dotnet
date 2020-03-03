@@ -17,6 +17,7 @@
         public const string IllegalContinue = "Illegal continue statement";
         public const string IllegalExportDeclaration = "Unexpected token";
         public const string IllegalImportDeclaration = "Unexpected token";
+        public const string IllegalLanguageModeDirective = "Illegal 'use strict' directive in function with non-simple parameter list";
         public const string IllegalReturn = "Illegal return statement";
         public const string InvalidEscapedReservedWord = "Keyword must not contain escaped characters";
         public const string InvalidHexEscapeSequence = "Invalid hexadecimal escape sequence";
