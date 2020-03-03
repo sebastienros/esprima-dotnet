@@ -3790,8 +3790,11 @@ namespace Esprima
             {
                 TolerateError(Messages.BadSetterArity);
             }
+            else if (formalParameters.Parameters[0] is RestElement)
+            {
+                TolerateError(Messages.BadSetterRestParameter);
+            }
             var method = ParsePropertyMethod(formalParameters);
-
             _context.AllowYield = previousAllowYield;
 
             return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
