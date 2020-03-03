@@ -10,8 +10,8 @@ namespace Esprima.Ast
 
         public Range(int start, int end)
         {
-            Start = start >= 0 ? start : throw new ArgumentOutOfRangeException(nameof(start));
-            End = end > start ? end : throw new ArgumentOutOfRangeException(nameof(end));
+            Start = start;
+            End = end;
         }
 
         public bool Equals(Range other) =>
