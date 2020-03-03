@@ -1176,7 +1176,6 @@ namespace Esprima
                         switch (ch)
                         {
                             case 'u':
-                            case 'x':
                                 if (Source[Index] == '{')
                                 {
                                     ++Index;
@@ -1184,13 +1183,19 @@ namespace Esprima
                                 }
                                 else
                                 {
-                                    char unescaped;
-                                    if (!ScanHexEscape(ch, out unescaped))
+                                    if (!ScanHexEscape(ch, out var unescaped))
                                     {
                                         ThrowUnexpectedToken();
                                     }
                                     str.Append(unescaped);
                                 }
+                                break;
+                            case 'x':
+                                if (!ScanHexEscape(ch, out var unescaped2))
+                                {
+                                    ThrowUnexpectedToken(Messages.InvalidHexEscapeSequence);
+                                }
+                                str.Append(unescaped2);
                                 break;
                             case 'n':
                                 str.Append("\n");
@@ -1321,7 +1326,6 @@ namespace Esprima
                                 cooked.Append("\t");
                                 break;
                             case 'u':
-                            case 'x':
                                 if (Source[Index] == '{')
                                 {
                                     ++Index;
@@ -1341,6 +1345,13 @@ namespace Esprima
                                         cooked.Append(ch);
                                     }
                                 }
+                                break;
+                            case 'x':
+                                if (!ScanHexEscape(ch, out var unescaped2))
+                                {
+                                    ThrowUnexpectedToken(Messages.InvalidHexEscapeSequence);
+                                }
+                                cooked.Append(unescaped2);
                                 break;
                             case 'b':
                                 cooked.Append("\b");
