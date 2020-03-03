@@ -701,29 +701,26 @@ namespace Esprima
 
         public Token ScanPunctuator()
         {
-            var token = new Token
+            static string SafeSubstring(string s, int startIndex, int length)
             {
-                Type = TokenType.Punctuator,
-                Value = "",
-                LineNumber = LineNumber,
-                LineStart = LineStart,
-                Start = Index,
-                End = Index
-            };
+                return startIndex + length > s.Length ? string.Empty : s.Substring(startIndex, length);
+            }
+
+            var start = Index;
 
             // Check for most common single-character punctuators.
-            var str = Source[Index];
+            // TODO spanify
+            var c = Source[Index];
+            var str = c.ToString();
 
-            switch (str)
+            switch (c)
             {
-
                 case '(':
                 case '{':
-                    if (str == '{')
+                    if (c == '{')
                     {
                         _curlyStack.Push("{");
                     }
-                    token.Value = ParserExtensions.CharToString(str);
                     ++Index;
                     break;
 
@@ -733,11 +730,7 @@ namespace Esprima
                     {
                         // Spread operator: ...
                         Index += 2;
-                        token.Value = "...";
-                    }
-                    else
-                    {
-                        token.Value = ".";
+                        str = "...";
                     }
                     break;
 
@@ -747,7 +740,6 @@ namespace Esprima
                     {
                         _curlyStack.Pop();
                     }
-                    token.Value = ParserExtensions.CharToString(str);
                     break;
 
                 case ')':
@@ -759,48 +751,38 @@ namespace Esprima
                 case '?':
                 case '~':
                     ++Index;
-                    token.Value = ParserExtensions.CharToString(str);
                     break;
 
                 default:
 
                     // 4-character punctuator.
-                    if (Source.Length >= Index + 4
-                        && Source[Index] == '>'
-                        && Source[Index + 1] == '>'
-                        && Source[Index + 2] == '>'
-                        && Source[Index + 3] == '=')
+                    str = SafeSubstring(Source, Index, 4);
+                    if (str == ">>>=")
                     {
                         Index += 4;
-                        token.Value = ">>>=";
                     }
                     else
                     {
 
                         // 3-character punctuators.
-                        string s;
-                        if (Source.Length >= Index + 3
-                            && (s = FindThreeCharEqual(Source, Index, threeCharacterPunctutors)) != null)
+                        str = SafeSubstring(Source, Index, 3);
+                        if (str.Length == 3 && FindThreeCharEqual(str, threeCharacterPunctutors) != null)
                         {
-                            token.Value = s;
                             Index += 3;
                         }
                         else
                         {
                             // 2-character punctuators.
-                            if (Source.Length >= Index + 2
-                                && (s = FindTwoCharEqual(Source, Index, twoCharacterPunctuators)) != null)
+                            str = SafeSubstring(Source, Index, 2);
+                            if (str.Length == 2 && FindTwoCharEqual(str, twoCharacterPunctuators) != null)
                             {
-                                token.Value = s;
                                 Index += 2;
                             }
                             else
                             {
-
                                 // 1-character punctuators.
-                                token.Value = ParserExtensions.CharToString(Source[Index]);
-                                if ('<' == str || '>' == str || '=' == str || '!' == str || '+' == str || '-' == str ||
-                                    '*' == str || '%' == str || '&' == str || '|' == str || '^' == str || '/' == str)
+                                str = Source[Index].ToString();
+                                if ("<>=!+-*%&|^/".IndexOf(str, StringComparison.Ordinal) >= 0)
                                 {
                                     ++Index;
                                 }
@@ -811,13 +793,20 @@ namespace Esprima
                     break;
             }
 
-            if (Index == token.Start)
+            if (Index == start)
             {
                 ThrowUnexpectedToken();
             }
 
-            token.End = Index;
-            return token;
+            return new Token
+            {
+                Type = TokenType.Punctuator,
+                Value = str,
+                LineNumber = LineNumber,
+                LineStart = LineStart,
+                Start = start,
+                End = Index
+            };
         }
 
         // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
@@ -1843,12 +1832,11 @@ namespace Esprima
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string FindTwoCharEqual(string input, int startIndex, string[] alternatives)
+        private static string FindTwoCharEqual(string input, string[] alternatives)
         {
-            var c1 = input[startIndex + 0];
-            var c2 = input[startIndex + 1];
-            var length = alternatives.Length;
-            for (int i = 0; i < length; ++i)
+            var c2 = input[1];
+            var c1 = input[0];
+            for (int i = 0; i < alternatives.Length; ++i)
             {
                 var s = alternatives[i];
                 if (c1 == s[0]
@@ -1862,13 +1850,12 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string FindThreeCharEqual(string input, int startIndex, string[] alternatives)
+        private static string FindThreeCharEqual(string input, string[] alternatives)
         {
-            var c1 = input[startIndex + 0];
-            var c2 = input[startIndex + 1];
-            var c3 = input[startIndex + 2];
-            var length = alternatives.Length;
-            for (int i = 0; i < length; ++i)
+            var c3 = input[2];
+            var c2 = input[1];
+            var c1 = input[0];
+            for (int i = 0; i < alternatives.Length; ++i)
             {
                 var s = alternatives[i];
                 if (c1 == s[0]
