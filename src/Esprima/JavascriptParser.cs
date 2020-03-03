@@ -2639,10 +2639,18 @@ namespace Esprima
             ExpectKeyword("while");
             Expect("(");
             var test = ParseExpression();
-            Expect(")");
-            if (Match(";"))
+
+            if (!Match(")") && _config.Tolerant)
             {
-                NextToken();
+                TolerateUnexpectedToken(NextToken());
+            }
+            else
+            {
+                Expect(")");
+                if (Match(";"))
+                {
+                    NextToken();
+                }
             }
 
             return Finalize(node, new DoWhileStatement(body, test));
@@ -2952,11 +2960,22 @@ namespace Esprima
             }
 
             var node = CreateNode();
+            Statement body;
+
             ExpectKeyword("with");
             Expect("(");
             var obj = ParseExpression();
-            Expect(")");
-            var body = ParseStatement();
+
+            if (!Match(")") && _config.Tolerant)
+            {
+                TolerateUnexpectedToken(NextToken());
+                body = Finalize(CreateNode(), new EmptyStatement());
+            }
+            else
+            {
+                Expect(")");
+                body = ParseStatement();
+            }
 
             return Finalize(node, new WithStatement(obj, body));
         }
