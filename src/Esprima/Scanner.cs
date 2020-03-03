@@ -173,9 +173,9 @@ namespace Esprima
             _errorHandler.ThrowError(Index, LineNumber, Index - LineStart + 1, message);
         }
 
-        public void TolerateUnexpectedToken()
+        public void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
-            _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, Messages.UnexpectedTokenIllegal);
+            _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, message);
         }
 
         private StringBuilder GetStringBuilder()
@@ -676,6 +676,14 @@ namespace Esprima
             else
             {
                 type = TokenType.Identifier;
+            }
+
+            if (type != TokenType.Identifier && (start + id.Length != Index))
+            {
+                var restore = Index;
+                Index = start;
+                TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
+                Index = restore;
             }
 
             return new Token
