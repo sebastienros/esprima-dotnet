@@ -3763,20 +3763,18 @@ namespace Esprima
             EnterHoistingScope();
 
             var node = CreateNode();
-            Expect("(");
-            Expect(")");
-
-            var parameters = new ParsedParameters
-            {
-                Simple = true
-            };
 
             var previousAllowYield = _context.AllowYield;
             _context.AllowYield = false;
-            var method = ParsePropertyMethod(parameters);
+            var formalParameters = ParseFormalParameters();
+            if (formalParameters.Parameters.Count > 0)
+            {
+                TolerateError(Messages.BadGetterArity);
+            }
+            var method = this.ParsePropertyMethod(formalParameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseSetterMethod()
@@ -3784,30 +3782,19 @@ namespace Esprima
             EnterHoistingScope();
 
             var node = CreateNode();
-
-            var options = new ParsedParameters
-            {
-                Simple = true
-            };
-
             var previousAllowYield = _context.AllowYield;
             _context.AllowYield = false;
 
-            Expect("(");
-            if (Match(")"))
+            var formalParameters = ParseFormalParameters();
+            if (formalParameters.Parameters.Count != 1)
             {
-                TolerateUnexpectedToken(_lookahead);
+                TolerateError(Messages.BadSetterArity);
             }
-            else
-            {
-                ParseFormalParameter(options);
-            }
-            Expect(")");
+            var method = ParsePropertyMethod(formalParameters);
 
-            var method = ParsePropertyMethod(options);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref options.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseGeneratorMethod()
