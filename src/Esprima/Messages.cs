@@ -18,6 +18,7 @@
         public const string IllegalExportDeclaration = "Unexpected token";
         public const string IllegalImportDeclaration = "Unexpected token";
         public const string IllegalReturn = "Illegal return statement";
+        public const string InvalidEscapedReservedWord = "Keyword must not contain escaped characters";
         public const string InvalidHexEscapeSequence = "Invalid hexadecimal escape sequence";
         public const string InvalidLHSInAssignment = "Invalid left-hand side in assignment";
         public const string InvalidLHSInForIn = "Invalid left-hand side in for-in";
