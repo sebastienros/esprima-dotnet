@@ -5,6 +5,7 @@
     {
         public const string BadGetterArity = "Getter must not have any formal parameters";
         public const string BadSetterArity = "Setter must have exactly one formal parameter";
+        public const string BadSetterRestParameter = "Setter function argument must not be a rest parameter";
         public const string ConstructorIsAsync = "Class constructor may not be an async method";
         public const string ConstructorSpecialMethod = "Class constructor may not be an accessor";
         public const string DeclarationMissingInitializer = "Missing initializer in {0} declaration";
