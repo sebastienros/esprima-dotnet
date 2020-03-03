@@ -1679,7 +1679,6 @@ namespace Esprima
 
         private int BinaryPrecedence(Token token)
         {
-
             int prec = 0;
             var op = token.Value;
 
@@ -1772,7 +1771,6 @@ namespace Esprima
             {
                 NextToken();
 
-                token.Precedence = prec;
                 _context.IsAssignmentTarget = false;
                 _context.IsBindingElement = false;
 
@@ -1780,7 +1778,8 @@ namespace Esprima
                 var left = expr;
                 var right = IsolateCoverGrammar(parseExponentiationExpression);
 
-                var stack = new ArrayList<object> { left, token, right };
+                var stack = new ArrayList<object> { left, token.Value, right };
+                var precedences = new ArrayList<int> { prec };
                 while (true)
                 {
                     prec = BinaryPrecedence(_lookahead);
@@ -1790,21 +1789,20 @@ namespace Esprima
                     }
 
                     // Reduce: make a binary expression from the three topmost entries.
-                    while ((stack.Count > 2) && (prec <= BinaryPrecedence((Token)stack[stack.Count - 2])))
+                    while ((stack.Count > 2) && (prec <= precedences[precedences.Count - 1]))
                     {
-                        right = (Expression)stack.Pop();
-                        var op = ((Token)stack.Pop()).Value;
-                        left = (Expression)stack.Pop();
-
+                        right = (Expression) stack.Pop();
+                        var op = (string) stack.Pop();
+                        precedences.Pop();
+                        left = (Expression) stack.Pop();
                         markers.Pop();
                         var node = StartNode(markers.Peek());
-                        stack.Push(Finalize(node, new BinaryExpression((string)op, left, right)));
+                        stack.Push(Finalize(node, new BinaryExpression(op, left, right)));
                     }
 
                     // Shift.
-                    token = NextToken();
-                    token.Precedence = prec;
-                    stack.Push(token);
+                    stack.Push(NextToken().Value);
+                    precedences.Push(prec);
                     markers.Push(_lookahead);
                     stack.Push(IsolateCoverGrammar(parseExponentiationExpression));
                 }
@@ -1819,7 +1817,8 @@ namespace Esprima
                     var marker = markers.Pop();
                     var lastLineStart = lastMarker?.LineStart ?? 0;
                     var node = StartNode(marker, lastLineStart);
-                    expr = Finalize(node, new BinaryExpression((string) ((Token) stack[i - 1]).Value, (Expression) stack[i - 2], expr));
+                    var op = (string) stack[i - 1];
+                    expr = Finalize(node, new BinaryExpression(op, (Expression) stack[i - 2], expr));
                     i -= 2;
                     lastMarker = marker;
                 }
