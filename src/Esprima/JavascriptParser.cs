@@ -127,15 +127,15 @@ namespace Esprima
             _startMarker = new Marker
             {
                 Index = 0,
-                LineNumber = _scanner.LineNumber,
-                LineStart = 0
+                Line = _scanner.LineNumber,
+                Column = 0
             };
 
             _lastMarker = new Marker
             {
                 Index = 0,
-                LineNumber = _scanner.LineNumber,
-                LineStart = 0
+                Line = _scanner.LineNumber,
+                Column = 0
             };
 
             NextToken();
@@ -143,8 +143,8 @@ namespace Esprima
             _lastMarker = new Marker
             {
                 Index = _scanner.Index,
-                LineNumber = _scanner.LineNumber,
-                LineStart = _scanner.LineStart
+                Line = _scanner.LineNumber,
+                Column = _scanner.Index - _scanner.LineStart
             };
         }
 
@@ -230,11 +230,15 @@ namespace Esprima
 
             if (_config.Loc)
             {
-                var start = new Position(_startMarker.LineNumber,
-                                         _startMarker.Index - _startMarker.LineStart);
+                var start = new Position(
+                    _startMarker.Line,
+                    _startMarker.Column
+                );
 
-                var end   = new Position(_scanner.LineNumber,
-                                         _scanner.Index - _scanner.LineStart);
+                var end = new Position(
+                    _scanner.LineNumber,
+                    _scanner.Index - _scanner.LineStart
+                );
 
                 t.Location = t.Location.WithPosition(start, end);
             }
@@ -252,17 +256,20 @@ namespace Esprima
             var token = _lookahead;
 
             _lastMarker.Index = _scanner.Index;
-            _lastMarker.LineNumber = _scanner.LineNumber;
-            _lastMarker.LineStart = _scanner.LineStart;
+            _lastMarker.Line = _scanner.LineNumber;
+            _lastMarker.Column = _scanner.Index - _scanner.LineStart;
 
             CollectComments();
 
-            _startMarker.Index = _scanner.Index;
-            _startMarker.LineNumber = _scanner.LineNumber;
-            _startMarker.LineStart = _scanner.LineStart;
+            if (_scanner.Index != _startMarker.Index)
+            {
+                _startMarker.Index = _scanner.Index;
+                _startMarker.Line = _scanner.LineNumber;
+                _startMarker.Column = _scanner.Index - _scanner.LineStart;
+            }
 
             var next = _scanner.Lex();
-            _hasLineTerminator = (token != null && next != null) ? (token.LineNumber != next.LineNumber) : false;
+            _hasLineTerminator = (token != null && next != null) && (token.LineNumber != next.LineNumber);
 
             if (next != null && _context.Strict && next.Type == TokenType.Identifier)
             {
@@ -306,13 +313,13 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private MetaNode CreateNode()
+        private Marker CreateNode()
         {
-            return new MetaNode(_startMarker.Index, _startMarker.LineNumber,_startMarker.Index - _startMarker.LineStart);
+            return new Marker(_startMarker.Index, _startMarker.Line,_startMarker.Column);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static MetaNode StartNode(Token token, int lastLineStart = 0)
+        private static Marker StartNode(Token token, int lastLineStart = 0)
         {
             var column = token.Start - token.LineStart;
             var line = token.LineNumber;
@@ -321,21 +328,20 @@ namespace Esprima
                 column += lastLineStart;
                 line--;
             }
-            return new MetaNode(token.Start, line, column);
+            return new Marker(token.Start, line, column);
         }
 
-        private T Finalize<T>(MetaNode meta, T node) where T : INode
+        private T Finalize<T>(Marker marker, T node) where T : INode
         {
             if (_config.Range)
             {
-                node.Range = new Range(meta.Index, _lastMarker.Index);
+                node.Range = new Range(marker.Index, _lastMarker.Index);
             }
 
             if (_config.Loc)
             {
-                var start = new Position(meta.Line, meta.Column);
-                var end   = new Position(_lastMarker.LineNumber,
-                                         _lastMarker.Index - _lastMarker.LineStart);
+                var start = new Position(marker.Line, marker.Column);
+                var end   = new Position(_lastMarker.Line, _lastMarker.Column);
 
                 node.Location = new Location(start, end, _errorHandler.Source);
             }
@@ -530,8 +536,8 @@ namespace Esprima
                 }
 
                 _lastMarker.Index = _startMarker.Index;
-                _lastMarker.LineNumber = _startMarker.LineNumber;
-                _lastMarker.LineStart = _startMarker.LineStart;
+                _lastMarker.Line = _startMarker.Line;
+                _lastMarker.Column = _startMarker.Column;
             }
 
         }
@@ -4439,18 +4445,18 @@ namespace Esprima
             string msg = string.Format(messageFormat, values);
 
             int index = _lastMarker.Index;
-            int line = _lastMarker.LineNumber;
-            int column = _lastMarker.Index - _lastMarker.LineStart + 1;
+            int line = _lastMarker.Line;
+            int column = _lastMarker.Column + 1;
             return _errorHandler.CreateError(index, line, column, msg);
         }
 
         private void TolerateError(string messageFormat, params object[] values)
         {
-            string msg = string.Format(messageFormat, values);
+            var msg = string.Format(messageFormat, values);
 
-            int index = _lastMarker.Index;
-            int line = _lastMarker.LineNumber;
-            int column = _lastMarker.Index - _lastMarker.LineStart + 1;
+            var index = _lastMarker.Index;
+            var line = _scanner.LineNumber;
+            var column = _lastMarker.Column + 1;
             _errorHandler.TolerateError(index, line, column, msg);
         }
 
@@ -4496,14 +4502,15 @@ namespace Esprima
             {
                 var index = token.Start;
                 var line = token.LineNumber;
-                var column = token.Start - _lastMarker.LineStart + 1;
+                var lastMarkerLineStart = _lastMarker.Index - _lastMarker.Column;
+                var column = token.Start - lastMarkerLineStart + 1;
                 return _errorHandler.CreateError(index, line, column, msg);
             }
             else
             {
                 var index = _lastMarker.Index;
-                var line = _lastMarker.LineNumber;
-                var column = index - _lastMarker.LineStart + 1;
+                var line = _lastMarker.Line;
+                var column = _lastMarker.Column + 1;
                 return _errorHandler.CreateError(index, line, column, msg);
             }
         }

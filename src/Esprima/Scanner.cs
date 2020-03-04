@@ -10,29 +10,26 @@ namespace Esprima
 {
     public class Loc
     {
-        public MetaNode Start;
-        public MetaNode End;
-    }
-
-    public struct MetaNode
-    {
-        public readonly int Index;
-        public readonly int Line;
-        public readonly int Column;
-
-        public MetaNode(int index, int line, int column)
-        {
-            Index = index;
-            Line = line;
-            Column = column;
-        }
+        public Marker Start;
+        public Marker End;
     }
 
     public class Marker
     {
         public int Index;
-        public int LineNumber;
-        public int LineStart;
+        public int Line;
+        public int Column;
+
+        public Marker()
+        {
+        }
+
+        public Marker(int index, int line, int column)
+        {
+            Index = index;
+            Line = line;
+            Column = column;
+        }
     }
 
     internal readonly struct ScannerState
@@ -250,8 +247,8 @@ namespace Esprima
             if (_trackComment)
             {
                 start = Index - offset;
-                loc.Start = new MetaNode(0, LineNumber, Index - LineStart - offset);
-                loc.End = new MetaNode();
+                loc.Start = new Marker(0, LineNumber, Index - LineStart - offset);
+                loc.End = new Marker();
             }
 
             while (!Eof())
@@ -262,7 +259,7 @@ namespace Esprima
                 {
                     if (_trackComment)
                     {
-                        loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart - 1);
+                        loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart - 1);
 
                         Comment entry = new Comment
                         {
@@ -287,7 +284,7 @@ namespace Esprima
 
             if (_trackComment)
             {
-                loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart);
+                loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart);
                 var entry = new Comment
                 {
                     MultiLine = false,
@@ -312,7 +309,7 @@ namespace Esprima
             if (_trackComment)
             {
                 start = Index - 2;
-                loc.Start = new MetaNode(loc.Start.Index, LineNumber, Index - LineStart - 2);
+                loc.Start = new Marker(loc.Start.Index, LineNumber, Index - LineStart - 2);
             }
 
 
@@ -337,7 +334,7 @@ namespace Esprima
                         Index += 2;
                         if (_trackComment)
                         {
-                            loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart);
+                            loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart);
                             var entry = new Comment
                             {
                                 MultiLine = true,
@@ -361,7 +358,7 @@ namespace Esprima
             // Ran off the end of the file - the whole thing is a comment
             if (_trackComment)
             {
-                loc.End = new MetaNode(loc.End.Index, LineNumber, Index - LineStart);
+                loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart);
                 var entry = new Comment
                 {
                     MultiLine = true,
