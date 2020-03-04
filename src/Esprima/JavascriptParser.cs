@@ -836,9 +836,14 @@ namespace Esprima
             switch (token.Type)
             {
                 case TokenType.StringLiteral:
+                    if (_context.Strict && token.Octal)
+                    {
+                        TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
+                    }
                     var raw = GetTokenRaw(token);
                     key = Finalize(node, new Literal((string)token.Value, raw));
                     break;
+
                 case TokenType.NumericLiteral:
                     if (_context.Strict && token.Octal)
                     {

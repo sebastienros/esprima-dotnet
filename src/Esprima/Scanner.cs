@@ -502,11 +502,19 @@ namespace Esprima
 
             for (var i = 0; i < len; ++i)
             {
-                var d = Source[Index];
-                if (!Eof() && Character.IsHexDigit(d))
+                if (!Eof())
                 {
-                    code = code * 16 + HexValue(d);
-                    Index++;
+                    var d = Source[Index];
+                    if (Character.IsHexDigit(d))
+                    {
+                        code = code * 16 + HexValue(d);
+                        Index++;
+                    }
+                    else
+                    {
+                        result = char.MinValue;
+                        return false;
+                    }
                 }
                 else
                 {
@@ -631,15 +639,14 @@ namespace Esprima
                         ThrowUnexpectedToken();
                     }
                     ++Index;
-                    if (Source[Index] == '{')
+                    if (Index < Source.Length && Source[Index] == '{')
                     {
                         ++Index;
                         ch = ScanUnicodeCodePointEscape();
                     }
                     else
                     {
-                        char ch1;
-                        if (!ScanHexEscape('u', out ch1) || ch1 == '\\' || !Character.IsIdentifierPart(ch1))
+                        if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierPart(ch1))
                         {
                             ThrowUnexpectedToken();
                         }
@@ -1187,7 +1194,8 @@ namespace Esprima
 
             while (!Eof())
             {
-                var ch = Source[Index++];
+                var ch = Index < Source.Length ? Source[Index] : char.MinValue;
+                Index++;
 
                 if (ch == quote)
                 {
@@ -1196,13 +1204,14 @@ namespace Esprima
                 }
                 else if (ch == '\\')
                 {
-                    ch = Source[Index++];
+                    ch = Index < Source.Length ? Source[Index] : char.MinValue;
+                    Index++;
                     if (ch == char.MinValue || !Character.IsLineTerminator(ch))
                     {
                         switch (ch)
                         {
                             case 'u':
-                                if (Source[Index] == '{')
+                                if (Index < Source.Length && Source[Index] == '{')
                                 {
                                     ++Index;
                                     str.Append(ScanUnicodeCodePointEscape());
@@ -1899,7 +1908,7 @@ namespace Esprima
         }
     }
 
-    public struct OctalValue
+    public readonly struct OctalValue
     {
         public readonly int Code;
         public readonly bool Octal;
