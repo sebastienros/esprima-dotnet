@@ -35,6 +35,20 @@ namespace Esprima
         public int LineStart;
     }
 
+    internal readonly struct ScannerState
+    {
+        public readonly int Index;
+        public readonly int LineNumber;
+        public readonly int LineStart;
+
+        public ScannerState(int index, int lineNumber, int lineStart)
+        {
+            Index = index;
+            LineNumber = lineNumber;
+            LineStart = lineStart;
+        }
+    }
+
     public class Scanner
     {
         private readonly IErrorHandler _errorHandler;
@@ -160,6 +174,19 @@ namespace Esprima
             LineNumber = (code.Length > 0) ? 1 : 0;
             LineStart = 0;
             _curlyStack = new Stack<string>(20);
+        }
+
+
+        internal ScannerState SaveState()
+        {
+            return new ScannerState(Index, LineNumber, LineStart);
+        }
+
+        internal void RestoreState(in ScannerState state)
+        {
+            Index = state.Index;
+            LineNumber = state.LineNumber;
+            LineStart = state.LineStart;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
