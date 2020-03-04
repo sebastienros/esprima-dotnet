@@ -2869,6 +2869,10 @@ namespace Esprima
                 else
                 {
                     var initStartToken = _lookahead;
+                    var previousIsBindingElement = _context.IsBindingElement;
+                    var previousIsAssignmentTarget = _context.IsAssignmentTarget;
+                    var previousFirstCoverInitializedNameError = _context.FirstCoverInitializedNameError;
+
                     var previousAllowIn = _context.AllowIn;
                     _context.AllowIn = false;
                     init = InheritCoverGrammar(parseAssignmentExpression);
@@ -2903,6 +2907,11 @@ namespace Esprima
                     }
                     else
                     {
+                        // The `init` node was not parsed isolated, but we would have wanted it to.
+                        _context.IsBindingElement = previousIsBindingElement;
+                        _context.IsAssignmentTarget = previousIsAssignmentTarget;
+                        _context.FirstCoverInitializedNameError = previousFirstCoverInitializedNameError;
+
                         if (Match(","))
                         {
                             var initSeq = new ArrayList<Expression>(1) {(Expression) init};
@@ -2922,12 +2931,12 @@ namespace Esprima
             {
                 if (!Match(";"))
                 {
-                    test = ParseExpression();
+                    test = IsolateCoverGrammar(parseExpression);
                 }
                 Expect(";");
                 if (!Match(")"))
                 {
-                    update = ParseExpression();
+                    update = IsolateCoverGrammar(parseExpression);
                 }
             }
 
