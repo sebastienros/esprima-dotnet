@@ -37,18 +37,18 @@ namespace Esprima
 
     public class Scanner
     {
-        private IErrorHandler _errorHandler;
-        private bool _trackComment;
-        private bool _adaptRegexp;
+        private readonly IErrorHandler _errorHandler;
+        private readonly bool _trackComment;
+        private readonly bool _adaptRegexp;
+        private readonly int _length;
 
-        public int Length;
-        public string Source;
+        public readonly string Source;
         public int Index;
         public int LineNumber;
         public int LineStart;
-        private Stack<string> _curlyStack;
+        private readonly Stack<string> _curlyStack;
 
-        private StringBuilder strb = new StringBuilder();
+        private readonly StringBuilder strb = new StringBuilder();
 
         private static readonly HashSet<string> Keywords = new HashSet<string>
         {
@@ -155,7 +155,7 @@ namespace Esprima
             _errorHandler = options.ErrorHandler;
             _trackComment = options.Comment;
 
-            Length = code.Length;
+            _length = code.Length;
             Index = 0;
             LineNumber = (code.Length > 0) ? 1 : 0;
             LineStart = 0;
@@ -165,7 +165,7 @@ namespace Esprima
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Eof()
         {
-            return Index >= Length;
+            return Index >= _length;
         }
 
         public void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
@@ -993,7 +993,7 @@ namespace Esprima
         {
             // Implicit octal, unless there is a non-octal digit.
             // (Annex B.1.1 on Numeric Literals)
-            for (var i = Index + 1; i < Length; ++i)
+            for (var i = Index + 1; i < _length; ++i)
             {
                 var ch = Source[i];
                 if (ch == '8' || ch == '9')

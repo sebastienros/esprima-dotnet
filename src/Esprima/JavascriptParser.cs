@@ -162,7 +162,7 @@ namespace Esprima
 
             var node = CreateNode();
             var body = ParseDirectivePrologues();
-            while (_startMarker.Index < _scanner.Length)
+            while (_lookahead.Type != TokenType.EOF)
             {
                 body.Push(ParseStatementListItem());
             }
@@ -1186,7 +1186,7 @@ namespace Esprima
 
                         _context.IsAssignmentTarget = false;
                         expressions.Add(expr.As<Expression>());
-                        while (_startMarker.Index < _scanner.Length)
+                        while (_lookahead.Type != TokenType.EOF)
                         {
                             if (!Match(","))
                             {
@@ -2117,7 +2117,7 @@ namespace Esprima
             {
                 var expressions = new ArrayList<Expression>();
                 expressions.Push(expr);
-                while (_startMarker.Index < _scanner.Length)
+                while (_lookahead.Type != TokenType.EOF)
                 {
                     if (!Match(","))
                     {
@@ -3317,7 +3317,7 @@ namespace Esprima
             _context.InSwitch = false;
             _context.InFunctionBody = true;
 
-            while (_startMarker.Index < _scanner.Length)
+            while (_lookahead.Type != TokenType.EOF)
             {
                 if (Match("}"))
                 {
@@ -3464,7 +3464,7 @@ namespace Esprima
             if (!Match(")"))
             {
                 options.Parameters = new ArrayList<INode>();
-                while (_startMarker.Index < _scanner.Length)
+                while (_lookahead.Type != TokenType.EOF)
                 {
                     ParseFormalParameter(options);
                     if (Match(")"))
