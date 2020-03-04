@@ -543,10 +543,9 @@ namespace Esprima
             var node = CreateNode();
 
             Expression expr = null;
-            Token token = null;
+            Token token;
             string raw;
 
-            TokenType type = _lookahead.Type;
             switch (_lookahead.Type)
             {
                 case TokenType.Identifier:
@@ -556,6 +555,7 @@ namespace Esprima
                     }
                     expr = MatchAsyncFunction() ? (Expression) ParseFunctionExpression() : Finalize(node, new Identifier((string) NextToken().Value));
                     break;
+
                 case TokenType.StringLiteral:
                     if (_context.Strict && _lookahead.Octal)
                     {
@@ -568,8 +568,8 @@ namespace Esprima
                     raw = GetTokenRaw(token);
                     expr = Finalize(node, new Literal((string)token.Value, raw));
                     break;
-                case TokenType.NumericLiteral:
 
+                case TokenType.NumericLiteral:
                     if (_context.Strict && _lookahead.Octal)
                     {
                         TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
@@ -581,31 +581,29 @@ namespace Esprima
                     raw = GetTokenRaw(token);
                     expr = Finalize(node, new Literal(token.NumericValue, raw));
                     break;
+
                 case TokenType.BooleanLiteral:
-
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
-                    token.BooleanValue = ("true".Equals(token.Value));
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(token.BooleanValue, raw));
+                    expr = Finalize(node, new Literal(("true".Equals(token.Value)), raw));
                     break;
+
                 case TokenType.NullLiteral:
-
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
-                    token.Value = null;
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(raw));
+                    expr = Finalize(node, new Literal(null, raw));
                     break;
-                case TokenType.Template:
 
+                case TokenType.Template:
                     expr = ParseTemplateLiteral();
                     break;
-                case TokenType.Punctuator:
 
-                    switch ((string)_lookahead.Value)
+                case TokenType.Punctuator:
+                switch ((string) _lookahead.Value)
                     {
                         case "(":
                             _context.IsBindingElement = false;
