@@ -57,8 +57,9 @@ namespace Esprima
         public int Index;
         public int LineNumber;
         public int LineStart;
-        private readonly Stack<string> _curlyStack;
+        internal bool IsModule;
 
+        private readonly Stack<string> _curlyStack;
         private readonly StringBuilder strb = new StringBuilder();
 
         private static readonly HashSet<string> Keywords = new HashSet<string>
@@ -446,7 +447,7 @@ namespace Esprima
                         break;
                     }
                 }
-                else if (ch == 0x3C)
+                else if (ch == 0x3C && !IsModule)
                 {
                     // U+003C is '<'
                     if (Source[Index + 1] == '!'

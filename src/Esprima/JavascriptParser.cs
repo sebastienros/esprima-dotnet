@@ -164,6 +164,7 @@ namespace Esprima
         {
             _context.Strict = true;
             _context.IsModule = true;
+            _scanner.IsModule = true;
 
             EnterHoistingScope();
 
