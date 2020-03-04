@@ -37,12 +37,14 @@ namespace Esprima
         public readonly int Index;
         public readonly int LineNumber;
         public readonly int LineStart;
+        public readonly Stack<string> CurlyStack;
 
-        public ScannerState(int index, int lineNumber, int lineStart)
+        public ScannerState(int index, int lineNumber, int lineStart, Stack<string> curlyStack)
         {
             Index = index;
             LineNumber = lineNumber;
             LineStart = lineStart;
+            CurlyStack = curlyStack;
         }
     }
 
@@ -57,9 +59,10 @@ namespace Esprima
         public int Index;
         public int LineNumber;
         public int LineStart;
+
         internal bool IsModule;
 
-        private readonly Stack<string> _curlyStack;
+        private Stack<string> _curlyStack;
         private readonly StringBuilder strb = new StringBuilder();
 
         private static readonly HashSet<string> Keywords = new HashSet<string>
@@ -177,7 +180,7 @@ namespace Esprima
 
         internal ScannerState SaveState()
         {
-            return new ScannerState(Index, LineNumber, LineStart);
+            return new ScannerState(Index, LineNumber, LineStart, new Stack<string>(_curlyStack));
         }
 
         internal void RestoreState(in ScannerState state)
@@ -185,6 +188,7 @@ namespace Esprima
             Index = state.Index;
             LineNumber = state.LineNumber;
             LineStart = state.LineStart;
+            _curlyStack = state.CurlyStack;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
