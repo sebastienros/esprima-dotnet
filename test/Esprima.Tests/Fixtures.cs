@@ -124,7 +124,7 @@ namespace Esprima.Test
 
             invalid |=
                 filename.Contains("error") ||
-                filename.Contains("invalid");
+                (filename.Contains("invalid") && !filename.Contains("invalid-yield-object-")) ;
 
             if (!invalid)
             {
