@@ -2262,14 +2262,10 @@ namespace Esprima
 
         private bool IsLexicalDeclaration()
         {
-            var previousIndex = _scanner.Index;
-            var previousLineNumber = _scanner.LineNumber;
-            var previousLineStart = _scanner.LineStart;
-            CollectComments();
+            var state = _scanner.SaveState();
+            _scanner.ScanComments();
             var next = _scanner.Lex();
-            _scanner.Index = previousIndex;
-            _scanner.LineNumber = previousLineNumber;
-            _scanner.LineStart = previousLineStart;
+            _scanner.RestoreState(state);
 
             return (next.Type == TokenType.Identifier) ||
                 (next.Type == TokenType.Punctuator && (string)next.Value == "[") ||
@@ -3495,16 +3491,12 @@ namespace Esprima
             var match = MatchContextualKeyword("async");
             if (match)
             {
-                var previousIndex = _scanner.Index;
-                var previousLineNumber = _scanner.LineNumber;
-                var previousLineStart = _scanner.LineStart;
-                CollectComments();
+                var state = _scanner.SaveState();
+                _scanner.ScanComments();
                 var next = _scanner.Lex();
-                _scanner.Index = previousIndex;
-                _scanner.LineNumber = previousLineNumber;
-                _scanner.LineStart = previousLineStart;
+                _scanner.RestoreState(state);
 
-                match = (previousLineNumber == next.LineNumber) && (next.Type == TokenType.Keyword) && ((string) next.Value == "function");
+                match = (state.LineNumber == next.LineNumber) && (next.Type == TokenType.Keyword) && ((string) next.Value == "function");
             }
 
             return match;
