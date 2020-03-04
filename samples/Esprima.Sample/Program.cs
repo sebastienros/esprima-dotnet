@@ -37,7 +37,7 @@ try { } catch (evil) { }
         private static void Parse(string source, TextWriter output)
         {
             var parser = new JavaScriptParser(source);
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             program.WriteJson(output);
             Console.WriteLine();

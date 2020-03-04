@@ -15,6 +15,7 @@ namespace Esprima
 
         private sealed class Context
         {
+            public bool IsModule;
             public bool AllowIn;
             public bool AllowStrictDirective;
             public bool AllowYield;
@@ -44,7 +45,6 @@ namespace Esprima
         private readonly Marker _lastMarker;
         private readonly Scanner _scanner;
         private readonly IErrorHandler _errorHandler;
-        private readonly SourceType _sourceType = SourceType.Script;
         private readonly ParserOptions _config;
         private bool _hasLineTerminator;
         private readonly Action<INode> _action;
@@ -106,8 +106,6 @@ namespace Esprima
             _errorHandler.Tolerant = _config.Tolerant;
             _scanner = new Scanner(code, _config);
 
-            _sourceType = _config.SourceType;
-
             _context = new Context
             {
                 Await = false,
@@ -121,7 +119,7 @@ namespace Esprima
                 InIteration = false,
                 InSwitch = false,
                 LabelSet = new HashSet<string>(),
-                Strict = (_sourceType == SourceType.Module),
+                Strict = false
             };
 
             _startMarker = new Marker
@@ -151,7 +149,35 @@ namespace Esprima
         // https://tc39.github.io/ecma262/#sec-scripts
         // https://tc39.github.io/ecma262/#sec-modules
 
-        public Program ParseProgram(bool strict = false)
+        /// <summary>
+        /// Should use explicit <see cref="ParseScript" /> or <see cref="ParseModule" />.
+        /// </summary>
+        [Obsolete("Should use explicit ParseScript or ParseModule")]
+        public Program ParseProgram()
+        {
+            return _config.SourceType == SourceType.Script
+                ? (Program) ParseScript()
+                : ParseModule();
+        }
+
+        public Module ParseModule()
+        {
+            _context.Strict = true;
+            _context.IsModule = true;
+
+            EnterHoistingScope();
+
+            var node = CreateNode();
+            var body = ParseDirectivePrologues();
+            while (_lookahead.Type != TokenType.EOF)
+            {
+                body.Push(ParseStatementListItem());
+            }
+
+            return Finalize(node, new Module(NodeList.From(ref body), LeaveHoistingScope()));
+        }
+
+        public Script ParseScript(bool strict = false)
         {
             if (strict)
             {
@@ -167,7 +193,7 @@ namespace Esprima
                 body.Push(ParseStatementListItem());
             }
 
-            return Finalize(node, new Program(NodeList.From(ref body), _sourceType, LeaveHoistingScope(), _context.Strict));
+            return Finalize(node, new Script(NodeList.From(ref body), _context.Strict, LeaveHoistingScope()));
         }
 
         private void CollectComments()
@@ -263,7 +289,7 @@ namespace Esprima
 
             if (_scanner.Index != _startMarker.Index)
             {
-                _startMarker.Index = _scanner.Index;
+            _startMarker.Index = _scanner.Index;
                 _startMarker.Line = _scanner.LineNumber;
                 _startMarker.Column = _scanner.Index - _scanner.LineStart;
             }
@@ -555,7 +581,7 @@ namespace Esprima
             switch (_lookahead.Type)
             {
                 case TokenType.Identifier:
-                    if ((_sourceType == SourceType.Module || _context.Await) && "await".Equals(_lookahead.Value))
+                    if ((_context.IsModule || _context.Await) && "await".Equals(_lookahead.Value))
                     {
                         TolerateUnexpectedToken(_lookahead);
                     }
@@ -2195,7 +2221,7 @@ namespace Esprima
                 switch ((string)_lookahead.Value)
                 {
                     case "export":
-                        if (_sourceType != SourceType.Module)
+                        if (!_context.IsModule)
                         {
                             TolerateUnexpectedToken(_lookahead, Messages.IllegalExportDeclaration);
                         }
@@ -2209,7 +2235,7 @@ namespace Esprima
                         }
                         else
                         {
-                            if (_sourceType != SourceType.Module)
+                            if (!_context.IsModule)
                             {
                                 TolerateUnexpectedToken(_lookahead, Messages.IllegalImportDeclaration);
                             }
@@ -2562,7 +2588,7 @@ namespace Esprima
                     }
                 }
             }
-            else if ((_sourceType == SourceType.Module || _context.Await) && token.Type == TokenType.Identifier && (string) token.Value == "await")
+            else if ((_context.IsModule || _context.Await) && token.Type == TokenType.Identifier && (string) token.Value == "await")
             {
                 TolerateUnexpectedToken(token);
             }
@@ -2698,11 +2724,11 @@ namespace Esprima
             }
             else
             {
-                Expect(")");
-                if (Match(";"))
-                {
-                    NextToken();
-                }
+            Expect(")");
+            if (Match(";"))
+            {
+                NextToken();
+            }
             }
 
             return Finalize(node, new DoWhileStatement(body, test));
@@ -3025,7 +3051,7 @@ namespace Esprima
             }
             else
             {
-                Expect(")");
+            Expect(")");
                 body = ParseStatement();
             }
 

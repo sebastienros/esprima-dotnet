@@ -36,7 +36,7 @@ namespace Jint.Benchmark
             for (int i = 0; i < N; ++i)
             {
                 var parser = new JavaScriptParser(Script);
-                parser.ParseProgram();
+                parser.ParseScript();
             }
         }
     }
