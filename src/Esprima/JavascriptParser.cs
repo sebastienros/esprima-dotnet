@@ -800,7 +800,7 @@ namespace Esprima
             var node = CreateNode();
 
             var previousAllowYield = _context.AllowYield;
-            _context.AllowYield = false;
+            _context.AllowYield = true;
             var parameters = ParseFormalParameters();
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
@@ -3857,8 +3857,9 @@ namespace Esprima
 
             var node = CreateNode();
 
+            const bool isGenerator = false;
             var previousAllowYield = _context.AllowYield;
-            _context.AllowYield = false;
+            _context.AllowYield = !isGenerator;
             var formalParameters = ParseFormalParameters();
             if (formalParameters.Parameters.Count > 0)
             {
@@ -3867,7 +3868,7 @@ namespace Esprima
             var method = this.ParsePropertyMethod(formalParameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseSetterMethod()
@@ -3875,8 +3876,10 @@ namespace Esprima
             EnterHoistingScope();
 
             var node = CreateNode();
+
+            const bool isGenerator = false;
             var previousAllowYield = _context.AllowYield;
-            _context.AllowYield = false;
+            _context.AllowYield = !isGenerator;
 
             var formalParameters = ParseFormalParameters();
             if (formalParameters.Parameters.Count != 1)
@@ -3890,7 +3893,7 @@ namespace Esprima
             var method = ParsePropertyMethod(formalParameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false, LeaveHoistingScope()));
         }
 
         private FunctionExpression ParseGeneratorMethod()
