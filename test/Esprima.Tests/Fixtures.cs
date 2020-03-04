@@ -101,7 +101,12 @@ namespace Esprima.Test
             var isModule =
                 filename.Contains("module") ||
                 filename.Contains("export") ||
-                (filename.Contains("import") && !jsFilePath.Contains("dynamic-import"));
+                filename.Contains("import");
+
+            if (!filename.Contains(".module"))
+            {
+                isModule &= !jsFilePath.Contains("dynamic-import") && !jsFilePath.Contains("script");
+            }
 
             options.SourceType = isModule
                 ? SourceType.Module
@@ -120,6 +125,11 @@ namespace Esprima.Test
             {
                 invalid = true;
                 expected = File.ReadAllText(failureFilePath);
+            }
+            else
+            {
+                // cannot compare
+                return;
             }
 
             invalid |=

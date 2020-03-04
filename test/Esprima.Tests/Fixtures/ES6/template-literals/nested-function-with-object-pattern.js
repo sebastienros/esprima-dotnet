@@ -1,1 +1,0 @@
-`${function() { let {x} = y; }}`
