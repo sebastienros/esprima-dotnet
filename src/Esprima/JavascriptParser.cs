@@ -3022,8 +3022,9 @@ namespace Esprima
             ExpectKeyword("return");
 
             var hasArgument = (!Match(";") && !Match("}") &&
-                                 !_hasLineTerminator && _lookahead.Type != TokenType.EOF) ||
-                                _lookahead.Type == TokenType.Template;
+                               !_hasLineTerminator && _lookahead.Type != TokenType.EOF) ||
+                              _lookahead.Type == TokenType.StringLiteral ||
+                              _lookahead.Type == TokenType.Template;
 
             var argument = hasArgument ? ParseExpression() : null;
             ConsumeSemicolon();
