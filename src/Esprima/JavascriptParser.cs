@@ -3020,8 +3020,10 @@ namespace Esprima
             var node = CreateNode();
             ExpectKeyword("return");
 
-            var hasArgument = !Match(";") && !Match("}") &&
-                !_hasLineTerminator && _lookahead.Type != TokenType.EOF;
+            var hasArgument = (!Match(";") && !Match("}") &&
+                                 !_hasLineTerminator && _lookahead.Type != TokenType.EOF) ||
+                                _lookahead.Type == TokenType.Template;
+
             var argument = hasArgument ? ParseExpression() : null;
             ConsumeSemicolon();
 
