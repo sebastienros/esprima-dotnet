@@ -195,6 +195,9 @@ namespace Esprima.Utils
                 case Nodes.ImportNamespaceSpecifier:
                     VisitImportNamespaceSpecifier(node.As<ImportNamespaceSpecifier>());
                     break;
+                case Nodes.Import:
+                    VisitImport(node.As<Import>());
+                    break;
                 case Nodes.ImportDeclaration:
                     VisitImportDeclaration(node.As<ImportDeclaration>());
                     break;
@@ -630,6 +633,10 @@ namespace Esprima.Utils
         }
 
         protected virtual void VisitExportSpecifier(ExportSpecifier exportSpecifier)
+        {
+        }
+
+        protected virtual void VisitImport(Import import)
         {
         }
 

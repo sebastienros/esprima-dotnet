@@ -90,6 +90,8 @@ namespace Esprima.Utils
         public event EventHandler<ExportNamedDeclaration> VisitedExportNamedDeclaration;
         public event EventHandler<ExportSpecifier> VisitingExportSpecifier;
         public event EventHandler<ExportSpecifier> VisitedExportSpecifier;
+        public event EventHandler<Import> VisitingImport;
+        public event EventHandler<Import> VisitedImport;
         public event EventHandler<ImportDeclaration> VisitingImportDeclaration;
         public event EventHandler<ImportDeclaration> VisitedImportDeclaration;
         public event EventHandler<ImportNamespaceSpecifier> VisitingImportNamespaceSpecifier;
@@ -427,6 +429,13 @@ namespace Esprima.Utils
             VisitingExportSpecifier?.Invoke(this, exportSpecifier);
             base.VisitExportSpecifier(exportSpecifier);
             VisitedExportSpecifier?.Invoke(this, exportSpecifier);
+        }
+
+        protected override void VisitImport(Import import)
+        {
+            VisitingImport?.Invoke(this, import);
+            base.VisitImport(import);
+            VisitedImport?.Invoke(this, import);
         }
 
         protected override void VisitImportDeclaration(ImportDeclaration importDeclaration)

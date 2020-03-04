@@ -3,6 +3,7 @@
     // Error messages should be identical to V8.
     public static class Messages
     {
+        public const string BadImportCallArity = "Unexpected token";
         public const string BadGetterArity = "Getter must not have any formal parameters";
         public const string BadSetterArity = "Setter must have exactly one formal parameter";
         public const string BadSetterRestParameter = "Setter function argument must not be a rest parameter";

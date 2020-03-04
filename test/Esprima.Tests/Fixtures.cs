@@ -97,7 +97,7 @@ namespace Esprima.Test
             var isModule =
                 filename.Contains("module") ||
                 filename.Contains("export") ||
-                filename.Contains("import");
+                (filename.Contains("import") && !jsFilePath.Contains("dynamic-import"));
 
             options.SourceType = isModule
                 ? SourceType.Module
