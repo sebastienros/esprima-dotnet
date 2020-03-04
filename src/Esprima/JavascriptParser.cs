@@ -2674,6 +2674,15 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-if-statement
 
+        private Statement ParseIfClause()
+        {
+            if (_context.Strict && MatchKeyword("function"))
+            {
+                TolerateError(Messages.StrictFunction);
+            }
+            return ParseStatement();
+        }
+
         private IfStatement ParseIfStatement()
         {
             var node = CreateNode();
@@ -2692,11 +2701,11 @@ namespace Esprima
             else
             {
                 Expect(")");
-                consequent = ParseStatement();
+                consequent = ParseIfClause();
                 if (MatchKeyword("else"))
                 {
                     NextToken();
-                    alternate = ParseStatement();
+                    alternate = ParseIfClause();
                 }
             }
 
