@@ -18,7 +18,7 @@ namespace Esprima.Test
             var parser = new JavaScriptParser(@"
                 function p() {}
                 var x;");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
             Assert.NotEmpty(program.HoistingScope.FunctionDeclarations);
             Assert.NotEmpty(program.HoistingScope.VariableDeclarations);
         }
@@ -26,12 +26,16 @@ namespace Esprima.Test
         public string ParseAndFormat(string source, ParserOptions options)
         {
             var parser = new JavaScriptParser(source, options);
+#pragma warning disable 618
             var program = parser.ParseProgram();
+#pragma warning restore 618
             const string indent = "  ";
-            return program.ToJsonString(AstJson.Options.Default
-                                                       .WithIncludingLineColumn(true)
-                                                       .WithIncludingRange(true),
-                                        indent);
+            return program.ToJsonString(
+                AstJson.Options.Default
+                    .WithIncludingLineColumn(true)
+                    .WithIncludingRange(true),
+                indent
+            );
         }
 
         public bool CompareTrees(string actual, string expected)
@@ -84,7 +88,7 @@ namespace Esprima.Test
             if (jsFilePath.EndsWith(".source.js"))
             {
                 var parser = new JavaScriptParser(script);
-                var program = parser.ParseProgram();
+                var program = parser.ParseScript();
                 var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init.As<Literal>().StringValue;
                 script = source;
             }
@@ -164,7 +168,7 @@ namespace Esprima.Test
             int count = 0;
             Action<INode> action = node => count++;
             var parser = new JavaScriptParser("// this is a comment", new ParserOptions(), action);
-            parser.ParseProgram();
+            parser.ParseScript();
 
             Assert.Equal(1, count);
         }

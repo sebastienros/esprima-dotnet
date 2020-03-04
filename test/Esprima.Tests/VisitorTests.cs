@@ -9,7 +9,7 @@ namespace Esprima.Tests
         public void CanVisitIfWithNoElse()
         {
             var parser = new JavaScriptParser("if (true) { p(); }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -23,7 +23,7 @@ namespace Esprima.Tests
         p();
         break;
 }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -37,7 +37,7 @@ namespace Esprima.Tests
         p();
         break;
 }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -47,7 +47,7 @@ namespace Esprima.Tests
         public void CanVisitForWithNoTest()
         {
             var parser = new JavaScriptParser(@"for (var a = []; ; ) { }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -57,7 +57,7 @@ namespace Esprima.Tests
         public void CanVisitForOfStatement()
         {
             var parser = new JavaScriptParser(@"for (var elem of list) { }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);

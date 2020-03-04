@@ -10,7 +10,7 @@ namespace Esprima.Tests
         public void ProgramShouldBeStrict()
         {
             var parser = new JavaScriptParser("'use strict'; function p() {}");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             Assert.True(program.Strict);
         }
@@ -19,7 +19,7 @@ namespace Esprima.Tests
         public void ProgramShouldNotBeStrict()
         {
             var parser = new JavaScriptParser("function p() {}");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
 
             Assert.False(program.Strict);
         }
@@ -28,7 +28,7 @@ namespace Esprima.Tests
         public void FunctionShouldNotBeStrict()
         {
             var parser = new JavaScriptParser("function p() {}");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
             var function = program.Body.First().As<FunctionDeclaration>();
 
             Assert.False(function.Strict);
@@ -38,7 +38,7 @@ namespace Esprima.Tests
         public void FunctionWithUseStrictShouldBeStrict()
         {
             var parser = new JavaScriptParser("function p() { 'use strict'; }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
             var function = program.Body.First().As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
@@ -48,7 +48,7 @@ namespace Esprima.Tests
         public void FunctionShouldBeStrictInProgramStrict()
         {
             var parser = new JavaScriptParser("'use strict'; function p() {}");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
             var function = program.Body.Skip(1).First().As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
@@ -58,7 +58,7 @@ namespace Esprima.Tests
         public void FunctionShouldBeStrict()
         {
             var parser = new JavaScriptParser("function p() {'use strict'; return false;}");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
             var function = program.Body.First().As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
@@ -68,7 +68,7 @@ namespace Esprima.Tests
         public void FunctionShouldBeStrictInStrictFunction()
         {
             var parser = new JavaScriptParser("function p() {'use strict'; function q() { return; } return; }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
             var p = program.Body.First().As<FunctionDeclaration>();
             var q = p.Body.As<BlockStatement>().Body.Skip(1).First().As<FunctionDeclaration>();
 
@@ -83,7 +83,7 @@ namespace Esprima.Tests
         public void LabelSetShouldPointToStatement()
         {
             var parser = new JavaScriptParser("here: Hello();");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
             var labeledStatement = program.Body.First().As<LabeledStatement>();
             var body = labeledStatement.Body;
 
@@ -109,14 +109,14 @@ namespace Esprima.Tests
         public void ShouldParseClassInheritance()
         {
             var parser = new JavaScriptParser("class Rectangle extends aggregation(Shape, Colored, ZCoord) { }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
         }
 
         [Fact]
         public void ShouldSymbolPropertyKey()
         {
             var parser = new JavaScriptParser("var a = { [Symbol.iterator]: undefined }");
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
         }
 
         [Fact]
@@ -128,7 +128,7 @@ namespace Esprima.Tests
             };
             var parser = new JavaScriptParser("// End on second line\r\n", options);
 
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
         }
 
 
@@ -148,14 +148,14 @@ f(values);
 
 ");
 
-            var program = parser.ParseProgram();
+            var program = parser.ParseScript();
         }
 
         [Fact]
         public void CanParseInvalidCurly()
         {
             var parser = new JavaScriptParser("if (1}=1) eval('1');");
-            Assert.Throws<ParserException>(() => parser.ParseProgram());
+            Assert.Throws<ParserException>(() => parser.ParseScript());
         }
 
         [Fact]
@@ -171,21 +171,21 @@ f(values);
         public void CanParseDot(string script)
         {
             var parser = new JavaScriptParser(script);
-            Assert.Throws<ParserException>(() => parser.ParseProgram());
+            Assert.Throws<ParserException>(() => parser.ParseScript());
         }
 
         [Fact]
         public void ThrowsErrorForInvalidRegExFlags()
         {
             var parser = new JavaScriptParser("/'/o//'///C//ÿ");
-            Assert.Throws<ParserException>(() => parser.ParseProgram());
+            Assert.Throws<ParserException>(() => parser.ParseScript());
         }
 
         [Fact]
         public void ThrowsErrorForDeepRecursionParsing()
         {
             var parser = new JavaScriptParser("if ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((true)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) { } ");
-            Assert.Throws<ParserException>(() => parser.ParseProgram());
+            Assert.Throws<ParserException>(() => parser.ParseScript());
         }        
     }
 }
