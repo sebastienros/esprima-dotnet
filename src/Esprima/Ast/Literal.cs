@@ -17,7 +17,7 @@ namespace Esprima.Ast
         public readonly string Raw;
         public readonly TokenType TokenType;
 
-        private Literal(TokenType tokenType, object value, string raw) :
+        internal Literal(TokenType tokenType, object value, string raw) :
             base(Nodes.Literal)
         {
             TokenType = tokenType;

@@ -601,7 +601,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(null, raw));
+                    expr = Finalize(node, new Literal(TokenType.NullLiteral, null, raw));
                     break;
 
                 case TokenType.Template:
@@ -2076,9 +2076,19 @@ namespace Esprima
 
                         var node = StartNode(startToken);
                         Expect("=>");
-                        INode body = Match("{")
-                            ? (INode)ParseFunctionSourceElements()
-                            : IsolateCoverGrammar(parseAssignmentExpression);
+
+                        INode body;
+                        if (Match("{"))
+                        {
+                            var previousAllowIn = _context.AllowIn;
+                            _context.AllowIn = true;
+                            body = ParseFunctionSourceElements();
+                            _context.AllowIn = previousAllowIn;
+                        }
+                        else
+                        {
+                            body = IsolateCoverGrammar(parseAssignmentExpression);
+                        }
 
                         var expression = body.Type != Nodes.BlockStatement;
 
