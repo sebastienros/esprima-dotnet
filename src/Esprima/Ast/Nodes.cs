@@ -21,6 +21,7 @@
         FunctionExpression,
         Identifier,
         IfStatement,
+        Import,
         Literal,
         LabeledStatement,
         LogicalExpression,

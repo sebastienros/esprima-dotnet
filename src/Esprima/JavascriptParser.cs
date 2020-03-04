@@ -662,6 +662,10 @@ namespace Esprima
                         {
                             expr = ParseClassExpression();
                         }
+                        else if (MatchImportCall())
+                        {
+                            expr = ParseImportCall();
+                        }
                         else
                         {
                             ThrowUnexpectedToken(NextToken());
@@ -1377,6 +1381,10 @@ namespace Esprima
                     ThrowUnexpectedToken(_lookahead);
                 }
             }
+            else if (MatchKeyword("import"))
+            {
+                ThrowUnexpectedToken(_lookahead);
+            }
             else
             {
                 var callee = IsolateCoverGrammar(parseLeftHandSideExpression);
@@ -1423,6 +1431,28 @@ namespace Esprima
             return NodeList.From(ref args);
         }
 
+        private bool MatchImportCall()
+        {
+            var match = MatchKeyword("import");
+            if (match)
+            {
+                var state = _scanner.SaveState();
+                _scanner.ScanComments();
+                var next = _scanner.Lex();
+                _scanner.RestoreState(state);
+                match = (next.Type == TokenType.Punctuator) && ((string) next.Value == "(");
+            }
+
+            return match;
+        }
+
+        private Import ParseImportCall()
+        {
+            var node = CreateNode();
+            ExpectKeyword("import");
+            return this.Finalize(node, new Import());
+        }
+
         private Expression ParseLeftHandSideExpressionAllowCall()
         {
             var startToken = _lookahead;
@@ -1464,6 +1494,10 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     _context.IsAssignmentTarget = false;
                     var args = asyncArrow ? ParseAsyncArguments() : ParseArguments();
+                    if (expr.Type == Nodes.Import && args.Count != 1)
+                    {
+                        TolerateError(Messages.BadImportCallArity);
+                    }
                     expr = Finalize(StartNode(startToken), new CallExpression(expr, args));
                     if (asyncArrow && Match("=>"))
                     {
@@ -2157,12 +2191,21 @@ namespace Esprima
                         }
                         statement = ParseExportDeclaration();
                         break;
+
                     case "import":
-                        if (_sourceType != SourceType.Module)
+                        if (MatchImportCall())
                         {
-                            TolerateUnexpectedToken(_lookahead, Messages.IllegalImportDeclaration);
+                            statement = ParseExpressionStatement();
                         }
-                        statement = ParseImportDeclaration();
+                        else
+                        {
+                            if (_sourceType != SourceType.Module)
+                            {
+                                TolerateUnexpectedToken(_lookahead, Messages.IllegalImportDeclaration);
+                            }
+
+                            statement = ParseImportDeclaration();
+                        }
                         break;
                     case "const":
                         var inFor = false;

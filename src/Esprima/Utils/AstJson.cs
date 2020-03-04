@@ -626,6 +626,13 @@ namespace Esprima.Utils
                 }
             }
 
+            protected override void VisitImport(Import import)
+            {
+                using (StartNodeObject(import))
+                {
+                }
+            }
+
             protected override void VisitImportDeclaration(ImportDeclaration importDeclaration)
             {
                 using (StartNodeObject(importDeclaration))
