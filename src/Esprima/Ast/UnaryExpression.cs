@@ -1,5 +1,6 @@
-using System;
 using Esprima.Utils;
+
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
@@ -33,31 +34,19 @@ namespace Esprima.Ast
 
         public static UnaryOperator ParseUnaryOperator(string op)
         {
-            switch (op)
+            return op switch
             {
-                case "+":
-                    return UnaryOperator.Plus;
-                case "-":
-                    return UnaryOperator.Minus;
-                case "++":
-                    return UnaryOperator.Increment;
-                case "--":
-                    return UnaryOperator.Decrement;
-                case "~":
-                    return UnaryOperator.BitwiseNot;
-                case "!":
-                    return UnaryOperator.LogicalNot;
-                case "delete":
-                    return UnaryOperator.Delete;
-                case "void":
-                    return UnaryOperator.Void;
-                case "typeof":
-                    return UnaryOperator.TypeOf;
-
-                default:
-                    throw new ArgumentOutOfRangeException("Invalid unary operator: " + op);
-
-            }
+                "+" => UnaryOperator.Plus,
+                "-" => UnaryOperator.Minus,
+                "++" => UnaryOperator.Increment,
+                "--" => UnaryOperator.Decrement,
+                "~" => UnaryOperator.BitwiseNot,
+                "!" => UnaryOperator.LogicalNot,
+                "delete" => UnaryOperator.Delete,
+                "void" => UnaryOperator.Void,
+                "typeof" => UnaryOperator.TypeOf,
+                _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
+            };
         }
 
         public UnaryExpression(string op, Expression arg) : this(Nodes.UnaryExpression, op, arg)

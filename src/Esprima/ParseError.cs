@@ -1,4 +1,4 @@
-﻿using System;
+﻿using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima
 {
@@ -21,7 +21,7 @@ namespace Esprima
         public ParseError(string description,
             string source, int index, Position position)
         {
-            Description = description ?? throw new ArgumentNullException(nameof(description));
+            Description = description ?? ThrowArgumentNullException<string>(nameof(description));
             Source      = source;
             Index       = index;
             Position    = position;

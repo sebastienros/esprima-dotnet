@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima
 {
@@ -30,14 +31,6 @@ namespace Esprima
 
             public HashSet<string> LabelSet;
         }
-
-        private struct HoistingScopeLists
-        {
-            public ArrayList<FunctionDeclaration> FunctionDeclarations;
-            public ArrayList<VariableDeclaration> VariableDeclarations;
-        }
-
-        private readonly Stack<HoistingScopeLists> _hoistingScopes = new Stack<HoistingScopeLists>();
 
         private Token _lookahead;
         private readonly Context _context;
@@ -78,12 +71,12 @@ namespace Esprima
         {
             if (code == null)
             {
-                throw new ArgumentNullException(nameof(code));
+                ThrowArgumentNullException(nameof(code));
             }
 
             if (options == null)
             {
-                throw new ArgumentNullException(nameof(options));
+                ThrowArgumentNullException(nameof(options));
             }
 
             parseAssignmentExpression = ParseAssignmentExpression;
@@ -149,24 +142,11 @@ namespace Esprima
         // https://tc39.github.io/ecma262/#sec-scripts
         // https://tc39.github.io/ecma262/#sec-modules
 
-        /// <summary>
-        /// Should use explicit <see cref="ParseScript" /> or <see cref="ParseModule" />.
-        /// </summary>
-        [Obsolete("Should use explicit ParseScript or ParseModule")]
-        public Program ParseProgram()
-        {
-            return _config.SourceType == SourceType.Script
-                ? (Program) ParseScript()
-                : ParseModule();
-        }
-
         public Module ParseModule()
         {
             _context.Strict = true;
             _context.IsModule = true;
             _scanner.IsModule = true;
-
-            EnterHoistingScope();
 
             var node = CreateNode();
             var body = ParseDirectivePrologues();
@@ -175,7 +155,7 @@ namespace Esprima
                 body.Push(ParseStatementListItem());
             }
 
-            return Finalize(node, new Module(NodeList.From(ref body), LeaveHoistingScope()));
+            return Finalize(node, new Module(NodeList.From(ref body)));
         }
 
         public Script ParseScript(bool strict = false)
@@ -185,8 +165,6 @@ namespace Esprima
                 _context.Strict = true;
             }
 
-            EnterHoistingScope();
-
             var node = CreateNode();
             var body = ParseDirectivePrologues();
             while (_lookahead.Type != TokenType.EOF)
@@ -194,7 +172,7 @@ namespace Esprima
                 body.Push(ParseStatementListItem());
             }
 
-            return Finalize(node, new Script(NodeList.From(ref body), _context.Strict, LeaveHoistingScope()));
+            return Finalize(node, new Script(NodeList.From(ref body), _context.Strict));
         }
 
         private void CollectComments()
@@ -796,8 +774,6 @@ namespace Esprima
 
         private FunctionExpression ParsePropertyMethodFunction()
         {
-            EnterHoistingScope();
-
             var node = CreateNode();
 
             var previousAllowYield = _context.AllowYield;
@@ -806,13 +782,11 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, _context.Strict, async: false));
         }
 
         private FunctionExpression ParsePropertyMethodAsyncFunction()
         {
-            EnterHoistingScope();
-
             var node = CreateNode();
 
             var previousAllowYield = _context.AllowYield;
@@ -824,7 +798,7 @@ namespace Esprima
             _context.AllowYield = previousAllowYield;
             _context.Await = previousAwait;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, strict: true, async: true, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, strict: true, async: true));
         }
 
         private Expression ParseObjectPropertyKey()
@@ -2078,7 +2052,6 @@ namespace Esprima
                 {
 
                     // https://tc39.github.io/ecma262/#sec-arrow-function-definitions
-                    EnterHoistingScope();
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
 
@@ -2129,7 +2102,7 @@ namespace Esprima
                             TolerateUnexpectedToken(list.Stricted, list.Message);
                         }
 
-                        expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, isAsync, LeaveHoistingScope()));
+                        expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, isAsync));
 
                         _context.Strict = previousStrict;
                         _context.AllowStrictDirective = previousAllowStrictDirective;
@@ -2651,7 +2624,7 @@ namespace Esprima
             var declarations = ParseVariableDeclarationList(ref inFor);
             ConsumeSemicolon();
 
-            return Hoist(Finalize(node, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
+            return Finalize(node, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
         }
 
         // https://tc39.github.io/ecma262/#sec-empty-statement
@@ -2815,14 +2788,14 @@ namespace Esprima
                             TolerateError(Messages.ForInOfLoopInitializer, "for-in");
                         }
 
-                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
+                        left = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
                         NextToken();
                         right = ParseExpression();
                         init = null;
                     }
                     else if (declarations.Count == 1 && declarations[0].Init == null && MatchContextualKeyword("of"))
                     {
-                        left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
+                        left = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
                         NextToken();
                         right = ParseAssignmentExpression();
                         init = null;
@@ -2830,7 +2803,7 @@ namespace Esprima
                     }
                     else
                     {
-                        init = Hoist(Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var)));
+                        init = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
                         Expect(";");
                     }
                 }
@@ -2856,14 +2829,14 @@ namespace Esprima
 
                         if (declarations.Count == 1 && declarations[0].Init == null && MatchKeyword("in"))
                         {
-                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, kind)));
+                            left = Finalize(initNode, new VariableDeclaration(declarations, kind));
                             NextToken();
                             right = ParseExpression();
                             init = null;
                         }
                         else if (declarations.Count == 1 && declarations[0].Init == null && MatchContextualKeyword("of"))
                         {
-                            left = Hoist(Finalize(initNode, new VariableDeclaration(declarations, kind)));
+                            left = Finalize(initNode, new VariableDeclaration(declarations, kind));
                             NextToken();
                             right = ParseAssignmentExpression();
                             init = null;
@@ -3611,8 +3584,6 @@ namespace Esprima
 
         private FunctionDeclaration ParseFunctionDeclaration(bool identifierIsOptional = false)
         {
-            EnterHoistingScope();
-
             var node = CreateNode();
             var isAsync = MatchContextualKeyword("async");
             if (isAsync)
@@ -3691,20 +3662,12 @@ namespace Esprima
             _context.Await = previousAllowAwait;
             _context.AllowYield = previousAllowYield;
 
-            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync, LeaveHoistingScope()));
-
-            var lists = _hoistingScopes.Pop();
-            ref var functionDeclarations = ref lists.FunctionDeclarations;
-            functionDeclarations.Add(functionDeclaration);
-            _hoistingScopes.Push(lists);
-
+            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync));
             return functionDeclaration;
         }
 
         private FunctionExpression ParseFunctionExpression()
         {
-            EnterHoistingScope();
-
             var node = CreateNode();
 
             var isAsync = MatchContextualKeyword("async");
@@ -3787,7 +3750,7 @@ namespace Esprima
             _context.Await = previousAllowAwait;
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression((Identifier) id, parameters, body, isGenerator, hasStrictDirective, isAsync, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression((Identifier) id, parameters, body, isGenerator, hasStrictDirective, isAsync));
         }
 
         // https://tc39.github.io/ecma262/#sec-directive-prologues-and-the-use-strict-directive
@@ -3877,8 +3840,6 @@ namespace Esprima
 
         private FunctionExpression ParseGetterMethod()
         {
-            EnterHoistingScope();
-
             var node = CreateNode();
 
             const bool isGenerator = false;
@@ -3892,13 +3853,11 @@ namespace Esprima
             var method = this.ParsePropertyMethod(formalParameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false));
         }
 
         private FunctionExpression ParseSetterMethod()
         {
-            EnterHoistingScope();
-
             var node = CreateNode();
 
             const bool isGenerator = false;
@@ -3917,13 +3876,11 @@ namespace Esprima
             var method = ParsePropertyMethod(formalParameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false));
         }
 
         private FunctionExpression ParseGeneratorMethod()
         {
-            EnterHoistingScope();
-
             var node = CreateNode();
 
             var previousAllowYield = _context.AllowYield;
@@ -3934,7 +3891,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: true, _context.Strict, async: false, LeaveHoistingScope()));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: true, _context.Strict, async: false));
         }
 
         // https://tc39.github.io/ecma262/#sec-generator-function-definitions
@@ -4027,18 +3984,12 @@ namespace Esprima
             {
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
-                string id;
-                switch(key.Type)
+                string id = key.Type switch
                 {
-                    case Nodes.Identifier:
-                        id = key.As<Identifier>().Name;
-                        break;
-                    case Nodes.Literal:
-                        id = key.As<Literal>().StringValue; // "constructor"
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
+                    Nodes.Identifier => key.As<Identifier>().Name,
+                    Nodes.Literal => key.As<Literal>().StringValue, // "constructor"
+                    _ => ThrowArgumentOutOfRangeException<string>(nameof(key.Type), key.Type)
+                };
 
                 if (id == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
                 {
@@ -4647,33 +4598,8 @@ namespace Esprima
 
             public void ParamSetAdd(string key)
             {
-                (paramSet = paramSet ?? new HashSet<string>()).Add(key);
+                (paramSet ??= new HashSet<string>()).Add(key);
             }
-        }
-
-        private void EnterHoistingScope()
-        {
-            _hoistingScopes.Push(new HoistingScopeLists());
-        }
-
-        private HoistingScope LeaveHoistingScope()
-        {
-            var scope = _hoistingScopes.Pop();
-            return new HoistingScope(NodeList.From(ref scope.FunctionDeclarations),
-                                     NodeList.From(ref scope.VariableDeclarations));
-        }
-
-        private VariableDeclaration Hoist(VariableDeclaration variableDeclaration)
-        {
-            if (variableDeclaration.Kind == VariableDeclarationKind.Var)
-            {
-                var scopeLists = _hoistingScopes.Pop();
-                ref var variableDeclarations = ref scopeLists.VariableDeclarations;
-                variableDeclarations.Add(variableDeclaration);
-                _hoistingScopes.Push(scopeLists);
-            }
-
-            return variableDeclaration;
         }
     }
 }

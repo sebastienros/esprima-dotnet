@@ -19,16 +19,12 @@ namespace Esprima.Test
                 function p() {}
                 var x;");
             var program = parser.ParseScript();
-            Assert.NotEmpty(program.HoistingScope.FunctionDeclarations);
-            Assert.NotEmpty(program.HoistingScope.VariableDeclarations);
         }
 
-        public string ParseAndFormat(string source, ParserOptions options)
+        private static string ParseAndFormat(SourceType sourceType, string source, ParserOptions options)
         {
             var parser = new JavaScriptParser(source, options);
-#pragma warning disable 618
-            var program = parser.ParseProgram();
-#pragma warning restore 618
+            var program = sourceType == SourceType.Script ?  (Program) parser.ParseScript() : parser.ParseModule();
             const string indent = "  ";
             return program.ToJsonString(
                 AstJson.Options.Default
@@ -59,8 +55,7 @@ namespace Esprima.Test
             {
                 Range = true,
                 Loc = true,
-                Tokens = true,
-                SourceType = SourceType.Script
+                Tokens = true
             };
 
             string treeFilePath, failureFilePath, moduleFilePath;
@@ -108,13 +103,13 @@ namespace Esprima.Test
                 isModule &= !jsFilePath.Contains("dynamic-import") && !jsFilePath.Contains("script");
             }
 
-            options.SourceType = isModule
+            var sourceType = isModule
                 ? SourceType.Module
                 : SourceType.Script;
 
             if (File.Exists(moduleFilePath))
             {
-                options.SourceType = SourceType.Module;
+                sourceType = SourceType.Module;
                 expected = File.ReadAllText(moduleFilePath);
             }
             else if(File.Exists(treeFilePath))
@@ -140,7 +135,7 @@ namespace Esprima.Test
             {
                 options.Tolerant = true;
 
-                var actual = ParseAndFormat(script, options);
+                var actual = ParseAndFormat(sourceType, script, options);
                 Assert.True(CompareTrees(actual, expected), jsFilePath);
             }
             else
@@ -148,7 +143,7 @@ namespace Esprima.Test
                 options.Tolerant = false;
 
                 // TODO: check the accuracy of the message and of the location
-                Assert.Throws<ParserException>(() => ParseAndFormat(script, options));
+                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, options));
             }
         }
 

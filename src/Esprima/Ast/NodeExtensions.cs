@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
+
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
@@ -17,7 +18,7 @@ namespace Esprima.Ast
         {
             if (node == null)
             {
-                throw new ArgumentNullException(nameof(node));
+                ThrowArgumentNullException(nameof(node));
             }
 
             return DescendantNodes(new NodeSysList { node });
@@ -27,7 +28,7 @@ namespace Esprima.Ast
         {
             if (node == null)
             {
-                throw new ArgumentNullException(nameof(node));
+                ThrowArgumentNullException(nameof(node));
             }
 
             return DescendantNodes(new NodeSysList(node.ChildNodes));
@@ -65,12 +66,12 @@ namespace Esprima.Ast
         {
             if (node == null)
             {
-                throw new ArgumentNullException(nameof(node));
+                ThrowArgumentNullException(nameof(node));
             }
 
             if (rootNode == null)
             {
-                throw new ArgumentNullException(nameof(rootNode));
+                ThrowArgumentNullException(nameof(rootNode));
             }
 
             var parents = new Stack<Node>();

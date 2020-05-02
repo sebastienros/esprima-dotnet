@@ -10,8 +10,7 @@ namespace Esprima.Ast
             BlockStatement body,
             bool generator,
             bool strict,
-            bool async,
-            HoistingScope hoistingScope) :
+            bool async) :
             base(Nodes.FunctionExpression)
         {
             Id = id;
@@ -21,7 +20,6 @@ namespace Esprima.Ast
             Expression = false;
             Strict = strict;
             Async = async;
-            HoistingScope = hoistingScope;
         }
 
         public Identifier Id { get; }
@@ -31,7 +29,6 @@ namespace Esprima.Ast
         public bool Expression { get; }
         public bool Async { get; }
         public bool Strict { get; }
-        public HoistingScope HoistingScope { get; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
     }

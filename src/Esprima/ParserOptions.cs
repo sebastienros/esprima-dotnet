@@ -36,11 +36,6 @@
         public bool Tolerant { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets whether the source represents a module or a script.
-        /// </summary>
-        public SourceType SourceType { get; set; } = SourceType.Script;
-
-        /// <summary>
         /// Gets or sets the <see cref="IErrorHandler"/> to use.
         /// </summary>
         public IErrorHandler ErrorHandler { get; set; }

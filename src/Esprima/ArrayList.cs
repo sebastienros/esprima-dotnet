@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
-using static Esprima.ExceptionHelper;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima
 {
@@ -77,7 +77,7 @@ namespace Esprima
         {
             if (initialCapacity < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(initialCapacity));
+                ThrowArgumentOutOfRangeException(nameof(initialCapacity), initialCapacity);
             }
 
             _items = initialCapacity > 0 ? new T[initialCapacity] : null;
@@ -183,7 +183,7 @@ namespace Esprima
 
             if (index < 0 || index >= _count)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), index, null);
+                ThrowArgumentOutOfRangeException(nameof(index), index, null);
             }
 
             _items[index] = default;
@@ -248,7 +248,7 @@ namespace Esprima
         {
             if (selector == null)
             {
-                throw new ArgumentNullException(nameof(selector));
+                ThrowArgumentNullException(nameof(selector));
             }
 
             var list = new ArrayList<TResult>

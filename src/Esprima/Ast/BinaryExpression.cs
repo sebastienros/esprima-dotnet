@@ -1,5 +1,6 @@
-using System;
 using Esprima.Utils;
+
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
@@ -74,59 +75,34 @@ namespace Esprima.Ast
 
         public static BinaryOperator ParseBinaryOperator(string op)
         {
-            switch (op)
+            return op switch
             {
-                case "+":
-                    return BinaryOperator.Plus;
-                case "-":
-                    return BinaryOperator.Minus;
-                case "*":
-                    return BinaryOperator.Times;
-                case "/":
-                    return BinaryOperator.Divide;
-                case "%":
-                    return BinaryOperator.Modulo;
-                case "==":
-                    return BinaryOperator.Equal;
-                case "!=":
-                    return BinaryOperator.NotEqual;
-                case ">":
-                    return BinaryOperator.Greater;
-                case ">=":
-                    return BinaryOperator.GreaterOrEqual;
-                case "<":
-                    return BinaryOperator.Less;
-                case "<=":
-                    return BinaryOperator.LessOrEqual;
-                case "===":
-                    return BinaryOperator.StrictlyEqual;
-                case "!==":
-                    return BinaryOperator.StricltyNotEqual;
-                case "&":
-                    return BinaryOperator.BitwiseAnd;
-                case "|":
-                    return BinaryOperator.BitwiseOr;
-                case "^":
-                    return BinaryOperator.BitwiseXOr;
-                case "<<":
-                    return BinaryOperator.LeftShift;
-                case ">>":
-                    return BinaryOperator.RightShift;
-                case ">>>":
-                    return BinaryOperator.UnsignedRightShift;
-                case "instanceof":
-                    return BinaryOperator.InstanceOf;
-                case "in":
-                    return BinaryOperator.In;
-                case "&&":
-                    return BinaryOperator.LogicalAnd;
-                case "||":
-                    return BinaryOperator.LogicalOr;
-                case "**":
-                    return BinaryOperator.Exponentiation;
-                default:
-                    throw new ArgumentOutOfRangeException("Invalid binary operator: " + op);
-            }
+                "+" => BinaryOperator.Plus,
+                "-" => BinaryOperator.Minus,
+                "*" => BinaryOperator.Times,
+                "/" => BinaryOperator.Divide,
+                "%" => BinaryOperator.Modulo,
+                "==" => BinaryOperator.Equal,
+                "!=" => BinaryOperator.NotEqual,
+                ">" => BinaryOperator.Greater,
+                ">=" => BinaryOperator.GreaterOrEqual,
+                "<" => BinaryOperator.Less,
+                "<=" => BinaryOperator.LessOrEqual,
+                "===" => BinaryOperator.StrictlyEqual,
+                "!==" => BinaryOperator.StricltyNotEqual,
+                "&" => BinaryOperator.BitwiseAnd,
+                "|" => BinaryOperator.BitwiseOr,
+                "^" => BinaryOperator.BitwiseXOr,
+                "<<" => BinaryOperator.LeftShift,
+                ">>" => BinaryOperator.RightShift,
+                ">>>" => BinaryOperator.UnsignedRightShift,
+                "instanceof" => BinaryOperator.InstanceOf,
+                "in" => BinaryOperator.In,
+                "&&" => BinaryOperator.LogicalAnd,
+                "||" => BinaryOperator.LogicalOr,
+                "**" => BinaryOperator.Exponentiation,
+                _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
+            };
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Left, Right);

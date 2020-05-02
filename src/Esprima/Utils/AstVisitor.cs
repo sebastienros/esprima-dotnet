@@ -1,5 +1,6 @@
 ﻿using System;
 using Esprima.Ast;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Utils
 {
@@ -90,7 +91,7 @@ namespace Esprima.Utils
                     VisitObjectExpression(node.As<ObjectExpression>());
                     break;
                 case Nodes.Program:
-                    VisitProgram(node.As<Esprima.Ast.Program>());
+                    VisitProgram(node.As<Program>());
                     break;
                 case Nodes.Property:
                     VisitProperty(node.As<Property>());
@@ -286,7 +287,7 @@ namespace Esprima.Utils
                     VisitWithStatement(statement.As<WithStatement>());
                     break;
                 case Nodes.Program:
-                    VisitProgram(statement.As<Esprima.Ast.Program>());
+                    VisitProgram(statement.As<Program>());
                     break;
                 case Nodes.CatchClause:
                     VisitCatchClause(statement.As<CatchClause>());
@@ -535,8 +536,7 @@ namespace Esprima.Utils
                 statement,
                 generator: false,
                 IsStrictMode,
-                async: false,
-                new HoistingScope());
+                async: false);
 
             VisitFunctionExpression(func);
         }
@@ -752,7 +752,8 @@ namespace Esprima.Utils
                 case PropertyKind.Method:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    ThrowArgumentOutOfRangeException(nameof(property.Key), property.Key);
+                    break;
             }
         }
 

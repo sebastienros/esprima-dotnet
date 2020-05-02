@@ -1,7 +1,11 @@
-﻿namespace Esprima
+﻿using System.Diagnostics;
+using static Esprima.EsprimaExceptionHelper;
+
+namespace Esprima
 {
     using System;
 
+    [DebuggerDisplay("{ToString()}")]
     public readonly struct Location : IEquatable<Location>
     {
         public Position Start  { get; }
@@ -19,8 +23,7 @@
                      || end == default && start != default
                      || end.Line < start.Line
                      || start.Line > 0 && start.Line == end.Line && end.Column < start.Column
-                   ? throw new ArgumentOutOfRangeException(nameof(end), end,
-                         Exception<ArgumentOutOfRangeException>.DefaultMessage)
+                   ? ThrowArgumentOutOfRangeException<Position>(nameof(end), end, Exception<ArgumentOutOfRangeException>.DefaultMessage)
                    : end;
             Source = source;
         }
