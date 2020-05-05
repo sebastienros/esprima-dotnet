@@ -2,9 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class Identifier : Node,
-        BindingIdentifier,
-        Expression
+    public class Identifier : BindingIdentifier
     {
         public readonly string Name;
 
@@ -14,6 +12,6 @@ namespace Esprima.Ast
             Name = name;
         }
 
-        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
+        public override IEnumerable<Node> ChildNodes => ZeroChildNodes;
     }
 }

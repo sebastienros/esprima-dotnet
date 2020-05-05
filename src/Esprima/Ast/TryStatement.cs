@@ -19,7 +19,7 @@ namespace Esprima.Ast
             Finalizer = finalizer;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Block, Handler, Finalizer);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ClassExpression : Node, Expression
+    public class ClassExpression : Expression
     {
         public readonly Identifier Id;
         public readonly Expression SuperClass;
@@ -16,7 +16,7 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Id, SuperClass, Body);
     }
 }

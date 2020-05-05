@@ -2,24 +2,23 @@
 
 namespace Esprima.Ast
 {
-    public class ArrowParameterPlaceHolder : Node, Expression
+    public class ArrowParameterPlaceHolder : Expression
     {
-        public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new NodeList<INode>(), false);
+        public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new NodeList<Expression>(), false);
 
-        private readonly NodeList<INode> _params;
+        private readonly NodeList<Expression> _params;
 
-        public ArrowParameterPlaceHolder(in NodeList<INode> parameters, bool async) :
+        public ArrowParameterPlaceHolder(in NodeList<Expression> parameters, bool async) :
             base(Nodes.ArrowParameterPlaceHolder)
         {
             Async = async;
             _params = parameters;
         }
 
-        public ref readonly NodeList<INode> Params => ref _params;
+        public ref readonly NodeList<Expression> Params => ref _params;
 
         public bool Async { get; }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(_params);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(_params);
     }
 }

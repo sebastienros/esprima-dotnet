@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class MetaProperty : Node, Expression
+    public class MetaProperty : Expression
     {
         public readonly Identifier Meta;
         public readonly Identifier Property;
@@ -14,7 +14,7 @@ namespace Esprima.Ast
             Property = property;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Meta, Property);
     }
 }

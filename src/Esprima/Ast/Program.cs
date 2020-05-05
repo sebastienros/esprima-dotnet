@@ -1,8 +1,13 @@
 namespace Esprima.Ast
 {
-    public interface Program : INode
+    public abstract class Program : Statement
     {
-        SourceType SourceType { get; }
-        ref readonly NodeList<IStatementListItem> Body { get; }
+        protected Program(Nodes type) : base(type)
+        {
+        }
+
+        public abstract SourceType SourceType { get; }
+
+        public abstract ref readonly NodeList<Statement> Body { get; }
     }
 }

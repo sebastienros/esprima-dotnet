@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class FunctionDeclaration : Statement, IFunctionDeclaration
+    public class FunctionDeclaration : Declaration, IFunction
     {
-        private readonly NodeList<INode> _parameters;
+        private readonly NodeList<Expression> _parameters;
 
         public FunctionDeclaration(
             Identifier id,
-            in NodeList<INode> parameters,
+            in NodeList<Expression> parameters,
             BlockStatement body,
             bool generator,
             bool strict,
@@ -28,16 +28,16 @@ namespace Esprima.Ast
 
         public Identifier Id { get; }
 
-        public INode Body { get; }
+        public Node Body { get; }
         public bool Generator { get; }
         public bool Expression { get; }
         public bool Async { get; }
         public bool Strict { get; }
 
         public HoistingScope HoistingScope { get; }
-        public ref readonly NodeList<INode> Params => ref _parameters;
+        public ref readonly NodeList<Expression> Params => ref _parameters;
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Id, _parameters, Body);
     }
 }

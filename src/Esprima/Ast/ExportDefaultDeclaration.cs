@@ -2,17 +2,16 @@
 
 namespace Esprima.Ast
 {
-    public class ExportDefaultDeclaration : Node, ExportDeclaration
+    public class ExportDefaultDeclaration : ExportDeclaration
     {
-        public readonly IDeclaration Declaration; //: BindingIdentifier | BindingPattern | ClassDeclaration | Expression | FunctionDeclaration;
+        public readonly StatementListItem Declaration; //: BindingIdentifier | BindingPattern | ClassDeclaration | Expression | FunctionDeclaration;
 
-        public ExportDefaultDeclaration(IDeclaration declaration) :
+        public ExportDefaultDeclaration(StatementListItem declaration) :
             base(Nodes.ExportDefaultDeclaration)
         {
             Declaration = declaration;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Declaration);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Declaration);
     }
 }

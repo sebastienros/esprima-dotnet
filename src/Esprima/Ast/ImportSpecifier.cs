@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ImportSpecifier : Node, ImportDeclarationSpecifier
+    public class ImportSpecifier : ImportDeclarationSpecifier
     {
         public readonly Identifier Local;
         public readonly Identifier Imported;
@@ -14,7 +14,7 @@ namespace Esprima.Ast
             Imported = imported;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Local, Imported);
     }
 }

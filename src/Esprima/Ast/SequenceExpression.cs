@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class SequenceExpression : Node, Expression
+    public class SequenceExpression : Expression
     {
         private NodeList<Expression> _expressions;
 
@@ -17,7 +17,7 @@ namespace Esprima.Ast
         internal void UpdateExpressions(in NodeList<Expression> value) =>
             _expressions = value;
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Expressions);
     }
 }

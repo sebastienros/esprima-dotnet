@@ -2,8 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class TemplateLiteral : Node,
-        Expression
+    public class TemplateLiteral : Expression
     {
         private readonly NodeList<TemplateElement> _quasis;
         private readonly NodeList<Expression> _expressions;
@@ -20,7 +19,7 @@ namespace Esprima.Ast
         public ref readonly NodeList<TemplateElement> Quasis => ref _quasis;
         public ref readonly NodeList<Expression> Expressions => ref _expressions;
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(_quasis,  _expressions);
     }
 }

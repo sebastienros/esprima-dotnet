@@ -1,11 +1,17 @@
 namespace Esprima.Ast
 {
-    public class Property : ClassProperty, ObjectExpressionProperty, ObjectPatternProperty
+    public class Property : ClassProperty
     {
         public readonly bool Method;
         public readonly bool Shorthand;
 
-        public Property(PropertyKind kind, Expression key, bool computed, PropertyValue value, bool method, bool shorthand) :
+        public Property(
+            PropertyKind kind,
+            Expression key,
+            bool computed, 
+            Expression value,
+            bool method,
+            bool shorthand) :
             base(Nodes.Property)
         {
             Key = key;

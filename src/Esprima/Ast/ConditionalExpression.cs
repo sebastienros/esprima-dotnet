@@ -2,8 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class ConditionalExpression : Node,
-        Expression
+    public class ConditionalExpression : Expression
     {
         public readonly Expression Test;
         public readonly Expression Consequent;
@@ -17,7 +16,7 @@ namespace Esprima.Ast
             Alternate = alternate;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Test, Consequent, Alternate);
     }
 }

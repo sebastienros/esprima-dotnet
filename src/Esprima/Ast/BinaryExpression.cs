@@ -56,8 +56,7 @@ namespace Esprima.Ast
         Exponentiation,
     }
 
-    public class BinaryExpression : Node,
-        Expression
+    public class BinaryExpression : Expression
     {
         public readonly BinaryOperator Operator;
         public readonly Expression Left;
@@ -131,7 +130,7 @@ namespace Esprima.Ast
             }
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Left, Right);
     }
 }

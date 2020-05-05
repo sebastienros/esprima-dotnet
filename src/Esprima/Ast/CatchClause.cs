@@ -4,17 +4,17 @@ namespace Esprima.Ast
 {
     public class CatchClause : Statement
     {
-        public readonly IArrayPatternElement Param; // BindingIdentifier | BindingPattern;
+        public readonly ArrayPatternElement Param; // BindingIdentifier | BindingPattern;
         public readonly BlockStatement Body;
 
-        public CatchClause(IArrayPatternElement param, BlockStatement body) :
+        public CatchClause(ArrayPatternElement param, BlockStatement body) :
             base(Nodes.CatchClause)
         {
             Param = param;
             Body = body;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Param, Body);
     }
 }

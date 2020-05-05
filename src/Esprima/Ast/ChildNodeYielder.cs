@@ -6,19 +6,17 @@ namespace Esprima.Ast
     /// Helps to succinctly implement <see cref="Node.ChildNodes"/> for
     /// subclasses of <see cref="Node"/>.
     /// </summary>
-
     internal static class ChildNodeYielder
     {
         /// <summary>
         /// Yields one to several nodes, skipping those that are
         /// <c>null</c>.
         /// </summary>
-
-        public static IEnumerable<INode> Yield(
-            INode first,
-            INode second = null,
-            INode third = null,
-            INode fourth = null)
+        public static IEnumerable<Node> Yield(
+            Node first,
+            Node second = null,
+            Node third = null,
+            Node fourth = null)
         {
             if (first  != null) yield return first;
             if (second != null) yield return second;
@@ -30,10 +28,9 @@ namespace Esprima.Ast
         /// Yields nodes of a list followed by optionally another node,
         /// skipping those arguments that <c>null</c>
         /// </summary>
-
-        public static IEnumerable<INode> Yield<T>(
-            NodeList<T> first, INode second = null)
-            where T : class, INode
+        public static IEnumerable<Node> Yield<T>(
+            NodeList<T> first, Node second = null)
+            where T : Node
         {
             foreach (var node in first)
                 yield return node;
@@ -48,11 +45,10 @@ namespace Esprima.Ast
         /// Yields nodes of lists, in the given order, skipping those
         /// lists that are <c>null</c>.
         /// </summary>
-
-        public static IEnumerable<INode> Yield<T1, T2>(
+        public static IEnumerable<Node> Yield<T1, T2>(
             NodeList<T1> first, NodeList<T2> second)
-            where T1 : class, INode
-            where T2 : class, INode
+            where T1 : Node
+            where T2 : Node
         {
             foreach (var node in first)
                 yield return node;
@@ -67,9 +63,9 @@ namespace Esprima.Ast
         /// <c>null</c> then they are skipped.
         /// </summary>
 
-        public static IEnumerable<INode> Yield<T>(
-            INode first, NodeList<T> second, INode third = null)
-            where T : class, INode
+        public static IEnumerable<Node> Yield<T>(
+            Node first, NodeList<T> second, Node third = null)
+            where T : Node
         {
             if (first != null)
             {

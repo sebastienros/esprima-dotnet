@@ -26,8 +26,7 @@ namespace Esprima.Ast
         Decrement,
     }
 
-    public class UnaryExpression : Node,
-        Expression
+    public class UnaryExpression : Expression
     {
         public readonly UnaryOperator Operator;
         public readonly Expression Argument;
@@ -73,7 +72,7 @@ namespace Esprima.Ast
             Prefix = true;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Argument);
     }
 }

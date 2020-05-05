@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public sealed class AwaitExpression : Node, Expression
+    public sealed class AwaitExpression : Expression
     {
         public readonly Expression Argument;
 
@@ -11,7 +11,7 @@ namespace Esprima.Ast
             Argument = argument;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Argument);
     }
 }

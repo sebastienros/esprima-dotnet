@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class VariableDeclaration : Statement, IDeclaration
+    public class VariableDeclaration : Declaration
     {
         private readonly NodeList<VariableDeclarator> _declarations;
 
@@ -19,7 +19,7 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<VariableDeclarator> Declarations => ref _declarations;
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(_declarations);
     }
 }

@@ -4,8 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
 {
-    public class Literal : Node,
-        Expression
+    public class Literal : Expression
     {
         public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
         public readonly double NumericValue;
@@ -50,7 +49,6 @@ namespace Esprima.Ast
             Regex = new RegexValue(pattern, flags);
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            Enumerable.Empty<INode>();
+        public override IEnumerable<Node> ChildNodes => Enumerable.Empty<Node>();
     }
 }

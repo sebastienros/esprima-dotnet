@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class TaggedTemplateExpression : Node, Expression
+    public class TaggedTemplateExpression : Expression
     {
         public readonly Expression Tag;
         public readonly TemplateLiteral Quasi;
@@ -14,7 +14,7 @@ namespace Esprima.Ast
             Quasi = quasi;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Tag, Quasi);
     }
 }

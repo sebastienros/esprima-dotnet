@@ -3,18 +3,17 @@ using System.Linq;
 
 namespace Esprima.Ast
 {
-    public abstract class Node : INode
+    public abstract class Node
     {
+        protected static readonly IEnumerable<Node> ZeroChildNodes = Enumerable.Empty<Node>();
+
+        protected Node(Nodes type) => Type = type;
+
         public Nodes Type { get; }
-        public Range Range { get; set; }
+        public Range Range { get; set; }    
 
         public Location Location { get; set; }
 
-        public abstract IEnumerable<INode> ChildNodes { get; }
-
-        protected static IEnumerable<INode> ZeroChildNodes = Enumerable.Empty<INode>();
-
-        protected Node(Nodes type) =>
-            Type = type;
+        public abstract IEnumerable<Node> ChildNodes { get; }
     }
 }

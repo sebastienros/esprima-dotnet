@@ -2,24 +2,19 @@
 
 namespace Esprima.Ast
 {
-    public class AssignmentPattern :
-        Node,
-        Expression,
-        IArrayPatternElement,
-        IFunctionParameter,
-        PropertyValue
+    public class AssignmentPattern : ArrayPatternElement
     {
-        public readonly INode Left;
-        public INode Right;
+        public readonly Node Left;
+        public Node Right;
 
-        public AssignmentPattern(INode left, INode right) :
+        public AssignmentPattern(Node left, Node right) :
             base(Nodes.AssignmentPattern)
         {
             Left = left;
             Right = right;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Left, Right);
     }
 }

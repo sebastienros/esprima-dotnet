@@ -30,7 +30,7 @@ namespace Esprima.Benchmark
             private int _varNameCount;
             private int _functionCount;
 
-            public void Visit(INode node)
+            public void Visit(Node node)
             {
                 foreach (var childNode in node.ChildNodes)
                 {

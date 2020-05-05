@@ -7,8 +7,7 @@ namespace Esprima.Tests
 {
     public class AstVisitorEventSourceTests
     {
-        static T ParseExpression<T>(string code) where T : class, Expression =>
-            new JavaScriptParser(code).ParseExpression().As<T>();
+        static T ParseExpression<T>(string code) where T : Expression => new JavaScriptParser(code).ParseExpression().As<T>();
 
         [Fact]
         public void MemberExpression()

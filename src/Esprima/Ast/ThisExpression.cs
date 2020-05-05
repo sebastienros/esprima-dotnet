@@ -2,12 +2,11 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class ThisExpression : Node,
-        Expression
+    public class ThisExpression : Expression
     {
         public ThisExpression() :
             base(Nodes.ThisExpression) {}
 
-        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
+        public override IEnumerable<Node> ChildNodes => ZeroChildNodes;
     }
 }

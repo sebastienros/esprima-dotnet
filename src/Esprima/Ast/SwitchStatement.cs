@@ -17,7 +17,7 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<SwitchCase> Cases => ref _cases;
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Discriminant, _cases);
     }
 }

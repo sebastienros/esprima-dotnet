@@ -7,6 +7,6 @@ namespace Esprima.Ast
         public DebuggerStatement() :
             base(Nodes.DebuggerStatement) {}
 
-        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
+        public override IEnumerable<Node> ChildNodes => ZeroChildNodes;
     }
 }

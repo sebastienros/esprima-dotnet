@@ -12,7 +12,7 @@ namespace Esprima.Ast
             Argument = argument;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Argument);
     }
 }

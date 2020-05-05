@@ -2,11 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class SpreadElement : Node,
-        ArgumentListElement,
-        ArrayExpressionElement,
-        ObjectExpressionProperty,
-        Expression
+    public class SpreadElement : Expression
     {
         public readonly Expression Argument;
 
@@ -16,7 +12,7 @@ namespace Esprima.Ast
             Argument = argument;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Argument);
     }
 }

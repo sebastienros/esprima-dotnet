@@ -14,7 +14,7 @@ namespace Esprima.Ast
             Local = local;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Exported, Local);
     }
 }

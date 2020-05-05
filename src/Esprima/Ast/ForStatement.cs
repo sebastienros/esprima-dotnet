@@ -5,12 +5,12 @@ namespace Esprima.Ast
     public class ForStatement : Statement
     {
         // can be a Statement (var i) or an Expression (i=0)
-        public readonly INode Init;
+        public readonly StatementListItem Init;
         public readonly Expression Test;
         public readonly Expression Update;
         public readonly Statement Body;
 
-        public ForStatement(INode init, Expression test, Expression update, Statement body) :
+        public ForStatement(StatementListItem init, Expression test, Expression update, Statement body) :
             base(Nodes.ForStatement)
         {
             Init = init;
@@ -19,7 +19,6 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Init, Test, Update, Body);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Init, Test, Update, Body);
     }
 }

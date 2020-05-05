@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class YieldExpression : Node, Expression
+    public class YieldExpression : Expression
     {
         public readonly Expression Argument;
         public readonly bool Delegate;
@@ -14,7 +14,7 @@ namespace Esprima.Ast
             Delegate = delgate;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Argument);
     }
 }

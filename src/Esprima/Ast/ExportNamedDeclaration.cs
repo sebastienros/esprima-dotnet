@@ -2,15 +2,15 @@
 
 namespace Esprima.Ast
 {
-    public class ExportNamedDeclaration : Node, ExportDeclaration
+    public class ExportNamedDeclaration : ExportDeclaration
     {
         private readonly NodeList<ExportSpecifier> _specifiers;
 
-        public readonly IStatementListItem Declaration;
+        public readonly StatementListItem Declaration;
         public readonly Literal Source;
 
         public ExportNamedDeclaration(
-            IStatementListItem declaration,
+            StatementListItem declaration,
             in NodeList<ExportSpecifier> specifiers,
             Literal source) :
             base(Nodes.ExportNamedDeclaration)
@@ -22,7 +22,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<ExportSpecifier> Specifiers => ref _specifiers;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Declaration, _specifiers, Source);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Declaration, _specifiers, Source);
     }
 }

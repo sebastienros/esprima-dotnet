@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ExportAllDeclaration : Node, ExportDeclaration
+    public class ExportAllDeclaration : ExportDeclaration
     {
         public readonly Literal Source;
 
@@ -12,7 +12,6 @@ namespace Esprima.Ast
             Source = source;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Source);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Source);
     }
 }

@@ -351,8 +351,7 @@ namespace Esprima
     {
         public static void AddRange<T>(
             ref this ArrayList<T> destination,
-            in NodeList<T> source)
-            where T: class, INode
+            in NodeList<T> source) where T: Node
         {
             foreach (var item in source)
                 destination.Add(item);

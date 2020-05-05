@@ -6,7 +6,7 @@ using static Esprima.ExceptionHelper;
 
 namespace Esprima.Ast
 {
-    public readonly struct NodeList<T> : IReadOnlyList<T> where T : class, INode
+    public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node
     {
         private readonly T[] _items;
         private readonly int _count;
@@ -37,8 +37,8 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        public NodeList<INode> AsNodes() =>
-            new NodeList<INode>(_items /* conversion by co-variance! */, _count);
+        public NodeList<Node> AsNodes() =>
+            new NodeList<Node>(_items /* conversion by co-variance! */, _count);
 
         public T this[int index]
         {
@@ -136,14 +136,14 @@ namespace Esprima.Ast
     public static class NodeList
     {
         internal static NodeList<T> From<T>(ref ArrayList<T> arrayList)
-            where T : class, INode
+            where T :  Node
         {
             arrayList.Yield(out var items, out var count);
             arrayList = default;
             return new NodeList<T>(items, count);
         }
 
-        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : class, INode
+        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : Node
         {
             switch (source)
             {

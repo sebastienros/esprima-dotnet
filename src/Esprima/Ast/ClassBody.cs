@@ -14,7 +14,7 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<ClassProperty> Body => ref _body;
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(_body);
     }
 }

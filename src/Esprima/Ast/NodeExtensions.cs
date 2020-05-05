@@ -1,28 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using NodeSysList = System.Collections.Generic.List<Esprima.Ast.INode>;
+using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
 
 namespace Esprima.Ast
 {
-    public interface
-        INode
-    {
-        Nodes Type { get; }
-        Range Range { get; set; }
-        Location Location { get; set; }
-        IEnumerable<INode> ChildNodes { get; }
-    }
-
     public static class NodeExtensions
     {
         [DebuggerStepThrough]
-        public static T As<T>(this object node) where T : class
+        public static T As<T>(this object node) where T : class 
         {
             return (T) node;
         }
 
-        public static IEnumerable<INode> DescendantNodesAndSelf(this INode node)
+        public static IEnumerable<Node> DescendantNodesAndSelf(this Node node)
         {
             if (node == null)
             {
@@ -32,7 +23,7 @@ namespace Esprima.Ast
             return DescendantNodes(new NodeSysList { node });
         }
 
-        public static IEnumerable<INode> DescendantNodes(this INode node)
+        public static IEnumerable<Node> DescendantNodes(this Node node)
         {
             if (node == null)
             {
@@ -42,7 +33,7 @@ namespace Esprima.Ast
             return DescendantNodes(new NodeSysList(node.ChildNodes));
         }
 
-        private static IEnumerable<INode> DescendantNodes(NodeSysList nodes)
+        private static IEnumerable<Node> DescendantNodes(NodeSysList nodes)
         {
             while (nodes.Count > 0)
             {
@@ -53,7 +44,7 @@ namespace Esprima.Ast
             }
         }
 
-        public static IEnumerable<INode> AncestorNodesAndSelf(this INode node, INode rootNode)
+        public static IEnumerable<Node> AncestorNodesAndSelf(this Node node, Node rootNode)
         {
             using (var ancestor = node.AncestorNodes(rootNode).GetEnumerator())
             {
@@ -70,7 +61,7 @@ namespace Esprima.Ast
             }
         }
 
-        public static IEnumerable<INode> AncestorNodes(this INode node, INode rootNode)
+        public static IEnumerable<Node> AncestorNodes(this Node node, Node rootNode)
         {
             if (node == null)
             {
@@ -82,11 +73,11 @@ namespace Esprima.Ast
                 throw new ArgumentNullException(nameof(rootNode));
             }
 
-            var parents = new Stack<INode>();
+            var parents = new Stack<Node>();
             Search(rootNode);
             return parents;
 
-            bool Search(INode aNode)
+            bool Search(Node aNode)
             {
                 parents.Push(aNode);
                 foreach (var childNode in aNode.ChildNodes)

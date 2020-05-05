@@ -4,11 +4,11 @@ namespace Esprima.Ast
 {
     public class ForOfStatement : Statement
     {
-        public readonly INode Left;
+        public readonly Node Left;
         public readonly Expression Right;
         public readonly Statement Body;
 
-        public ForOfStatement(INode left, Expression right, Statement body) :
+        public ForOfStatement(Node left, Expression right, Statement body) :
             base(Nodes.ForOfStatement)
         {
             Left = left;
@@ -16,7 +16,7 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
+        public override IEnumerable<Node> ChildNodes =>
             ChildNodeYielder.Yield(Left, Right, Body);
     }
 }

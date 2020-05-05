@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class Module : Statement, Program
+    public class Module : Program
     {
-        private readonly NodeList<IStatementListItem> _body;
-        public SourceType SourceType => SourceType.Module;
+        private readonly NodeList<Statement> _body;
+        public override SourceType SourceType => SourceType.Module;
 
         public Module(
-            in NodeList<IStatementListItem> body,
+            in NodeList<Statement> body,
             HoistingScope hoistingScope) :
             base(Nodes.Program)
         {
@@ -18,9 +18,8 @@ namespace Esprima.Ast
 
         public HoistingScope HoistingScope { get; }
 
-        public ref readonly NodeList<IStatementListItem> Body => ref _body;
+        public override ref readonly NodeList<Statement> Body => ref _body;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Body);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Body);
     }
 }

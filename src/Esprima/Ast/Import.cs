@@ -3,12 +3,12 @@ using System.Linq;
 
 namespace Esprima.Ast
 {
-    public class Import : Node, Expression
+    public class Import : Expression
     {
         public Import() : base(Nodes.Import)
         {
         }
 
-        public override IEnumerable<INode> ChildNodes => Enumerable.Empty<INode>();
+        public override IEnumerable<Node> ChildNodes => Enumerable.Empty<Node>();
     }
 }

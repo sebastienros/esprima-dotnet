@@ -46,16 +46,16 @@ namespace Esprima.Utils
                 value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
         }
 
-        public static string ToJsonString(this INode node) =>
+        public static string ToJsonString(this Node node) =>
             ToJsonString(node, indent: null);
 
-        public static string ToJsonString(this INode node, string indent) =>
+        public static string ToJsonString(this Node node, string indent) =>
             ToJsonString(node, Options.Default, indent);
 
-        public static string ToJsonString(this INode node, Options options) =>
+        public static string ToJsonString(this Node node, Options options) =>
             ToJsonString(node, options, null);
 
-        public static string ToJsonString(this INode node, Options options, string indent)
+        public static string ToJsonString(this Node node, Options options, string indent)
         {
             using (var writer = new StringWriter())
             {
@@ -64,16 +64,16 @@ namespace Esprima.Utils
             }
         }
 
-        public static void WriteJson(this INode node, TextWriter writer) =>
+        public static void WriteJson(this Node node, TextWriter writer) =>
             WriteJson(node, writer, indent: null);
 
-        public static void WriteJson(this INode node, TextWriter writer, string indent) =>
+        public static void WriteJson(this Node node, TextWriter writer, string indent) =>
             WriteJson(node, writer, Options.Default, indent);
 
-        public static void WriteJson(this INode node, TextWriter writer, Options options) =>
+        public static void WriteJson(this Node node, TextWriter writer, Options options) =>
             WriteJson(node, writer, options, null);
 
-        public static void WriteJson(this INode node, TextWriter writer, Options options, string indent)
+        public static void WriteJson(this Node node, TextWriter writer, Options options, string indent)
         {
             if (node == null)
             {
@@ -97,7 +97,7 @@ namespace Esprima.Utils
             visitor.Visit(node);
         }
 
-        public static void WriteJson(this INode node, JsonWriter writer, Options options)
+        public static void WriteJson(this Node node, JsonWriter writer, Options options)
         {
             if (node == null)
             {
@@ -124,14 +124,14 @@ namespace Esprima.Utils
         private sealed class Visitor : AstVisitor
         {
             private readonly JsonWriter _writer;
-            private readonly ObservableStack<INode> _stack;
+            private readonly ObservableStack<Node> _stack;
 
             public Visitor(JsonWriter writer,
                            bool includeLineColumn, bool includeRange,
                            LocationMembersPlacement locationMembersPlacement)
             {
                 _writer = writer ?? throw new ArgumentNullException(nameof(writer));
-                _stack = new ObservableStack<INode>();
+                _stack = new ObservableStack<Node>();
 
                 _stack.Pushed += node =>
                 {
@@ -157,7 +157,7 @@ namespace Esprima.Utils
                     _writer.EndObject();
                 };
 
-                void WriteLocationInfo(INode node)
+                void WriteLocationInfo(Node node)
                 {
                     if (includeRange)
                     {
@@ -189,10 +189,9 @@ namespace Esprima.Utils
                 }
             }
 
-            private IDisposable StartNodeObject(INode node) =>
-                _stack.Push(node);
+            private IDisposable StartNodeObject(Node node) => _stack.Push(node);
 
-            private void EmptyNodeObject(INode node)
+            private void EmptyNodeObject(Node node)
             {
                 using (StartNodeObject(node)) {}
             }
@@ -200,7 +199,7 @@ namespace Esprima.Utils
             private void Member(string name) =>
                 _writer.Member(name);
 
-            private void Member(string name, INode node)
+            private void Member(string name, Node node)
             {
                 Member(name);
                 Visit(node);
@@ -238,11 +237,10 @@ namespace Esprima.Utils
                 Member(name, map[value]);
             }
 
-            private void Member<T>(string name, in NodeList<T> nodes) where T : class, INode =>
+            private void Member<T>(string name, in NodeList<T> nodes) where T : Node =>
                 Member(name, nodes, node => node);
 
-            private void Member<T>(string name, in NodeList<T> list, Func<T, INode> nodeSelector)
-                where T : class, INode
+            private void Member<T>(string name, in NodeList<T> list, Func<T, Node> nodeSelector) where T : Node
             {
                 Member(name);
                 _writer.StartArray();
@@ -272,7 +270,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void Visit(INode node)
+            public override void Visit(Node node)
             {
                 if (node != null)
                 {
@@ -288,12 +286,12 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(program))
                 {
-                    Member("body", program.Body, e => (INode) e);
+                    Member("body", program.Body, e => (Node) e);
                     Member("sourceType", program.SourceType);
                 }
             }
 
-            protected override void VisitUnknownNode(INode node) =>
+            protected override void VisitUnknownNode(Node node) =>
                 throw new NotSupportedException("Unknown node type: " + node.Type);
 
             protected override void VisitCatchClause(CatchClause catchClause)
@@ -385,7 +383,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(switchCase))
                 {
                     Member("test", switchCase.Test);
-                    Member("consequent", switchCase.Consequent, e => (INode) e);
+                    Member("consequent", switchCase.Consequent, e => (Node) e);
                 }
             }
 
@@ -510,7 +508,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(newExpression))
                 {
                     Member("callee", newExpression.Callee);
-                    Member("arguments", newExpression.Arguments, e => (INode) e);
+                    Member("arguments", newExpression.Arguments, e => (Node) e);
                 }
             }
 
@@ -598,7 +596,7 @@ namespace Esprima.Utils
             protected override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
             {
                 using (StartNodeObject(exportDefaultDeclaration))
-                    Member("declaration", exportDefaultDeclaration.Declaration.As<INode>());
+                    Member("declaration", exportDefaultDeclaration.Declaration.As<Node>());
             }
 
             protected override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
@@ -611,7 +609,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(exportNamedDeclaration))
                 {
-                    Member("declaration", exportNamedDeclaration.Declaration.As<INode>());
+                    Member("declaration", exportNamedDeclaration.Declaration.As<Node>());
                     Member("specifiers", exportNamedDeclaration.Specifiers);
                     Member("source", exportNamedDeclaration.Source);
                 }
@@ -637,7 +635,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(importDeclaration))
                 {
-                    Member("specifiers", importDeclaration.Specifiers, e => (INode) e);
+                    Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
                     Member("source", importDeclaration.Source);
                 }
             }

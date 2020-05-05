@@ -2,11 +2,12 @@
 
 namespace Esprima.Ast
 {
-    public class Super : Node, Expression
+    public class Super : Expression
     {
-        public Super() :
-            base(Nodes.Super) {}
+        public Super() : base(Nodes.Super)
+        {
+        }
 
-        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
+        public override IEnumerable<Node> ChildNodes => ZeroChildNodes;
     }
 }
