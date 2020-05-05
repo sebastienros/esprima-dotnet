@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class Identifier : BindingIdentifier
+    public sealed class Identifier : BindingIdentifier
     {
         public readonly string Name;
 

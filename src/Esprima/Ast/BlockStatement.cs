@@ -2,12 +2,11 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class BlockStatement : Statement
+    public sealed class BlockStatement : Statement
     {
         private readonly NodeList<Statement> _body;
 
-        public BlockStatement(in NodeList<Statement> body) :
-            base(Nodes.BlockStatement)
+        public BlockStatement(in NodeList<Statement> body) : base(Nodes.BlockStatement)
         {
             _body = body;
         }

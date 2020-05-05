@@ -56,7 +56,7 @@ namespace Esprima.Ast
         Exponentiation,
     }
 
-    public class BinaryExpression : Expression
+    public sealed class BinaryExpression : Expression
     {
         public readonly BinaryOperator Operator;
         public readonly Expression Left;

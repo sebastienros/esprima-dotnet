@@ -2,19 +2,17 @@
 
 namespace Esprima.Ast
 {
-    public class ExportSpecifier : Statement
+    public sealed class ExportSpecifier : Statement
     {
         public readonly Identifier Exported;
         public readonly Identifier Local;
 
-        public ExportSpecifier(Identifier local, Identifier exported) :
-            base(Nodes.ExportSpecifier)
+        public ExportSpecifier(Identifier local, Identifier exported) : base(Nodes.ExportSpecifier)
         {
             Exported = exported;
             Local = local;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Exported, Local);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Exported, Local);
     }
 }

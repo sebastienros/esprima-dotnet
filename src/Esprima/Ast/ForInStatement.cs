@@ -2,15 +2,17 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class ForInStatement : Statement
+    public sealed class ForInStatement : Statement
     {
         public readonly Node Left;
         public readonly Expression Right;
         public readonly Statement Body;
         public readonly bool Each;
 
-        public ForInStatement(Node left, Expression right, Statement body) :
-            base(Nodes.ForInStatement)
+        public ForInStatement(
+            Node left, 
+            Expression right,
+            Statement body) : base(Nodes.ForInStatement)
         {
             Left = left;
             Right = right;
@@ -18,7 +20,6 @@ namespace Esprima.Ast
             Each = false;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Left, Right, Body);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Left, Right, Body);
     }
 }

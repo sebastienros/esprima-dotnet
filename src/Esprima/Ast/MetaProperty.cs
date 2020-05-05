@@ -2,19 +2,17 @@
 
 namespace Esprima.Ast
 {
-    public class MetaProperty : Expression
+    public sealed class MetaProperty : Expression
     {
         public readonly Identifier Meta;
         public readonly Identifier Property;
 
-        public MetaProperty(Identifier meta, Identifier property) :
-            base(Nodes.MetaProperty)
+        public MetaProperty(Identifier meta, Identifier property) : base(Nodes.MetaProperty)
         {
             Meta = meta;
             Property = property;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Meta, Property);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Meta, Property);
     }
 }

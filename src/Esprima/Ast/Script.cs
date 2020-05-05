@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class Script : Program
+    public sealed class Script : Program
     {
         private readonly NodeList<Statement> _body;
 

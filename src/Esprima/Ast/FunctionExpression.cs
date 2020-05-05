@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class FunctionExpression : Expression, IFunction
+    public sealed class FunctionExpression : Expression, IFunction
     {
         private readonly NodeList<Expression> _parameters;
 

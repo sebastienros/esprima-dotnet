@@ -2,13 +2,15 @@
 
 namespace Esprima.Ast
 {
-    public class ArrowParameterPlaceHolder : Expression
+    public sealed class ArrowParameterPlaceHolder : Expression
     {
         public static readonly ArrowParameterPlaceHolder Empty = new ArrowParameterPlaceHolder(new NodeList<Expression>(), false);
 
         private readonly NodeList<Expression> _params;
 
-        public ArrowParameterPlaceHolder(in NodeList<Expression> parameters, bool async) :
+        public ArrowParameterPlaceHolder(
+            in NodeList<Expression> parameters,
+            bool async) :
             base(Nodes.ArrowParameterPlaceHolder)
         {
             Async = async;

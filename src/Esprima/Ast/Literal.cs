@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
 {
-    public class Literal : Expression
+    public sealed class Literal : Expression
     {
         public string StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
         public readonly double NumericValue;

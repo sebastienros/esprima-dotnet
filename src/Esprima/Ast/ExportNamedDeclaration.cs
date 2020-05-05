@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ExportNamedDeclaration : ExportDeclaration
+    public sealed class ExportNamedDeclaration : ExportDeclaration
     {
         private readonly NodeList<ExportSpecifier> _specifiers;
 
@@ -12,8 +12,8 @@ namespace Esprima.Ast
         public ExportNamedDeclaration(
             StatementListItem declaration,
             in NodeList<ExportSpecifier> specifiers,
-            Literal source) :
-            base(Nodes.ExportNamedDeclaration)
+            Literal source) 
+            : base(Nodes.ExportNamedDeclaration)
         {
             Declaration = declaration;
             _specifiers = specifiers;

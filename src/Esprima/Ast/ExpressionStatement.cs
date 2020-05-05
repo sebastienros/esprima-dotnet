@@ -6,13 +6,11 @@ namespace Esprima.Ast
     {
         public readonly Expression Expression;
 
-        public ExpressionStatement(Expression expression) :
-            base(Nodes.ExpressionStatement)
+        public ExpressionStatement(Expression expression) : base(Nodes.ExpressionStatement)
         {
             Expression = expression;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Expression);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Expression);
     }
 }

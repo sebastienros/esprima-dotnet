@@ -1,6 +1,6 @@
 namespace Esprima.Ast
 {
-    public class Property : ClassProperty
+    public sealed class Property : ClassProperty
     {
         public readonly bool Method;
         public readonly bool Shorthand;
@@ -11,8 +11,8 @@ namespace Esprima.Ast
             bool computed, 
             Expression value,
             bool method,
-            bool shorthand) :
-            base(Nodes.Property)
+            bool shorthand)
+            : base(Nodes.Property)
         {
             Key = key;
             Computed = computed;

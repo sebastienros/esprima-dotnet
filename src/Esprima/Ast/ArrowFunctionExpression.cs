@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ArrowFunctionExpression : Expression, IFunction
+    public sealed class ArrowFunctionExpression : Expression, IFunction
     {
         private readonly NodeList<Expression> _params;
 

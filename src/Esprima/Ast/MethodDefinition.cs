@@ -1,11 +1,16 @@
 ﻿namespace Esprima.Ast
 {
-    public class MethodDefinition : ClassProperty
+    public sealed class MethodDefinition : ClassProperty
     {
         public readonly bool Static;
 
-        public MethodDefinition(Expression key, bool computed, FunctionExpression value, PropertyKind kind, bool isStatic) :
-            base(Nodes.MethodDefinition)
+        public MethodDefinition(
+            Expression key,
+            bool computed, 
+            FunctionExpression value,
+            PropertyKind kind,
+            bool isStatic) 
+            : base(Nodes.MethodDefinition)
         {
             Static = isStatic;
             Key = key;

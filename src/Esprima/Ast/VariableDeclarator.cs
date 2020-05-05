@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class VariableDeclarator : Node
+    public sealed class VariableDeclarator : Node
     {
         public readonly ArrayPatternElement Id; // BindingIdentifier | BindingPattern;
         public readonly Expression Init;
@@ -14,7 +14,6 @@ namespace Esprima.Ast
             Init = init;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Id, Init);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Id, Init);
     }
 }

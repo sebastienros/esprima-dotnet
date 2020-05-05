@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class Super : Expression
+    public sealed class Super : Expression
     {
         public Super() : base(Nodes.Super)
         {

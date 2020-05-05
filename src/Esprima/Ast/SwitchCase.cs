@@ -2,13 +2,12 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class SwitchCase : Node
+    public sealed class SwitchCase : Node
     {
         private readonly NodeList<Statement> _consequent;
         public readonly Expression Test;
 
-        public SwitchCase(Expression test, in NodeList<Statement> consequent) :
-            base(Nodes.SwitchCase)
+        public SwitchCase(Expression test, in NodeList<Statement> consequent) : base(Nodes.SwitchCase)
         {
             Test = test;
             _consequent = consequent;

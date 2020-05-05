@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ImportDeclaration : Declaration
+    public sealed class ImportDeclaration : Declaration
     {
         private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
 
@@ -10,8 +10,8 @@ namespace Esprima.Ast
 
         public ImportDeclaration(
             in NodeList<ImportDeclarationSpecifier> specifiers,
-            Literal source) :
-            base(Nodes.ImportDeclaration)
+            Literal source)
+            : base(Nodes.ImportDeclaration)
         {
             _specifiers = specifiers;
             Source = source;

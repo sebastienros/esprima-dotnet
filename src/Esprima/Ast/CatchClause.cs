@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class CatchClause : Statement
+    public sealed class CatchClause : Statement
     {
         public readonly ArrayPatternElement Param; // BindingIdentifier | BindingPattern;
         public readonly BlockStatement Body;
@@ -14,7 +14,6 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Param, Body);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Param, Body);
     }
 }

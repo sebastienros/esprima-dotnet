@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class RestElement : ArrayPatternElement
+    public sealed class RestElement : ArrayPatternElement
     {
         // Identifier in esprima but not forced and
         // for instance ...i[0] is a SpreadElement
@@ -10,13 +10,11 @@ namespace Esprima.Ast
 
         public readonly Node Argument; // BindingIdentifier | BindingPattern
 
-        public RestElement(Node argument) :
-            base(Nodes.RestElement)
+        public RestElement(Node argument) : base(Nodes.RestElement)
         {
             Argument = argument;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Argument);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Argument);
     }
 }

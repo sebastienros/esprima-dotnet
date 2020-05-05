@@ -61,18 +61,17 @@ namespace Esprima.Ast
             }
         }
 
-        public UnaryExpression(string op, Expression arg) :
-            this(Nodes.UnaryExpression, op, arg) {}
+        public UnaryExpression(string op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
+        {
+        }
 
-        protected UnaryExpression(Nodes type, string op, Expression arg) :
-            base(type)
+        protected UnaryExpression(Nodes type, string op, Expression arg) : base(type)
         {
             Operator = ParseUnaryOperator(op);
             Argument = arg;
             Prefix = true;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Argument);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Argument);
     }
 }

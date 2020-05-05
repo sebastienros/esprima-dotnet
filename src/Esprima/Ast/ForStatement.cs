@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class ForStatement : Statement
+    public sealed class ForStatement : Statement
     {
         // can be a Statement (var i) or an Expression (i=0)
         public readonly StatementListItem Init;
@@ -10,8 +10,12 @@ namespace Esprima.Ast
         public readonly Expression Update;
         public readonly Statement Body;
 
-        public ForStatement(StatementListItem init, Expression test, Expression update, Statement body) :
-            base(Nodes.ForStatement)
+        public ForStatement(
+            StatementListItem init,
+            Expression test,
+            Expression update, 
+            Statement body) 
+            : base(Nodes.ForStatement)
         {
             Init = init;
             Test = test;

@@ -34,7 +34,7 @@ namespace Esprima.Ast
         ExponentiationAssign,
     }
 
-    public class AssignmentExpression : Expression
+    public sealed class AssignmentExpression : Expression
     {
         public readonly AssignmentOperator Operator;
 
@@ -42,7 +42,10 @@ namespace Esprima.Ast
         public readonly Expression Left;
         public readonly Expression Right;
 
-        public AssignmentExpression(string op, Expression left, Expression right) :
+        public AssignmentExpression(
+            string op,
+            Expression left, 
+            Expression right) :
             base(Nodes.AssignmentExpression)
         {
             Operator = ParseAssignmentOperator(op);

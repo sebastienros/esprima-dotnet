@@ -18,7 +18,6 @@ namespace Esprima.Ast
             Computed = computed;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Object, Property);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Object, Property);
     }
 }

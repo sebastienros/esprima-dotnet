@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class TryStatement : Statement
+    public sealed class TryStatement : Statement
     {
         public readonly Statement Block;
         public readonly CatchClause Handler;
@@ -19,7 +19,6 @@ namespace Esprima.Ast
             Finalizer = finalizer;
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Block, Handler, Finalizer);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Block, Handler, Finalizer);
     }
 }

@@ -2,15 +2,15 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class Module : Program
+    public sealed class Module : Program
     {
         private readonly NodeList<Statement> _body;
         public override SourceType SourceType => SourceType.Module;
 
         public Module(
             in NodeList<Statement> body,
-            HoistingScope hoistingScope) :
-            base(Nodes.Program)
+            HoistingScope hoistingScope) 
+            : base(Nodes.Program)
         {
             _body = body;
             HoistingScope = hoistingScope;

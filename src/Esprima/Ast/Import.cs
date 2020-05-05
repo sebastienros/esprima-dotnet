@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Esprima.Ast
 {
-    public class Import : Expression
+    public sealed class Import : Expression
     {
         public Import() : base(Nodes.Import)
         {

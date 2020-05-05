@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class FunctionDeclaration : Declaration, IFunction
+    public sealed class FunctionDeclaration : Declaration, IFunction
     {
         private readonly NodeList<Expression> _parameters;
 
@@ -13,8 +13,8 @@ namespace Esprima.Ast
             bool generator,
             bool strict,
             bool async,
-            HoistingScope hoistingScope) :
-            base(Nodes.FunctionDeclaration)
+            HoistingScope hoistingScope)
+            : base(Nodes.FunctionDeclaration)
         {
             Id = id;
             _parameters = parameters;
@@ -37,7 +37,6 @@ namespace Esprima.Ast
         public HoistingScope HoistingScope { get; }
         public ref readonly NodeList<Expression> Params => ref _parameters;
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Id, _parameters, Body);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Id, _parameters, Body);
     }
 }

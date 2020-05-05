@@ -2,19 +2,17 @@
 
 namespace Esprima.Ast
 {
-    public class ArrayPattern : BindingPattern
+    public sealed class ArrayPattern : BindingPattern
     {
         private readonly NodeList<ArrayPatternElement> _elements;
 
-        public ArrayPattern(in NodeList<ArrayPatternElement> elements) :
-            base(Nodes.ArrayPattern)
+        public ArrayPattern(in NodeList<ArrayPatternElement> elements) : base(Nodes.ArrayPattern)
         {
             _elements = elements;
         }
 
         public ref readonly NodeList<ArrayPatternElement> Elements => ref _elements;
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(_elements);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(_elements);
     }
 }

@@ -2,14 +2,13 @@ using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
-    public class SwitchStatement : Statement
+    public sealed class SwitchStatement : Statement
     {
         private readonly NodeList<SwitchCase> _cases;
 
         public readonly Expression Discriminant;
 
-        public SwitchStatement(Expression discriminant, in NodeList<SwitchCase> cases) :
-            base(Nodes.SwitchStatement)
+        public SwitchStatement(Expression discriminant, in NodeList<SwitchCase> cases) : base(Nodes.SwitchStatement)
         {
             Discriminant = discriminant;
             _cases = cases;
@@ -17,7 +16,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<SwitchCase> Cases => ref _cases;
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Discriminant, _cases);
+        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Discriminant, _cases);
     }
 }
