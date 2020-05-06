@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Esprima.Utils;
 
 namespace Esprima.Ast
@@ -89,7 +88,6 @@ namespace Esprima.Ast
             }
         }
 
-        public override IEnumerable<Node> ChildNodes =>
-            ChildNodeYielder.Yield(Left, Right);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Left, Right);
     }
 }

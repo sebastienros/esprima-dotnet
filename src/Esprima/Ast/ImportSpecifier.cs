@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class ImportSpecifier : ImportDeclarationSpecifier
     {
@@ -13,6 +11,6 @@ namespace Esprima.Ast
             Imported = imported;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Local, Imported);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Local, Imported);
     }
 }

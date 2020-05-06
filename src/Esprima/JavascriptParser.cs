@@ -1127,18 +1127,18 @@ namespace Esprima
                     break;
                 case Nodes.SpreadElement:
                     var newArgument = ReinterpretExpressionAsPattern(expr.As<SpreadElement>().Argument);
-                    node = new RestElement(newArgument.As<ArrayPatternElement>());
+                    node = new RestElement(newArgument);
                     node.Range = expr.Range;
                     node.Location = _config.Loc ? expr.Location : default;
                     break;
                 case Nodes.ArrayExpression:
-                    var elements = new ArrayList<ArrayPatternElement>();
+                    var elements = new ArrayList<Expression>();
 
                     foreach (var element in expr.As<ArrayExpression>().Elements)
                     {
                         if (element != null)
                         {
-                            elements.Add(ReinterpretExpressionAsPattern(element).As<ArrayPatternElement>());
+                            elements.Add(ReinterpretExpressionAsPattern(element));
                         }
                         else
                         {
@@ -2401,7 +2401,7 @@ namespace Esprima
             var node = CreateNode();
 
             Expect("[");
-            var elements = new ArrayList<ArrayPatternElement>();
+            var elements = new ArrayList<Expression>();
             while (!Match("]"))
             {
                 if (Match(","))
@@ -2514,9 +2514,9 @@ namespace Esprima
             return Finalize(node, new ObjectPattern(NodeList.From(ref properties)));
         }
 
-        private ArrayPatternElement ParsePattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
+        private Expression ParsePattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
         {
-            ArrayPatternElement pattern;
+            Expression pattern;
 
             if (Match("["))
             {
@@ -2539,7 +2539,7 @@ namespace Esprima
             return pattern;
         }
 
-        private ArrayPatternElement ParsePatternWithDefault(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
+        private Expression ParsePatternWithDefault(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
         {
             var startToken = _lookahead;
 
@@ -3264,7 +3264,7 @@ namespace Esprima
             Expect(")");
             var body = ParseBlock();
 
-            return Finalize(node, new CatchClause(param.As<ArrayPatternElement>(), body));
+            return Finalize(node, new CatchClause(param, body));
         }
 
         private BlockStatement ParseFinallyClause()

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public sealed class AssignmentPattern : ArrayPatternElement
+    public sealed class AssignmentPattern : Expression
     {
         public readonly Node Left;
         public Node Right;
@@ -13,6 +11,6 @@ namespace Esprima.Ast
             Right = right;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Left, Right);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Left, Right);
     }
 }

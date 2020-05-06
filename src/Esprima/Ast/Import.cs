@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class Import : Expression
     {
@@ -9,6 +6,6 @@ namespace Esprima.Ast
         {
         }
 
-        public override IEnumerable<Node> ChildNodes => Enumerable.Empty<Node>();
+        public override NodeCollection ChildNodes => ZeroChildNodes;
     }
 }

@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
-    public sealed class Identifier : ArrayPatternElement
+    public sealed class Identifier : Expression
     {
         public readonly string Name;
 
@@ -11,6 +9,6 @@ namespace Esprima.Ast
             Name = name;
         }
 
-        public override IEnumerable<Node> ChildNodes => ZeroChildNodes;
+        public override NodeCollection ChildNodes => ZeroChildNodes;
     }
 }

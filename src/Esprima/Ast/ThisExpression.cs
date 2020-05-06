@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class ThisExpression : Expression
@@ -8,6 +6,6 @@ namespace Esprima.Ast
         {
         }
 
-        public override IEnumerable<Node> ChildNodes => ZeroChildNodes;
+        public override NodeCollection ChildNodes => ZeroChildNodes;
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class ExportDefaultDeclaration : ExportDeclaration
     {
@@ -11,6 +9,6 @@ namespace Esprima.Ast
             Declaration = declaration;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Declaration);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Declaration);
     }
 }

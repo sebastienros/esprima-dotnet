@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class SequenceExpression : Expression
@@ -15,6 +13,6 @@ namespace Esprima.Ast
 
         internal void UpdateExpressions(in NodeList<Expression> value) => _expressions = value;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Expressions);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Expressions);
     }
 }

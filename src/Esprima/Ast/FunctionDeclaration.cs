@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class FunctionDeclaration : Declaration, IFunction
@@ -37,6 +35,6 @@ namespace Esprima.Ast
         public HoistingScope HoistingScope { get; }
         public ref readonly NodeList<Expression> Params => ref _parameters;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Id, _parameters, Body);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Id, _parameters, Body);
     }
 }

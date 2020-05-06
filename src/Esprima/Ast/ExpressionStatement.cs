@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public class ExpressionStatement : Statement
@@ -11,6 +9,6 @@ namespace Esprima.Ast
             Expression = expression;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Expression);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Expression);
     }
 }

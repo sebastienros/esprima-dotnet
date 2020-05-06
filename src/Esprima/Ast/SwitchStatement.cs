@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class SwitchStatement : Statement
@@ -16,6 +14,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<SwitchCase> Cases => ref _cases;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Discriminant, _cases);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Discriminant, _cases);
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class TaggedTemplateExpression : Expression
     {
@@ -13,6 +11,6 @@ namespace Esprima.Ast
             Quasi = quasi;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Tag, Quasi);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Tag, Quasi);
     }
 }

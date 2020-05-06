@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class AwaitExpression : Expression
@@ -11,6 +9,6 @@ namespace Esprima.Ast
             Argument = argument;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Argument);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Argument);
     }
 }

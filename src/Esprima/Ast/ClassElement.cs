@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Esprima.Ast
 {
@@ -26,6 +25,6 @@ namespace Esprima.Ast
 
         protected ClassProperty(Nodes type) : base(type) {}
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Key, Value);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Key, Value);
     }
 }

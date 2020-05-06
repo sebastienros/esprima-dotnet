@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class ClassExpression : Expression
     {
@@ -18,6 +16,6 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Id, SuperClass, Body);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Id, SuperClass, Body);
     }
 }

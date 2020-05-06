@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class TemplateLiteral : Expression
     {
@@ -19,6 +17,6 @@ namespace Esprima.Ast
         public ref readonly NodeList<TemplateElement> Quasis => ref _quasis;
         public ref readonly NodeList<Expression> Expressions => ref _expressions;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(_quasis,  _expressions);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_quasis,  _expressions);
     }
 }

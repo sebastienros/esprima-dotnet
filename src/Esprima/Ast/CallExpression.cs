@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class CallExpression : Expression
@@ -18,6 +16,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression> Arguments => ref _arguments;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Callee, _arguments);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Callee, _arguments);
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class TryStatement : Statement
@@ -19,6 +17,6 @@ namespace Esprima.Ast
             Finalizer = finalizer;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Block, Handler, Finalizer);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Block, Handler, Finalizer);
     }
 }

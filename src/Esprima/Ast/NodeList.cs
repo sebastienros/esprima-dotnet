@@ -8,8 +8,8 @@ namespace Esprima.Ast
 {
     public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node
     {
-        private readonly T[] _items;
-        private readonly int _count;
+        internal readonly T[] _items;
+        internal readonly int _count;
 
         internal NodeList(ICollection<T> collection)
         {

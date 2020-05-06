@@ -1,19 +1,17 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class CatchClause : Statement
     {
-        public readonly ArrayPatternElement Param; // BindingIdentifier | BindingPattern;
+        public readonly Expression Param; // BindingIdentifier | BindingPattern;
         public readonly BlockStatement Body;
 
-        public CatchClause(ArrayPatternElement param, BlockStatement body) :
+        public CatchClause(Expression param, BlockStatement body) :
             base(Nodes.CatchClause)
         {
             Param = param;
             Body = body;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Param, Body);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Param, Body);
     }
 }

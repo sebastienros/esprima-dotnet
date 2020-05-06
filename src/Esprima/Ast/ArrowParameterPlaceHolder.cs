@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class ArrowParameterPlaceHolder : Expression
     {
@@ -21,6 +19,6 @@ namespace Esprima.Ast
 
         public bool Async { get; }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(_params);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_params);
     }
 }

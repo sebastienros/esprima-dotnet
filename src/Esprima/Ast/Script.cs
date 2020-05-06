@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class Script : Program
@@ -23,6 +21,6 @@ namespace Esprima.Ast
         public HoistingScope HoistingScope { get; }
         public override ref readonly NodeList<Statement> Body => ref _body;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Body);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Body);
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class ArrayExpression : Expression
@@ -13,6 +11,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression> Elements => ref _elements;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(_elements);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_elements);
     }
 }

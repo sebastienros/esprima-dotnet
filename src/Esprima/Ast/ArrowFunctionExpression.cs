@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class ArrowFunctionExpression : Expression, IFunction
     {
@@ -33,6 +31,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression> Params => ref _params;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Params, Body);        
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Params, Body);        
     }
 }

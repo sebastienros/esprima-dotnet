@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class ClassBody : Node
     {
@@ -13,6 +11,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<ClassProperty> Body => ref _body;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(_body);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_body);
     }
 }

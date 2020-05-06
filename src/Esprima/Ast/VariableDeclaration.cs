@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class VariableDeclaration : Declaration
@@ -18,6 +16,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<VariableDeclarator> Declarations => ref _declarations;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(_declarations);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_declarations);
     }
 }

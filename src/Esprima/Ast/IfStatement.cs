@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class IfStatement : Statement
@@ -19,6 +17,6 @@ namespace Esprima.Ast
             Alternate = alternate;
         }
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Test, Consequent, Alternate);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Test, Consequent, Alternate);
     }
 }

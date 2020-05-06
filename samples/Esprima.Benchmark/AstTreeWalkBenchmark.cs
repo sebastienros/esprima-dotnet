@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using BenchmarkDotNet.Attributes;
 using Esprima.Ast;
 
@@ -20,18 +21,24 @@ namespace Esprima.Benchmark
         [Benchmark]
         public void VisitChildren()
         {
-            var parser = new ScriptWalker();
-            parser.Visit(_script);
+            var walker = new ScriptWalker();
+            walker.Visit(_script);
+            if (walker._lexicalNameCount != 0) throw new InvalidOperationException("wrong _lexicalNameCount" + walker._lexicalNameCount);
+            if (walker._varNameCount != 1849) throw new InvalidOperationException("wrong _varNameCount " + walker._varNameCount);
+            if (walker._functionCount != 1610) throw new InvalidOperationException("wrong _functionCount " + walker._functionCount);
+            if (walker._visitCount != 32315) throw new InvalidOperationException("wrong _visitCount " + walker._visitCount);
         }
 
         private sealed class ScriptWalker
         {
-            private int _lexicalNameCount;
-            private int _varNameCount;
-            private int _functionCount;
+            internal int _lexicalNameCount;
+            internal int _varNameCount;
+            internal int _functionCount;
+            internal int _visitCount;
 
             public void Visit(Node node)
             {
+                _visitCount++;
                 foreach (var childNode in node.ChildNodes)
                 {
                     if (childNode is null)
@@ -72,7 +79,10 @@ namespace Esprima.Benchmark
                         }
                     }
 
-                    Visit(childNode);
+                    if (childNode.ChildNodes.Count > 0)
+                    {
+                        Visit(childNode);
+                    }
                 }
             }
         }

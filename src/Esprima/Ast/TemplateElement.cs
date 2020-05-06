@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class TemplateElement : Node
     {
@@ -19,6 +17,6 @@ namespace Esprima.Ast
             public string Raw;
         }
 
-        public override IEnumerable<Node> ChildNodes => ZeroChildNodes;
+        public override NodeCollection ChildNodes => ZeroChildNodes;
     }
 }

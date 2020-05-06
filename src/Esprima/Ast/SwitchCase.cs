@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
     public sealed class SwitchCase : Node
@@ -15,6 +13,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Statement> Consequent => ref _consequent;
 
-        public override IEnumerable<Node> ChildNodes => ChildNodeYielder.Yield(Test, _consequent);
+        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Test, _consequent);
     }
 }

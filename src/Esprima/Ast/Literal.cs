@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Esprima.Ast
@@ -49,6 +47,6 @@ namespace Esprima.Ast
             Regex = new RegexValue(pattern, flags);
         }
 
-        public override IEnumerable<Node> ChildNodes => Enumerable.Empty<Node>();
+        public override NodeCollection ChildNodes => ZeroChildNodes;
     }
 }
