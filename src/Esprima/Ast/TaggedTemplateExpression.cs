@@ -11,6 +11,6 @@
             Quasi = quasi;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Tag, Quasi);
+        public override NodeCollection ChildNodes => new NodeCollection(Tag, Quasi);
     }
 }

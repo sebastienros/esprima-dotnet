@@ -13,6 +13,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Statement> Consequent => ref _consequent;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Test, _consequent);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Test, _consequent);
     }
 }

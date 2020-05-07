@@ -16,6 +16,6 @@
             Body = body;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Id, SuperClass, Body);
+        public override NodeCollection ChildNodes => new NodeCollection(Id, SuperClass, Body);
     }
 }

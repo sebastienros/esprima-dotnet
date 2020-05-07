@@ -35,6 +35,6 @@ namespace Esprima.Ast
         public HoistingScope HoistingScope { get; }
         public ref readonly NodeList<Expression> Params => ref _parameters;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Id, _parameters, Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
     }
 }

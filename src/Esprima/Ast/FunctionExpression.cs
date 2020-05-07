@@ -33,6 +33,6 @@ namespace Esprima.Ast
         public bool Strict { get; }
         public HoistingScope HoistingScope { get; }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Id, _parameters, Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
     }
 }

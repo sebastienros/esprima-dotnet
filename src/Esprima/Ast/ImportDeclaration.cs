@@ -17,6 +17,6 @@
 
         public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers => ref _specifiers;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_specifiers, Source);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_specifiers, Source);
     }
 }

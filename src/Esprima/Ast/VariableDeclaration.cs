@@ -16,6 +16,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<VariableDeclarator> Declarations => ref _declarations;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_declarations);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_declarations);
     }
 }

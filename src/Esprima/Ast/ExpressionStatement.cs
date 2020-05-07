@@ -9,6 +9,6 @@ namespace Esprima.Ast
             Expression = expression;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Expression);
+        public override NodeCollection ChildNodes => new NodeCollection(Expression);
     }
 }

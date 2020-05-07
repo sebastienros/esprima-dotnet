@@ -9,6 +9,6 @@ namespace Esprima.Ast
             Label = label;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Label);
+        public override NodeCollection ChildNodes => new NodeCollection(Label);
     }
 }

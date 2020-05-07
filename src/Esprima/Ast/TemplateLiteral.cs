@@ -17,6 +17,6 @@
         public ref readonly NodeList<TemplateElement> Quasis => ref _quasis;
         public ref readonly NodeList<Expression> Expressions => ref _expressions;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_quasis,  _expressions);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_quasis,  _expressions);
     }
 }

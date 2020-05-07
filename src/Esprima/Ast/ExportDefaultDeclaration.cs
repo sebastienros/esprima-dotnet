@@ -9,6 +9,6 @@
             Declaration = declaration;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Declaration);
+        public override NodeCollection ChildNodes => new NodeCollection(Declaration);
     }
 }

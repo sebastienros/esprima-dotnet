@@ -11,6 +11,6 @@
             Local = local;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Exported, Local);
+        public override NodeCollection ChildNodes => new NodeCollection(Exported, Local);
     }
 }

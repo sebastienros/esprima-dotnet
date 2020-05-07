@@ -13,6 +13,6 @@ namespace Esprima.Ast
 
         internal void UpdateExpressions(in NodeList<Expression> value) => _expressions = value;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Expressions);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Expressions);
     }
 }

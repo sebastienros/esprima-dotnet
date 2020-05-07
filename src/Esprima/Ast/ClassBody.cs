@@ -11,6 +11,6 @@
 
         public ref readonly NodeList<ClassProperty> Body => ref _body;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
     }
 }

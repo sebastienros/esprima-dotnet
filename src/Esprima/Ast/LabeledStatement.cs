@@ -12,6 +12,6 @@ namespace Esprima.Ast
             body.LabelSet = label;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Label, Body);
+        public override NodeCollection ChildNodes => new NodeCollection(Label, Body);
     }
 }

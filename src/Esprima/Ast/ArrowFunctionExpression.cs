@@ -31,6 +31,6 @@
 
         public ref readonly NodeList<Expression> Params => ref _params;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Params, Body);        
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Params, Body);        
     }
 }

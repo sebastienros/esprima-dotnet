@@ -13,6 +13,6 @@
             Argument = argument;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Argument);
+        public override NodeCollection ChildNodes => new NodeCollection(Argument);
     }
 }

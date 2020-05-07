@@ -16,6 +16,6 @@ namespace Esprima.Ast
             Computed = computed;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Object, Property);
+        public override NodeCollection ChildNodes => new NodeCollection(Object, Property);
     }
 }

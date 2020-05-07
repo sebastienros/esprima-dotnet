@@ -11,6 +11,6 @@
             Imported = imported;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Local, Imported);
+        public override NodeCollection ChildNodes => new NodeCollection(Local, Imported);
     }
 }

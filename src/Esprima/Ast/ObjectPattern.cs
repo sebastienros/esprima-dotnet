@@ -11,6 +11,6 @@
 
         public ref readonly NodeList<Node> Properties => ref _properties;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_properties);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_properties);
     }
 }

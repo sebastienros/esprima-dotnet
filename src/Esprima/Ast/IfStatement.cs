@@ -17,6 +17,6 @@ namespace Esprima.Ast
             Alternate = alternate;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Test, Consequent, Alternate);
+        public override NodeCollection ChildNodes => new NodeCollection(Test, Consequent, Alternate);
     }
 }

@@ -11,6 +11,6 @@
             Property = property;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Meta, Property);
+        public override NodeCollection ChildNodes => new NodeCollection(Meta, Property);
     }
 }

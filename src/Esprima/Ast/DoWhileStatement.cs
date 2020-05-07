@@ -11,6 +11,6 @@ namespace Esprima.Ast
             Test = test;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Body, Test);
+        public override NodeCollection ChildNodes => new NodeCollection(Body, Test);
     }
 }

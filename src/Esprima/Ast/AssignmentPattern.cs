@@ -11,6 +11,6 @@
             Right = right;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Left, Right);
+        public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
     }
 }

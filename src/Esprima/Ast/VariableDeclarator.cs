@@ -12,6 +12,6 @@ namespace Esprima.Ast
             Init = init;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Id, Init);
+        public override NodeCollection ChildNodes => new NodeCollection(Id, Init);
     }
 }

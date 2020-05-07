@@ -25,6 +25,6 @@ namespace Esprima.Ast
 
         protected ClassProperty(Nodes type) : base(type) {}
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Key, Value);
+        public override NodeCollection ChildNodes => new NodeCollection(Key, Value);
     }
 }

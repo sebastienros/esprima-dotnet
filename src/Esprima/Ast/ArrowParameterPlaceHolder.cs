@@ -19,6 +19,6 @@
 
         public bool Async { get; }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_params);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_params);
     }
 }

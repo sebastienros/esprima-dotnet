@@ -20,6 +20,6 @@
 
         public ref readonly NodeList<ExportSpecifier> Specifiers => ref _specifiers;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Declaration, _specifiers, Source);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declaration, _specifiers, Source);
     }
 }

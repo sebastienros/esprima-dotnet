@@ -18,6 +18,6 @@ namespace Esprima.Ast
             Each = false;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Left, Right, Body);
+        public override NodeCollection ChildNodes => new NodeCollection(Left, Right, Body);
     }
 }

@@ -11,6 +11,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression> Elements => ref _elements;
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(_elements);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_elements);
     }
 }

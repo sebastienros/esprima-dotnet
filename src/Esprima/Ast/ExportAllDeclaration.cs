@@ -9,6 +9,6 @@
             Source = source;
         }
 
-        public override NodeCollection ChildNodes => ChildNodeYielder.Yield(Source);
+        public override NodeCollection ChildNodes => new NodeCollection(Source);
     }
 }
