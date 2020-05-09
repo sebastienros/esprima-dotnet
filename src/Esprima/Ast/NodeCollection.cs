@@ -6,7 +6,7 @@ namespace Esprima.Ast
     /// <summary>
     /// Collection that enumerates nodes and node lists.
     /// </summary>
-    public readonly struct NodeCollection : IEnumerable<Node>
+    public readonly struct NodeCollection : IReadOnlyList<Node>
     {
         internal static readonly NodeCollection Empty = new NodeCollection(0);
 
@@ -14,73 +14,86 @@ namespace Esprima.Ast
         private readonly Node _second;
         private readonly Node _third;
         private readonly Node _fourth;
-        private readonly NodeArray _list1;
-        private readonly NodeArray _list2;
+        private readonly Node[] _list1;
+        private readonly int _list1Count;
+        private readonly Node[] _list2;
+        private readonly int _list2Count;
         private readonly Node _fifth;
 
         private readonly byte _startNodeCount;
-        public readonly int Count;
 
         private NodeCollection(int count)
-            : this(null, null, null, null, default, default, null)
+            : this(null, null, null, null, null)
         {
             Count = count;
         }
 
         internal NodeCollection(Node first)
-            : this(first, null, null, null, default, default, null)
+            : this(first, null, null, null, null)
         {
             Count = _startNodeCount = 1;
         }
 
         internal NodeCollection(Node first, Node second)
-            : this(first, second, null, null, default, default, null)
+            : this(first, second, null, null, null)
         {
             Count = _startNodeCount = 2;
         }
 
         internal NodeCollection(Node first, Node second, Node third)
-            : this(first, second, third, null, default, default, null)
+            : this(first, second, third, null, null)
         {
             Count = _startNodeCount = 3;
         }
 
         internal NodeCollection(Node first, Node second, Node third, Node fourth)
-            : this(first, second, third, fourth, default, default, null)
+            : this(first, second, third, fourth, null)
         {
             Count = _startNodeCount = 4;
         }
 
-        internal NodeCollection(NodeArray first, Node second)
-            : this(null, null, null, null, first, default, second)
+        internal NodeCollection(Node[] first, int firstCount, Node second)
+            : this(null, null, null, null, second)
         {
-            Count = first.Count + 1;
+            _list1 = first;
+            _list1Count = firstCount;
+            Count = firstCount + 1;
         }
 
-        internal NodeCollection(Node first, NodeArray second)
-            : this(first, null, null, null, second, default, null)
+        internal NodeCollection(Node first, Node[] second, int secondCount)
+            : this(first, null, null, null, null)
         {
             _startNodeCount = 1;
-            Count = 1 + second.Count;
+            _list1 = second;
+            _list1Count = secondCount;
+            Count = 1 + secondCount;
         }
 
-        internal NodeCollection(NodeArray first, NodeArray second)
-            : this(null, null, null, null, first, second, null)
+        internal NodeCollection(Node[] first, int firstCount, Node[] second, int secondCount)
+            : this(null, null, null, null, null)
         {
-            Count = first.Count + second.Count;
+            _list1 = first;
+            _list1Count = firstCount;
+            _list2 = second;
+            _list2Count = secondCount;
+            Count = firstCount + secondCount;
         }
 
-        internal NodeCollection(Node first, NodeArray second, Node third)
-            : this(first, null, null, null, second, default, third)
+        internal NodeCollection(Node first, Node[] second, int secondCount, Node third)
+            : this(first, null, null, null, third)
         {
             _startNodeCount = 1;
-            Count = 1 + second.Count + 1;
+            _list1 = second;
+            _list1Count = secondCount;
+            Count = 1 + secondCount + 1;
         }
 
-        internal NodeCollection(NodeArray first)
-            : this(null, null, null, null, first, default, null)
+        internal NodeCollection(Node[] first, int firstCount)
+            : this(null, null, null, null, null)
         {
-            Count = first.Count;
+            _list1 = first;
+            _list1Count = firstCount;
+            Count = firstCount;
         }
 
         private NodeCollection(
@@ -88,20 +101,73 @@ namespace Esprima.Ast
             Node second,
             Node third,
             Node fourth,
-            NodeArray list1,
-            NodeArray list2,
             Node fifth)
         {
+            _startNodeCount = 0;
             _first = first;
             _second = second;
             _third = third;
             _fourth = fourth;
-            _list1 = list1;
-            _list2 = list2;
+
+            _list1 = null;
+            _list1Count = 0;
+            
+            _list2 = null;
+            _list2Count = 0;
+
             _fifth = fifth;
 
-            _startNodeCount = 0;
             Count = 0;
+        }
+
+        public int Count { get; }
+
+        public Node this[int index]
+        {
+            get
+            {
+                if (index >= Count)
+                {
+                    ExceptionHelper.ThrowIndexOutOfRangeException();
+                }
+
+                if (index < _startNodeCount)
+                {
+                    switch (index)
+                    {
+                        case 0:
+                            return _first;
+                        case 1:
+                            return _second;
+                        case 2:
+                            return _third;
+                        case 3:
+                            return _fourth;
+                    }
+                }
+
+                index -= _startNodeCount;
+                var list = _list1;
+                var listCount = _list1Count;
+                if (listCount == 0)
+                {
+                    list = _list2;
+                    listCount = _list2Count;
+                }
+                
+                if (index < listCount)
+                {
+                    return list[index];
+                }
+
+                index -= _list1Count;
+                if (index < _list2Count)
+                {
+                    return _list2[index];
+                }
+
+                return _fifth;
+            }
         }
 
         public Enumerator GetEnumerator()
@@ -139,57 +205,14 @@ namespace Esprima.Ast
             public bool MoveNext()
             {
                 var collection = _collection;
-                var index = _index;
-                if (index >= collection.Count)
+                if (_index < collection.Count)
                 {
-                    return false;
-                }
-
-                _index++;
-
-                if (index < collection._startNodeCount)
-                {
-                    if (index == 0)
-                    {
-                        _current = collection._first;
-                    }
-                    else if (index == 1)
-                    {
-                        _current = collection._second;
-                    }
-                    else if (index == 2)
-                    {
-                        _current = collection._third;
-                    }
-                    else if (index == 3)
-                    {
-                        _current = collection._fourth;
-                    }
+                    _current = collection[_index];
+                    _index++;
                     return true;
                 }
 
-                index -= collection._startNodeCount;
-                var list = collection._list1;
-                if (list.Count == 0)
-                {
-                    list = collection._list2;
-                }
-                
-                if (index < list.Count)
-                {
-                    _current = list.Nodes[index];
-                    return true;
-                }
-
-                index -= collection._list1.Count;
-                if (index < collection._list2.Count)
-                {
-                    _current = collection._list2.Nodes[index];
-                    return true;
-                }
-
-                _current = collection._fifth;
-                return true;
+                return false;
             }
 
             public Node Current => _current;
@@ -200,18 +223,6 @@ namespace Esprima.Ast
             {
                 _index = 0;
                 _current = default;
-            }
-        }
-
-        internal readonly struct NodeArray
-        {
-            internal readonly Node[] Nodes;
-            internal readonly int Count;
-
-            public NodeArray(Node[] nodes, int count)
-            {
-                Nodes = nodes;
-                Count = count;
             }
         }
     }
