@@ -280,68 +280,60 @@ namespace Esprima
         /// during iteration and therefore the behaviour is undefined
         /// under those conditions.
         /// </remarks>
-
         public struct Enumerator : IEnumerator<T>
         {
+            private readonly T[] _items; // Usually null when count is zero
+            private readonly int _count;
+
             private int _index;
-            private T[] _items; // Usually null when count is zero
-            private int _count;
+            private T _current;
 
             internal Enumerator(T[] items, int count) : this()
             {
-                _index = -1;
+                _index = 0;
                 _items = items;
                 _count = count;
             }
 
-            // Since the items can be null when count is zero, a negative
-            // count is used to designate the disposed state.
-
-            private bool IsDisposed => _count < 0;
-
             public void Dispose()
             {
-                _items = null;
-                _count = -1;
             }
 
             public bool MoveNext()
             {
-                ThrowIfDisposed();
-
-                if (_index + 1 == _count)
-                {
-                    return false;
+                if (_index < _count) 
+                {                                                     
+                    _current = _items[_index];                    
+                    _index++;
+                    return true;
                 }
-
-                _index++;
-                return true;
+                return MoveNextRare();
+            }
+ 
+            private bool MoveNextRare()
+            {                
+                _index = _count + 1;
+                _current = default;
+                return false;                
             }
 
             public void Reset()
             {
-                ThrowIfDisposed();
-                _index = -1;
+                _index = 0;
+                _current = default;
             }
 
-            public T Current
+            public T Current => _current;
+
+            object IEnumerator.Current
             {
                 get
                 {
-                    ThrowIfDisposed();
-                    return _index >= 0
-                         ? _items[_index]
-                         : ThrowInvalidOperationException<T>();
-                }
-            }
-
-            object IEnumerator.Current => Current;
-
-            private void ThrowIfDisposed()
-            {
-                if (IsDisposed)
-                {
-                    ThrowObjectDisposedException(nameof(Enumerator));
+                    if(_index == 0 || _index == _count + 1)
+                    {
+                        ThrowInvalidOperationException<object>();
+                    }
+                    return Current;
                 }
             }
         }

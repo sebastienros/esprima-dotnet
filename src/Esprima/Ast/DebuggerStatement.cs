@@ -4,6 +4,6 @@ namespace Esprima.Ast
     {
         public DebuggerStatement() : base(Nodes.DebuggerStatement) {}
 
-        public override NodeCollection ChildNodes => ZeroChildNodes;
+        public override NodeCollection ChildNodes => NodeCollection.Empty;
     }
 }

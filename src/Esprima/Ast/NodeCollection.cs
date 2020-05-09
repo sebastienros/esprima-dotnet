@@ -19,37 +19,38 @@ namespace Esprima.Ast
         private readonly Node[] _list2;
         private readonly int _list2Count;
         private readonly Node _fifth;
+        private readonly int _count;
 
-        private readonly byte _startNodeCount;
+        private readonly int _startNodeCount;
 
         private NodeCollection(int count)
             : this(null, null, null, null, null)
         {
-            Count = count;
+            _count = count;
         }
 
         internal NodeCollection(Node first)
             : this(first, null, null, null, null)
         {
-            Count = _startNodeCount = 1;
+            _count = _startNodeCount = 1;
         }
 
         internal NodeCollection(Node first, Node second)
             : this(first, second, null, null, null)
         {
-            Count = _startNodeCount = 2;
+            _count = _startNodeCount = 2;
         }
 
         internal NodeCollection(Node first, Node second, Node third)
             : this(first, second, third, null, null)
         {
-            Count = _startNodeCount = 3;
+            _count = _startNodeCount = 3;
         }
 
         internal NodeCollection(Node first, Node second, Node third, Node fourth)
             : this(first, second, third, fourth, null)
         {
-            Count = _startNodeCount = 4;
+            _count = _startNodeCount = 4;
         }
 
         internal NodeCollection(Node[] first, int firstCount, Node second)
@@ -57,7 +58,7 @@ namespace Esprima.Ast
         {
             _list1 = first;
             _list1Count = firstCount;
-            Count = firstCount + 1;
+            _count = firstCount + 1;
         }
 
         internal NodeCollection(Node first, Node[] second, int secondCount)
@@ -66,7 +67,7 @@ namespace Esprima.Ast
             _startNodeCount = 1;
             _list1 = second;
             _list1Count = secondCount;
-            Count = 1 + secondCount;
+            _count = 1 + secondCount;
         }
 
         internal NodeCollection(Node[] first, int firstCount, Node[] second, int secondCount)
@@ -76,7 +77,7 @@ namespace Esprima.Ast
             _list1Count = firstCount;
             _list2 = second;
             _list2Count = secondCount;
-            Count = firstCount + secondCount;
+            _count = firstCount + secondCount;
         }
 
         internal NodeCollection(Node first, Node[] second, int secondCount, Node third)
@@ -85,7 +86,7 @@ namespace Esprima.Ast
             _startNodeCount = 1;
             _list1 = second;
             _list1Count = secondCount;
-            Count = 1 + secondCount + 1;
+            _count = 1 + secondCount + 1;
         }
 
         internal NodeCollection(Node[] first, int firstCount)
@@ -93,7 +94,7 @@ namespace Esprima.Ast
         {
             _list1 = first;
             _list1Count = firstCount;
-            Count = firstCount;
+            _count = firstCount;
         }
 
         private NodeCollection(
@@ -117,16 +118,16 @@ namespace Esprima.Ast
 
             _fifth = fifth;
 
-            Count = 0;
+            _count = 0;
         }
 
-        public int Count { get; }
+        public int Count => _count;
 
         public Node this[int index]
         {
             get
             {
-                if (index >= Count)
+                if (index >= _count)
                 {
                     ExceptionHelper.ThrowIndexOutOfRangeException();
                 }
@@ -147,19 +148,11 @@ namespace Esprima.Ast
                 }
 
                 index -= _startNodeCount;
-                var list = _list1;
-                var listCount = _list1Count;
-                if (listCount == 0)
+                if (index < _list1Count)
                 {
-                    list = _list2;
-                    listCount = _list2Count;
+                    return _list1[index];
                 }
                 
-                if (index < listCount)
-                {
-                    return list[index];
-                }
-
                 index -= _list1Count;
                 if (index < _list2Count)
                 {

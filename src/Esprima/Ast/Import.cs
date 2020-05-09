@@ -6,6 +6,6 @@
         {
         }
 
-        public override NodeCollection ChildNodes => ZeroChildNodes;
+        public override NodeCollection ChildNodes => NodeCollection.Empty;
     }
 }

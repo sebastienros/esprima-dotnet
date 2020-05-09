@@ -47,6 +47,6 @@ namespace Esprima.Ast
             Regex = new RegexValue(pattern, flags);
         }
 
-        public override NodeCollection ChildNodes => ZeroChildNodes;
+        public override NodeCollection ChildNodes => NodeCollection.Empty;
     }
 }
