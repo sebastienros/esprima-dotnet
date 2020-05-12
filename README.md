@@ -60,10 +60,10 @@ compared to the time it took for the same script using the original Esprima in C
 
 | Script | Size | Esprima .NET | Esprima (Chrome) |
 | --- | --- | --- | --- |
-| underscore-1.5.2 | 43 KB | 3.9 ms | 6.6 ms |
-| backbone-1.1.0 | 60 KB | 4.4 ms | 6.1 ms |
-| mootools-1.4.5 | 163 KB | 33.2 ms | 29.8 ms | 
-| jquery-1.9.1 | 271 KB | 44.2 ms | 36.2 ms |
-| yui-3.12.0| 341 KB | 27.6 ms | 33.4 ms |
-| jquery.mobile-1.4.2 | 456 K | 65.4 ms | 159.1 ms | 
-| angular-1.2.5 | 721 KB | 56.6 ms | 98.4 ms |
+| underscore-1.5.2 | 43 KB | 2.4 ms | 3.1 ms |
+| backbone-1.1.0 | 60 KB | 2.9 ms | 3.5 ms |
+| mootools-1.4.5 | 163 KB | 18.7 ms | 16.2 ms | 
+| jquery-1.9.1 | 271 KB | 22.8 ms | 19.0 ms |
+| yui-3.12.0| 341 KB | 17.2 ms | 16.2 ms |
+| jquery.mobile-1.4.2 | 456 K | 43.3 ms | 46.9 ms | 
+| angular-1.2.5 | 721 KB | 29.3 ms | 37.2 ms |
