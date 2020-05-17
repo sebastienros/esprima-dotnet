@@ -2,10 +2,10 @@
 {
     public sealed class AssignmentPattern : Expression
     {
-        public readonly Node Left;
-        public Node Right;
+        public readonly Expression Left;
+        public Expression Right;
 
-        public AssignmentPattern(Node left, Node right) : base(Nodes.AssignmentPattern)
+        public AssignmentPattern(Expression left, Expression right) : base(Nodes.AssignmentPattern)
         {
             Left = left;
             Right = right;

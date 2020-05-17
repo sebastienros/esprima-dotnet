@@ -2966,10 +2966,11 @@ namespace Esprima
                 _context.InIteration = previousInIteration;
             }
 
-            return (left == null) ?
-                Finalize(node, new ForStatement(init, test, update, body)) :
-                forIn ? (Statement)Finalize(node, new ForInStatement(left, right, body)) :
-                    Finalize(node, new ForOfStatement(left, right, body));
+            return left == null 
+                ? Finalize(node, new ForStatement(init, test, update, body)) 
+                : forIn
+                    ? (Statement)Finalize(node, new ForInStatement(left, right, body))
+                    : Finalize(node, new ForOfStatement(left, right, body));
         }
 
         // https://tc39.github.io/ecma262/#sec-continue-statement
