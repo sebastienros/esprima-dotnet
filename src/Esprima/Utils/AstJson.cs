@@ -449,7 +449,7 @@ namespace Esprima.Utils
                     Member("left", forInStatement.Left);
                     Member("right", forInStatement.Right);
                     Member("body", forInStatement.Body);
-                    Member("each", forInStatement.Each);
+                    Member("each", false);
                 }
             }
 
