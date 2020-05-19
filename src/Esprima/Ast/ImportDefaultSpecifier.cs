@@ -1,18 +1,14 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class ImportDefaultSpecifier : Node, ImportDeclarationSpecifier
+    public sealed class ImportDefaultSpecifier : ImportDeclarationSpecifier
     {
         public readonly Identifier Local;
 
-        public ImportDefaultSpecifier(Identifier local) :
-            base(Nodes.ImportDefaultSpecifier)
+        public ImportDefaultSpecifier(Identifier local) : base(Nodes.ImportDefaultSpecifier)
         {
             Local = local;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Local);
+        public override NodeCollection ChildNodes => new NodeCollection(Local);
     }
 }

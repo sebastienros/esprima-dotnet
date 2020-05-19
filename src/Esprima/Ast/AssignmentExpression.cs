@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Esprima.Utils;
 
 namespace Esprima.Ast
@@ -34,19 +33,21 @@ namespace Esprima.Ast
         ExponentiationAssign,
     }
 
-    public class AssignmentExpression : Node,
-        Expression
+    public sealed class AssignmentExpression : Expression
     {
         public readonly AssignmentOperator Operator;
 
         // Can be something else than Expression (ObjectPattern, ArrayPattern) in case of destructuring assignment
-        public readonly INode Left;
+        public readonly Expression Left;
         public readonly Expression Right;
 
-        public AssignmentExpression(string op, INode left, Expression right) :
+        public AssignmentExpression(
+            string op,
+            Expression left, 
+            Expression right) :
             base(Nodes.AssignmentExpression)
         {
-            Operator = AssignmentExpression.ParseAssignmentOperator(op);
+            Operator = ParseAssignmentOperator(op);
             Left = left;
             Right = right;
         }
@@ -87,7 +88,6 @@ namespace Esprima.Ast
             }
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Left, Right);
+        public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
     }
 }

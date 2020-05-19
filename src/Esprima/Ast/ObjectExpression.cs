@@ -1,20 +1,16 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
-    public class ObjectExpression : Node, Expression
+    public sealed class ObjectExpression : Expression
     {
-        private readonly NodeList<ObjectExpressionProperty> _properties;
+        private readonly NodeList<Expression> _properties;
 
-        public ObjectExpression(in NodeList<ObjectExpressionProperty> properties) :
-            base(Nodes.ObjectExpression)
+        public ObjectExpression(in NodeList<Expression> properties) : base(Nodes.ObjectExpression)
         {
             _properties = properties;
         }
 
-        public ref readonly NodeList<ObjectExpressionProperty> Properties => ref _properties;
+        public ref readonly NodeList<Expression> Properties => ref _properties;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(_properties);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_properties);
     }
 }

@@ -1,6 +1,9 @@
 ﻿namespace Esprima.Ast
 {
-    public interface IDeclaration : IStatementListItem
+    public abstract class Declaration : Statement
     {
+        protected Declaration(Nodes type) : base(type)
+        {
+        }
     }
 }

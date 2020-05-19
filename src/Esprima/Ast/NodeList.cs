@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using static Esprima.ExceptionHelper;
 
 namespace Esprima.Ast
 {
-    public readonly struct NodeList<T> : IReadOnlyList<T> where T : class, INode
+    public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node
     {
-        private readonly T[] _items;
-        private readonly int _count;
+        internal readonly T[] _items;
+        internal readonly int _count;
 
         internal NodeList(ICollection<T> collection)
         {
-            if (collection == null)
-            {
-                throw new ArgumentNullException(nameof(collection));
-            }
+            collection ??= ThrowArgumentNullException<ICollection<T>>(nameof(collection));
 
             var count = _count = collection.Count;
             if ((_items = count == 0 ? null : new T[count]) != null)
@@ -37,8 +33,8 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        public NodeList<INode> AsNodes() =>
-            new NodeList<INode>(_items /* conversion by co-variance! */, _count);
+        public NodeList<Node> AsNodes() =>
+            new NodeList<Node>(_items /* conversion by co-variance! */, _count);
 
         public T this[int index]
         {
@@ -69,65 +65,58 @@ namespace Esprima.Ast
 
         public struct Enumerator : IEnumerator<T>
         {
+            private readonly T[] _items; // Usually null when count is zero
+            private readonly int _count;
+
             private int _index;
-            private T[] _items; // Usually null when count is zero
-            private int _count;
+            private T _current;
 
             internal Enumerator(T[] items, int count) : this()
             {
-                _index = -1;
+                _index = 0;
                 _items = items;
                 _count = count;
             }
 
-            // Since the items can be null when count is zero, a negative
-            // count is used to designate the disposed state.
-
-            private bool IsDisposed => _count < 0;
-
             public void Dispose()
             {
-                _items = null;
-                _count = -1;
             }
 
             public bool MoveNext()
             {
-                ThrowIfDisposed();
-
-                if (_index + 1 == _count)
-                {
-                    return false;
+                if (_index < _count) 
+                {                                                     
+                    _current = _items[_index];                    
+                    _index++;
+                    return true;
                 }
-
-                _index++;
-                return true;
+                return MoveNextRare();
+            }
+ 
+            private bool MoveNextRare()
+            {                
+                _index = _count + 1;
+                _current = default;
+                return false;                
             }
 
             public void Reset()
             {
-                ThrowIfDisposed();
-                _index = -1;
+                _index = 0;
+                _current = default;
             }
 
-            public T Current
+            public T Current => _current;
+
+            object IEnumerator.Current
             {
                 get
                 {
-                    ThrowIfDisposed();
-                    return _index >= 0
-                         ? _items[_index]
-                         : ThrowInvalidOperationException<T>();
-                }
-            }
-
-            object IEnumerator.Current => Current;
-
-            private void ThrowIfDisposed()
-            {
-                if (IsDisposed)
-                {
-                    ThrowObjectDisposedException(nameof(Enumerator));
+                    if(_index == 0 || _index == _count + 1)
+                    {
+                        ThrowInvalidOperationException<object>();
+                    }
+                    return Current;
                 }
             }
         }
@@ -136,20 +125,20 @@ namespace Esprima.Ast
     public static class NodeList
     {
         internal static NodeList<T> From<T>(ref ArrayList<T> arrayList)
-            where T : class, INode
+            where T :  Node
         {
             arrayList.Yield(out var items, out var count);
             arrayList = default;
             return new NodeList<T>(items, count);
         }
 
-        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : class, INode
+        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : Node
         {
             switch (source)
             {
                 case null:
                 {
-                    throw new ArgumentNullException(nameof(source));
+                    return ThrowArgumentNullException<NodeList<T>>(nameof(source));
                 }
 
                 case NodeList<T> list:

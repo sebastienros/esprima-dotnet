@@ -14,7 +14,7 @@
     <PackageTags>javascript, parser</PackageTags>
     <PackageProjectUrl>https://github.com/sebastienros/esprima-dotnet</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/sebastienros/esprima-dotnet/master/LICENSE.txt</PackageLicenseUrl>
-    <Version>1.0.$(BuildNumber)</Version>
+    <Version>2.0.0-beta-$(BuildNumber)</Version>
     <LangVersion>latest</LangVersion>
 
     <!-- SourceLink support -->

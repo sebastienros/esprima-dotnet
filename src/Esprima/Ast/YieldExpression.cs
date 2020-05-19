@@ -1,20 +1,16 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class YieldExpression : Node, Expression
+    public sealed class YieldExpression : Expression
     {
         public readonly Expression Argument;
         public readonly bool Delegate;
 
-        public YieldExpression(Expression argument, bool delgate) :
-            base(Nodes.YieldExpression)
+        public YieldExpression(Expression argument, bool delgate) : base(Nodes.YieldExpression)
         {
             Argument = argument;
             Delegate = delgate;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Argument);
+        public override NodeCollection ChildNodes => new NodeCollection(Argument);
     }
 }

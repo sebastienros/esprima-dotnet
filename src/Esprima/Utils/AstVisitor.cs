@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Esprima.Ast;
 
 namespace Esprima.Utils
@@ -8,7 +7,7 @@ namespace Esprima.Utils
     {
         public bool IsStrictMode { get; set; } = false;
 
-        public virtual void Visit(INode node)
+        public virtual void Visit(Node node)
         {
             switch (node.Type)
             {
@@ -306,7 +305,7 @@ namespace Esprima.Utils
             }
         }
 
-        protected virtual void VisitUnknownNode(INode node)
+        protected virtual void VisitUnknownNode(Node node)
         {
             throw new NotImplementedException($"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
         }
@@ -384,7 +383,7 @@ namespace Esprima.Utils
 
             foreach (var s in switchCase.Consequent)
             {
-                VisitStatement(s.As<Statement>());
+                VisitStatement(s);
             }
         }
 
@@ -450,7 +449,7 @@ namespace Esprima.Utils
         protected virtual void VisitForInStatement(ForInStatement forInStatement)
         {
             Identifier identifier = forInStatement.Left.Type == Nodes.VariableDeclaration
-                ? forInStatement.Left.As<VariableDeclaration>().Declarations.First().Id.As<Identifier>()
+                ? forInStatement.Left.As<VariableDeclaration>().Declarations[0].Id.As<Identifier>()
                 : forInStatement.Left.As<Identifier>();
             VisitExpression(identifier);
             VisitExpression(forInStatement.Right);
@@ -459,7 +458,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
-            VisitStatement(doWhileStatement.Body.As<Statement>());
+            VisitStatement(doWhileStatement.Body);
             VisitExpression(doWhileStatement.Test);
         }
 
@@ -483,7 +482,7 @@ namespace Esprima.Utils
                     VisitConditionalExpression(expression.As<ConditionalExpression>());
                     break;
                 case Nodes.FunctionExpression:
-                    VisitFunctionExpression(expression.As<IFunction>());
+                    VisitFunctionExpression(expression.As<FunctionExpression>());
                     break;
                 case Nodes.Identifier:
                     VisitIdentifier(expression.As<Identifier>());
@@ -528,7 +527,7 @@ namespace Esprima.Utils
         {
             //Here we construct the function so if we iterate only functions we will be able to iterate ArrowFunctions too
             var statement = arrowFunctionExpression.Expression
-                ? new BlockStatement(new NodeList<IStatementListItem>(new IStatementListItem[] {new ReturnStatement(arrowFunctionExpression.Body.As<Expression>())}, 1))
+                ? new BlockStatement(new NodeList<Statement>(new Statement[] {new ReturnStatement(arrowFunctionExpression.Body.As<Expression>())}, 1))
                 : arrowFunctionExpression.Body.As<BlockStatement>();
 
             var func = new FunctionExpression(new Identifier(null),
@@ -583,7 +582,7 @@ namespace Esprima.Utils
         {
             foreach (var e in newExpression.Arguments)
             {
-                VisitExpression(e.As<Expression>());
+                VisitExpression(e);
             }
             VisitExpression(newExpression.Callee);
         }
@@ -740,7 +739,7 @@ namespace Esprima.Utils
             {
                 case PropertyKind.Init:
                 case PropertyKind.Data:
-                    VisitExpression(property.Value.As<Expression>());
+                    VisitExpression(property.Value);
                     break;
                 case PropertyKind.None:
                     break;
@@ -774,28 +773,28 @@ namespace Esprima.Utils
             VisitExpression(callExpression.Callee);
             foreach (var arg in callExpression.Arguments)
             {
-                VisitExpression(arg.As<Expression>());
+                VisitExpression(arg);
             }
         }
 
         protected virtual void VisitBinaryExpression(BinaryExpression binaryExpression)
         {
-            VisitExpression(binaryExpression.Left.As<Expression>());
-            VisitExpression(binaryExpression.Right.As<Expression>());
+            VisitExpression(binaryExpression.Left);
+            VisitExpression(binaryExpression.Right);
         }
 
         protected virtual void VisitArrayExpression(ArrayExpression arrayExpression)
         {
             foreach (var expr in arrayExpression.Elements)
             {
-                VisitExpression(expr.As<Expression>());
+                VisitExpression(expr);
             }
         }
 
         protected virtual void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
         {
-            VisitExpression(assignmentExpression.Left.As<Expression>());
-            VisitExpression(assignmentExpression.Right.As<Expression>());
+            VisitExpression(assignmentExpression.Left);
+            VisitExpression(assignmentExpression.Right);
         }
 
         protected virtual void VisitContinueStatement(ContinueStatement continueStatement)
@@ -810,7 +809,7 @@ namespace Esprima.Utils
         {
             foreach (var statement in blockStatement.Body)
             {
-                VisitStatement(statement.As<Statement>());
+                VisitStatement(statement);
             }
         }
     }

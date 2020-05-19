@@ -1,22 +1,14 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class SpreadElement : Node,
-        ArgumentListElement,
-        ArrayExpressionElement,
-        ObjectExpressionProperty,
-        Expression
+    public sealed class SpreadElement : Expression
     {
         public readonly Expression Argument;
 
-        public SpreadElement(Expression argument) :
-            base(Nodes.SpreadElement)
+        public SpreadElement(Expression argument) : base(Nodes.SpreadElement)
         {
             Argument = argument;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Argument);
+        public override NodeCollection ChildNodes => new NodeCollection(Argument);
     }
 }

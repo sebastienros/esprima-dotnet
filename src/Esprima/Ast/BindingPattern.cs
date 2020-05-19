@@ -1,9 +1,9 @@
 ﻿namespace Esprima.Ast
 {
-    public interface BindingPattern :
-        IArrayPatternElement,
-        IFunctionParameter,
-        PropertyValue
+    public abstract class BindingPattern : Expression
     {
+        protected BindingPattern(Nodes type) : base(type)
+        {
+        }
     }
 }

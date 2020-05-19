@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Esprima.Utils;
 
 namespace Esprima.Ast
@@ -26,8 +25,7 @@ namespace Esprima.Ast
         Decrement,
     }
 
-    public class UnaryExpression : Node,
-        Expression
+    public class UnaryExpression : Expression
     {
         public readonly UnaryOperator Operator;
         public readonly Expression Argument;
@@ -62,18 +60,17 @@ namespace Esprima.Ast
             }
         }
 
-        public UnaryExpression(string op, Expression arg) :
-            this(Nodes.UnaryExpression, op, arg) {}
+        public UnaryExpression(string op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
+        {
+        }
 
-        protected UnaryExpression(Nodes type, string op, Expression arg) :
-            base(type)
+        protected UnaryExpression(Nodes type, string op, Expression arg) : base(type)
         {
             Operator = ParseUnaryOperator(op);
             Argument = arg;
             Prefix = true;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Argument);
+        public override NodeCollection ChildNodes => new NodeCollection(Argument);
     }
 }

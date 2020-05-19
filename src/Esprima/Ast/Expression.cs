@@ -1,13 +1,11 @@
 namespace Esprima.Ast
 {
-    public interface Expression :
-        INode,
-        PropertyValue,
-        IDeclaration,
-        ArgumentListElement,
-        ArrayExpressionElement
+    // an expression represents an actual value
+    // foo() is an expression, a switch/case is a statement
+    public abstract class Expression : StatementListItem
     {
-        // an expression represents an actual value
-        // foo() is an expression, a switch/case is a statement
+        protected Expression(Nodes type) : base(type)
+        {
+        }
     }
 }

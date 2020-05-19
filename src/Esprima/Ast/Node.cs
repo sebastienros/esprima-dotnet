@@ -1,20 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public abstract class Node : INode
+    public abstract class Node
     {
-        public Nodes Type { get; }
-        public Range Range { get; set; }
-
-        public Location Location { get; set; }
-
-        public abstract IEnumerable<INode> ChildNodes { get; }
-
-        protected static IEnumerable<INode> ZeroChildNodes = Enumerable.Empty<INode>();
-
-        protected Node(Nodes type) =>
+        protected Node(Nodes type)
+        {
             Type = type;
+        }
+
+        public readonly Nodes Type;
+        public Range Range;    
+        public Location Location;
+
+        public abstract NodeCollection ChildNodes { get; }
     }
 }

@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class Import : Node, Expression
+    public sealed class Import : Expression
     {
         public Import() : base(Nodes.Import)
         {
         }
 
-        public override IEnumerable<INode> ChildNodes => Enumerable.Empty<INode>();
+        public override NodeCollection ChildNodes => NodeCollection.Empty;
     }
 }

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class ImportDeclaration : Node, IDeclaration
+    public sealed class ImportDeclaration : Declaration
     {
         private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
 
@@ -10,8 +8,8 @@ namespace Esprima.Ast
 
         public ImportDeclaration(
             in NodeList<ImportDeclarationSpecifier> specifiers,
-            Literal source) :
-            base(Nodes.ImportDeclaration)
+            Literal source)
+            : base(Nodes.ImportDeclaration)
         {
             _specifiers = specifiers;
             Source = source;
@@ -19,7 +17,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers => ref _specifiers;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(_specifiers, Source);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_specifiers, Source);
     }
 }

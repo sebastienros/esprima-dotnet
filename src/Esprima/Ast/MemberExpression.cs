@@ -1,10 +1,6 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
-    public abstract class MemberExpression : Node,
-        Expression,
-        IArrayPatternElement
+    public abstract class MemberExpression : Expression
     {
         public readonly Expression Object;
         public readonly Expression Property;
@@ -20,7 +16,6 @@ namespace Esprima.Ast
             Computed = computed;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Object, Property);
+        public override NodeCollection ChildNodes => new NodeCollection(Object, Property);
     }
 }

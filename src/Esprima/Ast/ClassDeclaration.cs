@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class ClassDeclaration : Statement, IDeclaration
+    public sealed class ClassDeclaration : Declaration
     {
         public readonly Identifier Id;
         public readonly Expression SuperClass; // Identifier || CallExpression
@@ -16,7 +14,6 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Id, SuperClass, Body);
+        public override NodeCollection ChildNodes => new NodeCollection(Id, SuperClass, Body);
     }
 }

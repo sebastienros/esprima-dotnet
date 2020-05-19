@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Esprima.Utils;
 
 namespace Esprima.Ast
@@ -56,8 +55,7 @@ namespace Esprima.Ast
         Exponentiation,
     }
 
-    public class BinaryExpression : Node,
-        Expression
+    public sealed class BinaryExpression : Expression
     {
         public readonly BinaryOperator Operator;
         public readonly Expression Left;
@@ -131,7 +129,6 @@ namespace Esprima.Ast
             }
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Left, Right);
+        public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
     }
 }

@@ -1,25 +1,16 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class AssignmentPattern :
-        Node,
-        Expression,
-        IArrayPatternElement,
-        IFunctionParameter,
-        PropertyValue
+    public sealed class AssignmentPattern : Expression
     {
-        public readonly INode Left;
-        public INode Right;
+        public readonly Expression Left;
+        public Expression Right;
 
-        public AssignmentPattern(INode left, INode right) :
-            base(Nodes.AssignmentPattern)
+        public AssignmentPattern(Expression left, Expression right) : base(Nodes.AssignmentPattern)
         {
             Left = left;
             Right = right;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Left, Right);
+        public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
     }
 }

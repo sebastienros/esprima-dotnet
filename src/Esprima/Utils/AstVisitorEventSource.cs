@@ -10,14 +10,14 @@ namespace Esprima.Utils
 
     public class AstVisitorEventSource : AstVisitor
     {
-        public event EventHandler<INode> VisitingNode;
-        public event EventHandler<INode> VisitedNode;
+        public event EventHandler<Node> VisitingNode;
+        public event EventHandler<Node> VisitedNode;
         public event EventHandler<Program> VisitingProgram;
         public event EventHandler<Program> VisitedProgram;
         public event EventHandler<Statement> VisitingStatement;
         public event EventHandler<Statement> VisitedStatement;
-        public event EventHandler<INode> VisitingUnknownNode;
-        public event EventHandler<INode> VisitedUnknownNode;
+        public event EventHandler<Node> VisitingUnknownNode;
+        public event EventHandler<Node> VisitedUnknownNode;
         public event EventHandler<CatchClause> VisitingCatchClause;
         public event EventHandler<CatchClause> VisitedCatchClause;
         public event EventHandler<FunctionDeclaration> VisitingFunctionDeclaration;
@@ -151,7 +151,7 @@ namespace Esprima.Utils
         public event EventHandler<BlockStatement> VisitingBlockStatement;
         public event EventHandler<BlockStatement> VisitedBlockStatement;
 
-        public override void Visit(INode node)
+        public override void Visit(Node node)
         {
             VisitingNode?.Invoke(this, node);
             base.Visit(node);
@@ -172,7 +172,7 @@ namespace Esprima.Utils
             VisitedStatement?.Invoke(this, statement);
         }
 
-        protected override void VisitUnknownNode(INode node)
+        protected override void VisitUnknownNode(Node node)
         {
             VisitingUnknownNode?.Invoke(this, node);
             base.VisitUnknownNode(node);

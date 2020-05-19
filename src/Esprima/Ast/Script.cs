@@ -1,13 +1,11 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
-    public class Script : Statement, Program
+    public sealed class Script : Program
     {
-        private readonly NodeList<IStatementListItem> _body;
+        private readonly NodeList<Statement> _body;
 
         public Script(
-            in NodeList<IStatementListItem> body,
+            in NodeList<Statement> body,
             bool strict,
             HoistingScope hoistingScope)
             : base(Nodes.Program)
@@ -17,13 +15,12 @@ namespace Esprima.Ast
             HoistingScope = hoistingScope;
         }
 
-        public SourceType SourceType => SourceType.Script;
+        public override SourceType SourceType => SourceType.Script;
         public bool Strict { get; }
 
         public HoistingScope HoistingScope { get; }
-        public ref readonly NodeList<IStatementListItem> Body => ref _body;
+        public override ref readonly NodeList<Statement> Body => ref _body;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
     }
 }

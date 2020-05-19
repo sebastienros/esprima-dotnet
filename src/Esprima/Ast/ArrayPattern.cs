@@ -1,20 +1,16 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class ArrayPattern : Node, BindingPattern
+    public sealed class ArrayPattern : BindingPattern
     {
-        private readonly NodeList<IArrayPatternElement> _elements;
+        private readonly NodeList<Expression> _elements;
 
-        public ArrayPattern(in NodeList<IArrayPatternElement> elements) :
-            base(Nodes.ArrayPattern)
+        public ArrayPattern(in NodeList<Expression> elements) : base(Nodes.ArrayPattern)
         {
             _elements = elements;
         }
 
-        public ref readonly NodeList<IArrayPatternElement> Elements => ref _elements;
+        public ref readonly NodeList<Expression> Elements => ref _elements;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(_elements);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_elements);
     }
 }

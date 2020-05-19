@@ -176,7 +176,7 @@ namespace Esprima.Test
         public void CommentsAreParsed()
         {
             int count = 0;
-            Action<INode> action = node => count++;
+            Action<Node> action = node => count++;
             var parser = new JavaScriptParser("// this is a comment", new ParserOptions(), action);
             parser.ParseScript();
 

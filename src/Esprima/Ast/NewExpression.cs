@@ -1,26 +1,21 @@
-using System.Collections.Generic;
-
 namespace Esprima.Ast
 {
-    public class NewExpression : Node,
-        Expression
+    public sealed class NewExpression : Expression
     {
-        private readonly NodeList<ArgumentListElement> _arguments;
-
+        private readonly NodeList<Expression> _arguments;
         public readonly Expression Callee;
 
         public NewExpression(
             Expression callee,
-            in NodeList<ArgumentListElement> args) :
-            base(Nodes.NewExpression)
+            in NodeList<Expression> args)
+            : base(Nodes.NewExpression)
         {
             Callee = callee;
             _arguments = args;
         }
 
-        public ref readonly NodeList<ArgumentListElement> Arguments => ref _arguments;
+        public ref readonly NodeList<Expression> Arguments => ref _arguments;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Callee, Arguments);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Callee, Arguments);
     }
 }

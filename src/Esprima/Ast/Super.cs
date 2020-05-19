@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class Super : Node, Expression
+    public sealed class Super : Expression
     {
-        public Super() :
-            base(Nodes.Super) {}
+        public Super() : base(Nodes.Super)
+        {
+        }
 
-        public override IEnumerable<INode> ChildNodes => ZeroChildNodes;
+        public override NodeCollection ChildNodes => NodeCollection.Empty;
     }
 }

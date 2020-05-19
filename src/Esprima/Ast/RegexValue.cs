@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Ast
 {
-    public class RegexValue
+    public sealed class RegexValue
     {
         public readonly string Pattern;
         public readonly string Flags;

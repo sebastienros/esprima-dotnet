@@ -9,9 +9,14 @@ namespace Esprima
             throw new IndexOutOfRangeException();
         }
 
-        public static void ThrowObjectDisposedException(string objectName)
+        public static void ThrowArgumentNullException(string paramName)
         {
-            throw new ObjectDisposedException(objectName);
+            throw new ArgumentNullException(paramName);
+        }
+
+        public static T ThrowArgumentNullException<T>(string paramName)
+        {
+            throw new ArgumentNullException(paramName);
         }
 
         public static T ThrowInvalidOperationException<T>()

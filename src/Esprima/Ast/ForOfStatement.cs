@@ -1,22 +1,21 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class ForOfStatement : Statement
+    public sealed class ForOfStatement : Statement
     {
-        public readonly INode Left;
+        public readonly Node Left;
         public readonly Expression Right;
         public readonly Statement Body;
 
-        public ForOfStatement(INode left, Expression right, Statement body) :
-            base(Nodes.ForOfStatement)
+        public ForOfStatement(
+            Node left, 
+            Expression right,
+            Statement body) : base(Nodes.ForOfStatement)
         {
             Left = left;
             Right = right;
             Body = body;
         }
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Left, Right, Body);
+        public override NodeCollection ChildNodes => new NodeCollection(Left, Right, Body); 
     }
 }

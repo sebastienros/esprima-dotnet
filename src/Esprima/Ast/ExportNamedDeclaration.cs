@@ -1,19 +1,17 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
-    public class ExportNamedDeclaration : Node, ExportDeclaration
+    public sealed class ExportNamedDeclaration : ExportDeclaration
     {
         private readonly NodeList<ExportSpecifier> _specifiers;
 
-        public readonly IStatementListItem Declaration;
+        public readonly StatementListItem Declaration;
         public readonly Literal Source;
 
         public ExportNamedDeclaration(
-            IStatementListItem declaration,
+            StatementListItem declaration,
             in NodeList<ExportSpecifier> specifiers,
-            Literal source) :
-            base(Nodes.ExportNamedDeclaration)
+            Literal source) 
+            : base(Nodes.ExportNamedDeclaration)
         {
             Declaration = declaration;
             _specifiers = specifiers;
@@ -22,7 +20,6 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<ExportSpecifier> Specifiers => ref _specifiers;
 
-        public override IEnumerable<INode> ChildNodes =>
-            ChildNodeYielder.Yield(Declaration, _specifiers, Source);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declaration, _specifiers, Source);
     }
 }
