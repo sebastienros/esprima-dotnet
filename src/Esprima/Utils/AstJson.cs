@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Utils
 {
@@ -77,17 +78,17 @@ namespace Esprima.Utils
         {
             if (node == null)
             {
-                throw new ArgumentNullException(nameof(node));
+                ThrowArgumentNullException(nameof(node));
             }
 
             if (writer == null)
             {
-                throw new ArgumentNullException(nameof(writer));
+                ThrowArgumentNullException(nameof(writer));
             }
 
             if (options == null)
             {
-                throw new ArgumentNullException(nameof(options));
+                ThrowArgumentNullException(nameof(options));
             }
 
             var visitor = new Visitor(new JsonTextWriter(writer, indent),
@@ -101,17 +102,17 @@ namespace Esprima.Utils
         {
             if (node == null)
             {
-                throw new ArgumentNullException(nameof(node));
+                ThrowArgumentNullException(nameof(node));
             }
 
             if (writer == null)
             {
-                throw new ArgumentNullException(nameof(writer));
+                ThrowArgumentNullException(nameof(writer));
             }
 
             if (options == null)
             {
-                throw new ArgumentNullException(nameof(options));
+                ThrowArgumentNullException(nameof(options));
             }
 
             var visitor = new Visitor(writer,
@@ -130,7 +131,7 @@ namespace Esprima.Utils
                            bool includeLineColumn, bool includeRange,
                            LocationMembersPlacement locationMembersPlacement)
             {
-                _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+                _writer = writer ?? ThrowArgumentNullException<JsonWriter>(nameof(writer));
                 _stack = new ObservableStack<Node>();
 
                 _stack.Pushed += node =>

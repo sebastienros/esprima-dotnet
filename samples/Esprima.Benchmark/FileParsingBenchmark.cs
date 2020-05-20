@@ -43,7 +43,7 @@ namespace Esprima.Benchmark
         public void ParseProgram()
         {
             var parser = new JavaScriptParser(files[FileName]);
-            parser.ParseProgram();
+            parser.ParseScript();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using static Esprima.ExceptionHelper;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {

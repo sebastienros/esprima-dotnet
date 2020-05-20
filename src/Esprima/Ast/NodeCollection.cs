@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
+using static Esprima.EsprimaExceptionHelper;
+
 namespace Esprima.Ast
 {
     /// <summary>
@@ -129,7 +131,7 @@ namespace Esprima.Ast
             {
                 if (index >= _count)
                 {
-                    ExceptionHelper.ThrowIndexOutOfRangeException();
+                    ThrowIndexOutOfRangeException();
                 }
 
                 if (index < _startNodeCount)

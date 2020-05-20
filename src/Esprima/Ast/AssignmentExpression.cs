@@ -1,5 +1,6 @@
-using System;
 using Esprima.Utils;
+
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
@@ -55,37 +56,23 @@ namespace Esprima.Ast
 
         public static AssignmentOperator ParseAssignmentOperator(string op)
         {
-            switch (op)
+            return op switch
             {
-                case "=":
-                    return AssignmentOperator.Assign;
-                case "+=":
-                    return AssignmentOperator.PlusAssign;
-                case "-=":
-                    return AssignmentOperator.MinusAssign;
-                case "*=":
-                    return AssignmentOperator.TimesAssign;
-                case "/=":
-                    return AssignmentOperator.DivideAssign;
-                case "%=":
-                    return AssignmentOperator.ModuloAssign;
-                case "&=":
-                    return AssignmentOperator.BitwiseAndAssign;
-                case "|=":
-                    return AssignmentOperator.BitwiseOrAssign;
-                case "^=":
-                    return AssignmentOperator.BitwiseXOrAssign;
-                case "**=":
-                    return AssignmentOperator.ExponentiationAssign;
-                case "<<=":
-                    return AssignmentOperator.LeftShiftAssign;
-                case ">>=":
-                    return AssignmentOperator.RightShiftAssign;
-                case ">>>=":
-                    return AssignmentOperator.UnsignedRightShiftAssign;
-                default:
-                    throw new ArgumentOutOfRangeException("Invalid assignment operator: " + op);
-            }
+                "=" => AssignmentOperator.Assign,
+                "+=" => AssignmentOperator.PlusAssign,
+                "-=" => AssignmentOperator.MinusAssign,
+                "*=" => AssignmentOperator.TimesAssign,
+                "/=" => AssignmentOperator.DivideAssign,
+                "%=" => AssignmentOperator.ModuloAssign,
+                "&=" => AssignmentOperator.BitwiseAndAssign,
+                "|=" => AssignmentOperator.BitwiseOrAssign,
+                "^=" => AssignmentOperator.BitwiseXOrAssign,
+                "**=" => AssignmentOperator.ExponentiationAssign,
+                "<<=" => AssignmentOperator.LeftShiftAssign,
+                ">>=" => AssignmentOperator.RightShiftAssign,
+                ">>>=" => AssignmentOperator.UnsignedRightShiftAssign,
+                _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op)
+            };
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Left, Right);

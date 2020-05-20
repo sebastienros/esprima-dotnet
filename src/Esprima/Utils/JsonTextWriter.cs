@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using static Esprima.EsprimaExceptionHelper;
 using SysArray = System.Array;
 
 namespace Esprima.Utils
@@ -50,7 +51,8 @@ namespace Esprima.Utils
 
         public JsonTextWriter(TextWriter writer, string indent)
         {
-            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            _writer = writer ?? ThrowArgumentNullException<TextWriter>(nameof(writer));
+            _writer = writer ?? ThrowArgumentNullException<TextWriter>(nameof(writer));
             _indent = indent;
             _counters = new Stack<int>(8);
             _structures = new Stack<StructureKind>(8);
@@ -68,17 +70,17 @@ namespace Esprima.Utils
         {
             if (name == null)
             {
-                throw new ArgumentNullException(nameof(name));
+                ThrowArgumentNullException(nameof(name));
             }
 
             if (Depth == 0 || _structures.Top != StructureKind.Object)
             {
-                throw new InvalidOperationException("Member must be within an object.");
+                ThrowInvalidOperationException("Member must be within an object.");
             }
 
             if (_memberName != null)
             {
-                throw new InvalidOperationException("Missing value for member: " + _memberName);
+                ThrowInvalidOperationException("Missing value for member: " + _memberName);
             }
 
             _memberName = name;
@@ -111,7 +113,7 @@ namespace Esprima.Utils
         {
             if (double.IsNaN(n) || double.IsInfinity(n))
             {
-                throw new ArgumentOutOfRangeException(nameof(n), n, null);
+                ThrowArgumentOutOfRangeException(nameof(n), n, null);
             }
 
             Write(n.ToString(CultureInfo.InvariantCulture), TokenKind.Scalar);
@@ -152,12 +154,12 @@ namespace Esprima.Utils
         {
             if (Depth == 0)
             {
-                throw new InvalidOperationException("No JSON structure in effect.");
+                ThrowInvalidOperationException("No JSON structure in effect.");
             }
 
             if (_memberName != null)
             {
-                throw new InvalidOperationException("Missing value for member: " + _memberName);
+                ThrowInvalidOperationException("Missing value for member: " + _memberName);
             }
 
             if (_counters.Top > 0)
@@ -178,7 +180,7 @@ namespace Esprima.Utils
 
             if (Depth == 0 && kind == TokenKind.Scalar)
             {
-                throw new InvalidOperationException("JSON text must start with an object or an array.");
+                ThrowInvalidOperationException("JSON text must start with an object or an array.");
             }
 
             var writer = _writer;
@@ -187,7 +189,7 @@ namespace Esprima.Utils
             {
                 if (_structures.Top == StructureKind.Object && _memberName == null)
                 {
-                    throw new InvalidOperationException("JSON object member name is undefined.");
+                    ThrowInvalidOperationException("JSON object member name is undefined.");
                 }
 
                 if (_counters.Top > 0)
@@ -298,7 +300,7 @@ namespace Esprima.Utils
                 {
                     if (Count <= 0)
                     {
-                        throw new InvalidOperationException();
+                        ThrowInvalidOperationException<object>();
                     }
 
                     return ref _items[Count - 1];
@@ -330,7 +332,7 @@ namespace Esprima.Utils
             {
                 if (Count == 0)
                 {
-                    throw new InvalidOperationException();
+                    ThrowInvalidOperationException();
                 }
 
                 var top = Top;
