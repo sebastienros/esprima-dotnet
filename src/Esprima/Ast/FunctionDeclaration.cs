@@ -5,7 +5,7 @@ namespace Esprima.Ast
         private readonly NodeList<Expression> _parameters;
 
         public FunctionDeclaration(
-            Identifier id,
+            Identifier? id,
             in NodeList<Expression> parameters,
             BlockStatement body,
             bool generator,
@@ -22,7 +22,7 @@ namespace Esprima.Ast
             Async = async;
         }
 
-        public Identifier Id { get; }
+        public Identifier? Id { get; }
 
         public Node Body { get; }
         public bool Generator { get; }

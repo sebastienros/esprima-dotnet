@@ -5,7 +5,7 @@ namespace Esprima
     public class ParseError
     {
         public string Description     { get; }
-        public string Source          { get; }
+        public string? Source          { get; }
 
         public bool IsIndexDefined    => Index >= 0;
         public int Index              { get; }
@@ -19,7 +19,7 @@ namespace Esprima
             this(description, null, -1, default) {}
 
         public ParseError(string description,
-            string source, int index, Position position)
+            string? source, int index, Position position)
         {
             Description = description ?? ThrowArgumentNullException<string>(nameof(description));
             Source      = source;

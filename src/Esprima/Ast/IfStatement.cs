@@ -4,12 +4,12 @@ namespace Esprima.Ast
     {
         public readonly Expression Test;
         public readonly Statement Consequent;
-        public readonly Statement Alternate;
+        public readonly Statement? Alternate;
 
         public IfStatement(
             Expression test,
             Statement consequent,
-            Statement alternate)
+            Statement? alternate)
             : base(Nodes.IfStatement)
         {
             Test = test;

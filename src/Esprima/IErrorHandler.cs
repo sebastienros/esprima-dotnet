@@ -2,7 +2,7 @@
 {
     public interface IErrorHandler
     {
-        string Source { get; set; }
+        string? Source { get; set; }
         bool Tolerant { get; set; }
         void RecordError(ParserException error);
         void Tolerate(ParserException error);

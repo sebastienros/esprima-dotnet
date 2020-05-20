@@ -9,7 +9,7 @@ namespace Esprima.Ast
     public static class NodeExtensions
     {
         [DebuggerStepThrough]
-        public static T As<T>(this object node) where T : class 
+        public static T As<T>(this Node node) where T : Node 
         {
             return (T) node;
         }
@@ -18,7 +18,7 @@ namespace Esprima.Ast
         {
             if (node == null)
             {
-                ThrowArgumentNullException(nameof(node));
+                return ThrowArgumentNullException<IEnumerable<Node>>(nameof(node));
             }
 
             return DescendantNodes(new NodeSysList { node });
@@ -28,7 +28,7 @@ namespace Esprima.Ast
         {
             if (node == null)
             {
-                ThrowArgumentNullException(nameof(node));
+                return ThrowArgumentNullException<IEnumerable<Node>>(nameof(node));
             }
 
             return DescendantNodes(new NodeSysList(node.ChildNodes));
@@ -66,12 +66,12 @@ namespace Esprima.Ast
         {
             if (node == null)
             {
-                ThrowArgumentNullException(nameof(node));
+                return ThrowArgumentNullException<IEnumerable<Node>>(nameof(node));
             }
 
             if (rootNode == null)
             {
-                ThrowArgumentNullException(nameof(rootNode));
+                return ThrowArgumentNullException<IEnumerable<Node>>(nameof(rootNode));
             }
 
             var parents = new Stack<Node>();

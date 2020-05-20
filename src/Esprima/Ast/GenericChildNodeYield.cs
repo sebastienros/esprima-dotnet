@@ -8,7 +8,7 @@ namespace Esprima.Ast
     internal static class GenericChildNodeYield
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NodeCollection Yield<T>(Node first, in NodeList<T> second, Node third) where T : Node
+        public static NodeCollection Yield<T>(Node? first, in NodeList<T> second, Node? third) where T : Node
         {
             return new NodeCollection(first, second._items, second._count, third);
         }
@@ -26,13 +26,13 @@ namespace Esprima.Ast
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NodeCollection Yield<T>(Node first, in NodeList<T> second) where T : Node
+        public static NodeCollection Yield<T>(Node? first, in NodeList<T> second) where T : Node
         {
             return new NodeCollection(first, second._items, second._count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NodeCollection Yield<T>(in NodeList<T> first, Node second) where T : Node
+        public static NodeCollection Yield<T>(in NodeList<T> first, Node? second) where T : Node
         {
             return new NodeCollection(first._items, first._count, second);
         }

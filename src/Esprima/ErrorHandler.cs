@@ -7,7 +7,7 @@ namespace Esprima
         public IList<ParserException> Errors { get; }
         public bool Tolerant { get; set; }
 
-        public string Source { get; set; }
+        public string? Source { get; set; }
 
         public ErrorHandler()
         {
@@ -42,7 +42,7 @@ namespace Esprima
             var error = this.CreateError(index, line, col, description);
             if (Tolerant)
             {
-                this.RecordError(error);
+                RecordError(error);
             }
             else
             {

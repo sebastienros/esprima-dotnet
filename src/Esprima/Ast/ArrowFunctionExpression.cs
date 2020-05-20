@@ -19,7 +19,7 @@
             Async = async;
         }
 
-        public Identifier Id { get; }
+        public Identifier? Id { get; }
         public Node Body { get; } // : BlockStatement | Expression;
         public bool Generator { get; }
         public bool Expression { get; }

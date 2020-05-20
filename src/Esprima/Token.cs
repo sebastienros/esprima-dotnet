@@ -19,7 +19,7 @@ namespace Esprima
     public class Token
     {
         public TokenType Type;
-        public string Literal;
+        public string? Literal;
 
         public int Start; // Range[0]
         public int End; // Range[1]
@@ -36,12 +36,12 @@ namespace Esprima
         // For templates
         public bool Head;
         public bool Tail;
-        public string RawTemplate;
+        public string? RawTemplate;
 
         public bool BooleanValue;
         public double NumericValue;
-        public object Value;
-        public RegexValue RegexValue;
+        public object? Value;
+        public RegexValue? RegexValue;
 
         public void Clear()
         {

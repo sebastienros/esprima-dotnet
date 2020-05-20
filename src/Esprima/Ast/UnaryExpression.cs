@@ -32,7 +32,18 @@ namespace Esprima.Ast
         public readonly Expression Argument;
         public bool Prefix { get; protected set; }
 
-        public static UnaryOperator ParseUnaryOperator(string op)
+        public UnaryExpression(string? op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
+        {
+        }
+
+        protected UnaryExpression(Nodes type, string? op, Expression arg) : base(type)
+        {
+            Operator = ParseUnaryOperator(op);
+            Argument = arg;
+            Prefix = true;
+        }
+
+        private static UnaryOperator ParseUnaryOperator(string? op)
         {
             return op switch
             {
@@ -47,17 +58,6 @@ namespace Esprima.Ast
                 "typeof" => UnaryOperator.TypeOf,
                 _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
             };
-        }
-
-        public UnaryExpression(string op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
-        {
-        }
-
-        protected UnaryExpression(Nodes type, string op, Expression arg) : base(type)
-        {
-            Operator = ParseUnaryOperator(op);
-            Argument = arg;
-            Prefix = true;
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Argument);

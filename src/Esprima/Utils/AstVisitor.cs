@@ -610,7 +610,7 @@ namespace Esprima.Utils
         {
             foreach (var param in function.Params)
             {
-                Visit(param);
+                Visit(param!);
             }
             Visit(function.Body);
         }
@@ -745,7 +745,7 @@ namespace Esprima.Utils
                     break;
                 case PropertyKind.Set:
                 case PropertyKind.Get:
-                    VisitFunctionExpression(property.Value.As<IFunction>());
+                    VisitFunctionExpression((IFunction) property.Value);
                     break;
                 case PropertyKind.Constructor:
                     break;
@@ -788,7 +788,7 @@ namespace Esprima.Utils
         {
             foreach (var expr in arrayExpression.Elements)
             {
-                VisitExpression(expr);
+                VisitExpression(expr!);
             }
         }
 
