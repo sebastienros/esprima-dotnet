@@ -2,10 +2,10 @@ namespace Esprima
 {
     using System;
 
-    static class Exception<T> where T : Exception, new()
+    internal static class Exception<T> where T : Exception, new()
     {
-        static string _message;
+        private static string? _message;
 
-        public static string DefaultMessage => _message ?? (_message = new T().Message);
+        public static string DefaultMessage => _message ??= new T().Message;
     }
 }

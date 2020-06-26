@@ -31,7 +31,7 @@ namespace Esprima.Utils // System.Runtime.Serialization;
     [AttributeUsage(AttributeTargets.Field)]
     internal sealed class EnumMemberAttribute : Attribute
     {
-        private string _value;
+        private string _value = "";
 
         public string Value
         {

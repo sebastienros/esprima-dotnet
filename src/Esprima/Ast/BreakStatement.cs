@@ -2,9 +2,9 @@ namespace Esprima.Ast
 {
     public sealed class BreakStatement : Statement
     {
-        public readonly Identifier Label;
+        public readonly Identifier? Label;
 
-        public BreakStatement(Identifier label) : base(Nodes.BreakStatement)
+        public BreakStatement(Identifier? label) : base(Nodes.BreakStatement)
         {
             Label = label;
         }

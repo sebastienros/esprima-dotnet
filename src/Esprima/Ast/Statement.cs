@@ -6,6 +6,6 @@ namespace Esprima.Ast
         {
         }
 
-        public Identifier LabelSet { get; internal set; }
+        public Identifier? LabelSet { get; internal set; }
     }
 }

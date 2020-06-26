@@ -13,8 +13,8 @@
 
         public sealed class TemplateElementValue
         {
-            public string Cooked;
-            public string Raw;
+            public string Cooked = "";
+            public string Raw = "";
         }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;

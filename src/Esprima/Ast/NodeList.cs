@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#nullable disable
+
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using static Esprima.EsprimaExceptionHelper;
@@ -124,8 +126,7 @@ namespace Esprima.Ast
 
     public static class NodeList
     {
-        internal static NodeList<T> From<T>(ref ArrayList<T> arrayList)
-            where T :  Node
+        internal static NodeList<T> From<T>(ref ArrayList<T> arrayList) where T :  Node
         {
             arrayList.Yield(out var items, out var count);
             arrayList = default;

@@ -10,8 +10,8 @@ namespace Esprima
 {
     public class Loc
     {
-        public Marker Start;
-        public Marker End;
+        public Marker? Start;
+        public Marker? End;
     }
 
     public class Marker
@@ -192,17 +192,22 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Eof()
+        private bool Eof()
         {
             return Index >= _length;
         }
 
-        public void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
+        private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
-            _errorHandler.ThrowError(Index, LineNumber, Index - LineStart + 1, message);
+            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
         }
 
-        public void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
+        private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
+        {
+            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+        }
+
+        private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
             _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, message);
         }
@@ -216,19 +221,19 @@ namespace Esprima
         // https://tc39.github.io/ecma262/#sec-future-reserved-words
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsFutureReservedWord(string id)
+        public static bool IsFutureReservedWord(string? id)
         {
-            return FutureReservedWords.Contains(id);
+            return id != null && FutureReservedWords.Contains(id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsStrictModeReservedWord(string id)
+        public static bool IsStrictModeReservedWord(string? id)
         {
-            return StrictModeReservedWords.Contains(id);
+            return id != null && StrictModeReservedWords.Contains(id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsRestrictedWord(string id)
+        public static bool IsRestrictedWord(string? id)
         {
             return "eval".Equals(id) || "arguments".Equals(id);
         }
@@ -264,12 +269,12 @@ namespace Esprima
                 {
                     if (_trackComment)
                     {
-                        loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart - 1);
+                        loc.End = new Marker(loc.End!.Index, LineNumber, Index - LineStart - 1);
 
                         Comment entry = new Comment
                         {
                             MultiLine = false,
-                            Slice = new int[] { start + offset, Index - 1 },
+                            Slice = new[] { start + offset, Index - 1 },
                             Start = start,
                             End = Index - 1,
                             Loc = loc
@@ -289,7 +294,7 @@ namespace Esprima
 
             if (_trackComment)
             {
-                loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart);
+                loc.End = new Marker(loc.End!.Index, LineNumber, Index - LineStart);
                 var entry = new Comment
                 {
                     MultiLine = false,
@@ -314,9 +319,8 @@ namespace Esprima
             if (_trackComment)
             {
                 start = Index - 2;
-                loc.Start = new Marker(loc.Start.Index, LineNumber, Index - LineStart - 2);
+                loc.Start = new Marker(loc.Start!.Index, LineNumber, Index - LineStart - 2);
             }
-
 
             while (!Eof())
             {
@@ -339,7 +343,7 @@ namespace Esprima
                         Index += 2;
                         if (_trackComment)
                         {
-                            loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart);
+                            loc.End = new Marker(loc.End!.Index, LineNumber, Index - LineStart);
                             var entry = new Comment
                             {
                                 MultiLine = true,
@@ -363,7 +367,7 @@ namespace Esprima
             // Ran off the end of the file - the whole thing is a comment
             if (_trackComment)
             {
-                loc.End = new Marker(loc.End.Index, LineNumber, Index - LineStart);
+                loc.End = new Marker(loc.End!.Index, LineNumber, Index - LineStart);
                 var entry = new Comment
                 {
                     MultiLine = true,
@@ -1008,8 +1012,7 @@ namespace Esprima
             }
             catch (OverflowException)
             {
-                ThrowUnexpectedToken($"Value {number} was either too large or too small for a UInt64.");
-                return null;
+                return ThrowUnexpectedToken<Token>($"Value {number} was either too large or too small for a UInt64.");
             }
 
             return new Token
@@ -1472,7 +1475,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
 
-        public Regex TestRegExp(string pattern, string flags)
+        public Regex? TestRegExp(string pattern, string flags)
         {
             // The BMP character to use as a replacement for astral symbols when
             // translating an ES6 "u"-flagged pattern to an ES5-compatible
@@ -1690,15 +1693,15 @@ namespace Esprima
 
             var body = ScanRegExpBody();
             var flags = ScanRegExpFlags();
-            var flagsValue = (string) flags.Value;
-            var value = TestRegExp((string) body.Value, flagsValue);
+            var flagsValue = (string) flags.Value!;
+            var value = TestRegExp((string) body.Value!, flagsValue);
 
             return new Token
             {
                 Type = TokenType.RegularExpression,
                 Value = value,
                 Literal = body.Literal + flags.Literal,
-                RegexValue = new RegexValue((string) body.Value, flagsValue),
+                RegexValue = new RegexValue((string) body.Value!, flagsValue),
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -1870,7 +1873,7 @@ namespace Esprima
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string FindTwoCharEqual(string input, string[] alternatives)
+        private static string? FindTwoCharEqual(string input, string[] alternatives)
         {
             var c2 = input[1];
             var c1 = input[0];
@@ -1888,7 +1891,7 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string FindThreeCharEqual(string input, string[] alternatives)
+        private static string? FindThreeCharEqual(string input, string[] alternatives)
         {
             var c3 = input[2];
             var c2 = input[1];

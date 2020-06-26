@@ -9,12 +9,12 @@ namespace Esprima
             throw new IndexOutOfRangeException();
         }
 
-        public static T ThrowArgumentOutOfRangeException<T>(string paramName, object actualValue, string message = null)
+        public static T ThrowArgumentOutOfRangeException<T>(string paramName, object actualValue, string? message = null)
         {
             throw new ArgumentOutOfRangeException(paramName, actualValue, message);
         }
 
-        public static void ThrowArgumentOutOfRangeException(string paramName, object actualValue, string message = null)
+        public static void ThrowArgumentOutOfRangeException(string paramName, object actualValue, string? message = null)
         {
             throw new ArgumentOutOfRangeException(paramName, actualValue, message);
         }
@@ -24,12 +24,12 @@ namespace Esprima
             throw new ObjectDisposedException(objectName);
         }
 
-        public static T ThrowInvalidOperationException<T>(string message = null)
+        public static T ThrowInvalidOperationException<T>(string? message = null)
         {
             throw new InvalidOperationException(message);
         }
 
-        public static void ThrowInvalidOperationException(string message = null)
+        public static void ThrowInvalidOperationException(string? message = null)
         {
             throw new InvalidOperationException(message);
         }

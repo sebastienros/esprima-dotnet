@@ -50,13 +50,13 @@ namespace Esprima.Utils
         public static string ToJsonString(this Node node) =>
             ToJsonString(node, indent: null);
 
-        public static string ToJsonString(this Node node, string indent) =>
+        public static string ToJsonString(this Node node, string? indent) =>
             ToJsonString(node, Options.Default, indent);
 
         public static string ToJsonString(this Node node, Options options) =>
             ToJsonString(node, options, null);
 
-        public static string ToJsonString(this Node node, Options options, string indent)
+        public static string ToJsonString(this Node node, Options options, string? indent)
         {
             using (var writer = new StringWriter())
             {
@@ -68,27 +68,30 @@ namespace Esprima.Utils
         public static void WriteJson(this Node node, TextWriter writer) =>
             WriteJson(node, writer, indent: null);
 
-        public static void WriteJson(this Node node, TextWriter writer, string indent) =>
+        public static void WriteJson(this Node node, TextWriter writer, string? indent) =>
             WriteJson(node, writer, Options.Default, indent);
 
         public static void WriteJson(this Node node, TextWriter writer, Options options) =>
             WriteJson(node, writer, options, null);
 
-        public static void WriteJson(this Node node, TextWriter writer, Options options, string indent)
+        public static void WriteJson(this Node node, TextWriter writer, Options options, string? indent)
         {
             if (node == null)
             {
                 ThrowArgumentNullException(nameof(node));
+                return;
             }
 
             if (writer == null)
             {
                 ThrowArgumentNullException(nameof(writer));
+                return;
             }
 
             if (options == null)
             {
                 ThrowArgumentNullException(nameof(options));
+                return;
             }
 
             var visitor = new Visitor(new JsonTextWriter(writer, indent),
@@ -103,16 +106,19 @@ namespace Esprima.Utils
             if (node == null)
             {
                 ThrowArgumentNullException(nameof(node));
+                return;
             }
 
             if (writer == null)
             {
                 ThrowArgumentNullException(nameof(writer));
+                return;
             }
 
             if (options == null)
             {
                 ThrowArgumentNullException(nameof(options));
+                return;
             }
 
             var visitor = new Visitor(writer,
@@ -200,13 +206,13 @@ namespace Esprima.Utils
             private void Member(string name) =>
                 _writer.Member(name);
 
-            private void Member(string name, Node node)
+            private void Member(string name, Node? node)
             {
                 Member(name);
                 Visit(node);
             }
 
-            private void Member(string name, string value)
+            private void Member(string name, string? value)
             {
                 Member(name);
                 _writer.String(value);
@@ -254,8 +260,8 @@ namespace Esprima.Utils
             {
                 private readonly Stack<T> _stack = new Stack<T>();
 
-                public event Action<T> Pushed;
-                public event Action<T> Popped;
+                public event Action<T>? Pushed;
+                public event Action<T>? Popped;
 
                 public IDisposable Push(T item)
                 {
@@ -271,7 +277,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void Visit(Node node)
+            public override void Visit(Node? node)
             {
                 if (node != null)
                 {
@@ -568,7 +574,9 @@ namespace Esprima.Utils
             protected override void VisitIdentifier(Identifier identifier)
             {
                 using (StartNodeObject(identifier))
+                {
                     Member("name", identifier.Name);
+                }
             }
 
             protected override void VisitFunctionExpression(IFunction function)
@@ -597,7 +605,7 @@ namespace Esprima.Utils
             protected override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
             {
                 using (StartNodeObject(exportDefaultDeclaration))
-                    Member("declaration", exportDefaultDeclaration.Declaration.As<Node>());
+                    Member("declaration", exportDefaultDeclaration.Declaration);
             }
 
             protected override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
@@ -610,7 +618,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(exportNamedDeclaration))
                 {
-                    Member("declaration", exportNamedDeclaration.Declaration.As<Node>());
+                    Member("declaration", exportNamedDeclaration.Declaration);
                     Member("specifiers", exportNamedDeclaration.Specifiers);
                     Member("source", exportNamedDeclaration.Source);
                 }

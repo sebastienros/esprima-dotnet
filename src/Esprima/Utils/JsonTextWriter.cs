@@ -44,16 +44,16 @@ namespace Esprima.Utils
         private readonly string _indent;
         private Stack<StructureKind> _structures;
         private Stack<int> _counters;
-        private string _memberName;
+        private string? _memberName;
 
         public JsonTextWriter(TextWriter writer) :
             this(writer, null) {}
 
-        public JsonTextWriter(TextWriter writer, string indent)
+        public JsonTextWriter(TextWriter writer, string? indent)
         {
             _writer = writer ?? ThrowArgumentNullException<TextWriter>(nameof(writer));
             _writer = writer ?? ThrowArgumentNullException<TextWriter>(nameof(writer));
-            _indent = indent;
+            _indent = indent ?? "";
             _counters = new Stack<int>(8);
             _structures = new Stack<StructureKind>(8);
         }
@@ -86,7 +86,7 @@ namespace Esprima.Utils
             _memberName = name;
         }
 
-        public override void String(string str)
+        public override void String(string? str)
         {
             if (str == null)
             {
@@ -119,7 +119,7 @@ namespace Esprima.Utils
             Write(n.ToString(CultureInfo.InvariantCulture), TokenKind.Scalar);
         }
 
-        private bool Pretty => !string.IsNullOrEmpty(_indent);
+        private bool Pretty => _indent != "";
 
         private void Eol()
         {
@@ -236,12 +236,12 @@ namespace Esprima.Utils
 
             var length = (s ?? string.Empty).Length;
 
-            writer.Write('"');
+            writer!.Write('"');
 
             for (var index = 0; index < length; index++)
             {
                 Debug.Assert(s != null);
-                var ch = s[index];
+                var ch = s![index];
 
                 switch (ch)
                 {
@@ -280,7 +280,7 @@ namespace Esprima.Utils
         }
 
         [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-        private struct Stack<T> : IEnumerable<T>
+        private struct Stack<T> : IEnumerable<T> where T : struct
         {
             private T[] _items;
 
@@ -290,7 +290,7 @@ namespace Esprima.Utils
                 Count = 0;
             }
 
-            private int Capacity => _items?.Length ?? 0;
+            private int Capacity => _items.Length;
 
             public int Count { get; private set; }
 
@@ -323,7 +323,6 @@ namespace Esprima.Utils
                     SysArray.Resize(ref _items, Math.Max(capacity * 2, 4));
                 }
 
-                Debug.Assert(_items != null);
                 _items[Count] = item;
                 Count++;
             }

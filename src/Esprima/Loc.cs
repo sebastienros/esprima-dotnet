@@ -10,12 +10,13 @@ namespace Esprima
     {
         public Position Start  { get; }
         public Position End    { get; }
-        public string   Source { get; }
+        public string?   Source { get; }
 
-        public Location(Position start, Position end) :
-            this(start, end, null) {}
+        public Location(Position start, Position end) : this(start, end, null)
+        {
+        }
 
-        public Location(Position start, Position end, string source)
+        public Location(Position start, Position end, string? source)
         {
             Start  = start;
 
@@ -56,7 +57,7 @@ namespace Esprima
             end   = End;
         }
 
-        public void Deconstruct(out Position start, out Position end, out string source)
+        public void Deconstruct(out Position start, out Position end, out string? source)
         {
             start  = Start;
             end    = End;

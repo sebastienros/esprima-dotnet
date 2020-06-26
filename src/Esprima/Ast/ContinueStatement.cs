@@ -2,9 +2,9 @@ namespace Esprima.Ast
 {
     public sealed class ContinueStatement : Statement
     {
-        public readonly Identifier Label;
+        public readonly Identifier? Label;
 
-        public ContinueStatement(Identifier label) : base(Nodes.ContinueStatement)
+        public ContinueStatement(Identifier? label) : base(Nodes.ContinueStatement)
         {
             Label = label;
         }

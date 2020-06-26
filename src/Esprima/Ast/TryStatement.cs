@@ -3,13 +3,13 @@ namespace Esprima.Ast
     public sealed class TryStatement : Statement
     {
         public readonly Statement Block;
-        public readonly CatchClause Handler;
-        public readonly Statement Finalizer;
+        public readonly CatchClause? Handler;
+        public readonly Statement? Finalizer;
 
         public TryStatement(
             Statement block,
-            CatchClause handler,
-            Statement finalizer) :
+            CatchClause? handler,
+            Statement? finalizer) :
             base(Nodes.TryStatement)
         {
             Block = block;

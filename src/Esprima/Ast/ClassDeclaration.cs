@@ -2,11 +2,11 @@
 {
     public sealed class ClassDeclaration : Declaration
     {
-        public readonly Identifier Id;
-        public readonly Expression SuperClass; // Identifier || CallExpression
+        public readonly Identifier? Id;
+        public readonly Expression? SuperClass; // Identifier || CallExpression
         public readonly ClassBody Body;
 
-        public ClassDeclaration(Identifier id, Expression superClass, ClassBody body) :
+        public ClassDeclaration(Identifier? id, Expression? superClass, ClassBody body) :
             base(Nodes.ClassDeclaration)
         {
             Id = id;

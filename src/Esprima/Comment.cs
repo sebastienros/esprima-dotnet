@@ -1,4 +1,6 @@
-﻿namespace Esprima
+﻿using System;
+
+namespace Esprima
 {
     public enum CommentType
     {
@@ -6,15 +8,15 @@
         Line
     }
 
-    public struct Comment
+    public class Comment
     {
         public CommentType Type;
-        public string Value;
+        public string? Value;
 
         public bool MultiLine;
-        public int[] Slice;
+        public int[] Slice = Array.Empty<int>();
         public int Start;
         public int End;
-        public Loc Loc;
+        public Loc? Loc;
     }
 }

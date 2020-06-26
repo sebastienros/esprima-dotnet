@@ -4,13 +4,13 @@
     {
         private readonly NodeList<ExportSpecifier> _specifiers;
 
-        public readonly StatementListItem Declaration;
-        public readonly Literal Source;
+        public readonly StatementListItem? Declaration;
+        public readonly Literal? Source;
 
         public ExportNamedDeclaration(
-            StatementListItem declaration,
+            StatementListItem? declaration,
             in NodeList<ExportSpecifier> specifiers,
-            Literal source) 
+            Literal? source) 
             : base(Nodes.ExportNamedDeclaration)
         {
             Declaration = declaration;
