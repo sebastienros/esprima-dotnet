@@ -94,9 +94,11 @@ namespace Esprima.Utils
                 return;
             }
 
-            var visitor = new Visitor(new JsonTextWriter(writer, indent),
-                                      options.IncludingLineColumn, options.IncludingRange,
-                                      options.LocationMembersPlacement);
+            var visitor = new Visitor(
+                new JsonTextWriter(writer, indent),
+                options.IncludingLineColumn,
+                options.IncludingRange,
+                options.LocationMembersPlacement);
 
             visitor.Visit(node);
         }
@@ -121,9 +123,11 @@ namespace Esprima.Utils
                 return;
             }
 
-            var visitor = new Visitor(writer,
-                                      options.IncludingLineColumn, options.IncludingRange,
-                                      options.LocationMembersPlacement);
+            var visitor = new Visitor(
+                writer,
+                options.IncludingLineColumn,
+                options.IncludingRange,
+                options.LocationMembersPlacement);
 
             visitor.Visit(node);
         }
@@ -133,11 +137,13 @@ namespace Esprima.Utils
             private readonly JsonWriter _writer;
             private readonly ObservableStack<Node> _stack;
 
-            public Visitor(JsonWriter writer,
-                           bool includeLineColumn, bool includeRange,
-                           LocationMembersPlacement locationMembersPlacement)
+            public Visitor(
+                JsonWriter writer,
+                bool includeLineColumn,
+                bool includeRange,
+                LocationMembersPlacement locationMembersPlacement)
             {
-                _writer = writer ?? ThrowArgumentNullException<JsonWriter>(nameof(writer));
+                _writer = writer;
                 _stack = new ObservableStack<Node>();
 
                 _stack.Pushed += node =>
@@ -238,7 +244,7 @@ namespace Esprima.Utils
                     EnumMap.GetValue(value.GetType(),
                         t => t.GetRuntimeFields()
                               .Where(f => f.IsStatic)
-                              .ToDictionary(f => (T) f.GetValue(null),
+                              .ToDictionary(f => (T) f.GetValue(null)!,
                                             f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
                                                ? a.Value : f.Name.ToLowerInvariant()));
                 Member(name, map[value]);

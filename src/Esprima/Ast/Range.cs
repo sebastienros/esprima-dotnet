@@ -17,7 +17,7 @@ namespace Esprima.Ast
         public bool Equals(Range other) =>
             Start == other.Start && End == other.End;
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is Range other && Equals(other);
 
         public override int GetHashCode() =>

@@ -32,7 +32,7 @@ namespace Esprima
         public Location WithPosition(Position start, Position end) =>
             new Location(start, end, Source);
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is Location other && Equals(other);
 
         public bool Equals(Location other) =>

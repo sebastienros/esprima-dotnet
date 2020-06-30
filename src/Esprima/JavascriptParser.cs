@@ -3220,10 +3220,10 @@ namespace Esprima
 
             var parameters = new ArrayList<Token>();
             var param = ParsePattern(ref parameters);
-            var paramMap = new Dictionary<string?, bool>();
+            var paramMap = new Dictionary<string, bool>();
             for (var i = 0; i < parameters.Count; i++)
             {
-                var key = (string?) parameters[i].Value;
+                var key = (string) parameters[i].Value!;
                 if (paramMap.ContainsKey(key))
                 {
                     TolerateError(Messages.DuplicateBinding, parameters[i].Value);
@@ -4527,7 +4527,7 @@ namespace Esprima
         private ParserException UnexpectedTokenError(Token? token, string? message = null)
         {
             var msg = message ?? Messages.UnexpectedToken;
-            string value;
+            string? value;
 
             if (token != null)
             {
@@ -4553,8 +4553,8 @@ namespace Esprima
                     }
                 }
 
-                value = (token.Type == TokenType.Template) 
-                    ? token.RawTemplate!
+                value = token.Type == TokenType.Template 
+                    ? token.RawTemplate
                     : Convert.ToString(token.Value);
             }
             else
@@ -4562,7 +4562,7 @@ namespace Esprima
                 value = "ILLEGAL";
             }
 
-            msg = String.Format(msg, value);
+            msg = string.Format(msg, value);
 
             if (token != null && token.LineNumber > 0)
             {

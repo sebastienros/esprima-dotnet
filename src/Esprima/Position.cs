@@ -31,7 +31,7 @@ namespace Esprima
                    : ThrowArgumentOutOfRangeException<int>(nameof(column), column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
         }
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is Position other && Equals(other);
 
         public bool Equals(Position other) =>
