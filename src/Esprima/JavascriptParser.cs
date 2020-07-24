@@ -58,7 +58,8 @@ namespace Esprima
         private bool _hasLineTerminator;
         private readonly Action<Node>? _action;
 
-        internal List<Token> Tokens = new List<Token>();
+        private List<Token> _Tokens = new List<Token>();
+        public IReadOnlyList<Token> Tokens { get { return _Tokens; } }
 
         // cache frequently called funcs so we don't need to build Func<T> intances all the time
         private readonly Func<Expression> parseAssignmentExpression;
@@ -291,7 +292,7 @@ namespace Esprima
 
             if (_config.Tokens && next != null && next.Type != TokenType.EOF)
             {
-                Tokens.Add(ConvertToken(next));
+                _Tokens.Add(ConvertToken(next));
             }
 
             return token!;
@@ -307,9 +308,9 @@ namespace Esprima
             {
                 // Pop the previous token, '/' or '/='
                 // This is added from the lookahead token.
-                Tokens.RemoveAt(Tokens.Count - 1);
+                _Tokens.RemoveAt(_Tokens.Count - 1);
 
-                Tokens.Add(ConvertToken(token));
+                _Tokens.Add(ConvertToken(token));
             }
 
             // Prime the next lookahead.
