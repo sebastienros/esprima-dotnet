@@ -74,8 +74,10 @@ namespace Esprima.Test
             }
 
             // Convert to LF to match the number of chars the parser finds, but some tests expect to check Windows
+            // TODO should be based on .gitattributes
             var script = File.ReadAllText(jsFilePath);
-            if (!jsFilePath.EndsWith("primary\\literal\\string\\migrated_0017.js"))
+            if (!jsFilePath.EndsWith("primary\\literal\\string\\migrated_0017.js")
+                && !jsFilePath.EndsWith("expression\\binary\\multiline_string_literal.js"))
             {
                 script = script.Replace(Environment.NewLine, "\n");
             }

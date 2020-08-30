@@ -1838,7 +1838,8 @@ namespace Esprima
                         precedences.Pop();
                         left = (Expression) stack.Pop();
                         markers.Pop();
-                        var node = StartNode(markers.Peek());
+                        var marker = markers.Peek();
+                        var node = StartNode(marker, marker.LineStart);
                         stack.Push(Finalize(node, new BinaryExpression(op, left, right)));
                     }
 
