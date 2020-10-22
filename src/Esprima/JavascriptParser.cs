@@ -10,7 +10,7 @@ namespace Esprima
     /// Provides JavaScript parsing capabilities.
     /// </summary>
     /// <remarks>
-    /// Use the methods <c>ParseScript()</c>, <c>ParseModule()</c> or <c>ParseExpression()</c> to parse the JavaScript code.
+    /// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
     /// </remarks>
     public class JavaScriptParser
     {
