@@ -1,6 +1,6 @@
 namespace Esprima
 {
-    public class Marker
+    internal class Marker
     {
         public int Index;
         public int Line;
