@@ -17,6 +17,6 @@ namespace Esprima
         public int[] Slice = Array.Empty<int>();
         public int Start;
         public int End;
-        public Loc? Loc;
+        public SourceLocation? Loc;
     }
 }
