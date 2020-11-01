@@ -168,30 +168,30 @@ namespace Esprima.Utils
                 {
                     if (includeRange)
                     {
-                        writer.Member("range");
-                        writer.StartArray();
-                        writer.Number(node.Range.Start);
-                        writer.Number(node.Range.End);
-                        writer.EndArray();
+                        _writer.Member("range");
+                        _writer.StartArray();
+                        _writer.Number(node.Range.Start);
+                        _writer.Number(node.Range.End);
+                        _writer.EndArray();
                     }
 
                     if (includeLineColumn)
                     {
-                        writer.Member("loc");
-                        writer.StartObject();
-                        writer.Member("start");
+                        _writer.Member("loc");
+                        _writer.StartObject();
+                        _writer.Member("start");
                         Write(node.Location.Start);
-                        writer.Member("end");
+                        _writer.Member("end");
                         Write(node.Location.End);
-                        writer.EndObject();
+                        _writer.EndObject();
                     }
 
                     void Write(Position position)
                     {
-                        writer.StartObject();
+                        _writer.StartObject();
                         Member("line", position.Line);
                         Member("column", position.Column);
-                        writer.EndObject();
+                        _writer.EndObject();
                     }
                 }
             }
