@@ -2764,9 +2764,20 @@ namespace Esprima
             var forIn = true;
             Node? left = null;
             Expression? right = null;
+            var _await = false;
 
             var node = CreateNode();
             ExpectKeyword("for");
+            if (MatchContextualKeyword("await"))
+            {
+                if (!_context.Await) 
+                {
+                    TolerateUnexpectedToken(_lookahead);
+                }
+                _await = true;
+                NextToken();
+            }
+            
             Expect("(");
 
             if (Match(";"))
@@ -2786,7 +2797,7 @@ namespace Esprima
                     var declarations = ParseVariableDeclarationList(ref inFor);
                     _context.AllowIn = previousAllowIn;
 
-                    if (declarations.Count == 1 && MatchKeyword("in"))
+                    if (!_await && declarations.Count == 1 && MatchKeyword("in"))
                     {
                         var decl = declarations[0];
                         if (decl.Init != null && (decl.Id.Type == Nodes.ArrayPattern || decl.Id.Type == Nodes.ObjectPattern || _context.Strict))
@@ -2949,7 +2960,7 @@ namespace Esprima
                 ? Finalize(node, new ForStatement(init, test, update, body)) 
                 : forIn
                     ? (Statement) Finalize(node, new ForInStatement(left, right!, body))
-                    : Finalize(node, new ForOfStatement(left, right!, body));
+                    : Finalize(node, new ForOfStatement(left, right!, body, _await));
         }
 
         // https://tc39.github.io/ecma262/#sec-continue-statement
