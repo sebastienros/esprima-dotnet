@@ -686,6 +686,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(forOfStatement))
                 {
+                    Member("await", forOfStatement.Await);
                     Member("left", forOfStatement.Left);
                     Member("right", forOfStatement.Right);
                     Member("body", forOfStatement.Body);
