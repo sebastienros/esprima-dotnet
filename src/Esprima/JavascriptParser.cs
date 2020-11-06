@@ -6,6 +6,12 @@ using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima
 {
+    /// <summary>
+    /// Provides JavaScript parsing capabilities.
+    /// </summary>
+    /// <remarks>
+    /// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
+    /// </remarks>
     public class JavaScriptParser
     {
         private static readonly HashSet<string> AssignmentOperators = new HashSet<string>
@@ -59,9 +65,16 @@ namespace Esprima
         private readonly Action<Node>? _action;
 
         private List<Token> _tokens = new List<Token>();
+
+        /// <summary>
+        /// Returns the list of tokens that were parsed.
+        /// </summary>
+        /// <remarks>
+        /// It requires the parser options to be configured to generate to tokens.
+        /// </remarks>
         public IReadOnlyList<Token> Tokens => _tokens;
 
-        // cache frequently called funcs so we don't need to build Func<T> intances all the time
+        // cache frequently called Func so we don't need to build Func<T> instances all the time
         private readonly Func<Expression> parseAssignmentExpression;
         private readonly Func<Expression> parseExponentiationExpression;
         private readonly Func<Expression> parseUnaryExpression;
@@ -76,14 +89,30 @@ namespace Esprima
         private readonly Func<Expression> parseLeftHandSideExpressionAllowCall;
         private readonly Func<Statement> parseStatement;
 
+        /// <summary>
+        /// Creates a new <see cref="JavaScriptParser" /> instance.
+        /// </summary>
+        /// <param name="code">The JavaScript code to parse.</param>
         public JavaScriptParser(string code) : this(code, new ParserOptions())
         {
         }
 
+        /// <summary>
+        /// Creates a new <see cref="JavaScriptParser" /> instance.
+        /// </summary>
+        /// <param name="code">The JavaScript code to parse.</param>
+        /// <param name="options">The parser options.</param>
+        /// <returns></returns>
         public JavaScriptParser(string code, ParserOptions options) : this(code, options, null)
         {
         }
 
+        /// <summary>
+        /// Creates a new <see cref="JavaScriptParser" /> instance.
+        /// </summary>
+        /// <param name="code">The JavaScript code to parse.</param>
+        /// <param name="options">The parser options.</param>
+        /// <param name="action">Action to execute on each parsed node.</param>
         public JavaScriptParser(string code, ParserOptions options, Action<Node>? action)
         {
             if (code == null)
@@ -145,6 +174,9 @@ namespace Esprima
         // https://tc39.github.io/ecma262/#sec-scripts
         // https://tc39.github.io/ecma262/#sec-modules
 
+        /// <summary>
+        /// Parses the code as a JavaScript module.
+        /// </summary>
         public Module ParseModule()
         {
             _context.Strict = true;
@@ -161,6 +193,9 @@ namespace Esprima
             return Finalize(node, new Module(NodeList.From(ref body)));
         }
 
+        /// <summary>
+        /// Parses the code as a JavaScript script.
+        /// </summary>
         public Script ParseScript(bool strict = false)
         {
             if (strict)
@@ -689,8 +724,6 @@ namespace Esprima
         /// <summary>
         /// Return true if provided expression is LeftHandSideExpression
         /// </summary>
-        /// <param name="expr"></param>
-        /// <returns></returns>
         private bool IsLeftHandSide(Expression expr)
         {
             return expr.Type == Nodes.Identifier || expr.Type == Nodes.MemberExpression;
@@ -2161,6 +2194,9 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-comma-operator
 
+        /// <summary>
+        /// Parses the code as a JavaScript expression.
+        /// </summary>
         public Expression ParseExpression()
         {
             var startToken = _lookahead;

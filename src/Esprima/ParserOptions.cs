@@ -1,20 +1,39 @@
 ﻿namespace Esprima
 {
+    /// <summary>
+    /// Parser options.
+    /// </summary>
     public class ParserOptions
     {
+        /// <summary>
+        /// Create a new <see cref="ParserOptions" /> instance.
+        /// </summary>
         public ParserOptions() : this(new ErrorHandler())
         {
         }
 
+        /// <summary>
+        /// Create a new <see cref="ParserOptions" /> instance.
+        /// </summary>
+        /// <param name="source">A string representing where the code is coming from, if an error occurs.</param>
+        /// <returns></returns>
         public ParserOptions(string source) : this(new ErrorHandler {Source = source})
         {
         }
 
+        /// <summary>
+        /// Create a new <see cref="ParserOptions" /> instance.
+        /// </summary>
+        /// <param name="errorHandler">The <see cref="IErrorHandler" /> to use to handle errors.</param>
         public ParserOptions(IErrorHandler errorHandler)
         {
             ErrorHandler = errorHandler;
         }
 
+        /// <summary>
+        /// Gets or sets whether each node should have their range included.
+        /// </summary>
+        /// <value></value>
         public bool Range { get; set; } = false;
 
         /// <summary>
