@@ -92,6 +92,7 @@ namespace Esprima
         {
             "&&" ,
             "||" ,
+            "??" ,
             "==" ,
             "!=" ,
             "+=" ,
@@ -770,7 +771,6 @@ namespace Esprima
                 case '[':
                 case ']':
                 case ':':
-                case '?':
                 case '~':
                     ++Index;
                     break;
@@ -804,7 +804,7 @@ namespace Esprima
                             {
                                 // 1-character punctuators.
                                 str = Source[Index].ToString();
-                                if ("<>=!+-*%&|^/".IndexOf(str, StringComparison.Ordinal) >= 0)
+                                if ("<>=!+-*%&|?^/".IndexOf(str, StringComparison.Ordinal) >= 0)
                                 {
                                     ++Index;
                                 }

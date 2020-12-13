@@ -54,6 +54,8 @@ namespace Esprima.Ast
         LogicalOr,
         [EnumMember(Value = "**")]
         Exponentiation,
+        [EnumMember(Value = "??")]
+        NullishCoalescing,
     }
 
     public sealed class BinaryExpression : Expression
@@ -66,7 +68,7 @@ namespace Esprima.Ast
             this(ParseBinaryOperator(op), left, right) {}
 
         private BinaryExpression(BinaryOperator op, Expression left, Expression right) :
-            base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr ? Nodes.LogicalExpression : Nodes.BinaryExpression)
+            base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr || op ==BinaryOperator.NullishCoalescing ? Nodes.LogicalExpression : Nodes.BinaryExpression)
         {
             Operator = op;
             Left = left;
@@ -101,6 +103,7 @@ namespace Esprima.Ast
                 "&&" => BinaryOperator.LogicalAnd,
                 "||" => BinaryOperator.LogicalOr,
                 "**" => BinaryOperator.Exponentiation,
+                "??" => BinaryOperator.NullishCoalescing,
                 _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
             };
         }

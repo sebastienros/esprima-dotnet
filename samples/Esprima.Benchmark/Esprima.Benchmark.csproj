@@ -3,13 +3,13 @@
     <AssemblyName>Esprima.Benchmark</AssemblyName>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\test\Esprima.Tests\Fixtures\3rdparty\**" CopyToOutputDirectory="PreserveNewest" LinkBase="3rdparty" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
-    <PackageReference Include="BenchmarkDotNet" Version="0.12.0" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
   </ItemGroup>
 </Project>
