@@ -10,7 +10,6 @@ build_script:
   - dotnet --version
   - dotnet pack -c Release
 test_script:
-  - dotnet test .\test\Esprima.Tests\Esprima.Tests.csproj -c Debug
   - dotnet test .\test\Esprima.Tests\Esprima.Tests.csproj -c Release
 artifacts:
   - path: 'src\**\*.*nupkg'

@@ -1759,7 +1759,6 @@ namespace Esprima
 
             if (token.Type == TokenType.Punctuator)
             {
-
                 switch ((string?) op)
                 {
                     case ")":
@@ -1770,55 +1769,59 @@ namespace Esprima
                         prec = 0;
                         break;
 
+                    case "??":
+                        prec = 5;
+                        break;
+
                     case "||":
-                        prec = 1;
+                        prec = 6;
                         break;
 
                     case "&&":
-                        prec = 2;
+                        prec = 7;
                         break;
 
                     case "|":
-                        prec = 3;
+                        prec = 8;
                         break;
 
                     case "^":
-                        prec = 4;
+                        prec = 9;
                         break;
 
                     case "&":
-                        prec = 5;
+                        prec = 10;
                         break;
 
                     case "==":
                     case "!=":
                     case "===":
                     case "!==":
-                        prec = 6;
+                        prec = 11;
                         break;
 
                     case "<":
                     case ">":
                     case "<=":
                     case ">=":
-                        prec = 7;
+                        prec = 12;
                         break;
 
                     case "<<":
                     case ">>":
                     case ">>>":
-                        prec = 8;
+                        prec = 13;
                         break;
 
                     case "+":
                     case "-":
-                        prec = 9;
+                        prec = 14;
                         break;
 
                     case "*":
                     case "/":
                     case "%":
-                        prec = 11;
+                        prec = 15;
                         break;
 
                     default:
@@ -1828,7 +1831,7 @@ namespace Esprima
             }
             else if (token.Type == TokenType.Keyword)
             {
-                prec = ("instanceof".Equals(op) || (_context.AllowIn && "in".Equals(op))) ? 7 : 0;
+                prec = ("instanceof".Equals(op) || (_context.AllowIn && "in".Equals(op))) ? 12 : 0;
             }
 
             return prec;
@@ -1840,10 +1843,25 @@ namespace Esprima
 
             var expr = InheritCoverGrammar(parseExponentiationExpression);
 
+            var allowAndOr = true;
+            var allowNullishCoalescing = true;
+            void UpdateNullishCoalescingRestrictions(Token t) {
+                var value = t.Value;
+                if ("&&".Equals(value) || "||".Equals(value))
+                {
+                    allowNullishCoalescing = false;
+                }
+                if ("??".Equals(value))
+                {
+                    allowAndOr = false;
+                }
+            }
+            
             var token = _lookahead;
             var prec = BinaryPrecedence(token);
             if (prec > 0)
             {
+                UpdateNullishCoalescingRestrictions(token);
                 NextToken();
 
                 _context.IsAssignmentTarget = false;
@@ -1863,6 +1881,12 @@ namespace Esprima
                     {
                         break;
                     }
+                    if ((!allowAndOr && ("&&".Equals(_lookahead.Value) || "||".Equals(_lookahead.Value))) ||
+                        (!allowNullishCoalescing && "??".Equals(_lookahead.Value)))
+                    {
+                        ThrowUnexpectedToken(_lookahead);
+                    }
+                    UpdateNullishCoalescingRestrictions(_lookahead);
 
                     // Reduce: make a binary expression from the three topmost entries.
                     while (stack.Count > 2 && prec <= precedences.Peek())
