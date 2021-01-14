@@ -31,17 +31,6 @@
         }
 
         /// <summary>
-        /// Gets or sets whether each node should have their range included.
-        /// </summary>
-        /// <value></value>
-        public bool Range { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets whether the parsed elements have their location included.
-        /// </summary>
-        public bool Loc { get; set; } = false;
-
-        /// <summary>
         /// Gets or sets whether the tokens are included in the parsed tree.
         /// </summary>
         public bool Tokens { get; set; } = false;

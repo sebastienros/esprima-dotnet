@@ -122,15 +122,9 @@ namespace Esprima.Tests
         [Fact]
         public void ShouldParseLocation()
         {
-            var options = new ParserOptions
-            {
-                Loc = true
-            };
-            var parser = new JavaScriptParser("// End on second line\r\n", options);
-
+            var parser = new JavaScriptParser("// End on second line\r\n");
             var program = parser.ParseScript();
         }
-
 
         [Fact]
         public void ShouldParseArrayPattern()

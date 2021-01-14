@@ -28,8 +28,6 @@ namespace Esprima
 
         public Location Location;
 
-        public int Precedence;
-
         // For NumericLiteral
         public bool Octal;
 
@@ -52,7 +50,6 @@ namespace Esprima
             LineNumber = 0;
             LineStart = 0;
             Location = default;
-            Precedence = 0;
             Octal = false;
             Head = false;
             Tail = false;

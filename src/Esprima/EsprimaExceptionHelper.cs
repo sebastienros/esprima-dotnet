@@ -19,11 +19,6 @@ namespace Esprima
             throw new ArgumentOutOfRangeException(paramName, actualValue, message);
         }
 
-        public static void ThrowObjectDisposedException(string objectName)
-        {
-            throw new ObjectDisposedException(objectName);
-        }
-
         public static T ThrowInvalidOperationException<T>(string? message = null)
         {
             throw new InvalidOperationException(message);
