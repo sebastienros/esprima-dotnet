@@ -53,8 +53,6 @@ namespace Esprima.Test
         {
             var options = new ParserOptions
             {
-                Range = true,
-                Loc = true,
                 Tokens = true
             };
 

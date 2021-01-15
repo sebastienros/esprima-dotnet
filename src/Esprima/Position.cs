@@ -1,10 +1,8 @@
-﻿using static Esprima.EsprimaExceptionHelper;
+﻿using System;
+using System.Globalization;
 
 namespace Esprima
 {
-    using System;
-    using System.Globalization;
-
     /// <summary>
     /// Represents a source position as line number and column offset, where
     /// the first line is 1 and first column is 0.
@@ -22,13 +20,18 @@ namespace Esprima
 
         public Position(int line, int column)
         {
-            Line = line >= 0 ? line
-                 : ThrowArgumentOutOfRangeException<int>(nameof(line), line, Exception<ArgumentOutOfRangeException>.DefaultMessage);
-
-            Column = line > 0 && column >= 0
-                     || line == 0 && column == 0 // if line is 0 then column MUST BE 0!
-                   ? column
-                   : ThrowArgumentOutOfRangeException<int>(nameof(column), column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+#if LOCATION_ASSERTS
+            if (line < 0)
+            {
+                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(line), line, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            }
+            if ((line <= 0 || column < 0) && (line != 0 || column != 0))
+            {
+                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(column), column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            }
+#endif
+            Line = line;
+            Column = column;
         }
 
         public override bool Equals(object obj) =>

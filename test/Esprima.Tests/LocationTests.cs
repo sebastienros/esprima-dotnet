@@ -21,6 +21,7 @@ namespace Esprima.Tests
             Assert.Equal(end, actualEnd);
         }
 
+#if LOCATION_ASSERTS
         [Theory]
         [InlineData(0, 0, 1, 0)]
         [InlineData(1, 0, 0, 0)]
@@ -35,5 +36,6 @@ namespace Esprima.Tests
             Assert.Equal("end", e.ParamName);
             Assert.Equal(end, e.ActualValue);
         }
+#endif        
     }
 }

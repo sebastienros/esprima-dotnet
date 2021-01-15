@@ -19,6 +19,12 @@ namespace Esprima.Benchmark
             {"angular-1.2.5", null}
         };
 
+        private static readonly ParserOptions parserOptions = new ParserOptions()
+        {
+            Comment = true,
+            Tokens = true 
+        };
+
         [GlobalSetup]
         public void Setup()
         {
@@ -42,7 +48,7 @@ namespace Esprima.Benchmark
         [Benchmark]
         public void ParseProgram()
         {
-            var parser = new JavaScriptParser(files[FileName]);
+            var parser = new JavaScriptParser(files[FileName], parserOptions);
             parser.ParseScript();
         }
     }
