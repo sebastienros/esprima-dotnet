@@ -16,7 +16,6 @@
         /// Create a new <see cref="ParserOptions" /> instance.
         /// </summary>
         /// <param name="source">A string representing where the code is coming from, if an error occurs.</param>
-        /// <returns></returns>
         public ParserOptions(string source) : this(new ErrorHandler {Source = source})
         {
         }
