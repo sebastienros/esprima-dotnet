@@ -2,10 +2,13 @@
 {
     public sealed class Import : Expression
     {
-        public Import() : base(Nodes.Import)
+        public readonly Expression Source;
+
+        public Import(Expression source) : base(Nodes.Import)
         {
+            Source = source;
         }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        public override NodeCollection ChildNodes => new NodeCollection(Source);
     }
 }
