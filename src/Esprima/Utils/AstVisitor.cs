@@ -7,28 +7,8 @@ namespace Esprima.Utils
 {
     public class AstVisitor
     {
-        private readonly List<Node> _parentStack = new List<Node>();
-        protected IReadOnlyList<Node> ParentStack => _parentStack;
-
-        /// <summary>
-        /// Returns parent node at specified position.
-        /// </summary>
-        /// <param name="offset">Zero index value returns current node; one corresponds to direct
-        /// parent of current node.</param>
-        protected Node? TryGetParentAt(int offset)
-        {
-            if (_parentStack.Count < offset + 1)
-            {
-                return null;
-            }
-
-            return _parentStack[_parentStack.Count - 1 - offset];
-        }
-
         public virtual void Visit(Node node)
         {
-            _parentStack.Add(node);
-
             switch (node.Type)
             {
                 case Nodes.AssignmentExpression:
@@ -239,8 +219,6 @@ namespace Esprima.Utils
                     VisitUnknownNode(node);
                     break;
             }
-
-            _parentStack.RemoveAt(_parentStack.Count - 1);
         }
 
         protected virtual void VisitProgram(Program program)
