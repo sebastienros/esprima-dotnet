@@ -123,5 +123,53 @@ export function checkSecurityAnswerCodeDirect(result) {
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
         }
+
+        [Fact]
+        public void ToJavascriptTest5()
+        {
+            var parser = new JavaScriptParser(@"(function () {
+  'use strict';
+})();
+
+(class ApplyShimInterface {
+  constructor() {
+    this.customStyleInterface = null;
+    applyShim['invalidCallback'] = ApplyShimUtils.invalidate;
+  }
+});
+
+(
+  a
+)();
+
+
+aa({});
+
+(function aa(){});");
+            var program = parser.ParseScript();
+            var code = ToJavascriptConverter.ToJavascript(program);
+        }
+
+        [Fact]
+        public void ToJavascriptTest6()
+        {
+            var parser = new JavaScriptParser(@"function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }");
+            var program = parser.ParseScript();
+            var code = ToJavascriptConverter.ToJavascript(program);
+        }
+
+        [Fact]
+        public void ToJavascriptTest7()
+        {
+            var parser = new JavaScriptParser(@"if ((x ? a.nodeName.toLowerCase() === f : 1 === a.nodeType) && ++d && (p && ((i = (o = a[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID] = {}))[h] = [k, d]), a === e))
+{
+}");
+            var program = parser.ParseScript();
+            var code = ToJavascriptConverter.ToJavascript(program);
+        }
     }
 }

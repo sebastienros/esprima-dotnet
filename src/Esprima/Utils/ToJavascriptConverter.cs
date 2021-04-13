@@ -40,8 +40,28 @@ namespace Esprima.Utils
                 return map[value];
             }
 
+            private readonly List<Node> _parentStack = new List<Node>();
+            protected IReadOnlyList<Node> ParentStack => _parentStack;
+
+            /// <summary>
+            /// Returns parent node at specified position.
+            /// </summary>
+            /// <param name="offset">Zero index value returns current node; one corresponds to direct
+            /// parent of current node.</param>
+            protected Node? TryGetParentAt(int offset)
+            {
+                if (_parentStack.Count < offset + 1)
+                {
+                    return null;
+                }
+
+                return _parentStack[_parentStack.Count - 1 - offset];
+            }
+
             public virtual void Visit(Node node)
             {
+                _parentStack.Add(node);
+
                 switch (node.Type)
                 {
                     case Nodes.AssignmentExpression:
@@ -252,6 +272,7 @@ namespace Esprima.Utils
                         VisitUnknownNode(node);
                         break;
                 }
+                _parentStack.RemoveAt(_parentStack.Count - 1);
             }
 
             protected virtual void VisitProgram(Program program)
@@ -266,15 +287,20 @@ namespace Esprima.Utils
 
             protected virtual void VisitCatchClause(CatchClause catchClause)
             {
+                _sb.Append("(");
                 Visit(catchClause.Param);
+                _sb.Append(")");
                 Visit(catchClause.Body);
             }
 
             protected virtual void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
             {
-                _sb.Append("function ");
+                _sb.Append("function");
+                if (functionDeclaration.Generator)
+                    _sb.Append("*");
                 if (functionDeclaration.Id != null)
                 {
+                    _sb.Append(" ");
                     Visit(functionDeclaration.Id);
                 }
                 _sb.Append("(");
@@ -285,20 +311,24 @@ namespace Esprima.Utils
 
             protected virtual void VisitWithStatement(WithStatement withStatement)
             {
+                _sb.Append("with(");
                 Visit(withStatement.Object);
+                _sb.Append(")");
                 Visit(withStatement.Body);
             }
 
             protected virtual void VisitWhileStatement(WhileStatement whileStatement)
             {
+                _sb.Append("while(");
                 Visit(whileStatement.Test);
+                _sb.Append(")");
                 Visit(whileStatement.Body);
             }
 
             protected virtual void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
             {
                 _sb.Append(variableDeclaration.Kind.ToString().ToLower() + " ");
-                VisitNodeList(variableDeclaration.Declarations);
+                VisitNodeList(variableDeclaration.Declarations, appendSeperatorString: ",");
             }
 
             protected virtual void VisitTryStatement(TryStatement tryStatement)
@@ -307,13 +337,12 @@ namespace Esprima.Utils
                 Visit(tryStatement.Block);
                 if (tryStatement.Handler != null)
                 {
-                    _sb.Append(" catch ");
+                    _sb.Append(" catch");
                     Visit(tryStatement.Handler);
                 }
-
                 if (tryStatement.Finalizer != null)
                 {
-                    _sb.Append(" finally ");
+                    _sb.Append(" finally");
                     Visit(tryStatement.Finalizer);
                 }
             }
@@ -322,6 +351,7 @@ namespace Esprima.Utils
             {
                 _sb.Append("throw ");
                 Visit(throwStatement.Argument);
+                _sb.Append(";");
             }
 
             protected virtual void VisitSwitchStatement(SwitchStatement switchStatement)
@@ -354,6 +384,7 @@ namespace Esprima.Utils
                 {
                     Visit(returnStatement.Argument);
                 }
+                _sb.Append(";");
             }
 
             protected virtual void VisitLabeledStatement(LabeledStatement labeledStatement)
@@ -369,9 +400,14 @@ namespace Esprima.Utils
                 Visit(ifStatement.Test);
                 WriteEndLineToSb(")");
                 Visit(ifStatement.Consequent);
+                if (NodeNeedsSemicolon(ifStatement.Consequent))
+                    _sb.Append(";");
                 if (ifStatement.Alternate != null)
                 {
+                    _sb.Append(" else ");
                     Visit(ifStatement.Alternate);
+                    if (NodeNeedsSemicolon(ifStatement.Alternate))
+                        _sb.Append(";");
                 }
             }
 
@@ -387,7 +423,23 @@ namespace Esprima.Utils
 
             protected virtual void VisitExpressionStatement(ExpressionStatement expressionStatement)
             {
-                Visit(expressionStatement.Expression);
+                if (expressionStatement.Expression is CallExpression callExpression && !(callExpression.Callee is Identifier))
+                {
+                    _sb.Append("(");
+                    Visit(callExpression.Callee);
+                    _sb.Append(")");
+                    _sb.Append("(");
+                    VisitNodeList(callExpression.Arguments, appendSeperatorString: ",");
+                    _sb.Append(")");
+                }
+                else if (expressionStatement.Expression is ClassExpression)
+                {
+                    _sb.Append("(");
+                    Visit(expressionStatement.Expression);
+                    _sb.Append(")");
+                }
+                else
+                    Visit(expressionStatement.Expression);
             }
 
             protected virtual void VisitForStatement(ForStatement forStatement)
@@ -409,6 +461,8 @@ namespace Esprima.Utils
                 }
                 _sb.Append(")");
                 Visit(forStatement.Body);
+                if (NodeNeedsSemicolon(forStatement.Body))
+                    _sb.Append(";");
             }
 
             protected virtual void VisitForInStatement(ForInStatement forInStatement)
@@ -419,6 +473,8 @@ namespace Esprima.Utils
                 Visit(forInStatement.Right);
                 _sb.Append(")");
                 Visit(forInStatement.Body);
+                if (NodeNeedsSemicolon(forInStatement.Body))
+                    _sb.Append(";");
             }
 
             protected virtual void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
@@ -453,11 +509,20 @@ namespace Esprima.Utils
 
             protected virtual void VisitUnaryExpression(UnaryExpression unaryExpression)
             {
+                var op = GetEnumValue("unaryoperator", unaryExpression.Operator);
                 if (unaryExpression.Prefix)
-                    _sb.Append(GetEnumValue("unaryoperator", unaryExpression.Operator));
+                {
+                    _sb.Append(op);
+                    if (char.IsLetter(op[0]))
+                        _sb.Append(" ");
+                }
+                if (!(unaryExpression.Argument is Literal) && !(unaryExpression.Argument is UnaryExpression))
+                    _sb.Append("(");
                 Visit(unaryExpression.Argument);
+                if (!(unaryExpression.Argument is Literal) && !(unaryExpression.Argument is UnaryExpression))
+                    _sb.Append(")");
                 if (!unaryExpression.Prefix)
-                    _sb.Append(GetEnumValue("unaryoperator", unaryExpression.Operator));
+                    _sb.Append(op);
             }
 
             protected virtual void VisitUpdateExpression(UpdateExpression updateExpression)
@@ -498,8 +563,13 @@ namespace Esprima.Utils
             protected virtual void VisitMemberExpression(MemberExpression memberExpression)
             {
                 Visit(memberExpression.Object);
-                _sb.Append(".");
+                if (memberExpression.Computed)
+                    _sb.Append("[");
+                else
+                    _sb.Append(".");
                 Visit(memberExpression.Property);
+                if (memberExpression.Computed)
+                    _sb.Append("]");
             }
 
             protected virtual void VisitLiteral(Literal literal)
@@ -514,8 +584,13 @@ namespace Esprima.Utils
 
             protected virtual void VisitFunctionExpression(IFunction function)
             {
+                if (!(TryGetParentAt(1) is MethodDefinition))
+                    _sb.Append("function");
+                if (function.Generator)
+                    _sb.Append("*");
                 if (function.Id != null)
                 {
+                    _sb.Append(" ");
                     Visit(function.Id);
                 }
                 _sb.Append("(");
@@ -526,6 +601,7 @@ namespace Esprima.Utils
 
             protected virtual void VisitClassExpression(ClassExpression classExpression)
             {
+                _sb.Append("class ");
                 if (classExpression.Id != null)
                 {
                     Visit(classExpression.Id);
@@ -533,10 +609,12 @@ namespace Esprima.Utils
 
                 if (classExpression.SuperClass != null)
                 {
+                    _sb.Append(" extends ");
                     Visit(classExpression.SuperClass);
                 }
-
+                _sb.Append("{");
                 Visit(classExpression.Body);
+                _sb.Append("}");
             }
 
             protected virtual void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
@@ -658,6 +736,8 @@ namespace Esprima.Utils
                 Visit(forOfStatement.Right);
                 _sb.Append(")");
                 Visit(forOfStatement.Body);
+                if (NodeNeedsSemicolon(forOfStatement.Body))
+                    _sb.Append(";");
             }
 
             protected virtual void VisitClassDeclaration(ClassDeclaration classDeclaration)
@@ -792,9 +872,17 @@ namespace Esprima.Utils
             {
                 Visit(conditionalExpression.Test);
                 _sb.Append("?");
+                if (ExpressionNeedsBrackets(conditionalExpression.Consequent))
+                    _sb.Append("(");
                 Visit(conditionalExpression.Consequent);
+                if (ExpressionNeedsBrackets(conditionalExpression.Consequent))
+                    _sb.Append(")");
                 _sb.Append(":");
+                if (ExpressionNeedsBrackets(conditionalExpression.Alternate))
+                    _sb.Append("(");
                 Visit(conditionalExpression.Alternate);
+                if (ExpressionNeedsBrackets(conditionalExpression.Alternate))
+                    _sb.Append(")");
             }
 
             protected virtual void VisitCallExpression(CallExpression callExpression)
@@ -807,9 +895,22 @@ namespace Esprima.Utils
 
             protected virtual void VisitBinaryExpression(BinaryExpression binaryExpression)
             {
+                if (ExpressionNeedsBrackets(binaryExpression.Left))
+                    _sb.Append("(");
                 Visit(binaryExpression.Left);
-                _sb.Append(GetEnumValue("operator", binaryExpression.Operator));
+                if (ExpressionNeedsBrackets(binaryExpression.Left))
+                    _sb.Append(")");
+                var op = GetEnumValue("operator", binaryExpression.Operator);
+                if (char.IsLetter(op[0]))
+                    _sb.Append(" ");
+                _sb.Append(op);
+                if (char.IsLetter(op[0]))
+                    _sb.Append(" ");
+                if (ExpressionNeedsBrackets(binaryExpression.Right))
+                    _sb.Append("(");
                 Visit(binaryExpression.Right);
+                if (ExpressionNeedsBrackets(binaryExpression.Right))
+                    _sb.Append(")");
             }
 
             protected virtual void VisitArrayExpression(ArrayExpression arrayExpression)
@@ -821,9 +922,14 @@ namespace Esprima.Utils
 
             protected virtual void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
             {
+                var op = GetEnumValue("assignmentoperator", assignmentExpression.Operator);
                 Visit(assignmentExpression.Left);
-                _sb.Append("=");
+                _sb.Append(op);
+                if (ExpressionNeedsBrackets(assignmentExpression.Right) && !(assignmentExpression.Right is AssignmentExpression))
+                    _sb.Append("(");
                 Visit(assignmentExpression.Right);
+                if (ExpressionNeedsBrackets(assignmentExpression.Right) && !(assignmentExpression.Right is AssignmentExpression))
+                    _sb.Append(")");
             }
 
             protected virtual void VisitContinueStatement(ContinueStatement continueStatement)
@@ -917,11 +1023,24 @@ namespace Esprima.Utils
                     node is ForOfStatement ||
                     node is ForStatement ||
                     node is FunctionDeclaration ||
+                    node is ReturnStatement ||
+                    node is ThrowStatement ||
                     node is ClassDeclaration)
                     return false;
                 if (node is ExportNamedDeclaration end)
                     return NodeNeedsSemicolon(end.Declaration);
                 return true;
+            }
+
+            public bool ExpressionNeedsBrackets(Node? node)
+            {
+                if (node is AssignmentExpression)
+                    return true;
+                if (node is SequenceExpression)
+                    return true;
+                if (node is ConditionalExpression)
+                    return true;
+                return false;
             }
         }
     }
