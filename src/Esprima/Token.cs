@@ -30,6 +30,7 @@ namespace Esprima
 
         // For NumericLiteral
         public bool Octal;
+        public char? NotEscapeSequenceHead;
 
         // For templates
         public bool Head;

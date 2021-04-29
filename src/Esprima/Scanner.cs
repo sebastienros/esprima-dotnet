@@ -19,9 +19,9 @@ namespace Esprima
         public readonly int Index;
         public readonly int LineNumber;
         public readonly int LineStart;
-        public readonly Stack<string> CurlyStack;
+        public readonly List<string> CurlyStack;
 
-        public ScannerState(int index, int lineNumber, int lineStart, Stack<string> curlyStack)
+        public ScannerState(int index, int lineNumber, int lineStart, List<string> curlyStack)
         {
             Index = index;
             LineNumber = lineNumber;
@@ -44,7 +44,7 @@ namespace Esprima
 
         internal bool IsModule;
 
-        private Stack<string> _curlyStack;
+        private List<string> _curlyStack;
         private readonly StringBuilder strb = new StringBuilder();
 
         private static readonly HashSet<string> Keywords = new HashSet<string>
@@ -157,13 +157,13 @@ namespace Esprima
             Index = 0;
             LineNumber = (code.Length > 0) ? 1 : 0;
             LineStart = 0;
-            _curlyStack = new Stack<string>(20);
+            _curlyStack = new List<string>(20);
         }
 
 
         internal ScannerState SaveState()
         {
-            return new ScannerState(Index, LineNumber, LineStart, new Stack<string>(_curlyStack));
+            return new ScannerState(Index, LineNumber, LineStart, new List<string>(_curlyStack));
         }
 
         internal void RestoreState(in ScannerState state)
@@ -514,7 +514,7 @@ namespace Esprima
             return true;
         }
 
-        public string ScanUnicodeCodePointEscape()
+        public string? TryToScanUnicodeCodePointEscape()
         {
             var ch = Source[Index];
             int code = 0;
@@ -522,7 +522,7 @@ namespace Esprima
             // At least, one hex digit is required.
             if (ch == '}')
             {
-                ThrowUnexpectedToken();
+                return null;
             }
 
             while (!Eof())
@@ -537,10 +537,20 @@ namespace Esprima
 
             if (code > 0x10FFFF || ch != '}')
             {
-                ThrowUnexpectedToken();
+                return null;
             }
 
             return Character.FromCodePoint(code);
+        }
+
+        private string ScanUnicodeCodePointEscape()
+        {
+            var result = TryToScanUnicodeCodePointEscape();
+            if (result is null)
+            {
+                ThrowUnexpectedToken();
+            }
+            return result!;
         }
 
         public string GetIdentifier()
@@ -742,7 +752,7 @@ namespace Esprima
                 case '{':
                     if (c == '{')
                     {
-                        _curlyStack.Push("{");
+                        _curlyStack.Add("{");
                     }
                     ++Index;
                     break;
@@ -761,7 +771,7 @@ namespace Esprima
                     ++Index;
                     if (_curlyStack.Count > 0)
                     {
-                        _curlyStack.Pop();
+                        _curlyStack.RemoveAt(_curlyStack.Count - 1);
                     }
                     break;
 
@@ -1302,8 +1312,9 @@ namespace Esprima
             var terminated = false;
             var start = Index;
 
-            var head = (Source[start] == '`');
+            var head = Source[start] == '`';
             var tail = false;
+            char? notEscapeSequenceHead = null;
             var rawOffset = 2;
 
             ++Index;
@@ -1322,12 +1333,16 @@ namespace Esprima
                 {
                     if (Source[Index] == '{')
                     {
-                        _curlyStack.Push("${");
+                        _curlyStack.Add("${");
                         ++Index;
                         terminated = true;
                         break;
                     }
                     cooked.Append(ch);
+                }
+                else if (notEscapeSequenceHead is not null)
+                {
+                    continue;
                 }
                 else if (ch == '\\')
                 {
@@ -1349,29 +1364,37 @@ namespace Esprima
                                 if (Source[Index] == '{')
                                 {
                                     ++Index;
-                                    cooked.Append(ScanUnicodeCodePointEscape());
-                                }
-                                else
-                                {
-                                    var restore = Index;
-                                    char unescaped;
-                                    if (ScanHexEscape(ch, out unescaped))
+                                    var unicodeCodePointEscape = TryToScanUnicodeCodePointEscape();
+                                    if (unicodeCodePointEscape is null)
                                     {
-                                        cooked.Append(unescaped);
+                                        notEscapeSequenceHead = 'u';
                                     }
                                     else
                                     {
-                                        Index = restore;
-                                        cooked.Append(ch);
+                                        cooked.Append(unicodeCodePointEscape);
+                                    }
+                                }
+                                else
+                                {
+                                    if (!ScanHexEscape(ch, out var unescapedChar))
+                                    {
+                                        notEscapeSequenceHead = 'u';
+                                    }
+                                    else
+                                    {
+                                        cooked.Append(unescapedChar);
                                     }
                                 }
                                 break;
                             case 'x':
                                 if (!ScanHexEscape(ch, out var unescaped2))
                                 {
-                                    ThrowUnexpectedToken(Messages.InvalidHexEscapeSequence);
+                                    notEscapeSequenceHead = 'x';
                                 }
-                                cooked.Append(unescaped2);
+                                else
+                                {
+                                    cooked.Append(unescaped2);
+                                }
                                 break;
                             case 'b':
                                 cooked.Append("\b");
@@ -1388,15 +1411,18 @@ namespace Esprima
                                 {
                                     if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                                     {
-                                        // Illegal: \01 \02 and so on
-                                        ThrowUnexpectedToken(Messages.TemplateOctalLiteral);
+                                        // NotEscapeSequence: \01 \02 and so on
+                                        notEscapeSequenceHead = '0';
                                     }
-                                    cooked.Append("\0");
+                                    else
+                                    {
+                                        cooked.Append("\0");
+                                    }
                                 }
-                                else if (Character.IsOctalDigit(ch))
+                                else if (Character.IsDecimalDigit(ch))
                                 {
-                                    // Illegal: \1 \2
-                                    ThrowUnexpectedToken(Messages.TemplateOctalLiteral);
+                                    // NotEscapeSequence: \1 \2
+                                    notEscapeSequenceHead = ch;
                                 }
                                 else
                                 {
@@ -1438,16 +1464,17 @@ namespace Esprima
 
             if (!head)
             {
-                _curlyStack.Pop();
+                _curlyStack.RemoveAt(_curlyStack.Count - 1);
             }
 
             return new Token
             {
                 Type = TokenType.Template,
-                Value = cooked.ToString(),
+                Value = notEscapeSequenceHead is null ? cooked.ToString() : null,
                 RawTemplate = Source.Slice(start + 1, Index - rawOffset),
                 Head = head,
                 Tail = tail,
+                NotEscapeSequenceHead = notEscapeSequenceHead,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -1742,7 +1769,7 @@ namespace Esprima
 
             // Template literals start with ` (U+0060) for template head
             // or } (U+007D) for template middle or template tail.
-            if (cp == 0x60 || (cp == 0x7D && _curlyStack.Count > 0 && _curlyStack.Peek() == "${"))
+            if (cp == 0x60 || (cp == 0x7D && _curlyStack.Count > 0 && _curlyStack[_curlyStack.Count - 1] == "${"))
             {
                 return ScanTemplate();
             }
