@@ -529,9 +529,6 @@ namespace Esprima.Utils
                 }
             }
 
-            protected override void VisitLogicalExpression(BinaryExpression binaryExpression) =>
-                VisitBinaryExpression(binaryExpression);
-
             protected override void VisitLiteral(Literal literal)
             {
                 using (StartNodeObject(literal))

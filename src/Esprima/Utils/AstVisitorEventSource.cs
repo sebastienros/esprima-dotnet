@@ -14,8 +14,6 @@ namespace Esprima.Utils
         public event EventHandler<Node>? VisitedNode;
         public event EventHandler<Program>? VisitingProgram;
         public event EventHandler<Program>? VisitedProgram;
-        public event EventHandler<Statement>? VisitingStatement;
-        public event EventHandler<Statement>? VisitedStatement;
         public event EventHandler<Node>? VisitingUnknownNode;
         public event EventHandler<Node>? VisitedUnknownNode;
         public event EventHandler<CatchClause>? VisitingCatchClause;
@@ -54,8 +52,6 @@ namespace Esprima.Utils
         public event EventHandler<ForInStatement>? VisitedForInStatement;
         public event EventHandler<DoWhileStatement>? VisitingDoWhileStatement;
         public event EventHandler<DoWhileStatement>? VisitedDoWhileStatement;
-        public event EventHandler<Expression>? VisitingExpression;
-        public event EventHandler<Expression>? VisitedExpression;
         public event EventHandler<ArrowFunctionExpression>? VisitingArrowFunctionExpression;
         public event EventHandler<ArrowFunctionExpression>? VisitedArrowFunctionExpression;
         public event EventHandler<UnaryExpression>? VisitingUnaryExpression;
@@ -72,8 +68,6 @@ namespace Esprima.Utils
         public event EventHandler<NewExpression>? VisitedNewExpression;
         public event EventHandler<MemberExpression>? VisitingMemberExpression;
         public event EventHandler<MemberExpression>? VisitedMemberExpression;
-        public event EventHandler<BinaryExpression>? VisitingLogicalExpression;
-        public event EventHandler<BinaryExpression>? VisitedLogicalExpression;
         public event EventHandler<Literal>? VisitingLiteral;
         public event EventHandler<Literal>? VisitedLiteral;
         public event EventHandler<Identifier>? VisitingIdentifier;
@@ -163,13 +157,6 @@ namespace Esprima.Utils
             VisitingProgram?.Invoke(this, program);
             base.VisitProgram(program);
             VisitedProgram?.Invoke(this, program);
-        }
-
-        protected override void VisitStatement(Statement statement)
-        {
-            VisitingStatement?.Invoke(this, statement);
-            base.VisitStatement(statement);
-            VisitedStatement?.Invoke(this, statement);
         }
 
         protected override void VisitUnknownNode(Node node)
@@ -305,13 +292,6 @@ namespace Esprima.Utils
             VisitedDoWhileStatement?.Invoke(this, doWhileStatement);
         }
 
-        protected override void VisitExpression(Expression expression)
-        {
-            VisitingExpression?.Invoke(this, expression);
-            base.VisitExpression(expression);
-            VisitedExpression?.Invoke(this, expression);
-        }
-
         protected override void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
         {
             VisitingArrowFunctionExpression?.Invoke(this, arrowFunctionExpression);
@@ -366,13 +346,6 @@ namespace Esprima.Utils
             VisitingMemberExpression?.Invoke(this, memberExpression);
             base.VisitMemberExpression(memberExpression);
             VisitedMemberExpression?.Invoke(this, memberExpression);
-        }
-
-        protected override void VisitLogicalExpression(BinaryExpression binaryExpression)
-        {
-            VisitingLogicalExpression?.Invoke(this, binaryExpression);
-            base.VisitLogicalExpression(binaryExpression);
-            VisitedLogicalExpression?.Invoke(this, binaryExpression);
         }
 
         protected override void VisitLiteral(Literal literal)
