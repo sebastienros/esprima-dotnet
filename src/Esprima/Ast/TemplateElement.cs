@@ -13,7 +13,7 @@
 
         public sealed class TemplateElementValue
         {
-            public string Cooked = "";
+            public string? Cooked;
             public string Raw = "";
         }
 

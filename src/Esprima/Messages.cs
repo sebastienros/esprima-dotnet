@@ -30,6 +30,7 @@
         public const string InvalidLHSInForLoop = "Invalid left-hand side in for-loop";
         public const string InvalidModuleSpecifier = "Unexpected token";
         public const string InvalidRegExp = "Invalid regular expression";
+        public const string InvalidUnicodeEscapeSequence = "Invalid Unicode escape sequence";
         public const string LetInLexicalBinding = "let is disallowed as a lexically bound name";
         public const string MissingFromClause = "Unexpected token";
         public const string MultipleDefaultsInSwitch = "More than one default clause in switch statement";
@@ -54,6 +55,7 @@
         public const string StrictReservedWord = "Use of future reserved word in strict mode";
         public const string StrictVarName = "Variable name may not be eval or arguments in strict mode";
         public const string TemplateOctalLiteral = "Octal literals are not allowed in template strings.";
+        public const string TemplateEscape89 = "\\8 and \\9 are not allowed in template strings.";
         public const string UnexpectedEOS = "Unexpected end of input";
         public const string UnexpectedIdentifier = "Unexpected identifier";
         public const string UnexpectedNumber = "Unexpected number";
