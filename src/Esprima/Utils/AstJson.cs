@@ -166,6 +166,11 @@ namespace Esprima.Utils
 
                 void WriteLocationInfo(Node node)
                 {
+                    if (node is ChainExpression)
+                    {
+                        return;
+                    }
+
                     if (includeRange)
                     {
                         _writer.Member("range");
@@ -601,6 +606,12 @@ namespace Esprima.Utils
                     Member("superClass", classExpression.SuperClass);
                     Member("body", classExpression.Body);
                 }
+            }
+
+            protected override void VisitChainExpression(ChainExpression chainExpression)
+            {
+                using (StartNodeObject(chainExpression)) 
+                    Member("expression", chainExpression.Expression);
             }
 
             protected override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
