@@ -4136,6 +4136,7 @@ namespace Esprima
                     {
                         isAsync = true;
                         token = _lookahead;
+                        computed = Match("[");
                         key = ParseObjectPropertyKey();
                         if (token.Type == TokenType.Identifier && (string?) token.Value == "constructor")
                         {

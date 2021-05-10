@@ -71,6 +71,7 @@
                     }
                   },
                   "computed": false,
+                  "optional": false,
                   "range": [
                     11,
                     26
