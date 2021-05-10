@@ -526,6 +526,7 @@ namespace Esprima.Utils
                     Member("computed", memberExpression.Computed);
                     Member("object", memberExpression.Object);
                     Member("property", memberExpression.Property);
+                    Member("optional", memberExpression.Optional);
                 }
             }
 
@@ -848,7 +849,8 @@ namespace Esprima.Utils
                 using (StartNodeObject(callExpression))
                 {
                     Member("callee", callExpression.Callee);
-                    Member("arguments", callExpression.Arguments, e => (Expression) e);
+                    Member("arguments", callExpression.Arguments, e => e);
+                    Member("optional", callExpression.Optional);
                 }
             }
 
