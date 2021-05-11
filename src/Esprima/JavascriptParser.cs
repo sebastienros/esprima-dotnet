@@ -1487,7 +1487,22 @@ namespace Esprima
         {
             var node = CreateNode();
             ExpectKeyword("import");
-            return this.Finalize(node, new Import());
+            Expect("(");
+            var source = ParseExpression();
+
+            if (!Match(")") && _config.Tolerant)
+            {
+                TolerateUnexpectedToken(NextToken());
+            }
+            else
+            {
+                Expect(")");
+                if (Match(";"))
+                {
+                    NextToken();
+                }
+            }
+            return this.Finalize(node, new Import(source));
         }
 
         private Expression ParseLeftHandSideExpressionAllowCall()
