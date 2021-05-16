@@ -3283,34 +3283,38 @@ namespace Esprima
 
             ExpectKeyword("catch");
 
-            Expect("(");
-            if (Match(")"))
+            Expression? param = null;
+            if (Match("(")) 
             {
-                ThrowUnexpectedToken(_lookahead);
-            }
-
-            var parameters = new ArrayList<Token>();
-            var param = ParsePattern(ref parameters);
-            var paramMap = new Dictionary<string?, bool>();
-            for (var i = 0; i < parameters.Count; i++)
-            {
-                var key = (string?) parameters[i].Value;
-                if (paramMap.ContainsKey(key))
+                Expect("(");
+                if (Match(")")) 
                 {
-                    TolerateError(Messages.DuplicateBinding, parameters[i].Value);
+                    ThrowUnexpectedToken(_lookahead);
                 }
-                paramMap[key] = true;
-            }
 
-            if (_context.Strict && param.Type == Nodes.Identifier)
-            {
-                if (Scanner.IsRestrictedWord(param.As<Identifier>().Name))
+                var parameters = new ArrayList<Token>();
+                param = ParsePattern(ref parameters);
+                var paramMap = new Dictionary<string?, bool>();
+                for (var i = 0; i < parameters.Count; i++)
                 {
-                    TolerateError(Messages.StrictCatchVariable);
+                    var key = (string?) parameters[i].Value;
+                    {
+                        TolerateError(Messages.DuplicateBinding, parameters[i].Value);
+                    }
+                    paramMap[key] = true;
                 }
+
+                if (_context.Strict && param.Type == Nodes.Identifier)
+                {
+                    if (Scanner.IsRestrictedWord(param.As<Identifier>().Name))
+                    {
+                        TolerateError(Messages.StrictCatchVariable);
+                    }
+                }
+
+                Expect(")");
             }
 
-            Expect(")");
             var body = ParseBlock();
 
             return Finalize(node, new CatchClause(param, body));
