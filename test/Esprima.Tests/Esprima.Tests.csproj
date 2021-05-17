@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net461</TargetFrameworks>
     <AssemblyName>Esprima.Tests</AssemblyName>
     <PackageId>Esprima.Tests</PackageId>
     <DefineConstants Condition="'$(Checked)' == true or $(Configuration) == 'Debug'">$(DefineConstants);LOCATION_ASSERTS</DefineConstants>
