@@ -1,0 +1,4 @@
+* text eol=lf
+
+**migrated_0017* text eol=crlf
+**multiline_string_literal* text eol=crlf
