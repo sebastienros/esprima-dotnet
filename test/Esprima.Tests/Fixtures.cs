@@ -71,12 +71,15 @@ namespace Esprima.Test
                 moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".module.json";
             }
 
+            bool replaceEncodedLineEndings = false;
+
             // Convert to LF to match the number of chars the parser finds, but some tests expect to check Windows
             // TODO should be based on .gitattributes
             var script = File.ReadAllText(jsFilePath);
             if (!jsFilePath.EndsWith("primary\\literal\\string\\migrated_0017.js")
                 && !jsFilePath.EndsWith("expression\\binary\\multiline_string_literal.js"))
             {
+                replaceEncodedLineEndings = true;
                 script = script.Replace(Environment.NewLine, "\n");
             }
 
@@ -115,6 +118,7 @@ namespace Esprima.Test
             else if(File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
+                expected = expected.Replace("\\r\\n", "\\n");
             }
             else if (File.Exists(failureFilePath))
             {
