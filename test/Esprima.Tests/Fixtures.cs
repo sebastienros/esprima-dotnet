@@ -118,7 +118,11 @@ namespace Esprima.Test
             else if(File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
-                expected = expected.Replace("\\r\\n", "\\n");
+                
+                if (replaceEncodedLineEndings)
+                {
+                    expected = expected.Replace("\\r\\n", "\\n");
+                }
             }
             else if (File.Exists(failureFilePath))
             {
