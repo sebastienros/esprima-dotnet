@@ -152,7 +152,7 @@ namespace Esprima.Test
 
         private static string GetFixturesPath()
         {
-            var assemblyPath = new Uri(typeof(Fixtures).GetTypeInfo().Assembly.CodeBase).LocalPath;
+            var assemblyPath = new Uri(typeof(EcmaTest).GetTypeInfo().Assembly.Location).LocalPath;
             var assemblyDirectory = new FileInfo(assemblyPath).Directory;
 
             var root = assemblyDirectory.Parent.Parent.Parent.FullName;
