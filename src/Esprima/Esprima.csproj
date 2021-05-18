@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Standard-compliant ECMAScript 2016 parser (also popularly known as JavaScript or ES6).</Description>
+    <Description>Standard-compliant ECMAScript 2018 parser (also known as JavaScript).</Description>
     <Copyright>Sebastien Ros</Copyright>
     <AssemblyName>Esprima</AssemblyName>
     <AssemblyTitle>Esprima .NET</AssemblyTitle>
@@ -11,7 +11,7 @@
     <AssemblyOriginatorKeyFile>../Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PackageId>Esprima</PackageId>
-    <PackageTags>javascript, parser</PackageTags>
+    <PackageTags>javascript, parser, ecmascript</PackageTags>
     <PackageProjectUrl>https://github.com/sebastienros/esprima-dotnet</PackageProjectUrl>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <Version>2.0.0-beta-$(BuildNumber)</Version>
