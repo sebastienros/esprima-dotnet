@@ -316,7 +316,10 @@ namespace Esprima.Utils
 
         protected virtual void VisitCatchClause(CatchClause catchClause)
         {
-            VisitIdentifier(catchClause.Param.As<Identifier>());
+            if (catchClause.Param is not null)
+            {
+                VisitIdentifier(catchClause.Param.As<Identifier>());
+            }
             VisitStatement(catchClause.Body);
         }
 

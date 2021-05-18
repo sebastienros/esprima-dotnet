@@ -2,10 +2,10 @@ namespace Esprima.Ast
 {
     public sealed class CatchClause : Statement
     {
-        public readonly Expression Param; // BindingIdentifier | BindingPattern;
+        public readonly Expression? Param; // BindingIdentifier | BindingPattern | null;
         public readonly BlockStatement Body;
 
-        public CatchClause(Expression param, BlockStatement body) :
+        public CatchClause(Expression? param, BlockStatement body) :
             base(Nodes.CatchClause)
         {
             Param = param;
