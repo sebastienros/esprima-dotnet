@@ -1514,18 +1514,18 @@ namespace Esprima
                 expr = MatchKeyword("new") ? InheritCoverGrammar(parseNewExpression) : InheritCoverGrammar(parsePrimaryExpression);
             }
 
+            var hasOptional = false;
             while (true)
             {
-                if (Match("."))
+                var optional = false;
+                if (Match("?."))
                 {
-                    _context.IsBindingElement = false;
-                    _context.IsAssignmentTarget = true;
-                    Expect(".");
-                    var property = ParseIdentifierName();
-                    expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property));
-
+                    optional = true;
+                    hasOptional = true;
+                    Expect("?.");
                 }
-                else if (Match("("))
+
+                if (Match("("))
                 {
                     var asyncArrow = maybeAsync && (startToken.LineNumber == _lookahead.LineNumber);
                     _context.IsBindingElement = false;
@@ -1535,7 +1535,7 @@ namespace Esprima
                     {
                         TolerateError(Messages.BadImportCallArity);
                     }
-                    expr = Finalize(StartNode(startToken), new CallExpression(expr, args));
+                    expr = Finalize(StartNode(startToken), new CallExpression(expr, args, optional));
                     if (asyncArrow && Match("=>"))
                     {
                         var nodeArguments = new ArrayList<Expression>();
@@ -1549,24 +1549,52 @@ namespace Esprima
                 else if (Match("["))
                 {
                     _context.IsBindingElement = false;
-                    _context.IsAssignmentTarget = true;
+                    _context.IsAssignmentTarget = !optional;
                     Expect("[");
                     var property = IsolateCoverGrammar(parseExpression);
                     Expect("]");
-                    expr = Finalize(StartNode(startToken), new ComputedMemberExpression(expr, property));
+                    expr = Finalize(StartNode(startToken), new ComputedMemberExpression(expr, property, optional));
 
                 }
                 else if (_lookahead.Type == TokenType.Template && _lookahead.Head)
                 {
+                    // Optional template literal is not included in the spec.
+                    // https://github.com/tc39/proposal-optional-chaining/issues/54
+                    if (optional)
+                    {
+                        ThrowUnexpectedToken(_lookahead);
+                    }
+                    if (hasOptional)
+                    {
+                        ThrowError(Messages.InvalidTaggedTemplateOnOptionalChain);
+                    }
+
                     var quasi = ParseTemplateLiteral(isTagged: true);
                     expr = Finalize(StartNode(startToken), new TaggedTemplateExpression(expr, quasi));
+                }
+                else if (Match(".") || optional)
+                {
+                    this._context.IsBindingElement = false;
+                    this._context.IsAssignmentTarget = !optional;
+                    if (!optional)
+                    {
+                        Expect(".");
+                    }
+                    var property = ParseIdentifierName();
+                    expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
                 }
                 else
                 {
                     break;
                 }
             }
+
             _context.AllowIn = previousAllowIn;
+
+            if (hasOptional)
+            {
+                return new ChainExpression(expr);
+            }
 
             return expr;
         }
@@ -1595,36 +1623,60 @@ namespace Esprima
                     ? InheritCoverGrammar(parseNewExpression)
                     : InheritCoverGrammar(parsePrimaryExpression);
 
+            var hasOptional = false;
             while (true)
             {
+                var optional = false;
+                if (Match("?."))
+                {
+                    optional = true;
+                    hasOptional = true;
+                    Expect("?.");
+                }
                 if (Match("["))
                 {
                     _context.IsBindingElement = false;
-                    _context.IsAssignmentTarget = true;
+                    _context.IsAssignmentTarget = !optional;
                     Expect("[");
                     var property = IsolateCoverGrammar(parseExpression);
                     Expect("]");
-                    expr = Finalize(node, new ComputedMemberExpression(expr, property));
-
-                }
-                else if (Match("."))
-                {
-                    _context.IsBindingElement = false;
-                    _context.IsAssignmentTarget = true;
-                    Expect(".");
-                    var property = ParseIdentifierName();
-                    expr = Finalize(node, new StaticMemberExpression(expr, property));
-
+                    expr = Finalize(node, new ComputedMemberExpression(expr, property, optional));
                 }
                 else if (_lookahead.Type == TokenType.Template && _lookahead.Head)
                 {
+                    // Optional template literal is not included in the spec.
+                    // https://github.com/tc39/proposal-optional-chaining/issues/54
+                    if (optional)
+                    {
+                        ThrowUnexpectedToken(_lookahead);
+                    }
+                    if (hasOptional)
+                    {
+                        ThrowError(Messages.InvalidTaggedTemplateOnOptionalChain);
+                    }
                     var quasi = ParseTemplateLiteral(isTagged: true);
                     expr = Finalize(node, new TaggedTemplateExpression(expr, quasi));
+                }
+                else if (Match(".") || optional)
+                {
+                    _context.IsBindingElement = false;
+                    _context.IsAssignmentTarget = !optional;
+                    if (!optional)
+                    {
+                        Expect(".");
+                    }
+                    var property = ParseIdentifierName();
+                    expr = Finalize(node, new StaticMemberExpression(expr, property, optional));
                 }
                 else
                 {
                     break;
                 }
+            }
+
+            if (hasOptional)
+            {
+                return new ChainExpression(expr);
             }
 
             return expr;
@@ -4084,6 +4136,7 @@ namespace Esprima
                     {
                         isAsync = true;
                         token = _lookahead;
+                        computed = Match("[");
                         key = ParseObjectPropertyKey();
                         if (token.Type == TokenType.Identifier && (string?) token.Value == "constructor")
                         {

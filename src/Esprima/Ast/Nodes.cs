@@ -9,6 +9,7 @@
         BreakStatement,
         CallExpression,
         CatchClause,
+        ChainExpression,
         ConditionalExpression,
         ContinueStatement,
         DoWhileStatement,

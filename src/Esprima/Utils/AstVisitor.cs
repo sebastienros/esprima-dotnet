@@ -216,6 +216,9 @@ namespace Esprima.Utils
                 case Nodes.ClassExpression:
                     VisitClassExpression(node.As<ClassExpression>());
                     break;
+                case Nodes.ChainExpression:
+                    VisitChainExpression(node.As<ChainExpression>());
+                    break;
                 default:
                     VisitUnknownNode(node);
                     break;
@@ -613,6 +616,10 @@ namespace Esprima.Utils
                 Visit(param!);
             }
             Visit(function.Body);
+        }
+
+        protected virtual void VisitChainExpression(ChainExpression chainExpression)
+        {
         }
 
         protected virtual void VisitClassExpression(ClassExpression classExpression)

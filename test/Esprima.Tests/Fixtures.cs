@@ -44,7 +44,13 @@ namespace Esprima.Test
             expectedJObject.Remove("comments");
             expectedJObject.Remove("errors");
 
-            return JToken.DeepEquals(actualJObject, expectedJObject);
+            var areEqual = JToken.DeepEquals(actualJObject, expectedJObject);
+            if (!areEqual)
+            {
+                var actualString = actualJObject.ToString();
+                var expectedString = expectedJObject.ToString();
+            }
+            return areEqual;
         }
 
         [Theory]

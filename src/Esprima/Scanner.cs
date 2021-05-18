@@ -775,6 +775,23 @@ namespace Esprima
                     }
                     break;
 
+
+                case '?':
+                    ++Index;
+                    if (Source[Index] == '?')
+                    {
+                        ++Index;
+                        str = "??";
+                    }
+                    if (Source[Index] == '.' && !char.IsDigit(Source[Index + 1]))
+                    {
+                        // "?." in "foo?.3:0" should not be treated as optional chaining.
+                        // See https://github.com/tc39/proposal-optional-chaining#notes
+                        ++Index;
+                        str = "?.";
+                    }
+                    break;
+
                 case ')':
                 case ';':
                 case ',':
@@ -814,7 +831,7 @@ namespace Esprima
                             {
                                 // 1-character punctuators.
                                 str = Source[Index].ToString();
-                                if ("<>=!+-*%&|?^/".IndexOf(str, StringComparison.Ordinal) >= 0)
+                                if ("<>=!+-*%&|^/".IndexOf(str, StringComparison.Ordinal) >= 0)
                                 {
                                     ++Index;
                                 }

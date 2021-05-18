@@ -166,6 +166,11 @@ namespace Esprima.Utils
 
                 void WriteLocationInfo(Node node)
                 {
+                    if (node is ChainExpression)
+                    {
+                        return;
+                    }
+
                     if (includeRange)
                     {
                         _writer.Member("range");
@@ -526,6 +531,7 @@ namespace Esprima.Utils
                     Member("computed", memberExpression.Computed);
                     Member("object", memberExpression.Object);
                     Member("property", memberExpression.Property);
+                    Member("optional", memberExpression.Optional);
                 }
             }
 
@@ -600,6 +606,12 @@ namespace Esprima.Utils
                     Member("superClass", classExpression.SuperClass);
                     Member("body", classExpression.Body);
                 }
+            }
+
+            protected override void VisitChainExpression(ChainExpression chainExpression)
+            {
+                using (StartNodeObject(chainExpression)) 
+                    Member("expression", chainExpression.Expression);
             }
 
             protected override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
@@ -848,7 +860,8 @@ namespace Esprima.Utils
                 using (StartNodeObject(callExpression))
                 {
                     Member("callee", callExpression.Callee);
-                    Member("arguments", callExpression.Arguments, e => (Expression) e);
+                    Member("arguments", callExpression.Arguments, e => e);
+                    Member("optional", callExpression.Optional);
                 }
             }
 

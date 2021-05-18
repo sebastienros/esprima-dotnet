@@ -80,6 +80,8 @@ namespace Esprima.Utils
         public event EventHandler<Identifier>? VisitedIdentifier;
         public event EventHandler<IFunction>? VisitingFunctionExpression;
         public event EventHandler<IFunction>? VisitedFunctionExpression;
+        public event EventHandler<ChainExpression>? VisitingChainExpression;
+        public event EventHandler<ChainExpression>? VisitedChainExpression;
         public event EventHandler<ClassExpression>? VisitingClassExpression;
         public event EventHandler<ClassExpression>? VisitedClassExpression;
         public event EventHandler<ExportDefaultDeclaration>? VisitingExportDefaultDeclaration;
@@ -394,6 +396,13 @@ namespace Esprima.Utils
             VisitingFunctionExpression?.Invoke(this, function);
             base.VisitFunctionExpression(function);
             VisitedFunctionExpression?.Invoke(this, function);
+        }
+
+        protected override void VisitChainExpression(ChainExpression chainExpression)
+        {
+            VisitingChainExpression?.Invoke(this, chainExpression);
+            base.VisitChainExpression(chainExpression);
+            VisitedChainExpression?.Invoke(this, chainExpression);
         }
 
         protected override void VisitClassExpression(ClassExpression classExpression)
