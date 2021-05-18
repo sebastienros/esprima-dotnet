@@ -5,13 +5,13 @@ on:
     branches: [ main, release/1.x, release/2.x ]
     paths-ignore:
     - 'doc/**'
-    - 'readme.md'
+    - '*.md'
 
   pull_request:
     branches: [ main, release/1.x, release/2.x ]
     paths-ignore:
     - 'doc/**'
-    - 'readme.md'
+    - '*.md'
 
 jobs:
 
