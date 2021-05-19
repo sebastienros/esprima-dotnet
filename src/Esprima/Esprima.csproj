@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Standard-compliant ECMAScript 2018 parser (also known as JavaScript).</Description>
+    <Description>Standard-compliant ECMAScript 2019 parser (also known as JavaScript).</Description>
     <Copyright>Sebastien Ros</Copyright>
     <AssemblyName>Esprima</AssemblyName>
     <AssemblyTitle>Esprima .NET</AssemblyTitle>
