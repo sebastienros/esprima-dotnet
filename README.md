@@ -8,7 +8,7 @@ parser (also popularly known as
 
 ### Features
 
-- Full support for ECMAScript 2018 ([ECMA-262 9th Edition](http://www.ecma-international.org/publications/standards/Ecma-262.htm))
+- Full support for ECMAScript 2019 ([ECMA-262 10th Edition](http://www.ecma-international.org/publications/standards/Ecma-262.htm))
 - Sensible [syntax tree format](https://github.com/estree/estree/blob/master/es5.md) as standardized by [ESTree project](https://github.com/estree/estree)
 - Optional tracking of syntax node location (index-based and line-column)
 - Heavily tested
