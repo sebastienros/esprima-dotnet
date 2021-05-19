@@ -3350,6 +3350,7 @@ namespace Esprima
                 for (var i = 0; i < parameters.Count; i++)
                 {
                     var key = (string?) parameters[i].Value;
+                    if (paramMap.ContainsKey(key))
                     {
                         TolerateError(Messages.DuplicateBinding, parameters[i].Value);
                     }
