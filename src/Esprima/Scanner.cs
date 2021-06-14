@@ -1549,6 +1549,13 @@ namespace Esprima
                 tmp = Regex.Replace(tmp, "[\uD800-\uDBFF][\uDC00-\uDFFF]", astralSubstitute);
             }
 
+            // .NET doesn't support [^] which is equivalent to `[^.]`
+            // c.f. https://github.com/sebastienros/esprima-dotnet/issues/146
+            if (tmp.Contains("[^]"))
+            {
+                tmp = tmp.Replace("[^]", "[^.]");
+            }
+
             // First, detect invalid regular expressions.
             var options = ParseRegexOptions(flags);
 
