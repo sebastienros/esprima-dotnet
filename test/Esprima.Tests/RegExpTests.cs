@@ -21,5 +21,17 @@ namespace Esprima.Tests
             var token = new Scanner(code, options).ScanRegExp();
             return (Regex) token.Value;
         }
+
+        [Theory]
+        [InlineData(@"/[^]*? (:[rp] [el] a[\w -]+)[^]*/")]
+        [InlineData(@"/[^]/")]
+        [InlineData(@"/[^ ]/")]
+        public void ShouldParseRegularExpression(string regexp)
+        {
+            var parser = new JavaScriptParser(@"var O = " + regexp);
+            var program = parser.ParseScript();
+
+            Assert.NotNull(program);
+        }
     }
 }
