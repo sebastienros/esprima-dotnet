@@ -1574,20 +1574,29 @@ namespace Esprima
             try
             {
                 // Do we need to convert the expression to its .NET equivalent?
-                if (_adaptRegexp && options.HasFlag(RegexOptions.Multiline))
+                if (_adaptRegexp)
                 {
-                    // Replace all non-escaped $ occurences by \r?$
-                    // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
-
-                    int index = 0;
                     var newPattern = pattern;
-                    while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
+
+                    if (options.HasFlag(RegexOptions.Multiline))
                     {
-                        if (index > 0 && newPattern[index - 1] != '\\')
+                        // Replace all non-escaped $ occurences by \r?$
+                        // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
+
+                        int index = 0;
+                        while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                         {
-                            newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
-                            index += 4;
+                            if (index > 0 && newPattern[index - 1] != '\\')
+                            {
+                                newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
+                                index += 4;
+                            }
                         }
+                    }
+
+                    if (newPattern.Contains("[^]"))
+                    {
+                        newPattern = newPattern.Replace("[^]", "[^.]");
                     }
 
                     pattern = newPattern;

@@ -33,5 +33,17 @@ namespace Esprima.Tests
 
             Assert.NotNull(program);
         }
+
+        [Theory]
+        [InlineData(@"/[^]*? (:[rp] [el] a[\w -]+)[^]*/")]
+        [InlineData(@"/[^]/")]
+        [InlineData(@"/[^ ]/")]
+        public void ShouldGetNonNullRegexFromScanner(string regexp)
+        {
+            var scanner = new Scanner("", new ParserOptions { AdaptRegexp = true });
+            var regex = scanner.TestRegExp(regexp, "");
+
+            Assert.NotNull(regex);
+        }
     }
 }
