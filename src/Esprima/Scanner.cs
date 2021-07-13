@@ -1549,12 +1549,7 @@ namespace Esprima
                 tmp = Regex.Replace(tmp, "[\uD800-\uDBFF][\uDC00-\uDFFF]", astralSubstitute);
             }
 
-            // .NET doesn't support [^] which is equivalent to `[^.]`
-            // c.f. https://github.com/sebastienros/esprima-dotnet/issues/146
-            if (tmp.Contains("[^]"))
-            {
-                tmp = tmp.Replace("[^]", "[^.]");
-            }
+            tmp = EscapeFailingRegex(tmp);
 
             // First, detect invalid regular expressions.
             var options = ParseRegexOptions(flags);
@@ -1594,12 +1589,7 @@ namespace Esprima
                         }
                     }
 
-                    if (newPattern.Contains("[^]"))
-                    {
-                        newPattern = newPattern.Replace("[^]", "[^.]");
-                    }
-
-                    pattern = newPattern;
+                    pattern = EscapeFailingRegex(newPattern);
                 }
 
                 return new Regex(pattern, options);
@@ -1608,6 +1598,25 @@ namespace Esprima
             {
                 return null;
             }
+        }
+
+        public string EscapeFailingRegex(string pattern)
+        {
+            // .NET 4.x doesn't support [^] which should match any character including newline
+            // c.f. https://github.com/sebastienros/esprima-dotnet/issues/146
+            if (pattern.Contains("[^]"))
+            {
+                pattern = pattern.Replace("[^]", "[\\s\\S]");
+            }
+
+
+            // .NET doesn't support [] which should not match any characters (inverse of [^])
+            if (pattern.Contains("[]"))
+            {
+                pattern = pattern.Replace("[]", "(?:a^)");
+            }
+
+            return pattern;
         }
 
         public Token ScanRegExpBody()
