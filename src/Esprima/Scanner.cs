@@ -1549,8 +1549,6 @@ namespace Esprima
                 tmp = Regex.Replace(tmp, "[\uD800-\uDBFF][\uDC00-\uDFFF]", astralSubstitute);
             }
 
-            tmp = EscapeFailingRegex(tmp);
-
             // First, detect invalid regular expressions.
             var options = ParseRegexOptions(flags);
 
@@ -1560,7 +1558,16 @@ namespace Esprima
             }
             catch
             {
-                ThrowUnexpectedToken(Messages.InvalidRegExp);
+                tmp = EscapeFailingRegex(tmp);
+
+                try
+                {
+                    new Regex(tmp, options);
+                }
+                catch
+                {
+                    ThrowUnexpectedToken(Messages.InvalidRegExp);
+                }
             }
 
             // Return a regular expression object for this pattern-flag pair, or
@@ -1569,27 +1576,23 @@ namespace Esprima
             try
             {
                 // Do we need to convert the expression to its .NET equivalent?
-                if (_adaptRegexp)
+                if (_adaptRegexp && options.HasFlag(RegexOptions.Multiline))
                 {
+                    // Replace all non-escaped $ occurences by \r?$
+                    // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
+
+                    int index = 0;
                     var newPattern = pattern;
-
-                    if (options.HasFlag(RegexOptions.Multiline))
+                    while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                     {
-                        // Replace all non-escaped $ occurences by \r?$
-                        // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
-
-                        int index = 0;
-                        while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
+                        if (index > 0 && newPattern[index - 1] != '\\')
                         {
-                            if (index > 0 && newPattern[index - 1] != '\\')
-                            {
-                                newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
-                                index += 4;
-                            }
+                            newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
+                            index += 4;
                         }
                     }
 
-                    pattern = EscapeFailingRegex(newPattern);
+                    pattern = newPattern;
                 }
 
                 return new Regex(pattern, options);
@@ -1606,14 +1609,15 @@ namespace Esprima
             // c.f. https://github.com/sebastienros/esprima-dotnet/issues/146
             if (pattern.Contains("[^]"))
             {
-                pattern = pattern.Replace("[^]", "[\\s\\S]");
+                pattern = pattern.Replace("[^]", @"[\s\S]");
             }
 
 
             // .NET doesn't support [] which should not match any characters (inverse of [^])
             if (pattern.Contains("[]"))
             {
-                pattern = pattern.Replace("[]", "(?:a^)");
+                // This is a temporary solution to make the parser pass. It is not a correct replacement as it will match the \0 char.
+                pattern = pattern.Replace("[]", @"[\0]");
             }
 
             return pattern;
