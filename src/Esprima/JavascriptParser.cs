@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
-using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima
 {
@@ -3336,10 +3335,10 @@ namespace Esprima
             ExpectKeyword("catch");
 
             Expression? param = null;
-            if (Match("(")) 
+            if (Match("("))
             {
                 Expect("(");
-                if (Match(")")) 
+                if (Match(")"))
                 {
                     ThrowUnexpectedToken(_lookahead);
                 }
@@ -4114,11 +4113,11 @@ namespace Esprima
             {
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
-                var id = key.Type switch
+                var id = key switch
                 {
-                    Nodes.Identifier => key.As<Identifier>().Name,
-                    Nodes.Literal => key.As<Literal>().StringValue, // "constructor"
-                    _ => ThrowArgumentOutOfRangeException<string?>(nameof(key.Type), key.Type)
+                    Identifier identifier => identifier.Name,
+                    Literal literal => literal.StringValue, // "constructor"
+                    _ => null
                 };
 
                 if (id == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
