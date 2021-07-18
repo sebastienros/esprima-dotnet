@@ -23,27 +23,18 @@ namespace Esprima.Tests
         }
 
         [Theory]
-        [InlineData(@"/[^]*? (:[rp] [el] a[\w -]+)[^]*/")]
+        [InlineData(@"/[^]*?(:[rp][el]a[\w-]+)[^]*/")]
         [InlineData(@"/[^]/")]
         [InlineData(@"/[^ ]/")]
+        [InlineData(@"/[]/")]
+        [InlineData(@"/[]*/")]
+        [InlineData(@"/[]a/")]
         public void ShouldParseRegularExpression(string regexp)
         {
             var parser = new JavaScriptParser(@"var O = " + regexp);
             var program = parser.ParseScript();
 
             Assert.NotNull(program);
-        }
-
-        [Theory]
-        [InlineData(@"/[^]*? (:[rp] [el] a[\w -]+)[^]*/")]
-        [InlineData(@"/[^]/")]
-        [InlineData(@"/[^ ]/")]
-        public void ShouldGetNonNullRegexFromScanner(string regexp)
-        {
-            var scanner = new Scanner("", new ParserOptions { AdaptRegexp = true });
-            var regex = scanner.TestRegExp(regexp, "");
-
-            Assert.NotNull(regex);
         }
     }
 }
