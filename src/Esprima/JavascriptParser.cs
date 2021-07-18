@@ -678,6 +678,14 @@ namespace Esprima
                         {
                             expr = ParseImportCall();
                         }
+                        else if (MatchImportMeta())
+                        {
+                            if (!_context.IsModule)
+                            {
+                                TolerateUnexpectedToken(_lookahead, Messages.CannotUseImportMetaOutsideAModule);
+                            }
+                            expr = ParseImportMeta();
+                        }
                         else
                         {
                             return ThrowUnexpectedToken<Expression>(NextToken());
@@ -1486,7 +1494,48 @@ namespace Esprima
         {
             var node = CreateNode();
             ExpectKeyword("import");
-            return this.Finalize(node, new Import());
+            return Finalize(node, new Import());
+        }
+
+        private bool MatchImportMeta()
+        {
+            var match = MatchKeyword("import");
+            if (match)
+            {
+                var state = _scanner.SaveState();
+                _scanner.ScanComments();
+                var dot = _scanner.Lex();
+                if (dot.Type == TokenType.Punctuator && Equals(dot.Value, "."))
+                {
+                    _scanner.ScanComments();
+                    var meta = _scanner.Lex();
+                    match = meta.Type == TokenType.Identifier && Equals(meta.Value, "meta");
+                    if (match)
+                    {
+                        if (meta.End - meta.Start != "meta".Length)
+                        {
+                            TolerateUnexpectedToken(meta, Messages.InvalidEscapedReservedWord);
+                        }
+                    }
+                }
+                else
+                {
+                    match = false;
+                }
+                _scanner.RestoreState(state);
+            }
+
+            return match;
+        }
+
+        private MetaProperty ParseImportMeta()
+        {
+            var node = CreateNode();
+            var id = ParseIdentifierName(); // 'import', already ensured by matchImportMeta
+            Expect(".");
+            var property = ParseIdentifierName(); // 'meta', already ensured by matchImportMeta
+            _context.IsAssignmentTarget = false;
+            return Finalize(node, new MetaProperty(id, property));
         }
 
         private Expression ParseLeftHandSideExpressionAllowCall()
@@ -1573,8 +1622,8 @@ namespace Esprima
                 }
                 else if (Match(".") || optional)
                 {
-                    this._context.IsBindingElement = false;
-                    this._context.IsAssignmentTarget = !optional;
+                    _context.IsBindingElement = false;
+                    _context.IsAssignmentTarget = !optional;
                     if (!optional)
                     {
                         Expect(".");
@@ -1688,7 +1737,7 @@ namespace Esprima
             Expression expr;
             var startToken = _lookahead;
 
-            if (Match("++") || this.Match("--"))
+            if (Match("++") || Match("--"))
             {
                 var node = StartNode(startToken);
                 var token = NextToken();
@@ -2320,6 +2369,10 @@ namespace Esprima
                         if (MatchImportCall())
                         {
                             statement = ParseExpressionStatement();
+                        }
+                        else if (MatchImportMeta())
+                        {
+                            statement = ParseStatement();
                         }
                         else
                         {
@@ -3979,7 +4032,7 @@ namespace Esprima
             {
                 TolerateError(Messages.BadGetterArity);
             }
-            var method = this.ParsePropertyMethod(formalParameters);
+            var method = ParsePropertyMethod(formalParameters);
             _context.AllowYield = previousAllowYield;
 
             return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false));

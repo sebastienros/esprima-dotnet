@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Json;
 using Esprima.Ast;
 using Esprima.Utils;
 using Newtonsoft.Json.Linq;
@@ -34,7 +35,7 @@ namespace Esprima.Test
             );
         }
 
-        public bool CompareTrees(string actual, string expected)
+        private static void CompareTrees(string actual, string expected, string path)
         {
             var actualJObject = JObject.Parse(actual);
             var expectedJObject = JObject.Parse(expected);
@@ -49,8 +50,8 @@ namespace Esprima.Test
             {
                 var actualString = actualJObject.ToString();
                 var expectedString = expectedJObject.ToString();
+                Assert.Equal(expectedString, actualString);
             }
-            return areEqual;
         }
 
         [Theory]
@@ -134,7 +135,7 @@ namespace Esprima.Test
                 options.Tolerant = true;
 
                 var actual = ParseAndFormat(sourceType, script, options);
-                Assert.True(CompareTrees(actual, expected), jsFilePath);
+                CompareTrees(actual, expected, jsFilePath);
             }
             else
             {
