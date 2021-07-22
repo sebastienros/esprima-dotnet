@@ -21,7 +21,7 @@ public sealed class ParseError
     }
 
     public ParseError(string description,
-        string? source, int index, Position position)
+        string? source, int index, in Position position)
     {
         Description = description ?? ThrowArgumentNullException<string>(nameof(description));
         Source = source;

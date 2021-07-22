@@ -35,15 +35,18 @@ public sealed partial class Scanner
     internal const int NonIdentifierInterningThreshold = 20;
 
     private readonly IErrorHandler _errorHandler;
+    private readonly bool _tolerant;
     private readonly bool _trackComment;
     private readonly bool _adaptRegexp;
     private readonly TimeSpan _regexTimeout;
-    private readonly int _length;
 
-    public readonly string Source;
-    public int Index;
-    public int LineNumber;
-    public int LineStart;
+    private int _length;
+    internal string Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
+    internal string? _sourceName;
+
+    internal int Index { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] set; }
+    internal int LineNumber { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] set; }
+    internal int LineStart { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] set; }
 
     internal bool IsModule;
 
@@ -81,23 +84,95 @@ public sealed partial class Scanner
         return ch - '0';
     }
 
+    internal Scanner(ParserOptions options)
+    {
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options));
+        }
+
+        _adaptRegexp = options.AdaptRegexp;
+        _regexTimeout = options.RegexTimeout;
+        _errorHandler = options.ErrorHandler;
+        _tolerant = options.Tolerant;
+        _trackComment = options.Comment;
+
+        Source = string.Empty;
+        _curlyStack = new List<string>();
+    }
+
     public Scanner(string code) : this(code, new ParserOptions())
     {
     }
 
-    public Scanner(string code, ParserOptions options)
+    public Scanner(string code, ParserOptions options) : this(code, null, options)
     {
-        Source = code;
-        _adaptRegexp = options.AdaptRegexp;
-        _regexTimeout = options.RegexTimeout;
-        _errorHandler = options.ErrorHandler;
-        _trackComment = options.Comment;
+    }
 
+    public Scanner(string code, string? source) : this(code, source, new ParserOptions())
+    {
+    }
+
+    public Scanner(string code, string? source, ParserOptions options) : this(options)
+    {
+        Reset(code, source);
+    }
+
+    public void Reset()
+    {
+        Reset(startIndex: 0, lineNumber: _length > 0 ? 1 : 0, lineStartIndex: 0);
+    }
+
+    public void Reset(int startIndex, int lineNumber, int lineStartIndex)
+    {
+        if (_length > 0)
+        {
+            Index = 0 <= startIndex && startIndex < _length ? startIndex : throw new ArgumentOutOfRangeException(nameof(startIndex));
+            LineNumber = lineNumber > 0 ? lineNumber : throw new ArgumentOutOfRangeException(nameof(lineNumber));
+            LineStart = 0 <= lineStartIndex && lineStartIndex <= Index ? lineStartIndex : throw new ArgumentOutOfRangeException(nameof(lineStartIndex));
+        }
+        else
+        {
+            Index = startIndex == 0 ? startIndex : throw new ArgumentOutOfRangeException(nameof(startIndex));
+            LineNumber = lineNumber == 0 ? lineNumber : throw new ArgumentOutOfRangeException(nameof(lineNumber));
+            LineStart = lineStartIndex == 0 ? lineStartIndex : throw new ArgumentOutOfRangeException(nameof(lineStartIndex));
+        }
+
+        _curlyStack.Clear();
+        strb.Clear();
+    }
+
+    internal void Reset(string code, string? source)
+    {
+        Reset(code, source, startIndex: 0, lineNumber: code.Length > 0 ? 1 : 0, lineStartIndex: 0);
+    }
+
+    internal void Reset(string code, string? source, int startIndex, int lineNumber, int lineStartIndex)
+    {
+        Source = code ?? throw new ArgumentNullException(nameof(code));
         _length = code.Length;
-        Index = 0;
-        LineNumber = code.Length > 0 ? 1 : 0;
-        LineStart = 0;
-        _curlyStack = new List<string>(20);
+        _sourceName = source;
+
+        Reset(startIndex, lineNumber, lineStartIndex);
+        _stringPool = default;
+        IsModule = false;
+    }
+
+    internal void ReleaseLargeBuffers()
+    {
+        _curlyStack.Clear();
+        if (_curlyStack.Capacity > 16)
+        {
+            _curlyStack.Capacity = 16;
+        }
+
+        strb.Clear();
+        if (strb.Capacity > 1024)
+        {
+            strb.Capacity = 1024;
+        }
+
+        _stringPool = default;
     }
 
     internal ScannerState SaveState()
@@ -121,17 +196,17 @@ public sealed partial class Scanner
 
     private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message);
     }
 
     private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message);
     }
 
     private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, message);
+        _errorHandler.TolerateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message, _tolerant);
     }
 
     private StringBuilder GetStringBuilder()
@@ -2402,12 +2477,7 @@ public sealed partial class Scanner
     {
         if (Eof())
         {
-            // Release possibly large buffers
-            _curlyStack.Clear();
-            _curlyStack.Capacity = 0;
-            strb.Clear();
-            strb.Capacity = 0;
-            _stringPool = default;
+            ReleaseLargeBuffers();
 
             return Token.CreateEof(Index, LineNumber, LineStart);
         }

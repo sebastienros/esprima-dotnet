@@ -29,8 +29,8 @@ public class RegExpTests
     [InlineData(@"/[]a/")]
     public void ShouldParseRegularExpression(string regexp)
     {
-        var parser = new JavaScriptParser(@"var O = " + regexp);
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript(@"var O = " + regexp);
 
         Assert.NotNull(program);
     }
@@ -198,7 +198,7 @@ public class RegExpTests
 
         var path = Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "3rdparty", "bundle.js");
         var source = File.ReadAllText(path);
-        var parser = new JavaScriptParser(source, new ParserOptions { AdaptRegexp = true });
-        parser.ParseScript();
+        var parser = new JavaScriptParser(new ParserOptions { AdaptRegexp = true });
+        parser.ParseScript(source);
     }
 }

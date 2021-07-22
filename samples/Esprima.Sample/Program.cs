@@ -10,11 +10,12 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var scanner = new Scanner(@"
+        const string code = @"
 ""use strict"";
 try { } catch (evil) { }
 
-");
+";
+        var scanner = new Scanner(code);
         Tokenize(scanner);
         //Parse(scanner);
     }
@@ -36,8 +37,8 @@ try { } catch (evil) { }
 
     private static void Parse(string source, TextWriter output)
     {
-        var parser = new JavaScriptParser(source);
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript(source);
 
         program.WriteJson(output);
         Console.WriteLine();

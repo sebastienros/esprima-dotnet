@@ -7,7 +7,7 @@ public class AstVisitorEventSourceTests
 {
     private static T ParseExpression<T>(string code) where T : Expression
     {
-        return new JavaScriptParser(code).ParseExpression().As<T>();
+        return new JavaScriptParser().ParseExpression(code).As<T>();
     }
 
     [Fact]

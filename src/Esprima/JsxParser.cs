@@ -8,7 +8,7 @@ namespace Esprima;
 /// </summary>
 /// <remarks>
 /// Use the <see cref="JavaScriptParser.ParseScript" />, <see cref="JavaScriptParser.ParseModule" /> or
-/// <see cref="JavaScriptParser.ParseExpression" /> methods to parse the JSX code.
+/// <see cref="JavaScriptParser.ParseExpression(string)" /> methods to parse the JSX code.
 /// </remarks>
 public class JsxParser : JavaScriptParser
 {
@@ -288,11 +288,11 @@ public class JsxParser : JavaScriptParser
         { "rang", "\u27E9" }
     };
 
-    public JsxParser(string code) : this(code, new JsxParserOptions())
+    public JsxParser() : this(new JsxParserOptions())
     {
     }
 
-    public JsxParser(string code, JsxParserOptions options) : base(code, options)
+    public JsxParser(JsxParserOptions options) : base(options)
     {
     }
 
@@ -323,7 +323,7 @@ public class JsxParser : JavaScriptParser
         StartJsx();
         ExpectJsx("}");
 
-        if (_config.Tokens)
+        if (_collectTokens)
         {
             _tokens.RemoveAt(_tokens.Count - 1);
         }
@@ -497,7 +497,7 @@ public class JsxParser : JavaScriptParser
 
         _lastMarker = _scanner.GetMarker();
 
-        if (_config.Tokens)
+        if (_collectTokens)
         {
             _tokens.Add(ConvertToken(token));
         }
@@ -539,7 +539,7 @@ public class JsxParser : JavaScriptParser
 
         var token = JsxToken.CreateText(text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
 
-        if (text.Length > 0 && _config.Tokens)
+        if (text.Length > 0 && _collectTokens)
         {
             _tokens.Add(ConvertToken(token));
         }
@@ -913,7 +913,7 @@ public class JsxParser : JavaScriptParser
 
     private JsxElement ParseJsxRoot()
     {
-        if (_config.Tokens)
+        if (_collectTokens)
         {
             _tokens.RemoveAt(_tokens.Count - 1);
         }

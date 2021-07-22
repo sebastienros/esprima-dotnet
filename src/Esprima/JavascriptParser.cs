@@ -8,7 +8,7 @@ namespace Esprima;
 /// Provides JavaScript parsing capabilities.
 /// </summary>
 /// <remarks>
-/// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
+/// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression(string)" /> methods to parse the JavaScript code.
 /// </remarks>
 public partial class JavaScriptParser
 {
@@ -20,9 +20,42 @@ public partial class JavaScriptParser
         public Context()
         {
             LabelSet = new HashSet<string?>();
+            Reset();
+        }
+
+        public void Reset()
+        {
+            IsModule = false;
             AllowIn = true;
-            AllowYield = true;
             AllowStrictDirective = true;
+            AllowSuper = false;
+            AllowYield = true;
+            IsAsync = false;
+            FirstCoverInitializedNameError = null;
+            IsAssignmentTarget = false;
+            IsBindingElement = false;
+            InFunctionBody = false;
+            InIteration = false;
+            InSwitch = false;
+            InClassConstructor = false;
+            Strict = false;
+            AllowIdentifierEscape = false;
+
+            Decorators.Clear();
+            LabelSet.Clear();
+        }
+
+        public void ReleaseLargeBuffers()
+        {
+            if (Decorators.Count > 64)
+            {
+                Decorators.Resize(64);
+            }
+
+            if (LabelSet.Count > 64)
+            {
+                LabelSet = new HashSet<string?>();
+            }
         }
 
         public bool IsModule;
@@ -52,9 +85,14 @@ public partial class JavaScriptParser
     private protected Marker _startMarker;
     private protected Marker _lastMarker;
 
-    private protected readonly Scanner _scanner;
     private protected readonly IErrorHandler _errorHandler;
-    private protected readonly ParserOptions _config;
+    private protected readonly bool _tolerant;
+    private protected readonly bool _collectTokens;
+    private protected readonly bool _collectComments;
+    private protected readonly int _maxAssignmentDepth;
+    private readonly Action<Node>? _onNodeCreated;
+
+    private protected readonly Scanner _scanner;
     private protected bool _hasLineTerminator;
 
     private protected readonly List<SyntaxToken> _tokens = new();
@@ -98,24 +136,17 @@ public partial class JavaScriptParser
     /// <summary>
     /// Creates a new <see cref="JavaScriptParser" /> instance.
     /// </summary>
-    /// <param name="code">The JavaScript code to parse.</param>
-    public JavaScriptParser(string code) : this(code, new ParserOptions())
+    public JavaScriptParser() : this(new ParserOptions())
     {
     }
 
     /// <summary>
     /// Creates a new <see cref="JavaScriptParser" /> instance.
     /// </summary>
-    /// <param name="code">The JavaScript code to parse.</param>
     /// <param name="options">The parser options.</param>
     /// <returns></returns>
-    public JavaScriptParser(string code, ParserOptions options)
+    public JavaScriptParser(ParserOptions options)
     {
-        if (code == null)
-        {
-            throw new ArgumentNullException(nameof(code));
-        }
-
         if (options == null)
         {
             throw new ArgumentNullException(nameof(options));
@@ -137,19 +168,56 @@ public partial class JavaScriptParser
         parseFunctionSourceElements = ParseFunctionSourceElements;
         parseAsyncArgument = ParseAsyncArgument;
 
-        _config = options;
-        _errorHandler = _config.ErrorHandler;
-        _errorHandler.Tolerant = _config.Tolerant;
-        _scanner = new Scanner(code, _config);
+        _errorHandler = options.ErrorHandler;
+        _tolerant = options.Tolerant;
+        _collectTokens = options.Tokens;
+        _collectComments = options.Comment;
+        _maxAssignmentDepth = options.MaxAssignmentDepth;
+        _onNodeCreated = options.OnNodeCreated;
+
+        _scanner = new Scanner(options);
 
         _context = new Context();
+    }
+
+    private void Reset(string code, string? source)
+    {
+        _assignmentDepth = 0;
+        _hasLineTerminator = false;
+        _lookahead = default;
+
+        _markersStack = null;
+        _precedencesStack = null;
+        _sharedStack = null;
+        _parseVariableBindingParameters = null;
+
+        _tokens.Clear();
+        if (_tokens.Capacity > 256)
+        {
+            _tokens.Capacity = 256;
+        }
+
+        _comments.Clear();
+        if (_comments.Capacity > 64)
+        {
+            _comments.Capacity = 64;
+        }
+
+        _scanner.Reset(code, source);
+
+        _context.Reset();
 
         _startMarker = new Marker(Index: 0, Line: _scanner.LineNumber, Column: 0);
-        _lastMarker = new Marker(Index: 0, Line: _scanner.LineNumber, Column: 0);
 
         NextToken();
 
         _lastMarker = _scanner.GetMarker();
+    }
+
+    private void ReleaseLargeBuffers()
+    {
+        _scanner.ReleaseLargeBuffers();
+        _context.ReleaseLargeBuffers();
     }
 
     // https://tc39.github.io/ecma262/#sec-scripts
@@ -158,46 +226,58 @@ public partial class JavaScriptParser
     /// <summary>
     /// Parses the code as a JavaScript module.
     /// </summary>
-    public Module ParseModule()
+    public Module ParseModule(string code, string? source = null)
     {
-        _context.Strict = true;
-        _context.IsModule = true;
-        _scanner.IsModule = true;
-
-        var node = CreateNode();
-        var body = ParseDirectivePrologues();
-        while (_lookahead.Type != TokenType.EOF)
+        Reset(code, source);
+        try
         {
-            body.Push(ParseStatementListItem());
-        }
+            _context.Strict = true;
+            _context.IsModule = true;
+            _scanner.IsModule = true;
 
-        return Finalize(node, new Module(NodeList.From(ref body)));
+            var node = CreateNode();
+            var body = ParseDirectivePrologues();
+            while (_lookahead.Type != TokenType.EOF)
+            {
+                body.Push(ParseStatementListItem());
+            }
+
+            return Finalize(node, new Module(NodeList.From(ref body)));
+        }
+        finally
+        {
+            ReleaseLargeBuffers();
+        }
     }
 
     /// <summary>
     /// Parses the code as a JavaScript script.
     /// </summary>
-    public Script ParseScript(bool strict = false)
+    public Script ParseScript(string code, string? source = null, bool strict = false)
     {
-        if (strict)
+        Reset(code, source);
+        try
         {
-            _context.Strict = true;
-        }
-        _scanner.IsModule = false;
+            _context.Strict = strict;
 
-        var node = CreateNode();
-        var body = ParseDirectivePrologues();
-        while (_lookahead.Type != TokenType.EOF)
+            var node = CreateNode();
+            var body = ParseDirectivePrologues();
+            while (_lookahead.Type != TokenType.EOF)
+            {
+                body.Push(ParseStatementListItem());
+            }
+
+            return Finalize(node, new Script(NodeList.From(ref body), _context.Strict));
+        }
+        finally
         {
-            body.Push(ParseStatementListItem());
+            ReleaseLargeBuffers();
         }
-
-        return Finalize(node, new Script(NodeList.From(ref body), _context.Strict));
     }
 
     private protected void CollectComments()
     {
-        if (!_config.Comment)
+        if (!_collectComments)
         {
             _scanner.ScanComments();
         }
@@ -215,7 +295,7 @@ public partial class JavaScriptParser
                 var comment = new SyntaxComment(e.Type, value)
                 {
                     Range = new Range(e.Start, e.End),
-                    Location = new Location(in e.StartPosition, in e.EndPosition, _errorHandler.Source)
+                    Location = new Location(in e.StartPosition, in e.EndPosition, _scanner._sourceName)
                 };
 
                 _comments.Add(comment);
@@ -298,7 +378,7 @@ public partial class JavaScriptParser
 
         _lookahead = next!;
 
-        if (_config.Tokens && next.Type != TokenType.Unknown && next.Type != TokenType.EOF)
+        if (_collectTokens && next.Type != TokenType.Unknown && next.Type != TokenType.EOF)
         {
             _tokens.Add(ConvertToken(next));
         }
@@ -312,7 +392,7 @@ public partial class JavaScriptParser
 
         var token = _scanner.ScanRegExp();
 
-        if (_config.Tokens)
+        if (_collectTokens)
         {
             // Pop the previous token, '/' or '/='
             // This is added from the lookahead token.
@@ -355,9 +435,9 @@ public partial class JavaScriptParser
         var start = new Position(marker.Line, marker.Column);
         var end = new Position(_lastMarker.Line, _lastMarker.Column);
 
-        node.Location = new Location(start, end, _errorHandler.Source);
+        node.Location = new Location(start, end, _scanner._sourceName);
 
-        _config.OnNodeCreated?.Invoke(node);
+        _onNodeCreated?.Invoke(node);
 
         return node;
     }
@@ -381,7 +461,7 @@ public partial class JavaScriptParser
     /// </summary>
     private void ExpectCommaSeparator()
     {
-        if (_config.Tolerant)
+        if (_tolerant)
         {
             var token = _lookahead;
             if (token.Type == TokenType.Punctuator && ",".Equals(token.Value))
@@ -1559,7 +1639,7 @@ public partial class JavaScriptParser
 
         _context.IsAssignmentTarget = previousIsAssignmentTarget;
 
-        if (!this.Match(")") && this._config.Tolerant)
+        if (!this.Match(")") && _tolerant)
         {
             this.TolerateUnexpectedToken(this.NextToken());
         }
@@ -2317,7 +2397,7 @@ public partial class JavaScriptParser
     {
         Expression expr;
 
-        if (_assignmentDepth++ > _config.MaxAssignmentDepth)
+        if (_assignmentDepth++ > _maxAssignmentDepth)
         {
             ThrowUnexpectedToken(_lookahead, "Maximum statements depth reached");
         }
@@ -2459,10 +2539,7 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-comma-operator
 
-    /// <summary>
-    /// Parses the code as a JavaScript expression.
-    /// </summary>
-    public Expression ParseExpression()
+    private Expression ParseExpression()
     {
         var startToken = _lookahead;
         var expr = IsolateCoverGrammar(parseAssignmentExpression);
@@ -2486,6 +2563,22 @@ public partial class JavaScriptParser
         }
 
         return expr;
+    }
+
+    /// <summary>
+    /// Parses the code as a JavaScript expression.
+    /// </summary>
+    public Expression ParseExpression(string code)
+    {
+        Reset(code, source: null);
+        try
+        {
+            return ParseExpression();
+        }
+        finally
+        {
+            ReleaseLargeBuffers();
+        }
     }
 
     // https://tc39.github.io/ecma262/#sec-block
@@ -2996,7 +3089,7 @@ public partial class JavaScriptParser
         Expect("(");
         var test = ParseExpression();
 
-        if (!Match(")") && _config.Tolerant)
+        if (!Match(")") && _tolerant)
         {
             TolerateUnexpectedToken(NextToken());
             consequent = Finalize(CreateNode(), new EmptyStatement());
@@ -3036,7 +3129,7 @@ public partial class JavaScriptParser
         Expect("(");
         var test = ParseExpression();
 
-        if (!Match(")") && _config.Tolerant)
+        if (!Match(")") && _tolerant)
         {
             TolerateUnexpectedToken(NextToken());
         }
@@ -3063,7 +3156,7 @@ public partial class JavaScriptParser
         Expect("(");
         var test = ParseExpression();
 
-        if (!Match(")") && _config.Tolerant)
+        if (!Match(")") && _tolerant)
         {
             TolerateUnexpectedToken(NextToken());
             body = Finalize(CreateNode(), new EmptyStatement());
@@ -3309,7 +3402,7 @@ public partial class JavaScriptParser
         }
 
         Statement body;
-        if (!Match(")") && _config.Tolerant)
+        if (!Match(")") && _tolerant)
         {
             TolerateUnexpectedToken(NextToken());
             body = Finalize(CreateNode(), new EmptyStatement());
@@ -3428,7 +3521,7 @@ public partial class JavaScriptParser
         Expect("(");
         var obj = ParseExpression();
 
-        if (!Match(")") && _config.Tolerant)
+        if (!Match(")") && _tolerant)
         {
             TolerateUnexpectedToken(NextToken());
             body = Finalize(CreateNode(), new EmptyStatement());
@@ -5218,7 +5311,7 @@ public partial class JavaScriptParser
         var index = _lastMarker.Index;
         var line = _lastMarker.Line;
         var column = _lastMarker.Column + 1;
-        return _errorHandler.CreateError(index, line, column, msg);
+        return _errorHandler.CreateError(_scanner._sourceName, index, line, column, msg);
     }
 
     private protected void TolerateError(string messageFormat, params object?[] values)
@@ -5228,7 +5321,7 @@ public partial class JavaScriptParser
         var index = _lastMarker.Index;
         var line = _scanner.LineNumber;
         var column = _lastMarker.Column + 1;
-        _errorHandler.TolerateError(index, line, column, msg);
+        _errorHandler.TolerateError(_scanner._sourceName, index, line, column, msg, _tolerant);
     }
 
     private ParserException UnexpectedTokenError(in Token token, string? message = null)
@@ -5277,14 +5370,14 @@ public partial class JavaScriptParser
             var line = token.LineNumber;
             var lastMarkerLineStart = _lastMarker.Index - _lastMarker.Column;
             var column = token.Start - lastMarkerLineStart + 1;
-            return _errorHandler.CreateError(index, line, column, msg);
+            return _errorHandler.CreateError(_scanner._sourceName, index, line, column, msg);
         }
         else
         {
             var index = _lastMarker.Index;
             var line = _lastMarker.Line;
             var column = _lastMarker.Column + 1;
-            return _errorHandler.CreateError(index, line, column, msg);
+            return _errorHandler.CreateError(_scanner._sourceName, index, line, column, msg);
         }
     }
 
@@ -5300,7 +5393,7 @@ public partial class JavaScriptParser
 
     private protected void TolerateUnexpectedToken(in Token token, string? message = null)
     {
-        _errorHandler.Tolerate(UnexpectedTokenError(token, message));
+        _errorHandler.Tolerate(UnexpectedTokenError(token, message), _tolerant);
     }
 
     private void TolerateInvalidLoopStatement()

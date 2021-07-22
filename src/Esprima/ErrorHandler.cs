@@ -1,20 +1,17 @@
-﻿namespace Esprima;
+namespace Esprima;
 
 /// <summary>
 /// Default error handling logic for Esprima.
 /// </summary>
 public class ErrorHandler : IErrorHandler
 {
-    public string? Source { get; set; }
-    public bool Tolerant { get; set; }
-
     public virtual void RecordError(ParserException error)
     {
     }
 
-    public void Tolerate(ParserException error)
+    public void Tolerate(ParserException error, bool tolerant)
     {
-        if (Tolerant)
+        if (tolerant)
         {
             RecordError(error);
         }
@@ -24,21 +21,14 @@ public class ErrorHandler : IErrorHandler
         }
     }
 
-    public ParserException CreateError(int index, int line, int col, string description)
+    public ParserException CreateError(string? source, int index, int line, int col, string description)
     {
-        return new ParserException(new ParseError(description, Source, index, new Position(line, col)));
+        return new(new ParseError(description, source, index, new Position(line, col)));
     }
 
-    public void TolerateError(int index, int line, int col, string description)
+    public void TolerateError(string? source, int index, int line, int col, string description, bool tolerant)
     {
-        var error = CreateError(index, line, col, description);
-        if (Tolerant)
-        {
-            RecordError(error);
-        }
-        else
-        {
-            throw error;
-        }
+        var error = CreateError(source, index, line, col, description);
+        Tolerate(error, tolerant);
     }
 }

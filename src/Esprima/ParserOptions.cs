@@ -17,14 +17,6 @@ public class ParserOptions
     /// <summary>
     /// Create a new <see cref="ParserOptions" /> instance.
     /// </summary>
-    /// <param name="source">A string representing where the code is coming from, if an error occurs.</param>
-    public ParserOptions(string source) : this(new ErrorHandler { Source = source })
-    {
-    }
-
-    /// <summary>
-    /// Create a new <see cref="ParserOptions" /> instance.
-    /// </summary>
     /// <param name="errorHandler">The <see cref="IErrorHandler" /> to use to handle errors.</param>
     public ParserOptions(IErrorHandler errorHandler)
     {

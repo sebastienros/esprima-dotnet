@@ -27,15 +27,17 @@ public class EvaluationBenchmark
             var done = true;
         ";
 
-    [Params(200)] public int N { get; set; }
+    private readonly JavaScriptParser _parser = new JavaScriptParser();
+
+    [Params(200)]
+    public int N { get; set; }
 
     [Benchmark]
     public void ParseProgram()
     {
         for (var i = 0; i < N; ++i)
         {
-            var parser = new JavaScriptParser(Script);
-            parser.ParseScript();
+            _parser.ParseScript(Script);
         }
     }
 }

@@ -19,11 +19,11 @@ public class Fixtures
     private static Lazy<Dictionary<string, FixtureMetadata>> Metadata { get; } = new(() => FixtureMetadata.ReadMetadata());
 
     private static string ParseAndFormat(SourceType sourceType, string source,
-        ParserOptions parserOptions, Func<string, ParserOptions, JavaScriptParser> parserFactory,
+        ParserOptions parserOptions, Func<ParserOptions, JavaScriptParser> parserFactory,
         AstToJsonOptions conversionOptions)
     {
-        var parser = parserFactory(source, parserOptions);
-        var program = sourceType == SourceType.Script ? (Program) parser.ParseScript() : parser.ParseModule();
+        var parser = parserFactory(parserOptions);
+        var program = sourceType == SourceType.Script ? (Program) parser.ParseScript(source) : parser.ParseModule(source);
 
         return program.ToJsonString(conversionOptions, indent: "  ");
     }
@@ -88,10 +88,10 @@ public class Fixtures
     {
         var (parserOptions, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX")
             ? (new JsxParserOptions(),
-                (src, opts) => new JsxParser(src, (JsxParserOptions) opts),
+                opts => new JsxParser((JsxParserOptions) opts),
                 JsxAstToJsonOptions.Default)
             : (new ParserOptions(),
-                new Func<string, ParserOptions, JavaScriptParser>((src, opts) => new JavaScriptParser(src, opts)),
+                new Func<ParserOptions, JavaScriptParser>(opts => new JavaScriptParser(opts)),
                 AstToJsonOptions.Default);
 
         parserOptions.Tokens = true;
@@ -115,8 +115,8 @@ public class Fixtures
         var script = File.ReadAllText(jsFilePath);
         if (jsFilePath.EndsWith(".source.js"))
         {
-            var parser = new JavaScriptParser(script);
-            var program = parser.ParseScript();
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(script);
             var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!;
             script = source;
         }

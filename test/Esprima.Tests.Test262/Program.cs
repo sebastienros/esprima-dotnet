@@ -62,14 +62,14 @@ public static class Program
                         {
                             Tolerant = false
                         };
-                        var parser = new JavaScriptParser(file.Program, parserOptions);
+                        var parser = new JavaScriptParser(parserOptions);
                         if (file.Type == ProgramType.Script)
                         {
-                            parser.ParseScript(file.Strict);
+                            parser.ParseScript(file.Program, strict: file.Strict);
                         }
                         else
                         {
-                            parser.ParseModule();
+                            parser.ParseModule(file.Program);
                         }
                     },
                     IsIgnored = file => knownFailing.Contains(file.ToString()),

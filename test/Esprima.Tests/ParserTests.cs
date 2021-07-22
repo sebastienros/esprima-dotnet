@@ -9,8 +9,8 @@ public class ParserTests
     [Fact]
     public void ProgramShouldBeStrict()
     {
-        var parser = new JavaScriptParser("'use strict'; function p() {}");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("'use strict'; function p() {}");
 
         Assert.True(program.Strict);
     }
@@ -18,8 +18,8 @@ public class ParserTests
     [Fact]
     public void ProgramShouldNotBeStrict()
     {
-        var parser = new JavaScriptParser("function p() {}");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("function p() {}");
 
         Assert.False(program.Strict);
     }
@@ -27,8 +27,8 @@ public class ParserTests
     [Fact]
     public void FunctionShouldNotBeStrict()
     {
-        var parser = new JavaScriptParser("function p() {}");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("function p() {}");
         var function = program.Body.First().As<FunctionDeclaration>();
 
         Assert.False(function.Strict);
@@ -37,8 +37,8 @@ public class ParserTests
     [Fact]
     public void FunctionWithUseStrictShouldBeStrict()
     {
-        var parser = new JavaScriptParser("function p() { 'use strict'; }");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("function p() { 'use strict'; }");
         var function = program.Body.First().As<FunctionDeclaration>();
 
         Assert.True(function.Strict);
@@ -47,8 +47,8 @@ public class ParserTests
     [Fact]
     public void FunctionShouldBeStrictInProgramStrict()
     {
-        var parser = new JavaScriptParser("'use strict'; function p() {}");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("'use strict'; function p() {}");
         var function = program.Body.Skip(1).First().As<FunctionDeclaration>();
 
         Assert.True(function.Strict);
@@ -57,8 +57,8 @@ public class ParserTests
     [Fact]
     public void FunctionShouldBeStrict()
     {
-        var parser = new JavaScriptParser("function p() {'use strict'; return false;}");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("function p() {'use strict'; return false;}");
         var function = program.Body.First().As<FunctionDeclaration>();
 
         Assert.True(function.Strict);
@@ -67,8 +67,8 @@ public class ParserTests
     [Fact]
     public void FunctionShouldBeStrictInStrictFunction()
     {
-        var parser = new JavaScriptParser("function p() {'use strict'; function q() { return; } return; }");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("function p() {'use strict'; function q() { return; } return; }");
         var p = program.Body.First().As<FunctionDeclaration>();
         var q = p.Body.As<BlockStatement>().Body.Skip(1).First().As<FunctionDeclaration>();
 
@@ -82,8 +82,8 @@ public class ParserTests
     [Fact]
     public void LabelSetShouldPointToStatement()
     {
-        var parser = new JavaScriptParser("here: Hello();");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("here: Hello();");
         var labeledStatement = program.Body.First().As<LabeledStatement>();
         var body = labeledStatement.Body;
 
@@ -95,8 +95,8 @@ public class ParserTests
     [InlineData(18446744073709552000d, "0xffffffffffffffff")]
     public void ShouldParseNumericLiterals(object expected, string source)
     {
-        var parser = new JavaScriptParser(source);
-        var expression = parser.ParseExpression();
+        var parser = new JavaScriptParser();
+        var expression = parser.ParseExpression(source);
 
         var literal = expression as Literal;
 
@@ -111,14 +111,14 @@ public class ParserTests
     [InlineData("import { \"☿\" as Ami } from \"./export-expname_FIXTURE.js\";")]
     public void ShouldParseModuleImportExportWithStringIdentifiers(string source)
     {
-        new JavaScriptParser(source).ParseModule();
+        new JavaScriptParser().ParseModule(source);
     }
 
     [Fact]
     public void ShouldParseClassInheritance()
     {
-        var parser = new JavaScriptParser("class Rectangle extends aggregation(Shape, Colored, ZCoord) { }");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("class Rectangle extends aggregation(Shape, Colored, ZCoord) { }");
     }
 
     [Fact]
@@ -138,27 +138,29 @@ class aa {
       this.staticProperty3 = 'Property 3';
     }
 }";
-        new JavaScriptParser(Code).ParseScript();
+        new JavaScriptParser().ParseScript(Code);
     }
 
     [Fact]
     public void ShouldSymbolPropertyKey()
     {
-        var parser = new JavaScriptParser("var a = { [Symbol.iterator]: undefined }");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("var a = { [Symbol.iterator]: undefined }");
     }
 
     [Fact]
     public void ShouldParseLocation()
     {
-        var parser = new JavaScriptParser("// End on second line\r\n");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("// End on second line\r\n");
     }
 
     [Fact]
     public void ShouldParseArrayPattern()
     {
-        var parser = new JavaScriptParser(@"
+        var parser = new JavaScriptParser();
+
+        var program = parser.ParseScript(@"
 var values = [1, 2, 3];
 
 var callCount = 0;
@@ -170,21 +172,19 @@ f = ([...[...x]]) => {
 f(values);
 
 ");
-
-        var program = parser.ParseScript();
     }
 
     [Fact]
     public void CanParseInvalidCurly()
     {
-        var parser = new JavaScriptParser("if (1}=1) eval('1');");
-        Assert.Throws<ParserException>(() => parser.ParseScript());
+        var parser = new JavaScriptParser();
+        Assert.Throws<ParserException>(() => parser.ParseScript("if (1}=1) eval('1');"));
     }
 
     [Fact]
     public void CanReportProblemWithLargeNumber()
     {
-        Assert.Throws<ParserException>(() => new JavaScriptParser("066666666666666666666666666666"));
+        Assert.Throws<ParserException>(() => new JavaScriptParser().ParseExpression("066666666666666666666666666666"));
     }
 
     [Theory]
@@ -193,43 +193,43 @@ f(values);
     [InlineData("...")]
     public void CanParseDot(string script)
     {
-        var parser = new JavaScriptParser(script);
-        Assert.Throws<ParserException>(() => parser.ParseScript());
+        var parser = new JavaScriptParser();
+        Assert.Throws<ParserException>(() => parser.ParseScript(script));
     }
 
     [Fact]
     public void ThrowsErrorForInvalidRegExFlags()
     {
-        var parser = new JavaScriptParser("/'/o//'///C//ÿ");
-        Assert.Throws<ParserException>(() => parser.ParseScript());
+        var parser = new JavaScriptParser();
+        Assert.Throws<ParserException>(() => parser.ParseScript("/'/o//'///C//ÿ"));
     }
 
     [Fact]
     public void ThrowsErrorForDeepRecursionParsing()
     {
-        var parser = new JavaScriptParser("if ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((true)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) { } ");
-        Assert.Throws<ParserException>(() => parser.ParseScript());
+        var parser = new JavaScriptParser(new ParserOptions { MaxAssignmentDepth = 100 });
+        Assert.Throws<ParserException>(() => parser.ParseScript("if ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((true)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) { } "));
     }
 
     [Fact]
     public void ShouldParseStaticMemberExpressionPropertyInitializer()
     {
-        var parser = new JavaScriptParser("class Edge { [util.inspect.custom] () { return this.toJSON() } }");
-        parser.ParseScript();
+        var parser = new JavaScriptParser();
+        parser.ParseScript("class Edge { [util.inspect.custom] () { return this.toJSON() } }");
     }
 
     [Fact]
     public void AllowsSingleProto()
     {
-        var parser = new JavaScriptParser("if({ __proto__: [] } instanceof Array) {}", new ParserOptions { Tolerant = false });
-        parser.ParseScript();
+        var parser = new JavaScriptParser(new ParserOptions { Tolerant = false });
+        parser.ParseScript("if({ __proto__: [] } instanceof Array) {}");
     }
 
     [Fact]
     public void ThrowsErrorForDuplicateProto()
     {
-        var parser = new JavaScriptParser("if({ __proto__: [], __proto__: [] } instanceof Array) {}", new ParserOptions { Tolerant = false });
-        Assert.Throws<ParserException>(() => parser.ParseScript());
+        var parser = new JavaScriptParser(new ParserOptions { Tolerant = false });
+        Assert.Throws<ParserException>(() => parser.ParseScript("if({ __proto__: [], __proto__: [] } instanceof Array) {}"));
     }
 
     [Theory]
@@ -240,8 +240,8 @@ f(values);
     public void ParsesValidForAwaitLoops(string code)
     {
         var errorHandler = new CollectingErrorHandler();
-        var parser = new JavaScriptParser(code, new ParserOptions { Tolerant = true, ErrorHandler = errorHandler });
-        parser.ParseScript();
+        var parser = new JavaScriptParser(new ParserOptions { Tolerant = true, ErrorHandler = errorHandler });
+        parser.ParseScript(code);
 
         Assert.False(errorHandler.Errors.Any());
     }
@@ -261,13 +261,13 @@ f(values);
     public void ToleratesInvalidForAwaitLoops(string code)
     {
         var errorHandler = new CollectingErrorHandler();
-        var parser = new JavaScriptParser(code, new ParserOptions { Tolerant = true, ErrorHandler = errorHandler });
-        parser.ParseScript();
+        var parser = new JavaScriptParser(new ParserOptions { Tolerant = true, ErrorHandler = errorHandler });
+        parser.ParseScript(code);
 
         Assert.True(errorHandler.Errors.Any());
 
-        parser = new JavaScriptParser(code, new ParserOptions { Tolerant = false });
-        Assert.Throws<ParserException>(() => parser.ParseScript());
+        parser = new JavaScriptParser(new ParserOptions { Tolerant = false });
+        Assert.Throws<ParserException>(() => parser.ParseScript(code));
     }
 
     [Fact]
@@ -292,7 +292,7 @@ f(values);
                 0x20602800080017fn;
                 0b00n;";
 
-        new JavaScriptParser(Code).ParseScript();
+        new JavaScriptParser().ParseScript(Code);
     }
 
     [Fact]
@@ -305,15 +305,15 @@ class aa {
         var d =  #bb in ee;
     }
 }";
-        new JavaScriptParser(Code).ParseScript();
+        new JavaScriptParser().ParseScript(Code);
     }
 
     [Fact]
     public void DescendantNodesShouldHandleNullNodes()
     {
         var source = File.ReadAllText(Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "3rdparty", "raptor_frida_ios_trace.js"));
-        var parser = new JavaScriptParser(source);
-        var script = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var script = parser.ParseScript(source);
 
         var variableDeclarations = script.ChildNodes
             .SelectMany(z => z!.DescendantNodesAndSelf().OfType<VariableDeclaration>())
@@ -326,8 +326,8 @@ class aa {
     public void AncestorNodesShouldHandleNullNodes()
     {
         var source = File.ReadAllText(Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "JSX", "fragment-with-child.js"));
-        var parser = new JsxParser(source, new JsxParserOptions());
-        var script = parser.ParseScript();
+        var parser = new JsxParser(new JsxParserOptions());
+        var script = parser.ParseScript(source);
 
         var variableDeclarations = script.DescendantNodesAndSelf()
             .SelectMany(z => z.AncestorNodesAndSelf(script))
@@ -342,8 +342,8 @@ class aa {
     [InlineData("`a${b}c`", "a", "b", "c")]
     public void TemplateLiteralChildNodesShouldCorrectOrder(string source, params string[] correctOrder)
     {
-        var parser = new JavaScriptParser(source);
-        var script = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var script = parser.ParseScript(source);
         var templateLiteral = script.DescendantNodes().OfType<TemplateLiteral>().First();
 
         var childNodes = templateLiteral.ChildNodes.ToArray();
@@ -373,9 +373,10 @@ class aa {
     [Fact]
     public void ShouldParseLineComment()
     {
-        var parser = new JavaScriptParser(@"
+        var parser = new JavaScriptParser(new ParserOptions { Comment = true });
+        parser.ParseScript(@"
 //this is a line comment
-", new ParserOptions { Comment = true });
+");
 
         var comment = parser.Comments.First();
 
@@ -386,10 +387,11 @@ class aa {
     [Fact]
     public void ShouldParseBlockComment()
     {
-        var parser = new JavaScriptParser(@"
+        var parser = new JavaScriptParser(new ParserOptions { Comment = true });
+        parser.ParseScript(@"
 /*this is a
 block comment*/
-", new ParserOptions { Comment = true });
+");
 
         var comment = parser.Comments.First();
 
@@ -401,10 +403,10 @@ block comment", comment.Value);
     [Fact]
     public void HoistingScopeShouldWork()
     {
-        var parser = new JavaScriptParser(@"
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript(@"
                 function p() {}
                 var x;");
-        var program = parser.ParseScript();
     }
 
     private sealed class ParentNodeChecker : AstVisitor
@@ -437,8 +439,8 @@ block comment", comment.Value);
             }
         };
 
-        var parser = new JavaScriptParser("function add(a, b) { return a + b; }", new ParserOptions { OnNodeCreated = action });
-        var script = parser.ParseScript();
+        var parser = new JavaScriptParser(new ParserOptions { OnNodeCreated = action });
+        var script = parser.ParseScript("function add(a, b) { return a + b; }");
 
         new ParentNodeChecker().Check(script);
     }
@@ -448,8 +450,8 @@ block comment", comment.Value);
     {
         var count = 0;
         Action<Node> action = node => count++;
-        var parser = new JavaScriptParser("// this is a comment", new ParserOptions { OnNodeCreated = action });
-        parser.ParseScript();
+        var parser = new JavaScriptParser(new ParserOptions { OnNodeCreated = action });
+        parser.ParseScript("// this is a comment");
 
         Assert.Equal(1, count);
     }
