@@ -24,6 +24,12 @@ namespace Esprima
             public Context()
             {
                 LabelSet = new HashSet<string?>();
+                Reset();
+            }
+
+            internal void Reset()
+            {
+                LabelSet.Clear();
                 Await = false;
                 AllowIn = true;
                 AllowYield = true;
@@ -53,6 +59,7 @@ namespace Esprima
             public HashSet<string?> LabelSet;
         }
 
+        private string? _source;
         private Token _lookahead = null!;
         private readonly Context _context;
         private readonly Marker _startMarker;
@@ -63,7 +70,7 @@ namespace Esprima
         private bool _hasLineTerminator;
         private readonly Action<Node>? _action;
 
-        private List<Token> _tokens = new List<Token>();
+        private readonly List<Token> _tokens = new List<Token>();
 
         /// <summary>
         /// Returns the list of tokens that were parsed.
@@ -91,39 +98,26 @@ namespace Esprima
         /// <summary>
         /// Creates a new <see cref="JavaScriptParser" /> instance.
         /// </summary>
-        /// <param name="code">The JavaScript code to parse.</param>
-        public JavaScriptParser(string code) : this(code, new ParserOptions())
+        public JavaScriptParser() : this(new ParserOptions())
         {
         }
 
         /// <summary>
         /// Creates a new <see cref="JavaScriptParser" /> instance.
         /// </summary>
-        /// <param name="code">The JavaScript code to parse.</param>
         /// <param name="options">The parser options.</param>
         /// <returns></returns>
-        public JavaScriptParser(string code, ParserOptions options) : this(code, options, null)
+        public JavaScriptParser(ParserOptions options) : this(options, null)
         {
         }
 
         /// <summary>
         /// Creates a new <see cref="JavaScriptParser" /> instance.
         /// </summary>
-        /// <param name="code">The JavaScript code to parse.</param>
         /// <param name="options">The parser options.</param>
         /// <param name="action">Action to execute on each parsed node.</param>
-        public JavaScriptParser(string code, ParserOptions options, Action<Node>? action)
+        public JavaScriptParser(ParserOptions options, Action<Node>? action)
         {
-            if (code == null)
-            {
-                throw new ArgumentNullException(nameof(code));
-            }
-
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
             parseAssignmentExpression = ParseAssignmentExpression;
             parseExponentiationExpression = ParseExponentiationExpression;
             parseUnaryExpression = ParseUnaryExpression;
@@ -138,36 +132,35 @@ namespace Esprima
             parseLeftHandSideExpressionAllowCall = ParseLeftHandSideExpressionAllowCall;
             parseStatement = ParseStatement;
 
-            _config = options;
+            _config = options ?? throw new ArgumentNullException(nameof(options));
             _action = action;
             _errorHandler = _config.ErrorHandler;
             _errorHandler.Tolerant = _config.Tolerant;
-            _scanner = new Scanner(code, _config);
 
+            _scanner = new Scanner();
             _context = new Context();
 
-            _startMarker = new Marker
-            {
-                Index = 0,
-                Line = _scanner.LineNumber,
-                Column = 0
-            };
+            _startMarker = new Marker();
+            _lastMarker = new Marker();
+        }
 
-            _lastMarker = new Marker
-            {
-                Index = 0,
-                Line = _scanner.LineNumber,
-                Column = 0
-            };
+        private void Reset(string code, string? source)
+        {
+            _source = source;
+            _tokens.Clear();
+
+            _scanner.Initialize(code, source, _config);
+            _context.Reset();
+
+            _startMarker.Index = 0;
+            _startMarker.Line = _scanner.LineNumber;
+            _startMarker.Column = 0;
 
             NextToken();
 
-            _lastMarker = new Marker
-            {
-                Index = _scanner.Index,
-                Line = _scanner.LineNumber,
-                Column = _scanner.Index - _scanner.LineStart
-            };
+            _lastMarker.Index = _scanner.Index;
+            _lastMarker.Line = _scanner.LineNumber;
+            _lastMarker.Column = _scanner.Index - _scanner.LineStart;
         }
 
         // https://tc39.github.io/ecma262/#sec-scripts
@@ -176,8 +169,12 @@ namespace Esprima
         /// <summary>
         /// Parses the code as a JavaScript module.
         /// </summary>
-        public Module ParseModule()
+        /// <param name="code">The JavaScript code to parse.</param>
+        /// <param name="fileName">Filename to report when using <see cref="IErrorHandler"/>.</param>
+        public Module ParseModule(string code, string? fileName = null)
         {
+            Reset(code, fileName);
+
             _context.Strict = true;
             _context.IsModule = true;
             _scanner.IsModule = true;
@@ -195,8 +192,13 @@ namespace Esprima
         /// <summary>
         /// Parses the code as a JavaScript script.
         /// </summary>
-        public Script ParseScript(bool strict = false)
+        /// <param name="code">The JavaScript code to parse.</param>
+        /// <param name="strict">Whether to parse in strict mode.</param>
+        /// <param name="fileName">Filename to report when using <see cref="IErrorHandler"/>.</param>
+        public Script ParseScript(string code, bool strict = false, string? fileName = null)
         {
+            Reset(code, fileName);
+
             if (strict)
             {
                 _context.Strict = true;
@@ -358,7 +360,7 @@ namespace Esprima
             var start = new Position(marker.Line, marker.Column);
             var end = new Position(_lastMarker.Line, _lastMarker.Column);
 
-            node.Location = new Location(start, end, _errorHandler.Source);
+            node.Location = new Location(start, end, _source);
 
             _action?.Invoke(node);
 
@@ -2319,7 +2321,7 @@ namespace Esprima
         /// <summary>
         /// Parses the code as a JavaScript expression.
         /// </summary>
-        public Expression ParseExpression()
+        private Expression ParseExpression()
         {
             var startToken = _lookahead;
             var expr = IsolateCoverGrammar(parseAssignmentExpression);
@@ -4692,7 +4694,7 @@ namespace Esprima
             int index = _lastMarker.Index;
             int line = _lastMarker.Line;
             int column = _lastMarker.Column + 1;
-            return _errorHandler.CreateError(index, line, column, msg);
+            return _errorHandler.CreateError(_source, index, line, column, msg);
         }
 
         private void TolerateError(string messageFormat, params object?[] values)
@@ -4702,7 +4704,7 @@ namespace Esprima
             var index = _lastMarker.Index;
             var line = _scanner.LineNumber;
             var column = _lastMarker.Column + 1;
-            _errorHandler.TolerateError(index, line, column, msg);
+            _errorHandler.TolerateError(_source, index, line, column, msg);
         }
 
         private ParserException UnexpectedTokenError(Token? token, string? message = null)
@@ -4751,14 +4753,14 @@ namespace Esprima
                 var line = token.LineNumber;
                 var lastMarkerLineStart = _lastMarker.Index - _lastMarker.Column;
                 var column = token.Start - lastMarkerLineStart + 1;
-                return _errorHandler.CreateError(index, line, column, msg);
+                return _errorHandler.CreateError(_source, index, line, column, msg);
             }
             else
             {
                 var index = _lastMarker.Index;
                 var line = _lastMarker.Line;
                 var column = _lastMarker.Column + 1;
-                return _errorHandler.CreateError(index, line, column, msg);
+                return _errorHandler.CreateError(_source, index, line, column, msg);
             }
         }
 

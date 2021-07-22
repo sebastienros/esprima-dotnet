@@ -22,8 +22,10 @@ namespace Esprima.Benchmark
         private static readonly ParserOptions parserOptions = new ParserOptions()
         {
             Comment = true,
-            Tokens = true 
+            Tokens = true
         };
+
+        private JavaScriptParser _parser;
 
         [GlobalSetup]
         public void Setup()
@@ -32,6 +34,8 @@ namespace Esprima.Benchmark
             {
                 files[fileName] = File.ReadAllText($"3rdparty/{fileName}.js");
             }
+
+            _parser = new JavaScriptParser(parserOptions);
         }
 
         [ParamsSource(nameof(FileNames))]
@@ -48,8 +52,7 @@ namespace Esprima.Benchmark
         [Benchmark]
         public void ParseProgram()
         {
-            var parser = new JavaScriptParser(files[FileName], parserOptions);
-            parser.ParseScript();
+            _parser.ParseScript(files[FileName]);
         }
     }
 }

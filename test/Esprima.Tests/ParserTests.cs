@@ -9,8 +9,9 @@ namespace Esprima.Tests
         [Fact]
         public void ProgramShouldBeStrict()
         {
-            var parser = new JavaScriptParser("'use strict'; function p() {}");
-            var program = parser.ParseScript();
+            const string code = "'use strict'; function p() {}";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
 
             Assert.True(program.Strict);
         }
@@ -18,8 +19,9 @@ namespace Esprima.Tests
         [Fact]
         public void ProgramShouldNotBeStrict()
         {
-            var parser = new JavaScriptParser("function p() {}");
-            var program = parser.ParseScript();
+            const string code = "function p() {}";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
 
             Assert.False(program.Strict);
         }
@@ -27,8 +29,9 @@ namespace Esprima.Tests
         [Fact]
         public void FunctionShouldNotBeStrict()
         {
-            var parser = new JavaScriptParser("function p() {}");
-            var program = parser.ParseScript();
+            const string code = "function p() {}";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
             var function = program.Body.First().As<FunctionDeclaration>();
 
             Assert.False(function.Strict);
@@ -37,8 +40,9 @@ namespace Esprima.Tests
         [Fact]
         public void FunctionWithUseStrictShouldBeStrict()
         {
-            var parser = new JavaScriptParser("function p() { 'use strict'; }");
-            var program = parser.ParseScript();
+            const string code = "function p() { 'use strict'; }";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
             var function = program.Body.First().As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
@@ -47,8 +51,9 @@ namespace Esprima.Tests
         [Fact]
         public void FunctionShouldBeStrictInProgramStrict()
         {
-            var parser = new JavaScriptParser("'use strict'; function p() {}");
-            var program = parser.ParseScript();
+            const string code = "'use strict'; function p() {}";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
             var function = program.Body.Skip(1).First().As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
@@ -57,8 +62,9 @@ namespace Esprima.Tests
         [Fact]
         public void FunctionShouldBeStrict()
         {
-            var parser = new JavaScriptParser("function p() {'use strict'; return false;}");
-            var program = parser.ParseScript();
+            const string code = "function p() {'use strict'; return false;}";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
             var function = program.Body.First().As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
@@ -67,8 +73,9 @@ namespace Esprima.Tests
         [Fact]
         public void FunctionShouldBeStrictInStrictFunction()
         {
-            var parser = new JavaScriptParser("function p() {'use strict'; function q() { return; } return; }");
-            var program = parser.ParseScript();
+            const string code = "function p() {'use strict'; function q() { return; } return; }";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
             var p = program.Body.First().As<FunctionDeclaration>();
             var q = p.Body.As<BlockStatement>().Body.Skip(1).First().As<FunctionDeclaration>();
 
@@ -82,8 +89,9 @@ namespace Esprima.Tests
         [Fact]
         public void LabelSetShouldPointToStatement()
         {
-            var parser = new JavaScriptParser("here: Hello();");
-            var program = parser.ParseScript();
+            const string code = "here: Hello();";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
             var labeledStatement = program.Body.First().As<LabeledStatement>();
             var body = labeledStatement.Body;
 
@@ -95,41 +103,44 @@ namespace Esprima.Tests
         [InlineData(18446744073709552000d, "0xffffffffffffffff")]
         public void ShouldParseNumericLiterals(object expected, string source)
         {
-            var parser = new JavaScriptParser(source);
-            var expression = parser.ParseExpression();
+            var parser = new JavaScriptParser();
+            var script = parser.ParseScript($"var f = {source};");
+            var expression = script.Body[0].As<VariableDeclaration>().Declarations[0].Init;
 
             var literal = expression as Literal;
 
             Assert.NotNull(literal);
             Assert.Equal(expected, literal.NumericValue);
-
         }
 
         [Fact]
         public void ShouldParseClassInheritance()
         {
-            var parser = new JavaScriptParser("class Rectangle extends aggregation(Shape, Colored, ZCoord) { }");
-            var program = parser.ParseScript();
+            const string code = "class Rectangle extends aggregation(Shape, Colored, ZCoord) { }";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
         }
 
         [Fact]
         public void ShouldSymbolPropertyKey()
         {
-            var parser = new JavaScriptParser("var a = { [Symbol.iterator]: undefined }");
-            var program = parser.ParseScript();
+            var code = "var a = { [Symbol.iterator]: undefined }";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
         }
 
         [Fact]
         public void ShouldParseLocation()
         {
-            var parser = new JavaScriptParser("// End on second line\r\n");
-            var program = parser.ParseScript();
+            const string code = "// End on second line\r\n";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
         }
 
         [Fact]
         public void ShouldParseArrayPattern()
         {
-            var parser = new JavaScriptParser(@"
+            const string code = @"
 var values = [1, 2, 3];
 
 var callCount = 0;
@@ -139,23 +150,24 @@ f = ([...[...x]]) => {
 };
 
 f(values);
+";
+            var parser = new JavaScriptParser();
 
-");
-
-            var program = parser.ParseScript();
+            var program = parser.ParseScript(code);
         }
 
         [Fact]
         public void CanParseInvalidCurly()
         {
-            var parser = new JavaScriptParser("if (1}=1) eval('1');");
-            Assert.Throws<ParserException>(() => parser.ParseScript());
+            const string code = "if (1}=1) eval('1');";
+            var parser = new JavaScriptParser();
+            Assert.Throws<ParserException>(() => parser.ParseScript(code));
         }
 
         [Fact]
         public void CanReportProblemWithLargeNumber()
         {
-            Assert.Throws<ParserException>(() => new JavaScriptParser("066666666666666666666666666666"));
+            Assert.Throws<ParserException>(() => new JavaScriptParser().ParseScript("066666666666666666666666666666"));
         }
 
         [Theory]
@@ -164,29 +176,32 @@ f(values);
         [InlineData("...")]
         public void CanParseDot(string script)
         {
-            var parser = new JavaScriptParser(script);
-            Assert.Throws<ParserException>(() => parser.ParseScript());
+            var parser = new JavaScriptParser();
+            Assert.Throws<ParserException>(() => parser.ParseScript(script));
         }
 
         [Fact]
         public void ThrowsErrorForInvalidRegExFlags()
         {
-            var parser = new JavaScriptParser("/'/o//'///C//ÿ");
-            Assert.Throws<ParserException>(() => parser.ParseScript());
+            const string code = "/'/o//'///C//ÿ";
+            var parser = new JavaScriptParser();
+            Assert.Throws<ParserException>(() => parser.ParseScript(code));
         }
 
         [Fact]
         public void ThrowsErrorForDeepRecursionParsing()
         {
-            var parser = new JavaScriptParser("if ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((true)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) { } ");
-            Assert.Throws<ParserException>(() => parser.ParseScript());
+            const string code = "if ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((true)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) { } ";
+            var parser = new JavaScriptParser();
+            Assert.Throws<ParserException>(() => parser.ParseScript(code));
         }
 
         [Fact]
         public void ShouldParseStaticMemberExpressionPropertyInitializer()
         {
-            var parser = new JavaScriptParser("class Edge { [util.inspect.custom] () { return this.toJSON() } }");
-            parser.ParseScript();
+            const string code = "class Edge { [util.inspect.custom] () { return this.toJSON() } }";
+            var parser = new JavaScriptParser();
+            parser.ParseScript(code);
         }
     }
 }

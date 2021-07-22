@@ -5,11 +5,17 @@ namespace Esprima.Tests
 {
     public class VisitorTests
     {
+        private readonly JavaScriptParser _parser;
+
+        public VisitorTests()
+        {
+            _parser = new JavaScriptParser();
+        }
+
         [Fact]
         public void CanVisitIfWithNoElse()
         {
-            var parser = new JavaScriptParser("if (true) { p(); }");
-            var program = parser.ParseScript();
+            var program = _parser.ParseScript("if (true) { p(); }");
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -18,12 +24,12 @@ namespace Esprima.Tests
         [Fact]
         public void CanVisitSwitchCase()
         {
-            var parser = new JavaScriptParser(@"switch(foo) {
+            var parser = new JavaScriptParser();
+            var program = _parser.ParseScript(@"switch(foo) {
     case 'A':
         p();
         break;
 }");
-            var program = parser.ParseScript();
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -32,12 +38,12 @@ namespace Esprima.Tests
         [Fact]
         public void CanVisitDefaultSwitchCase()
         {
-            var parser = new JavaScriptParser(@"switch(foo) {
+            var parser = new JavaScriptParser();
+            var program = _parser.ParseScript(@"switch(foo) {
     default:
         p();
         break;
 }");
-            var program = parser.ParseScript();
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -46,8 +52,7 @@ namespace Esprima.Tests
         [Fact]
         public void CanVisitForWithNoTest()
         {
-            var parser = new JavaScriptParser(@"for (var a = []; ; ) { }");
-            var program = parser.ParseScript();
+            var program = _parser.ParseScript(@"for (var a = []; ; ) { }");
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);
@@ -56,8 +61,8 @@ namespace Esprima.Tests
         [Fact]
         public void CanVisitForOfStatement()
         {
-            var parser = new JavaScriptParser(@"for (var elem of list) { }");
-            var program = parser.ParseScript();
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(@"for (var elem of list) { }");
 
             AstVisitor visitor = new AstVisitor();
             visitor.Visit(program);

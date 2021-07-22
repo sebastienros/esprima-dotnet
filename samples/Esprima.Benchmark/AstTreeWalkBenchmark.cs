@@ -14,8 +14,8 @@ namespace Esprima.Benchmark
         public void Setup()
         {
             var code = File.ReadAllText("3rdparty/angular-1.7.9.js");
-            var parser = new JavaScriptParser(code);
-            _script = parser.ParseScript();
+            var parser = new JavaScriptParser();
+            _script = parser.ParseScript(code);
         }
 
         [Benchmark]
@@ -70,8 +70,8 @@ namespace Esprima.Benchmark
                     {
                         var type = childNode.Type;
                         if (type == Nodes.FunctionDeclaration
-                            || type == Nodes.FunctionExpression  
-                            || type == Nodes.ArrowFunctionExpression 
+                            || type == Nodes.FunctionExpression
+                            || type == Nodes.ArrowFunctionExpression
                             || type == Nodes.ArrowParameterPlaceHolder)
                         {
                             _functionCount++;

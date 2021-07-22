@@ -27,6 +27,8 @@ namespace Jint.Benchmark
             var done = true;
         ";
 
+        private readonly JavaScriptParser _parser = new JavaScriptParser();
+
         [Params(200)]
         public int N { get; set; }
 
@@ -35,8 +37,7 @@ namespace Jint.Benchmark
         {
             for (int i = 0; i < N; ++i)
             {
-                var parser = new JavaScriptParser(Script);
-                parser.ParseScript();
+                _parser.ParseScript(Script);
             }
         }
     }

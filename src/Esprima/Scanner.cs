@@ -32,19 +32,21 @@ namespace Esprima
 
     public class Scanner
     {
-        private readonly IErrorHandler _errorHandler;
-        private readonly bool _trackComment;
-        private readonly bool _adaptRegexp;
-        private readonly int _length;
+        private IErrorHandler _errorHandler = null!;
+        private bool _trackComment;
+        private bool _adaptRegexp;
+        private int _length;
 
-        public readonly string Source;
+        public string Source = null!;
         public int Index;
         public int LineNumber;
         public int LineStart;
 
         internal bool IsModule;
 
-        private List<string> _curlyStack;
+        private string? _sourceName;
+
+        private List<string> _curlyStack = new List<string>();
         private readonly StringBuilder strb = new StringBuilder();
 
         private static readonly HashSet<string> Keywords = new HashSet<string>
@@ -142,24 +144,58 @@ namespace Esprima
             return ch - '0';
         }
 
-        public Scanner(string code) : this(code, new ParserOptions())
+        public Scanner() : this(new ParserOptions())
         {
         }
 
-        public Scanner(string code, ParserOptions options)
+        public Scanner(ParserOptions options) : this("", null, options)
         {
+
+        }
+
+        public Scanner(string code, ParserOptions options) : this(code, null, options)
+        {
+        }
+
+        public Scanner(string code, string? source = null) : this(code, source, new ParserOptions())
+        {
+        }
+
+        public Scanner(string code, string? source, ParserOptions? options = null)
+        {
+            Initialize(code, source, options);
+        }
+
+        /// <summary>
+        /// Initializes the scanner instance for the given code.
+        /// </summary>
+        /// <param name="code">The code to scan</param>
+        /// <param name="source">The source name (file name or logical name) for error reporting.</param>
+        /// <param name="options">Parsing options.</param>
+        public void Initialize(string code, string? source = null, ParserOptions? options = null)
+        {
+            if (options is not null)
+            {
+                _adaptRegexp = options.AdaptRegexp;
+                _errorHandler = options.ErrorHandler;
+                _trackComment = options.Comment;
+            }
+            else
+            {
+                // make sure we have default behavior
+                _errorHandler ??= new ErrorHandler();
+            }
+
             Source = code;
-            _adaptRegexp = options.AdaptRegexp;
-            _errorHandler = options.ErrorHandler;
-            _trackComment = options.Comment;
-
             _length = code.Length;
-            Index = 0;
-            LineNumber = (code.Length > 0) ? 1 : 0;
-            LineStart = 0;
-            _curlyStack = new List<string>(20);
-        }
 
+            _sourceName = source;
+
+            Index = 0;
+            LineNumber = code.Length > 0 ? 1 : 0;
+            LineStart = 0;
+            _curlyStack.Clear();
+        }
 
         internal ScannerState SaveState()
         {
@@ -182,17 +218,17 @@ namespace Esprima
 
         private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
-            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+            throw _errorHandler.CreateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message);
         }
 
         private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
         {
-            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+            throw _errorHandler.CreateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message);
         }
 
         private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
-            _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, message);
+            _errorHandler.TolerateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message);
         }
 
         private StringBuilder GetStringBuilder()

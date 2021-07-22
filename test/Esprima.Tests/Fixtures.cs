@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Json;
 using Esprima.Ast;
 using Esprima.Utils;
 using Newtonsoft.Json.Linq;
@@ -16,16 +15,17 @@ namespace Esprima.Test
         [Fact]
         public void HoistingScopeShouldWork()
         {
-            var parser = new JavaScriptParser(@"
+            const string code = @"
                 function p() {}
-                var x;");
-            var program = parser.ParseScript();
+                var x;";
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
         }
 
         private static string ParseAndFormat(SourceType sourceType, string source, ParserOptions options)
         {
-            var parser = new JavaScriptParser(source, options);
-            var program = sourceType == SourceType.Script ?  (Program) parser.ParseScript() : parser.ParseModule();
+            var parser = new JavaScriptParser(options);
+            var program = sourceType == SourceType.Script ?  (Program) parser.ParseScript(source) : parser.ParseModule(source);
             const string indent = "  ";
             return program.ToJsonString(
                 AstJson.Options.Default
@@ -67,23 +67,25 @@ namespace Esprima.Test
             var jsFilePath = Path.Combine(GetFixturesPath(), "Fixtures", fixture);
             if (jsFilePath.EndsWith(".source.js"))
             {
-                treeFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath)))) + ".tree.json";
-                failureFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath)))) + ".failure.json";
-                moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath)))) + ".module.json";
+                var root = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath))));
+                treeFilePath = root + ".tree.json";
+                failureFilePath = root + ".failure.json";
+                moduleFilePath = root + ".module.json";
             }
             else
             {
-                treeFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".tree.json";
-                failureFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".failure.json";
-                moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".module.json";
+                var root = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath));
+                treeFilePath = root + ".tree.json";
+                failureFilePath = root + ".failure.json";
+                moduleFilePath = root + ".module.json";
             }
 
             var script = File.ReadAllText(jsFilePath);
             if (jsFilePath.EndsWith(".source.js"))
             {
-                var parser = new JavaScriptParser(script);
-                var program = parser.ParseScript();
-                var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init.As<Literal>().StringValue;
+                var parser = new JavaScriptParser();
+                var program = parser.ParseScript(script);
+                var source = program.Body[0].As<VariableDeclaration>().Declarations[0].As<VariableDeclarator>().Init.As<Literal>().StringValue;
                 script = source;
             }
 
@@ -171,8 +173,9 @@ namespace Esprima.Test
         {
             int count = 0;
             Action<Node> action = node => count++;
-            var parser = new JavaScriptParser("// this is a comment", new ParserOptions(), action);
-            parser.ParseScript();
+            const string code = "// this is a comment";
+            var parser = new JavaScriptParser(new ParserOptions(), action);
+            parser.ParseScript(code);
 
             Assert.Equal(1, count);
         }

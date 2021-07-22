@@ -31,8 +31,9 @@ namespace Esprima.Tests
         [InlineData(@"/[]a/")]
         public void ShouldParseRegularExpression(string regexp)
         {
-            var parser = new JavaScriptParser(@"var O = " + regexp);
-            var program = parser.ParseScript();
+            var code = @"var O = " + regexp;
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(code);
 
             Assert.NotNull(program);
         }

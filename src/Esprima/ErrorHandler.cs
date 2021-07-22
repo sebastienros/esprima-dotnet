@@ -5,7 +5,6 @@ namespace Esprima
     /// </summary>
     public class ErrorHandler : IErrorHandler
     {
-        public string? Source { get; set; }
         public bool Tolerant { get; set; }
 
         public virtual void RecordError(ParserException error)
@@ -24,14 +23,14 @@ namespace Esprima
             }
         }
 
-        public ParserException CreateError(int index, int line, int col, string description)
+        public ParserException CreateError(string? source, int index, int line, int col, string description)
         {
-            return new(new ParseError(description, Source, index, new Position(line, col)));
+            return new(new ParseError(description, source, index, new Position(line, col)));
         }
 
-        public void TolerateError(int index, int line, int col, string description)
+        public void TolerateError(string? source, int index, int line, int col, string description)
         {
-            var error = CreateError(index, line, col, description);
+            var error = CreateError(source, index, line, col, description);
             if (Tolerant)
             {
                 RecordError(error);
