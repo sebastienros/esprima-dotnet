@@ -249,10 +249,10 @@ namespace Esprima.Utils
                 Member(name, map[value]);
             }
 
-            private void Member<T>(string name, in NodeList<T> nodes) where T : Node =>
+            private void Member<T>(string name, in NodeList<T> nodes) where T : Node? =>
                 Member(name, nodes, node => node);
 
-            private void Member<T>(string name, in NodeList<T> list, Func<T, Node> nodeSelector) where T : Node
+            private void Member<T>(string name, in NodeList<T> list, Func<T, Node?> nodeSelector) where T : Node?
             {
                 Member(name);
                 _writer.StartArray();
@@ -610,7 +610,7 @@ namespace Esprima.Utils
 
             protected override void VisitChainExpression(ChainExpression chainExpression)
             {
-                using (StartNodeObject(chainExpression)) 
+                using (StartNodeObject(chainExpression))
                     Member("expression", chainExpression.Expression);
             }
 
