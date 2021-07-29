@@ -64,6 +64,16 @@ public partial class JavaScriptParser
     /// </remarks>
     public IReadOnlyList<Token> Tokens => _tokens;
 
+    private protected readonly List<Comment> _comments = new();
+
+    /// <summary>
+    /// Returns the list of comments that were parsed.
+    /// </summary>
+    /// <remarks>
+    /// It requires the parser options to be configured to generate comments.
+    /// </remarks>
+    public IReadOnlyList<Comment> Comments => _comments;
+
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
     private readonly Func<Expression> parseAssignmentExpression;
@@ -204,6 +214,8 @@ public partial class JavaScriptParser
                     node.Start = e.Start;
                     node.End = e.End;
                     node.Loc = e.Loc;
+
+                    _comments.Add(node);
                 }
             }
         }

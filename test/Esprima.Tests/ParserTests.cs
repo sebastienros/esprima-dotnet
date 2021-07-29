@@ -371,6 +371,34 @@ class aa {
     }
 
     [Fact]
+    public void ShouldParseLineComment()
+    {
+        var parser = new JavaScriptParser(@"
+//this is a line comment
+", new ParserOptions { Comment = true });
+
+        var comment = parser.Comments.First();
+
+        Assert.Equal(CommentType.Line, comment.Type);
+        Assert.Equal("this is a line comment", comment.Value);
+    }
+
+    [Fact]
+    public void ShouldParseBlockComment()
+    {
+        var parser = new JavaScriptParser(@"
+/*this is a
+block comment*/
+", new ParserOptions { Comment = true });
+
+        var comment = parser.Comments.First();
+
+        Assert.Equal(CommentType.Block, comment.Type);
+        Assert.Equal(@"this is a
+block comment", comment.Value);
+    }
+
+    [Fact]
     public void HoistingScopeShouldWork()
     {
         var parser = new JavaScriptParser(@"
