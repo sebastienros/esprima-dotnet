@@ -241,23 +241,20 @@ namespace Esprima.Utils
 
         protected virtual void VisitCatchClause(CatchClause catchClause)
         {
-            if (catchClause.Param is Identifier identifier)
+            if (catchClause.Param is not null)
             {
-                VisitIdentifier(identifier);
-            }
-            else if (catchClause.Param is ArrayPattern arrayPattern)
-            {
-                VisitArrayPattern(arrayPattern);
-            }
-            else if (catchClause.Param is ObjectPattern objectPattern)
-            {
-                VisitObjectPattern(objectPattern);
+                Visit(catchClause.Param);
             }
             Visit(catchClause.Body);
         }
 
         protected virtual void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
         {
+            if (functionDeclaration.Id is not null)
+            {
+                Visit(functionDeclaration.Id);
+            }
+
             ref readonly var parameters = ref functionDeclaration.Params;
             for (var i = 0; i < parameters.Count; i++)
             {
@@ -293,7 +290,7 @@ namespace Esprima.Utils
             Visit(tryStatement.Block);
             if (tryStatement.Handler != null)
             {
-                VisitCatchClause(tryStatement.Handler);
+                Visit(tryStatement.Handler);
             }
 
             if (tryStatement.Finalizer != null)
@@ -313,7 +310,7 @@ namespace Esprima.Utils
             ref readonly var cases = ref switchStatement.Cases;
             for (var i = 0; i < cases.Count; i++)
             {
-                VisitSwitchCase(cases[i]);
+                Visit(cases[i]);
             }
         }
 
@@ -341,6 +338,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitLabeledStatement(LabeledStatement labeledStatement)
         {
+            Visit(labeledStatement.Label);
             Visit(labeledStatement.Body);
         }
 
@@ -414,11 +412,11 @@ namespace Esprima.Utils
             var func = new FunctionExpression(new Identifier(null),
                 arrowFunctionExpression.Params,
                 statement,
-                generator: false,
+                generator: arrowFunctionExpression.Generator,
                 IsStrictMode,
-                async: false);
+                async: arrowFunctionExpression.Async);
 
-            VisitFunctionExpression(func);
+            Visit(func);
         }
 
         protected virtual void VisitUnaryExpression(UnaryExpression unaryExpression)
@@ -450,13 +448,9 @@ namespace Esprima.Utils
             for (var i = 0; i < properties.Count; i++)
             {
                 var p = properties[i];
-                if (p is SpreadElement spreadElement)
+                if (p is not null)
                 {
-                    VisitSpreadElement(spreadElement);
-                }
-                else
-                {
-                    VisitProperty((Property) p);
+                    Visit(p);
                 }
             }
         }
@@ -481,8 +475,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitLogicalExpression(BinaryExpression binaryExpression)
         {
-            VisitBinaryExpression(binaryExpression);
-        }
+            Visit(binaryExpression.Left);
+            Visit(binaryExpression.Right);        }
 
         protected virtual void VisitLiteral(Literal literal)
         {
@@ -492,8 +486,13 @@ namespace Esprima.Utils
         {
         }
 
-        protected virtual void VisitFunctionExpression(IFunction function)
+        protected virtual void VisitFunctionExpression(FunctionExpression function)
         {
+            if (function.Id is not null)
+            {
+                Visit(function.Id);
+            }
+
             ref readonly var parameters = ref function.Params;
             for (var i = 0; i < parameters.Count; i++)
             {
@@ -515,6 +514,13 @@ namespace Esprima.Utils
             {
                 Visit(classExpression.Id);
             }
+
+            if (classExpression.SuperClass is not null)
+            {
+                Visit(classExpression.SuperClass);
+            }
+
+            Visit(classExpression.Body);
         }
 
         protected virtual void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
@@ -524,7 +530,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
         {
-            VisitLiteral(exportAllDeclaration.Source);
+            Visit(exportAllDeclaration.Source);
         }
 
         protected virtual void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
@@ -532,7 +538,7 @@ namespace Esprima.Utils
             ref readonly var specifiers = ref exportNamedDeclaration.Specifiers;
             for (var i = 0; i < specifiers.Count; i++)
             {
-                VisitExportSpecifier(specifiers[i]);
+                Visit(specifiers[i]);
             }
 
             if (exportNamedDeclaration.Declaration is not null)
@@ -600,13 +606,13 @@ namespace Esprima.Utils
         {
             if (classDeclaration.Id is not null)
             {
-                VisitIdentifier(classDeclaration.Id);
+                Visit(classDeclaration.Id);
             }
             if (classDeclaration.SuperClass is not null)
             {
                 Visit(classDeclaration.SuperClass);
             }
-            VisitClassBody(classDeclaration.Body);
+            Visit(classDeclaration.Body);
         }
 
         protected virtual void VisitClassBody(ClassBody classBody)
@@ -630,7 +636,7 @@ namespace Esprima.Utils
         protected virtual void VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
         {
             Visit(taggedTemplateExpression.Tag);
-            VisitTemplateLiteral(taggedTemplateExpression.Quasi);
+            Visit(taggedTemplateExpression.Quasi);
         }
 
         protected virtual void VisitSuper(Super super)
@@ -639,8 +645,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitMetaProperty(MetaProperty metaProperty)
         {
-            VisitIdentifier(metaProperty.Meta);
-            VisitIdentifier(metaProperty.Property);
+            Visit(metaProperty.Meta);
+            Visit(metaProperty.Property);
         }
 
         protected virtual void VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
@@ -696,7 +702,7 @@ namespace Esprima.Utils
             ref readonly var quasis = ref templateLiteral.Quasis;
             for (var i = 0; i < quasis.Count; i++)
             {
-                VisitTemplateElement(quasis[i]);
+                Visit(quasis[i]);
             }
 
             ref readonly var expressions = ref templateLiteral.Expressions;
@@ -729,7 +735,7 @@ namespace Esprima.Utils
                     break;
                 case PropertyKind.Set:
                 case PropertyKind.Get:
-                    VisitFunctionExpression((IFunction) property.Value);
+                    Visit(property.Value);
                     break;
                 case PropertyKind.Constructor:
                     break;
@@ -793,7 +799,7 @@ namespace Esprima.Utils
         {
             if (continueStatement.Label is not null)
             {
-                VisitIdentifier(continueStatement.Label);
+                Visit(continueStatement.Label);
             }
         }
 
@@ -801,7 +807,7 @@ namespace Esprima.Utils
         {
             if (breakStatement.Label is not null)
             {
-                VisitIdentifier(breakStatement.Label);
+                Visit(breakStatement.Label);
             }
         }
 
