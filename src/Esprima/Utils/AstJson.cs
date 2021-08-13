@@ -585,7 +585,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected override void VisitFunctionExpression(FunctionExpression function)
+            protected override void VisitFunctionExpression(IFunction function)
             {
                 using (StartNodeObject((Node) function))
                 {
