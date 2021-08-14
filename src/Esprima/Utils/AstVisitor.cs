@@ -365,26 +365,19 @@ namespace Esprima.Utils
 
         protected virtual void VisitForStatement(ForStatement forStatement)
         {
-            if (forStatement.Init != null)
+            if (forStatement.Init is not null)
             {
-                if (forStatement.Init.Type == Nodes.VariableDeclaration)
-                {
-                    Visit(forStatement.Init.As<Statement>());
-                }
-                else
-                {
-                    Visit(forStatement.Init.As<Expression>());
-                }
+                Visit(forStatement.Init);
             }
-            if (forStatement.Test != null)
+            if (forStatement.Test is not null)
             {
                 Visit(forStatement.Test);
             }
-            Visit(forStatement.Body);
-            if (forStatement.Update != null)
+            if (forStatement.Update is not null)
             {
                 Visit(forStatement.Update);
             }
+            Visit(forStatement.Body);
         }
 
         protected virtual void VisitForInStatement(ForInStatement forInStatement)
@@ -590,8 +583,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitForOfStatement(ForOfStatement forOfStatement)
         {
-            Visit(forOfStatement.Right);
             Visit(forOfStatement.Left);
+            Visit(forOfStatement.Right);
             Visit(forOfStatement.Body);
         }
 
@@ -684,7 +677,7 @@ namespace Esprima.Utils
         protected virtual void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
         {
             Visit(variableDeclarator.Id);
-            if (variableDeclarator.Init != null)
+            if (variableDeclarator.Init is not null)
             {
                 Visit(variableDeclarator.Init);
             }
