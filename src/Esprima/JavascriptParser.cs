@@ -783,7 +783,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-object-initializer
 
-        private BlockStatement ParsePropertyMethod(ParsedParameters parameters)
+        private BlockStatement ParsePropertyMethod(ParsedParameters parameters, out bool hasStrictDirective)
         {
             _context.IsAssignmentTarget = false;
             _context.IsBindingElement = false;
@@ -792,6 +792,7 @@ namespace Esprima
             var previousAllowStrictDirective = _context.AllowStrictDirective;
             _context.AllowStrictDirective = parameters.Simple;
             var body = IsolateCoverGrammar(ParseFunctionSourceElements);
+            hasStrictDirective = _context.Strict;
             if (_context.Strict && parameters.FirstRestricted != null)
             {
                 TolerateUnexpectedToken(parameters.FirstRestricted, parameters.Message);
@@ -813,10 +814,10 @@ namespace Esprima
             var previousAllowYield = _context.AllowYield;
             _context.AllowYield = true;
             var parameters = ParseFormalParameters();
-            var method = ParsePropertyMethod(parameters);
+            var method = ParsePropertyMethod(parameters, out var hasStrictDirective);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, _context.Strict, async: false));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, hasStrictDirective, async: false));
         }
 
         private FunctionExpression ParsePropertyMethodAsyncFunction()
@@ -828,7 +829,7 @@ namespace Esprima
             _context.AllowYield = false;
             _context.Await = true;
             var parameters = ParseFormalParameters();
-            var method = ParsePropertyMethod(parameters);
+            var method = ParsePropertyMethod(parameters, out _);
             _context.AllowYield = previousAllowYield;
             _context.Await = previousAwait;
 
@@ -2261,7 +2262,7 @@ namespace Esprima
                             TolerateUnexpectedToken(list.Stricted, list.Message);
                         }
 
-                        expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, isAsync));
+                        expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, _context.Strict, isAsync));
 
                         _context.Strict = previousStrict;
                         _context.AllowStrictDirective = previousAllowStrictDirective;
@@ -4032,10 +4033,10 @@ namespace Esprima
             {
                 TolerateError(Messages.BadGetterArity);
             }
-            var method = ParsePropertyMethod(formalParameters);
+            var method = ParsePropertyMethod(formalParameters, out var hasStrictDirective);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, hasStrictDirective, async: false));
         }
 
         private FunctionExpression ParseSetterMethod()
@@ -4055,10 +4056,10 @@ namespace Esprima
             {
                 TolerateError(Messages.BadSetterRestParameter);
             }
-            var method = ParsePropertyMethod(formalParameters);
+            var method = ParsePropertyMethod(formalParameters, out var hasStrictDirective);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, _context.Strict, async: false));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: isGenerator, hasStrictDirective, async: false));
         }
 
         private FunctionExpression ParseGeneratorMethod()
@@ -4070,10 +4071,10 @@ namespace Esprima
             _context.AllowYield = true;
             var parameters = ParseFormalParameters();
             _context.AllowYield = false;
-            var method = ParsePropertyMethod(parameters);
+            var method = ParsePropertyMethod(parameters, out var hasStrictDirective);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: true, _context.Strict, async: false));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: true, hasStrictDirective, async: false));
         }
 
         // https://tc39.github.io/ecma262/#sec-generator-function-definitions

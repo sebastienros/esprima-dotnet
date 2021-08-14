@@ -6,8 +6,6 @@ namespace Esprima.Utils
 {
     public class AstVisitor
     {
-        public bool IsStrictMode { get; set; } = false;
-
         public virtual void Visit(Node node)
         {
             switch (node.Type)
