@@ -44,6 +44,28 @@ namespace Esprima.Tests
         }
 
         [Fact]
+        public void DetectsForAsyncFunctionExpressionInsideObjectExpression_Strict()
+        {
+            var script = new JavaScriptParser("var obj = { async method() { 'use strict'; } }").ParseScript();
+            var variable = (VariableDeclaration)script.Body.First();
+            var objectExpression = (ObjectExpression)variable.Declarations.First().Init;
+            var property = (Property)objectExpression.Properties.First();
+            var function = (FunctionExpression)property.Value;
+            Assert.True(function.Strict);
+        }
+
+        [Fact]
+        public void DetectsForAsyncFunctionExpressionInsideObjectExpression_NotStrict()
+        {
+            var script = new JavaScriptParser("var obj = { async method() { } }").ParseScript();
+            var variable = (VariableDeclaration)script.Body.First();
+            var objectExpression = (ObjectExpression)variable.Declarations.First().Init;
+            var property = (Property)objectExpression.Properties.First();
+            var function = (FunctionExpression)property.Value;
+            Assert.False(function.Strict);
+        }
+
+        [Fact]
         public void DetectsForFunctionExpressionInsideObjectGetter()
         {
             var script = new JavaScriptParser("var obj = { get prop() { 'use strict'; } }").ParseScript();

@@ -829,11 +829,11 @@ namespace Esprima
             _context.AllowYield = false;
             _context.Await = true;
             var parameters = ParseFormalParameters();
-            var method = ParsePropertyMethod(parameters, out _);
+            var method = ParsePropertyMethod(parameters, out var hasStrictDirective);
             _context.AllowYield = previousAllowYield;
             _context.Await = previousAwait;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, strict: true, async: true));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: false, hasStrictDirective, async: true));
         }
 
         private Expression ParseObjectPropertyKey()
