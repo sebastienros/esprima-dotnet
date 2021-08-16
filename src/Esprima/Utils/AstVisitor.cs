@@ -286,12 +286,12 @@ namespace Esprima.Utils
         protected virtual void VisitTryStatement(TryStatement tryStatement)
         {
             Visit(tryStatement.Block);
-            if (tryStatement.Handler != null)
+            if (tryStatement.Handler is not null)
             {
                 Visit(tryStatement.Handler);
             }
 
-            if (tryStatement.Finalizer != null)
+            if (tryStatement.Finalizer is not null)
             {
                 Visit(tryStatement.Finalizer);
             }
@@ -314,7 +314,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitSwitchCase(SwitchCase switchCase)
         {
-            if (switchCase.Test != null)
+            if (switchCase.Test is not null)
             {
                 Visit(switchCase.Test);
             }
@@ -329,9 +329,10 @@ namespace Esprima.Utils
 
         protected virtual void VisitReturnStatement(ReturnStatement returnStatement)
         {
-            if (returnStatement.Argument == null)
-                return;
-            Visit(returnStatement.Argument);
+            if (returnStatement.Argument is not null)
+            {
+                Visit(returnStatement.Argument);
+            }
         }
 
         protected virtual void VisitLabeledStatement(LabeledStatement labeledStatement)
@@ -344,7 +345,7 @@ namespace Esprima.Utils
         {
             Visit(ifStatement.Test);
             Visit(ifStatement.Consequent);
-            if (ifStatement.Alternate != null)
+            if (ifStatement.Alternate is not null)
             {
                 Visit(ifStatement.Alternate);
             }
@@ -443,14 +444,13 @@ namespace Esprima.Utils
 
         protected virtual void VisitNewExpression(NewExpression newExpression)
         {
+            Visit(newExpression.Callee);
             ref readonly var arguments = ref newExpression.Arguments;
             for (var i = 0; i < arguments.Count; i++)
             {
                 var e = arguments[i];
                 Visit(e);
             }
-
-            Visit(newExpression.Callee);
         }
 
         protected virtual void VisitMemberExpression(MemberExpression memberExpression)
@@ -462,7 +462,8 @@ namespace Esprima.Utils
         protected virtual void VisitLogicalExpression(BinaryExpression binaryExpression)
         {
             Visit(binaryExpression.Left);
-            Visit(binaryExpression.Right);        }
+            Visit(binaryExpression.Right);
+        }
 
         protected virtual void VisitLiteral(Literal literal)
         {
@@ -521,15 +522,15 @@ namespace Esprima.Utils
 
         protected virtual void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
         {
+            if (exportNamedDeclaration.Declaration is not null)
+            {
+                Visit(exportNamedDeclaration.Declaration);
+            }
+
             ref readonly var specifiers = ref exportNamedDeclaration.Specifiers;
             for (var i = 0; i < specifiers.Count; i++)
             {
                 Visit(specifiers[i]);
-            }
-
-            if (exportNamedDeclaration.Declaration is not null)
-            {
-                Visit(exportNamedDeclaration.Declaration);
             }
 
             if (exportNamedDeclaration.Source is not null)
@@ -540,8 +541,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitExportSpecifier(ExportSpecifier exportSpecifier)
         {
-            Visit(exportSpecifier.Exported);
             Visit(exportSpecifier.Local);
+            Visit(exportSpecifier.Exported);
         }
 
         protected virtual void VisitImport(Import import)
@@ -571,8 +572,8 @@ namespace Esprima.Utils
 
         protected virtual void VisitImportSpecifier(ImportSpecifier importSpecifier)
         {
-            Visit(importSpecifier.Local);
             Visit(importSpecifier.Imported);
+            Visit(importSpecifier.Local);
         }
 
         protected virtual void VisitMethodDefinition(MethodDefinition methodDefinition)
@@ -686,16 +687,17 @@ namespace Esprima.Utils
         protected virtual void VisitTemplateLiteral(TemplateLiteral templateLiteral)
         {
             ref readonly var quasis = ref templateLiteral.Quasis;
-            for (var i = 0; i < quasis.Count; i++)
+            ref readonly var expressions = ref templateLiteral.Expressions;
+
+            var n = expressions.Count;
+
+            for (var i = 0; i < n; i++)
             {
                 Visit(quasis[i]);
-            }
-
-            ref readonly var expressions = ref templateLiteral.Expressions;
-            for (var i = 0; i < expressions.Count; i++)
-            {
                 Visit(expressions[i]);
             }
+
+            Visit(quasis[n]);
         }
 
         protected virtual void VisitTemplateElement(TemplateElement templateElement)
