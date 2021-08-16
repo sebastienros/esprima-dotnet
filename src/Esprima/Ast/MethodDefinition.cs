@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class MethodDefinition : ClassProperty
     {
@@ -18,5 +20,7 @@
             Value = value;
             Kind = kind;
         }
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitMethodDefinition(this);
     }
 }

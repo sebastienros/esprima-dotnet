@@ -61,5 +61,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Argument);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitUnaryExpression(this);
     }
 }

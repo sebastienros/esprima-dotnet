@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class TryStatement : Statement
@@ -18,5 +20,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Block, Handler, Finalizer);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitTryStatement(this);
     }
 }

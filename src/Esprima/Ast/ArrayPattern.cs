@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ArrayPattern : BindingPattern
     {
@@ -14,5 +16,7 @@
 #pragma warning disable 8631
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_elements);
 #pragma warning restore 8631
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitArrayPattern(this);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class YieldExpression : Expression
     {
@@ -12,5 +14,7 @@
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Argument);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitYieldExpression(this);
     }
 }

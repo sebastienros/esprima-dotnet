@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class RestElement : Expression
     {
@@ -14,5 +16,7 @@
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Argument);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitRestElement(this);
     }
 }

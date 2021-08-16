@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class CallExpression : Expression
@@ -20,5 +22,7 @@ namespace Esprima.Ast
         public ref readonly NodeList<Expression> Arguments => ref _arguments;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Callee, _arguments);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitCallExpression(this);
     }
 }

@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public class ExpressionStatement : Statement
@@ -10,5 +12,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Expression);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitExpressionStatement(this);
     }
 }

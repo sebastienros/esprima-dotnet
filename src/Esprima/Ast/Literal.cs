@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -46,5 +47,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitLiteral(this);
     }
 }

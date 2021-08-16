@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class Identifier : Expression
@@ -10,5 +12,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitIdentifier(this);
     }
 }

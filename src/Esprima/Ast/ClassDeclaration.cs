@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ClassDeclaration : Declaration
     {
@@ -15,5 +17,7 @@
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Id, SuperClass, Body);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitClassDeclaration(this);
     }
 }

@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class WhileStatement : Statement
@@ -12,5 +14,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Test, Body);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitWhileStatement(this);
     }
 }

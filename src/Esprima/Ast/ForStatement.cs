@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class ForStatement : Statement
@@ -22,5 +24,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Init, Test, Update, Body);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitForStatement(this);
     }
 }

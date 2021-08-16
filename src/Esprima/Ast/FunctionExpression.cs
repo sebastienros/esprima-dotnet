@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class FunctionExpression : Expression, IFunction
@@ -31,5 +33,7 @@ namespace Esprima.Ast
         public bool Strict { get; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitFunctionExpression(this);
     }
 }

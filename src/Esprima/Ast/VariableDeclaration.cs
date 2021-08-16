@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class VariableDeclaration : Declaration
@@ -17,5 +19,7 @@ namespace Esprima.Ast
         public ref readonly NodeList<VariableDeclarator> Declarations => ref _declarations;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_declarations);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitVariableDeclaration(this);
     }
 }

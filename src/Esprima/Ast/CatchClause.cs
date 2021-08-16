@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class CatchClause : Statement
@@ -13,5 +15,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Param, Body);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitCatchClause(this);
     }
 }

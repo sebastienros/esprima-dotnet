@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ImportNamespaceSpecifier : ImportDeclarationSpecifier
     {
@@ -10,5 +12,7 @@
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Local);
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitImportNamespaceSpecifier(this);
     }
 }

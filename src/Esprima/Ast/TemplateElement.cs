@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class TemplateElement : Node
     {
@@ -18,5 +20,7 @@
         }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
+
+        public override void Accept(AstVisitor visitor) => visitor.VisitTemplateElement(this);
     }
 }
