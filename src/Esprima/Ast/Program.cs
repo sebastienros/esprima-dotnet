@@ -12,6 +12,6 @@ namespace Esprima.Ast
 
         public abstract ref readonly NodeList<Statement> Body { get; }
 
-        public override void Accept(AstVisitor visitor) => visitor.VisitProgram(this);
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitProgram(this);
     }
 }

@@ -9,6 +9,6 @@ namespace Esprima.Ast
             Prefix = prefix;
         }
 
-        public override void Accept(AstVisitor visitor) => visitor.VisitUpdateExpression(this);
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitUpdateExpression(this);
     }
 }

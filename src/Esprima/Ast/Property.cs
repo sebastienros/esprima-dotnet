@@ -24,6 +24,6 @@ namespace Esprima.Ast
             Shorthand = shorthand;
         }
 
-        public override void Accept(AstVisitor visitor) => visitor.VisitProperty(this);
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitProperty(this);
     }
 }

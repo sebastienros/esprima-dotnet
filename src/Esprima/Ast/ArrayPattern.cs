@@ -17,6 +17,6 @@ namespace Esprima.Ast
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_elements);
 #pragma warning restore 8631
 
-        public override void Accept(AstVisitor visitor) => visitor.VisitArrayPattern(this);
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitArrayPattern(this);
     }
 }

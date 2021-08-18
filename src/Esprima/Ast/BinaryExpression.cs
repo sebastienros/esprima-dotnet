@@ -110,7 +110,7 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
 
-        public override void Accept(AstVisitor visitor)
+        protected internal override void Accept(AstVisitor visitor)
         {
             if (Type == Nodes.LogicalExpression)
             {

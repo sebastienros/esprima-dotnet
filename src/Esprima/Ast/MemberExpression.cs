@@ -22,6 +22,6 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new NodeCollection(Object, Property);
 
-        public override void Accept(AstVisitor visitor) => visitor.VisitMemberExpression(this);
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitMemberExpression(this);
     }
 }

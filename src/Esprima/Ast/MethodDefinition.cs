@@ -21,6 +21,6 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
-        public override void Accept(AstVisitor visitor) => visitor.VisitMethodDefinition(this);
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitMethodDefinition(this);
     }
 }

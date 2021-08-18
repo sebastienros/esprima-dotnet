@@ -77,6 +77,6 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
 
-        public override void Accept(AstVisitor visitor) => visitor.VisitAssignmentExpression(this);
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitAssignmentExpression(this);
     }
 }
