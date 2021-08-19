@@ -5,6 +5,8 @@ namespace Esprima.Ast
     public sealed class ImportSpecifier : ImportDeclarationSpecifier
     {
         public readonly Identifier Local;
+        protected override Identifier LocalId => Local;
+
         public readonly Identifier Imported;
 
         public ImportSpecifier(Identifier local, Identifier imported) : base(Nodes.ImportSpecifier)
