@@ -1,6 +1,5 @@
 ﻿using System;
 using Esprima.Ast;
-using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Utils
 {
