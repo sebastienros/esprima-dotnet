@@ -13,9 +13,7 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression?> Elements => ref _elements;
 
-#pragma warning disable 8631
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_elements);
-#pragma warning restore 8631
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield<Expression>(_elements!);
 
         protected internal override void Accept(AstVisitor visitor) => visitor.VisitArrayPattern(this);
     }
