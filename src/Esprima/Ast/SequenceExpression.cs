@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class SequenceExpression : Expression
@@ -14,5 +16,7 @@ namespace Esprima.Ast
         internal void UpdateExpressions(in NodeList<Expression> value) => _expressions = value;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Expressions);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitSequenceExpression(this);
     }
 }

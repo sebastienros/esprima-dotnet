@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ObjectPattern : BindingPattern
     {
@@ -12,5 +14,7 @@
         public ref readonly NodeList<Node> Properties => ref _properties;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_properties);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitObjectPattern(this);
     }
 }

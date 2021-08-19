@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class BlockStatement : Statement
@@ -12,5 +14,7 @@ namespace Esprima.Ast
         public ref readonly NodeList<Statement> Body => ref _body;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitBlockStatement(this);
     }
 }

@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class ObjectExpression : Expression
@@ -12,5 +14,7 @@ namespace Esprima.Ast
         public ref readonly NodeList<Expression> Properties => ref _properties;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_properties);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitObjectExpression(this);
     }
 }

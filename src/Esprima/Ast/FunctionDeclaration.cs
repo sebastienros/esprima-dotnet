@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class FunctionDeclaration : Declaration, IFunction
@@ -33,5 +35,7 @@ namespace Esprima.Ast
         public ref readonly NodeList<Expression> Params => ref _parameters;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitFunctionDeclaration(this);
     }
 }

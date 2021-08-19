@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public abstract class Program : Statement
@@ -9,5 +11,7 @@ namespace Esprima.Ast
         public abstract SourceType SourceType { get; }
 
         public abstract ref readonly NodeList<Statement> Body { get; }
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitProgram(this);
     }
 }

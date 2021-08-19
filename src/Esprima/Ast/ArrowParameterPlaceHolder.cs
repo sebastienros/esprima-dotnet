@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ArrowParameterPlaceHolder : Expression
     {
@@ -20,5 +22,7 @@
         public bool Async { get; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_params);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitArrowParameterPlaceHolder(this);
     }
 }

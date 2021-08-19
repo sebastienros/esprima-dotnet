@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ExportAllDeclaration : ExportDeclaration
     {
@@ -10,5 +12,7 @@
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Source);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitExportAllDeclaration(this);
     }
 }

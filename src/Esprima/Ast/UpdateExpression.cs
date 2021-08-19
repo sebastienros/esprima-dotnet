@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class UpdateExpression : UnaryExpression
@@ -6,5 +8,7 @@ namespace Esprima.Ast
         {
             Prefix = prefix;
         }
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitUpdateExpression(this);
     }
 }

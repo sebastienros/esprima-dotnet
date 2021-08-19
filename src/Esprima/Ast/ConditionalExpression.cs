@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class ConditionalExpression : Expression
@@ -17,5 +19,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Test, Consequent, Alternate);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitConditionalExpression(this);
     }
 }

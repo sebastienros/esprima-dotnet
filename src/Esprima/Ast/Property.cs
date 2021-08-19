@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class Property : ClassProperty
@@ -21,5 +23,7 @@ namespace Esprima.Ast
             Method = method;
             Shorthand = shorthand;
         }
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitProperty(this);
     }
 }

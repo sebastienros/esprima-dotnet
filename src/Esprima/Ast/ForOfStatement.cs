@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ForOfStatement : Statement
     {
@@ -19,6 +21,8 @@
             Await = _await;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Left, Right, Body); 
+        public override NodeCollection ChildNodes => new NodeCollection(Left, Right, Body);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitForOfStatement(this);
     }
 }

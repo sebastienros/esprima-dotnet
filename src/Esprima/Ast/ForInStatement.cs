@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class ForInStatement : Statement
@@ -17,5 +19,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Left, Right, Body);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitForInStatement(this);
     }
 }

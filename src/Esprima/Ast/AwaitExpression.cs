@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class AwaitExpression : Expression
@@ -10,5 +12,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Argument);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitAwaitExpression(this);
     }
 }

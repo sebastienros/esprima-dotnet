@@ -1,3 +1,5 @@
+using Esprima.Utils;
+
 namespace Esprima.Ast
 {
     public sealed class WithStatement : Statement
@@ -12,5 +14,7 @@ namespace Esprima.Ast
         }
 
         public override NodeCollection ChildNodes => new NodeCollection(Object, Body);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitWithStatement(this);
     }
 }

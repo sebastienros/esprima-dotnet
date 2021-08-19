@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class ExportNamedDeclaration : ExportDeclaration
     {
@@ -21,5 +23,7 @@
         public ref readonly NodeList<ExportSpecifier> Specifiers => ref _specifiers;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declaration, _specifiers, Source);
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitExportNamedDeclaration(this);
     }
 }

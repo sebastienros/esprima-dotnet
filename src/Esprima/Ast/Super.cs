@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class Super : Expression
     {
@@ -7,5 +9,7 @@
         }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
+
+        protected internal override void Accept(AstVisitor visitor) => visitor.VisitSuper(this);
     }
 }
