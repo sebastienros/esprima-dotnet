@@ -1,7 +1,7 @@
 ﻿namespace Esprima.Ast
 {
     /// <summary>
-    /// Represents either a <see cref="FunctionDeclaration"/> or a <see cref="FunctionExpression"/>
+    /// Represents either a <see cref="FunctionDeclaration"/>, a <see cref="FunctionExpression"/> or an <see cref="ArrowFunctionExpression"/>
     /// </summary>
     public interface IFunction
     {

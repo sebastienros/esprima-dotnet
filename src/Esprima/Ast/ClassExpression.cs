@@ -2,14 +2,19 @@
 
 namespace Esprima.Ast
 {
-    public sealed class ClassExpression : Expression
+    public sealed class ClassExpression : Expression, IClass
     {
         public readonly Identifier? Id;
+        Identifier? IClass.Id => Id;
+
         public readonly Expression? SuperClass;
+        Expression? IClass.SuperClass => SuperClass;
+
         public readonly ClassBody Body;
+        ClassBody IClass.Body => Body;
 
         public ClassExpression(
-            Identifier? id, 
+            Identifier? id,
             Expression? superClass,
             ClassBody body) : base(Nodes.ClassExpression)
         {
