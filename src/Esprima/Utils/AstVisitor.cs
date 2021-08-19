@@ -111,8 +111,7 @@ namespace Esprima.Utils
             ref readonly var consequent = ref switchCase.Consequent;
             for (var i = 0; i < consequent.Count; i++)
             {
-                var s = consequent[i];
-                Visit(s);
+                Visit(consequent[i]);
             }
         }
 
@@ -188,8 +187,7 @@ namespace Esprima.Utils
             ref readonly var parameters = ref arrowFunctionExpression.Params;
             for (var i = 0; i < parameters.Count; i++)
             {
-                var param = parameters[i];
-                Visit(param!);
+                Visit(parameters[i]);
             }
 
             Visit(arrowFunctionExpression.Body);
@@ -223,11 +221,7 @@ namespace Esprima.Utils
             ref readonly var properties = ref objectExpression.Properties;
             for (var i = 0; i < properties.Count; i++)
             {
-                var p = properties[i];
-                if (p is not null)
-                {
-                    Visit(p);
-                }
+                Visit(properties[i]);
             }
         }
 
@@ -237,8 +231,7 @@ namespace Esprima.Utils
             ref readonly var arguments = ref newExpression.Arguments;
             for (var i = 0; i < arguments.Count; i++)
             {
-                var e = arguments[i];
-                Visit(e);
+                Visit(arguments[i]);
             }
         }
 
@@ -272,8 +265,7 @@ namespace Esprima.Utils
             ref readonly var parameters = ref function.Params;
             for (var i = 0; i < parameters.Count; i++)
             {
-                var param = parameters[i];
-                Visit(param!);
+                Visit(parameters[i]);
             }
 
             Visit(function.Body);
@@ -396,8 +388,7 @@ namespace Esprima.Utils
             ref readonly var body = ref classBody.Body;
             for (var i = 0; i < body.Count; i++)
             {
-                var classProperty = body[i];
-                Visit(classProperty);
+                Visit(body[i]);
             }
         }
 
@@ -435,8 +426,7 @@ namespace Esprima.Utils
             ref readonly var properties = ref objectPattern.Properties;
             for (var i = 0; i < properties.Count; i++)
             {
-                var property = properties[i];
-                Visit(property);
+                Visit(properties[i]);
             }
         }
 
@@ -456,10 +446,10 @@ namespace Esprima.Utils
             ref readonly var elements = ref arrayPattern.Elements;
             for (var i = 0; i < elements.Count; i++)
             {
-                var arg = elements[i];
-                if (arg is not null)
+                var expr = elements[i];
+                if (expr is not null)
                 {
-                    Visit(arg);
+                    Visit(expr);
                 }
             }
         }
@@ -501,27 +491,7 @@ namespace Esprima.Utils
         protected internal virtual void VisitProperty(Property property)
         {
             Visit(property.Key);
-
-            switch (property.Kind)
-            {
-                case PropertyKind.Init:
-                case PropertyKind.Data:
-                    Visit(property.Value);
-                    break;
-                case PropertyKind.None:
-                    break;
-                case PropertyKind.Set:
-                case PropertyKind.Get:
-                    Visit(property.Value);
-                    break;
-                case PropertyKind.Constructor:
-                    break;
-                case PropertyKind.Method:
-                    break;
-                default:
-                    ThrowArgumentOutOfRangeException(nameof(property.Key), property.Key);
-                    break;
-            }
+            Visit(property.Value);
         }
 
         protected internal virtual void VisitAwaitExpression(AwaitExpression awaitExpression)
@@ -542,8 +512,7 @@ namespace Esprima.Utils
             ref readonly var arguments = ref callExpression.Arguments;
             for (var i = 0; i < arguments.Count; i++)
             {
-                var arg = arguments[i];
-                Visit(arg);
+                Visit(arguments[i]);
             }
         }
 
@@ -593,8 +562,7 @@ namespace Esprima.Utils
             ref readonly var body = ref blockStatement.Body;
             for (var i = 0; i < body.Count; i++)
             {
-                var statement = body[i];
-                Visit(statement);
+                Visit(body[i]);
             }
         }
     }
