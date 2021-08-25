@@ -973,7 +973,7 @@ namespace Esprima
                 {
                     if (!computed && IsPropertyKey(key, "__proto__"))
                     {
-                        if (hasProto.Value != null)
+                        if (hasProto.BooleanValue)
                         {
                             TolerateError(Messages.DuplicateProtoProperty);
                         }
