@@ -101,14 +101,14 @@ public class StringMatcherGenerator : IIncrementalGenerator
             sourceBuilder.Append("public partial class ").AppendLine(typeGrouping.Key)
                 .AppendLine("{");
 
-            foreach (var method in methods)
+            foreach (var method in typeGrouping)
             {
                 context.CancellationToken.ThrowIfCancellationRequested();
 
                 sourceBuilder.Append(indent);
                 sourceBuilder.Append(method.Modifiers).Append(" bool ").Append(method.Name).Append("(").Append(method.InputType).AppendLine(" input)");
                 sourceBuilder.Append(indent).AppendLine("{");
-                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4));
+                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4, checkNull: method.InputType.EndsWith("?")));
                 sourceBuilder.Append(indent).AppendLine("}");
                 sourceBuilder.AppendLine();
             }

@@ -3,6 +3,214 @@
 
 namespace Esprima;
 
+public partial class JavaScriptParser
+{
+    private static partial bool IsAssignmentOperator(string input)
+    {
+        switch (input.Length)
+        {
+            case 1:
+                return input == "=";
+
+            case 2:
+                var disc2 = input[0];
+                if (disc2 == '*' && input == "*=")
+                {
+                    return true;
+                }
+                else if (disc2 == '/' && input == "/=")
+                {
+                    return true;
+                }
+                else if (disc2 == '%' && input == "%=")
+                {
+                    return true;
+                }
+                else if (disc2 == '+' && input == "+=")
+                {
+                    return true;
+                }
+                else if (disc2 == '-' && input == "-=")
+                {
+                    return true;
+                }
+                else if (disc2 == '&' && input == "&=")
+                {
+                    return true;
+                }
+                else if (disc2 == '^' && input == "^=")
+                {
+                    return true;
+                }
+                else if (disc2 == '|' && input == "|=")
+                {
+                    return true;
+                }
+                return false;
+
+            case 3:
+                var disc3 = input[0];
+                if (disc3 == '*' && input == "**=")
+                {
+                    return true;
+                }
+                else if (disc3 == '<' && input == "<<=")
+                {
+                    return true;
+                }
+                else if (disc3 == '>' && input == ">>=")
+                {
+                    return true;
+                }
+                else if (disc3 == '&' && input == "&&=")
+                {
+                    return true;
+                }
+                else if (disc3 == '|' && input == "||=")
+                {
+                    return true;
+                }
+                else if (disc3 == '?' && input == "??=")
+                {
+                    return true;
+                }
+                return false;
+
+            case 4:
+                return input == ">>>=";
+
+            default:
+               return false;
+        }
+    }
+
+    private static partial bool IsPunctuatorExpressionStart(string input)
+    {
+        switch (input.Length)
+        {
+            case 1:
+                var disc1 = input[0];
+                if (disc1 == '[' && input == "[")
+                {
+                    return true;
+                }
+                else if (disc1 == '(' && input == "(")
+                {
+                    return true;
+                }
+                else if (disc1 == '{' && input == "{")
+                {
+                    return true;
+                }
+                else if (disc1 == '+' && input == "+")
+                {
+                    return true;
+                }
+                else if (disc1 == '-' && input == "-")
+                {
+                    return true;
+                }
+                else if (disc1 == '!' && input == "!")
+                {
+                    return true;
+                }
+                else if (disc1 == '~' && input == "~")
+                {
+                    return true;
+                }
+                else if (disc1 == '/' && input == "/")
+                {
+                    return true;
+                }
+                return false;
+
+            case 2:
+                var disc2 = input[0];
+                if (disc2 == '+' && input == "++")
+                {
+                    return true;
+                }
+                else if (disc2 == '-' && input == "--")
+                {
+                    return true;
+                }
+                else if (disc2 == '/' && input == "/=")
+                {
+                    return true;
+                }
+                return false;
+
+            default:
+               return false;
+        }
+    }
+
+    private static partial bool IsKeywordExpressionStart(string input)
+    {
+        switch (input.Length)
+        {
+            case 3:
+                var disc3 = input[0];
+                if (disc3 == 'l' && input == "let")
+                {
+                    return true;
+                }
+                else if (disc3 == 'n' && input == "new")
+                {
+                    return true;
+                }
+                return false;
+
+            case 4:
+                var disc4 = input[0];
+                if (disc4 == 't' && input == "this")
+                {
+                    return true;
+                }
+                else if (disc4 == 'v' && input == "void")
+                {
+                    return true;
+                }
+                return false;
+
+            case 5:
+                var disc5 = input[0];
+                if (disc5 == 'c' && input == "class")
+                {
+                    return true;
+                }
+                else if (disc5 == 's' && input == "super")
+                {
+                    return true;
+                }
+                else if (disc5 == 'y' && input == "yield")
+                {
+                    return true;
+                }
+                return false;
+
+            case 6:
+                var disc6 = input[0];
+                if (disc6 == 'd' && input == "delete")
+                {
+                    return true;
+                }
+                else if (disc6 == 't' && input == "typeof")
+                {
+                    return true;
+                }
+                return false;
+
+            case 8:
+                return input == "function";
+
+            default:
+               return false;
+        }
+    }
+
+}
+
 public partial class Scanner
 {
     public static partial bool IsFutureReservedWord(string? input)
