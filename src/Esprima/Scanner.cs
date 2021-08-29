@@ -85,14 +85,15 @@ namespace Esprima
             ">>>",
             "<<=",
             ">>=",
-            "**="
+            "**=",
+            "&&=",
+            "||="
         };
 
         private static readonly string[] twoCharacterPunctuators =
         {
             "&&" ,
             "||" ,
-            "??" ,
             "==" ,
             "!=" ,
             "+=" ,
@@ -781,7 +782,15 @@ namespace Esprima
                     if (Source[Index] == '?')
                     {
                         ++Index;
-                        str = "??";
+                        if (Source[Index] == '=')
+                        {
+                            ++Index;
+                            str = "??=";
+                        }
+                        else
+                        {
+                            str = "??";
+                        }
                     }
                     if (Source[Index] == '.' && !char.IsDigit(Source[Index + 1]))
                     {
