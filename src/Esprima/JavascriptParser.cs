@@ -13,10 +13,11 @@ namespace Esprima
     /// </remarks>
     public class JavaScriptParser
     {
-        private static readonly HashSet<string> AssignmentOperators = new HashSet<string>
+        private static readonly HashSet<string> AssignmentOperators = new()
         {
             "=", "*=", "**=", "/=", "%=","+=", "-=",
-            "<<=", ">>=", ">>>=", "&=", "^=", "|="
+            "<<=", ">>=", ">>>=", "&=", "^=", "|=",
+            "&&=", "||=", "??="
         };
 
         private sealed class Context

@@ -32,6 +32,12 @@ namespace Esprima.Ast
         UnsignedRightShiftAssign,
         [EnumMember(Value = "**=")]
         ExponentiationAssign,
+        [EnumMember(Value = "??=")]
+        NullishAssign,
+        [EnumMember(Value = "&&=")]
+        AndAssign,
+        [EnumMember(Value = "||=")]
+        OrAssign
     }
 
     public sealed class AssignmentExpression : Expression
@@ -44,7 +50,7 @@ namespace Esprima.Ast
 
         public AssignmentExpression(
             string op,
-            Expression left, 
+            Expression left,
             Expression right) :
             base(Nodes.AssignmentExpression)
         {
@@ -71,6 +77,9 @@ namespace Esprima.Ast
                 "<<=" => AssignmentOperator.LeftShiftAssign,
                 ">>=" => AssignmentOperator.RightShiftAssign,
                 ">>>=" => AssignmentOperator.UnsignedRightShiftAssign,
+                "??=" => AssignmentOperator.NullishAssign,
+                "&&=" => AssignmentOperator.AndAssign,
+                "||=" => AssignmentOperator.OrAssign,
                 _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op)
             };
         }
