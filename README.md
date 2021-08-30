@@ -1,5 +1,7 @@
-[![Build](https://github.com/sebastienros/esprima-dotnet/actions/workflows/build.yml/badge.svg)](https://github.com/sebastienros/esprima-dotnet/actions/workflows/build.yml)
+[![Build](https://github.com/sebastienros/esprima-dotnet/actions/workflows/staging.yml/badge.svg)](https://github.com/sebastienros/esprima-dotnet/actions/workflows/staging.yml)
 [![NuGet](https://img.shields.io/nuget/v/esprima.svg)](https://www.nuget.org/packages/esprima)
+[![MyGet](https://img.shields.io/myget/esprimadotnet/v/esprima?label=MyGet)](https://www.myget.org/feed/esprimadotnet/package/nuget/Esprima)
+
 
 **Esprima .NET** (BSD license) is a .NET port of the [esprima.org](http://esprima.org) project.
 It is a standard-compliant [ECMAScript](http://www.ecma-international.org/publications/standards/Ecma-262.htm)
