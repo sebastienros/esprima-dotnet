@@ -624,7 +624,10 @@ namespace Esprima.Utils
             protected internal override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
             {
                 using (StartNodeObject(exportAllDeclaration))
+                {
                     Member("source", exportAllDeclaration.Source);
+                    Member("exported", exportAllDeclaration.Exported);
+                }
             }
 
             protected internal override void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)

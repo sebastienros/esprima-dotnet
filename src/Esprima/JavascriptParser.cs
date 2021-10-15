@@ -4628,6 +4628,15 @@ namespace Esprima
             {
                 // export * from 'foo';
                 NextToken();
+
+                //export * as ns from 'foo'
+                Identifier? exported = null;
+                if (MatchContextualKeyword("as"))
+                {
+                    NextToken();
+                    exported = ParseIdentifierName();
+                }
+
                 if (!MatchContextualKeyword("from"))
                 {
                     var message = _lookahead.Value != null ? Messages.UnexpectedToken : Messages.MissingFromClause;
@@ -4636,7 +4645,7 @@ namespace Esprima
                 NextToken();
                 var src = ParseModuleSpecifier();
                 ConsumeSemicolon();
-                exportDeclaration = Finalize(node, new ExportAllDeclaration(src));
+                exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported));
 
             }
             else if (_lookahead.Type == TokenType.Keyword)
