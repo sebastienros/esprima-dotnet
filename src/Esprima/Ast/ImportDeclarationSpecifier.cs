@@ -1,12 +1,12 @@
 ﻿namespace Esprima.Ast
 {
-    public abstract class ImportDeclarationSpecifier : Declaration, IImportDeclarationSpecifier
+    public abstract class ImportDeclarationSpecifier : Declaration
     {
         protected ImportDeclarationSpecifier(Nodes type) : base(type)
         {
         }
 
-        Identifier IImportDeclarationSpecifier.Local => LocalId;
+        public Identifier Local => LocalId;
         protected abstract Identifier LocalId { get; }
     }
 }

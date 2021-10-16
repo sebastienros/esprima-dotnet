@@ -189,6 +189,20 @@ f(values);
             parser.ParseScript();
         }
 
+        [Fact]
+        public void AllowsSingleProto()
+        {
+            var parser = new JavaScriptParser("if({ __proto__: [] } instanceof Array) {}", new ParserOptions { Tolerant = false });
+            parser.ParseScript();
+        }
+
+        [Fact]
+        public void ThrowsErrorForDuplicateProto()
+        {
+            var parser = new JavaScriptParser("if({ __proto__: [], __proto__: [] } instanceof Array) {}", new ParserOptions { Tolerant = false });
+            Assert.Throws<ParserException>(() => parser.ParseScript());
+        }
+
         [Theory]
         [InlineData("(async () => { for await (var x of []) { } })()")]
         [InlineData("(async () => { for await (let x of []) { } })()")]

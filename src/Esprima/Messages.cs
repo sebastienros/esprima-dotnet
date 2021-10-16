@@ -3,6 +3,7 @@
     // Error messages should be identical to V8.
     public static class Messages
     {
+        public const string AsyncFunctionInSingleStatementContext = "Async functions can only be declared at the top level or inside a block.";
         public const string BadImportCallArity = "Unexpected token";
         public const string BadGetterArity = "Getter must not have any formal parameters";
         public const string BadSetterArity = "Setter must have exactly one formal parameter";
@@ -15,6 +16,7 @@
         public const string DefaultRestProperty = "Unexpected token =";
         public const string DuplicateBinding = "Duplicate binding {0}";
         public const string DuplicateConstructor = "A class may only have one constructor";
+        public const string DuplicateParameter = "Duplicate parameter name not allowed in this context";
         public const string DuplicateProtoProperty = "Duplicate __proto__ fields are not allowed in object literals";
         public const string ForInOfLoopInitializer = "'{0} loop variable declaration may not have an initializer";
         public const string GeneratorInLegacyContext = "Generator declarations are not allowed in legacy contexts";
@@ -52,7 +54,6 @@
         public const string StrictLHSPrefix = "Prefix increment/decrement may not have eval or arguments operand in strict mode";
         public const string StrictModeWith = "Strict mode code may not include a with statement";
         public const string StrictOctalLiteral = "Octal literals are not allowed in strict mode.";
-        public const string StrictParamDupe = "Strict mode function may not have duplicate parameter names";
         public const string StrictParamName = "Parameter name eval or arguments is not allowed in strict mode";
         public const string StrictReservedWord = "Use of future reserved word in strict mode";
         public const string StrictVarName = "Variable name may not be eval or arguments in strict mode";
@@ -63,6 +64,7 @@
         public const string UnexpectedNumber = "Unexpected number";
         public const string UnexpectedReserved = "Unexpected reserved word";
         public const string UnexpectedString = "Unexpected string";
+        public const string UnexpectedSuper = "'super' keyword unexpected here";
         public const string UnexpectedTemplate = "Unexpected quasi {0}";
         public const string UnexpectedToken = "Unexpected token {0}";
         public const string UnexpectedTokenIllegal = "Unexpected token ILLEGAL";
