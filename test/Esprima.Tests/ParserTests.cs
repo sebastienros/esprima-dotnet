@@ -202,5 +202,43 @@ f(values);
             var parser = new JavaScriptParser("if({ __proto__: [], __proto__: [] } instanceof Array) {}", new ParserOptions { Tolerant = false });
             Assert.Throws<ParserException>(() => parser.ParseScript());
         }
+
+        [Theory]
+        [InlineData("(async () => { for await (var x of []) { } })()")]
+        [InlineData("(async () => { for await (let x of []) { } })()")]
+        [InlineData("(async () => { for await (const x of []) { } })()")]
+        [InlineData("(async () => { for await (x of []) { } })()")]
+        public void ParsesValidForAwaitLoops(string code)
+        {
+            var errorHandler = new CollectingErrorHandler();
+            var parser = new JavaScriptParser(code, new ParserOptions { Tolerant = true, ErrorHandler = errorHandler });
+            parser.ParseScript();
+
+            Assert.False(errorHandler.Errors.Any());
+        }
+
+        [Theory]
+        [InlineData("(async () => { for await (;;) { } })()")]
+        [InlineData("(async () => { for await (var i = 0, j = 1;;) { } })()")]
+        [InlineData("(async () => { for await (let i = 0, j = 1;;) { } })()")]
+        [InlineData("(async () => { for await (const i = 0, j = 1;;) { } })()")]
+        [InlineData("(async () => { for await (i = 0, j = 1;;) { } })()")]
+        [InlineData("(async () => { for await (var x = (0 in []) in {}) { } })()")]
+        [InlineData("(async () => { for await (let x in {}) { } })()")]
+        [InlineData("(async () => { for await (const x in {}) { } })()")]
+        [InlineData("(async () => { for await (let in {}) { } })()")]
+        [InlineData("(async () => { for await (const in {}) { } })()")]
+        [InlineData("(async () => { for await (x in {}) { } })()")]
+        public void ToleratesInvalidForAwaitLoops(string code)
+        {
+            var errorHandler = new CollectingErrorHandler();
+            var parser = new JavaScriptParser(code, new ParserOptions { Tolerant = true, ErrorHandler = errorHandler });
+            parser.ParseScript();
+
+            Assert.True(errorHandler.Errors.Any());
+
+            parser = new JavaScriptParser(code, new ParserOptions { Tolerant = false });
+            Assert.Throws<ParserException>(() => parser.ParseScript());
+        }
     }
 }

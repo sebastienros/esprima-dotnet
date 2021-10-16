@@ -546,7 +546,6 @@ namespace Esprima
                 _lastMarker.Line = _startMarker.Line;
                 _lastMarker.Column = _startMarker.Column;
             }
-
         }
 
         // https://tc39.github.io/ecma262/#sec-primary-expression
@@ -2938,7 +2937,7 @@ namespace Esprima
             var forIn = true;
             Node? left = null;
             Expression? right = null;
-            var _await = false;
+            var @await = false;
 
             var node = CreateNode();
             ExpectKeyword("for");
@@ -2948,7 +2947,7 @@ namespace Esprima
                 {
                     TolerateUnexpectedToken(_lookahead);
                 }
-                _await = true;
+                @await = true;
                 NextToken();
             }
 
@@ -2956,6 +2955,11 @@ namespace Esprima
 
             if (Match(";"))
             {
+                if (@await)
+                {
+                    TolerateUnexpectedToken(_lookahead);
+                }
+
                 NextToken();
             }
             else
@@ -2971,8 +2975,13 @@ namespace Esprima
                     var declarations = ParseVariableDeclarationList(ref inFor);
                     _context.AllowIn = previousAllowIn;
 
-                    if (!_await && declarations.Count == 1 && MatchKeyword("in"))
+                    if (declarations.Count == 1 && MatchKeyword("in"))
                     {
+                        if (@await)
+                        {
+                            TolerateUnexpectedToken(_lookahead);
+                        }
+
                         var decl = declarations[0];
                         if (decl.Init != null && (decl.Id.Type == Nodes.ArrayPattern || decl.Id.Type == Nodes.ObjectPattern || _context.Strict))
                         {
@@ -2994,6 +3003,11 @@ namespace Esprima
                     }
                     else
                     {
+                        if (@await)
+                        {
+                            TolerateUnexpectedToken(_lookahead);
+                        }
+
                         init = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
                         Expect(";");
                     }
@@ -3005,6 +3019,11 @@ namespace Esprima
                     var kind = ParseVariableDeclarationKind(kindString);
                     if (!_context.Strict && (string?) _lookahead.Value == "in")
                     {
+                        if (@await)
+                        {
+                            TolerateUnexpectedToken(_lookahead);
+                        }
+
                         left = Finalize(initNode, new Identifier(kindString));
                         NextToken();
                         right = ParseExpression();
@@ -3020,6 +3039,11 @@ namespace Esprima
 
                         if (declarations.Count == 1 && declarations[0]!.Init == null && MatchKeyword("in"))
                         {
+                            if (@await)
+                            {
+                                TolerateUnexpectedToken(_lookahead);
+                            }
+
                             left = Finalize(initNode, new VariableDeclaration(declarations, kind));
                             NextToken();
                             right = ParseExpression();
@@ -3035,6 +3059,11 @@ namespace Esprima
                         }
                         else
                         {
+                            if (@await)
+                            {
+                                TolerateUnexpectedToken(_lookahead);
+                            }
+
                             ConsumeSemicolon();
                             init = Finalize(initNode, new VariableDeclaration(declarations, kind));
                         }
@@ -3054,6 +3083,11 @@ namespace Esprima
 
                     if (MatchKeyword("in"))
                     {
+                        if (@await)
+                        {
+                            TolerateUnexpectedToken(_lookahead);
+                        }
+
                         if (!_context.IsAssignmentTarget || init.Type == Nodes.AssignmentExpression)
                         {
                             TolerateError(Messages.InvalidLHSInForIn);
@@ -3081,6 +3115,11 @@ namespace Esprima
                     }
                     else
                     {
+                        if (@await)
+                        {
+                            TolerateUnexpectedToken(_lookahead);
+                        }
+
                         // The `init` node was not parsed isolated, but we would have wanted it to.
                         _context.IsBindingElement = previousIsBindingElement;
                         _context.IsAssignmentTarget = previousIsAssignmentTarget;
@@ -3135,8 +3174,8 @@ namespace Esprima
             return left == null
                 ? Finalize(node, new ForStatement(init, test, update, body))
                 : forIn
-                    ? Finalize(node, new ForInStatement(left, right!, body))
-                    : Finalize(node, new ForOfStatement(left, right!, body, _await));
+                    ? (Statement) Finalize(node, new ForInStatement(left, right!, body))
+                    : Finalize(node, new ForOfStatement(left, right!, body, @await));
         }
 
         // https://tc39.github.io/ecma262/#sec-continue-statement
