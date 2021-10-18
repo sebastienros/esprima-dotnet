@@ -7,6 +7,10 @@ namespace Esprima.Ast
         public readonly Literal Source;
         public readonly Identifier? Exported;
 
+        public ExportAllDeclaration(Literal source) : this(source, null)
+        {
+        }
+
         public ExportAllDeclaration(Literal source, Identifier? exported) : base(Nodes.ExportAllDeclaration)
         {
             Source = source;
