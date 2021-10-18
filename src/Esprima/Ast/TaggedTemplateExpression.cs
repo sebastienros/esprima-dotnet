@@ -13,8 +13,11 @@ namespace Esprima.Ast
             Quasi = quasi;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Tag, Quasi);
+        public override NodeCollection ChildNodes => new(Tag, Quasi);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitTaggedTemplateExpression(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitTaggedTemplateExpression(this);
+        }
     }
 }

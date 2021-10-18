@@ -12,8 +12,11 @@ namespace Esprima.Ast
             Local = local;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Local);
+        public override NodeCollection ChildNodes => new(Local);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitImportNamespaceSpecifier(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitImportNamespaceSpecifier(this);
+        }
     }
 }

@@ -13,10 +13,16 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression> Expressions => ref _expressions;
 
-        internal void UpdateExpressions(in NodeList<Expression> value) => _expressions = value;
+        internal void UpdateExpressions(in NodeList<Expression> value)
+        {
+            _expressions = value;
+        }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Expressions);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitSequenceExpression(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitSequenceExpression(this);
+        }
     }
 }

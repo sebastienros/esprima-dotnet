@@ -13,8 +13,11 @@ namespace Esprima.Ast
             Right = right;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
+        public override NodeCollection ChildNodes => new(Left, Right);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitAssignmentPattern(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitAssignmentPattern(this);
+        }
     }
 }

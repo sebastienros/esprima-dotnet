@@ -2,7 +2,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
@@ -12,7 +11,7 @@ namespace Esprima.Ast
     /// </summary>
     public readonly struct NodeCollection : IReadOnlyList<Node>
     {
-        internal static readonly NodeCollection Empty = new NodeCollection(0);
+        internal static readonly NodeCollection Empty = new(0);
 
         private readonly Node _first;
         private readonly Node _second;
@@ -116,7 +115,7 @@ namespace Esprima.Ast
 
             _list1 = null;
             _list1Count = 0;
-            
+
             _list2 = null;
             _list2Count = 0;
 
@@ -156,7 +155,7 @@ namespace Esprima.Ast
                 {
                     return _list1[index];
                 }
-                
+
                 index -= _list1Count;
                 if (index < _list2Count)
                 {

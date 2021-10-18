@@ -24,7 +24,7 @@ namespace Esprima.Test
         private static string ParseAndFormat(SourceType sourceType, string source, ParserOptions options)
         {
             var parser = new JavaScriptParser(source, options);
-            var program = sourceType == SourceType.Script ?  (Program) parser.ParseScript() : parser.ParseModule();
+            var program = sourceType == SourceType.Script ? (Program) parser.ParseScript() : parser.ParseModule();
             const string indent = "  ";
             return program.ToJsonString(
                 AstJson.Options.Default
@@ -57,18 +57,15 @@ namespace Esprima.Test
         [MemberData(nameof(SourceFiles), "Fixtures")]
         public void ExecuteTestCase(string fixture)
         {
-            var options = new ParserOptions
-            {
-                Tokens = true
-            };
+            var options = new ParserOptions { Tokens = true };
 
             string treeFilePath, failureFilePath, moduleFilePath;
             var jsFilePath = Path.Combine(GetFixturesPath(), "Fixtures", fixture);
             if (jsFilePath.EndsWith(".source.js"))
             {
-                treeFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath)))) + ".tree.json";
-                failureFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath)))) + ".failure.json";
-                moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension((Path.GetFileNameWithoutExtension(jsFilePath)))) + ".module.json";
+                treeFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".tree.json";
+                failureFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".failure.json";
+                moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".module.json";
             }
             else
             {
@@ -86,8 +83,8 @@ namespace Esprima.Test
                 script = source;
             }
 
-            string expected = "";
-            bool invalid = false;
+            var expected = "";
+            var invalid = false;
 
             var filename = Path.GetFileNameWithoutExtension(jsFilePath);
 
@@ -110,7 +107,7 @@ namespace Esprima.Test
                 sourceType = SourceType.Module;
                 expected = File.ReadAllText(moduleFilePath);
             }
-            else if(File.Exists(treeFilePath))
+            else if (File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
             }
@@ -127,7 +124,7 @@ namespace Esprima.Test
 
             invalid |=
                 filename.Contains("error") ||
-                (filename.Contains("invalid") && !filename.Contains("invalid-yield-object-")) ;
+                filename.Contains("invalid") && !filename.Contains("invalid-yield-object-");
 
             if (!invalid)
             {
@@ -168,7 +165,7 @@ namespace Esprima.Test
         [Fact]
         public void CommentsAreParsed()
         {
-            int count = 0;
+            var count = 0;
             Action<Node> action = node => count++;
             var parser = new JavaScriptParser("// this is a comment", new ParserOptions(), action);
             parser.ParseScript();

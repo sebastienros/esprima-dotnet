@@ -1,29 +1,19 @@
 using Esprima.Utils;
-
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
     public enum UnaryOperator
     {
-        [EnumMember(Value = "+")]
-        Plus,
-        [EnumMember(Value = "-")]
-        Minus,
-        [EnumMember(Value = "~")]
-        BitwiseNot,
-        [EnumMember(Value = "!")]
-        LogicalNot,
-        [EnumMember(Value = "delete")]
-        Delete,
-        [EnumMember(Value = "void")]
-        Void,
-        [EnumMember(Value = "typeof")]
-        TypeOf,
-        [EnumMember(Value = "++")]
-        Increment,
-        [EnumMember(Value = "--")]
-        Decrement,
+        [EnumMember(Value = "+")] Plus,
+        [EnumMember(Value = "-")] Minus,
+        [EnumMember(Value = "~")] BitwiseNot,
+        [EnumMember(Value = "!")] LogicalNot,
+        [EnumMember(Value = "delete")] Delete,
+        [EnumMember(Value = "void")] Void,
+        [EnumMember(Value = "typeof")] TypeOf,
+        [EnumMember(Value = "++")] Increment,
+        [EnumMember(Value = "--")] Decrement
     }
 
     public class UnaryExpression : Expression
@@ -60,8 +50,11 @@ namespace Esprima.Ast
             };
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Argument);
+        public override NodeCollection ChildNodes => new(Argument);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitUnaryExpression(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitUnaryExpression(this);
+        }
     }
 }

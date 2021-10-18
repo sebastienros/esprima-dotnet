@@ -102,7 +102,6 @@ namespace Esprima.Tests
 
             Assert.NotNull(literal);
             Assert.Equal(expected, literal.NumericValue);
-
         }
 
         [Fact]

@@ -12,7 +12,7 @@ namespace Esprima.Ast
         public ExportNamedDeclaration(
             StatementListItem? declaration,
             in NodeList<ExportSpecifier> specifiers,
-            Literal? source) 
+            Literal? source)
             : base(Nodes.ExportNamedDeclaration)
         {
             Declaration = declaration;
@@ -24,6 +24,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declaration, _specifiers, Source);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitExportNamedDeclaration(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitExportNamedDeclaration(this);
+        }
     }
 }

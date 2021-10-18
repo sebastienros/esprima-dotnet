@@ -10,7 +10,7 @@ namespace Esprima.Ast
         public readonly Statement Body;
 
         public ForOfStatement(
-            Node left, 
+            Node left,
             Expression right,
             Statement body,
             bool _await) : base(Nodes.ForOfStatement)
@@ -21,8 +21,11 @@ namespace Esprima.Ast
             Await = _await;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Left, Right, Body);
+        public override NodeCollection ChildNodes => new(Left, Right, Body);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitForOfStatement(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitForOfStatement(this);
+        }
     }
 }

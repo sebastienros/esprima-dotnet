@@ -8,22 +8,18 @@ namespace Esprima.Benchmark
     [MemoryDiagnoser]
     public class FileParsingBenchmark
     {
-        private static readonly Dictionary<string, string> files = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> files = new()
         {
-            {"underscore-1.5.2", null},
-            {"backbone-1.1.0", null},
-            {"mootools-1.4.5", null},
-            {"jquery-1.9.1", null},
-            {"yui-3.12.0", null},
-            {"jquery.mobile-1.4.2", null},
-            {"angular-1.2.5", null}
+            { "underscore-1.5.2", null },
+            { "backbone-1.1.0", null },
+            { "mootools-1.4.5", null },
+            { "jquery-1.9.1", null },
+            { "yui-3.12.0", null },
+            { "jquery.mobile-1.4.2", null },
+            { "angular-1.2.5", null }
         };
 
-        private static readonly ParserOptions parserOptions = new ParserOptions()
-        {
-            Comment = true,
-            Tokens = true 
-        };
+        private static readonly ParserOptions parserOptions = new() { Comment = true, Tokens = true };
 
         [GlobalSetup]
         public void Setup()
@@ -34,8 +30,7 @@ namespace Esprima.Benchmark
             }
         }
 
-        [ParamsSource(nameof(FileNames))]
-        public string FileName { get; set; }
+        [ParamsSource(nameof(FileNames))] public string FileName { get; set; }
 
         public IEnumerable<string> FileNames()
         {

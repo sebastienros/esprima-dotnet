@@ -13,8 +13,11 @@ namespace Esprima.Ast
             Property = property;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Meta, Property);
+        public override NodeCollection ChildNodes => new(Meta, Property);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitMetaProperty(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitMetaProperty(this);
+        }
     }
 }

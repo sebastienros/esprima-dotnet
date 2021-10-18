@@ -1,4 +1,5 @@
 ﻿#region Copyright (c) .NET Foundation and Contributors. All rights reserved.
+
 //
 // The MIT License (MIT)
 //
@@ -20,13 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+
 #endregion
 
 using System;
 
-namespace Esprima.Utils // System.Runtime.Serialization;
+namespace Esprima.Utils
 {
-    // https://github.com/dotnet/corefx/blob/795957f4e18238ae7688ccab729f1ef8e825ab3a/src/System.Runtime.Serialization.Primitives/src/System/Runtime/Serialization/EnumMemberAttribute.cs
+    // System.Runtime.Serialization;
+
+// https://github.com/dotnet/corefx/blob/795957f4e18238ae7688ccab729f1ef8e825ab3a/src/System.Runtime.Serialization.Primitives/src/System/Runtime/Serialization/EnumMemberAttribute.cs
 
     [AttributeUsage(AttributeTargets.Field)]
     internal sealed class EnumMemberAttribute : Attribute

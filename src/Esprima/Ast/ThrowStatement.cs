@@ -11,8 +11,11 @@ namespace Esprima.Ast
             Argument = argument;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Argument);
+        public override NodeCollection ChildNodes => new(Argument);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitThrowStatement(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitThrowStatement(this);
+        }
     }
 }

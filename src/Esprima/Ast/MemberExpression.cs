@@ -20,8 +20,11 @@ namespace Esprima.Ast
             Optional = optional;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Object, Property);
+        public override NodeCollection ChildNodes => new(Object, Property);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitMemberExpression(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitMemberExpression(this);
+        }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
-
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
@@ -9,7 +8,7 @@ namespace Esprima.Ast
     public static class NodeExtensions
     {
         [DebuggerStepThrough]
-        public static T As<T>(this Node node) where T : Node 
+        public static T As<T>(this Node node) where T : Node
         {
             return (T) node;
         }
@@ -56,8 +55,7 @@ namespace Esprima.Ast
                     do
                     {
                         yield return ancestor.Current;
-                    }
-                    while (ancestor.MoveNext());
+                    } while (ancestor.MoveNext());
                 }
             }
         }
@@ -84,10 +82,14 @@ namespace Esprima.Ast
                 foreach (var childNode in aNode.ChildNodes)
                 {
                     if (childNode == node)
+                    {
                         return true;
+                    }
 
                     if (Search(childNode))
+                    {
                         return true;
+                    }
                 }
 
                 parents.Pop();
