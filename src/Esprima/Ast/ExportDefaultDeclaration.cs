@@ -11,8 +11,11 @@ namespace Esprima.Ast
             Declaration = declaration;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Declaration);
+        public override NodeCollection ChildNodes => new(Declaration);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitExportDefaultDeclaration(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitExportDefaultDeclaration(this);
+        }
     }
 }

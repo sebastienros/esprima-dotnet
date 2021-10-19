@@ -1,4 +1,5 @@
 ﻿#region Copyright (c) 2004 Atif Aziz. All rights reserved.
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
@@ -32,10 +34,10 @@ namespace Esprima.Utils
     /// <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>.
     /// </summary>
 
-    // Following implementation is derived from [Jayrock] & [ELMAH].
-    //
-    //   [Jayrock]: https://github.com/atifaziz/Jayrock
-    //   [ELMAH]: https://elmah.github.io/
+// Following implementation is derived from [Jayrock] & [ELMAH].
+//
+//   [Jayrock]: https://github.com/atifaziz/Jayrock
+//   [ELMAH]: https://elmah.github.io/
     internal sealed class JsonTextWriter : JsonWriter
     {
         private enum StructureKind : byte { Array, Object }
@@ -47,7 +49,9 @@ namespace Esprima.Utils
         private string? _memberName;
 
         public JsonTextWriter(TextWriter writer) :
-            this(writer, null) {}
+            this(writer, null)
+        {
+        }
 
         public JsonTextWriter(TextWriter writer, string? indent)
         {
@@ -60,11 +64,25 @@ namespace Esprima.Utils
 
         public int Depth => _structures.Count;
 
-        public override void StartObject() => StartStructured(StructureKind.Object);
-        public override void EndObject() => EndStructured();
+        public override void StartObject()
+        {
+            StartStructured(StructureKind.Object);
+        }
 
-        public override void StartArray() => StartStructured(StructureKind.Array);
-        public override void EndArray() => EndStructured();
+        public override void EndObject()
+        {
+            EndStructured();
+        }
+
+        public override void StartArray()
+        {
+            StartStructured(StructureKind.Array);
+        }
+
+        public override void EndArray()
+        {
+            EndStructured();
+        }
 
         public override void Member(string name)
         {
@@ -98,16 +116,25 @@ namespace Esprima.Utils
             }
         }
 
-        public override void Null() => Write("null", TokenKind.Scalar);
+        public override void Null()
+        {
+            Write("null", TokenKind.Scalar);
+        }
 
-        public override void Boolean(bool flag) =>
+        public override void Boolean(bool flag)
+        {
             Write(flag ? "true" : "false", TokenKind.Scalar);
+        }
 
-        public void Number(int n) =>
+        public void Number(int n)
+        {
             Write(n.ToString(CultureInfo.InvariantCulture), TokenKind.Scalar);
+        }
 
-        public override void Number(long n) =>
+        public override void Number(long n)
+        {
             Write(n.ToString(CultureInfo.InvariantCulture), TokenKind.Scalar);
+        }
 
         public override void Number(double n)
         {
@@ -140,7 +167,9 @@ namespace Esprima.Utils
 
             var n = depth ?? Depth;
             for (var i = 0; i < n; i++)
+            {
                 _writer.Write(_indent);
+            }
         }
 
         private void StartStructured(StructureKind kind)
@@ -247,32 +276,42 @@ namespace Esprima.Utils
                 {
                     case '\\':
                     case '"':
-                    {
-                        writer.Write('\\');
-                        writer.Write(ch);
-                        break;
-                    }
+                        {
+                            writer.Write('\\');
+                            writer.Write(ch);
+                            break;
+                        }
 
-                    case '\b': writer.Write("\\b"); break;
-                    case '\t': writer.Write("\\t"); break;
-                    case '\n': writer.Write("\\n"); break;
-                    case '\f': writer.Write("\\f"); break;
-                    case '\r': writer.Write("\\r"); break;
+                    case '\b':
+                        writer.Write("\\b");
+                        break;
+                    case '\t':
+                        writer.Write("\\t");
+                        break;
+                    case '\n':
+                        writer.Write("\\n");
+                        break;
+                    case '\f':
+                        writer.Write("\\f");
+                        break;
+                    case '\r':
+                        writer.Write("\\r");
+                        break;
 
                     default:
-                    {
-                        if (ch < ' ')
                         {
-                            writer.Write("\\u");
-                            writer.Write(((int)ch).ToString("x4", CultureInfo.InvariantCulture));
-                        }
-                        else
-                        {
-                            writer.Write(ch);
-                        }
+                            if (ch < ' ')
+                            {
+                                writer.Write("\\u");
+                                writer.Write(((int) ch).ToString("x4", CultureInfo.InvariantCulture));
+                            }
+                            else
+                            {
+                                writer.Write(ch);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                 }
             }
 
@@ -310,10 +349,15 @@ namespace Esprima.Utils
             public IEnumerator<T> GetEnumerator()
             {
                 for (var i = 0; i < Count; i++)
+                {
                     yield return _items[i];
+                }
             }
 
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
 
             public void Push(T item)
             {

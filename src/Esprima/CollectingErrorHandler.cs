@@ -11,7 +11,7 @@ namespace Esprima
     /// </remarks>
     public sealed class CollectingErrorHandler : ErrorHandler
     {
-        private readonly List<ParserException> _errors = new List<ParserException>();
+        private readonly List<ParserException> _errors = new();
 
         public IReadOnlyCollection<ParserException> Errors => _errors;
 

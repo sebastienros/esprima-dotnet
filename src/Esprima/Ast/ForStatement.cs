@@ -13,8 +13,8 @@ namespace Esprima.Ast
         public ForStatement(
             StatementListItem? init,
             Expression? test,
-            Expression? update, 
-            Statement body) 
+            Expression? update,
+            Statement body)
             : base(Nodes.ForStatement)
         {
             Init = init;
@@ -23,8 +23,11 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Init, Test, Update, Body);
+        public override NodeCollection ChildNodes => new(Init, Test, Update, Body);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitForStatement(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitForStatement(this);
+        }
     }
 }

@@ -1,61 +1,35 @@
 using Esprima.Utils;
-
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
     public enum BinaryOperator
     {
-        [EnumMember(Value = "+")]
-        Plus,
-        [EnumMember(Value = "-")]
-        Minus,
-        [EnumMember(Value = "*")]
-        Times,
-        [EnumMember(Value = "/")]
-        Divide,
-        [EnumMember(Value = "%")]
-        Modulo,
-        [EnumMember(Value = "==")]
-        Equal,
-        [EnumMember(Value = "!=")]
-        NotEqual,
-        [EnumMember(Value = ">")]
-        Greater,
-        [EnumMember(Value = ">=")]
-        GreaterOrEqual,
-        [EnumMember(Value = "<")]
-        Less,
-        [EnumMember(Value = "<=")]
-        LessOrEqual,
-        [EnumMember(Value = "===")]
-        StrictlyEqual,
-        [EnumMember(Value = "!==")]
-        StricltyNotEqual,
-        [EnumMember(Value = "&")]
-        BitwiseAnd,
-        [EnumMember(Value = "|")]
-        BitwiseOr,
-        [EnumMember(Value = "^")]
-        BitwiseXOr,
-        [EnumMember(Value = "<<")]
-        LeftShift,
-        [EnumMember(Value = ">>")]
-        RightShift,
-        [EnumMember(Value = ">>>")]
-        UnsignedRightShift,
-        [EnumMember(Value = "instanceof")]
-        InstanceOf,
-        [EnumMember(Value = "in")]
-        In,
-        [EnumMember(Value = "&&")]
-        LogicalAnd,
-        [EnumMember(Value = "||")]
-        LogicalOr,
-        [EnumMember(Value = "**")]
-        Exponentiation,
-        [EnumMember(Value = "??")]
-        NullishCoalescing,
+        [EnumMember(Value = "+")] Plus,
+        [EnumMember(Value = "-")] Minus,
+        [EnumMember(Value = "*")] Times,
+        [EnumMember(Value = "/")] Divide,
+        [EnumMember(Value = "%")] Modulo,
+        [EnumMember(Value = "==")] Equal,
+        [EnumMember(Value = "!=")] NotEqual,
+        [EnumMember(Value = ">")] Greater,
+        [EnumMember(Value = ">=")] GreaterOrEqual,
+        [EnumMember(Value = "<")] Less,
+        [EnumMember(Value = "<=")] LessOrEqual,
+        [EnumMember(Value = "===")] StrictlyEqual,
+        [EnumMember(Value = "!==")] StricltyNotEqual,
+        [EnumMember(Value = "&")] BitwiseAnd,
+        [EnumMember(Value = "|")] BitwiseOr,
+        [EnumMember(Value = "^")] BitwiseXOr,
+        [EnumMember(Value = "<<")] LeftShift,
+        [EnumMember(Value = ">>")] RightShift,
+        [EnumMember(Value = ">>>")] UnsignedRightShift,
+        [EnumMember(Value = "instanceof")] InstanceOf,
+        [EnumMember(Value = "in")] In,
+        [EnumMember(Value = "&&")] LogicalAnd,
+        [EnumMember(Value = "||")] LogicalOr,
+        [EnumMember(Value = "**")] Exponentiation,
+        [EnumMember(Value = "??")] NullishCoalescing
     }
 
     public sealed class BinaryExpression : Expression
@@ -65,10 +39,12 @@ namespace Esprima.Ast
         public readonly Expression Right;
 
         public BinaryExpression(string op, Expression left, Expression right) :
-            this(ParseBinaryOperator(op), left, right) {}
+            this(ParseBinaryOperator(op), left, right)
+        {
+        }
 
         private BinaryExpression(BinaryOperator op, Expression left, Expression right) :
-            base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr || op ==BinaryOperator.NullishCoalescing ? Nodes.LogicalExpression : Nodes.BinaryExpression)
+            base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr || op == BinaryOperator.NullishCoalescing ? Nodes.LogicalExpression : Nodes.BinaryExpression)
         {
             Operator = op;
             Left = left;
@@ -108,7 +84,7 @@ namespace Esprima.Ast
             };
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
+        public override NodeCollection ChildNodes => new(Left, Right);
 
         protected internal override void Accept(AstVisitor visitor)
         {

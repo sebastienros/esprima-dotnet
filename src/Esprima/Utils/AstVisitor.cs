@@ -31,6 +31,7 @@ namespace Esprima.Utils
             {
                 Visit(catchClause.Param);
             }
+
             Visit(catchClause.Body);
         }
 
@@ -157,14 +158,17 @@ namespace Esprima.Utils
             {
                 Visit(forStatement.Init);
             }
+
             if (forStatement.Test is not null)
             {
                 Visit(forStatement.Test);
             }
+
             if (forStatement.Update is not null)
             {
                 Visit(forStatement.Update);
             }
+
             Visit(forStatement.Body);
         }
 
@@ -375,10 +379,12 @@ namespace Esprima.Utils
             {
                 Visit(classDeclaration.Id);
             }
+
             if (classDeclaration.SuperClass is not null)
             {
                 Visit(classDeclaration.SuperClass);
             }
+
             Visit(classDeclaration.Body);
         }
 

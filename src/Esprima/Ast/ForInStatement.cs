@@ -9,7 +9,7 @@ namespace Esprima.Ast
         public readonly Statement Body;
 
         public ForInStatement(
-            Node left, 
+            Node left,
             Expression right,
             Statement body) : base(Nodes.ForInStatement)
         {
@@ -18,8 +18,11 @@ namespace Esprima.Ast
             Body = body;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Left, Right, Body);
+        public override NodeCollection ChildNodes => new(Left, Right, Body);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitForInStatement(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitForInStatement(this);
+        }
     }
 }

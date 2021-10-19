@@ -78,7 +78,7 @@ namespace Esprima.Tests
                 var parser = new JavaScriptParser(File.ReadAllText(jsFilePath), new ParserOptions { Tolerant = true });
                 program = parser.ParseScript();
             }
-            catch (ParserException )
+            catch (ParserException)
             {
                 // OK as we have invalid files to test against
                 return;

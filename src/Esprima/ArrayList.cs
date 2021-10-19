@@ -148,12 +148,12 @@ namespace Esprima
 
         internal void Resize(int size)
         {
-            #if DEBUG
+#if DEBUG
             if (_sharedVersion == null)
             {
                 _sharedVersion = new[] { 1 };
             }
-            #endif
+#endif
 
             Array.Resize(ref _items, size);
         }
@@ -228,7 +228,10 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Push(T item) => Add(item);
+        internal void Push(T item)
+        {
+            Add(item);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal T Pop()
@@ -253,11 +256,7 @@ namespace Esprima
                 ThrowArgumentNullException(nameof(selector));
             }
 
-            var list = new ArrayList<TResult>
-            {
-                _count = Count,
-                _items = new TResult[Count]
-            };
+            var list = new ArrayList<TResult> { _count = Count, _items = new TResult[Count] };
 
             for (var i = 0; i < Count; i++)
             {
@@ -273,9 +272,15 @@ namespace Esprima
             return new Enumerator(_items, _count);
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         /// <remarks>
         /// This implementation does not detect changes to the list
@@ -303,20 +308,21 @@ namespace Esprima
 
             public bool MoveNext()
             {
-                if (_index < _count) 
-                {                                                     
-                    _current = _items[_index];                    
+                if (_index < _count)
+                {
+                    _current = _items[_index];
                     _index++;
                     return true;
                 }
+
                 return MoveNextRare();
             }
- 
+
             private bool MoveNextRare()
-            {                
+            {
                 _index = _count + 1;
                 _current = default;
-                return false;                
+                return false;
             }
 
             public void Reset()
@@ -331,10 +337,11 @@ namespace Esprima
             {
                 get
                 {
-                    if(_index == 0 || _index == _count + 1)
+                    if (_index == 0 || _index == _count + 1)
                     {
                         ThrowInvalidOperationException<object>();
                     }
+
                     return Current;
                 }
             }
@@ -345,10 +352,12 @@ namespace Esprima
     {
         public static void AddRange<T>(
             ref this ArrayList<T> destination,
-            in NodeList<T> source) where T: Node
+            in NodeList<T> source) where T : Node
         {
             foreach (var item in source)
+            {
                 destination.Add(item);
+            }
         }
     }
 }

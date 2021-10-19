@@ -11,8 +11,11 @@ namespace Esprima.Ast
             Label = label;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Label);
+        public override NodeCollection ChildNodes => new(Label);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitBreakStatement(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitBreakStatement(this);
+        }
     }
 }

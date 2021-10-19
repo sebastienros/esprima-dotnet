@@ -4,6 +4,6 @@ namespace Esprima.Ast
     {
         Var,
         Let,
-        Const,
+        Const
     }
 }

@@ -27,13 +27,12 @@ namespace Jint.Benchmark
             var done = true;
         ";
 
-        [Params(200)]
-        public int N { get; set; }
+        [Params(200)] public int N { get; set; }
 
         [Benchmark]
         public void ParseProgram()
         {
-            for (int i = 0; i < N; ++i)
+            for (var i = 0; i < N; ++i)
             {
                 var parser = new JavaScriptParser(Script);
                 parser.ParseScript();

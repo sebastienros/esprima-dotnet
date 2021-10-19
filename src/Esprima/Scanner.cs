@@ -45,19 +45,48 @@ namespace Esprima
         internal bool IsModule;
 
         private List<string> _curlyStack;
-        private readonly StringBuilder strb = new StringBuilder();
+        private readonly StringBuilder strb = new();
 
-        private static readonly HashSet<string> Keywords = new HashSet<string>
+        private static readonly HashSet<string> Keywords = new()
         {
-            "if", "in", "do", "var", "for", "new", "try", "let",
-            "this", "else", "case", "void", "with", "enum",
-            "while", "break", "catch", "throw", "const", "yield",
-            "class", "super", "return", "typeof", "delete",
-            "switch", "export", "import", "default", "finally", "extends",
-            "function", "continue", "debugger", "instanceof"
+            "if",
+            "in",
+            "do",
+            "var",
+            "for",
+            "new",
+            "try",
+            "let",
+            "this",
+            "else",
+            "case",
+            "void",
+            "with",
+            "enum",
+            "while",
+            "break",
+            "catch",
+            "throw",
+            "const",
+            "yield",
+            "class",
+            "super",
+            "return",
+            "typeof",
+            "delete",
+            "switch",
+            "export",
+            "import",
+            "default",
+            "finally",
+            "extends",
+            "function",
+            "continue",
+            "debugger",
+            "instanceof"
         };
 
-        private static readonly HashSet<string> StrictModeReservedWords = new HashSet<string>
+        private static readonly HashSet<string> StrictModeReservedWords = new()
         {
             "implements",
             "interface",
@@ -70,49 +99,11 @@ namespace Esprima
             "let"
         };
 
-        private static readonly HashSet<string> FutureReservedWords = new HashSet<string>
-        {
-            "enum",
-            "export",
-            "import",
-            "super"
-        };
+        private static readonly HashSet<string> FutureReservedWords = new() { "enum", "export", "import", "super" };
 
-        private static readonly string[] threeCharacterPunctutors =
-        {
-            "===",
-            "!==",
-            ">>>",
-            "<<=",
-            ">>=",
-            "**=",
-            "&&=",
-            "||="
-        };
+        private static readonly string[] threeCharacterPunctutors = { "===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=" };
 
-        private static readonly string[] twoCharacterPunctuators =
-        {
-            "&&" ,
-            "||" ,
-            "==" ,
-            "!=" ,
-            "+=" ,
-            "-=" ,
-            "*=" ,
-            "/=" ,
-            "++" ,
-            "--" ,
-            "<<" ,
-            ">>" ,
-            "&=" ,
-            "|=" ,
-            "^=" ,
-            "%=" ,
-            "<=" ,
-            ">=" ,
-            "=>" ,
-            "**"
-        };
+        private static readonly string[] twoCharacterPunctuators = { "&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**" };
 
         private static int HexValue(char ch)
         {
@@ -156,7 +147,7 @@ namespace Esprima
 
             _length = code.Length;
             Index = 0;
-            LineNumber = (code.Length > 0) ? 1 : 0;
+            LineNumber = code.Length > 0 ? 1 : 0;
             LineStart = 0;
             _curlyStack = new List<string>(20);
         }
@@ -235,7 +226,7 @@ namespace Esprima
         private ArrayList<Comment> SkipSingleLineComment(int offset)
         {
             var comments = new ArrayList<Comment>();
-            int start = 0;
+            var start = 0;
             var loc = new SourceLocation();
 
             if (_trackComment)
@@ -255,7 +246,7 @@ namespace Esprima
                     {
                         loc.End = new Position(LineNumber, Index - LineStart - 1);
 
-                        Comment entry = new Comment
+                        var entry = new Comment
                         {
                             MultiLine = false,
                             Slice = new[] { start + offset, Index - 1 },
@@ -266,10 +257,12 @@ namespace Esprima
 
                         comments.Add(entry);
                     }
+
                     if (ch == 13 && Source.CharCodeAt(Index) == 10)
                     {
                         ++Index;
                     }
+
                     ++LineNumber;
                     LineStart = Index;
                     return comments;
@@ -297,7 +290,7 @@ namespace Esprima
         private ArrayList<Comment> SkipMultiLineComment()
         {
             var comments = new ArrayList<Comment>();
-            int start = 0;
+            var start = 0;
             var loc = new SourceLocation();
 
             if (_trackComment)
@@ -315,6 +308,7 @@ namespace Esprima
                     {
                         ++Index;
                     }
+
                     ++LineNumber;
                     ++Index;
                     LineStart = Index;
@@ -338,8 +332,10 @@ namespace Esprima
                             };
                             comments.Add(entry);
                         }
+
                         return comments;
                     }
+
                     ++Index;
                 }
                 else
@@ -367,14 +363,16 @@ namespace Esprima
             return comments;
         }
 
-        public IReadOnlyList<Comment> ScanComments() =>
-            ScanCommentsInternal();
+        public IReadOnlyList<Comment> ScanComments()
+        {
+            return ScanCommentsInternal();
+        }
 
         internal ArrayList<Comment> ScanCommentsInternal()
         {
             var comments = new ArrayList<Comment>();
 
-            var start = (Index == 0);
+            var start = Index == 0;
             while (!Eof())
             {
                 var ch = Source.CharCodeAt(Index);
@@ -390,12 +388,14 @@ namespace Esprima
                     {
                         ++Index;
                     }
+
                     ++LineNumber;
                     LineStart = Index;
                     start = true;
                 }
                 else if (ch == 0x2F)
-                { // U+002F is '/'
+                {
+                    // U+002F is '/'
                     ch = Source.CharCodeAt(Index + 1);
                     if (ch == 0x2F)
                     {
@@ -405,10 +405,12 @@ namespace Esprima
                         {
                             comments.AddRange(comment);
                         }
+
                         start = true;
                     }
                     else if (ch == 0x2A)
-                    {  // U+002A is '*'
+                    {
+                        // U+002A is '*'
                         Index += 2;
                         var comment = SkipMultiLineComment();
                         if (_trackComment)
@@ -422,9 +424,10 @@ namespace Esprima
                     }
                 }
                 else if (start && ch == 0x2D)
-                { // U+002D is '-'
-                  // U+003E is '>'
-                    if ((Source.CharCodeAt(Index + 1) == 0x2D) && (Source.CharCodeAt(Index + 2) == 0x3E))
+                {
+                    // U+002D is '-'
+                    // U+003E is '>'
+                    if (Source.CharCodeAt(Index + 1) == 0x2D && Source.CharCodeAt(Index + 2) == 0x3E)
                     {
                         // '-->' is a single-line comment
                         Index += 3;
@@ -480,12 +483,12 @@ namespace Esprima
             //    }
             //}
 
-            return Char.ConvertToUtf32(Source, i);
+            return char.ConvertToUtf32(Source, i);
         }
 
         public bool ScanHexEscape(char prefix, out char result)
         {
-            var len = (prefix == 'u') ? 4 : 2;
+            var len = prefix == 'u' ? 4 : 2;
             var code = 0;
 
             for (var i = 0; i < len; ++i)
@@ -511,14 +514,14 @@ namespace Esprima
                 }
             }
 
-            result = (char)code;
+            result = (char) code;
             return true;
         }
 
         public string? TryToScanUnicodeCodePointEscape()
         {
             var ch = Source[Index];
-            int code = 0;
+            var code = 0;
 
             // At least, one hex digit is required.
             if (ch == '}')
@@ -533,6 +536,7 @@ namespace Esprima
                 {
                     break;
                 }
+
                 code = code * 16 + HexValue(ch);
             }
 
@@ -551,6 +555,7 @@ namespace Esprima
             {
                 ThrowUnexpectedToken();
             }
+
             return result!;
         }
 
@@ -572,6 +577,7 @@ namespace Esprima
                     Index = start;
                     return GetComplexIdentifier();
                 }
+
                 if (Character.IsIdentifierPart(ch))
                 {
                     ++Index;
@@ -599,6 +605,7 @@ namespace Esprima
                 {
                     ThrowUnexpectedToken();
                 }
+
                 ++Index;
                 if (Source[Index] == '{')
                 {
@@ -612,8 +619,10 @@ namespace Esprima
                     {
                         ThrowUnexpectedToken();
                     }
+
                     ch = ParserExtensions.CharToString(ch1);
                 }
+
                 id = ch;
             }
 
@@ -625,6 +634,7 @@ namespace Esprima
                 {
                     break;
                 }
+
                 id += ch;
                 Index += ch.Length;
 
@@ -636,6 +646,7 @@ namespace Esprima
                     {
                         ThrowUnexpectedToken();
                     }
+
                     ++Index;
                     if (Index < Source.Length && Source[Index] == '{')
                     {
@@ -648,8 +659,10 @@ namespace Esprima
                         {
                             ThrowUnexpectedToken();
                         }
+
                         ch = ParserExtensions.CharToString(ch1);
                     }
+
                     id += ch;
                 }
             }
@@ -660,7 +673,7 @@ namespace Esprima
         public OctalValue OctalToDecimal(char ch)
         {
             // \0 is not octal escape sequence
-            var octal = (ch != '0');
+            var octal = ch != '0';
             var code = OctalValue(ch);
 
             if (!Eof() && Character.IsOctalDigit(Source.CharCodeAt(Index)))
@@ -687,7 +700,7 @@ namespace Esprima
             var start = Index;
 
             // Backslash (U+005C) starts an escaped character.
-            var id = (Source.CharCodeAt(start) == 0x5C) ? GetComplexIdentifier() : GetIdentifier();
+            var id = Source.CharCodeAt(start) == 0x5C ? GetComplexIdentifier() : GetIdentifier();
 
             // There is no keyword or literal with only one character.
             // Thus, it must be an identifier.
@@ -712,7 +725,7 @@ namespace Esprima
                 type = TokenType.Identifier;
             }
 
-            if (type != TokenType.Identifier && (start + id.Length != Index))
+            if (type != TokenType.Identifier && start + id.Length != Index)
             {
                 var restore = Index;
                 Index = start;
@@ -727,7 +740,7 @@ namespace Esprima
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
-                End = Index,
+                End = Index
             };
         }
 
@@ -755,6 +768,7 @@ namespace Esprima
                     {
                         _curlyStack.Add("{");
                     }
+
                     ++Index;
                     break;
 
@@ -766,6 +780,7 @@ namespace Esprima
                         Index += 2;
                         str = "...";
                     }
+
                     break;
 
                 case '}':
@@ -774,6 +789,7 @@ namespace Esprima
                     {
                         _curlyStack.RemoveAt(_curlyStack.Count - 1);
                     }
+
                     break;
 
 
@@ -792,6 +808,7 @@ namespace Esprima
                             str = "??";
                         }
                     }
+
                     if (Source[Index] == '.' && !char.IsDigit(Source[Index + 1]))
                     {
                         // "?." in "foo?.3:0" should not be treated as optional chaining.
@@ -799,6 +816,7 @@ namespace Esprima
                         ++Index;
                         str = "?.";
                     }
+
                     break;
 
                 case ')':
@@ -821,7 +839,6 @@ namespace Esprima
                     }
                     else
                     {
-
                         // 3-character punctuators.
                         str = SafeSubstring(Source, Index, 3);
                         if (str.Length == 3 && FindThreeCharEqual(str, threeCharacterPunctutors) != null)
@@ -1057,6 +1074,7 @@ namespace Esprima
                 {
                     return false;
                 }
+
                 if (!Character.IsOctalDigit(ch))
                 {
                     return true;
@@ -1243,14 +1261,17 @@ namespace Esprima
                                     {
                                         ThrowUnexpectedToken();
                                     }
+
                                     str.Append(unescaped);
                                 }
+
                                 break;
                             case 'x':
                                 if (!ScanHexEscape(ch, out var unescaped2))
                                 {
                                     ThrowUnexpectedToken(Messages.InvalidHexEscapeSequence);
                                 }
+
                                 str.Append(unescaped2);
                                 break;
                             case 'n':
@@ -1283,12 +1304,13 @@ namespace Esprima
                                     var octToDec = OctalToDecimal(ch);
 
                                     octal = octToDec.Octal || octal;
-                                    str.Append((char)octToDec.Code);
+                                    str.Append((char) octToDec.Code);
                                 }
                                 else
                                 {
                                     str.Append(ch);
                                 }
+
                                 break;
                         }
                     }
@@ -1299,6 +1321,7 @@ namespace Esprima
                         {
                             ++Index;
                         }
+
                         LineStart = Index;
                     }
                 }
@@ -1364,6 +1387,7 @@ namespace Esprima
                         terminated = true;
                         break;
                     }
+
                     cooked.Append(ch);
                 }
                 else if (notEscapeSequenceHead is not null)
@@ -1411,6 +1435,7 @@ namespace Esprima
                                         cooked.Append(unescapedChar);
                                     }
                                 }
+
                                 break;
                             case 'x':
                                 if (!ScanHexEscape(ch, out var unescaped2))
@@ -1421,6 +1446,7 @@ namespace Esprima
                                 {
                                     cooked.Append(unescaped2);
                                 }
+
                                 break;
                             case 'b':
                                 cooked.Append("\b");
@@ -1454,6 +1480,7 @@ namespace Esprima
                                 {
                                     cooked.Append(ch);
                                 }
+
                                 break;
                         }
                     }
@@ -1464,6 +1491,7 @@ namespace Esprima
                         {
                             ++Index;
                         }
+
                         LineStart = Index;
                     }
                 }
@@ -1474,6 +1502,7 @@ namespace Esprima
                     {
                         ++Index;
                     }
+
                     LineStart = Index;
                     cooked.Append("\n");
                 }
@@ -1532,7 +1561,7 @@ namespace Esprima
                     .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}|\\u([a-fA-F0-9]{4})", (match) =>
                     {
                         int codePoint;
-                        if (!String.IsNullOrEmpty(match.Groups[1].Value))
+                        if (!string.IsNullOrEmpty(match.Groups[1].Value))
                         {
                             codePoint = Convert.ToInt32(match.Groups[1].Value, 16);
                         }
@@ -1545,10 +1574,12 @@ namespace Esprima
                         {
                             ThrowUnexpectedToken(Messages.InvalidRegExp);
                         }
+
                         if (codePoint <= 0xFFFF)
                         {
-                            return ParserExtensions.CharToString((char)codePoint);
+                            return ParserExtensions.CharToString((char) codePoint);
                         }
+
                         return astralSubstitute;
                     });
 
@@ -1590,7 +1621,7 @@ namespace Esprima
                     // Replace all non-escaped $ occurences by \r?$
                     // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
 
-                    int index = 0;
+                    var index = 0;
                     var newPattern = pattern;
                     while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                     {
@@ -1654,6 +1685,7 @@ namespace Esprima
                     {
                         ThrowUnexpectedToken(Messages.UnterminatedRegExp);
                     }
+
                     str.Append(ch);
                 }
                 else if (Character.IsLineTerminator(ch))
@@ -1688,11 +1720,7 @@ namespace Esprima
 
             // Exclude leading and trailing slash.
             var body = str.ToString();
-            return new Token
-            {
-                Value = body.Substring(1, body.Length - 2),
-                Literal = body
-            };
+            return new Token { Value = body.Substring(1, body.Length - 2), Literal = body };
         }
 
         public Token ScanRegExpFlags()
@@ -1729,6 +1757,7 @@ namespace Esprima
                             flags += 'u';
                             str += "\\u";
                         }
+
                         TolerateUnexpectedToken();
                     }
                     else
@@ -1744,11 +1773,7 @@ namespace Esprima
                 }
             }
 
-            return new Token
-            {
-                Value = flags,
-                Literal = str
-            };
+            return new Token { Value = flags, Literal = str };
         }
 
         public Token ScanRegExp()
@@ -1814,6 +1839,7 @@ namespace Esprima
                 {
                     return ScanNumericLiteral();
                 }
+
                 return ScanPunctuator();
             }
 
@@ -1824,7 +1850,7 @@ namespace Esprima
 
             // Template literals start with ` (U+0060) for template head
             // or } (U+007D) for template middle or template tail.
-            if (cp == 0x60 || (cp == 0x7D && _curlyStack.Count > 0 && _curlyStack[_curlyStack.Count - 1] == "${"))
+            if (cp == 0x60 || cp == 0x7D && _curlyStack.Count > 0 && _curlyStack[_curlyStack.Count - 1] == "${")
             {
                 return ScanTemplate();
             }
@@ -1832,7 +1858,7 @@ namespace Esprima
             // Possible identifier start in a surrogate pair.
             if (cp >= 0xD800 && cp < 0xDFFF)
             {
-                if (Char.IsLetter(Source, Index)) // Character.IsIdentifierStart(CodePointAt(Index))
+                if (char.IsLetter(Source, Index)) // Character.IsIdentifierStart(CodePointAt(Index))
                 {
                     return ScanIdentifier();
                 }
@@ -1850,7 +1876,7 @@ namespace Esprima
             var sticky = false;
             var dotAll = false;
 
-            for (int k = 0; k < flags.Length; k++)
+            for (var k = 0; k < flags.Length; k++)
             {
                 var c = flags[k];
                 if (c == 'g')
@@ -1941,7 +1967,7 @@ namespace Esprima
         {
             var c2 = input[1];
             var c1 = input[0];
-            for (int i = 0; i < alternatives.Length; ++i)
+            for (var i = 0; i < alternatives.Length; ++i)
             {
                 var s = alternatives[i];
                 if (c1 == s[0]
@@ -1960,7 +1986,7 @@ namespace Esprima
             var c3 = input[2];
             var c2 = input[1];
             var c1 = input[0];
-            for (int i = 0; i < alternatives.Length; ++i)
+            for (var i = 0; i < alternatives.Length; ++i)
             {
                 var s = alternatives[i];
                 if (c1 == s[0]
@@ -1987,4 +2013,3 @@ namespace Esprima
         }
     }
 }
-

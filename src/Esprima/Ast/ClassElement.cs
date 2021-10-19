@@ -14,6 +14,6 @@ namespace Esprima.Ast
         {
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Key, Value);
+        public override NodeCollection ChildNodes => new(Key, Value);
     }
 }

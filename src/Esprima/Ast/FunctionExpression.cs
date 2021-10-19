@@ -34,6 +34,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitFunctionExpression(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitFunctionExpression(this);
+        }
     }
 }

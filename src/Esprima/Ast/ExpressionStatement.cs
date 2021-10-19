@@ -11,8 +11,11 @@ namespace Esprima.Ast
             Expression = expression;
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Expression);
+        public override NodeCollection ChildNodes => new(Expression);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitExpressionStatement(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitExpressionStatement(this);
+        }
     }
 }

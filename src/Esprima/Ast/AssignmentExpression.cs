@@ -1,43 +1,26 @@
 using Esprima.Utils;
-
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
     public enum AssignmentOperator
     {
-        [EnumMember(Value = "=")]
-        Assign,
-        [EnumMember(Value = "+=")]
-        PlusAssign,
-        [EnumMember(Value = "-=")]
-        MinusAssign,
-        [EnumMember(Value = "*=")]
-        TimesAssign,
-        [EnumMember(Value = "/=")]
-        DivideAssign,
-        [EnumMember(Value = "%=")]
-        ModuloAssign,
-        [EnumMember(Value = "&=")]
-        BitwiseAndAssign,
-        [EnumMember(Value = "|=")]
-        BitwiseOrAssign,
-        [EnumMember(Value = "^=")]
-        BitwiseXOrAssign,
-        [EnumMember(Value = "<<=")]
-        LeftShiftAssign,
-        [EnumMember(Value = ">>=")]
-        RightShiftAssign,
-        [EnumMember(Value = ">>>=")]
-        UnsignedRightShiftAssign,
-        [EnumMember(Value = "**=")]
-        ExponentiationAssign,
-        [EnumMember(Value = "??=")]
-        NullishAssign,
-        [EnumMember(Value = "&&=")]
-        AndAssign,
-        [EnumMember(Value = "||=")]
-        OrAssign
+        [EnumMember(Value = "=")] Assign,
+        [EnumMember(Value = "+=")] PlusAssign,
+        [EnumMember(Value = "-=")] MinusAssign,
+        [EnumMember(Value = "*=")] TimesAssign,
+        [EnumMember(Value = "/=")] DivideAssign,
+        [EnumMember(Value = "%=")] ModuloAssign,
+        [EnumMember(Value = "&=")] BitwiseAndAssign,
+        [EnumMember(Value = "|=")] BitwiseOrAssign,
+        [EnumMember(Value = "^=")] BitwiseXOrAssign,
+        [EnumMember(Value = "<<=")] LeftShiftAssign,
+        [EnumMember(Value = ">>=")] RightShiftAssign,
+        [EnumMember(Value = ">>>=")] UnsignedRightShiftAssign,
+        [EnumMember(Value = "**=")] ExponentiationAssign,
+        [EnumMember(Value = "??=")] NullishAssign,
+        [EnumMember(Value = "&&=")] AndAssign,
+        [EnumMember(Value = "||=")] OrAssign
     }
 
     public sealed class AssignmentExpression : Expression
@@ -84,8 +67,11 @@ namespace Esprima.Ast
             };
         }
 
-        public override NodeCollection ChildNodes => new NodeCollection(Left, Right);
+        public override NodeCollection ChildNodes => new(Left, Right);
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitAssignmentExpression(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitAssignmentExpression(this);
+        }
     }
 }

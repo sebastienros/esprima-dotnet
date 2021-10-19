@@ -8,10 +8,10 @@ namespace Esprima.Ast
 
         public MethodDefinition(
             Expression key,
-            bool computed, 
+            bool computed,
             FunctionExpression value,
             PropertyKind kind,
-            bool isStatic) 
+            bool isStatic)
             : base(Nodes.MethodDefinition)
         {
             Static = isStatic;
@@ -21,6 +21,9 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
-        protected internal override void Accept(AstVisitor visitor) => visitor.VisitMethodDefinition(this);
+        protected internal override void Accept(AstVisitor visitor)
+        {
+            visitor.VisitMethodDefinition(this);
+        }
     }
 }

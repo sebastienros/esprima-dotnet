@@ -15,20 +15,20 @@ namespace Esprima.Utils
     public enum LocationMembersPlacement
     {
         End,
-        Start,
+        Start
     }
 
     public static class AstJson
     {
         public sealed class Options
         {
-            public static readonly Options Default = new Options();
+            public static readonly Options Default = new();
 
             public bool IncludingLineColumn { get; private set; }
             public bool IncludingRange { get; private set; }
             public LocationMembersPlacement LocationMembersPlacement { get; private set; }
 
-            public Options() {}
+            public Options() { }
 
             private Options(Options options)
             {
@@ -37,24 +37,36 @@ namespace Esprima.Utils
                 LocationMembersPlacement = options.LocationMembersPlacement;
             }
 
-            public Options WithIncludingLineColumn(bool value) =>
-                value == IncludingLineColumn ? this : new Options(this) { IncludingLineColumn = value };
+            public Options WithIncludingLineColumn(bool value)
+            {
+                return value == IncludingLineColumn ? this : new Options(this) { IncludingLineColumn = value };
+            }
 
-            public Options WithIncludingRange(bool value) =>
-                value == IncludingRange ? this : new Options(this) { IncludingRange = value };
+            public Options WithIncludingRange(bool value)
+            {
+                return value == IncludingRange ? this : new Options(this) { IncludingRange = value };
+            }
 
-            public Options WithLocationMembersPlacement(LocationMembersPlacement value) =>
-                value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
+            public Options WithLocationMembersPlacement(LocationMembersPlacement value)
+            {
+                return value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
+            }
         }
 
-        public static string ToJsonString(this Node node) =>
-            ToJsonString(node, indent: null);
+        public static string ToJsonString(this Node node)
+        {
+            return ToJsonString(node, indent: null);
+        }
 
-        public static string ToJsonString(this Node node, string? indent) =>
-            ToJsonString(node, Options.Default, indent);
+        public static string ToJsonString(this Node node, string? indent)
+        {
+            return ToJsonString(node, Options.Default, indent);
+        }
 
-        public static string ToJsonString(this Node node, Options options) =>
-            ToJsonString(node, options, null);
+        public static string ToJsonString(this Node node, Options options)
+        {
+            return ToJsonString(node, options, null);
+        }
 
         public static string ToJsonString(this Node node, Options options, string? indent)
         {
@@ -65,14 +77,20 @@ namespace Esprima.Utils
             }
         }
 
-        public static void WriteJson(this Node node, TextWriter writer) =>
+        public static void WriteJson(this Node node, TextWriter writer)
+        {
             WriteJson(node, writer, indent: null);
+        }
 
-        public static void WriteJson(this Node node, TextWriter writer, string? indent) =>
+        public static void WriteJson(this Node node, TextWriter writer, string? indent)
+        {
             WriteJson(node, writer, Options.Default, indent);
+        }
 
-        public static void WriteJson(this Node node, TextWriter writer, Options options) =>
+        public static void WriteJson(this Node node, TextWriter writer, Options options)
+        {
             WriteJson(node, writer, options, null);
+        }
 
         public static void WriteJson(this Node node, TextWriter writer, Options options, string? indent)
         {
@@ -95,8 +113,8 @@ namespace Esprima.Utils
             }
 
             var visitor = new Visitor(new JsonTextWriter(writer, indent),
-                                      options.IncludingLineColumn, options.IncludingRange,
-                                      options.LocationMembersPlacement);
+                options.IncludingLineColumn, options.IncludingRange,
+                options.LocationMembersPlacement);
 
             visitor.Visit(node);
         }
@@ -122,8 +140,8 @@ namespace Esprima.Utils
             }
 
             var visitor = new Visitor(writer,
-                                      options.IncludingLineColumn, options.IncludingRange,
-                                      options.LocationMembersPlacement);
+                options.IncludingLineColumn, options.IncludingRange,
+                options.LocationMembersPlacement);
 
             visitor.Visit(node);
         }
@@ -134,8 +152,8 @@ namespace Esprima.Utils
             private readonly ObservableStack<Node> _stack;
 
             public Visitor(JsonWriter writer,
-                           bool includeLineColumn, bool includeRange,
-                           LocationMembersPlacement locationMembersPlacement)
+                bool includeLineColumn, bool includeRange,
+                LocationMembersPlacement locationMembersPlacement)
             {
                 _writer = writer ?? ThrowArgumentNullException<JsonWriter>(nameof(writer));
                 _stack = new ObservableStack<Node>();
@@ -201,15 +219,20 @@ namespace Esprima.Utils
                 }
             }
 
-            private IDisposable StartNodeObject(Node node) => _stack.Push(node);
+            private IDisposable StartNodeObject(Node node)
+            {
+                return _stack.Push(node);
+            }
 
             private void EmptyNodeObject(Node node)
             {
-                using (StartNodeObject(node)) {}
+                using (StartNodeObject(node)) { }
             }
 
-            private void Member(string name) =>
+            private void Member(string name)
+            {
                 _writer.Member(name);
+            }
 
             private void Member(string name, Node? node)
             {
@@ -235,35 +258,41 @@ namespace Esprima.Utils
                 _writer.Number(value);
             }
 
-            private static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new ConditionalWeakTable<Type, IDictionary>();
+            private static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new();
 
             private void Member<T>(string name, T value) where T : Enum
             {
                 var map = (Dictionary<T, string>)
                     EnumMap.GetValue(value.GetType(),
                         t => t.GetRuntimeFields()
-                              .Where(f => f.IsStatic)
-                              .ToDictionary(f => (T) f.GetValue(null),
-                                            f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
-                                               ? a.Value : f.Name.ToLowerInvariant()));
+                            .Where(f => f.IsStatic)
+                            .ToDictionary(f => (T) f.GetValue(null),
+                                f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
+                                    ? a.Value
+                                    : f.Name.ToLowerInvariant()));
                 Member(name, map[value]);
             }
 
-            private void Member<T>(string name, in NodeList<T> nodes) where T : Node? =>
+            private void Member<T>(string name, in NodeList<T> nodes) where T : Node?
+            {
                 Member(name, nodes, node => node);
+            }
 
             private void Member<T>(string name, in NodeList<T> list, Func<T, Node?> nodeSelector) where T : Node?
             {
                 Member(name);
                 _writer.StartArray();
                 foreach (var item in list)
+                {
                     Visit(nodeSelector(item));
+                }
+
                 _writer.EndArray();
             }
 
             private sealed class ObservableStack<T> : IDisposable
             {
-                private readonly Stack<T> _stack = new Stack<T>();
+                private readonly Stack<T> _stack = new();
 
                 public event Action<T>? Pushed;
                 public event Action<T>? Popped;
@@ -304,8 +333,10 @@ namespace Esprima.Utils
             }
 
             [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-            protected override void VisitUnknownNode(Node node) =>
+            protected override void VisitUnknownNode(Node node)
+            {
                 throw new NotSupportedException("Unknown node type: " + node.Type);
+            }
 
             protected internal override void VisitCatchClause(CatchClause catchClause)
             {
@@ -403,7 +434,9 @@ namespace Esprima.Utils
             protected internal override void VisitReturnStatement(ReturnStatement returnStatement)
             {
                 using (StartNodeObject(returnStatement))
+                {
                     Member("argument", returnStatement.Argument);
+                }
             }
 
             protected internal override void VisitLabeledStatement(LabeledStatement labeledStatement)
@@ -425,11 +458,15 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitEmptyStatement(EmptyStatement emptyStatement) =>
+            protected internal override void VisitEmptyStatement(EmptyStatement emptyStatement)
+            {
                 EmptyNodeObject(emptyStatement);
+            }
 
-            protected internal override void VisitDebuggerStatement(DebuggerStatement debuggerStatement) =>
+            protected internal override void VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+            {
                 EmptyNodeObject(debuggerStatement);
+            }
 
             protected internal override void VisitExpressionStatement(ExpressionStatement expressionStatement)
             {
@@ -498,22 +535,30 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitUpdateExpression(UpdateExpression updateExpression) =>
+            protected internal override void VisitUpdateExpression(UpdateExpression updateExpression)
+            {
                 VisitUnaryExpression(updateExpression);
+            }
 
-            protected internal override void VisitThisExpression(ThisExpression thisExpression) =>
+            protected internal override void VisitThisExpression(ThisExpression thisExpression)
+            {
                 EmptyNodeObject(thisExpression);
+            }
 
             protected internal override void VisitSequenceExpression(SequenceExpression sequenceExpression)
             {
                 using (StartNodeObject(sequenceExpression))
+                {
                     Member("expressions", sequenceExpression.Expressions);
+                }
             }
 
             protected internal override void VisitObjectExpression(ObjectExpression objectExpression)
             {
                 using (StartNodeObject(objectExpression))
+                {
                     Member("properties", objectExpression.Properties);
+                }
             }
 
             protected internal override void VisitNewExpression(NewExpression newExpression)
@@ -536,8 +581,10 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitLogicalExpression(BinaryExpression binaryExpression) =>
+            protected internal override void VisitLogicalExpression(BinaryExpression binaryExpression)
+            {
                 VisitBinaryExpression(binaryExpression);
+            }
 
             protected internal override void VisitLiteral(Literal literal)
             {
@@ -612,13 +659,17 @@ namespace Esprima.Utils
             protected internal override void VisitChainExpression(ChainExpression chainExpression)
             {
                 using (StartNodeObject(chainExpression))
+                {
                     Member("expression", chainExpression.Expression);
+                }
             }
 
             protected internal override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
             {
                 using (StartNodeObject(exportDefaultDeclaration))
+                {
                     Member("declaration", exportDefaultDeclaration.Declaration);
+                }
             }
 
             protected internal override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
@@ -668,13 +719,17 @@ namespace Esprima.Utils
             protected internal override void VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
             {
                 using (StartNodeObject(importNamespaceSpecifier))
+                {
                     Member("local", importNamespaceSpecifier.Local);
+                }
             }
 
             protected internal override void VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
             {
                 using (StartNodeObject(importDefaultSpecifier))
+                {
                     Member("local", importDefaultSpecifier.Local);
+                }
             }
 
             protected internal override void VisitImportSpecifier(ImportSpecifier importSpecifier)
@@ -722,7 +777,9 @@ namespace Esprima.Utils
             protected internal override void VisitClassBody(ClassBody classBody)
             {
                 using (StartNodeObject(classBody))
+                {
                     Member("body", classBody.Body);
+                }
             }
 
             protected internal override void VisitYieldExpression(YieldExpression yieldExpression)
@@ -743,8 +800,10 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitSuper(Super super) =>
+            protected internal override void VisitSuper(Super super)
+            {
                 EmptyNodeObject(super);
+            }
 
             protected internal override void VisitMetaProperty(MetaProperty metaProperty)
             {
@@ -882,7 +941,9 @@ namespace Esprima.Utils
             protected internal override void VisitArrayExpression(ArrayExpression arrayExpression)
             {
                 using (StartNodeObject(arrayExpression))
+                {
                     Member("elements", arrayExpression.Elements);
+                }
             }
 
             protected internal override void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
@@ -898,19 +959,25 @@ namespace Esprima.Utils
             protected internal override void VisitContinueStatement(ContinueStatement continueStatement)
             {
                 using (StartNodeObject(continueStatement))
+                {
                     Member("label", continueStatement.Label);
+                }
             }
 
             protected internal override void VisitBreakStatement(BreakStatement breakStatement)
             {
                 using (StartNodeObject(breakStatement))
+                {
                     Member("label", breakStatement.Label);
+                }
             }
 
             protected internal override void VisitBlockStatement(BlockStatement blockStatement)
             {
                 using (StartNodeObject(blockStatement))
+                {
                     Member("body", blockStatement.Body, e => (Statement) e);
+                }
             }
         }
     }
