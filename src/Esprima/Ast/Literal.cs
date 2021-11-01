@@ -1,14 +1,16 @@
+﻿using System.Numerics;
 using System.Text.RegularExpressions;
 using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class Literal : Expression
+    public class Literal : Expression
     {
         public string? StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
         public readonly double NumericValue;
         public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
         public Regex? RegexValue => TokenType == TokenType.RegularExpression ? (Regex?) Value : null;
+        public BigInteger? BigIntValue => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null;
 
         public readonly RegexValue? Regex;
         public readonly object? Value;

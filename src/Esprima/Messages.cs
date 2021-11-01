@@ -41,6 +41,8 @@
         public const string NewlineAfterThrow = "Illegal newline after throw";
         public const string NoAsAfterImportNamespace = "Unexpected token";
         public const string NoCatchOrFinally = "Missing catch or finally after try";
+        public const string NumericSeperatorOneUnderscore = "Numeric separator must be exactly one underscore";
+        public const string NumericSeperatorNotAllowedHere = "Numeric separator is not allowed here";
         public const string ParameterAfterRestParameter = "Rest parameter must be last formal parameter";
         public const string PropertyAfterRestProperty = "Unexpected token";
         public const string Redeclaration = "{0} \"{1}\" has already been declared";

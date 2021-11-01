@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -888,19 +889,7 @@ namespace Esprima
 
         public Token ScanHexLiteral(int start)
         {
-            var index = Index;
-
-            while (!Eof())
-            {
-                if (!Character.IsHexDigit(Source.CharCodeAt(Index)))
-                {
-                    break;
-                }
-
-                Index++;
-            }
-
-            var number = Source.Substring(index, Index - index);
+            var number = this.ScanLiteralPart(Character.IsHexDigit);
 
             if (number.Length == 0)
             {
@@ -959,21 +948,8 @@ namespace Esprima
         public Token ScanBinaryLiteral(int start)
         {
             char ch;
-            var index = Index;
-
-            while (!Eof())
-            {
-                ch = Source[Index];
-                if (ch != '0' && ch != '1')
-                {
-                    break;
-                }
-
-                Index++;
-            }
-
-            var number = Source.Substring(index, Index - index);
-
+            var number = this.ScanLiteralPart(c => c == '0' || c == '1');
+            
             if (number.Length == 0)
             {
                 // only 0b or 0B
@@ -1017,16 +993,7 @@ namespace Esprima
                 ++Index;
             }
 
-            while (!Eof())
-            {
-                if (!Character.IsOctalDigit(Source.CharCodeAt(Index)))
-                {
-                    break;
-                }
-
-                sb.Append(Source[Index++]);
-            }
-
+            sb.Append(this.ScanLiteralPart(Character.IsOctalDigit));
             var number = sb.ToString();
 
             if (!octal && number.Length == 0)
@@ -1084,6 +1051,27 @@ namespace Esprima
             return true;
         }
 
+        private string ScanLiteralPart(Func<char, bool> check)
+        {
+            string num = "";
+
+            if (Source.CharCodeAt(Index) == '_')
+                ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
+
+            while (!Eof() && (check(Source.CharCodeAt(Index)) || Source.CharCodeAt(Index) == '_')) {
+                if (Source.CharCodeAt(Index) != '_')
+                    num += Source.CharCodeAt(Index);
+                Index++;
+                if (Source.CharCodeAt(Index-1) == '_' && Source.CharCodeAt(Index) == '_')
+                    ThrowUnexpectedToken(Messages.NumericSeperatorOneUnderscore);
+            }
+
+            if (Source.CharCodeAt(Index-1) == '_')
+                ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
+
+            return num;
+        }
+
         public Token ScanNumericLiteral()
         {
             var sb = GetStringBuilder();
@@ -1095,7 +1083,6 @@ namespace Esprima
             if (ch != '.')
             {
                 var first = Source[Index++];
-                sb.Append(first);
                 ch = Source.CharCodeAt(Index);
 
                 // Hex number starts with '0x'.
@@ -1130,21 +1117,15 @@ namespace Esprima
                     }
                 }
 
-                while (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
-                {
-                    sb.Append(Source[Index++]);
-                }
-
+                --Index;
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit));
                 ch = Source.CharCodeAt(Index);
             }
 
             if (ch == '.')
             {
                 sb.Append(Source[Index++]);
-                while (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
-                {
-                    sb.Append(Source[Index++]);
-                }
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit));
 
                 ch = Source.CharCodeAt(Index);
             }
@@ -1161,15 +1142,27 @@ namespace Esprima
 
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
-                    while (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
-                    {
-                        sb.Append(Source[Index++]);
-                    }
+                    sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit));
                 }
                 else
                 {
                     ThrowUnexpectedToken();
                 }
+            }
+            else if (ch == 'n')
+            {
+                Index++;
+                var bigInt = BigInteger.Parse(sb.ToString());
+                return new Token
+                {
+                    Type = TokenType.BigIntLiteral,
+                    Value = bigInt,
+                    BigIntValue = bigInt,
+                    LineNumber = LineNumber,
+                    LineStart = LineStart,
+                    Start = start,
+                    End = Index
+                };
             }
 
             if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))

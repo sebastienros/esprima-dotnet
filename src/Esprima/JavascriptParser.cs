@@ -591,6 +591,19 @@ namespace Esprima
                     expr = Finalize(node, new Literal(token.NumericValue, raw));
                     break;
 
+                case TokenType.BigIntLiteral:
+                    if (_context.Strict && _lookahead.Octal)
+                    {
+                        TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
+                    }
+
+                    _context.IsAssignmentTarget = false;
+                    _context.IsBindingElement = false;
+                    token = NextToken();
+                    raw = GetTokenRaw(token);
+                    expr = Finalize(node, new BigIntLiteral(token.BigIntValue.Value, raw));
+                    break;
+
                 case TokenType.BooleanLiteral:
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
@@ -859,6 +872,16 @@ namespace Esprima
 
                     raw = GetTokenRaw(token);
                     key = Finalize(node, new Literal(token.NumericValue, raw));
+                    break;
+
+                case TokenType.BigIntLiteral:
+                    if (_context.Strict && token.Octal)
+                    {
+                        TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
+                    }
+
+                    raw = GetTokenRaw(token);
+                    key = Finalize(node, new BigIntLiteral(token.BigIntValue.Value, raw));
                     break;
 
                 case TokenType.Identifier:
