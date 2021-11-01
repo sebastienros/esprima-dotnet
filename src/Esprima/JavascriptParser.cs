@@ -1863,8 +1863,12 @@ namespace Esprima
         {
             var startToken = _lookahead;
 
+            var isLeftParenthesized = this.Match("(");
             var expr = InheritCoverGrammar(parseUnaryExpression);
-            if (expr.Type != Nodes.UnaryExpression && Match("**"))
+
+            var exponentAllowed = expr.Type != Nodes.UnaryExpression || isLeftParenthesized;
+
+            if (exponentAllowed && Match("**"))
             {
                 NextToken();
                 _context.IsAssignmentTarget = false;
