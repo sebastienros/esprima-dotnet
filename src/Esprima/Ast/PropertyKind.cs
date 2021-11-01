@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Esprima.Ast
 {
@@ -11,6 +11,7 @@ namespace Esprima.Ast
         Set = 4,
         Init = 8,
         Constructor = 16,
-        Method = 32
+        Method = 32,
+        Property = 64
     };
 }

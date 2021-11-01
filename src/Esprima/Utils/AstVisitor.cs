@@ -258,6 +258,10 @@ namespace Esprima.Utils
         {
         }
 
+        protected internal virtual void VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+        {
+        }
+
         protected internal virtual void VisitFunctionExpression(IFunction function)
         {
             if (function.Id is not null)
@@ -364,6 +368,16 @@ namespace Esprima.Utils
         {
             Visit(methodDefinition.Key);
             Visit(methodDefinition.Value);
+        }
+
+        protected internal virtual void VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+        {
+            Visit(propertyDefinition.Key);
+
+            if (propertyDefinition.Value is not null)
+            {
+                Visit(propertyDefinition.Value);
+            }
         }
 
         protected internal virtual void VisitForOfStatement(ForOfStatement forOfStatement)
