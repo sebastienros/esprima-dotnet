@@ -46,6 +46,7 @@ namespace Esprima
             public bool IsModule;
             public bool AllowIn;
             public bool AllowStrictDirective;
+            public bool AllowSuper;
             public bool AllowYield;
             public bool IsAsync;
             public Token? FirstCoverInitializedNameError;
@@ -1581,7 +1582,7 @@ namespace Esprima
                 expr = MatchKeyword("new") ? InheritCoverGrammar(parseNewExpression) : InheritCoverGrammar(parsePrimaryExpression);
             }
 
-            if (isSuper && !_context.InClassConstructor)
+            if (isSuper && (!_context.InClassConstructor || !_context.AllowSuper))
             {
                 TolerateError(Messages.UnexpectedSuper);
             }
@@ -4478,6 +4479,7 @@ namespace Esprima
             var node = CreateNode();
 
             var previousStrict = _context.Strict;
+            var previousAllowSuper = _context.AllowSuper;
             _context.Strict = true;
             ExpectKeyword("class");
 
@@ -4490,10 +4492,12 @@ namespace Esprima
             {
                 NextToken();
                 superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);
+                _context.AllowSuper = true;
             }
 
             var classBody = ParseClassBody();
             _context.Strict = previousStrict;
+            _context.AllowSuper = previousAllowSuper;
 
             return Finalize(node, new ClassDeclaration(id, superClass, classBody));
         }
