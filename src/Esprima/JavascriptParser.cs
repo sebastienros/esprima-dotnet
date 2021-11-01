@@ -1511,7 +1511,23 @@ namespace Esprima
         {
             var node = CreateNode();
             ExpectKeyword("import");
-            return Finalize(node, new Import());
+            Expect("(");
+
+            var source = this.parseAssignmentExpression();
+            if (!this.Match(")") && this._config.Tolerant)
+            {
+                this.TolerateUnexpectedToken(this.NextToken());
+            }
+            else
+            {
+                this.Expect(")");
+                if (this.Match(";"))
+                {
+                    this.NextToken();
+                }
+            }
+
+            return Finalize(node, new Import(source));
         }
 
         private bool MatchImportMeta()
