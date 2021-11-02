@@ -30,7 +30,7 @@ namespace Esprima.Utils
 {
     // System.Runtime.Serialization;
 
-// https://github.com/dotnet/corefx/blob/795957f4e18238ae7688ccab729f1ef8e825ab3a/src/System.Runtime.Serialization.Primitives/src/System/Runtime/Serialization/EnumMemberAttribute.cs
+    // https://github.com/dotnet/corefx/blob/795957f4e18238ae7688ccab729f1ef8e825ab3a/src/System.Runtime.Serialization.Primitives/src/System/Runtime/Serialization/EnumMemberAttribute.cs
 
     [AttributeUsage(AttributeTargets.Field)]
     internal sealed class EnumMemberAttribute : Attribute

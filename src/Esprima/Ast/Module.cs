@@ -1,4 +1,4 @@
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class Module : Program
     {

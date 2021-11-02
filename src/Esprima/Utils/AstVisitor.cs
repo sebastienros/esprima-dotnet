@@ -331,6 +331,10 @@ namespace Esprima.Utils
 
         protected internal virtual void VisitImport(Import import)
         {
+            if (import.Source != null)
+            {
+                Visit(import.Source);
+            }
         }
 
         protected internal virtual void VisitImportDeclaration(ImportDeclaration importDeclaration)

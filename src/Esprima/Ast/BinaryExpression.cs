@@ -1,4 +1,4 @@
-using Esprima.Utils;
+﻿using Esprima.Utils;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast

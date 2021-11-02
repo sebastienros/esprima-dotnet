@@ -12,6 +12,8 @@ namespace Esprima.Test
 {
     public class Fixtures
     {
+        // Do manually set it to true to update local test files with the current results.
+        // Only use this when the test is deemed wrong.
         const bool WriteBackExpectedTree = false;
 
         [Fact]
@@ -118,6 +120,7 @@ namespace Esprima.Test
                 ? SourceType.Module
                 : SourceType.Script;
 
+#pragma warning disable 162
             if (File.Exists(moduleFilePath))
             {
                 sourceType = SourceType.Module;
@@ -133,6 +136,7 @@ namespace Esprima.Test
             {
                 expected = File.ReadAllText(treeFilePath);
                 if (WriteBackExpectedTree)
+
                 {
                     var actual = ParseAndFormat(sourceType, script, options);
                     if (!CompareTreesInternal(actual, expected))
@@ -149,6 +153,7 @@ namespace Esprima.Test
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(failureFilePath, actual);
                 }
+#pragma warning restore 162
             }
             else
             {
@@ -189,9 +194,13 @@ namespace Esprima.Test
 
         internal static string GetFixturesPath()
         {
+#if NET461
             var assemblyPath = new Uri(typeof(Fixtures).GetTypeInfo().Assembly.CodeBase).LocalPath;
             var assemblyDirectory = new FileInfo(assemblyPath).Directory;
-
+#else
+            var assemblyPath = typeof(Fixtures).GetTypeInfo().Assembly.Location;
+            var assemblyDirectory = new FileInfo(assemblyPath).Directory;
+#endif
             var root = assemblyDirectory.Parent.Parent.Parent.FullName;
             return root;
         }
