@@ -153,6 +153,7 @@ namespace Esprima.Test
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(failureFilePath, actual);
                 }
+#pragma warning restore 162
             }
             else
             {
