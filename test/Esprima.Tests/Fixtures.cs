@@ -134,7 +134,9 @@ namespace Esprima.Test
             else if (File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
+#pragma warning disable 162
                 if (WriteBackExpectedTree)
+
                 {
                     var actual = ParseAndFormat(sourceType, script, options);
                     if (!CompareTreesInternal(actual, expected))
