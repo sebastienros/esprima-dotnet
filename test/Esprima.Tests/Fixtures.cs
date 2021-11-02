@@ -194,9 +194,13 @@ namespace Esprima.Test
 
         internal static string GetFixturesPath()
         {
+#if NET461
             var assemblyPath = new Uri(typeof(Fixtures).GetTypeInfo().Assembly.CodeBase).LocalPath;
             var assemblyDirectory = new FileInfo(assemblyPath).Directory;
-
+#else
+            var assemblyPath = typeof(Fixtures).GetTypeInfo().Assembly.Location;
+            var assemblyDirectory = new FileInfo(assemblyPath).Directory;
+#endif
             var root = assemblyDirectory.Parent.Parent.Parent.FullName;
             return root;
         }
