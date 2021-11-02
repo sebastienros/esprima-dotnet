@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
 using static Esprima.EsprimaExceptionHelper;
+using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
 
 namespace Esprima.Ast
 {

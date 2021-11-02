@@ -71,7 +71,7 @@ namespace Esprima
         private bool _hasLineTerminator;
         private readonly Action<Node>? _action;
 
-        private List<Token> _tokens = new();
+        private readonly List<Token> _tokens = new();
 
         /// <summary>
         /// Returns the list of tokens that were parsed.
