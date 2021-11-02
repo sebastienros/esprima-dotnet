@@ -12,6 +12,8 @@ namespace Esprima.Test
 {
     public class Fixtures
     {
+        // Do manually set it to true to update local test files with the current results.
+        // Only use this when the test is deemed wrong.
         const bool WriteBackExpectedTree = false;
 
         [Fact]
