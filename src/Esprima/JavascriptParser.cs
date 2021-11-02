@@ -46,6 +46,7 @@ namespace Esprima
             public bool IsModule;
             public bool AllowIn;
             public bool AllowStrictDirective;
+            public bool AllowSuper;
             public bool AllowYield;
             public bool IsAsync;
             public Token? FirstCoverInitializedNameError;
@@ -70,7 +71,7 @@ namespace Esprima
         private bool _hasLineTerminator;
         private readonly Action<Node>? _action;
 
-        private List<Token> _tokens = new();
+        private readonly List<Token> _tokens = new();
 
         /// <summary>
         /// Returns the list of tokens that were parsed.
@@ -1538,7 +1539,23 @@ namespace Esprima
         {
             var node = CreateNode();
             ExpectKeyword("import");
-            return Finalize(node, new Import());
+            Expect("(");
+
+            var source = this.parseAssignmentExpression();
+            if (!this.Match(")") && this._config.Tolerant)
+            {
+                this.TolerateUnexpectedToken(this.NextToken());
+            }
+            else
+            {
+                this.Expect(")");
+                if (this.Match(";"))
+                {
+                    this.NextToken();
+                }
+            }
+
+            return Finalize(node, new Import(source));
         }
 
         private bool MatchImportMeta()
@@ -1608,7 +1625,7 @@ namespace Esprima
                 expr = MatchKeyword("new") ? InheritCoverGrammar(parseNewExpression) : InheritCoverGrammar(parsePrimaryExpression);
             }
 
-            if (isSuper && !_context.InClassConstructor)
+            if (isSuper && (!_context.InClassConstructor || !_context.AllowSuper))
             {
                 TolerateError(Messages.UnexpectedSuper);
             }
@@ -1889,8 +1906,12 @@ namespace Esprima
         {
             var startToken = _lookahead;
 
+            var isLeftParenthesized = this.Match("(");
             var expr = InheritCoverGrammar(parseUnaryExpression);
-            if (expr.Type != Nodes.UnaryExpression && Match("**"))
+
+            var exponentAllowed = expr.Type != Nodes.UnaryExpression || isLeftParenthesized;
+
+            if (exponentAllowed && Match("**"))
             {
                 NextToken();
                 _context.IsAssignmentTarget = false;
@@ -4559,6 +4580,7 @@ namespace Esprima
             var node = CreateNode();
 
             var previousStrict = _context.Strict;
+            var previousAllowSuper = _context.AllowSuper;
             _context.Strict = true;
             ExpectKeyword("class");
 
@@ -4571,10 +4593,12 @@ namespace Esprima
             {
                 NextToken();
                 superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);
+                _context.AllowSuper = true;
             }
 
             var classBody = ParseClassBody();
             _context.Strict = previousStrict;
+            _context.AllowSuper = previousAllowSuper;
 
             return Finalize(node, new ClassDeclaration(id, superClass, classBody));
         }

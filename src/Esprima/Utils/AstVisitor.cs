@@ -257,7 +257,7 @@ namespace Esprima.Utils
         protected internal virtual void VisitIdentifier(Identifier identifier)
         {
         }
-
+      
         protected internal virtual void VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
         {
         }
@@ -276,6 +276,16 @@ namespace Esprima.Utils
             }
 
             Visit(function.Body);
+        }
+
+        protected internal virtual void VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+        {
+            Visit(propertyDefinition.Key);
+
+            if (propertyDefinition.Value is not null)
+            {
+                Visit(propertyDefinition.Value);
+            }
         }
 
         protected internal virtual void VisitChainExpression(ChainExpression chainExpression)
@@ -335,6 +345,10 @@ namespace Esprima.Utils
 
         protected internal virtual void VisitImport(Import import)
         {
+            if (import.Source != null)
+            {
+                Visit(import.Source);
+            }
         }
 
         protected internal virtual void VisitImportDeclaration(ImportDeclaration importDeclaration)
@@ -368,16 +382,6 @@ namespace Esprima.Utils
         {
             Visit(methodDefinition.Key);
             Visit(methodDefinition.Value);
-        }
-
-        protected internal virtual void VisitPropertyDefinition(PropertyDefinition propertyDefinition)
-        {
-            Visit(propertyDefinition.Key);
-
-            if (propertyDefinition.Value is not null)
-            {
-                Visit(propertyDefinition.Value);
-            }
         }
 
         protected internal virtual void VisitForOfStatement(ForOfStatement forOfStatement)

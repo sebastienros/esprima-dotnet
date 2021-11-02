@@ -1,4 +1,4 @@
-namespace Esprima
+﻿namespace Esprima
 {
     /// <summary>
     /// Default error handling logic for Esprima.

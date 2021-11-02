@@ -12,6 +12,10 @@ namespace Esprima.Test
 {
     public class Fixtures
     {
+        // Do manually set it to true to update local test files with the current results.
+        // Only use this when the test is deemed wrong.
+        const bool WriteBackExpectedTree = false;
+
         [Fact]
         public void HoistingScopeShouldWork()
         {
@@ -32,6 +36,19 @@ namespace Esprima.Test
                     .WithIncludingRange(true),
                 indent
             );
+        }
+
+        private static bool CompareTreesInternal(string actual, string expected)
+        {
+            var actualJObject = JObject.Parse(actual);
+            var expectedJObject = JObject.Parse(expected);
+
+            // Don't compare the tokens array as it's not in the generated AST
+            expectedJObject.Remove("tokens");
+            expectedJObject.Remove("comments");
+            expectedJObject.Remove("errors");
+
+            return JToken.DeepEquals(actualJObject, expectedJObject);
         }
 
         private static void CompareTrees(string actual, string expected, string path)
@@ -57,6 +74,7 @@ namespace Esprima.Test
         [MemberData(nameof(SourceFiles), "Fixtures")]
         public void ExecuteTestCase(string fixture)
         {
+
             var options = new ParserOptions { Tokens = true };
 
             string treeFilePath, failureFilePath, moduleFilePath;
@@ -102,19 +120,40 @@ namespace Esprima.Test
                 ? SourceType.Module
                 : SourceType.Script;
 
+#pragma warning disable 162
             if (File.Exists(moduleFilePath))
             {
                 sourceType = SourceType.Module;
                 expected = File.ReadAllText(moduleFilePath);
+                if (WriteBackExpectedTree)
+                {
+                    var actual = ParseAndFormat(sourceType, script, options);
+                    if (!CompareTreesInternal(actual, expected))
+                        File.WriteAllText(moduleFilePath, actual);
+                }
             }
             else if (File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
+                if (WriteBackExpectedTree)
+
+                {
+                    var actual = ParseAndFormat(sourceType, script, options);
+                    if (!CompareTreesInternal(actual, expected))
+                        File.WriteAllText(treeFilePath, actual);
+                }
             }
             else if (File.Exists(failureFilePath))
             {
                 invalid = true;
                 expected = File.ReadAllText(failureFilePath);
+                if (WriteBackExpectedTree)
+                {
+                    var actual = ParseAndFormat(sourceType, script, options);
+                    if (!CompareTreesInternal(actual, expected))
+                        File.WriteAllText(failureFilePath, actual);
+                }
+#pragma warning restore 162
             }
             else
             {
@@ -155,9 +194,13 @@ namespace Esprima.Test
 
         internal static string GetFixturesPath()
         {
+#if NET461
             var assemblyPath = new Uri(typeof(Fixtures).GetTypeInfo().Assembly.CodeBase).LocalPath;
             var assemblyDirectory = new FileInfo(assemblyPath).Directory;
-
+#else
+            var assemblyPath = typeof(Fixtures).GetTypeInfo().Assembly.Location;
+            var assemblyDirectory = new FileInfo(assemblyPath).Directory;
+#endif
             var root = assemblyDirectory.Parent.Parent.Parent.FullName;
             return root;
         }
