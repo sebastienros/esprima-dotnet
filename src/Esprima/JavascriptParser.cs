@@ -666,6 +666,10 @@ namespace Esprima
                         {
                             expr = ParseClassExpression();
                         }
+                        else if (MatchKeyword("new"))
+                        {
+                            expr = ParseNewExpression();
+                        }
                         else if (MatchImportCall())
                         {
                             expr = ParseImportCall();
@@ -834,7 +838,7 @@ namespace Esprima
             return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, true));
         }
 
-        private Expression ParseObjectPropertyKey()
+        private Expression ParseObjectPropertyKey(Boolean isPrivate = false)
         {
             var node = CreateNode();
             var token = NextToken();
@@ -866,7 +870,7 @@ namespace Esprima
                 case TokenType.BooleanLiteral:
                 case TokenType.NullLiteral:
                 case TokenType.Keyword:
-                    key = Finalize(node, new Identifier((string?) token.Value));
+                    key = isPrivate ? Finalize(node, new PrivateIdentifier((string?) token.Value)) : Finalize(node, new Identifier((string?) token.Value));
                     break;
 
                 case TokenType.Punctuator:
@@ -964,7 +968,7 @@ namespace Esprima
                 kind = PropertyKind.Init;
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
-                value = ParseGeneratorMethod();
+                value = ParseGeneratorMethod(isAsync);
                 method = true;
             }
             else
@@ -1420,6 +1424,29 @@ namespace Esprima
             return Finalize(node, new Identifier((string?) token.Value));
         }
 
+        private Expression ParseIdentifierOrPrivateIdentifierName()
+        {
+            var isPrivateField = false;
+
+            var node = CreateNode();
+
+            var token = NextToken();
+
+            if (Equals(token.Value, "#"))
+            {
+                token = NextToken();
+                token.Value = '#' + (string?)token.Value;
+                isPrivateField = true;
+            }
+
+            if (!IsIdentifierName(token))
+            {
+                return ThrowUnexpectedToken<Identifier>(token);
+            }
+
+            return isPrivateField ? Finalize(node, new PrivateIdentifier((string?) token.Value)) : Finalize(node, new Identifier((string?) token.Value));
+        }
+
         private Expression ParseNewExpression()
         {
             var node = CreateNode();
@@ -1672,7 +1699,7 @@ namespace Esprima
                         Expect(".");
                     }
 
-                    var property = ParseIdentifierName();
+                    var property = ParseIdentifierOrPrivateIdentifierName();
                     expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
                 }
                 else
@@ -4164,7 +4191,7 @@ namespace Esprima
                 TokenType.NullLiteral => true,
                 TokenType.NumericLiteral => true,
                 TokenType.Keyword => true,
-                TokenType.Punctuator => Equals(token.Value, "["),
+                TokenType.Punctuator => Equals(token.Value, "[") || Equals(token.Value, "#"),
                 _ => false
             };
         }
@@ -4212,7 +4239,7 @@ namespace Esprima
             return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, isGenerator, hasStrictDirective, false));
         }
 
-        private FunctionExpression ParseGeneratorMethod()
+        private FunctionExpression ParseGeneratorMethod(bool isAsync = false)
         {
             var node = CreateNode();
 
@@ -4224,7 +4251,7 @@ namespace Esprima
             var method = ParsePropertyMethod(parameters, out var hasStrictDirective);
             _context.AllowYield = previousAllowYield;
 
-            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, true, hasStrictDirective, false));
+            return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, true, hasStrictDirective, isAsync));
         }
 
         // https://tc39.github.io/ecma262/#sec-generator-function-definitions
@@ -4321,12 +4348,13 @@ namespace Esprima
 
             var kind = PropertyKind.None;
             Expression? key = null;
-            FunctionExpression? value = null;
+            Expression? value = null;
             var computed = false;
             var method = false;
             var isStatic = false;
             var isAsync = false;
             var isGenerator = false;
+            var isPrivate = false;
 
             if (Match("*"))
             {
@@ -4336,10 +4364,17 @@ namespace Esprima
             else
             {
                 computed = Match("[");
-                key = ParseObjectPropertyKey();
+                if (Match("#"))
+                {
+                    isPrivate = true;
+                    NextToken();
+                    token = _lookahead;
+                }
+                key = ParseObjectPropertyKey(isPrivate);
                 var id = key switch
                 {
                     Identifier identifier => identifier.Name,
+                    PrivateIdentifier privateIdentifier => privateIdentifier.Name,
                     Literal literal => literal.StringValue, // "constructor"
                     _ => null
                 };
@@ -4352,9 +4387,21 @@ namespace Esprima
                     if (Match("*"))
                     {
                         NextToken();
+                        if (Match("#"))
+                        {
+                            isPrivate = true;
+                            NextToken();
+                            token = _lookahead;
+                        }
                     }
                     else
                     {
+                        if (Match("#"))
+                        {
+                            isPrivate = true;
+                            NextToken();
+                            token = _lookahead;
+                        }
                         key = ParseObjectPropertyKey();
                     }
                 }
@@ -4370,9 +4417,15 @@ namespace Esprima
                             NextToken();
                         }
 
+                        if (Match("#"))
+                        {
+                            isPrivate = true;
+                            NextToken();
+                        }
+
                         token = _lookahead;
                         computed = Match("[");
-                        key = ParseObjectPropertyKey();
+                        key = ParseObjectPropertyKey(isPrivate);
                         if (token.Type == TokenType.Identifier && (string?) token.Value == "constructor")
                         {
                             TolerateUnexpectedToken(token, Messages.ConstructorIsAsync);
@@ -4387,25 +4440,48 @@ namespace Esprima
                 if (lookaheadPropertyKey && (string?) token.Value == "get")
                 {
                     kind = PropertyKind.Get;
+                    if (Match("#"))
+                    {
+                        isPrivate = true;
+                        NextToken();
+                        token = _lookahead;
+                    }
                     computed = Match("[");
-                    key = ParseObjectPropertyKey();
+                    key = ParseObjectPropertyKey(isPrivate);
                     _context.AllowYield = false;
                     value = ParseGetterMethod();
                 }
                 else if (lookaheadPropertyKey && (string?) token.Value == "set")
                 {
                     kind = PropertyKind.Set;
+                    if (Match("#"))
+                    {
+                        isPrivate = true;
+                        NextToken();
+                        token = _lookahead;
+                    }
                     computed = Match("[");
-                    key = ParseObjectPropertyKey();
+                    key = ParseObjectPropertyKey(isPrivate);
                     value = ParseSetterMethod();
+                }
+                else if (!Match("("))
+                {
+                    kind = PropertyKind.Property;
+                    computed = false;
+
+                    if (Match("="))
+                    {
+                        NextToken();
+                        value = IsolateCoverGrammar(this.parseAssignmentExpression);
+                    }
                 }
             }
             else if (token.Type == TokenType.Punctuator && (string?) token.Value == "*" && lookaheadPropertyKey)
             {
                 kind = PropertyKind.Init;
                 computed = Match("[");
-                key = ParseObjectPropertyKey();
-                value = ParseGeneratorMethod();
+                key = ParseObjectPropertyKey(isPrivate);
+                value = ParseGeneratorMethod(isAsync);
                 method = true;
             }
 
@@ -4441,7 +4517,7 @@ namespace Esprima
 
                 if (!isStatic && IsPropertyKey(key!, "constructor"))
                 {
-                    if (kind != PropertyKind.Method || !method || value!.Generator)
+                    if (kind != PropertyKind.Method || !method || ((FunctionExpression)value!).Generator)
                     {
                         ThrowUnexpectedToken(token, Messages.ConstructorSpecialMethod);
                     }
@@ -4459,8 +4535,13 @@ namespace Esprima
                 }
             }
 
-
-            return Finalize(node, new MethodDefinition(key!, computed, value!, kind, isStatic));
+            if (kind == PropertyKind.Property)
+            {
+                ConsumeSemicolon();
+                return Finalize(node, new PropertyDefinition(key!, computed, value!, isStatic));
+            }
+            
+            return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic));
         }
 
         private ArrayList<ClassProperty> ParseClassElementList()
