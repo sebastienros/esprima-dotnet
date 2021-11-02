@@ -120,6 +120,7 @@ namespace Esprima.Test
                 ? SourceType.Module
                 : SourceType.Script;
 
+#pragma warning disable 162
             if (File.Exists(moduleFilePath))
             {
                 sourceType = SourceType.Module;
@@ -134,7 +135,6 @@ namespace Esprima.Test
             else if (File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
-#pragma warning disable 162
                 if (WriteBackExpectedTree)
 
                 {
