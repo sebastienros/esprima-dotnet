@@ -1,4 +1,4 @@
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     /// <summary>
     /// A JavaScript expression. 

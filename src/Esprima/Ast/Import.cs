@@ -4,7 +4,7 @@ namespace Esprima.Ast
 {
     public sealed class Import : Expression
     {
-        public readonly Expression Source;
+        public readonly Expression? Source;
 
         public Import() : base(Nodes.Import)
         {

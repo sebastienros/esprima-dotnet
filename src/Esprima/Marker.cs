@@ -1,4 +1,4 @@
-namespace Esprima
+﻿namespace Esprima
 {
     internal class Marker
     {

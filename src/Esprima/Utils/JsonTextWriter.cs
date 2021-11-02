@@ -34,10 +34,10 @@ namespace Esprima.Utils
     /// <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>.
     /// </summary>
 
-// Following implementation is derived from [Jayrock] & [ELMAH].
-//
-//   [Jayrock]: https://github.com/atifaziz/Jayrock
-//   [ELMAH]: https://elmah.github.io/
+    // Following implementation is derived from [Jayrock] & [ELMAH].
+    //
+    //   [Jayrock]: https://github.com/atifaziz/Jayrock
+    //   [ELMAH]: https://elmah.github.io/
     internal sealed class JsonTextWriter : JsonWriter
     {
         private enum StructureKind : byte { Array, Object }

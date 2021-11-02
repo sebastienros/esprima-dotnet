@@ -1,4 +1,4 @@
-namespace Esprima
+﻿namespace Esprima
 {
     using System;
 
