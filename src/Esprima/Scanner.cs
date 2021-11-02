@@ -1059,24 +1059,34 @@ namespace Esprima
         {
             var charCode = Source.CharCodeAt(Index);
             if (charCode == '_')
+            {
                 ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
+            }
 
             while ((check(charCode) || charCode == '_'))
             {
                 if (charCode != '_')
+                {
                     sb.Append(charCode);
+                }
                 Index++;
                 var newCharCode = Source.CharCodeAt(Index);
                 if (charCode == '_' && newCharCode == '_')
+                {
                     ThrowUnexpectedToken(Messages.NumericSeperatorOneUnderscore);
+                }
 
                 if (Eof())
+                {
                     break;
+                }
                 charCode = newCharCode;
             }
 
             if (charCode == '_')
+            {
                 ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
+            }
         }
 
         public Token ScanNumericLiteral()
