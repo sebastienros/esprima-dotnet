@@ -2281,7 +2281,7 @@ namespace Esprima
             };
         }
 
-        private const int MaxAssignmentDepth = 100;
+        public int MaxAssignmentDepth { get; set; } = 1000;
         private int _assignmentDepth = 0;
 
         private Expression ParseAssignmentExpression()
