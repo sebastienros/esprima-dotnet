@@ -298,7 +298,9 @@ namespace Esprima.Utils
         {
             _sb.Append("(");
             if (catchClause.Param is not null)
+            {
                 Visit(catchClause.Param);
+            }
             _sb.Append(")");
             Visit(catchClause.Body);
         }
@@ -306,10 +308,14 @@ namespace Esprima.Utils
         protected virtual void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
         {
             if (functionDeclaration.Async)
+            {
                 _sb.Append("async ");
+            }
             _sb.Append("function");
             if (functionDeclaration.Generator)
+            {
                 _sb.Append("*");
+            }
             if (functionDeclaration.Id != null)
             {
                 _sb.Append(" ");
@@ -379,12 +385,13 @@ namespace Esprima.Utils
         {
             if (switchCase.Test != null)
             {
-                //todo, remove space after case, if testcase is a string starting with " or '
                 WriteStartLineToSb("case ");
                 Visit(switchCase.Test);
             }
             else
+            {
                 WriteStartLineToSb("default");
+            }
             WriteStartLineToSb(":");
 
             VisitNodeList(switchCase.Consequent, appendAtEnd: ";");
@@ -415,7 +422,9 @@ namespace Esprima.Utils
             WriteEndLineToSb(")");
             Visit(ifStatement.Consequent);
             if (NodeNeedsSemicolon(ifStatement.Consequent))
+            {
                 _sb.Append(";");
+            }
             if (ifStatement.Alternate != null)
             {
                 _sb.Append(" else ");
@@ -440,10 +449,14 @@ namespace Esprima.Utils
             if (expressionStatement.Expression is CallExpression callExpression && !(callExpression.Callee is Identifier))
             {
                 if (ExpressionNeedsBrackets(callExpression.Callee))
+                {
                     _sb.Append("(");
+                }
                 Visit(callExpression.Callee);
                 if (ExpressionNeedsBrackets(callExpression.Callee))
+                {
                     _sb.Append(")");
+                }
                 _sb.Append("(");
                 VisitNodeList(callExpression.Arguments, appendSeperatorString: ",");
                 _sb.Append(")");
@@ -455,7 +468,9 @@ namespace Esprima.Utils
                 _sb.Append(")");
             }
             else
+            {
                 Visit(expressionStatement.Expression);
+            }
         }
 
         protected virtual void VisitForStatement(ForStatement forStatement)
@@ -478,7 +493,9 @@ namespace Esprima.Utils
             _sb.Append(")");
             Visit(forStatement.Body);
             if (NodeNeedsSemicolon(forStatement.Body))
+            {
                 _sb.Append(";");
+            }
         }
 
         protected virtual void VisitForInStatement(ForInStatement forInStatement)
@@ -490,7 +507,9 @@ namespace Esprima.Utils
             _sb.Append(")");
             Visit(forInStatement.Body);
             if (NodeNeedsSemicolon(forInStatement.Body))
+            {
                 _sb.Append(";");
+            }
         }
 
         protected virtual void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
@@ -498,7 +517,9 @@ namespace Esprima.Utils
             _sb.Append("do ");
             Visit(doWhileStatement.Body);
             if (NodeNeedsSemicolon(doWhileStatement.Body))
+            {
                 _sb.Append(";");
+            }
             _sb.Append("while(");
             Visit(doWhileStatement.Test);
             _sb.Append(")");
@@ -519,10 +540,14 @@ namespace Esprima.Utils
             if (arrowFunctionExpression.Params.Count == 1)
             {
                 if (arrowFunctionExpression.Params[0] is RestElement || ExpressionNeedsBrackets(arrowFunctionExpression.Params[0]))
+                {
                     _sb.Append("(");
+                }
                 Visit(arrowFunctionExpression.Params[0]);
                 if (arrowFunctionExpression.Params[0] is RestElement || ExpressionNeedsBrackets(arrowFunctionExpression.Params[0]))
+                {
                     _sb.Append(")");
+                }
             }
             else
             {
@@ -532,10 +557,14 @@ namespace Esprima.Utils
             }
             _sb.Append("=>");
             if (arrowFunctionExpression.Body is ObjectExpression || arrowFunctionExpression.Body is SequenceExpression)
+            {
                 _sb.Append("(");
+            }
             Visit(arrowFunctionExpression.Body);
             if (arrowFunctionExpression.Body is ObjectExpression || arrowFunctionExpression.Body is SequenceExpression)
+            {
                 _sb.Append(")");
+            }
         }
 
         protected virtual void VisitUnaryExpression(UnaryExpression unaryExpression)
@@ -548,21 +577,31 @@ namespace Esprima.Utils
                     _sb.Append(" ");
             }
             if (!(unaryExpression.Argument is Literal) && !(unaryExpression.Argument is UnaryExpression))
+            {
                 _sb.Append("(");
+            }
             Visit(unaryExpression.Argument);
             if (!(unaryExpression.Argument is Literal) && !(unaryExpression.Argument is UnaryExpression))
+            {
                 _sb.Append(")");
+            }
             if (!unaryExpression.Prefix)
+            {
                 _sb.Append(op);
+            }
         }
 
         protected virtual void VisitUpdateExpression(UpdateExpression updateExpression)
         {
             if (updateExpression.Prefix)
+            {
                 _sb.Append(GetEnumValue("unaryoperator", updateExpression.Operator));
+            }
             Visit(updateExpression.Argument);
             if (!updateExpression.Prefix)
+            {
                 _sb.Append(GetEnumValue("unaryoperator", updateExpression.Operator));
+            }
         }
 
         protected virtual void VisitThisExpression(ThisExpression thisExpression)
@@ -586,12 +625,18 @@ namespace Esprima.Utils
         {
             _sb.Append("new");
             if (ExpressionNeedsBrackets(newExpression.Callee))
+            {
                 _sb.Append("(");
+            }
             else
+            {
                 _sb.Append(" ");
+            }
             Visit(newExpression.Callee);
             if (ExpressionNeedsBrackets(newExpression.Callee))
+            {
                 _sb.Append(")");
+            }
             if (newExpression.Arguments.Count > 0)
             {
                 _sb.Append("(");
@@ -603,12 +648,18 @@ namespace Esprima.Utils
         protected virtual void VisitMemberExpression(MemberExpression memberExpression)
         {
             if (ExpressionNeedsBrackets(memberExpression.Object) || (memberExpression.Object is Literal l && l.TokenType != TokenType.StringLiteral))
+            {
                 _sb.Append("(");
+            }
             Visit(memberExpression.Object);
             if (ExpressionNeedsBrackets(memberExpression.Object) || (memberExpression.Object is Literal l2 && l2.TokenType != TokenType.StringLiteral))
+            {
                 _sb.Append(")");
+            }
             if (memberExpression.Computed)
+            {
                 _sb.Append("[");
+            }
             else
             {
                 if (TryGetParentAt(0) is ChainExpression)
@@ -617,7 +668,9 @@ namespace Esprima.Utils
             }
             Visit(memberExpression.Property);
             if (memberExpression.Computed)
+            {
                 _sb.Append("]");
+            }
         }
 
         protected virtual void VisitLiteral(Literal literal)
@@ -636,11 +689,17 @@ namespace Esprima.Utils
             if (!isParentMethod)
             {
                 if (function.Async)
+                {
                     _sb.Append("async ");
+                }
                 if (!(TryGetParentAt(1) is MethodDefinition))
+                {
                     _sb.Append("function");
+                }
                 if (function.Generator)
+                {
                     _sb.Append("*");
+                }
             }
             if (function.Id != null)
             {
@@ -660,7 +719,6 @@ namespace Esprima.Utils
             {
                 Visit(classExpression.Id);
             }
-
             if (classExpression.SuperClass != null)
             {
                 _sb.Append(" extends ");
@@ -706,7 +764,9 @@ namespace Esprima.Utils
                 Visit(exportNamedDeclaration.Source);
             }
             if (exportNamedDeclaration.Declaration == null && exportNamedDeclaration.Specifiers.Count == 0 && exportNamedDeclaration.Source == null)
+            {
                 _sb.Append("{}");
+            }
 
         }
 
@@ -738,7 +798,9 @@ namespace Esprima.Utils
                 {
                     _sb.Append(",");
                     if (importDeclaration.Specifiers[1] is ImportNamespaceSpecifier)
+                    {
                         VisitNodeList(importDeclaration.Specifiers.Skip(1), appendSeperatorString: ",");
+                    }
                     else
                     {
                         _sb.Append("{");
@@ -750,7 +812,9 @@ namespace Esprima.Utils
             else if (importDeclaration.Specifiers.Any())
             {
                 if (importDeclaration.Specifiers[0] is ImportNamespaceSpecifier)
+                {
                     VisitNodeList(importDeclaration.Specifiers, appendSeperatorString: ",");
+                }
                 else
                 {
                     _sb.Append("{");
@@ -789,24 +853,42 @@ namespace Esprima.Utils
         protected virtual void VisitMethodDefinition(MethodDefinition methodDefinition)
         {
             if (methodDefinition.Static)
+            {
                 _sb.Append("static ");
+            }
             if (IsAsync(methodDefinition.Value))
+            {
                 _sb.Append("async ");
+            }
             if (methodDefinition.Value is FunctionExpression f && f.Generator)
+            {
                 _sb.Append("*");
+            }
             if (methodDefinition.Kind == PropertyKind.Get)
+            {
                 _sb.Append("get ");
+            }
             else if (methodDefinition.Kind == PropertyKind.Set)
+            {
                 _sb.Append("set ");
+            }
             if (methodDefinition.Key is MemberExpression || ExpressionNeedsBrackets(methodDefinition.Key))
+            {
                 _sb.Append("[");
+            }
             if (ExpressionNeedsBrackets(methodDefinition.Key))
+            {
                 _sb.Append("(");
+            }
             Visit(methodDefinition.Key);
             if (ExpressionNeedsBrackets(methodDefinition.Key))
+            {
                 _sb.Append(")");
+            }
             if (methodDefinition.Key is MemberExpression || ExpressionNeedsBrackets(methodDefinition.Key))
+            {
                 _sb.Append("]");
+            }
             Visit(methodDefinition.Value);
         }
 
@@ -819,7 +901,9 @@ namespace Esprima.Utils
             _sb.Append(")");
             Visit(forOfStatement.Body);
             if (NodeNeedsSemicolon(forOfStatement.Body))
+            {
                 _sb.Append(";");
+            }
         }
 
         protected virtual void VisitClassDeclaration(ClassDeclaration classDeclaration)
@@ -906,23 +990,19 @@ namespace Esprima.Utils
 
         protected virtual void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
         {
-            if (variableDeclarator.Id is ObjectPattern)
-            {
-                //_sb.Append("{");
-            }
             Visit(variableDeclarator.Id);
-            if (variableDeclarator.Id is ObjectPattern)
-            {
-                //_sb.Append("}");
-            }
             if (variableDeclarator.Init != null)
             {
                 _sb.Append("=");
                 if (ExpressionNeedsBrackets(variableDeclarator.Init))
+                {
                     _sb.Append("(");
+                }
                 Visit(variableDeclarator.Init);
                 if (ExpressionNeedsBrackets(variableDeclarator.Init))
+                {
                     _sb.Append(")");
+                }
             }
         }
 
@@ -956,24 +1036,36 @@ namespace Esprima.Utils
         protected virtual void VisitProperty(Property property)
         {
             if (property.Key is MemberExpression || ExpressionNeedsBrackets(property.Key))
+            {
                 _sb.Append("[");
+            }
             if (ExpressionNeedsBrackets(property.Key))
+            {
                 _sb.Append("(");
+            }
             Visit(property.Key);
             if (ExpressionNeedsBrackets(property.Key))
+            {
                 _sb.Append(")");
+            }
             if (property.Key is MemberExpression || ExpressionNeedsBrackets(property.Key))
+            {
                 _sb.Append("]");
+            }
             if (property.Key is Identifier keyI && property.Value is Identifier valueI && keyI.Name == valueI.Name)
             { }
             else
             {
                 _sb.Append(":");
                 if (property.Value is not ObjectPattern && ExpressionNeedsBrackets(property.Value))
+                {
                     _sb.Append("(");
+                }
                 Visit(property.Value);
                 if (property.Value is not ObjectPattern && ExpressionNeedsBrackets(property.Value))
+                {
                     _sb.Append(")");
+                }
             }
         }
 
@@ -984,14 +1076,22 @@ namespace Esprima.Utils
                 _sb.Append("static ");
             }
             if (propertyDefinition.Key is MemberExpression || ExpressionNeedsBrackets(propertyDefinition.Key))
+            {
                 _sb.Append("[");
+            }
             if (ExpressionNeedsBrackets(propertyDefinition.Key))
+            {
                 _sb.Append("(");
+            }
             Visit(propertyDefinition.Key);
             if (ExpressionNeedsBrackets(propertyDefinition.Key))
+            {
                 _sb.Append(")");
+            }
             if (propertyDefinition.Key is MemberExpression || ExpressionNeedsBrackets(propertyDefinition.Key))
+            {
                 _sb.Append("]");
+            }
             if (propertyDefinition.Value != null)
             {
                 _sb.Append("=");
@@ -1009,31 +1109,47 @@ namespace Esprima.Utils
         protected virtual void VisitConditionalExpression(ConditionalExpression conditionalExpression)
         {
             if (conditionalExpression.Test is AssignmentExpression)
+            {
                 _sb.Append("(");
+            }
             Visit(conditionalExpression.Test);
             if (conditionalExpression.Test is AssignmentExpression)
+            {
                 _sb.Append(")");
+            }
             _sb.Append("?");
             if (ExpressionNeedsBrackets(conditionalExpression.Consequent))
+            {
                 _sb.Append("(");
+            }
             Visit(conditionalExpression.Consequent);
             if (ExpressionNeedsBrackets(conditionalExpression.Consequent))
+            {
                 _sb.Append(")");
+            }
             _sb.Append(":");
             if (ExpressionNeedsBrackets(conditionalExpression.Alternate))
+            {
                 _sb.Append("(");
+            }
             Visit(conditionalExpression.Alternate);
             if (ExpressionNeedsBrackets(conditionalExpression.Alternate))
+            {
                 _sb.Append(")");
+            }
         }
 
         protected virtual void VisitCallExpression(CallExpression callExpression)
         {
             if (ExpressionNeedsBrackets(callExpression.Callee))
+            {
                 _sb.Append("(");
+            }
             Visit(callExpression.Callee);
             if (ExpressionNeedsBrackets(callExpression.Callee))
+            {
                 _sb.Append(")");
+            }
             _sb.Append("(");
             VisitNodeList(callExpression.Arguments, appendSeperatorString: ",", appendBracketsIfNeeded: true);
             _sb.Append(")");
@@ -1042,21 +1158,33 @@ namespace Esprima.Utils
         protected virtual void VisitBinaryExpression(BinaryExpression binaryExpression)
         {
             if (ExpressionNeedsBrackets(binaryExpression.Left))
+            {
                 _sb.Append("(");
+            }
             Visit(binaryExpression.Left);
             if (ExpressionNeedsBrackets(binaryExpression.Left))
+            {
                 _sb.Append(")");
+            }
             var op = GetEnumValue("operator", binaryExpression.Operator);
             if (char.IsLetter(op[0]))
+            {
                 _sb.Append(" ");
+            }
             _sb.Append(op);
             if (char.IsLetter(op[0]))
+            {
                 _sb.Append(" ");
+            }
             if (ExpressionNeedsBrackets(binaryExpression.Right))
+            {
                 _sb.Append("(");
+            }
             Visit(binaryExpression.Right);
             if (ExpressionNeedsBrackets(binaryExpression.Right))
+            {
                 _sb.Append(")");
+            }
         }
 
         protected virtual void VisitArrayExpression(ArrayExpression arrayExpression)
@@ -1069,17 +1197,25 @@ namespace Esprima.Utils
         protected virtual void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
         {
             if (assignmentExpression.Left is ObjectPattern)
+            {
                 _sb.Append("(");
+            }
             var op = GetEnumValue("assignmentoperator", assignmentExpression.Operator);
             Visit(assignmentExpression.Left);
             _sb.Append(op);
             if (ExpressionNeedsBrackets(assignmentExpression.Right) && !(assignmentExpression.Right is AssignmentExpression))
+            {
                 _sb.Append("(");
+            }
             Visit(assignmentExpression.Right);
             if (ExpressionNeedsBrackets(assignmentExpression.Right) && !(assignmentExpression.Right is AssignmentExpression))
+            {
                 _sb.Append(")");
+            }
             if (assignmentExpression.Left is ObjectPattern)
+            {
                 _sb.Append(")");
+            }
         }
 
         protected virtual void VisitContinueStatement(ContinueStatement continueStatement)
@@ -1104,7 +1240,9 @@ namespace Esprima.Utils
         {
             WriteStartLineToSb("{");
             if (beautify)
+            {
                 _sb.AppendLine();
+            }
             _indentionLevel++;
             VisitNodeList(blockStatement.Body, appendAtEnd: ";");
             _indentionLevel--;
@@ -1121,15 +1259,23 @@ namespace Esprima.Utils
                 if (node != null)
                 {
                     if (notfirst && appendSeperatorString != null)
+                    {
                         _sb.Append(appendSeperatorString);
+                    }
                     if (appendBracketsIfNeeded && ExpressionNeedsBrackets(node))
+                    {
                         _sb.Append("(");
+                    }
                     Visit(node);
                     if (appendBracketsIfNeeded && ExpressionNeedsBrackets(node))
+                    {
                         _sb.Append(")");
+                    }
                     notfirst = true;
                     if (appendAtEnd != null && NodeNeedsSemicolon(node))
+                    {
                         _sb.Append(appendAtEnd);
+                    }
                 }
             }
         }
@@ -1137,17 +1283,25 @@ namespace Esprima.Utils
         protected virtual void WriteStartLineToSb(string text)
         {
             if (!beautify)
+            {
                 _sb.Append(text);
+            }
             else
+            {
                 _sb.Append(text.PadLeft(_indentionLevel * _indentionSize, _indentionChar));
+            }
         }
 
         protected virtual void WriteEndLineToSb(string text)
         {
             if (!beautify)
+            {
                 _sb.Append(text);
+            }
             else
+            {
                 _sb.AppendLine(text);
+            }
         }
 
         public override string ToString()
@@ -1158,13 +1312,21 @@ namespace Esprima.Utils
         public bool IsAsync(Node node)
         {
             if (node is ArrowFunctionExpression afe)
+            {
                 return afe.Async;
+            }
             if (node is ArrowParameterPlaceHolder apph)
+            {
                 return apph.Async;
+            }
             if (node is FunctionDeclaration fd)
+            {
                 return fd.Async;
+            }
             if (node is FunctionExpression fe)
+            {
                 return fe.Async;
+            }
             return false;
         }
 
@@ -1182,38 +1344,66 @@ namespace Esprima.Utils
                 node is TryStatement ||
                 node is EmptyStatement ||
                 node is ClassDeclaration)
+            {
                 return false;
+            }
             if (node is ExportNamedDeclaration end)
+            {
                 return NodeNeedsSemicolon(end.Declaration);
+            }
             return true;
         }
 
         public bool ExpressionNeedsBrackets(Node? node)
         {
             if (node is FunctionExpression)
+            {
                 return true;
+            }
             if (node is ArrowFunctionExpression)
+            {
                 return true;
+            }
             if (node is AssignmentExpression)
+            {
                 return true;
+            }
             if (node is SequenceExpression)
+            {
                 return true;
+            }
             if (node is ConditionalExpression)
+            {
                 return true;
+            }
             if (node is BinaryExpression)
+            {
                 return true;
+            }
             if (node is UnaryExpression)
+            {
                 return true;
+            }
             if (node is CallExpression)
+            {
                 return true;
+            }
             if (node is NewExpression)
+            {
                 return true;
+            }
             if (node is ObjectPattern)
+            {
                 return true;
+            }
             if (node is ArrayPattern)
+            {
                 return true;
+            }
             if (node is YieldExpression)
+            {
                 return true;
+            }
             return false;
         }
     }
