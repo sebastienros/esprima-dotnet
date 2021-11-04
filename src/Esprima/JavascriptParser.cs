@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
+using Range = Esprima.Ast.Range;
 
 namespace Esprima
 {
