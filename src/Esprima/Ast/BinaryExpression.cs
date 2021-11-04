@@ -84,6 +84,39 @@ namespace Esprima.Ast
             };
         }
 
+        public static string ConvertBinaryOperator(BinaryOperator op)
+        {
+            return op switch
+            {
+                BinaryOperator.Plus => "+",
+                BinaryOperator.Minus => "-",
+                BinaryOperator.Times => "*",
+                BinaryOperator.Divide => "/",
+                BinaryOperator.Modulo => "%",
+                BinaryOperator.Equal => "==",
+                BinaryOperator.NotEqual => "!=",
+                BinaryOperator.Greater => ">",
+                BinaryOperator.GreaterOrEqual => ">=",
+                BinaryOperator.Less => "<",
+                BinaryOperator.LessOrEqual => "<=",
+                BinaryOperator.StrictlyEqual => "===",
+                BinaryOperator.StricltyNotEqual => "!==",
+                BinaryOperator.BitwiseAnd => "&",
+                BinaryOperator.BitwiseOr => "|",
+                BinaryOperator.BitwiseXOr => "^",
+                BinaryOperator.LeftShift => "<<",
+                BinaryOperator.RightShift => ">>",
+                BinaryOperator.UnsignedRightShift => ">>>",
+                BinaryOperator.InstanceOf => "instanceof",
+                BinaryOperator.In => "in",
+                BinaryOperator.LogicalAnd => "&&",
+                BinaryOperator.LogicalOr => "||",
+                BinaryOperator.Exponentiation => "**",
+                BinaryOperator.NullishCoalescing => "??",
+                _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid binary operator: " + op)
+            };
+        }
+
         public override NodeCollection ChildNodes => new(Left, Right);
 
         protected internal override void Accept(AstVisitor visitor)

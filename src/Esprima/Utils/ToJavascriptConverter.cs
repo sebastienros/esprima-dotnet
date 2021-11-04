@@ -9,6 +9,14 @@ using Esprima.Ast;
 
 namespace Esprima.Utils
 {
+    public static class ToJavascriptConverterExtension
+    {
+        public static string ToJavascript(this Node node)
+        {
+            return ToJavascriptConverter.ToJavascript(node);
+        }
+    }
+
     public class ToJavascriptConverter
     {
         public static string ToJavascript(Node node)
@@ -19,25 +27,7 @@ namespace Esprima.Utils
         }
 
         protected StringBuilder _sb = new StringBuilder();
-        protected int _indentionLevel = 0;
-        protected bool beautify = false;
-        protected int _indentionSize = 4;
-        protected char _indentionChar = ' ';
-
-        private static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new ConditionalWeakTable<Type, IDictionary>();
-
-        private string GetEnumValue<T>(string name, T value) where T : Enum
-        {
-            var map = (Dictionary<T, string>)
-                EnumMap.GetValue(value.GetType(),
-                    t => t.GetRuntimeFields()
-                          .Where(f => f.IsStatic)
-                          .ToDictionary(f => (T) f.GetValue(null),
-                                        f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
-                                           ? a.Value : f.Name.ToLowerInvariant()));
-            return map[value];
-        }
-
+        
         private readonly List<Node> _parentStack = new List<Node>();
         protected IReadOnlyList<Node> ParentStack => _parentStack;
 
@@ -374,7 +364,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitSwitchStatement(SwitchStatement switchStatement)
         {
-            WriteStartLineToSb("switch(");
+            _sb.Append("switch(");
             Visit(switchStatement.Discriminant);
             _sb.Append("){");
             VisitNodeList(switchStatement.Cases);
@@ -385,14 +375,14 @@ namespace Esprima.Utils
         {
             if (switchCase.Test != null)
             {
-                WriteStartLineToSb("case ");
+                _sb.Append("case ");
                 Visit(switchCase.Test);
             }
             else
             {
-                WriteStartLineToSb("default");
+                _sb.Append("default");
             }
-            WriteStartLineToSb(":");
+            _sb.Append(":");
 
             VisitNodeList(switchCase.Consequent, appendAtEnd: ";");
         }
@@ -417,9 +407,9 @@ namespace Esprima.Utils
 
         protected virtual void VisitIfStatement(IfStatement ifStatement)
         {
-            WriteStartLineToSb("if(");
+            _sb.Append("if(");
             Visit(ifStatement.Test);
-            WriteEndLineToSb(")");
+            _sb.Append(")");
             Visit(ifStatement.Consequent);
             if (NodeNeedsSemicolon(ifStatement.Consequent))
             {
@@ -475,7 +465,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitForStatement(ForStatement forStatement)
         {
-            WriteStartLineToSb("for(");
+            _sb.Append("for(");
             if (forStatement.Init != null)
             {
                 Visit(forStatement.Init);
@@ -569,7 +559,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitUnaryExpression(UnaryExpression unaryExpression)
         {
-            var op = GetEnumValue("unaryoperator", unaryExpression.Operator);
+            var op = UnaryExpression.ConvertUnaryOperator(unaryExpression.Operator);
             if (unaryExpression.Prefix)
             {
                 _sb.Append(op);
@@ -595,12 +585,12 @@ namespace Esprima.Utils
         {
             if (updateExpression.Prefix)
             {
-                _sb.Append(GetEnumValue("unaryoperator", updateExpression.Operator));
+                _sb.Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
             }
             Visit(updateExpression.Argument);
             if (!updateExpression.Prefix)
             {
-                _sb.Append(GetEnumValue("unaryoperator", updateExpression.Operator));
+                _sb.Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
             }
         }
 
@@ -1166,7 +1156,7 @@ namespace Esprima.Utils
             {
                 _sb.Append(")");
             }
-            var op = GetEnumValue("operator", binaryExpression.Operator);
+            var op = BinaryExpression.ConvertBinaryOperator(binaryExpression.Operator);
             if (char.IsLetter(op[0]))
             {
                 _sb.Append(" ");
@@ -1200,7 +1190,7 @@ namespace Esprima.Utils
             {
                 _sb.Append("(");
             }
-            var op = GetEnumValue("assignmentoperator", assignmentExpression.Operator);
+            var op = AssignmentExpression.ConvertAssignmentOperator(assignmentExpression.Operator);
             Visit(assignmentExpression.Left);
             _sb.Append(op);
             if (ExpressionNeedsBrackets(assignmentExpression.Right) && !(assignmentExpression.Right is AssignmentExpression))
@@ -1238,15 +1228,9 @@ namespace Esprima.Utils
 
         protected virtual void VisitBlockStatement(BlockStatement blockStatement)
         {
-            WriteStartLineToSb("{");
-            if (beautify)
-            {
-                _sb.AppendLine();
-            }
-            _indentionLevel++;
+            _sb.Append("{");
             VisitNodeList(blockStatement.Body, appendAtEnd: ";");
-            _indentionLevel--;
-            WriteEndLineToSb("}");
+            _sb.Append("}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1277,30 +1261,6 @@ namespace Esprima.Utils
                         _sb.Append(appendAtEnd);
                     }
                 }
-            }
-        }
-
-        protected virtual void WriteStartLineToSb(string text)
-        {
-            if (!beautify)
-            {
-                _sb.Append(text);
-            }
-            else
-            {
-                _sb.Append(text.PadLeft(_indentionLevel * _indentionSize, _indentionChar));
-            }
-        }
-
-        protected virtual void WriteEndLineToSb(string text)
-        {
-            if (!beautify)
-            {
-                _sb.Append(text);
-            }
-            else
-            {
-                _sb.AppendLine(text);
             }
         }
 

@@ -42,7 +42,6 @@ namespace Esprima.Ast
             Right = right;
         }
 
-
         public static AssignmentOperator ParseAssignmentOperator(string op)
         {
             return op switch
@@ -64,6 +63,30 @@ namespace Esprima.Ast
                 "&&=" => AssignmentOperator.AndAssign,
                 "||=" => AssignmentOperator.OrAssign,
                 _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op)
+            };
+        }
+
+        public static string ConvertAssignmentOperator(AssignmentOperator op)
+        {
+            return op switch
+            {
+                AssignmentOperator.Assign => "=",
+                AssignmentOperator.PlusAssign => "+=",
+                AssignmentOperator.MinusAssign => "-=",
+                AssignmentOperator.TimesAssign => "*=",
+                AssignmentOperator.DivideAssign => "/=",
+                AssignmentOperator.ModuloAssign => "%=",
+                AssignmentOperator.BitwiseAndAssign => "&=",
+                AssignmentOperator.BitwiseOrAssign => "|=",
+                AssignmentOperator.BitwiseXOrAssign => "^=",
+                AssignmentOperator.ExponentiationAssign => "**=",
+                AssignmentOperator.LeftShiftAssign => "<<=",
+                AssignmentOperator.RightShiftAssign => ">>=",
+                AssignmentOperator.UnsignedRightShiftAssign => ">>>=",
+                AssignmentOperator.NullishAssign => "??=",
+                AssignmentOperator.AndAssign => "&&=",
+                AssignmentOperator.OrAssign => "||=",
+                _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid assignment operator: " + op)
             };
         }
 

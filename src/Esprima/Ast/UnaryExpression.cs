@@ -33,7 +33,7 @@ namespace Esprima.Ast
             Prefix = true;
         }
 
-        private static UnaryOperator ParseUnaryOperator(string? op)
+        public static UnaryOperator ParseUnaryOperator(string? op)
         {
             return op switch
             {
@@ -47,6 +47,23 @@ namespace Esprima.Ast
                 "void" => UnaryOperator.Void,
                 "typeof" => UnaryOperator.TypeOf,
                 _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
+            };
+        }
+
+        public static string ConvertUnaryOperator(UnaryOperator op)
+        {
+            return op switch
+            {
+                UnaryOperator.Plus => "+",
+                UnaryOperator.Minus => "-",
+                UnaryOperator.Increment => "++",
+                UnaryOperator.Decrement => "--",
+                UnaryOperator.BitwiseNot => "~",
+                UnaryOperator.LogicalNot => "!",
+                UnaryOperator.Delete => "delete",
+                UnaryOperator.Void => "void",
+                UnaryOperator.TypeOf => "typeof",
+                _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid unary operator: " + op)
             };
         }
 
