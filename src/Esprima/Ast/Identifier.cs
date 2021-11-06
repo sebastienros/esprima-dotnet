@@ -1,7 +1,9 @@
-﻿using Esprima.Utils;
+﻿using System.Diagnostics;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
+    [DebuggerDisplay("{Name,nq}")]
     public sealed class Identifier : Expression
     {
         public readonly string? Name;
