@@ -279,6 +279,7 @@ d = (s = (r = (i = (o = (a = c)[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID]
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("d=((s=(((r=((i=((o=((a=c)[S]||(a[S]={})))[a.uniqueID]||(o[a.uniqueID]={})))[h]||[]))[0]===k)&&r[1]))&&r[2]),a=(s&&c.childNodes[s]);", code);
         }
 
         [Fact]
@@ -289,6 +290,7 @@ m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEv
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("m=(z.document,(((!!(v.documentElement))&&(!!(v.head)))&&('function'==(typeof (v.addEventListener))))&&v.createElement,(~(a.indexOf('MSIE')))||(a.indexOf('Trident/')),'___FONT_AWESOME___');", code);
         }
 
         [Fact]
@@ -310,6 +312,7 @@ m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEv
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("var h=(c.navigator||{}).userAgent,a=((void 0)===h?'':h),z=c,v=l,m=(z.document,(((!!(v.documentElement))&&(!!(v.head)))&&('function'==(typeof (v.addEventListener))))&&v.createElement,(~(a.indexOf('MSIE')))||(a.indexOf('Trident/')),'___FONT_AWESOME___'),e=((function(){try {return !0;} catch(c){return !1;}})());", code);
         }
 
         [Fact]
@@ -322,6 +325,7 @@ children: (b = O, 'g' === b.tag ? b.children : [b])
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("var a={children:(b=O,'g'===b.tag?b.children:[b])};", code);
         }
 
         [Fact]
@@ -338,6 +342,7 @@ if (e.IsWebService)
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("if(e.IsWebService)if(h=e.HttpRequest.responseXML,'undefined'==(typeof (h)))Trace.Write((('Error: '+e.UniqueId)+' data has no properties!')),m=(!0); else try {h.setProperty('SelectionLanguage','XPath');} catch(l){Trace.Write('Error: data.setProperty(',SelectionLanguage,', ',XPath,') because '+l.message);} else h=e.HttpRequest.responseText;", code);
         }
 
         [Fact]
