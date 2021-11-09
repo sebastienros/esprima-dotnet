@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Esprima.Ast;
@@ -11,25 +9,69 @@ namespace Esprima.Utils
 {
     public static class ToJavascriptConverterExtension
     {
-        public static string ToJavascript(this Node node)
+        public static string ToJavascript(this Node node, bool beautify = false)
         {
-            return ToJavascriptConverter.ToJavascript(node);
+            return ToJavascriptConverter.ToJavascript(node, beautify);
         }
     }
 
     public class ToJavascriptConverter
     {
-        public static string ToJavascript(Node node)
+        public static string ToJavascript(Node node, bool beautify = false)
         {
-            var visitor = new ToJavascriptConverter();
+            var visitor = new ToJavascriptConverter() { Beautify = beautify };
             visitor.Visit(node);
             return visitor.ToString();
         }
 
+        public bool Beautify { get; set; }
+
+        public int IndentionSize { get; set; } = 4;
+
         protected StringBuilder _sb = new StringBuilder();
-        
+        private int _indentionLevel = 0;
+
         private readonly List<Node> _parentStack = new List<Node>();
         protected IReadOnlyList<Node> ParentStack => _parentStack;
+
+        private void Append(string text)
+        {
+            _sb.Append(text);
+        }
+
+        private void AppendBeautificationSpace()
+        {
+            if (Beautify)
+            {
+                _sb.Append(" ");
+            }
+        }
+
+        private void AppendIndent()
+        {
+            if (Beautify)
+            {
+                _sb.Append("".PadLeft(_indentionLevel * IndentionSize, ' '));
+            }
+        }
+
+        private void AppendNewline()
+        {
+            if (Beautify)
+            {
+                _sb.AppendLine();
+            }
+        }
+
+        private void IncreaseIndent()
+        {
+            _indentionLevel++;
+        }
+
+        private void DecreaseIndent()
+        {
+            _indentionLevel--;
+        }
 
         /// <summary>
         /// Returns parent node at specified position.
@@ -271,7 +313,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitProgram(Program program)
         {
-            VisitNodeList(program.Body, appendAtEnd: ";");
+            VisitNodeList(program.Body, appendAtEnd: ";", addLineBreaks: true);
         }
 
         protected virtual void VisitUnknownNode(Node node)
@@ -286,12 +328,12 @@ namespace Esprima.Utils
 
         protected virtual void VisitCatchClause(CatchClause catchClause)
         {
-            _sb.Append("(");
+            Append("(");
             if (catchClause.Param is not null)
             {
                 Visit(catchClause.Param);
             }
-            _sb.Append(")");
+            Append(")");
             Visit(catchClause.Body);
         }
 
@@ -299,139 +341,171 @@ namespace Esprima.Utils
         {
             if (functionDeclaration.Async)
             {
-                _sb.Append("async ");
+                Append("async ");
             }
-            _sb.Append("function");
+            Append("function");
             if (functionDeclaration.Generator)
             {
-                _sb.Append("*");
+                Append("*");
             }
             if (functionDeclaration.Id != null)
             {
-                _sb.Append(" ");
+                Append(" ");
                 Visit(functionDeclaration.Id);
             }
-            _sb.Append("(");
+            Append("(");
             VisitNodeList(functionDeclaration.Params, appendSeperatorString: ",");
-            _sb.Append(")");
+            Append(")");
+            AppendBeautificationSpace();
             Visit(functionDeclaration.Body);
         }
 
         protected virtual void VisitWithStatement(WithStatement withStatement)
         {
-            _sb.Append("with(");
+            Append("with(");
             Visit(withStatement.Object);
-            _sb.Append(")");
+            Append(")");
             Visit(withStatement.Body);
         }
 
         protected virtual void VisitWhileStatement(WhileStatement whileStatement)
         {
-            _sb.Append("while(");
+            Append("while(");
             Visit(whileStatement.Test);
-            _sb.Append(")");
+            Append(")");
             Visit(whileStatement.Body);
         }
 
         protected virtual void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
         {
-            _sb.Append(variableDeclaration.Kind.ToString().ToLower() + " ");
+            Append(variableDeclaration.Kind.ToString().ToLower() + " ");
             VisitNodeList(variableDeclaration.Declarations, appendSeperatorString: ",");
         }
 
         protected virtual void VisitTryStatement(TryStatement tryStatement)
         {
-            _sb.Append("try ");
+            Append("try ");
             Visit(tryStatement.Block);
             if (tryStatement.Handler != null)
             {
-                _sb.Append(" catch");
+                Append(" catch");
                 Visit(tryStatement.Handler);
             }
             if (tryStatement.Finalizer != null)
             {
-                _sb.Append(" finally");
+                Append(" finally");
                 Visit(tryStatement.Finalizer);
             }
         }
 
         protected virtual void VisitThrowStatement(ThrowStatement throwStatement)
         {
-            _sb.Append("throw ");
+            Append("throw ");
             Visit(throwStatement.Argument);
-            _sb.Append(";");
+            Append(";");
         }
 
         protected virtual void VisitSwitchStatement(SwitchStatement switchStatement)
         {
-            _sb.Append("switch(");
+            Append("switch(");
             Visit(switchStatement.Discriminant);
-            _sb.Append("){");
+            Append("){");
             VisitNodeList(switchStatement.Cases);
-            _sb.Append("}");
+            Append("}");
         }
 
         protected virtual void VisitSwitchCase(SwitchCase switchCase)
         {
             if (switchCase.Test != null)
             {
-                _sb.Append("case ");
+                Append("case ");
                 Visit(switchCase.Test);
             }
             else
             {
-                _sb.Append("default");
+                Append("default");
             }
-            _sb.Append(":");
+            Append(":");
 
             VisitNodeList(switchCase.Consequent, appendAtEnd: ";");
         }
 
         protected virtual void VisitReturnStatement(ReturnStatement returnStatement)
         {
-            _sb.Append("return");
+            Append("return");
             if (returnStatement.Argument != null)
             {
-                _sb.Append(" ");
+                Append(" ");
                 Visit(returnStatement.Argument);
             }
-            _sb.Append(";");
+            Append(";");
         }
 
         protected virtual void VisitLabeledStatement(LabeledStatement labeledStatement)
         {
             Visit(labeledStatement.Label);
-            _sb.Append(":");
+            Append(":");
             Visit(labeledStatement.Body);
         }
 
         protected virtual void VisitIfStatement(IfStatement ifStatement)
         {
-            _sb.Append("if(");
+            Append("if");
+            AppendBeautificationSpace();
+            Append("(");
             Visit(ifStatement.Test);
-            _sb.Append(")");
+            Append(")");
+            AppendBeautificationSpace();
+
+            if (ifStatement.Consequent is not BlockStatement)
+            {
+                AppendNewline();
+                IncreaseIndent();
+                AppendIndent();
+            }
             Visit(ifStatement.Consequent);
             if (NodeNeedsSemicolon(ifStatement.Consequent))
             {
-                _sb.Append(";");
+                Append(";");
+            }
+            if (ifStatement.Consequent is not BlockStatement)
+            {
+                DecreaseIndent();
+                if (ifStatement.Alternate != null)
+                {
+                    AppendNewline();
+                    AppendIndent();
+                }
             }
             if (ifStatement.Alternate != null)
             {
-                _sb.Append(" else ");
+                Append(" else ");
+                if (ifStatement.Alternate is not BlockStatement && ifStatement.Alternate is not IfStatement)
+                {
+                    AppendNewline();
+                    IncreaseIndent();
+                    AppendIndent();
+                }
                 Visit(ifStatement.Alternate);
                 if (NodeNeedsSemicolon(ifStatement.Alternate))
-                    _sb.Append(";");
+                {
+                    Append(";");
+                }
+                if (ifStatement.Alternate is not BlockStatement && ifStatement.Alternate is not IfStatement)
+                {
+                    DecreaseIndent();
+                }
             }
         }
 
         protected virtual void VisitEmptyStatement(EmptyStatement emptyStatement)
         {
-            _sb.Append(";");
+            Append(";");
         }
 
         protected virtual void VisitDebuggerStatement(DebuggerStatement debuggerStatement)
         {
-            _sb.Append("debugger");
+            Append("debugger");
         }
 
         protected virtual void VisitExpressionStatement(ExpressionStatement expressionStatement)
@@ -440,22 +514,22 @@ namespace Esprima.Utils
             {
                 if (ExpressionNeedsBrackets(callExpression.Callee))
                 {
-                    _sb.Append("(");
+                    Append("(");
                 }
                 Visit(callExpression.Callee);
                 if (ExpressionNeedsBrackets(callExpression.Callee))
                 {
-                    _sb.Append(")");
+                    Append(")");
                 }
-                _sb.Append("(");
+                Append("(");
                 VisitNodeList(callExpression.Arguments, appendSeperatorString: ",");
-                _sb.Append(")");
+                Append(")");
             }
             else if (expressionStatement.Expression is ClassExpression)
             {
-                _sb.Append("(");
+                Append("(");
                 Visit(expressionStatement.Expression);
-                _sb.Append(")");
+                Append(")");
             }
             else
             {
@@ -465,61 +539,85 @@ namespace Esprima.Utils
 
         protected virtual void VisitForStatement(ForStatement forStatement)
         {
-            _sb.Append("for(");
+            Append("for(");
             if (forStatement.Init != null)
             {
                 Visit(forStatement.Init);
             }
-            _sb.Append(";");
+            Append(";");
             if (forStatement.Test != null)
             {
                 Visit(forStatement.Test);
             }
-            _sb.Append(";");
+            Append(";");
             if (forStatement.Update != null)
             {
                 Visit(forStatement.Update);
             }
-            _sb.Append(")");
+            Append(")");
+            AppendBeautificationSpace();
+
+            if (forStatement.Body is not BlockStatement)
+            {
+                AppendNewline();
+                IncreaseIndent();
+                AppendIndent();
+            }
             Visit(forStatement.Body);
             if (NodeNeedsSemicolon(forStatement.Body))
             {
-                _sb.Append(";");
+                Append(";");
+            }
+            if (forStatement.Body is not BlockStatement)
+            {
+                DecreaseIndent();
             }
         }
 
         protected virtual void VisitForInStatement(ForInStatement forInStatement)
         {
-            _sb.Append("for(");
+            Append("for(");
             Visit(forInStatement.Left);
-            _sb.Append(" in ");
+            Append(" in ");
             Visit(forInStatement.Right);
-            _sb.Append(")");
+            Append(")");
+            AppendBeautificationSpace();
+
+            if (forInStatement.Body is not BlockStatement)
+            {
+                AppendNewline();
+                IncreaseIndent();
+                AppendIndent();
+            }
             Visit(forInStatement.Body);
             if (NodeNeedsSemicolon(forInStatement.Body))
             {
-                _sb.Append(";");
+                Append(";");
+            }
+            if (forInStatement.Body is not BlockStatement)
+            {
+                DecreaseIndent();
             }
         }
 
         protected virtual void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
-            _sb.Append("do ");
+            Append("do ");
             Visit(doWhileStatement.Body);
             if (NodeNeedsSemicolon(doWhileStatement.Body))
             {
-                _sb.Append(";");
+                Append(";");
             }
-            _sb.Append("while(");
+            Append("while(");
             Visit(doWhileStatement.Test);
-            _sb.Append(")");
+            Append(")");
         }
 
         protected virtual void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
         {
             if (arrowFunctionExpression.Async)
             {
-                _sb.Append("async ");
+                Append("async ");
             }
 
             if (arrowFunctionExpression.Id != null)
@@ -531,29 +629,29 @@ namespace Esprima.Utils
             {
                 if (arrowFunctionExpression.Params[0] is RestElement || ExpressionNeedsBrackets(arrowFunctionExpression.Params[0]))
                 {
-                    _sb.Append("(");
+                    Append("(");
                 }
                 Visit(arrowFunctionExpression.Params[0]);
                 if (arrowFunctionExpression.Params[0] is RestElement || ExpressionNeedsBrackets(arrowFunctionExpression.Params[0]))
                 {
-                    _sb.Append(")");
+                    Append(")");
                 }
             }
             else
             {
-                _sb.Append("(");
+                Append("(");
                 VisitNodeList(arrowFunctionExpression.Params, appendSeperatorString: ",", appendBracketsIfNeeded: true); ;
-                _sb.Append(")");
+                Append(")");
             }
-            _sb.Append("=>");
+            Append("=>");
             if (arrowFunctionExpression.Body is ObjectExpression || arrowFunctionExpression.Body is SequenceExpression)
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(arrowFunctionExpression.Body);
             if (arrowFunctionExpression.Body is ObjectExpression || arrowFunctionExpression.Body is SequenceExpression)
             {
-                _sb.Append(")");
+                Append(")");
             }
         }
 
@@ -562,22 +660,22 @@ namespace Esprima.Utils
             var op = UnaryExpression.ConvertUnaryOperator(unaryExpression.Operator);
             if (unaryExpression.Prefix)
             {
-                _sb.Append(op);
+                Append(op);
                 if (char.IsLetter(op[0]))
-                    _sb.Append(" ");
+                    Append(" ");
             }
             if (!(unaryExpression.Argument is Literal) && !(unaryExpression.Argument is UnaryExpression))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(unaryExpression.Argument);
             if (!(unaryExpression.Argument is Literal) && !(unaryExpression.Argument is UnaryExpression))
             {
-                _sb.Append(")");
+                Append(")");
             }
             if (!unaryExpression.Prefix)
             {
-                _sb.Append(op);
+                Append(op);
             }
         }
 
@@ -585,53 +683,65 @@ namespace Esprima.Utils
         {
             if (updateExpression.Prefix)
             {
-                _sb.Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
+                Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
             }
             Visit(updateExpression.Argument);
             if (!updateExpression.Prefix)
             {
-                _sb.Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
+                Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
             }
         }
 
         protected virtual void VisitThisExpression(ThisExpression thisExpression)
         {
-            _sb.Append("this");
+            Append("this");
         }
 
         protected virtual void VisitSequenceExpression(SequenceExpression sequenceExpression)
         {
-            VisitNodeList(sequenceExpression.Expressions, appendSeperatorString: ",");
+            VisitNodeList(sequenceExpression.Expressions, appendSeperatorString: Beautify ? ", " : ",");
         }
 
         protected virtual void VisitObjectExpression(ObjectExpression objectExpression)
         {
-            _sb.Append("{");
-            VisitNodeList(objectExpression.Properties, appendSeperatorString: ",");
-            _sb.Append("}");
+            Append("{");
+            if (objectExpression.Properties.Count > 0)
+            {
+                AppendNewline();
+                IncreaseIndent();
+                AppendIndent();
+            }
+            VisitNodeList(objectExpression.Properties, appendSeperatorString: ",", addLineBreaks: true);
+            if (objectExpression.Properties.Count > 0)
+            {
+                AppendNewline();
+                DecreaseIndent();
+                AppendIndent();
+            }
+            Append("}");
         }
 
         protected virtual void VisitNewExpression(NewExpression newExpression)
         {
-            _sb.Append("new");
+            Append("new");
             if (ExpressionNeedsBrackets(newExpression.Callee))
             {
-                _sb.Append("(");
+                Append("(");
             }
             else
             {
-                _sb.Append(" ");
+                Append(" ");
             }
             Visit(newExpression.Callee);
             if (ExpressionNeedsBrackets(newExpression.Callee))
             {
-                _sb.Append(")");
+                Append(")");
             }
             if (newExpression.Arguments.Count > 0)
             {
-                _sb.Append("(");
+                Append("(");
                 VisitNodeList(newExpression.Arguments, appendSeperatorString: ",");
-                _sb.Append(")");
+                Append(")");
             }
         }
 
@@ -639,38 +749,38 @@ namespace Esprima.Utils
         {
             if (ExpressionNeedsBrackets(memberExpression.Object) || (memberExpression.Object is Literal l && l.TokenType != TokenType.StringLiteral))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(memberExpression.Object);
             if (ExpressionNeedsBrackets(memberExpression.Object) || (memberExpression.Object is Literal l2 && l2.TokenType != TokenType.StringLiteral))
             {
-                _sb.Append(")");
+                Append(")");
             }
             if (memberExpression.Computed)
             {
-                _sb.Append("[");
+                Append("[");
             }
             else
             {
                 if (TryGetParentAt(0) is ChainExpression)
-                    _sb.Append("?");
-                _sb.Append(".");
+                    Append("?");
+                Append(".");
             }
             Visit(memberExpression.Property);
             if (memberExpression.Computed)
             {
-                _sb.Append("]");
+                Append("]");
             }
         }
 
         protected virtual void VisitLiteral(Literal literal)
         {
-            _sb.Append(literal.Raw);
+            Append(literal.Raw);
         }
 
         protected virtual void VisitIdentifier(Identifier identifier)
         {
-            _sb.Append(identifier.Name);
+            Append(identifier.Name);
         }
 
         protected virtual void VisitFunctionExpression(IFunction function)
@@ -680,48 +790,49 @@ namespace Esprima.Utils
             {
                 if (function.Async)
                 {
-                    _sb.Append("async ");
+                    Append("async ");
                 }
                 if (!(TryGetParentAt(1) is MethodDefinition))
                 {
-                    _sb.Append("function");
+                    Append("function");
                 }
                 if (function.Generator)
                 {
-                    _sb.Append("*");
+                    Append("*");
                 }
             }
             if (function.Id != null)
             {
-                _sb.Append(" ");
+                Append(" ");
                 Visit(function.Id);
             }
-            _sb.Append("(");
+            Append("(");
             VisitNodeList(function.Params, appendSeperatorString: ",");
-            _sb.Append(")");
+            Append(")");
+            AppendBeautificationSpace();
             Visit(function.Body);
         }
 
         protected virtual void VisitClassExpression(ClassExpression classExpression)
         {
-            _sb.Append("class ");
+            Append("class ");
             if (classExpression.Id != null)
             {
                 Visit(classExpression.Id);
             }
             if (classExpression.SuperClass != null)
             {
-                _sb.Append(" extends ");
+                Append(" extends ");
                 Visit(classExpression.SuperClass);
             }
-            _sb.Append("{");
+            Append("{");
             Visit(classExpression.Body);
-            _sb.Append("}");
+            Append("}");
         }
 
         protected virtual void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
         {
-            _sb.Append("export default ");
+            Append("export default ");
             if (exportDefaultDeclaration.Declaration != null)
             {
                 Visit(exportDefaultDeclaration.Declaration);
@@ -730,32 +841,32 @@ namespace Esprima.Utils
 
         protected virtual void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
         {
-            _sb.Append("export*from");
+            Append("export*from");
             Visit(exportAllDeclaration.Source);
         }
 
         protected virtual void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
         {
-            _sb.Append("export");
+            Append("export");
             if (exportNamedDeclaration.Declaration != null)
             {
-                _sb.Append(" ");
+                Append(" ");
                 Visit(exportNamedDeclaration.Declaration);
             }
             if (exportNamedDeclaration.Specifiers.Count > 0)
             {
-                _sb.Append("{");
+                Append("{");
                 VisitNodeList(exportNamedDeclaration.Specifiers, appendSeperatorString: ",");
-                _sb.Append("}");
+                Append("}");
             }
             if (exportNamedDeclaration.Source != null)
             {
-                _sb.Append("from");
+                Append("from");
                 Visit(exportNamedDeclaration.Source);
             }
             if (exportNamedDeclaration.Declaration == null && exportNamedDeclaration.Specifiers.Count == 0 && exportNamedDeclaration.Source == null)
             {
-                _sb.Append("{}");
+                Append("{}");
             }
 
         }
@@ -765,37 +876,40 @@ namespace Esprima.Utils
             Visit(exportSpecifier.Local);
             if (exportSpecifier.Local != exportSpecifier.Exported)
             {
-                _sb.Append(" as ");
+                Append(" as ");
                 Visit(exportSpecifier.Exported);
             }
         }
 
         protected virtual void VisitImport(Import import)
         {
-            _sb.Append("import(");
+            Append("import(");
             Visit(import.Source);
-            _sb.Append(")");
+            Append(")");
         }
 
         protected virtual void VisitImportDeclaration(ImportDeclaration importDeclaration)
         {
-            _sb.Append("import ");
+            Append("import ");
             var firstSpecifier = importDeclaration.Specifiers.FirstOrDefault();
             if (firstSpecifier is ImportDefaultSpecifier)
             {
                 Visit(firstSpecifier);
                 if (importDeclaration.Specifiers.Count > 1)
                 {
-                    _sb.Append(",");
+                    Append(",");
+                    AppendBeautificationSpace();
                     if (importDeclaration.Specifiers[1] is ImportNamespaceSpecifier)
                     {
-                        VisitNodeList(importDeclaration.Specifiers.Skip(1), appendSeperatorString: ",");
+                        VisitNodeList(importDeclaration.Specifiers.Skip(1), appendSeperatorString: Beautify ? ", " : ",");
                     }
                     else
                     {
-                        _sb.Append("{");
-                        VisitNodeList(importDeclaration.Specifiers.Skip(1), appendSeperatorString: ",");
-                        _sb.Append("}");
+                        Append("{");
+                        AppendBeautificationSpace();
+                        VisitNodeList(importDeclaration.Specifiers.Skip(1), appendSeperatorString: Beautify ? ", " : ",");
+                        AppendBeautificationSpace();
+                        Append("}");
                     }
                 }
             }
@@ -803,25 +917,27 @@ namespace Esprima.Utils
             {
                 if (importDeclaration.Specifiers[0] is ImportNamespaceSpecifier)
                 {
-                    VisitNodeList(importDeclaration.Specifiers, appendSeperatorString: ",");
+                    VisitNodeList(importDeclaration.Specifiers, appendSeperatorString: Beautify ? ", " : ",");
                 }
                 else
                 {
-                    _sb.Append("{");
-                    VisitNodeList(importDeclaration.Specifiers, appendSeperatorString: ",");
-                    _sb.Append("}");
+                    Append("{");
+                    AppendBeautificationSpace();
+                    VisitNodeList(importDeclaration.Specifiers, appendSeperatorString: Beautify ? ", " : ",");
+                    AppendBeautificationSpace();
+                    Append("}");
                 }
             }
             if (importDeclaration.Specifiers.Count > 0)
             {
-                _sb.Append(" from ");
+                Append(" from ");
             }
             Visit(importDeclaration.Source);
         }
 
         protected virtual void VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
         {
-            _sb.Append("* as ");
+            Append("* as ");
             Visit(importNamespaceSpecifier.Local);
         }
 
@@ -835,7 +951,7 @@ namespace Esprima.Utils
             Visit(importSpecifier.Imported);
             if (importSpecifier.Local != importSpecifier.Imported)
             {
-                _sb.Append(" as ");
+                Append(" as ");
                 Visit(importSpecifier.Local);
             }
         }
@@ -844,61 +960,73 @@ namespace Esprima.Utils
         {
             if (methodDefinition.Static)
             {
-                _sb.Append("static ");
+                Append("static ");
             }
             if (IsAsync(methodDefinition.Value))
             {
-                _sb.Append("async ");
+                Append("async ");
             }
             if (methodDefinition.Value is FunctionExpression f && f.Generator)
             {
-                _sb.Append("*");
+                Append("*");
             }
             if (methodDefinition.Kind == PropertyKind.Get)
             {
-                _sb.Append("get ");
+                Append("get ");
             }
             else if (methodDefinition.Kind == PropertyKind.Set)
             {
-                _sb.Append("set ");
+                Append("set ");
             }
             if (methodDefinition.Key is MemberExpression || ExpressionNeedsBrackets(methodDefinition.Key))
             {
-                _sb.Append("[");
+                Append("[");
             }
             if (ExpressionNeedsBrackets(methodDefinition.Key))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(methodDefinition.Key);
             if (ExpressionNeedsBrackets(methodDefinition.Key))
             {
-                _sb.Append(")");
+                Append(")");
             }
             if (methodDefinition.Key is MemberExpression || ExpressionNeedsBrackets(methodDefinition.Key))
             {
-                _sb.Append("]");
+                Append("]");
             }
             Visit(methodDefinition.Value);
         }
 
         protected virtual void VisitForOfStatement(ForOfStatement forOfStatement)
         {
-            _sb.Append("for(");
+            Append("for(");
             Visit(forOfStatement.Left);
-            _sb.Append(" of ");
+            Append(" of ");
             Visit(forOfStatement.Right);
-            _sb.Append(")");
+            Append(")");
+            AppendBeautificationSpace();
+
+            if (forOfStatement.Body is not BlockStatement)
+            {
+                AppendNewline();
+                IncreaseIndent();
+                AppendIndent();
+            }
             Visit(forOfStatement.Body);
             if (NodeNeedsSemicolon(forOfStatement.Body))
             {
-                _sb.Append(";");
+                Append(";");
+            }
+            if (forOfStatement.Body is not BlockStatement)
+            {
+                DecreaseIndent();
             }
         }
 
         protected virtual void VisitClassDeclaration(ClassDeclaration classDeclaration)
         {
-            _sb.Append("class ");
+            Append("class ");
             if (classDeclaration.Id != null)
             {
                 Visit(classDeclaration.Id);
@@ -906,22 +1034,34 @@ namespace Esprima.Utils
 
             if (classDeclaration.SuperClass != null)
             {
-                _sb.Append(" extends ");
+                Append(" extends ");
                 Visit(classDeclaration.SuperClass);
             }
-            _sb.Append("{");
+
+            AppendBeautificationSpace();
+            Append("{");
+
+            AppendNewline();
+            IncreaseIndent();
+            AppendIndent();
+
             Visit(classDeclaration.Body);
-            _sb.Append("}");
+
+            AppendNewline();
+            DecreaseIndent();
+            AppendIndent();
+
+            Append("}");
         }
 
         protected virtual void VisitClassBody(ClassBody classBody)
         {
-            VisitNodeList(classBody.Body);
+            VisitNodeList(classBody.Body, addLineBreaks: true);
         }
 
         protected virtual void VisitYieldExpression(YieldExpression yieldExpression)
         {
-            _sb.Append("yield ");
+            Append("yield ");
             if (yieldExpression.Argument != null)
             {
                 Visit(yieldExpression.Argument);
@@ -936,13 +1076,13 @@ namespace Esprima.Utils
 
         protected virtual void VisitSuper(Super super)
         {
-            _sb.Append("super");
+            Append("super");
         }
 
         protected virtual void VisitMetaProperty(MetaProperty metaProperty)
         {
             Visit(metaProperty.Meta);
-            _sb.Append(".");
+            Append(".");
             Visit(metaProperty.Property);
         }
 
@@ -953,29 +1093,29 @@ namespace Esprima.Utils
 
         protected virtual void VisitObjectPattern(ObjectPattern objectPattern)
         {
-            _sb.Append("{");
+            Append("{");
             VisitNodeList(objectPattern.Properties, appendSeperatorString: ",");
-            _sb.Append("}");
+            Append("}");
         }
 
         protected virtual void VisitSpreadElement(SpreadElement spreadElement)
         {
-            _sb.Append("...");
+            Append("...");
             Visit(spreadElement.Argument);
         }
 
         protected virtual void VisitAssignmentPattern(AssignmentPattern assignmentPattern)
         {
             Visit(assignmentPattern.Left);
-            _sb.Append("=");
+            Append("=");
             Visit(assignmentPattern.Right);
         }
 
         protected virtual void VisitArrayPattern(ArrayPattern arrayPattern)
         {
-            _sb.Append("[");
+            Append("[");
             VisitNodeList(arrayPattern.Elements, appendSeperatorString: ",");
-            _sb.Append("]");
+            Append("]");
         }
 
         protected virtual void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
@@ -983,43 +1123,45 @@ namespace Esprima.Utils
             Visit(variableDeclarator.Id);
             if (variableDeclarator.Init != null)
             {
-                _sb.Append("=");
+                AppendBeautificationSpace();
+                Append("=");
+                AppendBeautificationSpace();
                 if (ExpressionNeedsBrackets(variableDeclarator.Init))
                 {
-                    _sb.Append("(");
+                    Append("(");
                 }
                 Visit(variableDeclarator.Init);
                 if (ExpressionNeedsBrackets(variableDeclarator.Init))
                 {
-                    _sb.Append(")");
+                    Append(")");
                 }
             }
         }
 
         protected virtual void VisitTemplateLiteral(TemplateLiteral templateLiteral)
         {
-            _sb.Append("`");
+            Append("`");
             for (int n = 0; n < templateLiteral.Quasis.Count; n++)
             {
                 Visit(templateLiteral.Quasis[n]);
                 if (templateLiteral.Expressions.Count > n)
                 {
-                    _sb.Append("${");
+                    Append("${");
                     Visit(templateLiteral.Expressions[n]);
-                    _sb.Append("}");
+                    Append("}");
                 }
             }
-            _sb.Append("`");
+            Append("`");
         }
 
         protected virtual void VisitTemplateElement(TemplateElement templateElement)
         {
-            _sb.Append(templateElement.Value.Raw);
+            Append(templateElement.Value.Raw);
         }
 
         protected virtual void VisitRestElement(RestElement restElement)
         {
-            _sb.Append("...");
+            Append("...");
             Visit(restElement.Argument);
         }
 
@@ -1027,34 +1169,36 @@ namespace Esprima.Utils
         {
             if (property.Key is MemberExpression || ExpressionNeedsBrackets(property.Key))
             {
-                _sb.Append("[");
+                Append("[");
             }
             if (ExpressionNeedsBrackets(property.Key))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(property.Key);
             if (ExpressionNeedsBrackets(property.Key))
             {
-                _sb.Append(")");
+                Append(")");
             }
             if (property.Key is MemberExpression || ExpressionNeedsBrackets(property.Key))
             {
-                _sb.Append("]");
+                Append("]");
             }
             if (property.Key is Identifier keyI && property.Value is Identifier valueI && keyI.Name == valueI.Name)
             { }
             else
             {
-                _sb.Append(":");
+                AppendBeautificationSpace();
+                Append(":");
+                AppendBeautificationSpace();
                 if (property.Value is not ObjectPattern && ExpressionNeedsBrackets(property.Value))
                 {
-                    _sb.Append("(");
+                    Append("(");
                 }
                 Visit(property.Value);
                 if (property.Value is not ObjectPattern && ExpressionNeedsBrackets(property.Value))
                 {
-                    _sb.Append(")");
+                    Append(")");
                 }
             }
         }
@@ -1063,36 +1207,36 @@ namespace Esprima.Utils
         {
             if (propertyDefinition.Static)
             {
-                _sb.Append("static ");
+                Append("static ");
             }
             if (propertyDefinition.Key is MemberExpression || ExpressionNeedsBrackets(propertyDefinition.Key))
             {
-                _sb.Append("[");
+                Append("[");
             }
             if (ExpressionNeedsBrackets(propertyDefinition.Key))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(propertyDefinition.Key);
             if (ExpressionNeedsBrackets(propertyDefinition.Key))
             {
-                _sb.Append(")");
+                Append(")");
             }
             if (propertyDefinition.Key is MemberExpression || ExpressionNeedsBrackets(propertyDefinition.Key))
             {
-                _sb.Append("]");
+                Append("]");
             }
             if (propertyDefinition.Value != null)
             {
-                _sb.Append("=");
+                Append("=");
                 Visit(propertyDefinition.Value);
             }
-            _sb.Append(";");
+            Append(";");
         }
 
         protected virtual void VisitAwaitExpression(AwaitExpression awaitExpression)
         {
-            _sb.Append("await ");
+            Append("await ");
             Visit(awaitExpression.Argument);
         }
 
@@ -1100,32 +1244,32 @@ namespace Esprima.Utils
         {
             if (conditionalExpression.Test is AssignmentExpression)
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(conditionalExpression.Test);
             if (conditionalExpression.Test is AssignmentExpression)
             {
-                _sb.Append(")");
+                Append(")");
             }
-            _sb.Append("?");
+            Append("?");
             if (ExpressionNeedsBrackets(conditionalExpression.Consequent))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(conditionalExpression.Consequent);
             if (ExpressionNeedsBrackets(conditionalExpression.Consequent))
             {
-                _sb.Append(")");
+                Append(")");
             }
-            _sb.Append(":");
+            Append(":");
             if (ExpressionNeedsBrackets(conditionalExpression.Alternate))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(conditionalExpression.Alternate);
             if (ExpressionNeedsBrackets(conditionalExpression.Alternate))
             {
-                _sb.Append(")");
+                Append(")");
             }
         }
 
@@ -1133,84 +1277,94 @@ namespace Esprima.Utils
         {
             if (ExpressionNeedsBrackets(callExpression.Callee))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(callExpression.Callee);
             if (ExpressionNeedsBrackets(callExpression.Callee))
             {
-                _sb.Append(")");
+                Append(")");
             }
-            _sb.Append("(");
+            Append("(");
             VisitNodeList(callExpression.Arguments, appendSeperatorString: ",", appendBracketsIfNeeded: true);
-            _sb.Append(")");
+            Append(")");
         }
 
         protected virtual void VisitBinaryExpression(BinaryExpression binaryExpression)
         {
             if (ExpressionNeedsBrackets(binaryExpression.Left))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(binaryExpression.Left);
             if (ExpressionNeedsBrackets(binaryExpression.Left))
             {
-                _sb.Append(")");
+                Append(")");
             }
             var op = BinaryExpression.ConvertBinaryOperator(binaryExpression.Operator);
             if (char.IsLetter(op[0]))
             {
-                _sb.Append(" ");
+                Append(" ");
+            } 
+            else
+            {
+                AppendBeautificationSpace();
             }
-            _sb.Append(op);
+            Append(op);
             if (char.IsLetter(op[0]))
             {
-                _sb.Append(" ");
+                Append(" ");
+            }
+            else
+            {
+                AppendBeautificationSpace();
             }
             if (ExpressionNeedsBrackets(binaryExpression.Right))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(binaryExpression.Right);
             if (ExpressionNeedsBrackets(binaryExpression.Right))
             {
-                _sb.Append(")");
+                Append(")");
             }
         }
 
         protected virtual void VisitArrayExpression(ArrayExpression arrayExpression)
         {
-            _sb.Append("[");
+            Append("[");
             VisitNodeList(arrayExpression.Elements, appendSeperatorString: ",");
-            _sb.Append("]");
+            Append("]");
         }
 
         protected virtual void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
         {
             if (assignmentExpression.Left is ObjectPattern)
             {
-                _sb.Append("(");
+                Append("(");
             }
             var op = AssignmentExpression.ConvertAssignmentOperator(assignmentExpression.Operator);
             Visit(assignmentExpression.Left);
-            _sb.Append(op);
+            AppendBeautificationSpace();
+            Append(op);
+            AppendBeautificationSpace();
             if (ExpressionNeedsBrackets(assignmentExpression.Right) && !(assignmentExpression.Right is AssignmentExpression))
             {
-                _sb.Append("(");
+                Append("(");
             }
             Visit(assignmentExpression.Right);
             if (ExpressionNeedsBrackets(assignmentExpression.Right) && !(assignmentExpression.Right is AssignmentExpression))
             {
-                _sb.Append(")");
+                Append(")");
             }
             if (assignmentExpression.Left is ObjectPattern)
             {
-                _sb.Append(")");
+                Append(")");
             }
         }
 
         protected virtual void VisitContinueStatement(ContinueStatement continueStatement)
         {
-            _sb.Append("continue ");
+            Append("continue ");
             if (continueStatement.Label != null)
             {
                 Visit(continueStatement.Label);
@@ -1223,18 +1377,28 @@ namespace Esprima.Utils
             {
                 Visit(breakStatement.Label);
             }
-            _sb.Append("break");
+            Append("break");
         }
 
         protected virtual void VisitBlockStatement(BlockStatement blockStatement)
         {
-            _sb.Append("{");
-            VisitNodeList(blockStatement.Body, appendAtEnd: ";");
-            _sb.Append("}");
+            Append("{");
+
+            AppendNewline();
+            IncreaseIndent();
+            AppendIndent();
+
+            VisitNodeList(blockStatement.Body, appendAtEnd: ";", addLineBreaks: true);
+
+            AppendNewline();
+            DecreaseIndent();
+            AppendIndent();
+
+            Append("}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void VisitNodeList<TNode>(IEnumerable<TNode> nodeList, string appendAtEnd = null, string appendSeperatorString = null, bool appendBracketsIfNeeded = false)
+        private void VisitNodeList<TNode>(IEnumerable<TNode> nodeList, string appendAtEnd = null, string appendSeperatorString = null, bool appendBracketsIfNeeded = false, bool addLineBreaks = false)
             where TNode : Node
         {
             var notfirst = false;
@@ -1242,23 +1406,29 @@ namespace Esprima.Utils
             {
                 if (node != null)
                 {
+                    if (notfirst && addLineBreaks)
+                    {
+                        AppendNewline();
+                        AppendIndent();
+                    }
+
                     if (notfirst && appendSeperatorString != null)
                     {
-                        _sb.Append(appendSeperatorString);
+                        Append(appendSeperatorString);
                     }
                     if (appendBracketsIfNeeded && ExpressionNeedsBrackets(node))
                     {
-                        _sb.Append("(");
+                        Append("(");
                     }
                     Visit(node);
                     if (appendBracketsIfNeeded && ExpressionNeedsBrackets(node))
                     {
-                        _sb.Append(")");
+                        Append(")");
                     }
                     notfirst = true;
                     if (appendAtEnd != null && NodeNeedsSemicolon(node))
                     {
-                        _sb.Append(appendAtEnd);
+                        Append(appendAtEnd);
                     }
                 }
             }
