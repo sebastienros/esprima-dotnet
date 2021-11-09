@@ -130,7 +130,7 @@ export function checkSecurityAnswerCodeDirect(result) {
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program, true);
-            
+
             var expected = @"import { MccDialog } from '../mccDialogHandler';
 import { commonClient, bb as f } from '../commonClient/commonClient';
 import ii, { hh, jj } from '../commonClient/commonClient';
@@ -144,31 +144,42 @@ a++;
 export function checkSecurityAnswerCodeDirect(result) {
     if (!(result)) {
         MccDialog.warning({
-            title : 'SecurityClientErrorOccured'
-            ,message : '<p>internal error, check console</p>'
+            title : 'SecurityClientErrorOccured',
+            message : '<p>internal error, check console</p>'
         });
         return false;
     }
-    switch(result.SecurityAnswerCode){case 'Allowed':return true;case 'Exception':MccDialog.warning({
-        title : 'SecurityClientInfoTitle'
-        ,message : ((('<p><t-t>SecurityClientExceptionOccured</t-t></p><p><t-t>Exception</t-t>: <t-t>' + result.Message) + '</t-t></p>') + result.StackTrace)
-    });return false;case 'Error':MccDialog.warning({
-        title : 'SecurityClientErrorOccured'
-        ,message : ((((('<p>' + (commonClient.getTranslation('SecurityClientMessage'))) + ': ') + (commonClient.getTranslation(result.Message))) + '</p>') + (result.MessageDetails?(('<p><t-t>SecurityClientDetails</t-t>: <t-t>' + result.MessageDetails) + '</t-t></p>'):' '))
-    });return false;default:{
-        let messagesnippet = (('<p><t-t>SecurityClient_' + result.SecurityAnswerCode) + '</t-t></p>');
-        if ((result.Message !== undefined) && (result.SecurityAnswerCode === 'LoginFailed')) {
-            messagesnippet += (('\n\n<t-t>SecurityClient_InternalServerErrorMessage</t-t>\n<t-t>' + result.Message) + '</t-t>');
-        }
-        if (result.Role) {
-            messagesnippet += (((('<p><t-t>SecurityClient_CheckedRole</t-t>' + '  [') + result.Role) + ']') + '</p>');
-        }
-        MccDialog.warning({
-            title : 'SecurityClientInfoTitle'
-            ,message : messagesnippet
-        });
-        return false;
-    }}
+    switch(result.SecurityAnswerCode) {
+        case 'Allowed':
+            return true;
+        case 'Exception':
+            MccDialog.warning({
+                title : 'SecurityClientInfoTitle',
+                message : ((('<p><t-t>SecurityClientExceptionOccured</t-t></p><p><t-t>Exception</t-t>: <t-t>' + result.Message) + '</t-t></p>') + result.StackTrace)
+            });
+            return false;
+        case 'Error':
+            MccDialog.warning({
+                title : 'SecurityClientErrorOccured',
+                message : ((((('<p>' + (commonClient.getTranslation('SecurityClientMessage'))) + ': ') + (commonClient.getTranslation(result.Message))) + '</p>') + (result.MessageDetails?(('<p><t-t>SecurityClientDetails</t-t>: <t-t>' + result.MessageDetails) + '</t-t></p>'):' '))
+            });
+            return false;
+        default:
+            {
+                let messagesnippet = (('<p><t-t>SecurityClient_' + result.SecurityAnswerCode) + '</t-t></p>');
+                if ((result.Message !== undefined) && (result.SecurityAnswerCode === 'LoginFailed')) {
+                    messagesnippet += (('\n\n<t-t>SecurityClient_InternalServerErrorMessage</t-t>\n<t-t>' + result.Message) + '</t-t>');
+                }
+                if (result.Role) {
+                    messagesnippet += (((('<p><t-t>SecurityClient_CheckedRole</t-t>' + '  [') + result.Role) + ']') + '</p>');
+                }
+                MccDialog.warning({
+                    title : 'SecurityClientInfoTitle',
+                    message : messagesnippet
+                });
+                return false;
+            }
+    }
 }";
             Assert.Equal(expected, code);
         }
@@ -176,7 +187,7 @@ export function checkSecurityAnswerCodeDirect(result) {
         [Fact]
         public void ToJavascriptTest5()
         {
-            var parser = new JavaScriptParser(@"(function () {
+            var source = @"(function () {
   'use strict';
 })();
 
@@ -194,21 +205,40 @@ export function checkSecurityAnswerCodeDirect(result) {
 
 aa({});
 
-(function aa(){});");
+(function aa(){});";
+            source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+            var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = ToJavascriptConverter.ToJavascript(program);
+            var code = ToJavascriptConverter.ToJavascript(program, true);
+
+            var expected = @"(function() {
+    'use strict';
+})();
+(class ApplyShimInterface{constructor() {
+    this.customStyleInterface = null;
+    applyShim['invalidCallback'] = ApplyShimUtils.invalidate;
+}});
+a();
+aa({});
+function aa() {
+    
+};";
+            Assert.Equal(expected, code);
         }
 
         [Fact]
         public void ToJavascriptTest6()
         {
-            var parser = new JavaScriptParser(@"function _createClass(Constructor, protoProps, staticProps) {
+            var source = @"function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
-  }");
+  }";
+            source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+            var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("function _createClass(Constructor,protoProps,staticProps){if(protoProps)_defineProperties(Constructor.prototype,protoProps);if(staticProps)_defineProperties(Constructor,staticProps);return Constructor;}", code);
         }
 
         [Fact]
@@ -219,6 +249,7 @@ aa({});
 }");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("if(((x?((a.nodeName.toLowerCase())===f):(1===a.nodeType))&&(++d))&&(p&&((i=((o=(a[S]||(a[S]={})))[a.uniqueID]||(o[a.uniqueID]={})))[h]=[k,d]),a===e)){}", code);
         }
 
         [Fact]
@@ -237,6 +268,7 @@ class a extends b {
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("class a extends b{constructor(){super();this.g=1;}q=1;r='cc';}", code);
         }
 
         [Fact]
