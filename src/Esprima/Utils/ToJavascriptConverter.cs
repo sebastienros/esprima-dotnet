@@ -409,8 +409,20 @@ namespace Esprima.Utils
         {
             Append("switch(");
             Visit(switchStatement.Discriminant);
-            Append("){");
-            VisitNodeList(switchStatement.Cases);
+            Append(")");
+            AppendBeautificationSpace();
+            Append("{");
+
+            AppendNewline();
+            IncreaseIndent();
+            AppendIndent();
+
+            VisitNodeList(switchStatement.Cases, addLineBreaks: true);
+
+            AppendNewline();
+            DecreaseIndent();
+            AppendIndent();
+
             Append("}");
         }
 
@@ -427,7 +439,13 @@ namespace Esprima.Utils
             }
             Append(":");
 
-            VisitNodeList(switchCase.Consequent, appendAtEnd: ";");
+            AppendNewline();
+            IncreaseIndent();
+            AppendIndent();
+
+            VisitNodeList(switchCase.Consequent, appendAtEnd: ";", addLineBreaks: true);
+
+            DecreaseIndent();
         }
 
         protected virtual void VisitReturnStatement(ReturnStatement returnStatement)
@@ -1406,15 +1424,14 @@ namespace Esprima.Utils
             {
                 if (node != null)
                 {
+                    if (notfirst && appendSeperatorString != null)
+                    {
+                        Append(appendSeperatorString);
+                    }
                     if (notfirst && addLineBreaks)
                     {
                         AppendNewline();
                         AppendIndent();
-                    }
-
-                    if (notfirst && appendSeperatorString != null)
-                    {
-                        Append(appendSeperatorString);
                     }
                     if (appendBracketsIfNeeded && ExpressionNeedsBrackets(node))
                     {
