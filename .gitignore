@@ -30,3 +30,4 @@ project.lock.json
 .testPublish/
 .idea
 BenchmarkDotNet.Artifacts*
+node_modules
