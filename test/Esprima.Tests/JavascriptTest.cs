@@ -1,4 +1,6 @@
-﻿using Esprima.Utils;
+﻿using System;
+using System.Text.RegularExpressions;
+using Esprima.Utils;
 using Xunit;
 
 namespace Esprima.Tests
@@ -46,6 +48,7 @@ for (var elem of list) { }
         }");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("let tips=[\"Click on any AST node with a '+' to expand it\",\"Hovering over a node highlights the \\\r\n   corresponding location in the source code\",\"Shift click on an AST node to expand the whole subtree\"];function printTips(){tips.forEach((tip,i)=>console.log((`Tip ${i}:`+tip)));}", code);
         }
 
         [Fact]
@@ -63,12 +66,13 @@ for (var elem of list) { }
 }");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("export class aa extends HTMLElement{constructor(a,b){super(a);this._div=(document.createElement('div'));}static get is(){return 'aa';}}", code);
         }
 
         [Fact]
         public void ToJavascriptTest4()
         {
-            var parser = new JavaScriptParser(@"import { MccDialog } from '../mccDialogHandler';
+            var source = @"import { MccDialog } from '../mccDialogHandler';
 import { commonClient, bb as f } from '../commonClient/commonClient';
 import ii, { hh, jj } from '../commonClient/commonClient';
 import '../commonClient/commonClient';
@@ -121,9 +125,52 @@ export function checkSecurityAnswerCodeDirect(result) {
             return false;
         }
     }
-}");
+}";
+            source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+            var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = ToJavascriptConverter.ToJavascript(program);
+            var code = ToJavascriptConverter.ToJavascript(program, true);
+            
+            var expected = @"import { MccDialog } from '../mccDialogHandler';
+import { commonClient, bb as f } from '../commonClient/commonClient';
+import ii, { hh, jj } from '../commonClient/commonClient';
+import '../commonClient/commonClient';
+import aa from 'module-name';
+import zz, * as ff from 'module-name';
+import * as name from 'module-name';
+import('qq');
+a++;
+--a;
+export function checkSecurityAnswerCodeDirect(result) {
+    if (!(result)) {
+        MccDialog.warning({
+            title : 'SecurityClientErrorOccured'
+            ,message : '<p>internal error, check console</p>'
+        });
+        return false;
+    }
+    switch(result.SecurityAnswerCode){case 'Allowed':return true;case 'Exception':MccDialog.warning({
+        title : 'SecurityClientInfoTitle'
+        ,message : ((('<p><t-t>SecurityClientExceptionOccured</t-t></p><p><t-t>Exception</t-t>: <t-t>' + result.Message) + '</t-t></p>') + result.StackTrace)
+    });return false;case 'Error':MccDialog.warning({
+        title : 'SecurityClientErrorOccured'
+        ,message : ((((('<p>' + (commonClient.getTranslation('SecurityClientMessage'))) + ': ') + (commonClient.getTranslation(result.Message))) + '</p>') + (result.MessageDetails?(('<p><t-t>SecurityClientDetails</t-t>: <t-t>' + result.MessageDetails) + '</t-t></p>'):' '))
+    });return false;default:{
+        let messagesnippet = (('<p><t-t>SecurityClient_' + result.SecurityAnswerCode) + '</t-t></p>');
+        if ((result.Message !== undefined) && (result.SecurityAnswerCode === 'LoginFailed')) {
+            messagesnippet += (('\n\n<t-t>SecurityClient_InternalServerErrorMessage</t-t>\n<t-t>' + result.Message) + '</t-t>');
+        }
+        if (result.Role) {
+            messagesnippet += (((('<p><t-t>SecurityClient_CheckedRole</t-t>' + '  [') + result.Role) + ']') + '</p>');
+        }
+        MccDialog.warning({
+            title : 'SecurityClientInfoTitle'
+            ,message : messagesnippet
+        });
+        return false;
+    }}
+}";
+            Assert.Equal(expected, code);
         }
 
         [Fact]
@@ -264,8 +311,7 @@ if (e.IsWebService)
         [Fact]
         public void ToJavascriptTest14()
         {
-            var parser = new JavaScriptParser(@"
-function tt(t, r) {
+            var source = @"function tt(t, r) {
   var n, e, i = b(t),
       s = b(r);
   if (s && (e = ft(r)), i);
@@ -274,9 +320,25 @@ function tt(t, r) {
   for (f = t.length < r.length ? t.length : r.length, o = 0, g = 0; f > g; g++) o += t[g] + r[g], t[g] = o & _t, o >>= at;
   for (g = f; o && g < t.length; g++) o += t[g], t[g] = o & _t, o >>= at
 }
-");
+";
+            source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+            var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = ToJavascriptConverter.ToJavascript(program);
+            var code = ToJavascriptConverter.ToJavascript(program, true);
+
+            var expected = @"function tt(t,r) {
+    var n,e,i = (b(t)),s = (b(r));
+    if (s && (e = (ft(r))), i) 
+        ;
+     else if (s) 
+        return D(t,e)?(void ($(t,e))):(n = (l(e,t)), G(t,n), void (ht(t)));
+    var g,o,f;
+    for(f = (t.length < r.length?t.length:r.length), o = 0, g = 0;f > g;g++) 
+        o += (t[g] + r[g]), t[g] = (o & _t), o >>= at;
+    for(g = f;o && (g < t.length);g++) 
+        o += t[g], t[g] = (o & _t), o >>= at;
+}";
+            Assert.Equal(expected, code);
         }
 
         [Fact]
@@ -287,6 +349,7 @@ h='M'+(+new Date).toString(36)
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("h=('M'+((+(new Date)).toString(36)));", code);
         }
 
         [Fact]
@@ -301,6 +364,7 @@ input.onchange = async (e) => {
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("input.onchange=(async e=>{const files=await readFiles(input.files,readMode);document.body.removeChild(input);resolve(files);});", code);
         }
 
         [Fact]
@@ -311,6 +375,7 @@ export const Base = LegacyElementMixin(HTMLElement).prototype;
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("export const Base=(LegacyElementMixin(HTMLElement)).prototype;", code);
         }
 
         [Fact]
@@ -321,6 +386,7 @@ let {is} = getIsExtends(element);
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("let {is}=(getIsExtends(element));", code);
         }
 
         [Fact]
@@ -332,6 +398,7 @@ export const wrap =
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("export const wrap=((window['ShadyDOM']&&window['ShadyDOM']['wrap'])||(node=>node));", code);
         }
 
         [Fact]
@@ -341,6 +408,7 @@ export const wrap =
 export {}");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("export{};", code);
         }
 
         [Fact]
@@ -353,6 +421,7 @@ export {}");
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("(()=>{mutablePropertyChange=MutableData._mutablePropertyChange;})();", code);
         }
 
         [Fact]
@@ -366,6 +435,7 @@ var Ol, jl = new (function() {
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("var Ol,jl=(new((function(){var l,h,z;return l=c;})()));", code);
         }
 
         [Fact]
@@ -382,12 +452,13 @@ var Ol, jl = new (function() {
 ");
             var program = parser.ParseScript();
             var code = ToJavascriptConverter.ToJavascript(program);
+            Assert.Equal("[y,{[Symbol.iterator]:(function(){return b;}),a:5}];", code);
         }
 
         [Fact]
         public void ToJavascriptTest24()
         {
-            var parser = new JavaScriptParser(@"
+            var source = @"
 
 class A { 
 *[Symbol.iterator]() {
@@ -398,16 +469,26 @@ class A {
             }
 }
         
-");
+";
+            source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+            var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = ToJavascriptConverter.ToJavascript(program);
+            var code = ToJavascriptConverter.ToJavascript(program, true);
+
+            var expected = @"class A {
+    *[Symbol.iterator]() {
+        let L = this._first;
+        for(;L !== _.Undefined;) 
+            yield L.element, L = L.next;
+    }
+}";
+            Assert.Equal(expected, code);
         }
 
         [Fact]
         public void ToJavascriptTest25()
         {
-            var parser = new JavaScriptParser(@"
-var i = function e(i) {
+            var source = @"var i = function e(i) {
             var r = n[i];
             if (void 0 !== r)
                 return r.exports;
@@ -417,9 +498,44 @@ var i = function e(i) {
             return t[i](a, a.exports, e),
             a.exports
         }(15);     
-");
+";
+            source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+            var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = ToJavascriptConverter.ToJavascript(program);
+            var code = ToJavascriptConverter.ToJavascript(program, true);
+
+            var expected = @"var i = ((function e(i) {
+    var r = n[i];
+    if ((void 0) !== r) 
+        return r.exports;
+    var a = (n[i] = {
+        exports : {}
+    });
+    return t[i](a,a.exports,e), a.exports;
+})(15));";
+            Assert.Equal(expected, code);
+        }
+
+        [Fact]
+        public void ToJavascriptTest26()
+        {
+            var source = @"class A {
+    aa() {
+        let a = 1;
+    }
+}
+var b = 1;
+var c;
+if (b == 2) {
+    c = 1;
+} else {
+    c = 3;
+}";
+            source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+            var parser = new JavaScriptParser(source);
+            var program = parser.ParseScript();
+            var code = ToJavascriptConverter.ToJavascript(program, true);
+            Assert.Equal(source, code);
         }
     }
 }
