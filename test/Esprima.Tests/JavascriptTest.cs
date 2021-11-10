@@ -181,6 +181,7 @@ export function checkSecurityAnswerCodeDirect(result) {
             }
     }
 }";
+            expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             Assert.Equal(expected, code);
         }
 
@@ -223,6 +224,7 @@ aa({});
 function aa() {
     
 };";
+            expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             Assert.Equal(expected, code);
         }
 
@@ -375,6 +377,7 @@ if (e.IsWebService)
     for(g = f;o && (g < t.length);g++) 
         o += t[g], t[g] = (o & _t), o >>= at;
 }";
+            expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             Assert.Equal(expected, code);
         }
 
@@ -519,6 +522,7 @@ class A {
             yield L.element, L = L.next;
     }
 }";
+            expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             Assert.Equal(expected, code);
         }
 
@@ -550,6 +554,7 @@ class A {
     });
     return t[i](a,a.exports,e), a.exports;
 })(15));";
+            expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             Assert.Equal(expected, code);
         }
 
