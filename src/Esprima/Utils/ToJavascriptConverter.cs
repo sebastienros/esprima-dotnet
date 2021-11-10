@@ -28,6 +28,8 @@ namespace Esprima.Utils
 
         public int IndentionSize { get; set; } = 4;
 
+        public string NewlineFormat { get; set; } = Environment.NewLine;
+
         protected StringBuilder _sb = new StringBuilder();
         private int _indentionLevel = 0;
 
@@ -47,7 +49,7 @@ namespace Esprima.Utils
             }
         }
 
-        private void AppendIndent()
+        private void AppendBeautificationIndent()
         {
             if (Beautify)
             {
@@ -55,11 +57,11 @@ namespace Esprima.Utils
             }
         }
 
-        private void AppendNewline()
+        private void AppendBeautificationNewline()
         {
             if (Beautify)
             {
-                _sb.AppendLine();
+                _sb.Append(NewlineFormat);
             }
         }
 
@@ -413,15 +415,15 @@ namespace Esprima.Utils
             AppendBeautificationSpace();
             Append("{");
 
-            AppendNewline();
+            AppendBeautificationNewline();
             IncreaseIndent();
-            AppendIndent();
+            AppendBeautificationIndent();
 
             VisitNodeList(switchStatement.Cases, addLineBreaks: true);
 
-            AppendNewline();
+            AppendBeautificationNewline();
             DecreaseIndent();
-            AppendIndent();
+            AppendBeautificationIndent();
 
             Append("}");
         }
@@ -439,9 +441,9 @@ namespace Esprima.Utils
             }
             Append(":");
 
-            AppendNewline();
+            AppendBeautificationNewline();
             IncreaseIndent();
-            AppendIndent();
+            AppendBeautificationIndent();
 
             VisitNodeList(switchCase.Consequent, appendAtEnd: ";", addLineBreaks: true);
 
@@ -477,9 +479,9 @@ namespace Esprima.Utils
 
             if (ifStatement.Consequent is not BlockStatement)
             {
-                AppendNewline();
+                AppendBeautificationNewline();
                 IncreaseIndent();
-                AppendIndent();
+                AppendBeautificationIndent();
             }
             Visit(ifStatement.Consequent);
             if (NodeNeedsSemicolon(ifStatement.Consequent))
@@ -491,8 +493,8 @@ namespace Esprima.Utils
                 DecreaseIndent();
                 if (ifStatement.Alternate != null)
                 {
-                    AppendNewline();
-                    AppendIndent();
+                    AppendBeautificationNewline();
+                    AppendBeautificationIndent();
                 }
             }
             if (ifStatement.Alternate != null)
@@ -500,9 +502,9 @@ namespace Esprima.Utils
                 Append(" else ");
                 if (ifStatement.Alternate is not BlockStatement && ifStatement.Alternate is not IfStatement)
                 {
-                    AppendNewline();
+                    AppendBeautificationNewline();
                     IncreaseIndent();
-                    AppendIndent();
+                    AppendBeautificationIndent();
                 }
                 Visit(ifStatement.Alternate);
                 if (NodeNeedsSemicolon(ifStatement.Alternate))
@@ -577,9 +579,9 @@ namespace Esprima.Utils
 
             if (forStatement.Body is not BlockStatement)
             {
-                AppendNewline();
+                AppendBeautificationNewline();
                 IncreaseIndent();
-                AppendIndent();
+                AppendBeautificationIndent();
             }
             Visit(forStatement.Body);
             if (NodeNeedsSemicolon(forStatement.Body))
@@ -603,9 +605,9 @@ namespace Esprima.Utils
 
             if (forInStatement.Body is not BlockStatement)
             {
-                AppendNewline();
+                AppendBeautificationNewline();
                 IncreaseIndent();
-                AppendIndent();
+                AppendBeautificationIndent();
             }
             Visit(forInStatement.Body);
             if (NodeNeedsSemicolon(forInStatement.Body))
@@ -725,16 +727,16 @@ namespace Esprima.Utils
             Append("{");
             if (objectExpression.Properties.Count > 0)
             {
-                AppendNewline();
+                AppendBeautificationNewline();
                 IncreaseIndent();
-                AppendIndent();
+                AppendBeautificationIndent();
             }
             VisitNodeList(objectExpression.Properties, appendSeperatorString: ",", addLineBreaks: true);
             if (objectExpression.Properties.Count > 0)
             {
-                AppendNewline();
+                AppendBeautificationNewline();
                 DecreaseIndent();
-                AppendIndent();
+                AppendBeautificationIndent();
             }
             Append("}");
         }
@@ -1027,9 +1029,9 @@ namespace Esprima.Utils
 
             if (forOfStatement.Body is not BlockStatement)
             {
-                AppendNewline();
+                AppendBeautificationNewline();
                 IncreaseIndent();
-                AppendIndent();
+                AppendBeautificationIndent();
             }
             Visit(forOfStatement.Body);
             if (NodeNeedsSemicolon(forOfStatement.Body))
@@ -1059,15 +1061,15 @@ namespace Esprima.Utils
             AppendBeautificationSpace();
             Append("{");
 
-            AppendNewline();
+            AppendBeautificationNewline();
             IncreaseIndent();
-            AppendIndent();
+            AppendBeautificationIndent();
 
             Visit(classDeclaration.Body);
 
-            AppendNewline();
+            AppendBeautificationNewline();
             DecreaseIndent();
-            AppendIndent();
+            AppendBeautificationIndent();
 
             Append("}");
         }
@@ -1402,15 +1404,15 @@ namespace Esprima.Utils
         {
             Append("{");
 
-            AppendNewline();
+            AppendBeautificationNewline();
             IncreaseIndent();
-            AppendIndent();
+            AppendBeautificationIndent();
 
             VisitNodeList(blockStatement.Body, appendAtEnd: ";", addLineBreaks: true);
 
-            AppendNewline();
+            AppendBeautificationNewline();
             DecreaseIndent();
-            AppendIndent();
+            AppendBeautificationIndent();
 
             Append("}");
         }
@@ -1430,8 +1432,8 @@ namespace Esprima.Utils
                     }
                     if (notfirst && addLineBreaks)
                     {
-                        AppendNewline();
-                        AppendIndent();
+                        AppendBeautificationNewline();
+                        AppendBeautificationIndent();
                     }
                     if (appendBracketsIfNeeded && ExpressionNeedsBrackets(node))
                     {
