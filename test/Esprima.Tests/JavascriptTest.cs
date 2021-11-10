@@ -161,7 +161,7 @@ export function checkSecurityAnswerCodeDirect(result) {
         case 'Error':
             MccDialog.warning({
                 title : 'SecurityClientErrorOccured',
-                message : ((((('<p>' + (commonClient.getTranslation('SecurityClientMessage'))) + ': ') + (commonClient.getTranslation(result.Message))) + '</p>') + (result.MessageDetails?(('<p><t-t>SecurityClientDetails</t-t>: <t-t>' + result.MessageDetails) + '</t-t></p>'):' '))
+                message : ((((('<p>' + (commonClient.getTranslation('SecurityClientMessage'))) + ': ') + (commonClient.getTranslation(result.Message))) + '</p>') + (result.MessageDetails ? (('<p><t-t>SecurityClientDetails</t-t>: <t-t>' + result.MessageDetails) + '</t-t></p>') : ' '))
             });
             return false;
         default:
@@ -372,11 +372,11 @@ if (e.IsWebService)
     if (s && (e = (ft(r))), i) 
         ;
      else if (s) 
-        return D(t,e)?(void ($(t,e))):(n = (l(e,t)), G(t,n), void (ht(t)));
+        return D(t,e) ? (void ($(t,e))) : (n = (l(e,t)), G(t,n), void (ht(t)));
     var g,o,f;
-    for(f = (t.length < r.length?t.length:r.length), o = 0, g = 0;f > g;g++) 
+    for(f = (t.length < r.length ? t.length : r.length), o = 0, g = 0; f > g; g++) 
         o += (t[g] + r[g]), t[g] = (o & _t), o >>= at;
-    for(g = f;o && (g < t.length);g++) 
+    for(g = f; o && (g < t.length); g++) 
         o += t[g], t[g] = (o & _t), o >>= at;
 }";
             expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
@@ -520,7 +520,7 @@ class A {
             var expected = @"class A {
     *[Symbol.iterator]() {
         let L = this._first;
-        for(;L !== _.Undefined;) 
+        for(; L !== _.Undefined; ) 
             yield L.element, L = L.next;
     }
 }";

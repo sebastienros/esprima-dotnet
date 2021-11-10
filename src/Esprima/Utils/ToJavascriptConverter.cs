@@ -573,11 +573,13 @@ namespace Esprima.Utils
                 Visit(forStatement.Init);
             }
             Append(";");
+            AppendBeautificationSpace();
             if (forStatement.Test != null)
             {
                 Visit(forStatement.Test);
             }
             Append(";");
+            AppendBeautificationSpace();
             if (forStatement.Update != null)
             {
                 Visit(forStatement.Update);
@@ -1291,7 +1293,9 @@ namespace Esprima.Utils
             {
                 Append(")");
             }
+            AppendBeautificationSpace();
             Append("?");
+            AppendBeautificationSpace();
             if (ExpressionNeedsBrackets(conditionalExpression.Consequent))
             {
                 Append("(");
@@ -1301,7 +1305,9 @@ namespace Esprima.Utils
             {
                 Append(")");
             }
+            AppendBeautificationSpace();
             Append(":");
+            AppendBeautificationSpace();
             if (ExpressionNeedsBrackets(conditionalExpression.Alternate))
             {
                 Append("(");
