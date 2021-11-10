@@ -553,7 +553,15 @@ namespace Esprima.Utils
             }
             else
             {
+                if (expressionStatement.Expression is FunctionExpression)
+                {
+                    Append("(");
+                }
                 Visit(expressionStatement.Expression);
+                if (expressionStatement.Expression is FunctionExpression)
+                {
+                    Append(")");
+                }
             }
         }
 
@@ -845,8 +853,20 @@ namespace Esprima.Utils
                 Append(" extends ");
                 Visit(classExpression.SuperClass);
             }
+
+            AppendBeautificationSpace();
             Append("{");
+
+            AppendBeautificationNewline();
+            IncreaseIndent();
+            AppendBeautificationIndent();
+
             Visit(classExpression.Body);
+
+            AppendBeautificationNewline();
+            DecreaseIndent();
+            AppendBeautificationIndent();
+
             Append("}");
         }
 

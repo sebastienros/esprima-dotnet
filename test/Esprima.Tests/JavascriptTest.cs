@@ -215,15 +215,17 @@ aa({});
             var expected = @"(function() {
     'use strict';
 })();
-(class ApplyShimInterface{constructor() {
-    this.customStyleInterface = null;
-    applyShim['invalidCallback'] = ApplyShimUtils.invalidate;
-}});
+(class ApplyShimInterface {
+    constructor() {
+        this.customStyleInterface = null;
+        applyShim['invalidCallback'] = ApplyShimUtils.invalidate;
+    }
+});
 a();
 aa({});
-function aa() {
+(function aa() {
     
-};";
+});";
             expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             Assert.Equal(expected, code);
         }
