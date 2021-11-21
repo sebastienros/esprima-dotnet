@@ -19,9 +19,9 @@ namespace Esprima.Ast
             Value = value;
         }
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal override Node? Accept(AstVisitor visitor)
         {
-            visitor.VisitPropertyDefinition(this);
+            return visitor.VisitPropertyDefinition(this);
         }
     }
 }

@@ -9,9 +9,9 @@ namespace Esprima.Ast
             Prefix = prefix;
         }
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal override Node? Accept(AstVisitor visitor)
         {
-            visitor.VisitUpdateExpression(this);
+            return visitor.VisitUpdateExpression(this);
         }
     }
 }

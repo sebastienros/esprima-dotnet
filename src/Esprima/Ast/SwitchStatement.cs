@@ -18,9 +18,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Discriminant, _cases);
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal override Node? Accept(AstVisitor visitor)
         {
-            visitor.VisitSwitchStatement(this);
+            return visitor.VisitSwitchStatement(this);
         }
     }
 }
