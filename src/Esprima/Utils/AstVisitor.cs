@@ -1,16 +1,53 @@
 ﻿using System;
+using System.Collections.Generic;
 using Esprima.Ast;
 
 namespace Esprima.Utils
 {
     public class AstVisitor
     {
-        public virtual void Visit(Node node)
+        /// <summary>
+        /// Dispatches the expression to one of the more specialized visit methods in this class.
+        /// </summary>
+        /// <param name="node">The expression to visit.</param>
+        /// <returns>The modified expression, if it or any subexpression was modified;
+        /// otherwise, returns the original expression.</returns>
+        public virtual Node? Visit(Node? node) => node?.Accept(this);
+
+        protected internal virtual ref NodeList<T> VisitNodeList<T>(ref NodeList<T> nodes) where T : Node
         {
-            node.Accept(this);
+            List<T>? newNodeList = null;
+            for (var i = 0; i < nodes.Count; i++)
+            {
+                var newNode = Visit(nodes[i]);
+                if (newNodeList != null)
+                {
+                    if (newNode != null)
+                    {
+                        newNodeList.Add((T) newNode);
+                    }
+                }
+                else if (newNode != nodes[i])
+                {
+                    newNodeList = new List<T>();
+                    if (newNode != null)
+                    {
+                        newNodeList.Add((T) newNode);
+                    }
+                }
+            }
+
+            if (newNodeList != null)
+            {
+                var nodeList = new NodeList<T>(newNodeList);
+                ref var nodeListRef = ref nodeList;
+                return ref nodeListRef;
+            }
+
+            return ref nodes;
         }
 
-        protected internal virtual void VisitProgram(Program program)
+        protected internal virtual void VisitProgram(Program program) //todo
         {
             ref readonly var statements = ref program.Body;
             for (var i = 0; i < statements.Count; i++)
@@ -19,36 +56,48 @@ namespace Esprima.Utils
             }
         }
 
-        [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-        protected virtual void VisitUnknownNode(Node node)
+        protected internal virtual Node? VisitCatchClause(CatchClause catchClause)
         {
-            throw new NotImplementedException($"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
-        }
-
-        protected internal virtual void VisitCatchClause(CatchClause catchClause)
-        {
+            Node? param = null;
             if (catchClause.Param is not null)
             {
-                Visit(catchClause.Param);
+                param = Visit(catchClause.Param);
             }
 
-            Visit(catchClause.Body);
+            var body = Visit(catchClause.Body);
+
+            if (catchClause.Param != param || catchClause.Body != body)
+            {
+                if (body == null)
+                {
+                    return null;
+                }
+                return new CatchClause((Expression?) param, (BlockStatement) body);
+            }
+
+            return catchClause;
         }
 
-        protected internal virtual void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+        protected internal virtual Node? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
         {
+            Identifier? id = null;
             if (functionDeclaration.Id is not null)
             {
-                Visit(functionDeclaration.Id);
+                id = (Identifier?) Visit(functionDeclaration.Id);
             }
 
-            ref readonly var parameters = ref functionDeclaration.Params;
-            for (var i = 0; i < parameters.Count; i++)
+            var @params = ref VisitNodeList(functionDeclaration.Params);
+            var body = Visit(functionDeclaration.Body);
+
+            if (functionDeclaration.Id != id || functionDeclaration.Params != @params || functionDeclaration.Body != body)
             {
-                Visit(parameters[i]);
+                if (body == null)
+                {
+                    return null;
+                }
+                return new FunctionDeclaration((Expression?) param, (BlockStatement) body);
             }
-
-            Visit(functionDeclaration.Body);
+            return functionDeclaration;
         }
 
         protected internal virtual void VisitWithStatement(WithStatement withStatement)
