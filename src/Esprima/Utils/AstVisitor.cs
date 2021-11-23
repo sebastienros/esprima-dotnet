@@ -6,23 +6,20 @@ namespace Esprima.Utils
 {
     public class AstVisitor
     {
-        /// <summary>
-        /// Dispatches the expression to one of the more specialized visit methods in this class.
-        /// </summary>
-        /// <param name="node">The expression to visit.</param>
-        /// <returns>The modified expression, if it or any subexpression was modified;
-        /// otherwise, returns the original expression.</returns>
-        public virtual Node? Visit(Node? node) => node?.Accept(this);
+        public virtual Node? Visit(Node node)
+        {
+            return node.Accept(this);
+        }
 
-        protected internal virtual ref NodeList<T> VisitNodeList<T>(ref NodeList<T> nodes) where T : Node
+        protected internal virtual bool VisitNodeListAndIsNew<T>(in NodeList<T> nodes, out NodeList<T> newNodes) where T : Node
         {
             List<T>? newNodeList = null;
             for (var i = 0; i < nodes.Count; i++)
             {
                 var newNode = Visit(nodes[i]);
-                if (newNodeList != null)
+                if (newNodeList is not null)
                 {
-                    if (newNode != null)
+                    if (newNode is not null)
                     {
                         newNodeList.Add((T) newNode);
                     }
@@ -30,30 +27,53 @@ namespace Esprima.Utils
                 else if (newNode != nodes[i])
                 {
                     newNodeList = new List<T>();
-                    if (newNode != null)
+                    for (var j = 0; j < i; j++)
+                    {
+                        newNodeList.Add(nodes[j]);
+                    }
+                    if (newNode is not null)
                     {
                         newNodeList.Add((T) newNode);
                     }
                 }
             }
 
-            if (newNodeList != null)
+            if (newNodeList is not null)
             {
-                var nodeList = new NodeList<T>(newNodeList);
-                ref var nodeListRef = ref nodeList;
-                return ref nodeListRef;
+                newNodes = new NodeList<T>(newNodeList);
+                return true;
             }
 
-            return ref nodes;
+            newNodes = default;
+            return false;
         }
 
-        protected internal virtual void VisitProgram(Program program) //todo
+        protected internal virtual Node? VisitModule(Module module)
         {
-            ref readonly var statements = ref program.Body;
-            for (var i = 0; i < statements.Count; i++)
+            var newParamsList = VisitNodeListAndIsNew(in module.Body, out var newStatements);
+            return UpdateModule(module, newParamsList, ref newStatements);
+        }
+
+        protected virtual Module? UpdateModule(Module module, bool newParamsList, ref NodeList<Statement> newStatements)
+        {
+            if (newParamsList)
             {
-                Visit(statements[i]);
+                return new Module(newStatements);
             }
+
+            return module;
+        }
+
+        protected internal virtual Node? VisitScript(Script script)
+        {
+            var newParamsList = VisitNodeListAndIsNew(in script.Body, out var statements);
+
+            if (newParamsList)
+            {
+                return new Script(statements, script.Strict);
+            }
+
+            return script;
         }
 
         protected internal virtual Node? VisitCatchClause(CatchClause catchClause)
@@ -85,17 +105,16 @@ namespace Esprima.Utils
             {
                 id = (Identifier?) Visit(functionDeclaration.Id);
             }
-
-            var @params = ref VisitNodeList(functionDeclaration.Params);
+            var newParamsList = VisitNodeListAndIsNew(in functionDeclaration.Params, out var @params);
             var body = Visit(functionDeclaration.Body);
 
-            if (functionDeclaration.Id != id || functionDeclaration.Params != @params || functionDeclaration.Body != body)
+            if (functionDeclaration.Id != id || newParamsList || functionDeclaration.Body != body)
             {
                 if (body == null)
                 {
                     return null;
                 }
-                return new FunctionDeclaration((Expression?) param, (BlockStatement) body);
+                return new FunctionDeclaration(id, newParamsList ? @params : functionDeclaration.Params, (BlockStatement) body, functionDeclaration.Generator, functionDeclaration.Strict, functionDeclaration.Async);
             }
             return functionDeclaration;
         }

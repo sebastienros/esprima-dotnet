@@ -1,4 +1,6 @@
-﻿namespace Esprima.Ast
+﻿using Esprima.Utils;
+
+namespace Esprima.Ast
 {
     public sealed class Module : Program
     {
@@ -13,5 +15,10 @@
         public override ref readonly NodeList<Statement> Body => ref _body;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+
+        protected internal override Node? Accept(AstVisitor visitor)
+        {
+            return visitor.VisitModule(this);
+        }
     }
 }
