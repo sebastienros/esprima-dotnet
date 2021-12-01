@@ -1640,6 +1640,10 @@ namespace Esprima
                             newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
                             index += 4;
                         }
+                        else
+                        {
+                            index++;
+                        }
                     }
 
                     pattern = newPattern;

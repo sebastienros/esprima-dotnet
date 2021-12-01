@@ -24,5 +24,13 @@ namespace Esprima.Tests
 
             Assert.Equal(new[] { "11-28" }, results);
         }
+
+        [Fact]
+        public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
+        {
+            var scanner = new Scanner("", new ParserOptions { AdaptRegexp = true });
+            var regex = scanner.TestRegExp("\\$", "gm");
+            Assert.NotNull(regex);
+        }
     }
 }
