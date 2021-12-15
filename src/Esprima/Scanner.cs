@@ -1071,12 +1071,6 @@ namespace Esprima
             }
             catch (OverflowException)
             {
-                // does it fit biginteger?
-                if (BigInteger.TryParse(number, out var bigInteger))
-                {
-                    return ScanBigIntLiteral(start, number.AsSpan(), NumberStyles.Integer);
-                }
-
                 return ThrowUnexpectedToken<Token>($"Value {number} was either too large or too small for a UInt64.");
             }
 
