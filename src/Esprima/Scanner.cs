@@ -57,7 +57,7 @@ namespace Esprima
             "for",
             "new",
             "try",
-            "let",
+            "let", // ADHOC: NOT SUPPORTED
             "this",
             "else",
             "case",
@@ -97,7 +97,7 @@ namespace Esprima
             "public",
             "static",
             "yield",
-            "let"
+            "let" // ADHOC: NOT SUPPORTED
         };
 
         private static readonly HashSet<string> FutureReservedWords = new() { "enum", "export", "import", "super" };

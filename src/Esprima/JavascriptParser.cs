@@ -658,10 +658,6 @@ namespace Esprima
                     {
                         expr = ParseIdentifierName();
                     }
-                    else if (!_context.Strict && MatchKeyword("let"))
-                    {
-                        expr = Finalize(node, new Identifier((string?) NextToken().Value));
-                    }
                     else
                     {
                         _context.IsAssignmentTarget = false;
@@ -2507,8 +2503,8 @@ namespace Esprima
                         statement = ParseClassDeclaration();
                         break;
                     case "let":
-                        inFor = false;
-                        statement = IsLexicalDeclaration() ? ParseLexicalDeclaration(ref inFor) : ParseStatement();
+                        ThrowUnexpectedToken(_lookahead, "let is not supported in Adhoc.");
+                        statement = null;
                         break;
                     default:
                         statement = ParseStatement();
@@ -2608,7 +2604,6 @@ namespace Esprima
             return next.Type == TokenType.Identifier ||
                    next.Type == TokenType.Punctuator && (string?) next.Value == "[" ||
                    next.Type == TokenType.Punctuator && (string?) next.Value == "{" ||
-                   next.Type == TokenType.Keyword && (string?) next.Value == "let" ||
                    next.Type == TokenType.Keyword && (string?) next.Value == "yield";
         }
 
@@ -2631,7 +2626,6 @@ namespace Esprima
             return kindString switch
             {
                 "const" => VariableDeclarationKind.Const,
-                "let" => VariableDeclarationKind.Let,
                 "var" => VariableDeclarationKind.Var,
                 _ => ThrowError<VariableDeclarationKind>("Unknown declaration kind '{0}'", kindString)
             };
@@ -2787,11 +2781,6 @@ namespace Esprima
             }
             else
             {
-                if (MatchKeyword("let") && (kind == VariableDeclarationKind.Const || kind == VariableDeclarationKind.Let))
-                {
-                    TolerateUnexpectedToken(_lookahead, Messages.LetInLexicalBinding);
-                }
-
                 parameters.Push(_lookahead);
                 pattern = ParseVariableIdentifier(kind);
             }
@@ -2845,7 +2834,7 @@ namespace Esprima
                 else
                 {
                     var stringValue = token.Value as string;
-                    if (_context.Strict || stringValue == null || stringValue != "let" || kind != VariableDeclarationKind.Var)
+                    if (_context.Strict || stringValue == null || kind != VariableDeclarationKind.Var)
                     {
                         ThrowUnexpectedToken(token);
                     }
@@ -3128,7 +3117,7 @@ namespace Esprima
                         Expect(";");
                     }
                 }
-                else if (MatchKeyword("const") || MatchKeyword("let"))
+                else if (MatchKeyword("const"))
                 {
                     var initNode = CreateNode();
                     var kindString = (string?) NextToken().Value;
@@ -4299,7 +4288,6 @@ namespace Esprima
             "class",
             "delete",
             "function",
-            "let",
             "new",
             "super",
             "this",
@@ -4922,6 +4910,8 @@ namespace Esprima
                 switch (_lookahead.Value)
                 {
                     case "let":
+                        throw new Exception("let is not supported in Adhoc.");
+                        break;
                     case "const":
                         var inFor = false;
                         declaration = ParseLexicalDeclaration(ref inFor);

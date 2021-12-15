@@ -35,7 +35,6 @@
         public const string InvalidRegExp = "Invalid regular expression";
         public const string InvalidTaggedTemplateOnOptionalChain = "Invalid tagged template on optional chain";
         public const string InvalidUnicodeEscapeSequence = "Invalid Unicode escape sequence";
-        public const string LetInLexicalBinding = "let is disallowed as a lexically bound name";
         public const string MissingFromClause = "Unexpected token";
         public const string MultipleDefaultsInSwitch = "More than one default clause in switch statement";
         public const string NewlineAfterThrow = "Illegal newline after throw";

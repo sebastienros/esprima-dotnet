@@ -10,13 +10,14 @@ namespace Esprima.Sample
     {
         public static void Main(string[] args)
         {
-            var scanner = new Scanner(@"
+            string source = @"
 ""use strict"";
-try { } catch (evil) { }
+let t = 5;
 
-");
+";
+            var scanner = new Scanner(source);
             Tokenize(scanner);
-            //Parse(scanner);
+            Parse(source, Console.Out);
         }
 
         private static void Tokenize(Scanner scanner)
