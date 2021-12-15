@@ -602,7 +602,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new BigIntLiteral(token.BigIntValue.Value, raw));
+                    expr = Finalize(node, new BigIntLiteral(token.BigIntValue!.Value, raw));
                     break;
 
                 case TokenType.BooleanLiteral:
@@ -886,7 +886,7 @@ namespace Esprima
                     }
 
                     raw = GetTokenRaw(token);
-                    key = Finalize(node, new BigIntLiteral(token.BigIntValue.Value, raw));
+                    key = Finalize(node, new BigIntLiteral(token.BigIntValue!.Value, raw));
                     break;
 
                 case TokenType.Identifier:
