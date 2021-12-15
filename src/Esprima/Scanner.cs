@@ -889,17 +889,21 @@ namespace Esprima
 
         public Token ScanHexLiteral(int start)
         {
-            var sb = GetStringBuilder();
-            this.ScanLiteralPart(sb, Character.IsHexDigit);
-            var number = sb.ToString();
+            var number = this.ScanLiteralPart(Character.IsHexDigit, out var hasUpperCase);
 
             if (number.Length == 0)
             {
                 ThrowUnexpectedToken();
             }
 
-            if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
+            var ch = Source.CharCodeAt(Index);
+            if (Character.IsIdentifierStart(ch))
             {
+                if (ch == 'n')
+                {
+                    Index++;
+                    return ScanBigIntLiteral(start, number, NumberStyles.HexNumber);
+                }
                 ThrowUnexpectedToken();
             }
 
@@ -907,7 +911,11 @@ namespace Esprima
 
             if (number.Length < 16)
             {
-                value = Convert.ToInt64(number, 16);
+#if !HAS_SPAN_PARSE
+                value = Convert.ToInt64(number.ToString(), 16);
+#else
+                value = long.Parse(number, NumberStyles.HexNumber, null);
+#endif
             }
             else if (number.Length > 255)
             {
@@ -916,7 +924,7 @@ namespace Esprima
             else
             {
                 double modulo = 1;
-                var literal = number.ToLowerInvariant();
+                var literal = hasUpperCase ? number.ToString().ToLowerInvariant().AsSpan() : number;
                 var length = literal.Length - 1;
                 for (var i = length; i >= 0; i--)
                 {
@@ -947,12 +955,34 @@ namespace Esprima
             };
         }
 
+        private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, NumberStyles style)
+        {
+            var c = number[0];
+            if (c > 7 && Character.IsHexDigit(c))
+            {
+                // ensure we get positive number
+                number = ("0" + number.ToString()).AsSpan();
+            }
+#if HAS_SPAN_PARSE
+            var bigInt = BigInteger.Parse(number, style);
+#else
+            var bigInt = BigInteger.Parse(number.ToString(), style);
+#endif
+            return new Token
+            {
+                Type = TokenType.BigIntLiteral,
+                Value = bigInt,
+                BigIntValue = bigInt,
+                LineNumber = LineNumber,
+                LineStart = LineStart,
+                Start = start,
+                End = Index
+            };
+        }
+
         public Token ScanBinaryLiteral(int start)
         {
-            char ch;
-            var sb = GetStringBuilder();
-            this.ScanLiteralPart(sb, c => c == '0' || c == '1');
-            var number = sb.ToString();
+            var number = this.ScanLiteralPart(static c => c is '0' or '1', out _).ToString();
 
             if (number.Length == 0)
             {
@@ -962,7 +992,7 @@ namespace Esprima
 
             if (!Eof())
             {
-                ch = Source.CharCodeAt(Index);
+                var ch = Source.CharCodeAt(Index);
                 /* istanbul ignore else */
                 if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
                 {
@@ -970,16 +1000,39 @@ namespace Esprima
                 }
             }
 
-            return new Token
+            var token = new Token
             {
-                Type = TokenType.NumericLiteral,
-                NumericValue = Convert.ToUInt32(number, 2),
                 Value = number,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
                 End = Index
             };
+
+            if (number.Length > 4)
+            {
+                token.Type = TokenType.BigIntLiteral;
+                token.BigIntValue = BinaryToBigInteger(number);
+            }
+            else
+            {
+                token.Type = TokenType.NumericLiteral;
+                token.NumericValue = Convert.ToUInt32(number, 2);
+            }
+
+            return token;
+        }
+
+        private BigInteger BinaryToBigInteger(string value)
+        {
+            BigInteger res = 0;
+            foreach(var c in value)
+            {
+                res <<= 1;
+                res += c == '1' ? 1 : 0;
+            }
+
+            return res;
         }
 
         public Token ScanOctalLiteral(char prefix, int start)
@@ -997,7 +1050,7 @@ namespace Esprima
                 ++Index;
             }
 
-            this.ScanLiteralPart(sb, Character.IsOctalDigit);
+            sb.Append(this.ScanLiteralPart(Character.IsOctalDigit, out _));
             var number = sb.ToString();
 
             if (!octal && number.Length == 0)
@@ -1055,20 +1108,27 @@ namespace Esprima
             return true;
         }
 
-        private void ScanLiteralPart(StringBuilder sb, Func<char, bool> check)
+        private ReadOnlySpan<char> ScanLiteralPart(Func<char, bool> check, out bool hasUpperCase)
         {
+            hasUpperCase = false;
+            var start = Index;
+
             var charCode = Source.CharCodeAt(Index);
             if (charCode == '_')
             {
                 ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
             }
 
-            while ((check(charCode) || charCode == '_'))
+            var needsCleanup = false;
+            while (check(charCode) || charCode == '_')
             {
-                if (charCode != '_')
+                if (charCode == '_')
                 {
-                    sb.Append(charCode);
+                    needsCleanup = true;
                 }
+
+                hasUpperCase |= char.IsUpper(charCode);
+
                 Index++;
                 var newCharCode = Source.CharCodeAt(Index);
                 if (charCode == '_' && newCharCode == '_')
@@ -1087,6 +1147,11 @@ namespace Esprima
             {
                 ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
             }
+
+            var span = Source.AsSpan(start, Index - start);
+            return needsCleanup
+                ? span.ToString().Replace("_", "").AsSpan()
+                : span;
         }
 
         public Token ScanNumericLiteral()
@@ -1135,14 +1200,14 @@ namespace Esprima
                 }
 
                 --Index;
-                this.ScanLiteralPart(sb, Character.IsDecimalDigit);
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit, out _));
                 ch = Source.CharCodeAt(Index);
             }
 
             if (ch == '.')
             {
                 sb.Append(Source[Index++]);
-                this.ScanLiteralPart(sb, Character.IsDecimalDigit);
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit, out _));
 
                 ch = Source.CharCodeAt(Index);
             }
@@ -1159,7 +1224,7 @@ namespace Esprima
 
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
-                    this.ScanLiteralPart(sb, Character.IsDecimalDigit);
+                    sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit, out _));
                 }
                 else
                 {
@@ -1169,17 +1234,7 @@ namespace Esprima
             else if (ch == 'n')
             {
                 Index++;
-                var bigInt = BigInteger.Parse(sb.ToString());
-                return new Token
-                {
-                    Type = TokenType.BigIntLiteral,
-                    Value = bigInt,
-                    BigIntValue = bigInt,
-                    LineNumber = LineNumber,
-                    LineStart = LineStart,
-                    Start = start,
-                    End = Index
-                };
+                return ScanBigIntLiteral(start, sb.ToString().AsSpan(), NumberStyles.Integer);
             }
 
             if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))

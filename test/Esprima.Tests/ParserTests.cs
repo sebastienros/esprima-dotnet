@@ -239,5 +239,30 @@ f(values);
             parser = new JavaScriptParser(code, new ParserOptions { Tolerant = false });
             Assert.Throws<ParserException>(() => parser.ParseScript());
         }
+
+        [Fact]
+        public void ShouldParseBigIntFormatsAndUsageTypes()
+        {
+            const string Code = @"
+                x = -1n;
+                x = 0n;
+                x = 1n;
+                x = 0x20602800080017fn;
+                x = 0b10100111010100001010110110010011100111011001110001010000100100010001010011;
+
+                callback(-1n);
+                callback(0n);
+                callback(1n);
+                callback(0x20602800080017fn)
+                callback(0b10100111010100001010110110010011100111011001110001010000100100010001010011);
+
+                -1n;
+                0n;
+                1n;
+                0x20602800080017fn;
+                0b10100111010100001010110110010011100111011001110001010000100100010001010011;";
+
+            new JavaScriptParser(Code).ParseScript();
+        }
     }
 }

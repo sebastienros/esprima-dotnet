@@ -6,7 +6,7 @@ namespace Esprima.Ast
     {
         public readonly string BigInt;
 
-        public BigInteger? BigIntValue => (BigInteger?) Value;
+        public new BigInteger? BigIntValue => (BigInteger?) Value;
 
         public BigIntLiteral(BigInteger value, string raw) : base(TokenType.BigIntLiteral, value, raw)
         {
