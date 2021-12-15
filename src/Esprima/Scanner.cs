@@ -911,7 +911,7 @@ namespace Esprima
 
             if (number.Length < 16)
             {
-#if NETFRAMEWORK || NETSTANDARD2_0
+#if !HAS_SPAN_PARSE
                 value = Convert.ToInt64(number.ToString(), 16);
 #else
                 value = long.Parse(number, NumberStyles.HexNumber, null);
@@ -958,12 +958,12 @@ namespace Esprima
         private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, NumberStyles style)
         {
             var c = number[0];
-            if (c >= 8 && c <= 'F')
+            if (c > 7 && Character.IsHexDigit(c))
             {
                 // ensure we get positive number
                 number = ("0" + number.ToString()).AsSpan();
             }
-#if !NETFRAMEWORK && !NETSTANDARD2_0
+#if HAS_SPAN_PARSE
             var bigInt = BigInteger.Parse(number, style);
 #else
             var bigInt = BigInteger.Parse(number.ToString(), style);
@@ -1071,6 +1071,12 @@ namespace Esprima
             }
             catch (OverflowException)
             {
+                // does it fit biginteger?
+                if (BigInteger.TryParse(number, out var bigInteger))
+                {
+                    return ScanBigIntLiteral(start, number.AsSpan(), NumberStyles.Integer);
+                }
+
                 return ThrowUnexpectedToken<Token>($"Value {number} was either too large or too small for a UInt64.");
             }
 

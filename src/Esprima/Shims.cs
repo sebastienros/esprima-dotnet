@@ -5,7 +5,7 @@ namespace Esprima;
 
 internal static class Shims
 {
-#if NETFRAMEWORK || NETSTANDARD2_0
+#if !NETSTANDARD2_1_OR_GREATER
     public static StringBuilder Append(this StringBuilder sb, ReadOnlySpan<char> value)
     {
         return sb.Append(value.ToString());
