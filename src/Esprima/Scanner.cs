@@ -990,11 +990,16 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
+            var bigInt = number.Length > 4;
             if (!Eof())
             {
                 var ch = Source.CharCodeAt(Index);
-                /* istanbul ignore else */
-                if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
+                if (ch == 'n')
+                {
+                    bigInt = true;
+                    Index++;
+                }
+                else if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
                 {
                     ThrowUnexpectedToken();
                 }
@@ -1009,7 +1014,7 @@ namespace Esprima
                 End = Index
             };
 
-            if (number.Length > 4)
+            if (bigInt)
             {
                 token.Type = TokenType.BigIntLiteral;
                 token.BigIntValue = BinaryToBigInteger(number);
