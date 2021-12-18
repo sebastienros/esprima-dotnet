@@ -957,17 +957,31 @@ namespace Esprima
 
         private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, NumberStyles style)
         {
-            var c = number[0];
-            if (c > '7' && Character.IsHexDigit(c))
+            BigInteger bigInt = 0;
+            if (style == NumberStyles.None)
             {
-                // ensure we get positive number
-                number = ("0" + number.ToString()).AsSpan();
+                // binary
+                foreach(var c in number)
+                {
+                    bigInt <<= 1;
+                    bigInt += c == '1' ? 1 : 0;
+                }
             }
+            else
+            {
+                var c = number[0];
+                if (c > '7' && Character.IsHexDigit(c))
+                {
+                    // ensure we get positive number
+                    number = ("0" + number.ToString()).AsSpan();
+                }
 #if HAS_SPAN_PARSE
-            var bigInt = BigInteger.Parse(number, style);
+                bigInt = BigInteger.Parse(number, style);
 #else
-            var bigInt = BigInteger.Parse(number.ToString(), style);
+                bigInt = BigInteger.Parse(number.ToString(), style);
 #endif
+            }
+
             return new Token
             {
                 Type = TokenType.BigIntLiteral,
@@ -982,7 +996,7 @@ namespace Esprima
 
         public Token ScanBinaryLiteral(int start)
         {
-            var number = this.ScanLiteralPart(static c => c is '0' or '1', out _).ToString();
+            var number = this.ScanLiteralPart(static c => c is '0' or '1', out _);
 
             if (number.Length == 0)
             {
@@ -990,54 +1004,34 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
-            var bigInt = false;
             if (!Eof())
             {
                 var ch = Source.CharCodeAt(Index);
                 if (ch == 'n')
                 {
-                    bigInt = true;
                     Index++;
+                    return ScanBigIntLiteral(start, number, NumberStyles.None);
                 }
-                else if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
+
+                if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
                 {
                     ThrowUnexpectedToken();
                 }
             }
 
+            var numberString = number.ToString();
             var token = new Token
             {
-                Value = number,
+                Type = TokenType.NumericLiteral,
+                NumericValue = Convert.ToUInt32(numberString, 2),
+                Value = numberString,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
                 End = Index
             };
 
-            if (bigInt)
-            {
-                token.Type = TokenType.BigIntLiteral;
-                token.BigIntValue = BinaryToBigInteger(number);
-            }
-            else
-            {
-                token.Type = TokenType.NumericLiteral;
-                token.NumericValue = Convert.ToUInt32(number, 2);
-            }
-
             return token;
-        }
-
-        private BigInteger BinaryToBigInteger(string value)
-        {
-            BigInteger res = 0;
-            foreach(var c in value)
-            {
-                res <<= 1;
-                res += c == '1' ? 1 : 0;
-            }
-
-            return res;
         }
 
         public Token ScanOctalLiteral(char prefix, int start)
