@@ -713,9 +713,9 @@ namespace Esprima
             {
                 type = TokenType.Keyword;
             }
-            else if ("null".Equals(id))
+            else if ("nil".Equals(id))
             {
-                type = TokenType.NullLiteral;
+                type = TokenType.NilLiteral;
             }
             else if ("true".Equals(id) || "false".Equals(id))
             {

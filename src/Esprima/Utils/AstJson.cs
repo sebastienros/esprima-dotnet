@@ -319,7 +319,7 @@ namespace Esprima.Utils
                 }
                 else
                 {
-                    _writer.Null();
+                    _writer.Nil();
                 }
             }
 
@@ -595,7 +595,7 @@ namespace Esprima.Utils
                     switch (value)
                     {
                         case null:
-                            _writer.Null();
+                            _writer.Nil();
                             break;
                         case bool b:
                             _writer.Boolean(b);

@@ -9,7 +9,7 @@ namespace Esprima
         EOF,
         Identifier,
         Keyword,
-        NullLiteral,
+        NilLiteral,
         NumericLiteral,
         Punctuator,
         StringLiteral,

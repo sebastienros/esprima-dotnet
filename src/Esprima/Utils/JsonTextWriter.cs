@@ -108,7 +108,7 @@ namespace Esprima.Utils
         {
             if (str == null)
             {
-                Null();
+                Nil();
             }
             else
             {
@@ -116,9 +116,9 @@ namespace Esprima.Utils
             }
         }
 
-        public override void Null()
+        public override void Nil()
         {
-            Write("null", TokenKind.Scalar);
+            Write("nil", TokenKind.Scalar);
         }
 
         public override void Boolean(bool flag)

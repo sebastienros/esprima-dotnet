@@ -304,9 +304,9 @@ namespace Esprima
 
                 if (source[from] == 'n')
                 {
-                    if (source[from + 1] == 'u' && source[from + 2] == 'l' && source[from + 3] == 'l')
+                    if (source[from + 1] == 'i' && source[from + 2] == 'l')
                     {
-                        return "null";
+                        return "nil";
                     }
 
                     if (source[from + 1] == 'a' && source[from + 2] == 'm' && source[from + 3] == 'e')

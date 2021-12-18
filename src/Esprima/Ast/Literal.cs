@@ -38,7 +38,7 @@ namespace Esprima.Ast
             NumericValue = value;
         }
 
-        public Literal(string raw) : this(TokenType.NullLiteral, null, raw)
+        public Literal(string raw) : this(TokenType.NilLiteral, null, raw)
         {
         }
 

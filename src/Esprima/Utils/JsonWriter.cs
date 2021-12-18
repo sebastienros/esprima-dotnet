@@ -2,7 +2,7 @@
 {
     public abstract class JsonWriter
     {
-        public abstract void Null();
+        public abstract void Nil();
         public abstract void Number(long n);
         public abstract void Number(double n);
         public abstract void String(string? value);

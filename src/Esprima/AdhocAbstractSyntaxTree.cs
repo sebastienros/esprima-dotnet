@@ -613,12 +613,12 @@ namespace Esprima
                     expr = Finalize(node, new Literal("true".Equals(token.Value), raw));
                     break;
 
-                case TokenType.NullLiteral:
+                case TokenType.NilLiteral:
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(TokenType.NullLiteral, null, raw));
+                    expr = Finalize(node, new Literal(TokenType.NilLiteral, null, raw));
                     break;
 
                 case TokenType.Template:
@@ -874,7 +874,7 @@ namespace Esprima
 
                 case TokenType.Identifier:
                 case TokenType.BooleanLiteral:
-                case TokenType.NullLiteral:
+                case TokenType.NilLiteral:
                 case TokenType.Keyword:
                     key = isPrivate ? Finalize(node, new PrivateIdentifier((string?) token.Value)) : Finalize(node, new Identifier((string?) token.Value));
                     break;
@@ -1413,7 +1413,7 @@ namespace Esprima
             return token.Type == TokenType.Identifier ||
                    token.Type == TokenType.Keyword ||
                    token.Type == TokenType.BooleanLiteral ||
-                   token.Type == TokenType.NullLiteral;
+                   token.Type == TokenType.NilLiteral;
         }
 
         private Identifier ParseIdentifierName()
@@ -3532,7 +3532,7 @@ namespace Esprima
             switch (_lookahead.Type)
             {
                 case TokenType.BooleanLiteral:
-                case TokenType.NullLiteral:
+                case TokenType.NilLiteral:
                 case TokenType.NumericLiteral:
                 case TokenType.StringLiteral:
                 case TokenType.Template:
@@ -4095,7 +4095,7 @@ namespace Esprima
                 TokenType.Identifier => true,
                 TokenType.StringLiteral => true,
                 TokenType.BooleanLiteral => true,
-                TokenType.NullLiteral => true,
+                TokenType.NilLiteral => true,
                 TokenType.NumericLiteral => true,
                 TokenType.Keyword => true,
                 TokenType.Punctuator => Equals(token.Value, "[") || Equals(token.Value, "#"),
