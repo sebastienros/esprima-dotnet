@@ -819,13 +819,19 @@ namespace Esprima
                     }
 
                     break;
-
+                case ':':
+                    ++Index;
+                    if (Source[Index] == ':')
+                    {
+                        ++Index;
+                        str = "::";
+                    }
+                    break;
                 case ')':
                 case ';':
                 case ',':
                 case '[':
                 case ']':
-                case ':':
                 case '~':
                     ++Index;
                     break;

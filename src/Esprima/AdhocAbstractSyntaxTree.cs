@@ -11,7 +11,7 @@ namespace Esprima
     /// <remarks>
     /// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
     /// </remarks>
-    public class JavaScriptParser
+    public class AdhocAbstractSyntaxTree
     {
         private static readonly HashSet<string> AssignmentOperators = new()
         {
@@ -97,30 +97,30 @@ namespace Esprima
         private readonly Func<Statement> parseStatement;
 
         /// <summary>
-        /// Creates a new <see cref="JavaScriptParser" /> instance.
+        /// Creates a new <see cref="AdhocAbstractSyntaxTree" /> instance.
         /// </summary>
         /// <param name="code">The JavaScript code to parse.</param>
-        public JavaScriptParser(string code) : this(code, new ParserOptions())
+        public AdhocAbstractSyntaxTree(string code) : this(code, new ParserOptions())
         {
         }
 
         /// <summary>
-        /// Creates a new <see cref="JavaScriptParser" /> instance.
+        /// Creates a new <see cref="AdhocAbstractSyntaxTree" /> instance.
         /// </summary>
         /// <param name="code">The JavaScript code to parse.</param>
         /// <param name="options">The parser options.</param>
         /// <returns></returns>
-        public JavaScriptParser(string code, ParserOptions options) : this(code, options, null)
+        public AdhocAbstractSyntaxTree(string code, ParserOptions options) : this(code, options, null)
         {
         }
 
         /// <summary>
-        /// Creates a new <see cref="JavaScriptParser" /> instance.
+        /// Creates a new <see cref="AdhocAbstractSyntaxTree" /> instance.
         /// </summary>
         /// <param name="code">The JavaScript code to parse.</param>
         /// <param name="options">The parser options.</param>
         /// <param name="action">Action to execute on each parsed node.</param>
-        public JavaScriptParser(string code, ParserOptions options, Action<Node>? action)
+        public AdhocAbstractSyntaxTree(string code, ParserOptions options, Action<Node>? action)
         {
             if (code == null)
             {
@@ -678,19 +678,6 @@ namespace Esprima
                         else if (MatchKeyword("new"))
                         {
                             expr = ParseNewExpression();
-                        }
-                        else if (MatchImportCall())
-                        {
-                            expr = ParseImportCall();
-                        }
-                        else if (MatchImportMeta())
-                        {
-                            if (!_context.IsModule)
-                            {
-                                TolerateUnexpectedToken(_lookahead, Messages.CannotUseImportMetaOutsideAModule);
-                            }
-
-                            expr = ParseImportMeta();
                         }
                         else
                         {
@@ -1537,86 +1524,6 @@ namespace Esprima
             Expect(")");
 
             return NodeList.From(ref args);
-        }
-
-        private bool MatchImportCall()
-        {
-            var match = MatchKeyword("import");
-            if (match)
-            {
-                var state = _scanner.SaveState();
-                _scanner.ScanComments();
-                var next = _scanner.Lex();
-                _scanner.RestoreState(state);
-                match = next.Type == TokenType.Punctuator && (string?) next.Value == "(";
-            }
-
-            return match;
-        }
-
-        private Import ParseImportCall()
-        {
-            var node = CreateNode();
-            ExpectKeyword("import");
-            Expect("(");
-
-            var source = this.parseAssignmentExpression();
-            if (!this.Match(")") && this._config.Tolerant)
-            {
-                this.TolerateUnexpectedToken(this.NextToken());
-            }
-            else
-            {
-                this.Expect(")");
-                if (this.Match(";"))
-                {
-                    this.NextToken();
-                }
-            }
-
-            return Finalize(node, new Import(source));
-        }
-
-        private bool MatchImportMeta()
-        {
-            var match = MatchKeyword("import");
-            if (match)
-            {
-                var state = _scanner.SaveState();
-                _scanner.ScanComments();
-                var dot = _scanner.Lex();
-                if (dot.Type == TokenType.Punctuator && Equals(dot.Value, "."))
-                {
-                    _scanner.ScanComments();
-                    var meta = _scanner.Lex();
-                    match = meta.Type == TokenType.Identifier && Equals(meta.Value, "meta");
-                    if (match)
-                    {
-                        if (meta.End - meta.Start != "meta".Length)
-                        {
-                            TolerateUnexpectedToken(meta, Messages.InvalidEscapedReservedWord);
-                        }
-                    }
-                }
-                else
-                {
-                    match = false;
-                }
-
-                _scanner.RestoreState(state);
-            }
-
-            return match;
-        }
-
-        private MetaProperty ParseImportMeta()
-        {
-            var node = CreateNode();
-            var id = ParseIdentifierName(); // 'import', already ensured by matchImportMeta
-            Expect(".");
-            var property = ParseIdentifierName(); // 'meta', already ensured by matchImportMeta
-            _context.IsAssignmentTarget = false;
-            return Finalize(node, new MetaProperty(id, property));
         }
 
         private Expression ParseLeftHandSideExpressionAllowCall()
@@ -2473,24 +2380,12 @@ namespace Esprima
                         break;
 
                     case "import":
-                        if (MatchImportCall())
+                        if (!_context.IsModule)
                         {
-                            statement = ParseExpressionStatement();
-                        }
-                        else if (MatchImportMeta())
-                        {
-                            statement = ParseStatement();
-                        }
-                        else
-                        {
-                            if (!_context.IsModule)
-                            {
-                                TolerateUnexpectedToken(_lookahead, Messages.IllegalImportDeclaration);
-                            }
-
-                            statement = ParseImportDeclaration();
+                            TolerateUnexpectedToken(_lookahead, Messages.IllegalImportDeclaration);
                         }
 
+                        statement = ParseImportDeclaration();
                         break;
                     case "const":
                         var inFor = false;
@@ -4654,60 +4549,6 @@ namespace Esprima
             return Finalize(node, new Literal((string?) token.Value, raw));
         }
 
-        // import {<foo as bar>} ...;
-        private ImportSpecifier ParseImportSpecifier()
-        {
-            var node = CreateNode();
-
-            Identifier local, imported;
-
-            if (_lookahead.Type == TokenType.Identifier)
-            {
-                imported = ParseVariableIdentifier();
-                local = imported;
-                if (MatchContextualKeyword("as"))
-                {
-                    NextToken();
-                    local = ParseVariableIdentifier();
-                }
-            }
-            else
-            {
-                imported = ParseIdentifierName();
-                local = imported;
-                if (MatchContextualKeyword("as"))
-                {
-                    NextToken();
-                    local = ParseVariableIdentifier();
-                }
-                else
-                {
-                    ThrowUnexpectedToken(NextToken());
-                }
-            }
-
-            return Finalize(node, new ImportSpecifier(local, imported));
-        }
-
-        // {foo, bar as bas}
-        private ArrayList<ImportSpecifier> ParseNamedImports()
-        {
-            Expect("{");
-            var specifiers = new ArrayList<ImportSpecifier>();
-            while (!Match("}"))
-            {
-                specifiers.Push(ParseImportSpecifier());
-                if (!Match("}"))
-                {
-                    Expect(",");
-                }
-            }
-
-            Expect("}");
-
-            return specifiers;
-        }
-
         // import <foo> ...;
         private ImportDefaultSpecifier ParseImportDefaultSpecifier()
         {
@@ -4716,20 +4557,13 @@ namespace Esprima
             return Finalize(node, new ImportDefaultSpecifier(local));
         }
 
-        // import <* as foo> ...;
-        private ImportNamespaceSpecifier ParseImportNamespaceSpecifier()
+        // import *;
+        private ImportNamespaceSpecifier ParseImportAll()
         {
             var node = CreateNode();
 
             Expect("*");
-            if (!MatchContextualKeyword("as"))
-            {
-                ThrowError(Messages.NoAsAfterImportNamespace);
-            }
-
-            NextToken();
-            var local = ParseIdentifierName();
-
+            var local = new Identifier("*");
             return Finalize(node, new ImportNamespaceSpecifier(local));
         }
 
@@ -4743,63 +4577,44 @@ namespace Esprima
             var node = CreateNode();
             ExpectKeyword("import");
 
-            Literal src;
+            Literal src = null;
             var specifiers = new ArrayList<ImportDeclarationSpecifier>();
-            if (_lookahead.Type == TokenType.StringLiteral)
+
+            if (Match("*"))
             {
-                // import 'foo';
-                src = ParseModuleSpecifier();
+                specifiers.Push(ParseImportAll());
+            }
+            else if (IsIdentifierName(_lookahead))
+            {
+                // import foo
+                specifiers.Push(ParseImportDefaultSpecifier());
+                while (Match("::"))
+                {
+                    NextToken();
+                    if (Match("*"))
+                    {
+                        // import foo::*
+                        specifiers.Push(ParseImportAll());
+                        break;
+                    }
+                    else if (_lookahead.Type == TokenType.Identifier)
+                    {
+                        // import foo::bar
+                        specifiers.Push(ParseImportDefaultSpecifier());
+                    }
+                    else
+                    {
+                        ThrowUnexpectedToken(_lookahead);
+                    }
+                }
             }
             else
             {
-                if (Match("{"))
-                {
-                    // import {bar}
-                    specifiers.AddRange(ParseNamedImports());
-                }
-                else if (Match("*"))
-                {
-                    // import * as foo
-                    specifiers.Push(ParseImportNamespaceSpecifier());
-                }
-                else if (IsIdentifierName(_lookahead) && !MatchKeyword("default"))
-                {
-                    // import foo
-                    specifiers.Push(ParseImportDefaultSpecifier());
-                    if (Match(","))
-                    {
-                        NextToken();
-                        if (Match("*"))
-                        {
-                            // import foo, * as foo
-                            specifiers.Push(ParseImportNamespaceSpecifier());
-                        }
-                        else if (Match("{"))
-                        {
-                            // import foo, {bar}
-                            specifiers.AddRange(ParseNamedImports());
-                        }
-                        else
-                        {
-                            ThrowUnexpectedToken(_lookahead);
-                        }
-                    }
-                }
-                else
-                {
-                    ThrowUnexpectedToken(NextToken());
-                }
-
-                if (!MatchContextualKeyword("from"))
-                {
-                    var message = _lookahead.Value != null ? Messages.UnexpectedToken : Messages.MissingFromClause;
-                    ThrowError(message, _lookahead.Value);
-                }
-
-                NextToken();
-                src = ParseModuleSpecifier();
+                ThrowUnexpectedToken(NextToken());
             }
 
+
+            NextToken();
             ConsumeSemicolon();
 
             return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src));
