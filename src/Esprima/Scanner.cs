@@ -958,7 +958,7 @@ namespace Esprima
         private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, NumberStyles style)
         {
             var c = number[0];
-            if (c > 7 && Character.IsHexDigit(c))
+            if (c > '7' && Character.IsHexDigit(c))
             {
                 // ensure we get positive number
                 number = ("0" + number.ToString()).AsSpan();
@@ -990,7 +990,7 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
-            var bigInt = number.Length > 4;
+            var bigInt = false;
             if (!Eof())
             {
                 var ch = Source.CharCodeAt(Index);
