@@ -4,10 +4,17 @@ namespace Esprima.Ast
 {
     public sealed class ExportSpecifier : Statement
     {
-        public readonly Identifier Exported;
-        public readonly Identifier Local;
+        /// <summary>
+        /// Identifier | StringLiteral
+        /// </summary>
+        public readonly Expression Exported;
 
-        public ExportSpecifier(Identifier local, Identifier exported) : base(Nodes.ExportSpecifier)
+        /// <summary>
+        /// Identifier | StringLiteral
+        /// </summary>
+        public readonly Expression Local;
+
+        public ExportSpecifier(Expression local, Expression exported) : base(Nodes.ExportSpecifier)
         {
             Exported = exported;
             Local = local;

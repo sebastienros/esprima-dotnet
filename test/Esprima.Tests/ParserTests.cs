@@ -104,6 +104,16 @@ namespace Esprima.Tests
             Assert.Equal(expected, literal.NumericValue);
         }
 
+        [Theory]
+        [InlineData("export { Mercury as \"☿\" } from \"./export-expname_FIXTURE.js\";")]
+        [InlineData("export * as \"All\" from \"./export-expname_FIXTURE.js\";")]
+        [InlineData("export { \"☿\" as Ami } from \"./export-expname_FIXTURE.js\"")]
+        [InlineData("import { \"☿\" as Ami } from \"./export-expname_FIXTURE.js\";")]
+        public void ShouldParseModuleImportExportWithStringIdentifiers(string source)
+        {
+            new JavaScriptParser(source).ParseModule();
+        }
+
         [Fact]
         public void ShouldParseClassInheritance()
         {

@@ -4,14 +4,13 @@ namespace Esprima.Ast
 {
     public sealed class ImportSpecifier : ImportDeclarationSpecifier
     {
-        public new readonly Identifier Local;
-        protected override Identifier LocalId => Local;
+        /// <summary>
+        /// Identifier | StringLiteral
+        /// </summary>
+        public readonly Expression Imported;
 
-        public readonly Identifier Imported;
-
-        public ImportSpecifier(Identifier local, Identifier imported) : base(Nodes.ImportSpecifier)
+        public ImportSpecifier(Expression local, Expression imported) : base(local, Nodes.ImportSpecifier)
         {
-            Local = local;
             Imported = imported;
         }
 

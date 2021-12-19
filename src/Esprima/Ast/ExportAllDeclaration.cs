@@ -5,13 +5,17 @@ namespace Esprima.Ast
     public sealed class ExportAllDeclaration : ExportDeclaration
     {
         public readonly Literal Source;
-        public readonly Identifier? Exported;
+
+        /// <summary>
+        /// Identifier | StringLiteral
+        /// </summary>
+        public readonly Expression? Exported;
 
         public ExportAllDeclaration(Literal source) : this(source, null)
         {
         }
 
-        public ExportAllDeclaration(Literal source, Identifier? exported) : base(Nodes.ExportAllDeclaration)
+        public ExportAllDeclaration(Literal source, Expression? exported) : base(Nodes.ExportAllDeclaration)
         {
             Source = source;
             Exported = exported;
