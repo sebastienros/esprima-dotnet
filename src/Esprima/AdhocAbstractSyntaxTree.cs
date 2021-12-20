@@ -576,7 +576,10 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal((string?) token.Value, raw));
+
+                    
+                    expr = Finalize(node, new Literal((string?)token.Value, raw));
+                    
                     break;
 
                 case TokenType.NumericLiteral:
@@ -589,20 +592,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(token.NumericValue, raw));
-                    break;
-
-                case TokenType.BigIntLiteral:
-                    if (_context.Strict && _lookahead.Octal)
-                    {
-                        TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
-                    }
-
-                    _context.IsAssignmentTarget = false;
-                    _context.IsBindingElement = false;
-                    token = NextToken();
-                    raw = GetTokenRaw(token);
-                    expr = Finalize(node, new BigIntLiteral(token.BigIntValue.Value, raw));
+                    expr = Finalize(node, new Literal(token.NumericTokenType, token.NumericValue, raw));
                     break;
 
                 case TokenType.BooleanLiteral:
@@ -859,17 +849,7 @@ namespace Esprima
                     }
 
                     raw = GetTokenRaw(token);
-                    key = Finalize(node, new Literal(token.NumericValue, raw));
-                    break;
-
-                case TokenType.BigIntLiteral:
-                    if (_context.Strict && token.Octal)
-                    {
-                        TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
-                    }
-
-                    raw = GetTokenRaw(token);
-                    key = Finalize(node, new BigIntLiteral(token.BigIntValue.Value, raw));
+                    key = Finalize(node, new Literal(token.NumericTokenType, token.NumericValue, raw));
                     break;
 
                 case TokenType.Identifier:
@@ -1626,6 +1606,18 @@ namespace Esprima
                     }
 
                     var property = ParseIdentifierOrPrivateIdentifierName();
+                    expr = Finalize(StartNode(startToken), new AttributeMemberExpression(expr, property, optional));
+                }
+                else if (Match("::") || optional)
+                {
+                    _context.IsBindingElement = false;
+                    _context.IsAssignmentTarget = !optional;
+                    if (!optional)
+                    {
+                        Expect("::");
+                    }
+
+                    var property = ParseIdentifierOrPrivateIdentifierName();
                     expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
                 }
                 else
@@ -1706,6 +1698,18 @@ namespace Esprima
                     expr = Finalize(node, new TaggedTemplateExpression(expr, quasi));
                 }
                 else if (Match(".") || optional)
+                {
+                    _context.IsBindingElement = false;
+                    _context.IsAssignmentTarget = !optional;
+                    if (!optional)
+                    {
+                        Expect(".");
+                    }
+
+                    var property = ParseIdentifierName();
+                    expr = Finalize(node, new AttributeMemberExpression(expr, property, optional));
+                }
+                else if (Match("::") || optional)
                 {
                     _context.IsBindingElement = false;
                     _context.IsAssignmentTarget = !optional;

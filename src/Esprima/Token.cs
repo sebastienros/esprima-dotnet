@@ -15,8 +15,18 @@ namespace Esprima
         StringLiteral,
         RegularExpression,
         Template,
-        BigIntLiteral
     };
+
+    public enum NumericTokenType
+    {
+        None,
+        Integer,
+        UnsignedInteger,
+        Long,
+        UnsignedLong,
+        Float,
+        Double,
+    }
 
     public class Token
     {
@@ -40,10 +50,11 @@ namespace Esprima
         public string? RawTemplate;
 
         public bool BooleanValue;
-        public double NumericValue;
+        public object NumericValue;
         public object? Value;
         public RegexValue? RegexValue;
-        public BigInteger? BigIntValue;
+
+        public NumericTokenType NumericTokenType;
 
         public void Clear()
         {
@@ -62,7 +73,6 @@ namespace Esprima
             NumericValue = 0;
             Value = null;
             RegexValue = null;
-            BigIntValue = null;
         }
     }
 }

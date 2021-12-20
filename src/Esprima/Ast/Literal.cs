@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Text.RegularExpressions;
 using Esprima.Utils;
 
@@ -7,15 +8,15 @@ namespace Esprima.Ast
     public class Literal : Expression
     {
         public string? StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
-        public readonly double NumericValue;
-        public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
+        public readonly object NumericValue;
+        public bool BooleanValue => TokenType == TokenType.BooleanLiteral && IsNotZero();
         public Regex? RegexValue => TokenType == TokenType.RegularExpression ? (Regex?) Value : null;
-        public BigInteger? BigIntValue => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null;
 
         public readonly RegexValue? Regex;
         public readonly object? Value;
         public readonly string Raw;
         public readonly TokenType TokenType;
+        public NumericTokenType NumericTokenType;
 
         internal Literal(TokenType tokenType, object? value, string raw) : base(Nodes.Literal)
         {
@@ -33,8 +34,12 @@ namespace Esprima.Ast
             NumericValue = value ? 1 : 0;
         }
 
-        public Literal(double value, string raw) : this(TokenType.NumericLiteral, value, raw)
+        public Literal(NumericTokenType numTokenType, object value, string raw) : this(TokenType.NumericLiteral, value, raw)
         {
+            if (numTokenType == NumericTokenType.None)
+                throw new Exception("NumericTokenType is not valid");
+
+            this.NumericTokenType = numTokenType;
             NumericValue = value;
         }
 
@@ -53,6 +58,14 @@ namespace Esprima.Ast
         protected internal override void Accept(AstVisitor visitor)
         {
             visitor.VisitLiteral(this);
+        }
+
+        private bool IsNotZero()
+        {
+            if (NumericTokenType == NumericTokenType.Integer)
+                return ((int)NumericValue) != 0;
+            else
+                throw new NotImplementedException("Not implemented");
         }
     }
 }

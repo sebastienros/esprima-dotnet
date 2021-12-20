@@ -1172,15 +1172,51 @@ namespace Esprima
                     ThrowUnexpectedToken();
                 }
             }
-            else if (ch == 'n')
+            else if (ch == 'u') // Unsigned
             {
                 Index++;
-                var bigInt = BigInteger.Parse(sb.ToString());
+
+                if (Source[Index] == 'l') // Unsigned long
+                {
+                    Index++;
+                    ulong ulongValue = ulong.Parse(sb.ToString());
+                    return new Token
+                    {
+                        Type = TokenType.NumericLiteral,
+                        NumericTokenType = NumericTokenType.UnsignedLong,
+                        Value = ulongValue,
+                        NumericValue = ulongValue,
+                        LineNumber = LineNumber,
+                        LineStart = LineStart,
+                        Start = start,
+                        End = Index
+                    };
+                }
+                else // Unsigned int
+                {
+                    var uintValue = uint.Parse(sb.ToString());
+                    return new Token
+                    {
+                        Type = TokenType.NumericLiteral,
+                        NumericTokenType = NumericTokenType.UnsignedInteger,
+                        Value = uintValue,
+                        NumericValue = uintValue,
+                        LineNumber = LineNumber,
+                        LineStart = LineStart,
+                        Start = start,
+                        End = Index
+                    };
+                }
+            }
+            else if (ch == 'l') // Long
+            {
+                long longValue = long.Parse(sb.ToString());
                 return new Token
                 {
-                    Type = TokenType.BigIntLiteral,
-                    Value = bigInt,
-                    BigIntValue = bigInt,
+                    Type = TokenType.NumericLiteral,
+                    NumericTokenType = NumericTokenType.Long,
+                    Value = longValue,
+                    NumericValue = longValue,
                     LineNumber = LineNumber,
                     LineStart = LineStart,
                     Start = start,
@@ -1204,13 +1240,25 @@ namespace Esprima
 
             var number = sb.ToString();
 
-            if (long.TryParse(
+            // Int by default
+            if (int.TryParse(
+                number,
+                NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture,
+                out var i))
+            {
+                token.NumericValue = i;
+                token.NumericTokenType = NumericTokenType.Integer;
+                token.Value = i;
+            }
+            else if (long.TryParse(
                 number,
                 NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
                 CultureInfo.InvariantCulture,
                 out var l))
             {
                 token.NumericValue = l;
+                token.NumericTokenType = NumericTokenType.Long;
                 token.Value = l;
             }
             else if (double.TryParse(
@@ -1219,6 +1267,7 @@ namespace Esprima
                 out var d))
             {
                 token.NumericValue = d;
+                token.NumericTokenType = NumericTokenType.Double;
                 token.Value = d;
             }
             else
@@ -1228,6 +1277,7 @@ namespace Esprima
                     : double.PositiveInfinity;
 
                 token.NumericValue = d;
+                token.NumericTokenType = NumericTokenType.Double;
                 token.Value = d;
             }
 
@@ -1377,7 +1427,7 @@ namespace Esprima
             var terminated = false;
             var start = Index;
 
-            var head = Source[start] == '`';
+            var head = Source[start] == '"';
             var tail = false;
             char? notEscapeSequenceHead = null;
             var rawOffset = 2;
@@ -1387,18 +1437,18 @@ namespace Esprima
             while (!Eof())
             {
                 var ch = Source[Index++];
-                if (ch == '`')
+                if (ch == '"')
                 {
                     rawOffset = 1;
                     tail = true;
                     terminated = true;
                     break;
                 }
-                else if (ch == '$')
+                else if (ch == '%')
                 {
                     if (Source[Index] == '{')
                     {
-                        _curlyStack.Add("${");
+                        _curlyStack.Add("%{");
                         ++Index;
                         terminated = true;
                         break;
@@ -1845,10 +1895,11 @@ namespace Esprima
                 return ScanPunctuator();
             }
 
-            // String literal starts with single quote (U+0027) or double quote (U+0022).
-            if (cp == 0x27 || cp == 0x22)
+            // Template literals start with " (U+0060) for template head
+            // or } (U+007D) for template middle or template tail.
+            if (cp == 0x22 || cp == 0x7D && _curlyStack.Count > 0 && _curlyStack[_curlyStack.Count - 1] == "%{")
             {
-                return ScanStringLiteral();
+                return ScanTemplate();
             }
 
             // Dot (.) U+002E can also start a floating-point number, hence the need
@@ -1866,13 +1917,6 @@ namespace Esprima
             if (Character.IsDecimalDigit(cp))
             {
                 return ScanNumericLiteral();
-            }
-
-            // Template literals start with ` (U+0060) for template head
-            // or } (U+007D) for template middle or template tail.
-            if (cp == 0x60 || cp == 0x7D && _curlyStack.Count > 0 && _curlyStack[_curlyStack.Count - 1] == "${")
-            {
-                return ScanTemplate();
             }
 
             // Possible identifier start in a surrogate pair.
