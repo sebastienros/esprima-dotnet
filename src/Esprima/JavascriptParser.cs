@@ -4672,7 +4672,8 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            Identifier local, imported;
+            Expression local;
+            Expression imported;
 
             if (_lookahead.Type == TokenType.Identifier)
             {
@@ -4686,7 +4687,10 @@ namespace Esprima
             }
             else
             {
-                imported = ParseIdentifierName();
+                imported = this._lookahead.Type == TokenType.StringLiteral
+                    ? ParseModuleSpecifier()
+                    : ParseIdentifierName();
+
                 local = imported;
                 if (MatchContextualKeyword("as"))
                 {
@@ -4824,12 +4828,17 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            var local = ParseIdentifierName();
+            Expression local = this._lookahead.Type == TokenType.StringLiteral
+                ? ParseModuleSpecifier()
+                : ParseIdentifierName();
+
             var exported = local;
             if (MatchContextualKeyword("as"))
             {
                 NextToken();
-                exported = ParseIdentifierName();
+                exported = this._lookahead.Type == TokenType.StringLiteral
+                    ? ParseModuleSpecifier()
+                    : ParseIdentifierName();
             }
 
             return Finalize(node, new ExportSpecifier(local, exported));
@@ -4898,11 +4907,13 @@ namespace Esprima
                 NextToken();
 
                 //export * as ns from 'foo'
-                Identifier? exported = null;
+                Expression? exported = null;
                 if (MatchContextualKeyword("as"))
                 {
                     NextToken();
-                    exported = ParseIdentifierName();
+                    exported = this._lookahead.Type == TokenType.StringLiteral
+                        ? ParseModuleSpecifier()
+                        : ParseIdentifierName();
                 }
 
                 if (!MatchContextualKeyword("from"))

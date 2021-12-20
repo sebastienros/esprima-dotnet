@@ -4,12 +4,8 @@ namespace Esprima.Ast
 {
     public sealed class ImportDefaultSpecifier : ImportDeclarationSpecifier
     {
-        public new readonly Identifier Local;
-        protected override Identifier LocalId => Local;
-
-        public ImportDefaultSpecifier(Identifier local) : base(Nodes.ImportDefaultSpecifier)
+        public ImportDefaultSpecifier(Identifier local) : base(local, Nodes.ImportDefaultSpecifier)
         {
-            Local = local;
         }
 
         public override NodeCollection ChildNodes => new(Local);
