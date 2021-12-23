@@ -961,7 +961,7 @@ namespace Esprima
             if (style == NumberStyles.None)
             {
                 // binary
-                foreach(var c in number)
+                foreach (var c in number)
                 {
                     bigInt <<= 1;
                     bigInt += c == '1' ? 1 : 0;
@@ -1744,7 +1744,7 @@ namespace Esprima
             while (!Eof())
             {
                 ch = Source[Index++];
-                str.Append(ch);
+
                 if (ch == '\\')
                 {
                     ch = Source[Index++];
@@ -1752,6 +1752,12 @@ namespace Esprima
                     if (Character.IsLineTerminator(ch))
                     {
                         ThrowUnexpectedToken(Messages.UnterminatedRegExp);
+                    }
+
+                    // We might need to do it for more chars, for instance /\a{3}/ in v8 doesn't try to escape 'a'.
+                    if (ch != 'u')
+                    {
+                        str.Append('\\');
                     }
 
                     str.Append(ch);

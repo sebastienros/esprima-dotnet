@@ -33,5 +33,17 @@ namespace Esprima.Tests
 
             Assert.NotNull(program);
         }
+
+        [Fact]
+        public void ShouldParseUnicodeEscapesWithoutFlag()
+        {
+            Assert.Matches(CreateRegex(@"/^\u{3}$/"), "uuu");
+        }
+
+        [Fact]
+        public void ShouldParseUnicodeEscapesWithFlag()
+        {
+            Assert.Matches(CreateRegex(@"/^\u{3}$/u"), "🚀");
+        }
     }
 }
