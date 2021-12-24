@@ -1601,17 +1601,55 @@ namespace Esprima
             };
         }
 
-        // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
+        private static string FromCharCode(uint[] codeUnits)
+        {
+            var chars = new char[codeUnits.Length];
+            for (var i = 0; i < chars.Length; i++)
+            {
+                chars[i] = (char) codeUnits[i];
+            }
+
+            return new string(chars);
+        }
+
+        private string FromCodePoint(params uint[] codePoints)
+        {
+            var codeUnits = new List<uint>();
+            var result = "";
+
+            foreach (var codePoint in codePoints)
+            {
+                if (codePoint < 0 || codePoint > 0x10FFFF)
+                {
+                    EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(codePoint), codePoint, "Invalid code point.");
+                }
+
+                var point = codePoint;
+                if (point <= 0xFFFF)
+                {
+                    // BMP code point
+                    codeUnits.Add(point);
+                }
+                else
+                {
+                    // Astral code point; split in surrogate halves
+                    // https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+                    point -= 0x10000;
+                    codeUnits.Add((point >> 10) + 0xD800); // highSurrogate
+                    codeUnits.Add((point % 0x400) + 0xDC00); // lowSurrogate
+                }
+                if (codeUnits.Count >= 0x3fff)
+                {
+                    result += FromCharCode(codeUnits.ToArray());
+                    codeUnits.Clear();
+                }
+            }
+
+            return result + FromCharCode(codeUnits.ToArray());
+        }
 
         public Regex? TestRegExp(string pattern, string flags)
         {
-            // The BMP character to use as a replacement for astral symbols when
-            // translating an ES6 "u"-flagged pattern to an ES5-compatible
-            // approximation.
-            // Note: replacing with '\uFFFF' enables false positives in unlikely
-            // scenarios. For example, `[\u{1044f}-\u{10440}]` is an invalid
-            // pattern that would not be detected by this substitution.
-            var astralSubstitute = "\uFFFF";
             var tmp = pattern;
             var self = this;
 
@@ -1622,35 +1660,41 @@ namespace Esprima
                     // BMP character or a constant ASCII code point in the case of
                     // astral symbols. (See the above note on `astralSubstitute`
                     // for more information.)
-                    .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}|\\u([a-fA-F0-9]{4})", (match) =>
+                    .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}|(\\u[a-fA-F0-9]{4})+", (match) =>
                     {
-                        int codePoint;
                         if (!string.IsNullOrEmpty(match.Groups[1].Value))
                         {
-                            codePoint = Convert.ToInt32(match.Groups[1].Value, 16);
+                            var codePoint = Convert.ToUInt32(match.Groups[1].Value, 16);
+
+                            if (codePoint > 0x10FFFF)
+                            {
+                                ThrowUnexpectedToken(Messages.InvalidRegExp);
+                            }
+
+                            return FromCodePoint(codePoint);
                         }
                         else
                         {
-                            codePoint = Convert.ToInt32(match.Groups[2].Value, 16);
-                        }
+                            // e.g., \uD83D\uDE80 (which is equivalent to \u{1F680}
+                            var codePoints = new uint[match.Value.Length / 6];
 
-                        if (codePoint > 0x10FFFF)
-                        {
-                            ThrowUnexpectedToken(Messages.InvalidRegExp);
-                        }
+                            for (var i = 0; i < codePoints.Length; i++)
+                            {
+                                codePoints[codePoints.Length - 1 - i] = Convert.ToUInt32(match.Value.Substring(i * 6 + 2, 4), 16);
+                            }
 
-                        if (codePoint <= 0xFFFF)
-                        {
-                            return ParserExtensions.CharToString((char) codePoint);
+                            return FromCodePoint(codePoints);
                         }
-
-                        return astralSubstitute;
                     });
+            }
+            else
+            {
+                // \u is a valid escape sequence in JS, but not in .NET
 
-                // Replace each paired surrogate with a single ASCII symbol to
-                // avoid throwing on regular expressions that are only valid in
-                // combination with the "u" flag.
-                tmp = Regex.Replace(tmp, "[\uD800-\uDBFF][\uDC00-\uDFFF]", astralSubstitute);
+                tmp = Regex.Replace(tmp, @"(\\+)u", (match) =>
+                {
+                    return new String('\\', match.Groups[1].Value.Length / 2 * 2) + 'u';
+                });
             }
 
             // First, detect invalid regular expressions.
@@ -1680,23 +1724,27 @@ namespace Esprima
             try
             {
                 // Do we need to convert the expression to its .NET equivalent?
-                if (_adaptRegexp && options.HasFlag(RegexOptions.Multiline))
+                if (_adaptRegexp)
                 {
                     // Replace all non-escaped $ occurences by \r?$
                     // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
 
                     var index = 0;
-                    var newPattern = pattern;
-                    while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
+                    var newPattern = tmp;
+
+                    if (options.HasFlag(RegexOptions.Multiline))
                     {
-                        if (index > 0 && newPattern[index - 1] != '\\')
+                        while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                         {
-                            newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
-                            index += 4;
-                        }
-                        else
-                        {
-                            index++;
+                            if (index > 0 && newPattern[index - 1] != '\\')
+                            {
+                                newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
+                                index += 4;
+                            }
+                            else
+                            {
+                                index++;
+                            }
                         }
                     }
 
@@ -1744,7 +1792,7 @@ namespace Esprima
             while (!Eof())
             {
                 ch = Source[Index++];
-
+                str.Append(ch);
                 if (ch == '\\')
                 {
                     ch = Source[Index++];
@@ -1752,12 +1800,6 @@ namespace Esprima
                     if (Character.IsLineTerminator(ch))
                     {
                         ThrowUnexpectedToken(Messages.UnterminatedRegExp);
-                    }
-
-                    // We might need to do it for more chars, for instance /\a{3}/ in v8 doesn't try to escape 'a'.
-                    if (ch != 'u')
-                    {
-                        str.Append('\\');
                     }
 
                     str.Append(ch);
