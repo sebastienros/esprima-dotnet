@@ -492,17 +492,6 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitForInStatement(ForInStatement forInStatement)
-            {
-                using (StartNodeObject(forInStatement))
-                {
-                    Member("left", forInStatement.Left);
-                    Member("right", forInStatement.Right);
-                    Member("body", forInStatement.Body);
-                    Member("each", false);
-                }
-            }
-
             protected internal override void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
             {
                 using (StartNodeObject(doWhileStatement))
@@ -753,7 +742,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitForOfStatement(ForOfStatement forOfStatement)
+            protected internal override void VisitForOfStatement(ForeachStatement forOfStatement)
             {
                 using (StartNodeObject(forOfStatement))
                 {

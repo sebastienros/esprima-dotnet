@@ -412,6 +412,21 @@ namespace Esprima
         }
 
         /// <summary>
+        /// Expect the next token to match the specified keyword.
+        /// If not, an exception will be thrown.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ExpectKeyword(params string[] keyword)
+        {
+            var token = NextToken();
+            foreach (var word in keyword)
+            {
+                if (token.Type == TokenType.Keyword && word.Equals(token.Value))
+                    continue;
+            }
+        }
+
+        /// <summary>
         /// Return true if the next token matches the specified punctuator.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -661,7 +676,7 @@ namespace Esprima
                             NextToken();
                             expr = Finalize(node, new ThisExpression());
                         }
-                        else if (MatchKeyword("class"))
+                        else if (MatchKeyword("class") || MatchKeyword("module"))
                         {
                             expr = ParseClassExpression();
                         }
@@ -2374,15 +2389,6 @@ namespace Esprima
             {
                 switch ((string?) _lookahead.Value)
                 {
-                    case "export":
-                        if (!_context.IsModule)
-                        {
-                            TolerateUnexpectedToken(_lookahead, Messages.IllegalExportDeclaration);
-                        }
-
-                        statement = ParseExportDeclaration();
-                        break;
-
                     case "import":
                         if (!_context.IsModule)
                         {
@@ -2391,12 +2397,12 @@ namespace Esprima
 
                         statement = ParseImportDeclaration();
                         break;
-                    case "const":
-                        var inFor = false;
-                        statement = ParseLexicalDeclaration(ref inFor);
-                        break;
                     case "function":
                         statement = ParseFunctionDeclaration();
+                        break;
+                    case "module":
+                        statement = ParseClassDeclaration();
+                        (statement as ClassDeclaration).IsModule = true;
                         break;
                     case "class":
                         statement = ParseClassDeclaration();
@@ -2456,22 +2462,7 @@ namespace Esprima
             }
 
             Expression? init = null;
-            if (kind == VariableDeclarationKind.Const)
-            {
-                if (!MatchKeyword("in") && !MatchContextualKeyword("of"))
-                {
-                    if (Match("="))
-                    {
-                        NextToken();
-                        init = IsolateCoverGrammar(parseAssignmentExpression);
-                    }
-                    else
-                    {
-                        return ThrowError<VariableDeclarator>(Messages.DeclarationMissingInitializer, "const");
-                    }
-                }
-            }
-            else if (!inFor && id.Type != Nodes.Identifier || Match("="))
+            if (!inFor && id.Type != Nodes.Identifier || Match("="))
             {
                 Expect("=");
                 init = IsolateCoverGrammar(parseAssignmentExpression);
@@ -2524,7 +2515,6 @@ namespace Esprima
         {
             return kindString switch
             {
-                "const" => VariableDeclarationKind.Const,
                 "var" => VariableDeclarationKind.Var,
                 _ => ThrowError<VariableDeclarationKind>("Unknown declaration kind '{0}'", kindString)
             };
@@ -2937,13 +2927,14 @@ namespace Esprima
             StatementListItem? init = null;
             Expression? test = null;
             Expression? update = null;
-            var forIn = true;
             Node? left = null;
             Expression? right = null;
             var @await = false;
 
             var node = CreateNode();
-            ExpectKeyword("for");
+
+            var forKeyword = _lookahead.Value;
+            ExpectKeyword("for", "foreach");
             if (MatchContextualKeyword("await"))
             {
                 if (!_context.IsAsync)
@@ -2979,31 +2970,12 @@ namespace Esprima
                     var declarations = ParseVariableDeclarationList(ref inFor);
                     _context.AllowIn = previousAllowIn;
 
-                    if (declarations.Count == 1 && MatchKeyword("in"))
-                    {
-                        if (@await)
-                        {
-                            TolerateUnexpectedToken(_lookahead);
-                        }
-
-                        var decl = declarations[0];
-                        if (decl.Init != null && (decl.Id.Type == Nodes.ArrayPattern || decl.Id.Type == Nodes.ObjectPattern || _context.Strict))
-                        {
-                            TolerateError(Messages.ForInOfLoopInitializer, "for-in");
-                        }
-
-                        left = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
-                        NextToken();
-                        right = ParseExpression();
-                        init = null;
-                    }
-                    else if (declarations.Count == 1 && declarations[0]!.Init == null && MatchContextualKeyword("of"))
+                    if (forKeyword.Equals("foreach") && declarations.Count == 1 && declarations[0]!.Init == null && MatchKeyword("in"))
                     {
                         left = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
                         NextToken();
                         right = ParseAssignmentExpression();
                         init = null;
-                        forIn = false;
                     }
                     else
                     {
@@ -3014,63 +2986,6 @@ namespace Esprima
 
                         init = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
                         Expect(";");
-                    }
-                }
-                else if (MatchKeyword("const"))
-                {
-                    var initNode = CreateNode();
-                    var kindString = (string?) NextToken().Value;
-                    var kind = ParseVariableDeclarationKind(kindString);
-                    if (!_context.Strict && (string?) _lookahead.Value == "in")
-                    {
-                        if (@await)
-                        {
-                            TolerateUnexpectedToken(_lookahead);
-                        }
-
-                        left = Finalize(initNode, new Identifier(kindString));
-                        NextToken();
-                        right = ParseExpression();
-                        init = null;
-                    }
-                    else
-                    {
-                        var previousAllowIn = _context.AllowIn;
-                        _context.AllowIn = false;
-                        var inFor = true;
-                        var declarations = ParseBindingList(kind, inFor);
-                        _context.AllowIn = previousAllowIn;
-
-                        if (declarations.Count == 1 && declarations[0]!.Init == null && MatchKeyword("in"))
-                        {
-                            if (@await)
-                            {
-                                TolerateUnexpectedToken(_lookahead);
-                            }
-
-                            left = Finalize(initNode, new VariableDeclaration(declarations, kind));
-                            NextToken();
-                            right = ParseExpression();
-                            init = null;
-                        }
-                        else if (declarations.Count == 1 && declarations[0]!.Init == null && MatchContextualKeyword("of"))
-                        {
-                            left = Finalize(initNode, new VariableDeclaration(declarations, kind));
-                            NextToken();
-                            right = ParseAssignmentExpression();
-                            init = null;
-                            forIn = false;
-                        }
-                        else
-                        {
-                            if (@await)
-                            {
-                                TolerateUnexpectedToken(_lookahead);
-                            }
-
-                            ConsumeSemicolon();
-                            init = Finalize(initNode, new VariableDeclaration(declarations, kind));
-                        }
                     }
                 }
                 else
@@ -3085,25 +3000,7 @@ namespace Esprima
                     init = InheritCoverGrammar(parseAssignmentExpression);
                     _context.AllowIn = previousAllowIn;
 
-                    if (MatchKeyword("in"))
-                    {
-                        if (@await)
-                        {
-                            TolerateUnexpectedToken(_lookahead);
-                        }
-
-                        if (!_context.IsAssignmentTarget || init.Type == Nodes.AssignmentExpression)
-                        {
-                            TolerateError(Messages.InvalidLHSInForIn);
-                        }
-
-                        NextToken();
-                        init = ReinterpretExpressionAsPattern((Expression) init);
-                        left = init;
-                        right = ParseExpression();
-                        init = null;
-                    }
-                    else if (MatchContextualKeyword("of"))
+                    if (MatchContextualKeyword("in"))
                     {
                         if (!_context.IsAssignmentTarget || init.Type == Nodes.AssignmentExpression)
                         {
@@ -3115,7 +3012,6 @@ namespace Esprima
                         left = init;
                         right = ParseAssignmentExpression();
                         init = null;
-                        forIn = false;
                     }
                     else
                     {
@@ -3180,9 +3076,7 @@ namespace Esprima
 
             return left == null
                 ? Finalize(node, new ForStatement(init, test, update, body))
-                : forIn
-                    ? (Statement) Finalize(node, new ForInStatement(left, right!, body))
-                    : Finalize(node, new ForOfStatement(left, right!, body, @await));
+                : Finalize(node, new ForeachStatement(left, right!, body, @await));
         }
 
         // https://tc39.github.io/ecma262/#sec-continue-statement
@@ -3262,36 +3156,6 @@ namespace Esprima
             ConsumeSemicolon();
 
             return Finalize(node, new ReturnStatement(argument));
-        }
-
-        // https://tc39.github.io/ecma262/#sec-with-statement
-
-        private WithStatement ParseWithStatement()
-        {
-            if (_context.Strict)
-            {
-                TolerateError(Messages.StrictModeWith);
-            }
-
-            var node = CreateNode();
-            Statement body;
-
-            ExpectKeyword("with");
-            Expect("(");
-            var obj = ParseExpression();
-
-            if (!Match(")") && _config.Tolerant)
-            {
-                TolerateUnexpectedToken(NextToken());
-                body = Finalize(CreateNode(), new EmptyStatement());
-            }
-            else
-            {
-                Expect(")");
-                body = ParseStatement();
-            }
-
-            return Finalize(node, new WithStatement(obj, body));
         }
 
         // https://tc39.github.io/ecma262/#sec-switch-statement
@@ -3392,7 +3256,7 @@ namespace Esprima
 
                 _context.LabelSet.Add(key);
                 Statement body;
-                if (MatchKeyword("class"))
+                if (MatchKeyword("class") || MatchKeyword("module"))
                 {
                     TolerateUnexpectedToken(_lookahead);
                     body = ParseClassDeclaration();
@@ -3518,16 +3382,6 @@ namespace Esprima
             return Finalize(node, new TryStatement(block, handler, finalizer));
         }
 
-        // https://tc39.github.io/ecma262/#sec-debugger-statement
-
-        private DebuggerStatement ParseDebuggerStatement()
-        {
-            var node = CreateNode();
-            ExpectKeyword("debugger");
-            ConsumeSemicolon();
-            return Finalize(node, new DebuggerStatement());
-        }
-
         // https://tc39.github.io/ecma262/#sec-ecmascript-language-statements-and-declarations
 
         private Statement ParseStatement()
@@ -3578,13 +3432,11 @@ namespace Esprima
                         case "continue":
                             statement = ParseContinueStatement();
                             break;
-                        case "debugger":
-                            statement = ParseDebuggerStatement();
-                            break;
                         case "do":
                             statement = ParseDoWhileStatement();
                             break;
                         case "for":
+                        case "foreach":
                             statement = ParseForStatement();
                             break;
                         case "function":
@@ -3610,9 +3462,6 @@ namespace Esprima
                             break;
                         case "while":
                             statement = ParseWhileStatement();
-                            break;
-                        case "with":
-                            statement = ParseWithStatement();
                             break;
                         default:
                             statement = ParseExpressionStatement();
@@ -4065,7 +3914,7 @@ namespace Esprima
                     break;
                 }
 
-                if (directive == "use strict")
+                if (directive == "use_strict")
                 {
                     _context.Strict = true;
                     if (firstRestricted != null)
@@ -4185,6 +4034,7 @@ namespace Esprima
         private static readonly HashSet<string> KeywordExpressionStart = new()
         {
             "class",
+            "module",
             "delete",
             "function",
             "new",
@@ -4492,7 +4342,7 @@ namespace Esprima
             var previousStrict = _context.Strict;
             var previousAllowSuper = _context.AllowSuper;
             _context.Strict = true;
-            ExpectKeyword("class");
+            ExpectKeyword("class", "module");
 
             var id = identifierIsOptional && _lookahead.Type != TokenType.Identifier
                 ? null
@@ -4519,7 +4369,7 @@ namespace Esprima
 
             var previousStrict = _context.Strict;
             _context.Strict = true;
-            ExpectKeyword("class");
+            ExpectKeyword("class", "module");
             var id = _lookahead.Type == TokenType.Identifier
                 ? ParseVariableIdentifier()
                 : null;
@@ -4622,179 +4472,6 @@ namespace Esprima
             ConsumeSemicolon();
 
             return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src));
-        }
-
-        // https://tc39.github.io/ecma262/#sec-exports
-
-        private ExportSpecifier ParseExportSpecifier()
-        {
-            var node = CreateNode();
-
-            var local = ParseIdentifierName();
-            var exported = local;
-            if (MatchContextualKeyword("as"))
-            {
-                NextToken();
-                exported = ParseIdentifierName();
-            }
-
-            return Finalize(node, new ExportSpecifier(local, exported));
-        }
-
-        private ExportDeclaration ParseExportDeclaration()
-        {
-            if (_context.InFunctionBody)
-            {
-                ThrowError(Messages.IllegalExportDeclaration);
-            }
-
-            var node = CreateNode();
-            ExpectKeyword("export");
-
-            ExportDeclaration exportDeclaration;
-            if (MatchKeyword("default"))
-            {
-                // export default ...
-                NextToken();
-                if (MatchKeyword("function"))
-                {
-                    // export default function foo () {}
-                    // export default function () {}
-                    var declaration = ParseFunctionDeclaration(true);
-                    exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
-                }
-                else if (MatchKeyword("class"))
-                {
-                    // export default class foo {}
-                    var declaration = ParseClassDeclaration(true);
-                    //var declaration = new ClassDeclaration(classExpression.Id, classExpression.SuperClass, classExpression.Body)
-                    //{
-                    //    Location = classExpression.Location,
-                    //    Range = classExpression.Range
-                    //};
-                    exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
-                }
-                else if (MatchContextualKeyword("async"))
-                {
-                    // export default async function f () {}
-                    // export default async function () {}
-                    // export default async x => x
-                    var declaration = MatchAsyncFunction() ? (StatementListItem) ParseFunctionDeclaration(true) : ParseAssignmentExpression();
-                    exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
-                }
-                else
-                {
-                    if (MatchContextualKeyword("from"))
-                    {
-                        ThrowError(Messages.UnexpectedToken, _lookahead.Value);
-                    }
-
-                    // export default {};
-                    // export default [];
-                    // export default (1 + 2);
-                    var declaration = Match("{") ? ParseObjectInitializer() :
-                        Match("[") ? ParseArrayInitializer() : ParseAssignmentExpression();
-                    ConsumeSemicolon();
-                    exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
-                }
-            }
-            else if (Match("*"))
-            {
-                // export * from 'foo';
-                NextToken();
-
-                //export * as ns from 'foo'
-                Identifier? exported = null;
-                if (MatchContextualKeyword("as"))
-                {
-                    NextToken();
-                    exported = ParseIdentifierName();
-                }
-
-                if (!MatchContextualKeyword("from"))
-                {
-                    var message = _lookahead.Value != null ? Messages.UnexpectedToken : Messages.MissingFromClause;
-                    ThrowError(message, _lookahead.Value);
-                }
-
-                NextToken();
-                var src = ParseModuleSpecifier();
-                ConsumeSemicolon();
-                exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported));
-            }
-            else if (_lookahead.Type == TokenType.Keyword)
-            {
-                // export var f = 1;
-                StatementListItem declaration;
-                switch (_lookahead.Value)
-                {
-                    case "let":
-                        throw new Exception("let is not supported in Adhoc.");
-                        break;
-                    case "const":
-                        var inFor = false;
-                        declaration = ParseLexicalDeclaration(ref inFor);
-                        break;
-                    case "var":
-                    case "class":
-                    case "function":
-                        declaration = ParseStatementListItem();
-                        break;
-                    default:
-                        declaration = ThrowUnexpectedToken<StatementListItem>(_lookahead);
-                        break;
-                }
-
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null));
-            }
-            else if (MatchAsyncFunction())
-            {
-                var declaration = ParseFunctionDeclaration();
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null));
-            }
-            else
-            {
-                var specifiers = new ArrayList<ExportSpecifier>();
-                Literal? source = null;
-                var isExportFromIdentifier = false;
-
-                Expect("{");
-                while (!Match("}"))
-                {
-                    isExportFromIdentifier = isExportFromIdentifier || MatchKeyword("default");
-                    specifiers.Push(ParseExportSpecifier());
-                    if (!Match("}"))
-                    {
-                        Expect(",");
-                    }
-                }
-
-                Expect("}");
-
-                if (MatchContextualKeyword("from"))
-                {
-                    // export {default} from 'foo';
-                    // export {foo} from 'foo';
-                    NextToken();
-                    source = ParseModuleSpecifier();
-                    ConsumeSemicolon();
-                }
-                else if (isExportFromIdentifier)
-                {
-                    // export {default}; // missing fromClause
-                    var message = _lookahead.Value != null ? Messages.UnexpectedToken : Messages.MissingFromClause;
-                    ThrowError(message, _lookahead.Value);
-                }
-                else
-                {
-                    // export {foo};
-                    ConsumeSemicolon();
-                }
-
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(null, NodeList.From(ref specifiers), source));
-            }
-
-            return exportDeclaration;
         }
 
         private void ThrowError(string messageFormat, params object?[] values)

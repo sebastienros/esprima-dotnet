@@ -172,13 +172,6 @@ namespace Esprima.Utils
             Visit(forStatement.Body);
         }
 
-        protected internal virtual void VisitForInStatement(ForInStatement forInStatement)
-        {
-            Visit(forInStatement.Left);
-            Visit(forInStatement.Right);
-            Visit(forInStatement.Body);
-        }
-
         protected internal virtual void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
             Visit(doWhileStatement.Body);
@@ -384,7 +377,7 @@ namespace Esprima.Utils
             Visit(methodDefinition.Value);
         }
 
-        protected internal virtual void VisitForOfStatement(ForOfStatement forOfStatement)
+        protected internal virtual void VisitForOfStatement(ForeachStatement forOfStatement)
         {
             Visit(forOfStatement.Left);
             Visit(forOfStatement.Right);

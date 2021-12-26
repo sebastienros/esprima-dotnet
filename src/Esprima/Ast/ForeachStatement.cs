@@ -2,27 +2,30 @@
 
 namespace Esprima.Ast
 {
-    public sealed class ForInStatement : Statement
+    public sealed class ForeachStatement : Statement
     {
+        public readonly bool Await;
         public readonly Node Left;
         public readonly Expression Right;
         public readonly Statement Body;
 
-        public ForInStatement(
+        public ForeachStatement(
             Node left,
             Expression right,
-            Statement body) : base(Nodes.ForInStatement)
+            Statement body,
+            bool _await) : base(Nodes.ForeachStatement)
         {
             Left = left;
             Right = right;
             Body = body;
+            Await = _await;
         }
 
         public override NodeCollection ChildNodes => new(Left, Right, Body);
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitForInStatement(this);
+            visitor.VisitForOfStatement(this);
         }
     }
 }

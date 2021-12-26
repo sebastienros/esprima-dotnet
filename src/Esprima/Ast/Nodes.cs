@@ -62,7 +62,7 @@
         AwaitExpression,
         ClassBody,
         ClassDeclaration,
-        ForOfStatement,
+        ForeachStatement,
         MethodDefinition,
         ImportSpecifier,
         ImportDefaultSpecifier,

@@ -3,6 +3,5 @@
     public enum VariableDeclarationKind
     {
         Var,
-        Const
     }
 }

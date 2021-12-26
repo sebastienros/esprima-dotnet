@@ -91,6 +91,11 @@ namespace Esprima
 
                 if (source[from] == 'f' && source[from + 1] == 'o' && source[from + 2] == 'r')
                 {
+                    if (source[from + 3] == 'e' && source[from + 4] == 'a' && source[from + 5] == 'c' && source[from + 6] == 'h')
+                    {
+                        return "foreach";
+                    }
+
                     return "for";
                 }
 

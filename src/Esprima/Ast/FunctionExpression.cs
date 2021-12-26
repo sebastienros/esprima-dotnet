@@ -24,7 +24,7 @@ namespace Esprima.Ast
             Async = async;
         }
 
-        public Identifier? Id { get; }
+        public Identifier? Id { get; set; }
         public ref readonly NodeList<Expression> Params => ref _parameters;
         public Node Body { get; }
         public bool Generator { get; }

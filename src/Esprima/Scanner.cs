@@ -55,6 +55,8 @@ namespace Esprima
             "do",
             "var",
             "for",
+            "foreach", // ADHOC
+            "in", // ADHOC
             "new",
             "try",
             "let", // ADHOC: NOT SUPPORTED
@@ -62,7 +64,7 @@ namespace Esprima
             "else",
             "case",
             "void",
-            "with",
+            "with", // ADHOC: NOT SUPPORTED
             "enum",
             "while",
             "break",
@@ -71,12 +73,13 @@ namespace Esprima
             "const",
             "yield",
             "class",
+            "module", // ADHOC
             "super",
             "return",
             "typeof",
             "delete",
             "switch",
-            "export",
+            "export", // ADHOC: NOT SUPPORTED
             "import",
             "default",
             "finally",
@@ -1152,6 +1155,13 @@ namespace Esprima
 
                 ch = Source.CharCodeAt(Index);
             }
+            else if (ch == '-')
+            {
+                sb.Append(Source[Index++]);
+                this.ScanLiteralPart(sb, Character.IsDecimalDigit);
+
+                ch = Source.CharCodeAt(Index);
+            }
 
             if (ch == 'e' || ch == 'E')
             {
@@ -1914,7 +1924,10 @@ namespace Esprima
                 return ScanPunctuator();
             }
 
-            if (Character.IsDecimalDigit(cp))
+            if (cp == '-')
+                ;
+
+            if (Character.IsDecimalDigit(cp) || cp == '-')
             {
                 return ScanNumericLiteral();
             }

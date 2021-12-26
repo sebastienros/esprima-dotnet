@@ -47,8 +47,6 @@ namespace Esprima.Utils
         public event EventHandler<ExpressionStatement>? VisitedExpressionStatement;
         public event EventHandler<ForStatement>? VisitingForStatement;
         public event EventHandler<ForStatement>? VisitedForStatement;
-        public event EventHandler<ForInStatement>? VisitingForInStatement;
-        public event EventHandler<ForInStatement>? VisitedForInStatement;
         public event EventHandler<DoWhileStatement>? VisitingDoWhileStatement;
         public event EventHandler<DoWhileStatement>? VisitedDoWhileStatement;
         public event EventHandler<ArrowFunctionExpression>? VisitingArrowFunctionExpression;
@@ -99,8 +97,8 @@ namespace Esprima.Utils
         public event EventHandler<ImportSpecifier>? VisitedImportSpecifier;
         public event EventHandler<MethodDefinition>? VisitingMethodDefinition;
         public event EventHandler<MethodDefinition>? VisitedMethodDefinition;
-        public event EventHandler<ForOfStatement>? VisitingForOfStatement;
-        public event EventHandler<ForOfStatement>? VisitedForOfStatement;
+        public event EventHandler<ForeachStatement>? VisitingForOfStatement;
+        public event EventHandler<ForeachStatement>? VisitedForOfStatement;
         public event EventHandler<ClassDeclaration>? VisitingClassDeclaration;
         public event EventHandler<ClassDeclaration>? VisitedClassDeclaration;
         public event EventHandler<ClassBody>? VisitingClassBody;
@@ -282,13 +280,6 @@ namespace Esprima.Utils
             VisitedForStatement?.Invoke(this, forStatement);
         }
 
-        protected internal override void VisitForInStatement(ForInStatement forInStatement)
-        {
-            VisitingForInStatement?.Invoke(this, forInStatement);
-            base.VisitForInStatement(forInStatement);
-            VisitedForInStatement?.Invoke(this, forInStatement);
-        }
-
         protected internal override void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
             VisitingDoWhileStatement?.Invoke(this, doWhileStatement);
@@ -464,7 +455,7 @@ namespace Esprima.Utils
             VisitedMethodDefinition?.Invoke(this, methodDefinition);
         }
 
-        protected internal override void VisitForOfStatement(ForOfStatement forOfStatement)
+        protected internal override void VisitForOfStatement(ForeachStatement forOfStatement)
         {
             VisitingForOfStatement?.Invoke(this, forOfStatement);
             base.VisitForOfStatement(forOfStatement);
