@@ -1658,6 +1658,16 @@ namespace Esprima
 
             if (flags.IndexOf('u') >= 0)
             {
+                if (Regex.IsMatch(tmp, @"\\0[0-9]+"))
+                {
+                    throw new ParserException("Invalid decimal escape");
+                }
+
+                if (Regex.IsMatch(tmp, @"\\[1-9]\d*"))
+                {
+                    throw new ParserException("Invalid escape");
+                }
+
                 tmp = Regex
                     // Replace every Unicode escape sequence with the equivalent
                     // BMP character or a constant ASCII code point in the case of

@@ -62,6 +62,17 @@ namespace Esprima.Tests
             Assert.Matches(CreateRegex(@"/^\uD83D\uDE80$/u"), "🚀");
         }
 
+
+        [Fact]
+        public void ShouldNotAcceptOctalEspacesWithUnicodeFlag()
+        {
+            Assert.Throws<ParserException>(() => CreateRegex(@"/\1/u"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/\251/u"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/\00/u"));
+            Assert.NotNull(CreateRegex(@"/\0/u")); // NULL == \u0000
+            Assert.NotNull(CreateRegex(@"/\1/"));
+        }
+
         [Fact]
         public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
         {
