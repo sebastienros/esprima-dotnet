@@ -1648,7 +1648,10 @@ namespace Esprima
             return result + FromCharCode(codeUnits.ToArray());
         }
 
-        public Regex? TestRegExp(string pattern, string flags)
+        /// <summary>
+        /// Converts an ECMAScript regular expression to a <see cref="Regex"/> instance.
+        /// </summary>
+        public Regex ParseRegex(string pattern, string flags)
         {
             var tmp = pattern;
             var self = this;
@@ -1660,42 +1663,42 @@ namespace Esprima
                     // BMP character or a constant ASCII code point in the case of
                     // astral symbols. (See the above note on `astralSubstitute`
                     // for more information.)
-                    .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}|(\\u[a-fA-F0-9]{4})+", (match) =>
+                    .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}", (match) =>
                     {
-                        if (!string.IsNullOrEmpty(match.Groups[1].Value))
+                        var codePoint = Convert.ToUInt32(match.Groups[1].Value, 16);
+
+                        if (codePoint > 0x10FFFF)
                         {
-                            var codePoint = Convert.ToUInt32(match.Groups[1].Value, 16);
-
-                            if (codePoint > 0x10FFFF)
-                            {
-                                ThrowUnexpectedToken(Messages.InvalidRegExp);
-                            }
-
-                            return FromCodePoint(codePoint);
+                            ThrowUnexpectedToken(Messages.InvalidRegExp);
                         }
-                        else
-                        {
-                            // e.g., \uD83D\uDE80 (which is equivalent to \u{1F680}
-                            var codePoints = new uint[match.Value.Length / 6];
 
-                            for (var i = 0; i < codePoints.Length; i++)
-                            {
-                                codePoints[codePoints.Length - 1 - i] = Convert.ToUInt32(match.Value.Substring(i * 6 + 2, 4), 16);
-                            }
-
-                            return FromCodePoint(codePoints);
-                        }
+                        return FromCodePoint(codePoint);
                     });
             }
-            else
-            {
-                // \u is a valid escape sequence in JS, but not in .NET
 
-                tmp = Regex.Replace(tmp, @"(\\+)u", (match) =>
+            tmp = Regex
+                .Replace(tmp, @"(\\u[a-fA-F0-9]{4})+", (match) =>
                 {
-                    return new String('\\', match.Groups[1].Value.Length / 2 * 2) + 'u';
+                    // e.g., \uD83D\uDE80 (which is equivalent to \u{1F680}
+                    var codePoints = new uint[match.Value.Length / 6];
+
+                    for (var i = 0; i < codePoints.Length; i++)
+                    {
+                        codePoints[i] = Convert.ToUInt32(match.Value.Substring(i * 6 + 2, 4), 16);
+                    }
+
+                    var sub = FromCodePoint(codePoints);
+
+                    return sub;
                 });
-            }
+
+            // \u is a valid escape sequence in JS, but not in .NET
+            // search for any of these that are not valid \uxxxx values
+
+            tmp = Regex.Replace(tmp, @"(\\+)u(?![a-fA-F0-9]{4})", (match) =>
+            {
+                return new String('\\', match.Groups[1].Value.Length / 2 * 2) + 'u';
+            });
 
             // First, detect invalid regular expressions.
             var options = ParseRegexOptions(flags);
@@ -1718,48 +1721,34 @@ namespace Esprima
                 }
             }
 
-            // Return a regular expression object for this pattern-flag pair, or
-            // `null` in case the current environment doesn't support the flags it
-            // uses.
-            try
+            // Replace all non-escaped $ occurences by \r?$
+            // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
+
+            var index = 0;
+            var newPattern = tmp;
+
+            if (options.HasFlag(RegexOptions.Multiline))
             {
-                // Do we need to convert the expression to its .NET equivalent?
-                if (_adaptRegexp)
+                while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                 {
-                    // Replace all non-escaped $ occurences by \r?$
-                    // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
-
-                    var index = 0;
-                    var newPattern = tmp;
-
-                    if (options.HasFlag(RegexOptions.Multiline))
+                    if (index > 0 && newPattern[index - 1] != '\\')
                     {
-                        while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
-                        {
-                            if (index > 0 && newPattern[index - 1] != '\\')
-                            {
-                                newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
-                                index += 4;
-                            }
-                            else
-                            {
-                                index++;
-                            }
-                        }
+                        newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
+                        index += 4;
                     }
-
-                    pattern = newPattern;
+                    else
+                    {
+                        index++;
+                    }
                 }
+            }
 
-                return new Regex(pattern, options);
-            }
-            catch
-            {
-                return null;
-            }
+            pattern = newPattern;
+
+            return new Regex(pattern, options);
         }
 
-        public string EscapeFailingRegex(string pattern)
+        internal string EscapeFailingRegex(string pattern)
         {
             // .NET 4.x doesn't support [^] which should match any character including newline
             // c.f. https://github.com/sebastienros/esprima-dotnet/issues/146
@@ -1899,12 +1888,11 @@ namespace Esprima
             var body = ScanRegExpBody();
             var flags = ScanRegExpFlags();
             var flagsValue = (string) flags.Value!;
-            var value = TestRegExp((string) body.Value!, flagsValue);
 
             return new Token
             {
                 Type = TokenType.RegularExpression,
-                Value = value,
+                Value = _adaptRegexp ? ParseRegex((string) body.Value!, flagsValue) : null,
                 Literal = body.Literal + flags.Literal,
                 RegexValue = new RegexValue((string) body.Value!, flagsValue),
                 LineNumber = LineNumber,

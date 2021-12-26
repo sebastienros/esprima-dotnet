@@ -55,5 +55,19 @@ namespace Esprima.Tests
         {
             Assert.Matches(CreateRegex(@"/^\u{1F680}$/u"), "🚀");
         }
+
+        [Fact]
+        public void ShouldParseSurrogatePairs()
+        {
+            Assert.Matches(CreateRegex(@"/^\uD83D\uDE80$/u"), "🚀");
+        }
+
+        [Fact]
+        public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
+        {
+            var scanner = new Scanner("", new ParserOptions { AdaptRegexp = true });
+            var regex = scanner.ParseRegex("\\$", "gm");
+            Assert.NotNull(regex);
+        }
     }
 }

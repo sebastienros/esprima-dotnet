@@ -26,7 +26,7 @@
                     },
                     "init": {
                         "type": "Literal",
-                        "value": null,
+                        "value": { },
                         "raw": "/[\\u{0000000000000061}-\\u{7A}]/u",
                         "regex": {
                             "pattern": "[\\u{0000000000000061}-\\u{7A}]",
