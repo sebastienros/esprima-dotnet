@@ -12,6 +12,7 @@ namespace Esprima.Ast
         Init = 8,
         Constructor = 16,
         Method = 32,
-        Property = 64
+        Property = 64,
+        Function = 128,
     };
 }

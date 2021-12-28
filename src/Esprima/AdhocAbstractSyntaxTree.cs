@@ -1589,6 +1589,7 @@ namespace Esprima
                 {
                     _context.IsBindingElement = false;
                     _context.IsAssignmentTarget = !optional;
+
                     Expect("[");
                     var property = IsolateCoverGrammar(parseExpression);
                     Expect("]");
@@ -1730,7 +1731,7 @@ namespace Esprima
                     _context.IsAssignmentTarget = !optional;
                     if (!optional)
                     {
-                        Expect(".");
+                        Expect("::");
                     }
 
                     var property = ParseIdentifierName();
@@ -2735,6 +2736,57 @@ namespace Esprima
             }
 
             return Finalize(node, new Identifier((string?) token.Value));
+        }
+
+        private Identifier ParseVariableIdentifierAllowStatic(VariableDeclarationKind? kind = null)
+        {
+            var node = CreateNode();
+            var token = NextToken();
+            if (token.Type == TokenType.Keyword && (string?)token.Value == "yield")
+            {
+                if (_context.Strict)
+                {
+                    TolerateUnexpectedToken(token, Messages.StrictReservedWord);
+                }
+
+                if (!_context.AllowYield)
+                {
+                    ThrowUnexpectedToken(token);
+                }
+            }
+            else if (token.Type != TokenType.Identifier)
+            {
+                if (_context.Strict && token.Type == TokenType.Keyword && Scanner.IsStrictModeReservedWord((string?)token.Value))
+                {
+                    TolerateUnexpectedToken(token, Messages.StrictReservedWord);
+                }
+                else
+                {
+                    var stringValue = token.Value as string;
+                    if (_context.Strict || stringValue == null || kind != VariableDeclarationKind.Var)
+                    {
+                        ThrowUnexpectedToken(token);
+                    }
+                }
+            }
+            else if ((_context.IsModule || _context.IsAsync) && token.Type == TokenType.Identifier && (string?)token.Value == "await")
+            {
+                TolerateUnexpectedToken(token);
+            }
+
+            string str = token.Value as string;
+            while (_lookahead.Value == "::")
+            {
+                NextToken();
+                token = NextToken();
+                str += "::";
+                str += token.Value;
+            }
+
+            if (str.EndsWith("::"))
+                str.Substring(0, str.Length - 2);
+
+            return Finalize(node, new Identifier((string?)token.Value));
         }
 
         private VariableDeclarator ParseVariableDeclaration(ref bool inFor)
@@ -4101,7 +4153,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-class-definitions
 
-        private ClassProperty ParseClassElement(ref bool hasConstructor)
+        private Expression ParseClassElement(ref bool hasConstructor)
         {
             var token = _lookahead;
             var node = CreateNode();
@@ -4116,10 +4168,16 @@ namespace Esprima
             var isGenerator = false;
             var isPrivate = false;
 
-            if (Match("*"))
+            if (_lookahead.Value == "function")
             {
-                isGenerator = true;
+                isStatic = true;
                 NextToken();
+                key = ParseObjectPropertyKey();
+            }
+            else if (MatchKeyword("class") || MatchKeyword("module"))
+            {
+                var classExpr = ParseClassExpression();
+                return Finalize(node, classExpr);
             }
             else
             {
@@ -4130,17 +4188,11 @@ namespace Esprima
                     NextToken();
                     token = _lookahead;
                 }
-                key = ParseObjectPropertyKey(isPrivate);
-                var id = key switch
-                {
-                    Identifier identifier => identifier.Name,
-                    PrivateIdentifier privateIdentifier => privateIdentifier.Name,
-                    Literal literal => literal.StringValue, // "constructor"
-                    _ => null
-                };
 
-                if (id == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
+                if (_lookahead.Value as string == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
                 {
+                    NextToken();
+
                     token = _lookahead;
                     isStatic = true;
                     computed = Match("[");
@@ -4165,8 +4217,12 @@ namespace Esprima
                         key = ParseObjectPropertyKey();
                     }
                 }
+                else
+                {
+                    key = ParseLeftHandSideExpression();
+                }
 
-                if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?) token.Value == "async")
+                if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?)token.Value == "async")
                 {
                     if (!(_lookahead.Value is string punctuator) || punctuator != ":" && punctuator != "(")
                     {
@@ -4186,7 +4242,7 @@ namespace Esprima
                         token = _lookahead;
                         computed = Match("[");
                         key = ParseObjectPropertyKey(isPrivate);
-                        if (token.Type == TokenType.Identifier && (string?) token.Value == "constructor")
+                        if (token.Type == TokenType.Identifier && (string?)token.Value == "constructor")
                         {
                             TolerateUnexpectedToken(token, Messages.ConstructorIsAsync);
                         }
@@ -4197,7 +4253,7 @@ namespace Esprima
             var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
             if (token.Type == TokenType.Identifier)
             {
-                if (lookaheadPropertyKey && (string?) token.Value == "get")
+                if (lookaheadPropertyKey && (string?)token.Value == "get")
                 {
                     kind = PropertyKind.Get;
                     if (Match("#"))
@@ -4211,7 +4267,7 @@ namespace Esprima
                     _context.AllowYield = false;
                     value = ParseGetterMethod();
                 }
-                else if (lookaheadPropertyKey && (string?) token.Value == "set")
+                else if (lookaheadPropertyKey && (string?)token.Value == "set")
                 {
                     kind = PropertyKind.Set;
                     if (Match("#"))
@@ -4236,7 +4292,7 @@ namespace Esprima
                     }
                 }
             }
-            else if (token.Type == TokenType.Punctuator && (string?) token.Value == "*" && lookaheadPropertyKey)
+            else if (token.Type == TokenType.Punctuator && (string?)token.Value == "*" && lookaheadPropertyKey)
             {
                 kind = PropertyKind.Init;
                 computed = Match("[");
@@ -4265,7 +4321,10 @@ namespace Esprima
 
             if (kind == PropertyKind.Init)
             {
-                kind = PropertyKind.Method;
+                if (!isStatic)
+                    kind = PropertyKind.Method;
+                else
+                    kind = PropertyKind.Function;
             }
 
             if (!computed)
@@ -4300,13 +4359,13 @@ namespace Esprima
                 ConsumeSemicolon();
                 return Finalize(node, new PropertyDefinition(key!, computed, value!, isStatic));
             }
-            
+
             return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic));
         }
 
-        private ArrayList<ClassProperty> ParseClassElementList()
+        private ArrayList<Expression> ParseClassElementList()
         {
-            var body = new ArrayList<ClassProperty>();
+            var body = new ArrayList<Expression>();
             var hasConstructor = false;
 
             Expect("{");
@@ -4371,7 +4430,7 @@ namespace Esprima
             _context.Strict = true;
             ExpectKeyword("class", "module");
             var id = _lookahead.Type == TokenType.Identifier
-                ? ParseVariableIdentifier()
+                ? ParseVariableIdentifierAllowStatic()
                 : null;
 
             Expression? superClass = null;

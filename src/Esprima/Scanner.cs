@@ -1220,6 +1220,8 @@ namespace Esprima
             }
             else if (ch == 'l') // Long
             {
+                Index++;
+
                 long longValue = long.Parse(sb.ToString());
                 return new Token
                 {
@@ -1227,6 +1229,23 @@ namespace Esprima
                     NumericTokenType = NumericTokenType.Long,
                     Value = longValue,
                     NumericValue = longValue,
+                    LineNumber = LineNumber,
+                    LineStart = LineStart,
+                    Start = start,
+                    End = Index
+                };
+            }
+            else if (ch == 'f') // Float
+            {
+                Index++;
+
+                float floatValue = float.Parse(sb.ToString());
+                return new Token
+                {
+                    Type = TokenType.NumericLiteral,
+                    NumericTokenType = NumericTokenType.Float,
+                    Value = floatValue,
+                    NumericValue = floatValue,
                     LineNumber = LineNumber,
                     LineStart = LineStart,
                     Start = start,
@@ -1924,10 +1943,7 @@ namespace Esprima
                 return ScanPunctuator();
             }
 
-            if (cp == '-')
-                ;
-
-            if (Character.IsDecimalDigit(cp) || cp == '-')
+            if (Character.IsDecimalDigit(cp)) // Hack-fix... -Nenkai
             {
                 return ScanNumericLiteral();
             }
