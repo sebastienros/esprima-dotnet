@@ -57,6 +57,7 @@ namespace Esprima
             "for",
             "foreach", // ADHOC
             "in", // ADHOC
+            "static", // ADHOC
             "new",
             "try",
             "let", // ADHOC: NOT SUPPORTED

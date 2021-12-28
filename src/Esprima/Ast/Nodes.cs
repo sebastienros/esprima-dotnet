@@ -72,6 +72,7 @@
         ExportNamedDeclaration,
         ExportAllDeclaration,
         ExportDefaultDeclaration,
-        ClassExpression
+        ClassExpression,
+        StaticDeclaration,
     };
 }

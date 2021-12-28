@@ -684,6 +684,15 @@ namespace Esprima
                         {
                             expr = ParseNewExpression();
                         }
+                        else if (MatchKeyword("static"))
+                        {
+                            NextToken();
+
+                            var exp = ParseAssignmentExpression();
+                            var staticExpr = new StaticExpression(Nodes.StaticDeclaration, exp.Location);
+                            staticExpr.VarExpression = exp;
+                            expr = staticExpr;
+                        }
                         else
                         {
                             return ThrowUnexpectedToken<Expression>(NextToken());
