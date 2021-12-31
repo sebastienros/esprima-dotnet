@@ -4,14 +4,14 @@ namespace Esprima.Ast
 {
     public sealed class ClassBody : Node
     {
-        private readonly NodeList<Expression> _body;
+        private readonly NodeList<Node> _body;
 
-        public ClassBody(in NodeList<Expression> body) : base(Nodes.ClassBody)
+        public ClassBody(in NodeList<Node> body) : base(Nodes.ClassBody)
         {
             _body = body;
         }
 
-        public ref readonly NodeList<Expression> Body => ref _body;
+        public ref readonly NodeList<Node> Body => ref _body;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
 

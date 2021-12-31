@@ -13,6 +13,8 @@ namespace Esprima.Ast
         public readonly ClassBody Body;
         ClassBody IClass.Body => Body;
 
+        public bool IsModule { get; set; }
+
         public ClassExpression(
             Identifier? id,
             Expression? superClass,

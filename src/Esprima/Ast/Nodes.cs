@@ -73,6 +73,7 @@
         ExportAllDeclaration,
         ExportDefaultDeclaration,
         ClassExpression,
-        StaticDeclaration,
+        StaticDeclaration, // ADHOC
+        IncludeStatement, // ADHOC
     };
 }

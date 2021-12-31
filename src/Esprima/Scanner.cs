@@ -837,6 +837,7 @@ namespace Esprima
                 case '[':
                 case ']':
                 case '~':
+                case '#': // Adhoc include
                     ++Index;
                     break;
 
@@ -913,18 +914,28 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
-            double value = 0;
+            object value = 0;
+            NumericTokenType tokenType = NumericTokenType.None;
 
-            if (number.Length < 16)
+            if (number.Length <= 8)
+            {
+                value = Convert.ToInt32(number, 16);
+                tokenType = NumericTokenType.Integer;
+            }
+            else if (number.Length <= 16)
             {
                 value = Convert.ToInt64(number, 16);
+                tokenType = NumericTokenType.Long;
             }
             else if (number.Length > 255)
             {
                 value = double.PositiveInfinity;
+                tokenType = NumericTokenType.Double;
             }
             else
             {
+                double tmpVal = 0;
+
                 double modulo = 1;
                 var literal = number.ToLowerInvariant();
                 var length = literal.Length - 1;
@@ -934,20 +945,24 @@ namespace Esprima
 
                     if (c <= '9')
                     {
-                        value += modulo * (c - '0');
+                        tmpVal += modulo * (c - '0');
                     }
                     else
                     {
-                        value += modulo * (c - 'a' + 10);
+                        tmpVal += modulo * (c - 'a' + 10);
                     }
 
                     modulo *= 16;
                 }
+
+                value = tmpVal;
+                tokenType = NumericTokenType.Double;
             }
 
             return new Token
             {
                 Type = TokenType.NumericLiteral,
+                NumericTokenType = tokenType,
                 NumericValue = value,
                 Value = value,
                 LineNumber = LineNumber,

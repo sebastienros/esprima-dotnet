@@ -3168,6 +3168,44 @@ namespace Esprima
             return Finalize(node, new ContinueStatement(label));
         }
 
+        private Statement ParsePreprocessorDirectiveStatement()
+        {
+            var node = CreateNode();
+            Expect("#");
+
+            if (_lookahead.Type == TokenType.Identifier)
+            {
+                if (MatchContextualKeyword("include"))
+                {
+                    return ParseIncludeStatement();
+                }
+                else
+                {
+                    return ThrowError<Statement>("Unknown preprocessor directive.", _lookahead.Value);
+                }
+            }
+
+            return null;
+        }
+
+        private IncludeStatement ParseIncludeStatement()
+        {
+            NextToken();
+            if (_lookahead.Type == TokenType.Template || _lookahead.Type == TokenType.StringLiteral)
+            {
+                var path = NextToken();
+                IncludeStatement include = new IncludeStatement();
+                include.Path = path.Value as string;
+                return include;
+            }
+            else
+            {
+                return ThrowError<IncludeStatement>("Expected string literal for include statement value.", _lookahead.Value);
+            }
+
+            return null;
+        }
+
         // https://tc39.github.io/ecma262/#sec-break-statement
 
         private BreakStatement ParseBreakStatement()
@@ -3472,6 +3510,10 @@ namespace Esprima
                     else if (value == ";")
                     {
                         statement = ParseEmptyStatement();
+                    }
+                    else if (value == "#")
+                    {
+                        statement = ParsePreprocessorDirectiveStatement();
                     }
                     else
                     {
@@ -4162,7 +4204,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-class-definitions
 
-        private Expression ParseClassElement(ref bool hasConstructor)
+        private Node ParseClassElement(ref bool hasConstructor)
         {
             var token = _lookahead;
             var node = CreateNode();
@@ -4187,6 +4229,12 @@ namespace Esprima
             {
                 var classExpr = ParseClassExpression();
                 return Finalize(node, classExpr);
+            }
+            else if (Match("#"))
+            {
+                NextToken();
+                var inclStatement = ParseIncludeStatement();
+                return Finalize(node, inclStatement);
             }
             else
             {
@@ -4372,9 +4420,9 @@ namespace Esprima
             return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic));
         }
 
-        private ArrayList<Expression> ParseClassElementList()
+        private ArrayList<Node> ParseClassElementList()
         {
-            var body = new ArrayList<Expression>();
+            var body = new ArrayList<Node>();
             var hasConstructor = false;
 
             Expect("{");
@@ -4437,6 +4485,8 @@ namespace Esprima
 
             var previousStrict = _context.Strict;
             _context.Strict = true;
+
+            bool isModule = _lookahead.Value as string == "module";
             ExpectKeyword("class", "module");
             var id = _lookahead.Type == TokenType.Identifier
                 ? ParseVariableIdentifierAllowStatic()
@@ -4452,7 +4502,7 @@ namespace Esprima
             var classBody = ParseClassBody();
             _context.Strict = previousStrict;
 
-            return Finalize(node, new ClassExpression(id, superClass, classBody));
+            return Finalize(node, new ClassExpression(id, superClass, classBody) {  IsModule = isModule });
         }
 
         // https://tc39.github.io/ecma262/#sec-imports
