@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -1656,7 +1657,11 @@ namespace Esprima
             var tmp = pattern;
             var self = this;
 
-            if (flags.IndexOf('u') >= 0)
+            var isUnicode = flags.IndexOf('u') >= 0;
+
+            CheckBracesBalance(pattern, isUnicode);
+
+            if (isUnicode)
             {
                 if (Regex.IsMatch(tmp, @"\\0[0-9]+"))
                 {
@@ -1684,6 +1689,8 @@ namespace Esprima
 
                         return FromCodePoint(codePoint);
                     });
+
+                tmp = ConvertUnicodeRegexRanges(tmp);
             }
 
             tmp = Regex
@@ -1756,6 +1763,117 @@ namespace Esprima
             pattern = newPattern;
 
             return new Regex(pattern, options);
+        }
+
+        /// <summary>
+        /// Ensures the braces are balanced in a unicode Regex
+        /// </summary>
+        private void CheckBracesBalance(string pattern, bool unicode)
+        {
+            int paren = 0;
+            int curly = 0;
+            int square = 0;
+
+            for (var i = 0; i < pattern.Length; i++)
+            {
+                var ch = pattern[i];
+
+                if (ch == '\\')
+                {
+                    // Skip escape
+
+                    i++;
+                    continue;
+                }
+
+                switch (ch)
+                {
+                    case '(': if (square == 0) paren++; break;
+                    case ')': if (square == 0) paren--; break;
+                    case '{': if (square == 0) curly++; break;
+                    case '}': if (square == 0) curly--; break;
+                    case '[': if (square == 0) square++; break;
+                    case ']': square--; break;
+                    default: break;
+                }
+
+                if (paren < 0)
+                {
+                    throw new ParserException(Messages.RegexUnmatchedOpenParen);
+                }
+
+                if (unicode)
+                {
+                    if (curly < 0 || square < 0)
+                    {
+                        throw new ParserException(Messages.RegexLoneQuantifierBrackets);
+                    }
+                }
+            }
+
+            if (paren > 0)
+            {
+                throw new ParserException(Messages.RegexUnterminatedGroup);
+            }
+
+            if (unicode)
+            {
+                if (curly > 0)
+                {
+                    throw new ParserException(Messages.RegexIncompleteQuantifier);
+                }
+
+                if (square > 0)
+                {
+                    throw new ParserException(Messages.RegexUnterminatedCharacterClass);
+                }
+            }
+        }
+
+        private string ConvertUnicodeRegexRanges(string pattern)
+        {
+            if (String.IsNullOrEmpty(pattern))
+            {
+                return pattern;
+            }
+
+            bool converted = false;
+
+            var sb = GetStringBuilder();
+
+            for (var i = 0; i < pattern.Length; i++)
+            {
+                var ch = pattern[i];
+
+                if (ch == '.')
+                {
+                    converted = true;
+
+                    sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|.)");
+                }
+                else if (ch == '\\' && i + 1 < pattern.Length)
+                {
+                    ch = pattern[++i];
+                    if (ch == 'D' || ch == 'S' || ch == 'W')
+                    {
+                        converted = true;
+
+                        sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|\\" + ch + ")");
+                    }
+                    else
+                    {
+                        converted = true;
+
+                        sb.Append('\\').Append(ch);
+                    }
+                }
+                else
+                {
+                    sb.Append(ch);
+                }
+            }
+
+            return converted ? sb.ToString() : pattern;
         }
 
         internal string EscapeFailingRegex(string pattern)

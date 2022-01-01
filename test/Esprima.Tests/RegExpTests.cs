@@ -74,6 +74,32 @@ namespace Esprima.Tests
         }
 
         [Fact]
+        public void ShouldCheckGroupBalance()
+        {
+            Assert.Throws<ParserException>(() => CreateRegex(@"/(/"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/)/"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/[/"));
+            Assert.NotNull(CreateRegex(@"/]/"));
+            Assert.NotNull(CreateRegex(@"/{/"));
+            Assert.NotNull(CreateRegex(@"/}/"));
+
+            Assert.NotNull(CreateRegex(@"/[(]/"));
+            Assert.NotNull(CreateRegex(@"/[)]/"));
+            Assert.NotNull(CreateRegex(@"/[{]/"));
+            Assert.NotNull(CreateRegex(@"/[}]/"));
+            Assert.NotNull(CreateRegex(@"/[[]/"));
+
+            Assert.Throws<ParserException>(() => CreateRegex(@"/(/u"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/)/u"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/[/u"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/]/u"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/{/u"));
+            Assert.Throws<ParserException>(() => CreateRegex(@"/}/u"));
+
+            Assert.NotNull(CreateRegex(@"/([-.*+?^${}()|[\]\/\\])/"));
+        }
+
+        [Fact]
         public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
         {
             var scanner = new Scanner("", new ParserOptions { AdaptRegexp = true });
