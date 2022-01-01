@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -961,7 +962,7 @@ namespace Esprima
             if (style == NumberStyles.None)
             {
                 // binary
-                foreach(var c in number)
+                foreach (var c in number)
                 {
                     bigInt <<= 1;
                     bigInt += c == '1' ? 1 : 0;
@@ -1601,57 +1602,120 @@ namespace Esprima
             };
         }
 
-        // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
-
-        public Regex? TestRegExp(string pattern, string flags)
+        private static string FromCharCode(uint[] codeUnits)
         {
-            // The BMP character to use as a replacement for astral symbols when
-            // translating an ES6 "u"-flagged pattern to an ES5-compatible
-            // approximation.
-            // Note: replacing with '\uFFFF' enables false positives in unlikely
-            // scenarios. For example, `[\u{1044f}-\u{10440}]` is an invalid
-            // pattern that would not be detected by this substitution.
-            var astralSubstitute = "\uFFFF";
+            var chars = new char[codeUnits.Length];
+            for (var i = 0; i < chars.Length; i++)
+            {
+                chars[i] = (char) codeUnits[i];
+            }
+
+            return new string(chars);
+        }
+
+        private string FromCodePoint(params uint[] codePoints)
+        {
+            var codeUnits = new List<uint>();
+            var result = "";
+
+            foreach (var codePoint in codePoints)
+            {
+                if (codePoint < 0 || codePoint > 0x10FFFF)
+                {
+                    EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(codePoint), codePoint, "Invalid code point.");
+                }
+
+                var point = codePoint;
+                if (point <= 0xFFFF)
+                {
+                    // BMP code point
+                    codeUnits.Add(point);
+                }
+                else
+                {
+                    // Astral code point; split in surrogate halves
+                    // https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+                    point -= 0x10000;
+                    codeUnits.Add((point >> 10) + 0xD800); // highSurrogate
+                    codeUnits.Add((point % 0x400) + 0xDC00); // lowSurrogate
+                }
+                if (codeUnits.Count >= 0x3fff)
+                {
+                    result += FromCharCode(codeUnits.ToArray());
+                    codeUnits.Clear();
+                }
+            }
+
+            return result + FromCharCode(codeUnits.ToArray());
+        }
+
+        /// <summary>
+        /// Converts an ECMAScript regular expression to a <see cref="Regex"/> instance.
+        /// </summary>
+        public Regex ParseRegex(string pattern, string flags)
+        {
             var tmp = pattern;
             var self = this;
 
-            if (flags.IndexOf('u') >= 0)
+            var isUnicode = flags.IndexOf('u') >= 0;
+
+            CheckBracesBalance(pattern, isUnicode);
+
+            if (isUnicode)
             {
+                if (Regex.IsMatch(tmp, @"\\0[0-9]+"))
+                {
+                    throw new ParserException("Invalid decimal escape");
+                }
+
+                if (Regex.IsMatch(tmp, @"\\[1-9]\d*"))
+                {
+                    throw new ParserException("Invalid escape");
+                }
+
                 tmp = Regex
                     // Replace every Unicode escape sequence with the equivalent
                     // BMP character or a constant ASCII code point in the case of
                     // astral symbols. (See the above note on `astralSubstitute`
                     // for more information.)
-                    .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}|\\u([a-fA-F0-9]{4})", (match) =>
+                    .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}", (match) =>
                     {
-                        int codePoint;
-                        if (!string.IsNullOrEmpty(match.Groups[1].Value))
-                        {
-                            codePoint = Convert.ToInt32(match.Groups[1].Value, 16);
-                        }
-                        else
-                        {
-                            codePoint = Convert.ToInt32(match.Groups[2].Value, 16);
-                        }
+                        var codePoint = Convert.ToUInt32(match.Groups[1].Value, 16);
 
                         if (codePoint > 0x10FFFF)
                         {
                             ThrowUnexpectedToken(Messages.InvalidRegExp);
                         }
 
-                        if (codePoint <= 0xFFFF)
-                        {
-                            return ParserExtensions.CharToString((char) codePoint);
-                        }
-
-                        return astralSubstitute;
+                        return FromCodePoint(codePoint);
                     });
 
-                // Replace each paired surrogate with a single ASCII symbol to
-                // avoid throwing on regular expressions that are only valid in
-                // combination with the "u" flag.
-                tmp = Regex.Replace(tmp, "[\uD800-\uDBFF][\uDC00-\uDFFF]", astralSubstitute);
+                tmp = ConvertUnicodeRegexRanges(tmp);
             }
+
+            tmp = Regex
+                .Replace(tmp, @"(\\u[a-fA-F0-9]{4})+", (match) =>
+                {
+                    // e.g., \uD83D\uDE80 (which is equivalent to \u{1F680}
+                    var codePoints = new uint[match.Value.Length / 6];
+
+                    for (var i = 0; i < codePoints.Length; i++)
+                    {
+                        codePoints[i] = Convert.ToUInt32(match.Value.Substring(i * 6 + 2, 4), 16);
+                    }
+
+                    var sub = FromCodePoint(codePoints);
+
+                    return sub;
+                });
+
+            // \u is a valid escape sequence in JS, but not in .NET
+            // search for any of these that are not valid \uxxxx values
+
+            tmp = Regex.Replace(tmp, @"(\\+)u(?![a-fA-F0-9]{4})", (match) =>
+            {
+                return new String('\\', match.Groups[1].Value.Length / 2 * 2) + 'u';
+            });
 
             // First, detect invalid regular expressions.
             var options = ParseRegexOptions(flags);
@@ -1674,44 +1738,145 @@ namespace Esprima
                 }
             }
 
-            // Return a regular expression object for this pattern-flag pair, or
-            // `null` in case the current environment doesn't support the flags it
-            // uses.
-            try
+            // Replace all non-escaped $ occurences by \r?$
+            // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
+
+            var index = 0;
+            var newPattern = tmp;
+
+            if (options.HasFlag(RegexOptions.Multiline))
             {
-                // Do we need to convert the expression to its .NET equivalent?
-                if (_adaptRegexp && options.HasFlag(RegexOptions.Multiline))
+                while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                 {
-                    // Replace all non-escaped $ occurences by \r?$
-                    // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
-
-                    var index = 0;
-                    var newPattern = pattern;
-                    while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
+                    if (index > 0 && newPattern[index - 1] != '\\')
                     {
-                        if (index > 0 && newPattern[index - 1] != '\\')
-                        {
-                            newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
-                            index += 4;
-                        }
-                        else
-                        {
-                            index++;
-                        }
+                        newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
+                        index += 4;
                     }
+                    else
+                    {
+                        index++;
+                    }
+                }
+            }
 
-                    pattern = newPattern;
+            pattern = newPattern;
+
+            return new Regex(pattern, options);
+        }
+
+        /// <summary>
+        /// Ensures the braces are balanced in a unicode Regex
+        /// </summary>
+        private void CheckBracesBalance(string pattern, bool unicode)
+        {
+            int paren = 0;
+            int curly = 0;
+            int square = 0;
+
+            for (var i = 0; i < pattern.Length; i++)
+            {
+                var ch = pattern[i];
+
+                if (ch == '\\')
+                {
+                    // Skip escape
+
+                    i++;
+                    continue;
                 }
 
-                return new Regex(pattern, options);
+                switch (ch)
+                {
+                    case '(': if (square == 0) paren++; break;
+                    case ')': if (square == 0) paren--; break;
+                    case '{': if (square == 0) curly++; break;
+                    case '}': if (square == 0) curly--; break;
+                    case '[': if (square == 0) square++; break;
+                    case ']': square--; break;
+                    default: break;
+                }
+
+                if (paren < 0)
+                {
+                    throw new ParserException(Messages.RegexUnmatchedOpenParen);
+                }
+
+                if (unicode)
+                {
+                    if (curly < 0 || square < 0)
+                    {
+                        throw new ParserException(Messages.RegexLoneQuantifierBrackets);
+                    }
+                }
             }
-            catch
+
+            if (paren > 0)
             {
-                return null;
+                throw new ParserException(Messages.RegexUnterminatedGroup);
+            }
+
+            if (unicode)
+            {
+                if (curly > 0)
+                {
+                    throw new ParserException(Messages.RegexIncompleteQuantifier);
+                }
+
+                if (square > 0)
+                {
+                    throw new ParserException(Messages.RegexUnterminatedCharacterClass);
+                }
             }
         }
 
-        public string EscapeFailingRegex(string pattern)
+        private string ConvertUnicodeRegexRanges(string pattern)
+        {
+            if (String.IsNullOrEmpty(pattern))
+            {
+                return pattern;
+            }
+
+            bool converted = false;
+
+            var sb = GetStringBuilder();
+
+            for (var i = 0; i < pattern.Length; i++)
+            {
+                var ch = pattern[i];
+
+                if (ch == '.')
+                {
+                    converted = true;
+
+                    sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|.)");
+                }
+                else if (ch == '\\' && i + 1 < pattern.Length)
+                {
+                    ch = pattern[++i];
+                    if (ch == 'D' || ch == 'S' || ch == 'W')
+                    {
+                        converted = true;
+
+                        sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|\\" + ch + ")");
+                    }
+                    else
+                    {
+                        converted = true;
+
+                        sb.Append('\\').Append(ch);
+                    }
+                }
+                else
+                {
+                    sb.Append(ch);
+                }
+            }
+
+            return converted ? sb.ToString() : pattern;
+        }
+
+        internal string EscapeFailingRegex(string pattern)
         {
             // .NET 4.x doesn't support [^] which should match any character including newline
             // c.f. https://github.com/sebastienros/esprima-dotnet/issues/146
@@ -1851,12 +2016,11 @@ namespace Esprima
             var body = ScanRegExpBody();
             var flags = ScanRegExpFlags();
             var flagsValue = (string) flags.Value!;
-            var value = TestRegExp((string) body.Value!, flagsValue);
 
             return new Token
             {
                 Type = TokenType.RegularExpression,
-                Value = value,
+                Value = _adaptRegexp ? ParseRegex((string) body.Value!, flagsValue) : null,
                 Literal = body.Literal + flags.Literal,
                 RegexValue = new RegexValue((string) body.Value!, flagsValue),
                 LineNumber = LineNumber,

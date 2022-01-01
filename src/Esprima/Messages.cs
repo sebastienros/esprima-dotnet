@@ -46,6 +46,11 @@
         public const string ParameterAfterRestParameter = "Rest parameter must be last formal parameter";
         public const string PropertyAfterRestProperty = "Unexpected token";
         public const string Redeclaration = "{0} \"{1}\" has already been declared";
+        public const string RegexLoneQuantifierBrackets = "Invalid regular expression: Lone quantifier brackets";
+        public const string RegexIncompleteQuantifier = "Invalid regular expression: Incomplete quantifier";
+        public const string RegexUnterminatedGroup = "Invalid regular expression: Unterminated group";
+        public const string RegexUnterminatedCharacterClass = "Invalid regular expression: Unterminated character class";
+        public const string RegexUnmatchedOpenParen = "Invalid regular expression: Unmatched ')'";
         public const string StaticPrototype = "Classes may not have static property named prototype";
         public const string StrictCatchVariable = "Catch variable may not be eval or arguments in strict mode";
         public const string StrictDelete = "Delete of an unqualified identifier in strict mode.";

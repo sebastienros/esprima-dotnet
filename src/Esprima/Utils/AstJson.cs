@@ -592,10 +592,19 @@ namespace Esprima.Utils
                 {
                     _writer.Member("value");
                     var value = literal.Value;
+
                     switch (value)
                     {
                         case null:
-                            _writer.Null();
+                            if (literal.TokenType == TokenType.RegularExpression)
+                            {
+                                // This is how esprima.org actually renders regexes since it relies on Regex.toString
+                                _writer.String(literal.Raw);
+                            }
+                            else
+                            {
+                                _writer.Null();
+                            }
                             break;
                         case bool b:
                             _writer.Boolean(b);
