@@ -75,5 +75,6 @@
         ClassExpression,
         StaticDeclaration, // ADHOC
         IncludeStatement, // ADHOC
+        ReferenceVariableExpression, // ADHOC
     };
 }

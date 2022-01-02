@@ -9,11 +9,13 @@ namespace Esprima.Ast
         [EnumMember(Value = "-")] Minus,
         [EnumMember(Value = "~")] BitwiseNot,
         [EnumMember(Value = "!")] LogicalNot,
+        [EnumMember(Value = "*")] Indirection, // ADHOC
+        [EnumMember(Value = "&")] ReferenceOf, // ADHOC
         [EnumMember(Value = "delete")] Delete,
         [EnumMember(Value = "void")] Void,
         [EnumMember(Value = "typeof")] TypeOf,
         [EnumMember(Value = "++")] Increment,
-        [EnumMember(Value = "--")] Decrement
+        [EnumMember(Value = "--")] Decrement,
     }
 
     public class UnaryExpression : Expression
@@ -46,6 +48,8 @@ namespace Esprima.Ast
                 "delete" => UnaryOperator.Delete,
                 "void" => UnaryOperator.Void,
                 "typeof" => UnaryOperator.TypeOf,
+                "*" => UnaryOperator.Indirection, // ADHOC
+                "&" => UnaryOperator.ReferenceOf, // ADHOC
                 _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
             };
         }

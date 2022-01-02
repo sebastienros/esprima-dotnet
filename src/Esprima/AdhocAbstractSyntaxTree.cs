@@ -1830,7 +1830,8 @@ namespace Esprima
             Expression expr;
 
             if (Match("+") || Match("-") || Match("~") || Match("!") ||
-                MatchKeyword("delete") || MatchKeyword("void") || MatchKeyword("typeof"))
+                MatchKeyword("delete") || MatchKeyword("void") || MatchKeyword("typeof") ||
+                Match("*") || Match("&")) // ADHOC
             {
                 var node = StartNode(_lookahead);
                 var token = NextToken();
