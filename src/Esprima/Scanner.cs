@@ -1770,9 +1770,9 @@ namespace Esprima
         /// </summary>
         private void CheckBracesBalance(string pattern, bool unicode)
         {
-            int paren = 0;
-            int curly = 0;
-            int square = 0;
+            int inGroup = 0;
+            bool inQuantifier = false;
+            bool inSet = false;
 
             for (var i = 0; i < pattern.Length; i++)
             {
@@ -1788,44 +1788,112 @@ namespace Esprima
 
                 switch (ch)
                 {
-                    case '(': if (square == 0) paren++; break;
-                    case ')': if (square == 0) paren--; break;
-                    case '{': if (square == 0) curly++; break;
-                    case '}': if (square == 0) curly--; break;
-                    case '[': if (square == 0) square++; break;
-                    case ']': square--; break;
+                    case '(':
+
+                        if (inSet)
+                        {
+                            break;
+                        }
+
+                        inGroup++;
+
+                        break;
+
+                    case ')':
+
+                        if (inSet)
+                        {
+                            break;
+                        }
+
+                        if (inGroup == 0)
+                        {
+                            throw new ParserException(Messages.RegexUnmatchedOpenParen);
+                        }
+
+                        inGroup--;
+
+                        break;
+
+                    case '{':
+
+                        if (inSet)
+                        {
+                            break;
+                        }
+
+                        if (!inQuantifier)
+                        {
+                            inQuantifier = true;
+                        }
+                        else if (unicode)
+                        {
+                            throw new ParserException(Messages.RegexIncompleteQuantifier);
+                        }
+
+                        break;
+
+                    case '}':
+
+                        if (inSet)
+                        {
+                            break;
+                        }
+
+                        if (inQuantifier)
+                        {
+                            inQuantifier = false;
+                        }
+                        else if (unicode)
+                        {
+                            throw new ParserException(Messages.RegexLoneQuantifierBrackets);
+                        }
+
+                        break;
+
+                    case '[':
+
+                        if (inSet)
+                        {
+                            break;
+                        }
+
+                        inSet = true;
+
+                        break;
+
+                    case ']':
+
+                        if (inSet)
+                        {
+                            inSet = false;
+                        }
+                        else if (unicode)
+                        {
+                            throw new ParserException(Messages.RegexLoneQuantifierBrackets);
+                        }
+
+                        break;
+
                     default: break;
-                }
-
-                if (paren < 0)
-                {
-                    throw new ParserException(Messages.RegexUnmatchedOpenParen);
-                }
-
-                if (unicode)
-                {
-                    if (curly < 0 || square < 0)
-                    {
-                        throw new ParserException(Messages.RegexLoneQuantifierBrackets);
-                    }
                 }
             }
 
-            if (paren > 0)
+            if (inGroup > 0)
             {
                 throw new ParserException(Messages.RegexUnterminatedGroup);
             }
 
+            if (inSet)
+            {
+                throw new ParserException(Messages.RegexUnterminatedCharacterClass);
+            }
+
             if (unicode)
             {
-                if (curly > 0)
+                if (inQuantifier)
                 {
-                    throw new ParserException(Messages.RegexIncompleteQuantifier);
-                }
-
-                if (square > 0)
-                {
-                    throw new ParserException(Messages.RegexUnterminatedCharacterClass);
+                    throw new ParserException(Messages.RegexLoneQuantifierBrackets);
                 }
             }
         }
