@@ -73,30 +73,37 @@ namespace Esprima.Tests
             Assert.NotNull(CreateRegex(@"/\1/"));
         }
 
-        [Fact]
-        public void ShouldCheckGroupBalance()
+        [Theory]
+        [InlineData(@"/(/")]
+        [InlineData(@"/)/")]
+        [InlineData(@"/[/")]
+        [InlineData(@"/(/u")]
+        [InlineData(@"/)/u")]
+        [InlineData(@"/[/u")]
+        [InlineData(@"/]/u")]
+        [InlineData(@"/{/u")]
+        [InlineData(@"/}/u")]
+        public void ShouldFailGroupBalance(string pattern)
         {
-            Assert.Throws<ParserException>(() => CreateRegex(@"/(/"));
-            Assert.Throws<ParserException>(() => CreateRegex(@"/)/"));
-            Assert.Throws<ParserException>(() => CreateRegex(@"/[/"));
-            Assert.NotNull(CreateRegex(@"/]/"));
-            Assert.NotNull(CreateRegex(@"/{/"));
-            Assert.NotNull(CreateRegex(@"/}/"));
+            Assert.Throws<ParserException>(() => CreateRegex(pattern));
+        }
 
-            Assert.NotNull(CreateRegex(@"/[(]/"));
-            Assert.NotNull(CreateRegex(@"/[)]/"));
-            Assert.NotNull(CreateRegex(@"/[{]/"));
-            Assert.NotNull(CreateRegex(@"/[}]/"));
-            Assert.NotNull(CreateRegex(@"/[[]/"));
-
-            Assert.Throws<ParserException>(() => CreateRegex(@"/(/u"));
-            Assert.Throws<ParserException>(() => CreateRegex(@"/)/u"));
-            Assert.Throws<ParserException>(() => CreateRegex(@"/[/u"));
-            Assert.Throws<ParserException>(() => CreateRegex(@"/]/u"));
-            Assert.Throws<ParserException>(() => CreateRegex(@"/{/u"));
-            Assert.Throws<ParserException>(() => CreateRegex(@"/}/u"));
-
-            Assert.NotNull(CreateRegex(@"/([-.*+?^${}()|[\]\/\\])/"));
+        [Theory]
+        [InlineData(@"/]/")]
+        [InlineData(@"/{/")]
+        [InlineData(@"/}/")]
+        [InlineData(@"/[(]/")]
+        [InlineData(@"/[)]/")]
+        [InlineData(@"/[{]/")]
+        [InlineData(@"/[}]/")]
+        [InlineData(@"/[[]/")]
+        [InlineData(@"/([-.*+?^${}()|[\]\/\\])/")]
+        [InlineData(@"/^(?:]|})/")]
+        [InlineData(@"/[a-z]/")]
+        [InlineData(@"/[a-z]/u")]
+        public void ShouldCheckGroupBalance(string pattern)
+        {
+            Assert.NotNull(CreateRegex(pattern));
         }
 
         [Fact]
