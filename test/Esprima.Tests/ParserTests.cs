@@ -122,6 +122,26 @@ namespace Esprima.Tests
         }
 
         [Fact]
+        public void ShouldParseClassStaticBlocks()
+        {
+            const string Code = @"
+class aa {
+    static qq() {
+    }
+    static staticProperty1 = 'Property 1';
+    static staticProperty2;
+    static {
+      this.staticProperty2 = 'Property 2';
+    }
+    static staticProperty3;
+    static {
+      this.staticProperty3 = 'Property 3';
+    }
+}";
+            new JavaScriptParser(Code).ParseScript();
+        }
+
+        [Fact]
         public void ShouldSymbolPropertyKey()
         {
             var parser = new JavaScriptParser("var a = { [Symbol.iterator]: undefined }");

@@ -4369,7 +4369,29 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-class-definitions
 
-        private ClassProperty ParseClassElement(ref bool hasConstructor)
+        private StaticBlock ParseStaticBlock()
+        {
+            var node = CreateNode();
+
+            Expect("{");
+
+            var block = new ArrayList<Statement>();
+            while (true)
+            {
+                if (Match("}"))
+                {
+                    break;
+                }
+
+                block.Add(ParseStatementListItem());
+            }
+
+            Expect("}");
+
+            return Finalize(node, new StaticBlock(NodeList.From(ref block)));
+        }
+
+        private Node ParseClassElement(ref bool hasConstructor)
         {
             var token = _lookahead;
             var node = CreateNode();
@@ -4432,6 +4454,11 @@ namespace Esprima
                         }
                         key = ParseObjectPropertyKey();
                     }
+                }
+
+                if (id == "static" && Match("{"))
+                {
+                    return ParseStaticBlock();
                 }
 
                 if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?) token.Value == "async")
@@ -4572,9 +4599,9 @@ namespace Esprima
             return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic));
         }
 
-        private ArrayList<ClassProperty> ParseClassElementList()
+        private ArrayList<Node> ParseClassElementList()
         {
-            var body = new ArrayList<ClassProperty>();
+            var body = new ArrayList<Node>();
             var hasConstructor = false;
 
             Expect("{");

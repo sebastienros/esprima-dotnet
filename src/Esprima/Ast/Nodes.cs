@@ -36,6 +36,7 @@
         RestElement,
         ReturnStatement,
         SequenceExpression,
+        StaticBlock,
         SwitchStatement,
         SwitchCase,
         TemplateElement,
