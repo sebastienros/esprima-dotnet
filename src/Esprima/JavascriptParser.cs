@@ -647,6 +647,10 @@ namespace Esprima
                             raw = GetTokenRaw(token);
                             expr = Finalize(node, new Literal(token.RegexValue!.Pattern, token.RegexValue.Flags, token.Value, raw));
                             break;
+                        case "#":
+                            NextToken();
+                            expr = Finalize(node, new PrivateIdentifier((string?) NextToken().Value));
+                            break;
                         default:
                             return ThrowUnexpectedToken<Expression>(NextToken());
                     }

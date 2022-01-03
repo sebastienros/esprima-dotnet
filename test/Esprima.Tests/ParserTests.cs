@@ -274,5 +274,18 @@ f(values);
 
             new JavaScriptParser(Code).ParseScript();
         }
+
+        [Fact]
+        public void TestPrivateIdentifierIn()
+        {
+            const string Code = @"
+class aa {
+    #bb;
+    cc(ee) {
+        var d =  #bb in ee;
+    }
+}";
+            new JavaScriptParser(Code).ParseScript();
+        }
     }
 }
