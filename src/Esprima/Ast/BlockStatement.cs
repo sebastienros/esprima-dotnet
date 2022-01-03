@@ -2,11 +2,16 @@
 
 namespace Esprima.Ast
 {
-    public sealed class BlockStatement : Statement
+    public class BlockStatement : Statement
     {
         private readonly NodeList<Statement> _body;
 
         public BlockStatement(in NodeList<Statement> body) : base(Nodes.BlockStatement)
+        {
+            _body = body;
+        }
+
+        internal BlockStatement(in NodeList<Statement> body, Nodes type) : base(type)
         {
             _body = body;
         }
