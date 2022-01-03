@@ -821,6 +821,7 @@ namespace Esprima
 
                     break;
 
+                case '#':
                 case ')':
                 case ';':
                 case ',':
