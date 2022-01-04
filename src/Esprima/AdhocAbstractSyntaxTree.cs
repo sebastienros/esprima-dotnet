@@ -1968,7 +1968,8 @@ namespace Esprima
             }
             else if (token.Type == TokenType.Keyword)
             {
-                prec = "instanceof".Equals(op) || _context.AllowIn && "in".Equals(op) ? 12 : 0;
+                prec = "instanceof".Equals(op) ||
+                    _context.AllowIn && "in".Equals(op) ? 12 : 0;
             }
 
             return prec;
@@ -2915,6 +2916,21 @@ namespace Esprima
             return Finalize(node, new IfStatement(test, consequent, alternate));
         }
 
+        // ADHOC: Object finalizer
+        private FinalizerStatement ParseFinalizer()
+        {
+            var node = CreateNode();
+            ExpectKeyword("finally");
+
+            var right = ParseExpression();
+            if (right.Type != Nodes.ArrowFunctionExpression && right.Type != Nodes.FunctionExpression)
+            {
+                return ThrowError<FinalizerStatement>("Expected finalizer body to be a function expression or arrow function.", _lookahead.Value);
+            }
+
+            return Finalize(node, new FinalizerStatement(right));
+        }
+
         // https://tc39.github.io/ecma262/#sec-do-while-statement
 
         private DoWhileStatement ParseDoWhileStatement()
@@ -3545,6 +3561,9 @@ namespace Esprima
                             break;
                         case "function":
                             statement = ParseFunctionDeclaration();
+                            break;
+                        case "finally": // Adhoc: Object finalizer
+                            statement = ParseFinalizer();
                             break;
                         case "if":
                             statement = ParseIfStatement();
