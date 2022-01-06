@@ -693,6 +693,11 @@ namespace Esprima
                             staticExpr.VarExpression = exp;
                             expr = staticExpr;
                         }
+                        else if (MatchKeyword("import")) // ADHOC
+                        {
+                            var decl = ParseImportDeclaration();
+                            expr = new ImportExpression(Nodes.ImportDeclaration, decl.Location) { Declaration = decl }; // Hack hack hack
+                        }
                         else
                         {
                             return ThrowUnexpectedToken<Expression>(NextToken());
@@ -2714,6 +2719,8 @@ namespace Esprima
             var node = CreateNode();
 
             var token = NextToken();
+
+
             if (token.Type == TokenType.Keyword && (string?) token.Value == "yield")
             {
                 if (_context.Strict)
@@ -2797,7 +2804,7 @@ namespace Esprima
             if (str.EndsWith("::"))
                 str.Substring(0, str.Length - 2);
 
-            return Finalize(node, new Identifier((string?)token.Value));
+            return Finalize(node, new Identifier((string?)str));
         }
 
         private VariableDeclarator ParseVariableDeclaration(ref bool inFor)
@@ -4256,6 +4263,15 @@ namespace Esprima
                 var inclStatement = ParseIncludeStatement();
                 return Finalize(node, inclStatement);
             }
+            else if (Match("-"))
+            {
+                NextToken();
+                key = ParseLeftHandSideExpressionAllowCall();
+                if (key is CallExpression)
+                    return key; // ADHOC Hack
+                else
+                    ThrowError("kek");
+            }
             else
             {
                 computed = Match("[");
@@ -4297,6 +4313,8 @@ namespace Esprima
                 else
                 {
                     key = ParseLeftHandSideExpression();
+                    if (key is ImportExpression)
+                        return key; // ADHOC Hack
                 }
 
                 if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?)token.Value == "async")
@@ -4482,7 +4500,7 @@ namespace Esprima
 
             var id = identifierIsOptional && _lookahead.Type != TokenType.Identifier
                 ? null
-                : ParseVariableIdentifier();
+                : ParseVariableIdentifierAllowStatic();
 
             Expression? superClass = null;
             if (MatchKeyword("extends"))
