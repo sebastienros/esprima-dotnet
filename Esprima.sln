@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{71570FFF-0BEA-4AF7-8288-9E46627EA676}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Sample", "samples\Esprima.Sample\Esprima.Sample.csproj", "{5FD90FD9-BF45-407A-94D1-9B4360AFF9F7}"
 EndProject
@@ -12,6 +17,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Tests", "test\Esprima.Tests\Esprima.Tests.csproj", "{4BCC2A35-C58B-4AD0-8DA2-48A686C203CE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Benchmark", "samples\Esprima.Benchmark\Esprima.Benchmark.csproj", "{0E05EB4C-CEE3-4D68-90B8-1F0FCE0D2DCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Esprima.Tests.Test262", "test\Esprima.Tests.Test262\Esprima.Tests.Test262.csproj", "{D006FF90-259B-4BFA-BB7E-C1985A520634}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +42,10 @@ Global
 		{0E05EB4C-CEE3-4D68-90B8-1F0FCE0D2DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E05EB4C-CEE3-4D68-90B8-1F0FCE0D2DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E05EB4C-CEE3-4D68-90B8-1F0FCE0D2DCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D006FF90-259B-4BFA-BB7E-C1985A520634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D006FF90-259B-4BFA-BB7E-C1985A520634}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D006FF90-259B-4BFA-BB7E-C1985A520634}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D006FF90-259B-4BFA-BB7E-C1985A520634}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

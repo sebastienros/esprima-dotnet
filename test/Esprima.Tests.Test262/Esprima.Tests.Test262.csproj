@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Spectre.Console" Version="0.43.0" />
+      <PackageReference Include="Test262Harness" Version="0.0.4" />
+      <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
+    </ItemGroup>
+
+</Project>

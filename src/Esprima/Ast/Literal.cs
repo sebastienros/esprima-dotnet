@@ -1,9 +1,11 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Text.RegularExpressions;
 using Esprima.Utils;
 
 namespace Esprima.Ast
 {
+    [DebuggerDisplay("{Raw,nq}")]
     public class Literal : Expression
     {
         public string? StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;

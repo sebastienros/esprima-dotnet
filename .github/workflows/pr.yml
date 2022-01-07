@@ -11,7 +11,7 @@ on:
 jobs:
 
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     env:
         DOTNET_NOLOGO: true
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -20,18 +20,12 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v2
 
-    - name: Setup .NET Core 3.1
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.*
-
-    - name: Setup .NET 6.0
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.*
-
     - name: Test
       run: dotnet test --configuration Release
+
+    - name: Parse Test262 ECMAScript Test Suite
+      run: dotnet run -c Release --project test/Esprima.Tests.Test262/Esprima.Tests.Test262.csproj
+
 
   linux:
     runs-on: ubuntu-latest
@@ -43,15 +37,15 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v2
 
-    - name: Setup .NET Core 3.1
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.*
-
-    - name: Setup .NET 6.0
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.*
+        dotnet-version: |
+          3.1.x
+          6.0.x
 
     - name: Test
       run: dotnet test --configuration Release
+
+    - name: Parse Test262 ECMAScript Test Suite
+      run: dotnet run -c Release --project test/Esprima.Tests.Test262/Esprima.Tests.Test262.csproj
