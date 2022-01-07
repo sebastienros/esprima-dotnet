@@ -17,15 +17,12 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v2
 
-    - name: Setup .NET Core 3.1
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.*
-
-    - name: Setup .NET 6.0
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.*
+        dotnet-version: |
+          3.1.x
+          6.0.x
 
     - name: Test
       run: dotnet test --configuration Release

@@ -20,21 +20,21 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v2
 
-    - name: Setup .NET Core 3.1
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.*
-
-    - name: Setup .NET 6.0
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.*
+        dotnet-version: |
+          3.1.x
+          6.0.x
 
     - name: Test
       run: dotnet test --configuration Release
 
     - name: Pack with dotnet
       run: dotnet pack --output artifacts --configuration Release -p:PackageVersion=$GITHUB_RUN_ID
+
+    - name: Parse Test262 ECMAScript Test Suite
+      run: dotnet run -c Release --project test/Esprima.Tests.Test262/Esprima.Tests.Test262.csproj
 
     - name: Push with dotnet
       run: dotnet nuget push artifacts/*.nupkg --api-key ${{ secrets.MYGET_API_KEY }} --skip-duplicate --source https://www.myget.org/F/esprimadotnet/api/v2/package
