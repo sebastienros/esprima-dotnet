@@ -1,7 +1,6 @@
 # to generate this file run:
 # dotnet run -c Release --project test/Esprima.Tests.Test262/Esprima.Tests.Test262.csproj -- --update-allow-list
 
-test/annexB/built-ins/RegExp/incomplete_hex_unicode_escape.js(default)
 test/annexB/built-ins/RegExp/incomplete_hex_unicode_escape.js(strict mode)
 test/annexB/built-ins/RegExp/named-groups/non-unicode-malformed-lookbehind.js(default)
 test/annexB/built-ins/RegExp/named-groups/non-unicode-malformed-lookbehind.js(strict mode)
