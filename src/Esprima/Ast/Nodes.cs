@@ -73,9 +73,12 @@
         ExportAllDeclaration,
         ExportDefaultDeclaration,
         ClassExpression,
-        StaticDeclaration, // ADHOC
-        IncludeStatement, // ADHOC
-        ReferenceVariableExpression, // ADHOC
+
+        // ADHOC
+        StaticDeclaration,
+        IncludeStatement,
+        ReferenceVariableExpression,
         FinalizerStatement,
+        MapExpression,
     };
 }

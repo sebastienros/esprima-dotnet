@@ -89,7 +89,7 @@ namespace Esprima
         private readonly Func<Expression> parseNewExpression;
         private readonly Func<Expression> parsePrimaryExpression;
         private readonly Func<Expression> parseGroupExpression;
-        private readonly Func<Expression> parseArrayInitializer;
+        private readonly Func<Expression> parseArrayOrMapInitializer;
         private readonly Func<Expression> parseObjectInitializer;
         private readonly Func<Expression> parseBinaryExpression;
         private readonly Func<Expression> parseLeftHandSideExpression;
@@ -139,7 +139,7 @@ namespace Esprima
             parseNewExpression = ParseNewExpression;
             parsePrimaryExpression = ParsePrimaryExpression;
             parseGroupExpression = ParseGroupExpression;
-            parseArrayInitializer = ParseArrayInitializer;
+            parseArrayOrMapInitializer = ParseArrayOrMapInitializer;
             parseObjectInitializer = ParseObjectInitializer;
             parseBinaryExpression = ParseBinaryExpression;
             parseLeftHandSideExpression = ParseLeftHandSideExpression;
@@ -638,7 +638,7 @@ namespace Esprima
                             expr = InheritCoverGrammar(parseGroupExpression);
                             break;
                         case "[":
-                            expr = InheritCoverGrammar(parseArrayInitializer);
+                            expr = InheritCoverGrammar(parseArrayOrMapInitializer);
                             break;
                         case "{":
                             expr = InheritCoverGrammar(parseObjectInitializer);
@@ -751,35 +751,52 @@ namespace Esprima
             return Finalize(node, new SpreadElement(arg));
         }
 
-        private ArrayExpression ParseArrayInitializer()
+        private Expression ParseArrayOrMapInitializer()
         {
             var node = CreateNode();
-            var elements = new ArrayList<Expression?>();
+            ArrayList<Expression?> arrElements = new();
+            Dictionary<Expression, Expression> map = new();
 
+            bool isMap = false;
             Expect("[");
 
+            // ADHOC: Added Map/KV support
             while (!Match("]"))
             {
                 if (Match(","))
                 {
                     NextToken();
-                    elements.Add(null);
+                    arrElements.Add(null);
                 }
-                else if (Match("..."))
+                else if (Match(":"))
                 {
-                    var element = ParseSpreadElement();
-                    if (!Match("]"))
-                    {
-                        _context.IsAssignmentTarget = false;
-                        _context.IsBindingElement = false;
-                        Expect(",");
-                    }
+                    if (arrElements.Count > 0)
+                        ThrowUnexpectedToken<Expression>(cacheToken, "Found mixed map and array elements in expression.");
 
-                    elements.Add(element);
+                    isMap = true;
+                    NextToken(); // Empty Map
                 }
                 else
                 {
-                    elements.Add(InheritCoverGrammar(parseAssignmentExpression));
+                    var elem = InheritCoverGrammar(parseAssignmentExpression);
+                    if (Match(":"))
+                    {
+                        if (arrElements.Count > 0)
+                            ThrowUnexpectedToken<Expression>(cacheToken, "Found mixed map and array elements in expression.");
+
+                        isMap = true;
+                        NextToken();
+                        var value = InheritCoverGrammar(parseAssignmentExpression);
+                        map.Add(elem, value);
+                    }
+                    else if (isMap)
+                    {
+                        ThrowUnexpectedToken<Expression>(cacheToken, "Element is a map, expected key/value.");
+                    }
+                    else
+                    {
+                        arrElements.Add(elem);
+                    }
 
                     if (!Match("]"))
                     {
@@ -791,7 +808,10 @@ namespace Esprima
             Expect("]");
 
 #nullable disable
-            return Finalize(node, new ArrayExpression(NodeList.From(ref elements)));
+            if (isMap)
+                return Finalize(node, new MapExpression(map));
+            else
+                return Finalize(node, new ArrayExpression(NodeList.From(ref arrElements)));
 #nullable enable
         }
 
