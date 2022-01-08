@@ -730,18 +730,6 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitMethodDefinition(MethodDefinition methodDefinition)
-            {
-                using (StartNodeObject(methodDefinition))
-                {
-                    Member("key", methodDefinition.Key);
-                    Member("computed", methodDefinition.Computed);
-                    Member("value", methodDefinition.Value);
-                    Member("kind", methodDefinition.Kind);
-                    Member("static", methodDefinition.Static);
-                }
-            }
-
             protected internal override void VisitForOfStatement(ForeachStatement forOfStatement)
             {
                 using (StartNodeObject(forOfStatement))
@@ -760,14 +748,6 @@ namespace Esprima.Utils
                     Member("id", classDeclaration.Id);
                     Member("superClass", classDeclaration.SuperClass);
                     Member("body", classDeclaration.Body);
-                }
-            }
-
-            protected internal override void VisitClassBody(ClassBody classBody)
-            {
-                using (StartNodeObject(classBody))
-                {
-                    Member("body", classBody.Body);
                 }
             }
 
@@ -881,19 +861,6 @@ namespace Esprima.Utils
                 using (StartNodeObject(restElement))
                 {
                     Member("argument", restElement.Argument);
-                }
-            }
-
-            protected internal override void VisitProperty(Property property)
-            {
-                using (StartNodeObject(property))
-                {
-                    Member("key", property.Key);
-                    Member("computed", property.Computed);
-                    Member("value", property.Value);
-                    Member("kind", property.Kind);
-                    Member("method", property.Method);
-                    Member("shorthand", property.Shorthand);
                 }
             }
 

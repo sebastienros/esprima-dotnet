@@ -10,22 +10,22 @@ namespace Esprima.Ast
         public readonly Expression? SuperClass;
         Expression? IClass.SuperClass => SuperClass;
 
-        public readonly ClassBody Body;
-        ClassBody IClass.Body => Body;
+        public readonly Statement Body;
+        Statement IClass.Body => Body;
 
         public bool IsModule { get; set; }
 
         public ClassExpression(
             Identifier? id,
             Expression? superClass,
-            ClassBody body) : base(Nodes.ClassExpression)
+            Statement body) : base(Nodes.ClassExpression)
         {
             Id = id;
             SuperClass = superClass;
             Body = body;
         }
 
-        public override NodeCollection ChildNodes => new(Id, SuperClass, Body);
+        public override NodeCollection ChildNodes => new(Id, SuperClass/*, Body*/);
 
         protected internal override void Accept(AstVisitor visitor)
         {

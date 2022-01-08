@@ -271,15 +271,6 @@ namespace Esprima.Utils
             Visit(function.Body);
         }
 
-        protected internal virtual void VisitPropertyDefinition(PropertyDefinition propertyDefinition)
-        {
-            Visit(propertyDefinition.Key);
-
-            if (propertyDefinition.Value is not null)
-            {
-                Visit(propertyDefinition.Value);
-            }
-        }
 
         protected internal virtual void VisitChainExpression(ChainExpression chainExpression)
         {
@@ -371,12 +362,6 @@ namespace Esprima.Utils
             Visit(importSpecifier.Local);
         }
 
-        protected internal virtual void VisitMethodDefinition(MethodDefinition methodDefinition)
-        {
-            Visit(methodDefinition.Key);
-            Visit(methodDefinition.Value);
-        }
-
         protected internal virtual void VisitForOfStatement(ForeachStatement forOfStatement)
         {
             Visit(forOfStatement.Left);
@@ -397,15 +382,6 @@ namespace Esprima.Utils
             }
 
             Visit(classDeclaration.Body);
-        }
-
-        protected internal virtual void VisitClassBody(ClassBody classBody)
-        {
-            ref readonly var body = ref classBody.Body;
-            for (var i = 0; i < body.Count; i++)
-            {
-                Visit(body[i]);
-            }
         }
 
         protected internal virtual void VisitYieldExpression(YieldExpression yieldExpression)
@@ -502,12 +478,6 @@ namespace Esprima.Utils
         protected internal virtual void VisitRestElement(RestElement restElement)
         {
             Visit(restElement.Argument);
-        }
-
-        protected internal virtual void VisitProperty(Property property)
-        {
-            Visit(property.Key);
-            Visit(property.Value);
         }
 
         protected internal virtual void VisitAwaitExpression(AwaitExpression awaitExpression)

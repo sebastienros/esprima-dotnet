@@ -7,7 +7,7 @@
     {
         Identifier? Id { get; }
         Expression? SuperClass { get; }
-        ClassBody Body { get; }
+        Statement Body { get; }
         NodeCollection ChildNodes { get; }
     }
 }

@@ -10,12 +10,12 @@ namespace Esprima.Ast
         public readonly Expression? SuperClass; // Identifier || CallExpression
         Expression? IClass.SuperClass => SuperClass;
 
-        public readonly ClassBody Body;
-        ClassBody IClass.Body => Body;
+        public readonly Statement Body;
+        Statement IClass.Body => Body;
 
         public bool IsModule { get; set; }
 
-        public ClassDeclaration(Identifier? id, Expression? superClass, ClassBody body) :
+        public ClassDeclaration(Identifier? id, Expression? superClass, Statement body) :
             base(Nodes.ClassDeclaration)
         {
             Id = id;

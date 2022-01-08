@@ -58,6 +58,7 @@ namespace Esprima
             "foreach", // ADHOC
             "in", // ADHOC
             "static", // ADHOC
+            "attribute", // ADHOC
             "new",
             "try",
             "let", // ADHOC: NOT SUPPORTED
@@ -86,9 +87,10 @@ namespace Esprima
             "finally",
             "extends",
             "function",
+            "method", // ADHOC
             "continue",
             "debugger",
-            "instanceof"
+            "instanceof",
         };
 
         private static readonly HashSet<string> StrictModeReservedWords = new()

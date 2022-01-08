@@ -95,14 +95,10 @@ namespace Esprima.Utils
         public event EventHandler<ImportDefaultSpecifier>? VisitedImportDefaultSpecifier;
         public event EventHandler<ImportSpecifier>? VisitingImportSpecifier;
         public event EventHandler<ImportSpecifier>? VisitedImportSpecifier;
-        public event EventHandler<MethodDefinition>? VisitingMethodDefinition;
-        public event EventHandler<MethodDefinition>? VisitedMethodDefinition;
         public event EventHandler<ForeachStatement>? VisitingForOfStatement;
         public event EventHandler<ForeachStatement>? VisitedForOfStatement;
         public event EventHandler<ClassDeclaration>? VisitingClassDeclaration;
         public event EventHandler<ClassDeclaration>? VisitedClassDeclaration;
-        public event EventHandler<ClassBody>? VisitingClassBody;
-        public event EventHandler<ClassBody>? VisitedClassBody;
         public event EventHandler<YieldExpression>? VisitingYieldExpression;
         public event EventHandler<YieldExpression>? VisitedYieldExpression;
         public event EventHandler<TaggedTemplateExpression>? VisitingTaggedTemplateExpression;
@@ -127,8 +123,6 @@ namespace Esprima.Utils
         public event EventHandler<TemplateElement>? VisitedTemplateElement;
         public event EventHandler<RestElement>? VisitingRestElement;
         public event EventHandler<RestElement>? VisitedRestElement;
-        public event EventHandler<Property>? VisitingProperty;
-        public event EventHandler<Property>? VisitedProperty;
         public event EventHandler<ConditionalExpression>? VisitingConditionalExpression;
         public event EventHandler<ConditionalExpression>? VisitedConditionalExpression;
         public event EventHandler<CallExpression>? VisitingCallExpression;
@@ -448,13 +442,6 @@ namespace Esprima.Utils
             VisitedImportSpecifier?.Invoke(this, importSpecifier);
         }
 
-        protected internal override void VisitMethodDefinition(MethodDefinition methodDefinition)
-        {
-            VisitingMethodDefinition?.Invoke(this, methodDefinition);
-            base.VisitMethodDefinition(methodDefinition);
-            VisitedMethodDefinition?.Invoke(this, methodDefinition);
-        }
-
         protected internal override void VisitForOfStatement(ForeachStatement forOfStatement)
         {
             VisitingForOfStatement?.Invoke(this, forOfStatement);
@@ -467,13 +454,6 @@ namespace Esprima.Utils
             VisitingClassDeclaration?.Invoke(this, classDeclaration);
             base.VisitClassDeclaration(classDeclaration);
             VisitedClassDeclaration?.Invoke(this, classDeclaration);
-        }
-
-        protected internal override void VisitClassBody(ClassBody classBody)
-        {
-            VisitingClassBody?.Invoke(this, classBody);
-            base.VisitClassBody(classBody);
-            VisitedClassBody?.Invoke(this, classBody);
         }
 
         protected internal override void VisitYieldExpression(YieldExpression yieldExpression)
@@ -558,13 +538,6 @@ namespace Esprima.Utils
             VisitingRestElement?.Invoke(this, restElement);
             base.VisitRestElement(restElement);
             VisitedRestElement?.Invoke(this, restElement);
-        }
-
-        protected internal override void VisitProperty(Property property)
-        {
-            VisitingProperty?.Invoke(this, property);
-            base.VisitProperty(property);
-            VisitedProperty?.Invoke(this, property);
         }
 
         protected internal override void VisitConditionalExpression(ConditionalExpression conditionalExpression)

@@ -2,11 +2,11 @@
 
 namespace Esprima.Ast
 {
-    public class StaticExpression : Expression
+    public class AttributeVariableDefinition : Expression
     {
         public Expression VarExpression { get; set; }
 
-        public StaticExpression(Nodes node, Location location)
+        public AttributeVariableDefinition(Nodes node, Location location)
             : base(node)
         {
             Location = location;

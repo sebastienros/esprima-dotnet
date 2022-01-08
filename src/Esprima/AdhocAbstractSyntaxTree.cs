@@ -689,9 +689,18 @@ namespace Esprima
                             NextToken();
 
                             var exp = ParseAssignmentExpression();
-                            var staticExpr = new StaticExpression(Nodes.StaticDeclaration, exp.Location);
+                            var staticExpr = new StaticVariableDefinition(Nodes.StaticDeclaration, exp.Location);
                             staticExpr.VarExpression = exp;
                             expr = staticExpr;
+                        }
+                        else if (MatchKeyword("attribute")) // ADHOC
+                        {
+                            NextToken();
+
+                            var exp = ParseAssignmentExpression();
+                            var attrExp = new AttributeVariableDefinition(Nodes.AttributeDeclaration, exp.Location);
+                            attrExp.VarExpression = exp;
+                            expr = attrExp;
                         }
                         else if (MatchKeyword("import")) // ADHOC
                         {
@@ -942,125 +951,6 @@ namespace Esprima
             return false;
         }
 
-        private Property ParseObjectProperty(Token hasProto)
-        {
-            var node = CreateNode();
-            var token = _lookahead;
-
-            Expression? key = null;
-            Expression value;
-
-            PropertyKind kind;
-            var computed = false;
-            var method = false;
-            var shorthand = false;
-            var isAsync = false;
-            var isGenerator = false;
-
-            if (token.Type == TokenType.Identifier)
-            {
-                var id = (string) token.Value!;
-                NextToken();
-                computed = Match("[");
-                isAsync = !_hasLineTerminator && id == "async" &&
-                          !Match(":") && !Match("(") && !Match(",");
-                isGenerator = Match("*");
-                if (isGenerator)
-                {
-                    NextToken();
-                }
-
-                key = isAsync ? ParseObjectPropertyKey() : Finalize(node, new Identifier(id));
-            }
-            else if (Match("*"))
-            {
-                NextToken();
-            }
-            else
-            {
-                computed = Match("[");
-                key = ParseObjectPropertyKey();
-            }
-
-            var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
-            if (token.Type == TokenType.Identifier && !isAsync && "get".Equals(token.Value) && lookaheadPropertyKey)
-            {
-                kind = PropertyKind.Get;
-                computed = Match("[");
-                key = ParseObjectPropertyKey();
-                _context.AllowYield = false;
-                value = ParseGetterMethod();
-            }
-            else if (token.Type == TokenType.Identifier && !isAsync && "set".Equals(token.Value) && lookaheadPropertyKey)
-            {
-                kind = PropertyKind.Set;
-                computed = Match("[");
-                key = ParseObjectPropertyKey();
-                value = ParseSetterMethod();
-            }
-            else if (token.Type == TokenType.Punctuator && "*".Equals(token.Value) && lookaheadPropertyKey)
-            {
-                kind = PropertyKind.Init;
-                computed = Match("[");
-                key = ParseObjectPropertyKey();
-                value = ParseGeneratorMethod(isAsync);
-                method = true;
-            }
-            else
-            {
-                if (key == null)
-                {
-                    return ThrowUnexpectedToken<Property>(_lookahead);
-                }
-
-                kind = PropertyKind.Init;
-                if (Match(":") && !isAsync)
-                {
-                    if (!computed && IsPropertyKey(key, "__proto__"))
-                    {
-                        if (hasProto.BooleanValue)
-                        {
-                            TolerateError(Messages.DuplicateProtoProperty);
-                        }
-
-                        hasProto.Value = "true";
-                        hasProto.BooleanValue = true;
-                    }
-
-                    NextToken();
-                    value = InheritCoverGrammar(parseAssignmentExpression);
-                }
-                else if (Match("("))
-                {
-                    value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
-                    method = true;
-                }
-                else if (token.Type == TokenType.Identifier)
-                {
-                    var id = (Identifier) key;
-                    if (Match("="))
-                    {
-                        _context.FirstCoverInitializedNameError = _lookahead;
-                        NextToken();
-                        shorthand = true;
-                        var init = IsolateCoverGrammar(parseAssignmentExpression);
-                        value = Finalize(node, new AssignmentPattern(id, init));
-                    }
-                    else
-                    {
-                        shorthand = true;
-                        value = id;
-                    }
-                }
-                else
-                {
-                    return ThrowUnexpectedToken<Property>(NextToken());
-                }
-            }
-
-            return Finalize(node, new Property(kind, key, computed, value, method, shorthand));
-        }
-
         private ObjectExpression ParseObjectInitializer()
         {
             var node = CreateNode();
@@ -1074,7 +964,7 @@ namespace Esprima
 
             while (!Match("}"))
             {
-                var property = Match("...") ? (Expression) ParseSpreadElement() : ParseObjectProperty(hasProto);
+                var property = ParseSpreadElement(); // ADHOC: Fixme
                 properties.Add(property);
 
                 if (!Match("}"))
@@ -1215,15 +1105,9 @@ namespace Esprima
                     var properties = new ArrayList<Node>();
                     foreach (var property in expr.As<ObjectExpression>().Properties)
                     {
-                        if (property is Property p)
-                        {
-                            p.Value = ReinterpretExpressionAsPattern(p.Value);
-                            properties.Add(p);
-                        }
-                        else
-                        {
-                            properties.Add(ReinterpretExpressionAsPattern(property!));
-                        }
+                        // FIXME - adhoc
+                        properties.Add(ReinterpretExpressionAsPattern(property!));
+                        
                     }
 
                     node = new ObjectPattern(NodeList.From(ref properties));
@@ -2150,10 +2034,7 @@ namespace Esprima
 
                     break;
                 case Nodes.ObjectPattern:
-                    foreach (var property in param.As<ObjectPattern>().Properties)
-                    {
-                        CheckPatternParam(options, property is Property p ? p.Value : property);
-                    }
+                    throw new Exception("Removed for adhoc");
 
                     break;
                 default:
@@ -2437,6 +2318,9 @@ namespace Esprima
                     case "function":
                         statement = ParseFunctionDeclaration();
                         break;
+                    case "method":
+                        statement = ParseMethodDeclaration();
+                        break;
                     case "module":
                         statement = ParseClassDeclaration();
                         (statement as ClassDeclaration).IsModule = true;
@@ -2608,52 +2492,6 @@ namespace Esprima
 #nullable enable
         }
 
-        private Property ParsePropertyPattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
-        {
-            var node = CreateNode();
-
-            var computed = false;
-            var shorthand = false;
-            var method = false;
-
-            Expression key;
-            Expression value;
-
-            if (_lookahead.Type == TokenType.Identifier)
-            {
-                var keyToken = _lookahead;
-                key = ParseVariableIdentifier();
-                var init = Finalize(node, new Identifier((string?) keyToken.Value));
-                if (Match("="))
-                {
-                    parameters.Push(keyToken);
-                    shorthand = true;
-                    NextToken();
-                    var expr = ParseAssignmentExpression();
-                    value = Finalize(StartNode(keyToken), new AssignmentPattern(init, expr));
-                }
-                else if (!Match(":"))
-                {
-                    parameters.Push(keyToken);
-                    shorthand = true;
-                    value = init;
-                }
-                else
-                {
-                    Expect(":");
-                    value = ParsePatternWithDefault(ref parameters, kind);
-                }
-            }
-            else
-            {
-                computed = Match("[");
-                key = ParseObjectPropertyKey();
-                Expect(":");
-                value = ParsePatternWithDefault(ref parameters, kind);
-            }
-
-            return Finalize(node, new Property(PropertyKind.Init, key, computed, value, method, shorthand));
-        }
 
         private RestElement ParseRestProperty(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)
         {
@@ -2681,7 +2519,7 @@ namespace Esprima
             Expect("{");
             while (!Match("}"))
             {
-                properties.Push(Match("...") ? ParseRestProperty(ref parameters, kind) : ParsePropertyPattern(ref parameters, kind));
+                properties.Push(ParseRestProperty(ref parameters, kind)); // Changed for ADHOc, fix me maybe
                 if (!Match("}"))
                 {
                     Expect(",");
@@ -3934,6 +3772,96 @@ namespace Esprima
             return functionDeclaration;
         }
 
+        private MethodDeclaration ParseMethodDeclaration(bool identifierIsOptional = false)
+        {
+            var node = CreateNode();
+            var isAsync = MatchContextualKeyword("async");
+            if (isAsync)
+            {
+                if (_context.InIteration)
+                {
+                    TolerateError(Messages.AsyncFunctionInSingleStatementContext);
+                }
+
+                NextToken();
+            }
+
+            ExpectKeyword("method");
+
+            var isGenerator = Match("*");
+            if (isGenerator)
+            {
+                NextToken();
+            }
+
+            string? message = null;
+            Identifier? id = null;
+            Token? firstRestricted = null;
+
+            if (!identifierIsOptional || !Match("("))
+            {
+                var token = _lookahead;
+                id = ParseVariableIdentifier();
+                if (_context.Strict)
+                {
+                    if (Scanner.IsRestrictedWord((string?) token.Value))
+                    {
+                        TolerateUnexpectedToken(token, Messages.StrictFunctionName);
+                    }
+                }
+                else
+                {
+                    if (Scanner.IsRestrictedWord((string?) token.Value))
+                    {
+                        firstRestricted = token;
+                        message = Messages.StrictFunctionName;
+                    }
+                    else if (Scanner.IsStrictModeReservedWord((string?) token.Value))
+                    {
+                        firstRestricted = token;
+                        message = Messages.StrictReservedWord;
+                    }
+                }
+            }
+
+            var previousIsAsync = _context.IsAsync;
+            var previousAllowYield = _context.AllowYield;
+            _context.IsAsync = isAsync;
+            _context.AllowYield = !isGenerator;
+
+            var formalParameters = ParseFormalParameters(firstRestricted);
+            var parameters = NodeList.From(ref formalParameters.Parameters);
+            var stricted = formalParameters.Stricted;
+            firstRestricted = formalParameters.FirstRestricted;
+            if (formalParameters.Message != null)
+            {
+                message = formalParameters.Message;
+            }
+
+            var previousStrict = _context.Strict;
+            var previousAllowStrictDirective = _context.AllowStrictDirective;
+            _context.AllowStrictDirective = formalParameters.Simple;
+            var body = ParseFunctionSourceElements();
+            if (_context.Strict && firstRestricted != null)
+            {
+                ThrowUnexpectedToken(firstRestricted, message);
+            }
+
+            if (_context.Strict && stricted != null)
+            {
+                TolerateUnexpectedToken(stricted, message);
+            }
+
+            var hasStrictDirective = _context.Strict;
+            _context.AllowStrictDirective = previousAllowStrictDirective;
+            _context.Strict = previousStrict;
+            _context.IsAsync = previousIsAsync;
+            _context.AllowYield = previousAllowYield;
+
+            var methodDeclaration = Finalize(node, new MethodDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync));
+            return methodDeclaration;
+        }
+
         private FunctionExpression ParseFunctionExpression()
         {
             var node = CreateNode();
@@ -4249,266 +4177,6 @@ namespace Esprima
             return Finalize(node, new YieldExpression(argument, delegat));
         }
 
-        // https://tc39.github.io/ecma262/#sec-class-definitions
-
-        private Node ParseClassElement(ref bool hasConstructor)
-        {
-            var token = _lookahead;
-            var node = CreateNode();
-
-            var kind = PropertyKind.None;
-            Expression? key = null;
-            Expression? value = null;
-            var computed = false;
-            var method = false;
-            var isStatic = false;
-            var isAsync = false;
-            var isGenerator = false;
-            var isPrivate = false;
-
-            if (_lookahead.Value == "function")
-            {
-                isStatic = true;
-                NextToken();
-                key = ParseObjectPropertyKey();
-            }
-            else if (MatchKeyword("class") || MatchKeyword("module"))
-            {
-                var classExpr = ParseClassExpression();
-                return Finalize(node, classExpr);
-            }
-            else if (Match("#"))
-            {
-                NextToken();
-                var inclStatement = ParseIncludeStatement();
-                return Finalize(node, inclStatement);
-            }
-            else if (Match("-"))
-            {
-                NextToken();
-                key = ParseLeftHandSideExpressionAllowCall();
-                if (key is CallExpression)
-                    return key; // ADHOC Hack
-                else
-                    ThrowError("kek");
-            }
-            else
-            {
-                computed = Match("[");
-                if (Match("#"))
-                {
-                    isPrivate = true;
-                    NextToken();
-                    token = _lookahead;
-                }
-
-                if (_lookahead.Value as string == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
-                {
-                    NextToken();
-
-                    token = _lookahead;
-                    isStatic = true;
-                    computed = Match("[");
-                    if (Match("*"))
-                    {
-                        NextToken();
-                        if (Match("#"))
-                        {
-                            isPrivate = true;
-                            NextToken();
-                            token = _lookahead;
-                        }
-                    }
-                    else
-                    {
-                        if (Match("#"))
-                        {
-                            isPrivate = true;
-                            NextToken();
-                            token = _lookahead;
-                        }
-                        key = ParseObjectPropertyKey();
-                    }
-                }
-                else
-                {
-                    key = ParseLeftHandSideExpression();
-                    if (key is ImportExpression)
-                        return key; // ADHOC Hack
-                }
-
-                if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?)token.Value == "async")
-                {
-                    if (!(_lookahead.Value is string punctuator) || punctuator != ":" && punctuator != "(")
-                    {
-                        isAsync = true;
-                        isGenerator = Match("*");
-                        if (isGenerator)
-                        {
-                            NextToken();
-                        }
-
-                        if (Match("#"))
-                        {
-                            isPrivate = true;
-                            NextToken();
-                        }
-
-                        token = _lookahead;
-                        computed = Match("[");
-                        key = ParseObjectPropertyKey(isPrivate);
-                        if (token.Type == TokenType.Identifier && (string?)token.Value == "constructor")
-                        {
-                            TolerateUnexpectedToken(token, Messages.ConstructorIsAsync);
-                        }
-                    }
-                }
-            }
-
-            var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
-            if (token.Type == TokenType.Identifier)
-            {
-                if (lookaheadPropertyKey && (string?)token.Value == "get")
-                {
-                    kind = PropertyKind.Get;
-                    if (Match("#"))
-                    {
-                        isPrivate = true;
-                        NextToken();
-                        token = _lookahead;
-                    }
-                    computed = Match("[");
-                    key = ParseObjectPropertyKey(isPrivate);
-                    _context.AllowYield = false;
-                    value = ParseGetterMethod();
-                }
-                else if (lookaheadPropertyKey && (string?)token.Value == "set")
-                {
-                    kind = PropertyKind.Set;
-                    if (Match("#"))
-                    {
-                        isPrivate = true;
-                        NextToken();
-                        token = _lookahead;
-                    }
-                    computed = Match("[");
-                    key = ParseObjectPropertyKey(isPrivate);
-                    value = ParseSetterMethod();
-                }
-                else if (!Match("("))
-                {
-                    kind = PropertyKind.Property;
-                    computed = false;
-
-                    if (Match("="))
-                    {
-                        NextToken();
-                        value = IsolateCoverGrammar(this.parseAssignmentExpression);
-                    }
-                }
-            }
-            else if (token.Type == TokenType.Punctuator && (string?)token.Value == "*" && lookaheadPropertyKey)
-            {
-                kind = PropertyKind.Init;
-                computed = Match("[");
-                key = ParseObjectPropertyKey(isPrivate);
-                value = ParseGeneratorMethod(isAsync);
-                method = true;
-            }
-
-            if (kind == PropertyKind.None && key != null)
-            {
-                if (Match("("))
-                {
-                    var previousInClassConstructor = _context.InClassConstructor;
-                    _context.InClassConstructor = Equals(token.Value, "constructor");
-                    kind = PropertyKind.Init;
-                    value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
-                    _context.InClassConstructor = previousInClassConstructor;
-                    method = true;
-                }
-            }
-
-            if (kind == PropertyKind.None)
-            {
-                ThrowUnexpectedToken(_lookahead);
-            }
-
-            if (kind == PropertyKind.Init)
-            {
-                if (!isStatic)
-                    kind = PropertyKind.Method;
-                else
-                    kind = PropertyKind.Function;
-            }
-
-            if (!computed)
-            {
-                if (isStatic && IsPropertyKey(key!, "prototype"))
-                {
-                    ThrowUnexpectedToken(token, Messages.StaticPrototype);
-                }
-
-                if (!isStatic && IsPropertyKey(key!, "constructor"))
-                {
-                    if (kind != PropertyKind.Method || !method || ((FunctionExpression)value!).Generator)
-                    {
-                        ThrowUnexpectedToken(token, Messages.ConstructorSpecialMethod);
-                    }
-
-                    if (hasConstructor)
-                    {
-                        ThrowUnexpectedToken(token, Messages.DuplicateConstructor);
-                    }
-                    else
-                    {
-                        hasConstructor = true;
-                    }
-
-                    kind = PropertyKind.Constructor;
-                }
-            }
-
-            if (kind == PropertyKind.Property)
-            {
-                ConsumeSemicolon();
-                return Finalize(node, new PropertyDefinition(key!, computed, value!, isStatic));
-            }
-
-            return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic));
-        }
-
-        private ArrayList<Node> ParseClassElementList()
-        {
-            var body = new ArrayList<Node>();
-            var hasConstructor = false;
-
-            Expect("{");
-            while (!Match("}"))
-            {
-                if (Match(";"))
-                {
-                    NextToken();
-                }
-                else
-                {
-                    body.Push(ParseClassElement(ref hasConstructor));
-                }
-            }
-
-            Expect("}");
-
-            return body;
-        }
-
-        private ClassBody ParseClassBody()
-        {
-            var node = CreateNode();
-            var elementList = ParseClassElementList();
-
-            return Finalize(node, new ClassBody(NodeList.From(ref elementList)));
-        }
-
         private ClassDeclaration ParseClassDeclaration(bool identifierIsOptional = false)
         {
             var node = CreateNode();
@@ -4530,7 +4198,7 @@ namespace Esprima
                 _context.AllowSuper = true;
             }
 
-            var classBody = ParseClassBody();
+            var classBody = ParseBlock();
             _context.Strict = previousStrict;
             _context.AllowSuper = previousAllowSuper;
 
@@ -4557,26 +4225,10 @@ namespace Esprima
                 superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);
             }
 
-            var classBody = ParseClassBody();
+            var classBody = ParseBlock();
             _context.Strict = previousStrict;
 
             return Finalize(node, new ClassExpression(id, superClass, classBody) {  IsModule = isModule });
-        }
-
-        // https://tc39.github.io/ecma262/#sec-imports
-
-        private Literal ParseModuleSpecifier()
-        {
-            var node = CreateNode();
-
-            if (_lookahead.Type != TokenType.StringLiteral)
-            {
-                ThrowError(Messages.InvalidModuleSpecifier);
-            }
-
-            var token = NextToken();
-            var raw = GetTokenRaw(token);
-            return Finalize(node, new Literal((string?) token.Value, raw));
         }
 
         // import <foo> ...;

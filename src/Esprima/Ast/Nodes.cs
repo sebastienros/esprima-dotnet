@@ -63,7 +63,7 @@
         ClassBody,
         ClassDeclaration,
         ForeachStatement,
-        MethodDefinition,
+        MethodDeclaration,
         ImportSpecifier,
         ImportDefaultSpecifier,
         ImportNamespaceSpecifier,
@@ -80,5 +80,6 @@
         ReferenceVariableExpression,
         FinalizerStatement,
         MapExpression,
+        AttributeDeclaration,
     };
 }
