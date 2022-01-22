@@ -45,7 +45,7 @@ namespace Esprima
 
         public static bool IsIdentifierStart(char ch)
         {
-            return ch == '$' || ch == '_' ||
+            return /*ch == '$' ||*/ ch == '_' || // ADHOC: Don't make it clash with symbol consts
                    ch >= 'A' && ch <= 'Z' ||
                    ch >= 'a' && ch <= 'z' ||
                    ch == '\\' ||

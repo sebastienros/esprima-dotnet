@@ -81,5 +81,7 @@
         FinalizerStatement,
         MapExpression,
         AttributeDeclaration,
+        RequireStatement,
+        UndefStatement,
     };
 }

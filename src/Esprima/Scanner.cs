@@ -91,6 +91,7 @@ namespace Esprima
             "continue",
             "debugger",
             "instanceof",
+            "undef", // ADHOC
         };
 
         private static readonly HashSet<string> StrictModeReservedWords = new()
@@ -108,7 +109,7 @@ namespace Esprima
 
         private static readonly HashSet<string> FutureReservedWords = new() { "enum", "export", "import", "super" };
 
-        private static readonly string[] threeCharacterPunctutors = { "===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=" };
+        private static readonly string[] threeCharacterPunctutors = { /*"===", "!==", ">>>",*/ "<<=", ">>=", "**=", "&&=", "||=" };
 
         private static readonly string[] twoCharacterPunctuators = { "&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**" };
 
@@ -911,15 +912,29 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
-            if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
-            {
-                ThrowUnexpectedToken();
-            }
-
             object value = 0;
             NumericTokenType tokenType = NumericTokenType.None;
 
-            if (number.Length <= 8)
+            if (Source.CharCodeAt(Index) == 'u' || Source.CharCodeAt(Index) == 'U')
+            {
+                Index++;
+                if (Source.CharCodeAt(Index + 1) == 'l' || Source.CharCodeAt(Index + 1) == 'L')
+                {
+                    Index++;
+                    value = Convert.ToUInt64(number, 16);
+                    tokenType = NumericTokenType.UnsignedLong;
+                }
+                else
+                {
+                    value = Convert.ToUInt32(number, 16);
+                    tokenType = NumericTokenType.UnsignedInteger;
+                }
+            } 
+            else if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
+            {
+                ThrowUnexpectedToken();
+            }
+            else if (number.Length <= 8)
             {
                 value = Convert.ToInt32(number, 16);
                 tokenType = NumericTokenType.Integer;
@@ -1200,11 +1215,11 @@ namespace Esprima
                     ThrowUnexpectedToken();
                 }
             }
-            else if (ch == 'u') // Unsigned
+            else if (ch == 'u' || ch == 'U') // Unsigned
             {
                 Index++;
 
-                if (Source[Index] == 'l') // Unsigned long
+                if (Source[Index] == 'l' || Source[Index] == 'L') // Unsigned long
                 {
                     Index++;
                     ulong ulongValue = ulong.Parse(sb.ToString());
@@ -1236,7 +1251,7 @@ namespace Esprima
                     };
                 }
             }
-            else if (ch == 'l') // Long
+            else if (ch == 'l' || ch == 'L') // Long
             {
                 Index++;
 
@@ -1253,7 +1268,7 @@ namespace Esprima
                     End = Index
                 };
             }
-            else if (ch == 'f') // Float
+            else if (ch == 'f' || ch == 'F') // Float
             {
                 Index++;
 
@@ -1650,6 +1665,173 @@ namespace Esprima
             };
         }
 
+        public Token ScanSymbolLiteral()
+        {
+            ++Index; // Skip $
+
+            var cooked = GetStringBuilder();
+            var terminated = false;
+            var start = Index;
+
+            var head = Source[start] == '"';
+            var tail = false;
+            char? notEscapeSequenceHead = null;
+            var rawOffset = 2;
+
+            ++Index;
+
+            while (!Eof())
+            {
+                var ch = Source[Index++];
+                if (ch == '"')
+                {
+                    rawOffset = 1;
+                    tail = true;
+                    terminated = true;
+                    break;
+                }
+                else if (notEscapeSequenceHead is not null)
+                {
+                    continue;
+                }
+                else if (ch == '\\')
+                {
+                    ch = Source[Index++];
+                    if (!Character.IsLineTerminator(ch))
+                    {
+                        switch (ch)
+                        {
+                            case 'n':
+                                cooked.Append("\n");
+                                break;
+                            case 'r':
+                                cooked.Append("\r");
+                                break;
+                            case 't':
+                                cooked.Append("\t");
+                                break;
+                            case 'u':
+                                if (Source[Index] == '{')
+                                {
+                                    ++Index;
+                                    var unicodeCodePointEscape = TryToScanUnicodeCodePointEscape();
+                                    if (unicodeCodePointEscape is null)
+                                    {
+                                        notEscapeSequenceHead = 'u';
+                                    }
+                                    else
+                                    {
+                                        cooked.Append(unicodeCodePointEscape);
+                                    }
+                                }
+                                else
+                                {
+                                    if (!ScanHexEscape(ch, out var unescapedChar))
+                                    {
+                                        notEscapeSequenceHead = 'u';
+                                    }
+                                    else
+                                    {
+                                        cooked.Append(unescapedChar);
+                                    }
+                                }
+
+                                break;
+                            case 'x':
+                                if (!ScanHexEscape(ch, out var unescaped2))
+                                {
+                                    notEscapeSequenceHead = 'x';
+                                }
+                                else
+                                {
+                                    cooked.Append(unescaped2);
+                                }
+
+                                break;
+                            case 'b':
+                                cooked.Append("\b");
+                                break;
+                            case 'f':
+                                cooked.Append("\f");
+                                break;
+                            case 'v':
+                                cooked.Append("\v");
+                                break;
+
+                            default:
+                                if (ch == '0')
+                                {
+                                    if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
+                                    {
+                                        // NotEscapeSequence: \01 \02 and so on
+                                        notEscapeSequenceHead = '0';
+                                    }
+                                    else
+                                    {
+                                        cooked.Append("\0");
+                                    }
+                                }
+                                else if (Character.IsDecimalDigit(ch))
+                                {
+                                    // NotEscapeSequence: \1 \2
+                                    notEscapeSequenceHead = ch;
+                                }
+                                else
+                                {
+                                    cooked.Append(ch);
+                                }
+
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        ++LineNumber;
+                        if (ch == '\r' && Source[Index] == '\n')
+                        {
+                            ++Index;
+                        }
+
+                        LineStart = Index;
+                    }
+                }
+                else if (Character.IsLineTerminator(ch))
+                {
+                    ++LineNumber;
+                    if (ch == '\r' && Source[Index] == '\n')
+                    {
+                        ++Index;
+                    }
+
+                    LineStart = Index;
+                    cooked.Append("\n");
+                }
+                else
+                {
+                    cooked.Append(ch);
+                }
+            }
+
+            if (!terminated)
+            {
+                ThrowUnexpectedToken();
+            }
+
+            return new Token
+            {
+                Type = TokenType.SymbolLiteral,
+                Value = notEscapeSequenceHead is null ? cooked.ToString() : null,
+                RawTemplate = Source.Slice(start + 1, Index - rawOffset),
+                Head = head,
+                Tail = tail,
+                NotEscapeSequenceHead = notEscapeSequenceHead,
+                LineNumber = LineNumber,
+                LineStart = LineStart,
+                Start = start,
+                End = Index
+            };
+        }
+
         // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
 
         public Regex? TestRegExp(string pattern, string flags)
@@ -1931,7 +2113,7 @@ namespace Esprima
 
             var cp = Source.CharCodeAt(Index);
 
-            if (Character.IsIdentifierStart(cp))
+            if (Character.IsIdentifierStart(cp)) // Edited for adhoc
             {
                 return ScanIdentifier();
             }
@@ -1940,6 +2122,12 @@ namespace Esprima
             if (cp == 0x28 || cp == 0x29 || cp == 0x3B)
             {
                 return ScanPunctuator();
+            }
+
+            // $ - Symbol const literal
+            if (cp == 0x24)
+            {
+                return ScanSymbolLiteral();
             }
 
             // Template literals start with " (U+0060) for template head

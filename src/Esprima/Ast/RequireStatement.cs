@@ -2,20 +2,19 @@
 
 namespace Esprima.Ast
 {
-    public sealed class Identifier : Expression
+    public class RequireStatement : Statement
     {
-        public string? Name { get; set; }
+        public Expression Path { get; set; }
 
-        public Identifier(string? name) : base(Nodes.Identifier)
+        public RequireStatement() : base(Nodes.RequireStatement)
         {
-            Name = name;
         }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitIdentifier(this);
+            
         }
     }
 }

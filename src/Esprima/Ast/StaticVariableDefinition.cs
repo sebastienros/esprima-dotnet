@@ -6,8 +6,8 @@ namespace Esprima.Ast
     {
         public Expression VarExpression { get; set; }
 
-        public StaticVariableDefinition(Nodes node, Location location)
-            : base(node)
+        public StaticVariableDefinition(Location location)
+            : base(Nodes.StaticDeclaration)
         {
             Location = location;
         }

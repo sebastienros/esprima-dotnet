@@ -6,8 +6,8 @@ namespace Esprima.Ast
     {
         public ImportDeclaration Declaration { get; set; }
 
-        public ImportExpression(Nodes node, Location location)
-            : base(node)
+        public ImportExpression(Location location)
+            : base(Nodes.ImportDeclaration)
         {
             Location = location;
         }

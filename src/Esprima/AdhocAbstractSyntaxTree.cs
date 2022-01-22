@@ -24,7 +24,7 @@ namespace Esprima
             "-=",
             "<<=",
             ">>=",
-            ">>>=",
+            //">>>=",
             "&=",
             "^=",
             "|=",
@@ -630,6 +630,20 @@ namespace Esprima
                     expr = ParseTemplateLiteral(false);
                     break;
 
+                case TokenType.SymbolLiteral:
+                    if (_context.Strict && _lookahead.Octal)
+                    {
+                        TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
+                    }
+
+                    _context.IsAssignmentTarget = false;
+                    _context.IsBindingElement = false;
+                    token = NextToken();
+                    raw = GetTokenRaw(token);
+
+                    expr = Finalize(node, new Literal(TokenType.SymbolLiteral, (string?) token.Value, raw));
+                    break;
+
                 case TokenType.Punctuator:
                     switch ((string?) _lookahead.Value)
                     {
@@ -661,7 +675,7 @@ namespace Esprima
 
                     if (!_context.Strict && _context.AllowYield && MatchKeyword("yield"))
                     {
-                        expr = ParseIdentifierName();
+                        expr = ParseYieldExpression();
                     }
                     else
                     {
@@ -676,6 +690,10 @@ namespace Esprima
                             NextToken();
                             expr = Finalize(node, new ThisExpression());
                         }
+                        else if (MatchKeyword("yield"))
+                        {
+                            expr = ParseYieldExpression();
+                        }
                         else if (MatchKeyword("class") || MatchKeyword("module"))
                         {
                             expr = ParseClassExpression();
@@ -689,7 +707,7 @@ namespace Esprima
                             NextToken();
 
                             var exp = ParseAssignmentExpression();
-                            var staticExpr = new StaticVariableDefinition(Nodes.StaticDeclaration, exp.Location);
+                            var staticExpr = new StaticVariableDefinition(exp.Location);
                             staticExpr.VarExpression = exp;
                             expr = staticExpr;
                         }
@@ -705,7 +723,7 @@ namespace Esprima
                         else if (MatchKeyword("import")) // ADHOC
                         {
                             var decl = ParseImportDeclaration();
-                            expr = new ImportExpression(Nodes.ImportDeclaration, decl.Location) { Declaration = decl }; // Hack hack hack
+                            expr = new ImportExpression(decl.Location) { Declaration = decl }; // Hack hack hack
                         }
                         else
                         {
@@ -1841,8 +1859,6 @@ namespace Esprima
 
                     case "==":
                     case "!=":
-                    case "===":
-                    case "!==":
                         prec = 11;
                         break;
 
@@ -1855,7 +1871,6 @@ namespace Esprima
 
                     case "<<":
                     case ">>":
-                    case ">>>":
                         prec = 13;
                         break;
 
@@ -3061,6 +3076,10 @@ namespace Esprima
                 {
                     return ParseIncludeStatement();
                 }
+                else if (MatchContextualKeyword("require"))
+                {
+                    return ParseRequireStatement();
+                }
                 else
                 {
                     return ThrowError<Statement>("Unknown preprocessor directive.", _lookahead.Value);
@@ -3072,13 +3091,14 @@ namespace Esprima
 
         private IncludeStatement ParseIncludeStatement()
         {
+            var node = CreateNode();
             NextToken();
             if (_lookahead.Type == TokenType.Template || _lookahead.Type == TokenType.StringLiteral)
             {
                 var path = NextToken();
                 IncludeStatement include = new IncludeStatement();
                 include.Path = path.Value as string;
-                return include;
+                return Finalize(node, include);
             }
             else
             {
@@ -3087,6 +3107,25 @@ namespace Esprima
 
             return null;
         }
+
+        private RequireStatement ParseRequireStatement()
+        {
+            var node = CreateNode();
+            NextToken();
+            if (_lookahead.Type == TokenType.Template || _lookahead.Type == TokenType.StringLiteral)
+            {
+                RequireStatement require = new RequireStatement();
+                require.Path = ParseTemplateLiteral(false);
+                return Finalize(node, require);
+            }
+            else
+            {
+                return ThrowError<RequireStatement>("Expected string literal for include statement value.", _lookahead.Value);
+            }
+
+            return null;
+        }
+
 
         // https://tc39.github.io/ecma262/#sec-break-statement
 
@@ -3275,6 +3314,43 @@ namespace Esprima
             return Finalize(node, statement);
         }
 
+        // Adhoc
+        private UndefStatement ParseUndefStatement()
+        {
+            var node = CreateNode();
+            ExpectKeyword("undef");
+
+            if (_hasLineTerminator)
+            {
+                ThrowError(Messages.NewlineAfterThrow);
+            }
+
+
+            Token token = NextToken();
+            if (token.Type != TokenType.Identifier)
+                ThrowError("Undef must be identifiers");
+
+            string str = token.Value as string;
+
+            while (Match("::"))
+            {
+                NextToken();
+                if (_lookahead.Type == TokenType.Identifier)
+                {
+                    token = NextToken();
+                    str += $"::{token.Value as string}";
+                }
+                else
+                {
+                    ThrowUnexpectedToken(_lookahead);
+                }
+            }
+
+            ConsumeSemicolon();
+
+            return Finalize(node, new UndefStatement(str));
+        }
+
         // https://tc39.github.io/ecma262/#sec-throw-statement
 
         private ThrowStatement ParseThrowStatement()
@@ -3438,6 +3514,9 @@ namespace Esprima
                             break;
                         case "switch":
                             statement = ParseSwitchStatement();
+                            break;
+                        case "undef":
+                            statement = ParseUndefStatement();
                             break;
                         case "throw":
                             statement = ParseThrowStatement();
@@ -4251,10 +4330,11 @@ namespace Esprima
 
         private ImportDeclaration ParseImportDeclaration()
         {
-            if (_context.InFunctionBody)
-            {
-                ThrowError(Messages.IllegalImportDeclaration);
-            }
+            // ADHOC
+            //if (_context.InFunctionBody)
+            //{
+            //    ThrowError(Messages.IllegalImportDeclaration);
+            //}
 
             var node = CreateNode();
             ExpectKeyword("import");

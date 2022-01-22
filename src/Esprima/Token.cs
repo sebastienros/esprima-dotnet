@@ -15,6 +15,7 @@ namespace Esprima
         StringLiteral,
         RegularExpression,
         Template,
+        SymbolLiteral,
     };
 
     public enum NumericTokenType
