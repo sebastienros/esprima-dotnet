@@ -685,6 +685,10 @@ namespace Esprima
                         {
                             expr = ParseFunctionExpression();
                         }
+                        else if (MatchKeyword("method"))
+                        {
+                            expr = ParseMethodExpression();
+                        }
                         else if (MatchKeyword("this"))
                         {
                             NextToken();
@@ -1363,25 +1367,16 @@ namespace Esprima
 
         private Expression ParseIdentifierOrPrivateIdentifierName()
         {
-            var isPrivateField = false;
-
             var node = CreateNode();
 
             var token = NextToken();
-
-            if (Equals(token.Value, "#"))
-            {
-                token = NextToken();
-                token.Value = '#' + (string?)token.Value;
-                isPrivateField = true;
-            }
 
             if (!IsIdentifierName(token))
             {
                 return ThrowUnexpectedToken<Identifier>(token);
             }
 
-            return isPrivateField ? Finalize(node, new PrivateIdentifier((string?) token.Value)) : Finalize(node, new Identifier((string?) token.Value));
+            return Finalize(node, new Identifier((string?) token.Value));
         }
 
         private Expression ParseNewExpression()
@@ -1557,7 +1552,17 @@ namespace Esprima
                         Expect(".");
                     }
 
-                    var property = ParseIdentifierOrPrivateIdentifierName();
+                    Expression property = ParseIdentifierName();
+
+                    while (Match("::"))
+                    {
+                        NextToken();
+
+                        var property2 = ParseIdentifierName();
+
+                        property = Finalize(StartNode(startToken), new StaticMemberExpression(property, property2, optional));
+                    }
+                    
                     expr = Finalize(StartNode(startToken), new AttributeMemberExpression(expr, property, optional));
                 }
                 else if (Match("::") || optional)
@@ -1569,7 +1574,7 @@ namespace Esprima
                         Expect("::");
                     }
 
-                    var property = ParseIdentifierOrPrivateIdentifierName();
+                    var property = ParseIdentifierName();
                     expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
                 }
                 else
@@ -1657,6 +1662,7 @@ namespace Esprima
                     {
                         Expect(".");
                     }
+
 
                     var property = ParseIdentifierName();
                     expr = Finalize(node, new AttributeMemberExpression(expr, property, optional));
@@ -4027,6 +4033,94 @@ namespace Esprima
             _context.AllowYield = previousAllowYield;
 
             return Finalize(node, new FunctionExpression((Identifier?) id, parameters, body, isGenerator, hasStrictDirective, isAsync));
+        }
+
+        private MethodExpression ParseMethodExpression()
+        {
+            var node = CreateNode();
+
+            var isAsync = MatchContextualKeyword("async");
+            if (isAsync)
+            {
+                NextToken();
+            }
+
+            ExpectKeyword("method");
+
+            var isGenerator = Match("*");
+            if (isGenerator)
+            {
+                NextToken();
+            }
+
+            string? message = null;
+            Expression? id = null;
+            Token? firstRestricted = null;
+
+            var previousIsAsync = _context.IsAsync;
+            var previousAllowYield = _context.AllowYield;
+            _context.IsAsync = isAsync;
+            _context.AllowYield = !isGenerator;
+
+            if (!Match("("))
+            {
+                var token = _lookahead;
+                id = !_context.Strict && !isGenerator && MatchKeyword("yield")
+                    ? ParseIdentifierName()
+                    : ParseVariableIdentifier();
+
+                if (_context.Strict)
+                {
+                    if (Scanner.IsRestrictedWord((string?) token.Value))
+                    {
+                        TolerateUnexpectedToken(token, Messages.StrictFunctionName);
+                    }
+                }
+                else
+                {
+                    if (Scanner.IsRestrictedWord((string?) token.Value))
+                    {
+                        firstRestricted = token;
+                        message = Messages.StrictFunctionName;
+                    }
+                    else if (Scanner.IsStrictModeReservedWord((string?) token.Value))
+                    {
+                        firstRestricted = token;
+                        message = Messages.StrictReservedWord;
+                    }
+                }
+            }
+
+            var formalParameters = ParseFormalParameters(firstRestricted);
+            var parameters = NodeList.From(ref formalParameters.Parameters);
+            var stricted = formalParameters.Stricted;
+            firstRestricted = formalParameters.FirstRestricted;
+            if (formalParameters.Message != null)
+            {
+                message = formalParameters.Message;
+            }
+
+            var previousStrict = _context.Strict;
+            var previousAllowStrictDirective = _context.AllowStrictDirective;
+            _context.AllowStrictDirective = formalParameters.Simple;
+            var body = ParseFunctionSourceElements();
+            if (_context.Strict && firstRestricted != null)
+            {
+                ThrowUnexpectedToken(firstRestricted, message);
+            }
+
+            if (_context.Strict && stricted != null)
+            {
+                TolerateUnexpectedToken(stricted, message);
+            }
+
+            var hasStrictDirective = _context.Strict;
+            _context.Strict = previousStrict;
+            _context.AllowStrictDirective = previousAllowStrictDirective;
+            _context.IsAsync = previousIsAsync;
+            _context.AllowYield = previousAllowYield;
+
+            return Finalize(node, new MethodExpression((Identifier?) id, parameters, body, isGenerator, hasStrictDirective, isAsync));
         }
 
         // https://tc39.github.io/ecma262/#sec-directive-prologues-and-the-use-strict-directive

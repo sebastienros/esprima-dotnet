@@ -83,5 +83,6 @@
         AttributeDeclaration,
         RequireStatement,
         UndefStatement,
+        MethodExpression,
     };
 }

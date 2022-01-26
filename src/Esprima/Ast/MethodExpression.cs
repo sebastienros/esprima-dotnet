@@ -2,18 +2,18 @@
 
 namespace Esprima.Ast
 {
-    public sealed class FunctionExpression : Expression, IFunction
+    public sealed class MethodExpression : Expression, IFunction
     {
         private readonly NodeList<Expression> _parameters;
 
-        public FunctionExpression(
+        public MethodExpression(
             Identifier? id,
             in NodeList<Expression> parameters,
             BlockStatement body,
             bool generator,
             bool strict,
             bool async) :
-            base(Nodes.FunctionExpression)
+            base(Nodes.MethodExpression)
         {
             Id = id;
             _parameters = parameters;
@@ -31,8 +31,6 @@ namespace Esprima.Ast
         public bool Expression { get; }
         public bool Async { get; }
         public bool Strict { get; }
-
-        public bool IsMethodExpression { get; set; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
 
