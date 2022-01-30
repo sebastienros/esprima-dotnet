@@ -1733,9 +1733,9 @@ namespace Esprima
                 {
                     new Regex(tmp, options);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    ThrowUnexpectedToken(Messages.InvalidRegExp);
+                    ThrowUnexpectedToken($"{Messages.InvalidRegExp}: {ex.Message}");
                 }
             }
 
@@ -1771,9 +1771,9 @@ namespace Esprima
         /// </summary>
         private void CheckBracesBalance(string pattern, bool unicode)
         {
-            int inGroup = 0;
-            bool inQuantifier = false;
-            bool inSet = false;
+            var inGroup = 0;
+            var inQuantifier = false;
+            var inSet = false;
 
             for (var i = 0; i < pattern.Length; i++)
             {
@@ -1914,7 +1914,45 @@ namespace Esprima
             {
                 var ch = pattern[i];
 
-                if (ch == '.')
+                // Sets have to be converted char by char
+                if (ch == '[' && i + 1 < pattern.Length)
+                {
+                    var inverted = pattern[i + 1] == '^';
+
+                    if (inverted)
+                    {
+                        i++;
+                    }
+
+                    var next = i + 1;
+
+                    while (next < pattern.Length && pattern[next] != ']')
+                    {
+                        // Consume escaped chars
+                        if (pattern[next] == '\\')
+                        {
+                            next++;
+                        }
+
+                        next++;
+                    }
+
+                    // Reached end of pattern
+                    if (next >= pattern.Length)
+                    {
+                        sb.Append('[');
+                        continue;
+                    }
+
+                    var set = pattern.Substring(i + 1, next - i - 1);
+
+                    // Convert the set of chars into their unicode
+
+                    AppendConvertUnicodeSet(sb, set, inverted);
+
+                    i = next;
+                }
+                else if (ch == '.')
                 {
                     converted = true;
 
@@ -1923,11 +1961,12 @@ namespace Esprima
                 else if (ch == '\\' && i + 1 < pattern.Length)
                 {
                     ch = pattern[++i];
+
                     if (ch == 'D' || ch == 'S' || ch == 'W')
                     {
                         converted = true;
 
-                        sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|\\" + ch + ")");
+                        sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|\\").Append(ch).Append(')');
                     }
                     else
                     {
@@ -1943,6 +1982,42 @@ namespace Esprima
             }
 
             return converted ? sb.ToString() : pattern;
+        }
+
+        internal static void AppendConvertUnicodeSet(StringBuilder sb, string set, bool inverted)
+        {
+            if (String.IsNullOrEmpty(set))
+            {
+                sb.Append("[]");
+                return;
+            }
+
+            sb.Append("[");
+
+            if (inverted)
+            {
+                sb.Append('^');
+            }
+
+            for (var i = 0; i < set.Length; i++)
+            {
+                var ch = set[i];
+
+                if (ch == '\\' && i < set.Length - 1)
+                {
+                    var nextCh = set[i + 1];
+
+                    // Convert unicode ranges here
+
+                    sb.Append(ch).Append(nextCh);
+                }
+                else
+                {
+                    sb.Append(ch);
+                }
+            }
+
+            sb.Append(']');
         }
 
         internal string EscapeFailingRegex(string pattern)
