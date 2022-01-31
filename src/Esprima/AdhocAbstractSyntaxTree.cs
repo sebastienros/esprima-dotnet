@@ -1587,7 +1587,7 @@ namespace Esprima
 
             if (hasOptional)
             {
-                return new ChainExpression(expr);
+                return Finalize(StartNode(startToken), new ChainExpression(expr));
             }
 
             return expr;
@@ -1762,8 +1762,7 @@ namespace Esprima
         {
             Expression expr;
 
-            if (Match("+") || Match("-") || Match("~") || Match("!") ||
-                MatchKeyword("delete") || MatchKeyword("void") || MatchKeyword("typeof") ||
+            if (Match("+") || Match("-") || Match("~") || Match("!") ||  MatchKeyword("void") || MatchKeyword("typeof") ||
                 Match("*") || Match("&")) // ADHOC
             {
                 var node = StartNode(_lookahead);
@@ -1771,10 +1770,6 @@ namespace Esprima
                 expr = InheritCoverGrammar(parseUnaryExpression);
                 expr = Finalize(node, new UnaryExpression((string?) token.Value, expr));
                 var unaryExpr = expr.As<UnaryExpression>();
-                if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
-                {
-                    TolerateError(Messages.StrictDelete);
-                }
 
                 _context.IsAssignmentTarget = false;
                 _context.IsBindingElement = false;
@@ -4286,7 +4281,6 @@ namespace Esprima
         {
             "class",
             "module",
-            "delete",
             "function",
             "new",
             "super",
@@ -4405,7 +4399,7 @@ namespace Esprima
         }
 
         // import <foo> ...;
-        private ImportDefaultSpecifier ParseImportDefaultSpecifier()
+        private ImportDefaultSpecifier ParseImportSpecifier()
         {
             var node = CreateNode();
             var local = ParseIdentifierName();
@@ -4413,13 +4407,14 @@ namespace Esprima
         }
 
         // import *;
-        private ImportNamespaceSpecifier ParseImportAll()
+        private Identifier ParseImportAll()
         {
             var node = CreateNode();
 
             Expect("*");
-            var local = new Identifier("*");
-            return Finalize(node, new ImportNamespaceSpecifier(local));
+            NextToken();
+
+            return Finalize(node, new Identifier("*"));
         }
 
         private ImportDeclaration ParseImportDeclaration()
@@ -4433,35 +4428,41 @@ namespace Esprima
             var node = CreateNode();
             ExpectKeyword("import");
 
-            Literal src = null;
-            var specifiers = new ArrayList<ImportDeclarationSpecifier>();
+            var namespacePath = new ArrayList<ImportDeclarationSpecifier>();
 
-            if (Match("*"))
+            Identifier target = null;
+            if (IsIdentifierName(_lookahead))
             {
-                specifiers.Push(ParseImportAll());
-            }
-            else if (IsIdentifierName(_lookahead))
-            {
+                ImportDefaultSpecifier mainNamespace = ParseImportSpecifier();
+                namespacePath.Push(mainNamespace);
+
                 // import foo
-                specifiers.Push(ParseImportDefaultSpecifier());
-                while (Match("::"))
+                while (Match("::") || Match("*"))
                 {
-                    NextToken();
-                    if (Match("*"))
+                    bool isStaticPathAccess = Match("::");
+
+                    if (isStaticPathAccess)
                     {
-                        // import foo::*
-                        specifiers.Push(ParseImportAll());
+                        NextToken();
+                        if (Match("*"))
+                        {
+                            target = ParseImportAll();
+                            break;
+                        }
+                        else if (_lookahead.Type == TokenType.Identifier)
+                        {
+                            namespacePath.Push(ParseImportSpecifier());
+                        }
+                        else
+                            ThrowUnexpectedToken(_lookahead);
+                    }
+                    else if (Match("*"))
+                    {
+                        target = ParseImportAll();
                         break;
                     }
-                    else if (_lookahead.Type == TokenType.Identifier)
-                    {
-                        // import foo::bar
-                        specifiers.Push(ParseImportDefaultSpecifier());
-                    }
-                    else
-                    {
-                        ThrowUnexpectedToken(_lookahead);
-                    }
+
+                    NextToken();
                 }
             }
             else
@@ -4469,11 +4470,12 @@ namespace Esprima
                 ThrowUnexpectedToken(NextToken());
             }
 
-
-            NextToken();
+            if (target is null && namespacePath.Count >= 2)
+                target = namespacePath.Pop().Local;
+            
             ConsumeSemicolon();
 
-            return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src));
+            return Finalize(node, new ImportDeclaration(NodeList.From(ref namespacePath), target));
         }
 
         private void ThrowError(string messageFormat, params object?[] values)

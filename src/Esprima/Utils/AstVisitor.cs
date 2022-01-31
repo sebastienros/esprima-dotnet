@@ -343,7 +343,7 @@ namespace Esprima.Utils
                 Visit(specifiers[i]);
             }
 
-            Visit(importDeclaration.Source);
+            Visit(importDeclaration.Target);
         }
 
         protected internal virtual void VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)

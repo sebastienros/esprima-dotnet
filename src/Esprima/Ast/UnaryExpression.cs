@@ -11,7 +11,6 @@ namespace Esprima.Ast
         [EnumMember(Value = "!")] LogicalNot,
         [EnumMember(Value = "*")] Indirection, // ADHOC
         [EnumMember(Value = "&")] ReferenceOf, // ADHOC
-        [EnumMember(Value = "delete")] Delete,
         [EnumMember(Value = "void")] Void,
         [EnumMember(Value = "typeof")] TypeOf,
         [EnumMember(Value = "++")] Increment,
@@ -45,7 +44,6 @@ namespace Esprima.Ast
                 "--" => UnaryOperator.Decrement,
                 "~" => UnaryOperator.BitwiseNot,
                 "!" => UnaryOperator.LogicalNot,
-                "delete" => UnaryOperator.Delete,
                 "void" => UnaryOperator.Void,
                 "typeof" => UnaryOperator.TypeOf,
                 "*" => UnaryOperator.Indirection, // ADHOC

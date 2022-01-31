@@ -6,20 +6,19 @@ namespace Esprima.Ast
     {
         private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
 
-        public readonly Literal Source;
-
         public ImportDeclaration(
-            in NodeList<ImportDeclarationSpecifier> specifiers,
-            Literal source)
+            in NodeList<ImportDeclarationSpecifier> namespacePath, Identifier target)
             : base(Nodes.ImportDeclaration)
         {
-            _specifiers = specifiers;
-            Source = source;
+            _specifiers = namespacePath;
+            Target = target;
         }
+
+        public Identifier Target { get; set; }
 
         public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers => ref _specifiers;
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_specifiers, Source);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_specifiers, Target);
 
         protected internal override void Accept(AstVisitor visitor)
         {

@@ -7,6 +7,7 @@
         }
 
         public Identifier Local => LocalId;
+
         protected abstract Identifier LocalId { get; }
     }
 }

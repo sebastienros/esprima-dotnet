@@ -701,7 +701,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(importDeclaration))
                 {
                     Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
-                    Member("source", importDeclaration.Source);
+                    Member("target", importDeclaration.Target);
                 }
             }
 
