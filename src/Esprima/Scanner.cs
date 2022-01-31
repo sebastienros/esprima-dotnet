@@ -79,7 +79,7 @@ namespace Esprima
             "super",
             "return",
             "typeof",
-            "delete",
+            //"delete",
             "switch",
             "export", // ADHOC: NOT SUPPORTED
             "import",
