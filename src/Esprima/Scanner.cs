@@ -67,7 +67,7 @@ namespace Esprima
             "case",
             "void",
             "with", // ADHOC: NOT SUPPORTED
-            "enum",
+            //"enum", // ADHOC: NOT SUPPORTED
             "while",
             "break",
             "catch",
@@ -782,6 +782,7 @@ namespace Esprima
 
                 case '.':
                     ++Index;
+
                     if (Source.Length >= Index + 2 && Source[Index] == '.' && Source[Index + 1] == '.')
                     {
                         // Spread operator: ...
@@ -832,6 +833,24 @@ namespace Esprima
                     {
                         ++Index;
                         str = "::";
+                    }
+                    break;
+                case '-': 
+                    ++Index;
+                    if (Source[Index] == '>') // Adhoc object selector
+                    {
+                        ++Index;
+                        str = "->";
+                    }
+                    else if (Source[Index] == '-')
+                    {
+                        ++Index;
+                        str = "--";
+                    }
+                    else if (Source[Index] == '=')
+                    {
+                        ++Index;
+                        str = "-=";
                     }
                     break;
                 case ')':
@@ -1015,7 +1034,8 @@ namespace Esprima
             return new Token
             {
                 Type = TokenType.NumericLiteral,
-                NumericValue = Convert.ToUInt32(number, 2),
+                NumericValue = Convert.ToInt32(number, 2),
+                NumericTokenType = NumericTokenType.Integer,
                 Value = number,
                 LineNumber = LineNumber,
                 LineStart = LineStart,

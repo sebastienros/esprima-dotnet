@@ -63,8 +63,8 @@ namespace Esprima
 
         private Token _lookahead = null!;
         private readonly Context _context;
-        private readonly Marker _startMarker;
-        private readonly Marker _lastMarker;
+        private Marker _startMarker;
+        private Marker _lastMarker;
         private readonly Scanner _scanner;
         private readonly IErrorHandler _errorHandler;
         private readonly ParserOptions _config;
@@ -1577,6 +1577,18 @@ namespace Esprima
                     var property = ParseIdentifierName();
                     expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
                 }
+                else if (Match("->"))
+                {
+                    _context.IsBindingElement = false;
+                    _context.IsAssignmentTarget = !optional;
+                    if (!optional)
+                    {
+                        Expect("->");
+                    }
+
+                    var property = ParseIdentifierName();
+                    expr = Finalize(StartNode(startToken), new ObjectSelectorMemberExpression(expr, property, optional));
+                }
                 else
                 {
                     break;
@@ -1667,7 +1679,7 @@ namespace Esprima
                     var property = ParseIdentifierName();
                     expr = Finalize(node, new AttributeMemberExpression(expr, property, optional));
                 }
-                else if (Match("::") || optional)
+                else if (Match("::") || optional) // ADHOC: Static
                 {
                     _context.IsBindingElement = false;
                     _context.IsAssignmentTarget = !optional;
@@ -1678,6 +1690,18 @@ namespace Esprima
 
                     var property = ParseIdentifierName();
                     expr = Finalize(node, new StaticMemberExpression(expr, property, optional));
+                }
+                else if (Match("->")) // ADHOC: Object selector
+                {
+                    _context.IsBindingElement = false;
+                    _context.IsAssignmentTarget = !optional;
+                    if (!optional)
+                    {
+                        Expect("->");
+                    }
+
+                    var property = ParseIdentifierName();
+                    expr = Finalize(node, new ObjectSelectorMemberExpression(expr, property, optional));
                 }
                 else
                 {
@@ -3080,6 +3104,19 @@ namespace Esprima
                 else if (MatchContextualKeyword("require"))
                 {
                     return ParseRequireStatement();
+                }
+                else if (MatchContextualKeyword("source"))
+                {
+                    NextToken();
+                    
+                    _scanner.LineNumber = 1;
+                    _scanner.LineStart = 0;
+
+                    _startMarker = new Marker { Index = 0, Line = _scanner.LineNumber, Column = 0 };
+                    _lastMarker = new Marker { Index = 0, Line = _scanner.LineNumber, Column = 0 };
+                    NextToken();
+
+                    return new EmptyStatement();
                 }
                 else
                 {
