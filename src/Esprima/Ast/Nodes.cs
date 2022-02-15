@@ -84,5 +84,6 @@
         RequireStatement,
         UndefStatement,
         MethodExpression,
+        SourceFileStatement,
     };
 }

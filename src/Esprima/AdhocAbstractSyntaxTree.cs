@@ -71,6 +71,11 @@ namespace Esprima
         private bool _hasLineTerminator;
         private readonly Action<Node>? _action;
 
+        /// <summary>
+        /// Used to keep track of the last source file when multi-file-merging (ADHOC Projects)
+        /// </summary>
+        public int _lastSourceFileLineStart;
+
         private readonly List<Token> _tokens = new();
 
         /// <summary>
@@ -324,11 +329,12 @@ namespace Esprima
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Marker CreateNode()
         {
-            return new Marker(_startMarker.Index, _startMarker.Line, _startMarker.Column);
+            var marker = new Marker(_startMarker.Index, _startMarker.Line - _lastSourceFileLineStart, _startMarker.Column);
+            return marker;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Marker StartNode(Token token, int lastLineStart = 0)
+        private Marker StartNode(Token token, int lastLineStart = 0)
         {
             var column = token.Start - token.LineStart;
             var line = token.LineNumber;
@@ -713,7 +719,7 @@ namespace Esprima
                             var exp = ParseAssignmentExpression();
                             var staticExpr = new StaticVariableDefinition(exp.Location);
                             staticExpr.VarExpression = exp;
-                            expr = staticExpr;
+                            expr = Finalize(node, staticExpr);
                         }
                         else if (MatchKeyword("attribute")) // ADHOC
                         {
@@ -722,12 +728,12 @@ namespace Esprima
                             var exp = ParseAssignmentExpression();
                             var attrExp = new AttributeVariableDefinition(Nodes.AttributeDeclaration, exp.Location);
                             attrExp.VarExpression = exp;
-                            expr = attrExp;
+                            expr = Finalize(node, attrExp);
                         }
                         else if (MatchKeyword("import")) // ADHOC
                         {
                             var decl = ParseImportDeclaration();
-                            expr = new ImportExpression(decl.Location) { Declaration = decl }; // Hack hack hack
+                            expr = Finalize(node, new ImportExpression(decl.Location) { Declaration = decl }); // Hack hack hack
                         }
                         else
                         {
@@ -3108,16 +3114,14 @@ namespace Esprima
                 }
                 else if (MatchContextualKeyword("source"))
                 {
+                    _lastSourceFileLineStart = node.Line + _lastSourceFileLineStart;
                     NextToken();
+                    var fileToken = NextToken();
                     
-                    _scanner.LineNumber = 1;
-                    _scanner.LineStart = 0;
+                    if (fileToken.Type != TokenType.Template)
+                        ThrowError<Statement>("Expected source file type to be string", fileToken.Value);
 
-                    _startMarker = new Marker { Index = 0, Line = _scanner.LineNumber, Column = 0 };
-                    _lastMarker = new Marker { Index = 0, Line = _scanner.LineNumber, Column = 0 };
-                    NextToken();
-
-                    return new EmptyStatement();
+                    return Finalize(node, new SourceFileStatement(fileToken.RawTemplate));
                 }
                 else
                 {
