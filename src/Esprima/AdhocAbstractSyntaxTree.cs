@@ -1070,7 +1070,8 @@ namespace Esprima
             {
                 expressions.Add(ParseExpression());
                 quasi = ParseTemplateElement(isTagged);
-                quasis.Add(quasi);
+                if (!string.IsNullOrEmpty(quasi.Value.Cooked))
+                    quasis.Add(quasi);
             }
 
             return Finalize(node, new TemplateLiteral(NodeList.From(ref quasis), NodeList.From(ref expressions)));
