@@ -40,7 +40,7 @@
         SwitchCase,
         TemplateElement,
         TemplateLiteral,
-        ThisExpression,
+        SelfExpression, // ADHOC: Changed from "This"
         ThrowStatement,
         TryStatement,
         UnaryExpression,

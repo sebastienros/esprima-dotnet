@@ -55,8 +55,8 @@ namespace Esprima.Utils
         public event EventHandler<UnaryExpression>? VisitedUnaryExpression;
         public event EventHandler<UpdateExpression>? VisitingUpdateExpression;
         public event EventHandler<UpdateExpression>? VisitedUpdateExpression;
-        public event EventHandler<ThisExpression>? VisitingThisExpression;
-        public event EventHandler<ThisExpression>? VisitedThisExpression;
+        public event EventHandler<SelfExpression>? VisitingThisExpression;
+        public event EventHandler<SelfExpression>? VisitedThisExpression;
         public event EventHandler<SequenceExpression>? VisitingSequenceExpression;
         public event EventHandler<SequenceExpression>? VisitedSequenceExpression;
         public event EventHandler<ObjectExpression>? VisitingObjectExpression;
@@ -302,10 +302,10 @@ namespace Esprima.Utils
             VisitedUpdateExpression?.Invoke(this, updateExpression);
         }
 
-        protected internal override void VisitThisExpression(ThisExpression thisExpression)
+        protected internal override void VisitSelfExpression(SelfExpression thisExpression)
         {
             VisitingThisExpression?.Invoke(this, thisExpression);
-            base.VisitThisExpression(thisExpression);
+            base.VisitSelfExpression(thisExpression);
             VisitedThisExpression?.Invoke(this, thisExpression);
         }
 

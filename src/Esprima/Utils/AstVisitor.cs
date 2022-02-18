@@ -199,7 +199,7 @@ namespace Esprima.Utils
             Visit(updateExpression.Argument);
         }
 
-        protected internal virtual void VisitThisExpression(ThisExpression thisExpression)
+        protected internal virtual void VisitSelfExpression(SelfExpression thisExpression)
         {
         }
 

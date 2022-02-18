@@ -62,8 +62,8 @@ namespace Esprima
             "new",
             "try",
             "let", // ADHOC: NOT SUPPORTED
-            "this",
-            "else",
+            "self", // ADHOC: Changed from "this"
+            "else", 
             "case",
             "void",
             "with", // ADHOC: NOT SUPPORTED

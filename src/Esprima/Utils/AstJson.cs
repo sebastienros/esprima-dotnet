@@ -529,7 +529,7 @@ namespace Esprima.Utils
                 VisitUnaryExpression(updateExpression);
             }
 
-            protected internal override void VisitThisExpression(ThisExpression thisExpression)
+            protected internal override void VisitSelfExpression(SelfExpression thisExpression)
             {
                 EmptyNodeObject(thisExpression);
             }

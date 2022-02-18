@@ -75,6 +75,7 @@ namespace Esprima
         /// Used to keep track of the last source file when multi-file-merging (ADHOC Projects)
         /// </summary>
         public int _lastSourceFileLineStart;
+        public string _fileName;
 
         private readonly List<Token> _tokens = new();
 
@@ -232,8 +233,6 @@ namespace Esprima
                         node.End = e.End;
                         node.Loc = e.Loc;
                     }
-
-                    ;
                 }
             }
         }
@@ -329,7 +328,7 @@ namespace Esprima
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Marker CreateNode()
         {
-            var marker = new Marker(_startMarker.Index, _startMarker.Line - _lastSourceFileLineStart, _startMarker.Column);
+            var marker = new Marker(_startMarker.Index, _startMarker.Line, _startMarker.Column);
             return marker;
         }
 
@@ -351,8 +350,8 @@ namespace Esprima
         {
             node.Range = new Range(marker.Index, _lastMarker.Index);
 
-            var start = new Position(marker.Line, marker.Column);
-            var end = new Position(_lastMarker.Line, _lastMarker.Column);
+            var start = new Position(marker.Line - _lastSourceFileLineStart, marker.Column);
+            var end = new Position(_lastMarker.Line - _lastSourceFileLineStart, _lastMarker.Column);
 
             node.Location = new Location(start, end, _errorHandler.Source);
 
@@ -695,10 +694,10 @@ namespace Esprima
                         {
                             expr = ParseMethodExpression();
                         }
-                        else if (MatchKeyword("this"))
+                        else if (MatchKeyword("self"))
                         {
                             NextToken();
-                            expr = Finalize(node, new ThisExpression());
+                            expr = Finalize(node, new SelfExpression());
                         }
                         else if (MatchKeyword("yield"))
                         {
@@ -3112,6 +3111,12 @@ namespace Esprima
                 {
                     return ParseRequireStatement();
                 }
+                else if (MatchContextualKeyword("resetline"))
+                {
+                    _lastSourceFileLineStart = 0; // Reset
+                    NextToken();
+                    return new EmptyStatement();
+                }
                 else if (MatchContextualKeyword("source"))
                 {
                     _lastSourceFileLineStart = node.Line + _lastSourceFileLineStart;
@@ -3121,7 +3126,10 @@ namespace Esprima
                     if (fileToken.Type != TokenType.Template)
                         ThrowError<Statement>("Expected source file type to be string", fileToken.Value);
 
-                    return Finalize(node, new SourceFileStatement(fileToken.RawTemplate));
+                    _fileName = fileToken.Value as string;
+                    _errorHandler.Source = _fileName;
+
+                    return new SourceFileStatement(fileToken.RawTemplate);
                 }
                 else
                 {
@@ -4326,7 +4334,7 @@ namespace Esprima
             "function",
             "new",
             "super",
-            "this",
+            "self",
             "typeof",
             "void",
             "yield"
@@ -4593,7 +4601,7 @@ namespace Esprima
             if (token != null && token.LineNumber > 0)
             {
                 var index = token.Start;
-                var line = token.LineNumber;
+                var line = token.LineNumber - _lastSourceFileLineStart;
                 var lastMarkerLineStart = _lastMarker.Index - _lastMarker.Column;
                 var column = token.Start - lastMarkerLineStart + 1;
                 return _errorHandler.CreateError(index, line, column, msg);
@@ -4601,7 +4609,7 @@ namespace Esprima
             else
             {
                 var index = _lastMarker.Index;
-                var line = _lastMarker.Line;
+                var line = _lastMarker.Line - _lastSourceFileLineStart;
                 var column = _lastMarker.Column + 1;
                 return _errorHandler.CreateError(index, line, column, msg);
             }

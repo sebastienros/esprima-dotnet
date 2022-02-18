@@ -2,9 +2,9 @@
 
 namespace Esprima.Ast
 {
-    public sealed class ThisExpression : Expression
+    public sealed class SelfExpression : Expression
     {
-        public ThisExpression() : base(Nodes.ThisExpression)
+        public SelfExpression() : base(Nodes.SelfExpression)
         {
         }
 
@@ -12,7 +12,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitThisExpression(this);
+            visitor.VisitSelfExpression(this);
         }
     }
 }

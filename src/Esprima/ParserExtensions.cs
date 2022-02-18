@@ -190,17 +190,9 @@ namespace Esprima
                         return "true";
                     }
 
-                    if (source[from + 1] == 'h')
+                    if (source[from + 1] == 'h' && source[from + 2] == 'e' && source[from + 3] == 'n')
                     {
-                        if (source[from + 2] == 'i' && source[from + 3] == 's')
-                        {
-                            return "this";
-                        }
-
-                        if (source[from + 2] == 'e' && source[from + 3] == 'n')
-                        {
-                            return "then";
-                        }
+                         return "then";
                     }
 
                     if (source[from + 1] == 'y' && source[from + 2] == 'p' && source[from + 3] == 'e')
