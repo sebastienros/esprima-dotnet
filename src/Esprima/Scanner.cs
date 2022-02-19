@@ -472,20 +472,24 @@ namespace Esprima
             return comments;
         }
 
-        public int CodePointAt(int i)
+        public static int CodePointAt(string text, int i)
         {
-            //int cp = Source.CharCodeAt(i);
+            int cp = text.CharCodeAt(i);
 
-            //if (cp >= 0xD800 && cp <= 0xDBFF) {
-            //    var second = Source.CharCodeAt(i + 1);
-            //    if (second >= 0xDC00 && second <= 0xDFFF)
-            //    {
-            //        var first = cp;
-            //        cp = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
-            //    }
-            //}
+            if (cp >= 0xD800 && cp <= 0xDBFF)
+            {
+                var second = text.CharCodeAt(i + 1);
+                if (second >= 0xDC00 && second <= 0xDFFF)
+                {
+                    var first = cp;
+                    cp = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
+                }
+            }
 
-            return char.ConvertToUtf32(Source, i);
+            return cp;
+
+            // There seems to be a bug with "\ud800" when using char.ConvertToUtf32(text, i);
+            // Test: /[\\uD800-\\uFA6D]/u
         }
 
         public bool ScanHexEscape(char prefix, out char result)
@@ -595,7 +599,7 @@ namespace Esprima
 
         public string GetComplexIdentifier()
         {
-            var cp = CodePointAt(Index);
+            var cp = CodePointAt(Source, Index);
             var id = Character.FromCodePoint(cp);
             Index += id.Length;
 
@@ -630,7 +634,7 @@ namespace Esprima
 
             while (!Eof())
             {
-                cp = CodePointAt(Index);
+                cp = CodePointAt(Source, Index);
                 ch = Character.FromCodePoint(cp);
                 if (!Character.IsIdentifierPart(ch))
                 {
@@ -1662,6 +1666,22 @@ namespace Esprima
 
             CheckBracesBalance(pattern, isUnicode);
 
+            tmp = Regex
+                .Replace(tmp, @"(\\u[a-fA-F0-9]{4})+", (match) =>
+                {
+                    // e.g., \uD83D\uDE80 (which is equivalent to \u{1F680}
+                    var codePoints = new uint[match.Value.Length / 6];
+
+                    for (var i = 0; i < codePoints.Length; i++)
+                    {
+                        codePoints[i] = Convert.ToUInt32(match.Value.Substring(i * 6 + 2, 4), 16);
+                    }
+
+                    var sub = FromCodePoint(codePoints);
+
+                    return sub;
+                });
+
             if (isUnicode)
             {
                 if (Regex.IsMatch(tmp, @"\\0[0-9]+"))
@@ -1693,22 +1713,6 @@ namespace Esprima
 
                 tmp = ConvertUnicodeRegexRanges(tmp);
             }
-
-            tmp = Regex
-                .Replace(tmp, @"(\\u[a-fA-F0-9]{4})+", (match) =>
-                {
-                    // e.g., \uD83D\uDE80 (which is equivalent to \u{1F680}
-                    var codePoints = new uint[match.Value.Length / 6];
-
-                    for (var i = 0; i < codePoints.Length; i++)
-                    {
-                        codePoints[i] = Convert.ToUInt32(match.Value.Substring(i * 6 + 2, 4), 16);
-                    }
-
-                    var sub = FromCodePoint(codePoints);
-
-                    return sub;
-                });
 
             // \u is a valid escape sequence in JS, but not in .NET
             // search for any of these that are not valid \uxxxx values
@@ -1951,6 +1955,8 @@ namespace Esprima
                     AppendConvertUnicodeSet(sb, set, inverted);
 
                     i = next;
+
+                    converted = true;
                 }
                 else if (ch == '.')
                 {
@@ -1984,40 +1990,321 @@ namespace Esprima
             return converted ? sb.ToString() : pattern;
         }
 
+        /// <summary>
+        /// Converts a range ([..]) with a unicode flag to a compatible one for RegEx.
+        /// </summary>
         internal static void AppendConvertUnicodeSet(StringBuilder sb, string set, bool inverted)
         {
+            // \u{1F4A9} == 💩 == \ud83d\udca9
+            // \u{1F4AB} == 💫 == \ud83d\udcab
+
+            // Regex only looks at single System.Char units. U+1F4A9 for example is two Chars that, from Regex 's perspective, are independent.
+            // "[💩-💫]" is "[\ud83d\udca9-\ud83d\udcab]", so it just looks at the individual Char values, it sees "\udca9-\ud83d", which is not ordered, hence the error.
+            // This is a known design / limitation of Regex that's existed since it was added, and there are currently no plans to improve that.
+            // The Regex needs to be rewritten to (?:\ud83d[\udca9-\udcab])
+
+            // Each char or special notation (\s, \d, ...) is converted to a char range such they can be sorted, groupped or inverted.
+
             if (String.IsNullOrEmpty(set))
             {
                 sb.Append("[]");
                 return;
             }
 
-            sb.Append("[");
+            var ranges = CreateRanges(set);
 
             if (inverted)
             {
-                sb.Append('^');
+                InvertRanges(ranges);
             }
 
-            for (var i = 0; i < set.Length; i++)
+            var singleCharRanges = new List<Range>(ranges.Length);
+
+            foreach (var range in ranges)
             {
-                var ch = set[i];
-
-                if (ch == '\\' && i < set.Length - 1)
+                if (range.Start > range.End)
                 {
-                    var nextCh = set[i + 1];
+                    throw new ParserException("Invalid regular expression: Range out of order in character class");
+                }
 
-                    // Convert unicode ranges here
-
-                    sb.Append(ch).Append(nextCh);
+                // If Start is not single char, End can't be either (greater), skip
+                if (range.Start >= 0x10000)
+                {
+                    continue;
+                }
+                else if (range.End >= 0x10000)
+                {
+                    singleCharRanges.Add(new Range(range.Start, 0xFFFF));
                 }
                 else
                 {
-                    sb.Append(ch);
+                    singleCharRanges.Add(range);
+                }
+
+                break;
+            }
+
+            var multiCharRanges = new List<Range>(ranges.Length - singleCharRanges.Count + 1);
+
+            for (var i = 0; i < ranges.Length; i++)
+            {
+                if (ranges[i].Start >= 0x10000)
+                {
+                    multiCharRanges.Add(ranges[i]);
+                }
+                else if (ranges[i].End >= 0x10000)
+                {
+                    multiCharRanges.Add(new Range(0x10000, ranges[i].End));
                 }
             }
 
-            sb.Append(']');
+            sb.Append("(?:");
+
+            if (multiCharRanges.Count > 0)
+            {
+                sb.Append("(?:");
+
+                for (var i = 0; i < multiCharRanges.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        sb.Append('|');
+                    }
+
+                    var c = multiCharRanges[i];
+
+                    if (c.Start == c.End)
+                    {
+                        sb.Append(char.ConvertFromUtf32(c.Start));
+                    }
+                    else
+                    {
+                        var start = char.ConvertFromUtf32(c.Start);
+                        var stop = char.ConvertFromUtf32(c.End);
+
+                        if (start[0] == stop[0])
+                        {
+                            sb.Append(start[0]).Append('[').Append(start[1]).Append('-').Append(stop[1]).Append(']');
+                        }
+                        else
+                        {
+                            var s1 = (start[1] > 0xDC00) ? 1 : 0;
+                            var s2 = (stop[1] < 0xDFFF) ? 1 : 0;
+
+                            if (s1 != 0)
+                            {
+                                sb.Append(start[0]).Append('[').Append(start[1]).Append("-\uDFFF]|");
+                            }
+
+                            if (stop[0] - start[0] >= s1 + s2)
+                            {
+                                sb.Append('[');
+                                sb.Append((char) (start[0] + s1));
+                                sb.Append('-');
+                                sb.Append((char) (stop[0] - s2));
+                                sb.Append(']');
+                                sb.Append("[\uDC00-\uDFFF]|");
+                            }
+
+                            if (s2 != 0)
+                            {
+                                sb.Append(stop[0]).Append("[\uDC00-").Append(stop[1]).Append(']');
+                            }
+                        }
+                    }
+                }
+
+                sb.Append(")");
+            }
+
+            if (singleCharRanges.Count > 0)
+            {
+                if (multiCharRanges.Count > 0)
+                {
+                    sb.Append('|');
+                }
+
+                sb.Append("[");
+
+                for (var i = 0; i < singleCharRanges.Count; i++)
+                {
+                    var c = singleCharRanges[i];
+
+                    if (c.Start == c.End)
+                    {
+                        sb.Append("\\u").Append(c.Start.ToString("X4"));
+                    }
+                    else
+                    {
+                        sb.Append("\\u").Append(c.Start.ToString("X4"));
+
+                        if (c.End > c.Start + 1)
+                        {
+                            sb.Append('-');
+                        }
+
+                        sb.Append("\\u").Append(c.End.ToString("X4"));
+                    }
+                }
+
+                sb.Append("]");
+            }
+
+            sb.Append(")");
+        }
+
+        internal record struct Range(int Start, int End);
+
+        internal static Range[] CreateRanges(string range)
+        {
+            var r = new List<Range>();
+
+            char c;
+            int firstCodePoint;
+            int secondCodePoint;
+
+            for (var i = 0; i < range.Length; i++)
+            {
+                c = range[i];
+                firstCodePoint = CodePointAt(range, i);
+
+                if (char.IsHighSurrogate(c))
+                {
+                    i++;
+                }
+
+                // Special char range?
+                // 
+                if (c == '\\' && i + 1 < range.Length)
+                {
+                    c = range[++i];
+
+                    switch (c)
+                    {
+                        case 'd':
+                            r.Add(new Range(48, 57));
+                            continue;
+
+                        case 'D': // Not a digit (inverse of d)
+                            r.Add(new Range(0, 47));
+                            r.Add(new Range(58, 0x10FFFF));
+                            continue;
+
+                        case 's':
+
+                            r.Add(new Range(9, 10));
+                            r.Add(new Range(13, 13));
+                            r.Add(new Range(32, 32));
+                            continue;
+
+                        case 'S': // Not a space (inverse of s)
+                            r.Add(new Range(0, 8));
+                            r.Add(new Range(11, 12));
+                            r.Add(new Range(14, 31));
+                            r.Add(new Range(33, 0x10FFFF));
+                            continue;
+
+                        case 'w':
+                            r.Add(new Range(48, 57));
+                            r.Add(new Range(65, 90));
+                            r.Add(new Range(95, 95));
+                            r.Add(new Range(97, 122));
+                            continue;
+
+                        case 'W': // Not a word letter (inverse of w)
+                            r.Add(new Range(0, 47));
+                            r.Add(new Range(58, 64));
+                            r.Add(new Range(91, 94));
+                            r.Add(new Range(96, 96));
+                            r.Add(new Range(123, 0x10FFFF));
+                            continue;
+
+                        default:
+                            i--;
+                            break;
+                    }
+                }
+                else if (i < range.Length - 2 && range[i + 1] == '-')
+                {
+                    i += 2;
+
+                    secondCodePoint = CodePointAt(range, i);
+
+                    if (secondCodePoint >= 0x10000)
+                    {
+                        i++;
+                    }
+
+                    r.Add(new Range(firstCodePoint, secondCodePoint));
+                    continue;
+                }
+
+                r.Add(new Range(firstCodePoint, firstCodePoint));
+            }
+
+            if (r.Count <= 1)
+            {
+                return r.ToArray();
+            }
+
+            r.Sort(new Comparison<Range>(new Func<Range, Range, int>((x, y) => x.Start - y.Start)));
+
+            // optimize
+
+            var rNew = new List<Range>();
+
+            var cr = r[0];
+            for (var i = 1; i < r.Count; i++)
+            {
+                if (r[i].End <= cr.End)
+                {
+                    continue;
+                }
+
+                if (cr.End >= r[i].Start - 1)
+                {
+                    cr.End = r[i].End;
+                    continue;
+                }
+
+                rNew.Add(cr);
+                cr = r[i];
+            }
+            rNew.Add(cr);
+
+            return rNew.ToArray();
+        }
+
+        /// <summary>
+        /// Negates a Range set.  b-y -> \0-a;z-\u0x10FFFF
+        /// </summary>
+        /// <param name="ranges"></param>
+        /// <returns></returns>
+        private static Range[] InvertRanges(Range[] ranges)
+        {
+            if (ranges.Length == 0)
+            {
+                return new Range[] { new Range(0, 0x10FFFF) };
+            }
+
+            var inverted = new List<Range>();
+
+            if (ranges[0].Start > 0)
+            {
+                inverted.Add(new Range(0, ranges[0].Start - 1));
+            }
+
+            for (var i = 1; i < ranges.Length; i++)
+            {
+                inverted.Add(new Range(ranges[i - 1].End + 1, ranges[i].Start - 1));
+            }
+
+            if (ranges[ranges.Length - 1].End < 0x10FFFF)
+            {
+                inverted.Add(new Range(ranges[ranges.Length - 1].End + 1, 0x10FFFF));
+            }
+
+            return inverted.ToArray();
         }
 
         internal string EscapeFailingRegex(string pattern)
