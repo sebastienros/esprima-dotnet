@@ -11,7 +11,7 @@ namespace Esprima.Tests.Test262;
 
 public static class Program
 {
-    public static async Task<int> Main(string[] args)
+    public static async Task<int> MainNotUsed(string[] args)
     {
         var rootDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
         var projectRoot = Path.Combine(rootDirectory, "../../..");
@@ -22,6 +22,7 @@ public static class Program
             .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("#"))
         );
 
+        // this should be same in both Test262Harness.settings.json and here
         const string Sha = "08a9fc2b974f83a9835174cede20a7935f126015";
         var stream = await Test262StreamExtensions.FromGitHub(Sha);
 

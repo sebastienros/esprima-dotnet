@@ -27,14 +27,15 @@ jobs:
           3.1.x
           6.0.x
 
+    - name: Generate test cases
+      working-directory: ./test/Esprima.Tests.Test262
+      run: dotnet tool restore && dotnet test262 generate
+
     - name: Test
       run: dotnet test --configuration Release
 
     - name: Pack with dotnet
       run: dotnet pack --output artifacts --configuration Release -p:PackageVersion=$GITHUB_RUN_ID
-
-    - name: Parse Test262 ECMAScript Test Suite
-      run: dotnet run -c Release --project test/Esprima.Tests.Test262/Esprima.Tests.Test262.csproj
 
     - name: Push with dotnet
       run: dotnet nuget push artifacts/*.nupkg --api-key ${{ secrets.MYGET_API_KEY }} --skip-duplicate --source https://www.myget.org/F/esprimadotnet/api/v2/package

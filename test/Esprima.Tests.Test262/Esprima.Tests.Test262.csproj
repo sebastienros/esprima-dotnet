@@ -3,17 +3,27 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+      <PackageReference Include="NUnit" Version="3.13.3-beta4" PrivateAssets="all" />
+      <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
       <PackageReference Include="Spectre.Console" Version="0.43.0" />
-      <PackageReference Include="Test262Harness" Version="0.0.4" />
+      <PackageReference Include="Test262Harness" Version="0.0.9" />
       <PackageReference Include="YamlDotNet" Version="11.2.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Using Include="NUnit.Framework" />
+    </ItemGroup>
+  
+    <ItemGroup>
+      <Content Include=".config\dotnet-tools.json" />
     </ItemGroup>
 
 </Project>
