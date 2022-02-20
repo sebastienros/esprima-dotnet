@@ -11,7 +11,7 @@ namespace Esprima.Tests.Test262;
 
 public static class Program
 {
-    public static async Task<int> MainNotUsed(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         var rootDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
         var projectRoot = Path.Combine(rootDirectory, "../../..");
@@ -44,13 +44,8 @@ public static class Program
                 var readTask = ctx.AddTask("Loading tests", maxValue: 90_000);
                 readTask.StartTask();
 
-                Parallel.ForEach(stream.GetTestFiles(), file =>
-                {
-                    test262Files.Add(file);
-                    readTask.Increment(1);
-                });
-
-                readTask.MaxValue = test262Files.Count;
+                test262Files = new ConcurrentBag<Test262File>(stream.GetTestFiles());
+                readTask.Value = 100;
                 readTask.StopTask();
 
                 AnsiConsole.WriteLine();
@@ -79,7 +74,7 @@ public static class Program
                 };
 
                 var executor = new Test262Runner(options);
-                summary = executor.Run(stream.GetTestFiles());
+                summary = executor.Run(test262Files);
                 testTask.StopTask();
             });
 
@@ -168,7 +163,7 @@ public static class Program
         List<string> knownFailing)
     {
         // make sure we don't keep new successful ones in list
-        var successs = new HashSet<string>(
+        var success = new HashSet<string>(
             testExecutionSummary.Allowed.Failure.Concat(testExecutionSummary.Allowed.Success).Select(x => x.ToString())
         );
 
@@ -176,8 +171,8 @@ public static class Program
             .Concat(testExecutionSummary.Disallowed.FalsePositive)
             .Concat(testExecutionSummary.Disallowed.Failure)
             .Select(x => x.ToString())
+            .Where(x => !success.Contains(x))
             .Concat(knownFailing)
-            .Where(x => !successs.Contains(x))
             .Distinct()
             .OrderBy(x => x)
             .ToList();

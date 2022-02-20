@@ -11,6 +11,13 @@ public abstract partial class Test262Test
 
     private static void ExecuteTest(JavaScriptParser parser, Test262File file)
     {
-        parser.ParseScript(file.Strict);
+        if (file.Type == ProgramType.Script)
+        {
+            parser.ParseScript(file.Strict);
+        }
+        else
+        {
+            parser.ParseModule();
+        }
     }
 }
