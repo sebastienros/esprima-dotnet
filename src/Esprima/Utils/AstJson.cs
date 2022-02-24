@@ -653,41 +653,6 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
-            {
-                using (StartNodeObject(exportDefaultDeclaration))
-                {
-                    Member("declaration", exportDefaultDeclaration.Declaration);
-                }
-            }
-
-            protected internal override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
-            {
-                using (StartNodeObject(exportAllDeclaration))
-                {
-                    Member("source", exportAllDeclaration.Source);
-                    Member("exported", exportAllDeclaration.Exported);
-                }
-            }
-
-            protected internal override void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
-            {
-                using (StartNodeObject(exportNamedDeclaration))
-                {
-                    Member("declaration", exportNamedDeclaration.Declaration);
-                    Member("specifiers", exportNamedDeclaration.Specifiers);
-                    Member("source", exportNamedDeclaration.Source);
-                }
-            }
-
-            protected internal override void VisitExportSpecifier(ExportSpecifier exportSpecifier)
-            {
-                using (StartNodeObject(exportSpecifier))
-                {
-                    Member("exported", exportSpecifier.Exported);
-                    Member("local", exportSpecifier.Local);
-                }
-            }
 
             protected internal override void VisitImport(Import import)
             {

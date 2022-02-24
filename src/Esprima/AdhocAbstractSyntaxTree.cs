@@ -1371,6 +1371,27 @@ namespace Esprima
             return Finalize(node, new Identifier((string?) token.Value));
         }
 
+        private Identifier ParseStaticIdentifierName()
+        {
+            var node = CreateNode();
+            var token = NextToken();
+            if (!IsIdentifierName(token))
+                return ThrowUnexpectedToken<Identifier>(token);
+
+            string id = token.Value as string;
+
+            while (Match("::"))
+            {
+                id += NextToken().Value as string;
+                token = NextToken();
+                if (!IsIdentifierName(token))
+                    return ThrowUnexpectedToken<Identifier>(token);
+                id += token.Value as string;
+            }
+
+            return Finalize(node, new Identifier((string?) id));
+        }
+
         private Expression ParseIdentifierOrPrivateIdentifierName()
         {
             var node = CreateNode();
@@ -1784,7 +1805,7 @@ namespace Esprima
         {
             var node = CreateNode();
             NextToken();
-            var argument = ParseUnaryExpression();
+            var argument = ParseExpression();
             return Finalize(node, new AwaitExpression(argument));
         }
 
@@ -2624,6 +2645,9 @@ namespace Esprima
 
             var token = NextToken();
 
+            // Hack (thanks podi)
+            if (token.Type == TokenType.Keyword && token.Value as string == "import")
+                token.Type = TokenType.Identifier;
 
             if (token.Type == TokenType.Keyword && (string?) token.Value == "yield")
             {
@@ -2811,7 +2835,7 @@ namespace Esprima
             if (!Match(")") && _config.Tolerant)
             {
                 TolerateUnexpectedToken(NextToken());
-                consequent = Finalize(CreateNode(), new EmptyStatement());
+                consequent = Finalize(node, new EmptyStatement());
             }
             else
             {
@@ -3114,12 +3138,15 @@ namespace Esprima
                 else if (MatchContextualKeyword("resetline"))
                 {
                     _lastSourceFileLineStart = 0; // Reset
+                    _scanner.LastSourceFileLineNumber = 0;
                     NextToken();
                     return new EmptyStatement();
                 }
                 else if (MatchContextualKeyword("source"))
                 {
                     _lastSourceFileLineStart = node.Line + _lastSourceFileLineStart;
+                    _scanner.LastSourceFileLineNumber = _lastSourceFileLineStart;
+
                     NextToken();
                     var fileToken = NextToken();
                     
@@ -4411,7 +4438,7 @@ namespace Esprima
             if (MatchKeyword("extends"))
             {
                 NextToken();
-                superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);
+                superClass = IsolateCoverGrammar(ParseStaticIdentifierName);
                 _context.AllowSuper = true;
             }
 

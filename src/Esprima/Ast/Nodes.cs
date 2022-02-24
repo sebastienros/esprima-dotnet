@@ -68,10 +68,6 @@
         ImportDefaultSpecifier,
         ImportNamespaceSpecifier,
         ImportDeclaration,
-        ExportSpecifier,
-        ExportNamedDeclaration,
-        ExportAllDeclaration,
-        ExportDefaultDeclaration,
         ClassExpression,
 
         // ADHOC

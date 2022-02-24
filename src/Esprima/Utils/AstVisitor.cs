@@ -292,41 +292,6 @@ namespace Esprima.Utils
             Visit(classExpression.Body);
         }
 
-        protected internal virtual void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
-        {
-            Visit(exportDefaultDeclaration.Declaration);
-        }
-
-        protected internal virtual void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
-        {
-            Visit(exportAllDeclaration.Source);
-        }
-
-        protected internal virtual void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
-        {
-            if (exportNamedDeclaration.Declaration is not null)
-            {
-                Visit(exportNamedDeclaration.Declaration);
-            }
-
-            ref readonly var specifiers = ref exportNamedDeclaration.Specifiers;
-            for (var i = 0; i < specifiers.Count; i++)
-            {
-                Visit(specifiers[i]);
-            }
-
-            if (exportNamedDeclaration.Source is not null)
-            {
-                Visit(exportNamedDeclaration.Source);
-            }
-        }
-
-        protected internal virtual void VisitExportSpecifier(ExportSpecifier exportSpecifier)
-        {
-            Visit(exportSpecifier.Local);
-            Visit(exportSpecifier.Exported);
-        }
-
         protected internal virtual void VisitImport(Import import)
         {
             if (import.Source != null)

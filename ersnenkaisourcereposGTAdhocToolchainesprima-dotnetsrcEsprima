@@ -1,0 +1,371 @@
+[1mdiff --git a/src/Esprima/AdhocAbstractSyntaxTree.cs b/src/Esprima/AdhocAbstractSyntaxTree.cs[m
+[1mindex 50b2127..6dc8809 100644[m
+[1m--- a/src/Esprima/AdhocAbstractSyntaxTree.cs[m
+[1m+++ b/src/Esprima/AdhocAbstractSyntaxTree.cs[m
+[36m@@ -1371,6 +1371,27 @@[m [mnamespace Esprima[m
+             return Finalize(node, new Identifier((string?) token.Value));[m
+         }[m
+ [m
+[32m+[m[32m        private Identifier ParseStaticIdentifierName()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            var node = CreateNode();[m
+[32m+[m[32m            var token = NextToken();[m
+[32m+[m[32m            if (!IsIdentifierName(token))[m
+[32m+[m[32m                return ThrowUnexpectedToken<Identifier>(token);[m
+[32m+[m
+[32m+[m[32m            string id = token.Value as string;[m
+[32m+[m
+[32m+[m[32m            while (Match("::"))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                id += NextToken().Value as string;[m
+[32m+[m[32m                token = NextToken();[m
+[32m+[m[32m                if (!IsIdentifierName(token))[m
+[32m+[m[32m                    return ThrowUnexpectedToken<Identifier>(token);[m
+[32m+[m[32m                id += token.Value as string;[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            return Finalize(node, new Identifier((string?) id));[m
+[32m+[m[32m        }[m
+[32m+[m
+         private Expression ParseIdentifierOrPrivateIdentifierName()[m
+         {[m
+             var node = CreateNode();[m
+[36m@@ -1784,7 +1805,7 @@[m [mnamespace Esprima[m
+         {[m
+             var node = CreateNode();[m
+             NextToken();[m
+[31m-            var argument = ParseUnaryExpression();[m
+[32m+[m[32m            var argument = ParseExpression();[m
+             return Finalize(node, new AwaitExpression(argument));[m
+         }[m
+ [m
+[36m@@ -2624,6 +2645,9 @@[m [mnamespace Esprima[m
+ [m
+             var token = NextToken();[m
+ [m
+[32m+[m[32m            // Hack (thanks podi)[m
+[32m+[m[32m            if (token.Type == TokenType.Keyword && token.Value as string == "import")[m
+[32m+[m[32m                token.Type = TokenType.Identifier;[m
+ [m
+             if (token.Type == TokenType.Keyword && (string?) token.Value == "yield")[m
+             {[m
+[36m@@ -2811,7 +2835,7 @@[m [mnamespace Esprima[m
+             if (!Match(")") && _config.Tolerant)[m
+             {[m
+                 TolerateUnexpectedToken(NextToken());[m
+[31m-                consequent = Finalize(CreateNode(), new EmptyStatement());[m
+[32m+[m[32m                consequent = Finalize(node, new EmptyStatement());[m
+             }[m
+             else[m
+             {[m
+[36m@@ -3114,12 +3138,15 @@[m [mnamespace Esprima[m
+                 else if (MatchContextualKeyword("resetline"))[m
+                 {[m
+                     _lastSourceFileLineStart = 0; // Reset[m
+[32m+[m[32m                    _scanner.LastSourceFileLineNumber = 0;[m
+                     NextToken();[m
+                     return new EmptyStatement();[m
+                 }[m
+                 else if (MatchContextualKeyword("source"))[m
+                 {[m
+                     _lastSourceFileLineStart = node.Line + _lastSourceFileLineStart;[m
+[32m+[m[32m                    _scanner.LastSourceFileLineNumber = _lastSourceFileLineStart;[m
+[32m+[m
+                     NextToken();[m
+                     var fileToken = NextToken();[m
+                     [m
+[36m@@ -4411,7 +4438,7 @@[m [mnamespace Esprima[m
+             if (MatchKeyword("extends"))[m
+             {[m
+                 NextToken();[m
+[31m-                superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);[m
+[32m+[m[32m                superClass = IsolateCoverGrammar(ParseStaticIdentifierName);[m
+                 _context.AllowSuper = true;[m
+             }[m
+ [m
+[1mdiff --git a/src/Esprima/Ast/ExportAllDeclaration.cs b/src/Esprima/Ast/ExportAllDeclaration.cs[m
+[1mdeleted file mode 100644[m
+[1mindex d09499f..0000000[m
+[1m--- a/src/Esprima/Ast/ExportAllDeclaration.cs[m
+[1m+++ /dev/null[m
+[36m@@ -1,27 +0,0 @@[m
+[31m-﻿using Esprima.Utils;[m
+[31m-[m
+[31m-namespace Esprima.Ast[m
+[31m-{[m
+[31m-    public sealed class ExportAllDeclaration : ExportDeclaration[m
+[31m-    {[m
+[31m-        public readonly Literal Source;[m
+[31m-        public readonly Identifier? Exported;[m
+[31m-[m
+[31m-        public ExportAllDeclaration(Literal source) : this(source, null)[m
+[31m-        {[m
+[31m-        }[m
+[31m-[m
+[31m-        public ExportAllDeclaration(Literal source, Identifier? exported) : base(Nodes.ExportAllDeclaration)[m
+[31m-        {[m
+[31m-            Source = source;[m
+[31m-            Exported = exported;[m
+[31m-        }[m
+[31m-[m
+[31m-        public override NodeCollection ChildNodes => new(Source, Exported);[m
+[31m-[m
+[31m-        protected internal override void Accept(AstVisitor visitor)[m
+[31m-        {[m
+[31m-            visitor.VisitExportAllDeclaration(this);[m
+[31m-        }[m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/src/Esprima/Ast/ExportDeclaration.cs b/src/Esprima/Ast/ExportDeclaration.cs[m
+[1mdeleted file mode 100644[m
+[1mindex f0eb707..0000000[m
+[1m--- a/src/Esprima/Ast/ExportDeclaration.cs[m
+[1m+++ /dev/null[m
+[36m@@ -1,9 +0,0 @@[m
+[31m-﻿namespace Esprima.Ast[m
+[31m-{[m
+[31m-    public abstract class ExportDeclaration : Declaration[m
+[31m-    {[m
+[31m-        protected ExportDeclaration(Nodes type) : base(type)[m
+[31m-        {[m
+[31m-        }[m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/src/Esprima/Ast/ExportDefaultDeclaration.cs b/src/Esprima/Ast/ExportDefaultDeclaration.cs[m
+[1mdeleted file mode 100644[m
+[1mindex c8023d9..0000000[m
+[1m--- a/src/Esprima/Ast/ExportDefaultDeclaration.cs[m
+[1m+++ /dev/null[m
+[36m@@ -1,21 +0,0 @@[m
+[31m-﻿using Esprima.Utils;[m
+[31m-[m
+[31m-namespace Esprima.Ast[m
+[31m-{[m
+[31m-    public sealed class ExportDefaultDeclaration : ExportDeclaration[m
+[31m-    {[m
+[31m-        public readonly StatementListItem Declaration; //: BindingIdentifier | BindingPattern | ClassDeclaration | Expression | FunctionDeclaration;[m
+[31m-[m
+[31m-        public ExportDefaultDeclaration(StatementListItem declaration) : base(Nodes.ExportDefaultDeclaration)[m
+[31m-        {[m
+[31m-            Declaration = declaration;[m
+[31m-        }[m
+[31m-[m
+[31m-        public override NodeCollection ChildNodes => new(Declaration);[m
+[31m-[m
+[31m-        protected internal override void Accept(AstVisitor visitor)[m
+[31m-        {[m
+[31m-            visitor.VisitExportDefaultDeclaration(this);[m
+[31m-        }[m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/src/Esprima/Ast/ExportNamedDeclaration.cs b/src/Esprima/Ast/ExportNamedDeclaration.cs[m
+[1mdeleted file mode 100644[m
+[1mindex 7869431..0000000[m
+[1m--- a/src/Esprima/Ast/ExportNamedDeclaration.cs[m
+[1m+++ /dev/null[m
+[36m@@ -1,32 +0,0 @@[m
+[31m-﻿using Esprima.Utils;[m
+[31m-[m
+[31m-namespace Esprima.Ast[m
+[31m-{[m
+[31m-    public sealed class ExportNamedDeclaration : ExportDeclaration[m
+[31m-    {[m
+[31m-        private readonly NodeList<ExportSpecifier> _specifiers;[m
+[31m-[m
+[31m-        public readonly StatementListItem? Declaration;[m
+[31m-        public readonly Literal? Source;[m
+[31m-[m
+[31m-        public ExportNamedDeclaration([m
+[31m-            StatementListItem? declaration,[m
+[31m-            in NodeList<ExportSpecifier> specifiers,[m
+[31m-            Literal? source)[m
+[31m-            : base(Nodes.ExportNamedDeclaration)[m
+[31m-        {[m
+[31m-            Declaration = declaration;[m
+[31m-            _specifiers = specifiers;[m
+[31m-            Source = source;[m
+[31m-        }[m
+[31m-[m
+[31m-        public ref readonly NodeList<ExportSpecifier> Specifiers => ref _specifiers;[m
+[31m-[m
+[31m-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declaration, _specifiers, Source);[m
+[31m-[m
+[31m-        protected internal override void Accept(AstVisitor visitor)[m
+[31m-        {[m
+[31m-            visitor.VisitExportNamedDeclaration(this);[m
+[31m-        }[m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/src/Esprima/Ast/ExportSpecifier.cs b/src/Esprima/Ast/ExportSpecifier.cs[m
+[1mdeleted file mode 100644[m
+[1mindex 01feeec..0000000[m
+[1m--- a/src/Esprima/Ast/ExportSpecifier.cs[m
+[1m+++ /dev/null[m
+[36m@@ -1,23 +0,0 @@[m
+[31m-﻿using Esprima.Utils;[m
+[31m-[m
+[31m-namespace Esprima.Ast[m
+[31m-{[m
+[31m-    public sealed class ExportSpecifier : Statement[m
+[31m-    {[m
+[31m-        public readonly Identifier Exported;[m
+[31m-        public readonly Identifier Local;[m
+[31m-[m
+[31m-        public ExportSpecifier(Identifier local, Identifier exported) : base(Nodes.ExportSpecifier)[m
+[31m-        {[m
+[31m-            Exported = exported;[m
+[31m-            Local = local;[m
+[31m-        }[m
+[31m-[m
+[31m-        public override NodeCollection ChildNodes => new(Exported, Local);[m
+[31m-[m
+[31m-        protected internal override void Accept(AstVisitor visitor)[m
+[31m-        {[m
+[31m-            visitor.VisitExportSpecifier(this);[m
+[31m-        }[m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/src/Esprima/Ast/Nodes.cs b/src/Esprima/Ast/Nodes.cs[m
+[1mindex f76e52d..21ee594 100644[m
+[1m--- a/src/Esprima/Ast/Nodes.cs[m
+[1m+++ b/src/Esprima/Ast/Nodes.cs[m
+[36m@@ -68,10 +68,6 @@[m
+         ImportDefaultSpecifier,[m
+         ImportNamespaceSpecifier,[m
+         ImportDeclaration,[m
+[31m-        ExportSpecifier,[m
+[31m-        ExportNamedDeclaration,[m
+[31m-        ExportAllDeclaration,[m
+[31m-        ExportDefaultDeclaration,[m
+         ClassExpression,[m
+ [m
+         // ADHOC[m
+[1mdiff --git a/src/Esprima/Scanner.cs b/src/Esprima/Scanner.cs[m
+[1mindex ac90824..e051b7d 100644[m
+[1m--- a/src/Esprima/Scanner.cs[m
+[1m+++ b/src/Esprima/Scanner.cs[m
+[36m@@ -43,6 +43,11 @@[m [mnamespace Esprima[m
+         public int LineNumber;[m
+         public int LineStart;[m
+ [m
+[32m+[m[32m        /// <summary>[m
+[32m+[m[32m        /// Used to keep track of the last source file when multi-file-merging (ADHOC Projects)[m
+[32m+[m[32m        /// </summary>[m
+[32m+[m[32m        public int LastSourceFileLineNumber;[m
+[32m+[m
+         internal bool IsModule;[m
+ [m
+         private List<string> _curlyStack;[m
+[36m@@ -81,7 +86,7 @@[m [mnamespace Esprima[m
+             "typeof",[m
+             //"delete",[m
+             "switch",[m
+[31m-            "export", // ADHOC: NOT SUPPORTED[m
+[32m+[m[32m            //"export", ADHOC: NOT SUPPORTED[m
+             "import",[m
+             "default",[m
+             "finally",[m
+[36m@@ -107,7 +112,7 @@[m [mnamespace Esprima[m
+             "let" // ADHOC: NOT SUPPORTED[m
+         };[m
+ [m
+[31m-        private static readonly HashSet<string> FutureReservedWords = new() { "enum", "export", "import", "super" };[m
+[32m+[m[32m        private static readonly HashSet<string> FutureReservedWords = new() { "enum", "super" };[m
+ [m
+         private static readonly string[] threeCharacterPunctutors = { /*"===", "!==", ">>>",*/ "<<=", ">>=", "**=", "&&=", "||=" };[m
+ [m
+[36m@@ -182,17 +187,17 @@[m [mnamespace Esprima[m
+ [m
+         private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)[m
+         {[m
+[31m-            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);[m
+[32m+[m[32m            throw _errorHandler.CreateError(Index, LineNumber - LastSourceFileLineNumber, Index - LineStart + 1, message);[m
+         }[m
+ [m
+         private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)[m
+         {[m
+[31m-            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);[m
+[32m+[m[32m            throw _errorHandler.CreateError(Index, LineNumber - LastSourceFileLineNumber, Index - LineStart + 1, message);[m
+         }[m
+ [m
+         private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)[m
+         {[m
+[31m-            _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, message);[m
+[32m+[m[32m            _errorHandler.TolerateError(Index, LineNumber - LastSourceFileLineNumber, Index - LineStart + 1, message);[m
+         }[m
+ [m
+         private StringBuilder GetStringBuilder()[m
+[36m@@ -934,21 +939,27 @@[m [mnamespace Esprima[m
+             object value = 0;[m
+             NumericTokenType tokenType = NumericTokenType.None;[m
+ [m
+[31m-            if (Source.CharCodeAt(Index) == 'u' || Source.CharCodeAt(Index) == 'U')[m
+[32m+[m[32m            if (Source.CharCodeAt(Index) == 'u' || Source.CharCodeAt(Index) == 'U') // Unsigned[m
+             {[m
+                 Index++;[m
+[31m-                if (Source.CharCodeAt(Index + 1) == 'l' || Source.CharCodeAt(Index + 1) == 'L')[m
+[32m+[m[32m                if (Source.CharCodeAt(Index) == 'l' || Source.CharCodeAt(Index) == 'L') // Unsigned Long[m
+                 {[m
+                     Index++;[m
+                     value = Convert.ToUInt64(number, 16);[m
+                     tokenType = NumericTokenType.UnsignedLong;[m
+                 }[m
+[31m-                else[m
+[32m+[m[32m                else // UInt[m
+                 {[m
+                     value = Convert.ToUInt32(number, 16);[m
+                     tokenType = NumericTokenType.UnsignedInteger;[m
+                 }[m
+             } [m
+[32m+[m[32m            else if (Source.CharCodeAt(Index) == 'l' || Source.CharCodeAt(Index) == 'L') // Long[m
+[32m+[m[32m            {[m
+[32m+[m[32m                Index++;[m
+[32m+[m[32m                value = Convert.ToInt64(number, 16);[m
+[32m+[m[32m                tokenType = NumericTokenType.Long;[m
+[32m+[m[32m            }[m
+             else if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))[m
+             {[m
+                 ThrowUnexpectedToken();[m
+[1mdiff --git a/src/Esprima/Utils/AstJson.cs b/src/Esprima/Utils/AstJson.cs[m
+[1mindex fb2f0f9..63d38e2 100644[m
+[1m--- a/src/Esprima/Utils/AstJson.cs[m
+[1m+++ b/src/Esprima/Utils/AstJson.cs[m
+[36m@@ -653,41 +653,6 @@[m [mnamespace Esprima.Utils[m
+                 }[m
+             }[m
+ [m
+[31m-            protected internal override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)[m
+[31m-            {[m
+[31m-                using (StartNodeObject(exportDefaultDeclaration))[m
+[31m-                {[m
+[31m-                    Member("declaration", exportDefaultDeclaration.Declaration);[m
+[31m-                }[m
+[31m-            }[m
+[31m-[m
+[31m-            protected internal override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)[m
+[31m-            {[m
+[31m-                using (StartNodeObject(exportAllDeclaration))[m
+[31m-                {[m
+[31m-                    Member("source", exportAllDeclaration.Source);[m
+[31m-                    Member("exported", exportAllDeclaration.Exported);[m
+[31m-                }[m
+[31m-            }[m
+[31m-[m
+[31m-            protected internal override void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)[m
+[31m-            {[m
+[31m-                using (StartNodeObject(exportNamedDeclaration))[m
+[31m-                {[m
+[31m-                    Member("declaration", exportNamedDeclaration.Declaration);[m
+[31m-                    Member("specifiers", exportNamedDeclaration.Specifiers);[m
+[31m-                    Member("source", exportNamedDeclaration.Source);[m
+[31m-                }[m
+[31m-            }[m
+[31m-[m
+[31m-            protected internal override void VisitExportSpecifier(ExportSpecifier exportSpecifier)[m
+[31m-            {[m
+[31m-                using (StartNodeObject(exportSpecifier))[m
+[31m-                {[m
+[31m-                    Member("exported", exportSpecifier.Exported);[m
+[31m-                    Member("local", exportSpecifier.Local);[m
+[31m-                }[m
+[31m- 

@@ -77,14 +77,6 @@ namespace Esprima.Utils
         public event EventHandler<ChainExpression>? VisitedChainExpression;
         public event EventHandler<ClassExpression>? VisitingClassExpression;
         public event EventHandler<ClassExpression>? VisitedClassExpression;
-        public event EventHandler<ExportDefaultDeclaration>? VisitingExportDefaultDeclaration;
-        public event EventHandler<ExportDefaultDeclaration>? VisitedExportDefaultDeclaration;
-        public event EventHandler<ExportAllDeclaration>? VisitingExportAllDeclaration;
-        public event EventHandler<ExportAllDeclaration>? VisitedExportAllDeclaration;
-        public event EventHandler<ExportNamedDeclaration>? VisitingExportNamedDeclaration;
-        public event EventHandler<ExportNamedDeclaration>? VisitedExportNamedDeclaration;
-        public event EventHandler<ExportSpecifier>? VisitingExportSpecifier;
-        public event EventHandler<ExportSpecifier>? VisitedExportSpecifier;
         public event EventHandler<Import>? VisitingImport;
         public event EventHandler<Import>? VisitedImport;
         public event EventHandler<ImportDeclaration>? VisitingImportDeclaration;
@@ -377,34 +369,6 @@ namespace Esprima.Utils
             VisitingClassExpression?.Invoke(this, classExpression);
             base.VisitClassExpression(classExpression);
             VisitedClassExpression?.Invoke(this, classExpression);
-        }
-
-        protected internal override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
-        {
-            VisitingExportDefaultDeclaration?.Invoke(this, exportDefaultDeclaration);
-            base.VisitExportDefaultDeclaration(exportDefaultDeclaration);
-            VisitedExportDefaultDeclaration?.Invoke(this, exportDefaultDeclaration);
-        }
-
-        protected internal override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
-        {
-            VisitingExportAllDeclaration?.Invoke(this, exportAllDeclaration);
-            base.VisitExportAllDeclaration(exportAllDeclaration);
-            VisitedExportAllDeclaration?.Invoke(this, exportAllDeclaration);
-        }
-
-        protected internal override void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
-        {
-            VisitingExportNamedDeclaration?.Invoke(this, exportNamedDeclaration);
-            base.VisitExportNamedDeclaration(exportNamedDeclaration);
-            VisitedExportNamedDeclaration?.Invoke(this, exportNamedDeclaration);
-        }
-
-        protected internal override void VisitExportSpecifier(ExportSpecifier exportSpecifier)
-        {
-            VisitingExportSpecifier?.Invoke(this, exportSpecifier);
-            base.VisitExportSpecifier(exportSpecifier);
-            VisitedExportSpecifier?.Invoke(this, exportSpecifier);
         }
 
         protected internal override void VisitImport(Import import)

@@ -43,6 +43,11 @@ namespace Esprima
         public int LineNumber;
         public int LineStart;
 
+        /// <summary>
+        /// Used to keep track of the last source file when multi-file-merging (ADHOC Projects)
+        /// </summary>
+        public int LastSourceFileLineNumber;
+
         internal bool IsModule;
 
         private List<string> _curlyStack;
@@ -81,7 +86,7 @@ namespace Esprima
             "typeof",
             //"delete",
             "switch",
-            "export", // ADHOC: NOT SUPPORTED
+            //"export", ADHOC: NOT SUPPORTED
             "import",
             "default",
             "finally",
@@ -107,7 +112,7 @@ namespace Esprima
             "let" // ADHOC: NOT SUPPORTED
         };
 
-        private static readonly HashSet<string> FutureReservedWords = new() { "enum", "export", "import", "super" };
+        private static readonly HashSet<string> FutureReservedWords = new() { "enum", "super" };
 
         private static readonly string[] threeCharacterPunctutors = { /*"===", "!==", ">>>",*/ "<<=", ">>=", "**=", "&&=", "||=" };
 
@@ -182,17 +187,17 @@ namespace Esprima
 
         private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
-            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+            throw _errorHandler.CreateError(Index, LineNumber - LastSourceFileLineNumber, Index - LineStart + 1, message);
         }
 
         private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
         {
-            throw _errorHandler.CreateError(Index, LineNumber, Index - LineStart + 1, message);
+            throw _errorHandler.CreateError(Index, LineNumber - LastSourceFileLineNumber, Index - LineStart + 1, message);
         }
 
         private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
         {
-            _errorHandler.TolerateError(Index, LineNumber, Index - LineStart + 1, message);
+            _errorHandler.TolerateError(Index, LineNumber - LastSourceFileLineNumber, Index - LineStart + 1, message);
         }
 
         private StringBuilder GetStringBuilder()
@@ -934,21 +939,27 @@ namespace Esprima
             object value = 0;
             NumericTokenType tokenType = NumericTokenType.None;
 
-            if (Source.CharCodeAt(Index) == 'u' || Source.CharCodeAt(Index) == 'U')
+            if (Source.CharCodeAt(Index) == 'u' || Source.CharCodeAt(Index) == 'U') // Unsigned
             {
                 Index++;
-                if (Source.CharCodeAt(Index + 1) == 'l' || Source.CharCodeAt(Index + 1) == 'L')
+                if (Source.CharCodeAt(Index) == 'l' || Source.CharCodeAt(Index) == 'L') // Unsigned Long
                 {
                     Index++;
                     value = Convert.ToUInt64(number, 16);
                     tokenType = NumericTokenType.UnsignedLong;
                 }
-                else
+                else // UInt
                 {
                     value = Convert.ToUInt32(number, 16);
                     tokenType = NumericTokenType.UnsignedInteger;
                 }
             } 
+            else if (Source.CharCodeAt(Index) == 'l' || Source.CharCodeAt(Index) == 'L') // Long
+            {
+                Index++;
+                value = Convert.ToInt64(number, 16);
+                tokenType = NumericTokenType.Long;
+            }
             else if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
             {
                 ThrowUnexpectedToken();
