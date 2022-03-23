@@ -194,7 +194,7 @@ namespace Esprima.Test
 
         internal static string GetFixturesPath()
         {
-#if NET461
+#if NETFRAMEWORK
             var assemblyPath = new Uri(typeof(Fixtures).GetTypeInfo().Assembly.CodeBase).LocalPath;
             var assemblyDirectory = new FileInfo(assemblyPath).Directory;
 #else
