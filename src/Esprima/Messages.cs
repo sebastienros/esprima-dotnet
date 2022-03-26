@@ -5,7 +5,6 @@
     {
         public const string AsyncFunctionInSingleStatementContext = "Async functions can only be declared at the top level or inside a block.";
         public const string BadGetterArity = "Getter must not have any formal parameters";
-        public const string BadImportCallArity = "Unexpected token";
         public const string BadSetterArity = "Setter must have exactly one formal parameter";
         public const string BadSetterRestParameter = "Setter function argument must not be a rest parameter";
         public const string CannotUseImportMetaOutsideAModule = "Cannot use 'import.meta' outside a module";
@@ -62,6 +61,7 @@
         public const string StrictLHSPostfix = "Postfix increment/decrement may not have eval or arguments operand in strict mode";
         public const string StrictLHSPrefix = "Prefix increment/decrement may not have eval or arguments operand in strict mode";
         public const string StrictModeWith = "Strict mode code may not include a with statement";
+        public const string StrictOctalEscape = "Octal escape sequences are not allowed in strict mode.";
         public const string StrictOctalLiteral = "Octal literals are not allowed in strict mode.";
         public const string StrictParamName = "Parameter name eval or arguments is not allowed in strict mode";
         public const string StrictReservedWord = "Use of future reserved word in strict mode";

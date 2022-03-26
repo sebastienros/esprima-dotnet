@@ -443,13 +443,18 @@ namespace Esprima
                         break;
                     }
                 }
-                else if (ch == 0x3C && !IsModule)
+                else if (ch == 0x3C)
                 {
                     // U+003C is '<'
                     if (Source[Index + 1] == '!'
                         && Source[Index + 2] == '-'
                         && Source[Index + 3] == '-')
                     {
+                        if (IsModule)
+                        {
+                            ThrowUnexpectedToken();
+                        }
+
                         Index += 4; // `<!--`
                         var comment = SkipSingleLineComment(4);
                         if (_trackComment)
@@ -699,7 +704,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-names-and-keywords
 
-        public Token ScanIdentifier()
+        private Token ScanIdentifier(bool allowEscapes)
         {
             TokenType type;
             var start = Index;
@@ -734,7 +739,10 @@ namespace Esprima
             {
                 var restore = Index;
                 Index = start;
-                // TODO TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
+                if (!allowEscapes)
+                {
+                    TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
+                }
                 Index = restore;
             }
 
@@ -1113,6 +1121,7 @@ namespace Esprima
                 Type = TokenType.NumericLiteral,
                 NumericValue = numericValue,
                 Value = number,
+                Octal = octal,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -1432,10 +1441,15 @@ namespace Esprima
                                 {
                                     var octToDec = OctalToDecimal(ch);
 
-                                    if (strict && octToDec.Octal)
+                                    if (octToDec.Octal)
                                     {
-                                        TolerateUnexpectedToken(Messages.StrictOctalLiteral);
+                                        octal = true;
+                                        if (strict)
+                                        {
+                                            TolerateUnexpectedToken(Messages.StrictOctalLiteral);
+                                        }
                                     }
+
                                     str.Append((char) octToDec.Code);
                                 }
                                 else
@@ -1477,6 +1491,7 @@ namespace Esprima
             {
                 Type = TokenType.StringLiteral,
                 Value = str.ToString(),
+                Octal = octal,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -2522,7 +2537,7 @@ namespace Esprima
             };
         }
 
-        public Token Lex(bool strict = false)
+        public Token Lex(bool strict = false, bool allowIdentifierEscape = false)
         {
             if (Eof())
             {
@@ -2540,7 +2555,7 @@ namespace Esprima
 
             if (Character.IsIdentifierStart(cp))
             {
-                return ScanIdentifier();
+                return ScanIdentifier(allowIdentifierEscape);
             }
 
             // Very common: ( and ) and ;
@@ -2584,7 +2599,7 @@ namespace Esprima
             {
                 if (char.IsLetter(Source, Index)) // Character.IsIdentifierStart(CodePointAt(Index))
                 {
-                    return ScanIdentifier();
+                    return ScanIdentifier(allowIdentifierEscape);
                 }
             }
 

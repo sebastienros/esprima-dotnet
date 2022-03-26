@@ -31,6 +31,7 @@ namespace Esprima
         public Location Location;
 
         // For NumericLiteral
+        public bool Octal;
         public char? NotEscapeSequenceHead;
 
         // For templates
