@@ -178,7 +178,6 @@ namespace Esprima
         {
             _context.Strict = true;
             _context.IsModule = true;
-            _scanner.IsModule = true;
 
             var node = CreateNode();
             var body = ParseDirectivePrologues();
@@ -282,7 +281,7 @@ namespace Esprima
                 _startMarker.Column = _scanner.Index - _scanner.LineStart;
             }
 
-            var next = _scanner.Lex();
+            var next = _scanner.Lex(_context.Strict);
             _hasLineTerminator = token != null && next != null && token.LineNumber != next.LineNumber;
 
             if (next != null && _context.Strict && next.Type == TokenType.Identifier)
@@ -572,11 +571,6 @@ namespace Esprima
                     break;
 
                 case TokenType.StringLiteral:
-                    if (_context.Strict && _lookahead.Octal)
-                    {
-                        TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
-                    }
-
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
@@ -585,11 +579,6 @@ namespace Esprima
                     break;
 
                 case TokenType.NumericLiteral:
-                    if (_context.Strict && _lookahead.Octal)
-                    {
-                        TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
-                    }
-
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
@@ -598,11 +587,6 @@ namespace Esprima
                     break;
 
                 case TokenType.BigIntLiteral:
-                    if (_context.Strict && _lookahead.Octal)
-                    {
-                        TolerateUnexpectedToken(_lookahead, Messages.StrictOctalLiteral);
-                    }
-
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
                     token = NextToken();
@@ -869,31 +853,16 @@ namespace Esprima
             switch (token.Type)
             {
                 case TokenType.StringLiteral:
-                    if (_context.Strict && token.Octal)
-                    {
-                        TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
-                    }
-
                     var raw = GetTokenRaw(token);
                     key = Finalize(node, new Literal((string?) token.Value, raw));
                     break;
 
                 case TokenType.NumericLiteral:
-                    if (_context.Strict && token.Octal)
-                    {
-                        TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
-                    }
-
                     raw = GetTokenRaw(token);
                     key = Finalize(node, new Literal(token.NumericValue, raw));
                     break;
 
                 case TokenType.BigIntLiteral:
-                    if (_context.Strict && token.Octal)
-                    {
-                        TolerateUnexpectedToken(token, Messages.StrictOctalLiteral);
-                    }
-
                     raw = GetTokenRaw(token);
                     key = Finalize(node, new BigIntLiteral(token.BigIntValue!.Value, raw));
                     break;
@@ -985,15 +954,23 @@ namespace Esprima
                 kind = PropertyKind.Get;
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
+                var previousAllowYield = _context.AllowYield;
+                var previousAllowSuper = _context.AllowSuper;
                 _context.AllowYield = false;
+                _context.AllowSuper = true;
                 value = ParseGetterMethod();
+                _context.AllowYield = previousAllowYield;
+                _context.AllowSuper = previousAllowSuper;
             }
             else if (token.Type == TokenType.Identifier && !isAsync && "set".Equals(token.Value) && lookaheadPropertyKey)
             {
                 kind = PropertyKind.Set;
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
+                var previousAllowSuper = _context.AllowSuper;
+                _context.AllowSuper = true;
                 value = ParseSetterMethod();
+                _context.AllowSuper = previousAllowSuper;
             }
             else if (token.Type == TokenType.Punctuator && "*".Equals(token.Value) && lookaheadPropertyKey)
             {
@@ -1028,7 +1005,10 @@ namespace Esprima
                 }
                 else if (Match("("))
                 {
+                    var previousAllowSuper = _context.AllowSuper;
+                    _context.AllowSuper = true;
                     value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
+                    _context.AllowSuper = previousAllowSuper;
                     method = true;
                 }
                 else if (token.Type == TokenType.Identifier)
@@ -1536,7 +1516,7 @@ namespace Esprima
             {
                 var state = _scanner.SaveState();
                 _scanner.ScanComments();
-                var next = _scanner.Lex();
+                var next = _scanner.Lex(_context.Strict);
                 _scanner.RestoreState(state);
                 match = next.Type == TokenType.Punctuator && (string?) next.Value == "(";
             }
@@ -1574,11 +1554,11 @@ namespace Esprima
             {
                 var state = _scanner.SaveState();
                 _scanner.ScanComments();
-                var dot = _scanner.Lex();
+                var dot = _scanner.Lex(_context.Strict);
                 if (dot.Type == TokenType.Punctuator && Equals(dot.Value, "."))
                 {
                     _scanner.ScanComments();
-                    var meta = _scanner.Lex();
+                    var meta = _scanner.Lex(_context.Strict);
                     match = meta.Type == TokenType.Identifier && Equals(meta.Value, "meta");
                     if (match)
                     {
@@ -1634,7 +1614,7 @@ namespace Esprima
                 expr = MatchKeyword("new") ? InheritCoverGrammar(parseNewExpression) : InheritCoverGrammar(parsePrimaryExpression);
             }
 
-            if (isSuper && (!_context.InClassConstructor || !_context.AllowSuper))
+            if (isSuper && !_context.AllowSuper)
             {
                 TolerateError(Messages.UnexpectedSuper);
             }
@@ -2588,7 +2568,7 @@ namespace Esprima
         {
             var state = _scanner.SaveState();
             _scanner.ScanComments();
-            var next = _scanner.Lex();
+            var next = _scanner.Lex(_context.Strict);
             _scanner.RestoreState(state);
 
             return next.Type == TokenType.Identifier ||
@@ -3935,7 +3915,7 @@ namespace Esprima
             {
                 var state = _scanner.SaveState();
                 _scanner.ScanComments();
-                var next = _scanner.Lex();
+                var next = _scanner.Lex(_context.Strict);
                 _scanner.RestoreState(state);
 
                 match = state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
@@ -4143,8 +4123,6 @@ namespace Esprima
 
         private ArrayList<Statement> ParseDirectivePrologues()
         {
-            Token? firstRestricted = null;
-
             var body = new ArrayList<Statement>();
             while (true)
             {
@@ -4167,21 +4145,9 @@ namespace Esprima
                 if (directive == "use strict")
                 {
                     _context.Strict = true;
-                    if (firstRestricted != null)
-                    {
-                        TolerateUnexpectedToken(firstRestricted, Messages.StrictOctalLiteral);
-                    }
-
                     if (!_context.AllowStrictDirective)
                     {
                         TolerateUnexpectedToken(token, Messages.IllegalLanguageModeDirective);
-                    }
-                }
-                else
-                {
-                    if (firstRestricted == null && token.Octal)
-                    {
-                        firstRestricted = token;
                     }
                 }
             }
@@ -4463,7 +4429,7 @@ namespace Esprima
                         token = _lookahead;
                         computed = Match("[");
                         key = ParseObjectPropertyKey(isPrivate);
-                        if (token.Type == TokenType.Identifier && (string?) token.Value == "constructor")
+                        if (token.Type == TokenType.Identifier && !isStatic && !isGenerator && (string?) token.Value == "constructor")
                         {
                             TolerateUnexpectedToken(token, Messages.ConstructorIsAsync);
                         }
@@ -4526,11 +4492,14 @@ namespace Esprima
             {
                 if (Match("("))
                 {
+                    var previousAllowSuper = _context.AllowSuper;
                     var previousInClassConstructor = _context.InClassConstructor;
                     _context.InClassConstructor = Equals(token.Value, "constructor");
+                    _context.AllowSuper = true;
                     kind = PropertyKind.Init;
                     value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
                     _context.InClassConstructor = previousInClassConstructor;
+                    _context.AllowSuper = previousAllowSuper;
                     method = true;
                 }
             }
@@ -4619,6 +4588,8 @@ namespace Esprima
             var previousStrict = _context.Strict;
             var previousAllowSuper = _context.AllowSuper;
             _context.Strict = true;
+            _context.AllowSuper = true;
+
             ExpectKeyword("class");
 
             var id = identifierIsOptional && _lookahead.Type != TokenType.Identifier
@@ -4630,7 +4601,6 @@ namespace Esprima
             {
                 NextToken();
                 superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);
-                _context.AllowSuper = true;
             }
 
             var classBody = ParseClassBody();
@@ -4645,7 +4615,10 @@ namespace Esprima
             var node = CreateNode();
 
             var previousStrict = _context.Strict;
+            var previousAllowSuper = _context.AllowSuper;
             _context.Strict = true;
+            _context.AllowSuper = true;
+            
             ExpectKeyword("class");
             var id = _lookahead.Type == TokenType.Identifier
                 ? ParseVariableIdentifier()
@@ -4660,6 +4633,7 @@ namespace Esprima
 
             var classBody = ParseClassBody();
             _context.Strict = previousStrict;
+            _context.AllowSuper = previousAllowSuper;
 
             return Finalize(node, new ClassExpression(id, superClass, classBody));
         }

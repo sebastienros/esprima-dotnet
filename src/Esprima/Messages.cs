@@ -54,6 +54,7 @@
         public const string RegexUnterminatedGroup = "Invalid regular expression: Unterminated group";
         public const string StaticPrototype = "Classes may not have static property named prototype";
         public const string StrictCatchVariable = "Catch variable may not be eval or arguments in strict mode";
+        public const string StrictDecimalWithLeadingZero = "Decimals with leading zeros are not allowed in strict mode.";
         public const string StrictDelete = "Delete of an unqualified identifier in strict mode.";
         public const string StrictFunction = "In strict mode code, functions can only be declared at top level or inside a block";
         public const string StrictFunctionName = "Function name may not be eval or arguments in strict mode";

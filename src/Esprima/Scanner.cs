@@ -734,7 +734,7 @@ namespace Esprima
             {
                 var restore = Index;
                 Index = start;
-                TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
+                // TODO TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
                 Index = restore;
             }
 
@@ -1113,7 +1113,6 @@ namespace Esprima
                 Type = TokenType.NumericLiteral,
                 NumericValue = numericValue,
                 Value = number,
-                Octal = octal,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -1200,7 +1199,7 @@ namespace Esprima
                 : span;
         }
 
-        public Token ScanNumericLiteral()
+        public Token ScanNumericLiteral(bool strict)
         {
             var sb = GetStringBuilder();
             var start = Index;
@@ -1239,7 +1238,13 @@ namespace Esprima
 
                     if (ch is '_')
                     {
-                        ThrowUnexpectedToken(Messages.NumericSeparatorAfterLeadingZero);
+                        TolerateUnexpectedToken(Messages.NumericSeparatorAfterLeadingZero);
+                    }
+
+                    nonOctal = char.IsNumber(ch);
+                    if (nonOctal && strict)
+                    {
+                        TolerateUnexpectedToken(Messages.StrictDecimalWithLeadingZero);
                     }
 
                     if (ch > 0 && Character.IsOctalDigit(ch))
@@ -1249,8 +1254,6 @@ namespace Esprima
                             return ScanOctalLiteral(ch, start, true);
                         }
                     }
-
-                    nonOctal = char.IsNumber(ch);
                 }
 
                 --Index;
@@ -1343,7 +1346,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-literals-string-literals
 
-        public Token ScanStringLiteral()
+        public Token ScanStringLiteral(bool strict)
         {
             var start = Index;
             var quote = Source[start];
@@ -1418,7 +1421,10 @@ namespace Esprima
                             case '8':
                             case '9':
                                 str.Append(ch);
-                                TolerateUnexpectedToken();
+                                if (strict)
+                                {
+                                    TolerateUnexpectedToken();
+                                }
                                 break;
 
                             default:
@@ -1426,7 +1432,10 @@ namespace Esprima
                                 {
                                     var octToDec = OctalToDecimal(ch);
 
-                                    octal = octToDec.Octal || octal;
+                                    if (strict && octToDec.Octal)
+                                    {
+                                        TolerateUnexpectedToken(Messages.StrictOctalLiteral);
+                                    }
                                     str.Append((char) octToDec.Code);
                                 }
                                 else
@@ -1468,7 +1477,6 @@ namespace Esprima
             {
                 Type = TokenType.StringLiteral,
                 Value = str.ToString(),
-                Octal = octal,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
@@ -2514,7 +2522,7 @@ namespace Esprima
             };
         }
 
-        public Token Lex()
+        public Token Lex(bool strict = false)
         {
             if (Eof())
             {
@@ -2544,7 +2552,7 @@ namespace Esprima
             // String literal starts with single quote (U+0027) or double quote (U+0022).
             if (cp == 0x27 || cp == 0x22)
             {
-                return ScanStringLiteral();
+                return ScanStringLiteral(strict);
             }
 
             // Dot (.) U+002E can also start a floating-point number, hence the need
@@ -2553,7 +2561,7 @@ namespace Esprima
             {
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index + 1)))
                 {
-                    return ScanNumericLiteral();
+                    return ScanNumericLiteral(strict);
                 }
 
                 return ScanPunctuator();
@@ -2561,7 +2569,7 @@ namespace Esprima
 
             if (Character.IsDecimalDigit(cp))
             {
-                return ScanNumericLiteral();
+                return ScanNumericLiteral(strict);
             }
 
             // Template literals start with ` (U+0060) for template head
