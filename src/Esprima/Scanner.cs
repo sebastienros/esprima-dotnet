@@ -31,6 +31,13 @@ namespace Esprima
         }
     }
 
+    internal readonly record struct LexOptions(bool Strict, bool AllowIdentifierEscape)
+    {
+        public LexOptions(JavaScriptParser.Context context) : this(context.Strict, context.AllowIdentifierEscape)
+        {
+        }
+    }
+
     public class Scanner
     {
         private readonly IErrorHandler _errorHandler;
@@ -2537,7 +2544,9 @@ namespace Esprima
             };
         }
 
-        public Token Lex(bool strict = false, bool allowIdentifierEscape = false)
+        public Token Lex() => Lex(new LexOptions());
+
+        internal Token Lex(LexOptions options)
         {
             if (Eof())
             {
@@ -2555,7 +2564,7 @@ namespace Esprima
 
             if (Character.IsIdentifierStart(cp))
             {
-                return ScanIdentifier(allowIdentifierEscape);
+                return ScanIdentifier(options.AllowIdentifierEscape);
             }
 
             // Very common: ( and ) and ;
@@ -2567,7 +2576,7 @@ namespace Esprima
             // String literal starts with single quote (U+0027) or double quote (U+0022).
             if (cp == 0x27 || cp == 0x22)
             {
-                return ScanStringLiteral(strict);
+                return ScanStringLiteral(options.Strict);
             }
 
             // Dot (.) U+002E can also start a floating-point number, hence the need
@@ -2576,7 +2585,7 @@ namespace Esprima
             {
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index + 1)))
                 {
-                    return ScanNumericLiteral(strict);
+                    return ScanNumericLiteral(options.Strict);
                 }
 
                 return ScanPunctuator();
@@ -2584,7 +2593,7 @@ namespace Esprima
 
             if (Character.IsDecimalDigit(cp))
             {
-                return ScanNumericLiteral(strict);
+                return ScanNumericLiteral(options.Strict);
             }
 
             // Template literals start with ` (U+0060) for template head
@@ -2599,7 +2608,7 @@ namespace Esprima
             {
                 if (char.IsLetter(Source, Index)) // Character.IsIdentifierStart(CodePointAt(Index))
                 {
-                    return ScanIdentifier(allowIdentifierEscape);
+                    return ScanIdentifier(options.AllowIdentifierEscape);
                 }
             }
 

@@ -33,7 +33,7 @@ namespace Esprima
             "??="
         };
 
-        private sealed class Context
+        internal sealed class Context
         {
             public Context()
             {
@@ -284,7 +284,7 @@ namespace Esprima
                 _startMarker.Column = _scanner.Index - _scanner.LineStart;
             }
 
-            var next = _scanner.Lex(_context.Strict, allowIdentifierEscape);
+            var next = _scanner.Lex(new LexOptions(_context.Strict, allowIdentifierEscape));
             _hasLineTerminator = token != null && next != null && token.LineNumber != next.LineNumber;
 
             if (next != null && _context.Strict && next.Type == TokenType.Identifier)
@@ -1522,7 +1522,7 @@ namespace Esprima
             {
                 var state = _scanner.SaveState();
                 _scanner.ScanComments();
-                var next = _scanner.Lex(_context.Strict, _context.AllowIdentifierEscape);
+                var next = _scanner.Lex(new LexOptions(_context));
                 _scanner.RestoreState(state);
                 match = next.Type == TokenType.Punctuator && (string?) next.Value == "(";
             }
@@ -1564,11 +1564,12 @@ namespace Esprima
             {
                 var state = _scanner.SaveState();
                 _scanner.ScanComments();
-                var dot = _scanner.Lex(_context.Strict, _context.AllowIdentifierEscape);
+                var lexOptions = new LexOptions(_context);
+                var dot = _scanner.Lex(lexOptions);
                 if (dot.Type == TokenType.Punctuator && Equals(dot.Value, "."))
                 {
                     _scanner.ScanComments();
-                    var meta = _scanner.Lex(_context.Strict, _context.AllowIdentifierEscape);
+                    var meta = _scanner.Lex(lexOptions);
                     match = meta.Type == TokenType.Identifier && Equals(meta.Value, "meta");
                     if (match)
                     {
@@ -2577,7 +2578,7 @@ namespace Esprima
         {
             var state = _scanner.SaveState();
             _scanner.ScanComments();
-            var next = _scanner.Lex(_context.Strict, _context.AllowIdentifierEscape);
+            var next = _scanner.Lex(new LexOptions(_context));
             _scanner.RestoreState(state);
 
             return next.Type == TokenType.Identifier ||
@@ -3927,7 +3928,7 @@ namespace Esprima
             {
                 var state = _scanner.SaveState();
                 _scanner.ScanComments();
-                var next = _scanner.Lex(_context.Strict, _context.AllowIdentifierEscape);
+                var next = _scanner.Lex(new LexOptions(_context));
                 _scanner.RestoreState(state);
 
                 match = state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
