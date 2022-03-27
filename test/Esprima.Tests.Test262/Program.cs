@@ -57,7 +57,11 @@ public static class Program
                 {
                     Execute = static file =>
                     {
-                        var parser = new JavaScriptParser(file.Program);
+                        var parserOptions = new ParserOptions
+                        {
+                            Tolerant = false
+                        };
+                        var parser = new JavaScriptParser(file.Program, parserOptions);
                         if (file.Type == ProgramType.Script)
                         {
                             parser.ParseScript(file.Strict);
