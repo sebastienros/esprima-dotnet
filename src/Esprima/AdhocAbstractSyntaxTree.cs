@@ -2383,10 +2383,8 @@ namespace Esprima
                         statement = ParseImportDeclaration();
                         break;
                     case "function":
-                        statement = ParseFunctionDeclaration();
-                        break;
                     case "method":
-                        statement = ParseMethodDeclaration();
+                        statement = ParseSubroutineDeclaration();
                         break;
                     case "module":
                         statement = ParseClassDeclaration();
@@ -3362,7 +3360,7 @@ namespace Esprima
                 else if (MatchKeyword("function"))
                 {
                     var token = _lookahead;
-                    var declaration = ParseFunctionDeclaration();
+                    var declaration = ParseSubroutineDeclaration() as FunctionDeclaration;
                     if (_context.Strict)
                     {
                         TolerateUnexpectedToken(token, Messages.StrictFunction);
@@ -3559,7 +3557,7 @@ namespace Esprima
                     break;
 
                 case TokenType.Identifier:
-                    statement = MatchAsyncFunction() ? ParseFunctionDeclaration() : ParseLabelledStatement();
+                    statement = MatchAsyncFunction() ? ParseSubroutineDeclaration() : ParseLabelledStatement();
                     break;
 
                 case TokenType.Keyword:
@@ -3579,7 +3577,7 @@ namespace Esprima
                             statement = ParseForStatement();
                             break;
                         case "function":
-                            statement = ParseFunctionDeclaration();
+                            statement = ParseSubroutineDeclaration();
                             break;
                         case "finally": // Adhoc: Object finalizer
                             statement = ParseFinalizer();
@@ -3833,13 +3831,13 @@ namespace Esprima
                 var next = _scanner.Lex();
                 _scanner.RestoreState(state);
 
-                match = state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
+                match = state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && ((string?) next.Value == "function" || (string?) next.Value == "method");
             }
 
             return match;
         }
 
-        private FunctionDeclaration ParseFunctionDeclaration(bool identifierIsOptional = false)
+        private Declaration ParseSubroutineDeclaration(bool identifierIsOptional = false)
         {
             var node = CreateNode();
             var isAsync = MatchContextualKeyword("async");
@@ -3853,7 +3851,10 @@ namespace Esprima
                 NextToken();
             }
 
-            ExpectKeyword("function");
+            bool isMethod = MatchKeyword("method");
+            if (!MatchKeyword("function") && !isMethod)
+                ThrowUnexpectedToken(_lookahead);
+            NextToken();
 
             var isGenerator = Match("*");
             if (isGenerator)
@@ -3925,99 +3926,13 @@ namespace Esprima
             _context.IsAsync = previousIsAsync;
             _context.AllowYield = previousAllowYield;
 
-            var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync));
-            return functionDeclaration;
+            if (!isMethod)
+                return Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync));
+            else
+                return Finalize(node, new MethodDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync));
         }
 
-        private MethodDeclaration ParseMethodDeclaration(bool identifierIsOptional = false)
-        {
-            var node = CreateNode();
-            var isAsync = MatchContextualKeyword("async");
-            if (isAsync)
-            {
-                if (_context.InIteration)
-                {
-                    TolerateError(Messages.AsyncFunctionInSingleStatementContext);
-                }
-
-                NextToken();
-            }
-
-            ExpectKeyword("method");
-
-            var isGenerator = Match("*");
-            if (isGenerator)
-            {
-                NextToken();
-            }
-
-            string? message = null;
-            Identifier? id = null;
-            Token? firstRestricted = null;
-
-            if (!identifierIsOptional || !Match("("))
-            {
-                var token = _lookahead;
-                id = ParseVariableIdentifier();
-                if (_context.Strict)
-                {
-                    if (Scanner.IsRestrictedWord((string?) token.Value))
-                    {
-                        TolerateUnexpectedToken(token, Messages.StrictFunctionName);
-                    }
-                }
-                else
-                {
-                    if (Scanner.IsRestrictedWord((string?) token.Value))
-                    {
-                        firstRestricted = token;
-                        message = Messages.StrictFunctionName;
-                    }
-                    else if (Scanner.IsStrictModeReservedWord((string?) token.Value))
-                    {
-                        firstRestricted = token;
-                        message = Messages.StrictReservedWord;
-                    }
-                }
-            }
-
-            var previousIsAsync = _context.IsAsync;
-            var previousAllowYield = _context.AllowYield;
-            _context.IsAsync = isAsync;
-            _context.AllowYield = !isGenerator;
-
-            var formalParameters = ParseFormalParameters(firstRestricted);
-            var parameters = NodeList.From(ref formalParameters.Parameters);
-            var stricted = formalParameters.Stricted;
-            firstRestricted = formalParameters.FirstRestricted;
-            if (formalParameters.Message != null)
-            {
-                message = formalParameters.Message;
-            }
-
-            var previousStrict = _context.Strict;
-            var previousAllowStrictDirective = _context.AllowStrictDirective;
-            _context.AllowStrictDirective = formalParameters.Simple;
-            var body = ParseFunctionSourceElements();
-            if (_context.Strict && firstRestricted != null)
-            {
-                ThrowUnexpectedToken(firstRestricted, message);
-            }
-
-            if (_context.Strict && stricted != null)
-            {
-                TolerateUnexpectedToken(stricted, message);
-            }
-
-            var hasStrictDirective = _context.Strict;
-            _context.AllowStrictDirective = previousAllowStrictDirective;
-            _context.Strict = previousStrict;
-            _context.IsAsync = previousIsAsync;
-            _context.AllowYield = previousAllowYield;
-
-            var methodDeclaration = Finalize(node, new MethodDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync));
-            return methodDeclaration;
-        }
+ 
 
         private FunctionExpression ParseFunctionExpression()
         {

@@ -1170,6 +1170,8 @@ namespace Esprima
             //assert(Character.IsDecimalDigit(ch) || (ch == '.'),
             //    'Numeric literal must start with a decimal digit or a decimal point');
 
+            bool hasComma = false;
+
             if (ch != '.')
             {
                 var first = Source[Index++];
@@ -1218,6 +1220,7 @@ namespace Esprima
                 this.ScanLiteralPart(sb, Character.IsDecimalDigit);
 
                 ch = Source.CharCodeAt(Index);
+                hasComma = true;
             }
             else if (ch == '-')
             {
@@ -1303,18 +1306,47 @@ namespace Esprima
             {
                 Index++;
 
-                float floatValue = float.Parse(sb.ToString());
-                return new Token
+                if (float.TryParse(sb.ToString(),
+                    NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture,
+                    out var f))
                 {
-                    Type = TokenType.NumericLiteral,
-                    NumericTokenType = NumericTokenType.Float,
-                    Value = floatValue,
-                    NumericValue = floatValue,
-                    LineNumber = LineNumber,
-                    LineStart = LineStart,
-                    Start = start,
-                    End = Index
-                };
+                    return new Token
+                    {
+                        Type = TokenType.NumericLiteral,
+                        NumericTokenType = NumericTokenType.Float,
+                        Value = f,
+                        NumericValue = f,
+                        LineNumber = LineNumber,
+                        LineStart = LineStart,
+                        Start = start,
+                        End = Index
+                    };
+                }
+                else
+                    ThrowUnexpectedToken();
+            }
+            else if (ch == 'd' || ch == 'D') // double
+            {
+                Index++;
+
+                if (double.TryParse(sb.ToString(),
+                    NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture,
+                    out var d))
+                {
+                    return new Token
+                    {
+                        Type = TokenType.NumericLiteral,
+                        NumericTokenType = NumericTokenType.Double,
+                        Value = d,
+                        NumericValue = d,
+                        LineNumber = LineNumber,
+                        LineStart = LineStart,
+                        Start = start,
+                        End = Index
+                    };
+                }
+                else
+                    ThrowUnexpectedToken();
             }
 
             if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
@@ -1333,45 +1365,62 @@ namespace Esprima
 
             var number = sb.ToString();
 
-            // Int by default
-            if (int.TryParse(
-                number,
-                NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
-                CultureInfo.InvariantCulture,
-                out var i))
+            if (hasComma)
             {
-                token.NumericValue = i;
-                token.NumericTokenType = NumericTokenType.Integer;
-                token.Value = i;
-            }
-            else if (long.TryParse(
-                number,
-                NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
-                CultureInfo.InvariantCulture,
-                out var l))
-            {
-                token.NumericValue = l;
-                token.NumericTokenType = NumericTokenType.Long;
-                token.Value = l;
-            }
-            else if (double.TryParse(
-                number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
-                CultureInfo.InvariantCulture,
-                out var d))
-            {
-                token.NumericValue = d;
-                token.NumericTokenType = NumericTokenType.Double;
-                token.Value = d;
+                if (float.TryParse(number,
+                    NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture,
+                    out var f))
+                {
+                    token.NumericValue = f;
+                    token.NumericTokenType = NumericTokenType.Float;
+                    token.Value = f;
+                }
+                else
+                    ThrowUnexpectedToken();
             }
             else
             {
-                d = number.TrimStart().StartsWith("-")
-                    ? double.NegativeInfinity
-                    : double.PositiveInfinity;
 
-                token.NumericValue = d;
-                token.NumericTokenType = NumericTokenType.Double;
-                token.Value = d;
+                // Int by default
+                if (int.TryParse(
+                    number,
+                    NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
+                    CultureInfo.InvariantCulture,
+                    out var i))
+                {
+                    token.NumericValue = i;
+                    token.NumericTokenType = NumericTokenType.Integer;
+                    token.Value = i;
+                }
+                else if (long.TryParse(
+                    number,
+                    NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
+                    CultureInfo.InvariantCulture,
+                    out var l))
+                {
+                    token.NumericValue = l;
+                    token.NumericTokenType = NumericTokenType.Long;
+                    token.Value = l;
+                }
+                else if (double.TryParse(
+                    number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
+                    CultureInfo.InvariantCulture,
+                    out var d))
+                {
+                    token.NumericValue = d;
+                    token.NumericTokenType = NumericTokenType.Double;
+                    token.Value = d;
+                }
+                else
+                {
+                    d = number.TrimStart().StartsWith("-")
+                        ? double.NegativeInfinity
+                        : double.PositiveInfinity;
+
+                    token.NumericValue = d;
+                    token.NumericTokenType = NumericTokenType.Double;
+                    token.Value = d;
+                }
             }
 
             return token;
