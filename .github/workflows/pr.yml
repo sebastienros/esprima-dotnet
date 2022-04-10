@@ -11,7 +11,7 @@ on:
 jobs:
 
   windows:
-    runs-on: windows-2022
+    runs-on: windows-latest
     env:
         DOTNET_NOLOGO: true
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -49,4 +49,4 @@ jobs:
       run: dotnet tool restore && dotnet test262 generate && dotnet run -c Release -- --update-allow-list
 
     - name: Test
-      run: dotnet test --configuration Release
+      run: dotnet test --configuration Release --framework net6.0
