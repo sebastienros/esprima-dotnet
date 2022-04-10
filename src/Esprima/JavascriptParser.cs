@@ -82,6 +82,7 @@ namespace Esprima
         public IReadOnlyList<Token> Tokens => _tokens;
 
         // cache frequently called Func so we don't need to build Func<T> instances all the time
+        // can be revisited with NET 7 SDK where things have improved
         private readonly Func<Expression> parseAssignmentExpression;
         private readonly Func<Expression> parseExponentiationExpression;
         private readonly Func<Expression> parseUnaryExpression;
@@ -95,6 +96,8 @@ namespace Esprima
         private readonly Func<Expression> parseLeftHandSideExpression;
         private readonly Func<Expression> parseLeftHandSideExpressionAllowCall;
         private readonly Func<Statement> parseStatement;
+        private readonly Func<BlockStatement> parseFunctionSourceElements;
+        private readonly Func<Expression> parseAsyncArgument;
 
         /// <summary>
         /// Creates a new <see cref="JavaScriptParser" /> instance.
@@ -145,6 +148,8 @@ namespace Esprima
             parseLeftHandSideExpression = ParseLeftHandSideExpression;
             parseLeftHandSideExpressionAllowCall = ParseLeftHandSideExpressionAllowCall;
             parseStatement = ParseStatement;
+            parseFunctionSourceElements = ParseFunctionSourceElements;
+            parseAsyncArgument = ParseAsyncArgument;
 
             _config = options;
             _action = action;
@@ -807,7 +812,7 @@ namespace Esprima
             var previousStrict = _context.Strict;
             var previousAllowStrictDirective = _context.AllowStrictDirective;
             _context.AllowStrictDirective = parameters.Simple;
-            var body = IsolateCoverGrammar(ParseFunctionSourceElements);
+            var body = IsolateCoverGrammar(parseFunctionSourceElements);
             hasStrictDirective = _context.Strict;
             if (_context.Strict && parameters.FirstRestricted != null)
             {
@@ -1527,7 +1532,7 @@ namespace Esprima
             {
                 while (true)
                 {
-                    var expr = Match("...") ? ParseSpreadElement() : IsolateCoverGrammar(ParseAsyncArgument);
+                    var expr = Match("...") ? ParseSpreadElement() : IsolateCoverGrammar(parseAsyncArgument);
                     args.Add(expr);
                     if (Match(")"))
                     {

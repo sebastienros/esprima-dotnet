@@ -49,6 +49,7 @@ namespace Esprima
                    ch >= 'A' && ch <= 'Z' ||
                    ch >= 'a' && ch <= 'z' ||
                    ch == '\\' ||
+                   ch == '#' ||
                    ch >= 0x80 && NonAsciiIdentifierStart.IsMatch(ParserExtensions.CharToString(ch));
         }
 
@@ -90,10 +91,14 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
 
+        internal static readonly Func<char, bool> IsDecimalDigitFunc = IsDecimalDigit;
+
         public static bool IsDecimalDigit(char cp)
         {
             return cp >= '0' && cp <= '9';
         }
+
+        internal static readonly Func<char, bool> IsHexDigitFunc = IsHexDigit;
 
         public static bool IsHexDigit(char cp)
         {
@@ -101,6 +106,8 @@ namespace Esprima
                    cp >= 'A' && cp <= 'F' ||
                    cp >= 'a' && cp <= 'f';
         }
+
+        internal static readonly Func<char, bool> IsOctalDigitFunc = IsOctalDigit;
 
         public static bool IsOctalDigit(char cp)
         {

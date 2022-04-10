@@ -825,7 +825,6 @@ namespace Esprima
 
                     break;
 
-                case '#':
                 case ')':
                 case ';':
                 case ',':
@@ -895,7 +894,7 @@ namespace Esprima
 
         public Token ScanHexLiteral(int start)
         {
-            var number = this.ScanLiteralPart(Character.IsHexDigit, out var hasUpperCase);
+            var number = this.ScanLiteralPart(Character.IsHexDigitFunc, out var hasUpperCase);
 
             if (number.Length == 0)
             {
@@ -1055,7 +1054,7 @@ namespace Esprima
                 ++Index;
             }
 
-            sb.Append(this.ScanLiteralPart(Character.IsOctalDigit, out _));
+            sb.Append(this.ScanLiteralPart(Character.IsOctalDigitFunc, out _));
             var number = sb.ToString();
 
             if (!octal && number.Length == 0)
@@ -1205,14 +1204,14 @@ namespace Esprima
                 }
 
                 --Index;
-                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit, out _));
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, out _));
                 ch = Source.CharCodeAt(Index);
             }
 
             if (ch == '.')
             {
                 sb.Append(Source[Index++]);
-                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit, out _));
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, out _));
 
                 ch = Source.CharCodeAt(Index);
             }
@@ -1229,7 +1228,7 @@ namespace Esprima
 
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
-                    sb.Append(this.ScanLiteralPart(Character.IsDecimalDigit, out _));
+                    sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, out _));
                 }
                 else
                 {
