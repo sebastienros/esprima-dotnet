@@ -4508,6 +4508,12 @@ namespace Esprima
             else if (token.Type == TokenType.Punctuator && (string?) token.Value == "*" && lookaheadPropertyKey)
             {
                 kind = PropertyKind.Init;
+                if (Match("#"))
+                {
+                    isPrivate = true;
+                    NextToken();
+                    token = _lookahead;
+                }
                 computed = Match("[");
                 key = ParseObjectPropertyKey(isPrivate);
                 value = ParseGeneratorMethod(isAsync);
@@ -4626,7 +4632,7 @@ namespace Esprima
             if (MatchKeyword("extends"))
             {
                 NextToken();
-                superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);
+                superClass = IsolateCoverGrammar(parseLeftHandSideExpressionAllowCall);
             }
 
             var classBody = ParseClassBody();
@@ -4654,7 +4660,7 @@ namespace Esprima
             if (MatchKeyword("extends"))
             {
                 NextToken();
-                superClass = IsolateCoverGrammar(ParseLeftHandSideExpressionAllowCall);
+                superClass = IsolateCoverGrammar(parseLeftHandSideExpressionAllowCall);
             }
 
             var classBody = ParseClassBody();
