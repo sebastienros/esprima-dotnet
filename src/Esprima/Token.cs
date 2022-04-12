@@ -44,25 +44,5 @@ namespace Esprima
         public object? Value;
         public RegexValue? RegexValue;
         public BigInteger? BigIntValue;
-
-        public void Clear()
-        {
-            Type = TokenType.BooleanLiteral;
-            Literal = null;
-            Start = 0;
-            End = 0;
-            LineNumber = 0;
-            LineStart = 0;
-            Location = default;
-            Octal = false;
-            Head = false;
-            Tail = false;
-            RawTemplate = null;
-            BooleanValue = false;
-            NumericValue = 0;
-            Value = null;
-            RegexValue = null;
-            BigIntValue = null;
-        }
     }
 }
