@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -29,6 +28,13 @@ namespace Esprima
             LineNumber = lineNumber;
             LineStart = lineStart;
             CurlyStack = curlyStack;
+        }
+    }
+
+    internal readonly record struct LexOptions(bool Strict, bool AllowIdentifierEscape)
+    {
+        public LexOptions(JavaScriptParser.Context context) : this(context.Strict, context.AllowIdentifierEscape)
+        {
         }
     }
 
@@ -444,13 +450,18 @@ namespace Esprima
                         break;
                     }
                 }
-                else if (ch == 0x3C && !IsModule)
+                else if (ch == 0x3C)
                 {
                     // U+003C is '<'
                     if (Source[Index + 1] == '!'
                         && Source[Index + 2] == '-'
                         && Source[Index + 3] == '-')
                     {
+                        if (IsModule)
+                        {
+                            ThrowUnexpectedToken();
+                        }
+
                         Index += 4; // `<!--`
                         var comment = SkipSingleLineComment(4);
                         if (_trackComment)
@@ -700,7 +711,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-names-and-keywords
 
-        public Token ScanIdentifier()
+        private Token ScanIdentifier(bool allowEscapes)
         {
             TokenType type;
             var start = Index;
@@ -735,7 +746,10 @@ namespace Esprima
             {
                 var restore = Index;
                 Index = start;
-                TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
+                if (!allowEscapes)
+                {
+                    TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
+                }
                 Index = restore;
             }
 
@@ -894,7 +908,7 @@ namespace Esprima
 
         public Token ScanHexLiteral(int start)
         {
-            var number = this.ScanLiteralPart(Character.IsHexDigitFunc, out var hasUpperCase);
+            var number = this.ScanLiteralPart(Character.IsHexDigitFunc, allowNumericSeparator: true, out var hasUpperCase);
 
             if (number.Length == 0)
             {
@@ -907,7 +921,7 @@ namespace Esprima
                 if (ch == 'n')
                 {
                     Index++;
-                    return ScanBigIntLiteral(start, number, NumberStyles.HexNumber);
+                    return ScanBigIntLiteral(start, number, JavascriptNumberStyle.Hex);
                 }
                 ThrowUnexpectedToken();
             }
@@ -960,10 +974,18 @@ namespace Esprima
             };
         }
 
-        private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, NumberStyles style)
+        private enum JavascriptNumberStyle
+        {
+            Binary,
+            Hex,
+            Octal,
+            Integer
+        }
+
+        private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, JavascriptNumberStyle style)
         {
             BigInteger bigInt = 0;
-            if (style == NumberStyles.None)
+            if (style == JavascriptNumberStyle.Binary)
             {
                 // binary
                 foreach (var c in number)
@@ -974,16 +996,26 @@ namespace Esprima
             }
             else
             {
-                var c = number[0];
-                if (c > '7' && Character.IsHexDigit(c))
+                if (style == JavascriptNumberStyle.Hex)
                 {
-                    // ensure we get positive number
-                    number = ("0" + number.ToString()).AsSpan();
+                    var c = number[0];
+                    if (c > '7' && Character.IsHexDigit(c))
+                    {
+                        // ensure we get positive number
+                        number = ("0" + number.ToString()).AsSpan();
+                    }
                 }
+
+                var parseStyle = style switch
+                {
+                    JavascriptNumberStyle.Integer => NumberStyles.Integer,
+                    JavascriptNumberStyle.Hex => NumberStyles.HexNumber,
+                    _ => NumberStyles.None
+                };
 #if HAS_SPAN_PARSE
-                bigInt = BigInteger.Parse(number, style);
+                bigInt = BigInteger.Parse(number, parseStyle);
 #else
-                bigInt = BigInteger.Parse(number.ToString(), style);
+                bigInt = BigInteger.Parse(number.ToString(), parseStyle);
 #endif
             }
 
@@ -1001,7 +1033,7 @@ namespace Esprima
 
         public Token ScanBinaryLiteral(int start)
         {
-            var number = this.ScanLiteralPart(static c => c is '0' or '1', out _);
+            var number = this.ScanLiteralPart(static c => c is '0' or '1', allowNumericSeparator: true, out _);
 
             if (number.Length == 0)
             {
@@ -1015,7 +1047,7 @@ namespace Esprima
                 if (ch == 'n')
                 {
                     Index++;
-                    return ScanBigIntLiteral(start, number, NumberStyles.None);
+                    return ScanBigIntLiteral(start, number, JavascriptNumberStyle.Binary);
                 }
 
                 if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
@@ -1039,7 +1071,7 @@ namespace Esprima
             return token;
         }
 
-        public Token ScanOctalLiteral(char prefix, int start)
+        public Token ScanOctalLiteral(char prefix, int start, bool isLegacyOctalDigital = false)
         {
             var sb = GetStringBuilder();
             var octal = false;
@@ -1054,7 +1086,7 @@ namespace Esprima
                 ++Index;
             }
 
-            sb.Append(this.ScanLiteralPart(Character.IsOctalDigitFunc, out _));
+            sb.Append(this.ScanLiteralPart(Character.IsOctalDigitFunc, allowNumericSeparator: true, out _));
             var number = sb.ToString();
 
             if (!octal && number.Length == 0)
@@ -1063,7 +1095,20 @@ namespace Esprima
                 ThrowUnexpectedToken();
             }
 
-            if (Character.IsIdentifierStart(Source.CharCodeAt(Index)) || Character.IsDecimalDigit(Source.CharCodeAt(Index)))
+            var ch = Source.CharCodeAt(Index);
+            
+            if (ch == 'n')
+            {
+                if (isLegacyOctalDigital)
+                {
+                    ThrowUnexpectedToken();
+                }
+           
+                Index++;
+                return ScanBigIntLiteral(start, number.AsSpan(), JavascriptNumberStyle.Octal);
+            }
+            
+            if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
             {
                 ThrowUnexpectedToken();
             }
@@ -1112,7 +1157,7 @@ namespace Esprima
             return true;
         }
 
-        private ReadOnlySpan<char> ScanLiteralPart(Func<char, bool> check, out bool hasUpperCase)
+        private ReadOnlySpan<char> ScanLiteralPart(Func<char, bool> check, bool allowNumericSeparator, out bool hasUpperCase)
         {
             hasUpperCase = false;
             var start = Index;
@@ -1120,7 +1165,7 @@ namespace Esprima
             var charCode = Source.CharCodeAt(Index);
             if (charCode == '_')
             {
-                ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
+                ThrowUnexpectedToken(Messages.NumericSeparatorNotAllowedHere);
             }
 
             var needsCleanup = false;
@@ -1128,6 +1173,10 @@ namespace Esprima
             {
                 if (charCode == '_')
                 {
+                    if (!allowNumericSeparator)
+                    {
+                        ThrowUnexpectedToken();
+                    }
                     needsCleanup = true;
                 }
 
@@ -1135,9 +1184,17 @@ namespace Esprima
 
                 Index++;
                 var newCharCode = Source.CharCodeAt(Index);
-                if (charCode == '_' && newCharCode == '_')
+                if (charCode == '_')
                 {
-                    ThrowUnexpectedToken(Messages.NumericSeperatorOneUnderscore);
+                    if (newCharCode == '_')
+                    {
+                        ThrowUnexpectedToken(Messages.NumericSeparatorOneUnderscore);
+                    }
+
+                    if (newCharCode == 'n')
+                    {
+                        ThrowUnexpectedToken(Messages.NumericSeparatorNotAllowedHere);
+                    }
                 }
 
                 if (Eof())
@@ -1147,9 +1204,9 @@ namespace Esprima
                 charCode = newCharCode;
             }
 
-            if (charCode == '_')
+            if (Source[Index -1] == '_')
             {
-                ThrowUnexpectedToken(Messages.NumericSeperatorNotAllowedHere);
+                ThrowUnexpectedToken(Messages.NumericSeparatorNotAllowedHere);
             }
 
             var span = Source.AsSpan(start, Index - start);
@@ -1158,7 +1215,7 @@ namespace Esprima
                 : span;
         }
 
-        public Token ScanNumericLiteral()
+        public Token ScanNumericLiteral(bool strict)
         {
             var sb = GetStringBuilder();
             var start = Index;
@@ -1166,6 +1223,7 @@ namespace Esprima
             //assert(Character.IsDecimalDigit(ch) || (ch == '.'),
             //    'Numeric literal must start with a decimal digit or a decimal point');
 
+            var nonOctal = false;
             if (ch != '.')
             {
                 var first = Source[Index++];
@@ -1177,42 +1235,52 @@ namespace Esprima
                 // Binary number in ES6 starts with '0b'.
                 if (first == '0')
                 {
-                    if (ch == 'x' || ch == 'X')
+                    if (ch is 'x' or 'X')
                     {
                         ++Index;
                         return ScanHexLiteral(start);
                     }
 
-                    if (ch == 'b' || ch == 'B')
+                    if (ch is 'b' or 'B')
                     {
                         ++Index;
                         return ScanBinaryLiteral(start);
                     }
 
-                    if (ch == 'o' || ch == 'O')
+                    if (ch is 'o' or 'O')
                     {
                         return ScanOctalLiteral(ch, start);
+                    }
+
+                    if (ch is '_')
+                    {
+                        TolerateUnexpectedToken(Messages.NumericSeparatorAfterLeadingZero);
+                    }
+
+                    nonOctal = char.IsNumber(ch);
+                    if (nonOctal && strict)
+                    {
+                        TolerateUnexpectedToken(Messages.StrictDecimalWithLeadingZero);
                     }
 
                     if (ch > 0 && Character.IsOctalDigit(ch))
                     {
                         if (IsImplicitOctalLiteral())
                         {
-                            return ScanOctalLiteral(ch, start);
+                            return ScanOctalLiteral(ch, start, true);
                         }
                     }
                 }
 
                 --Index;
-                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, out _));
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal, out _));
                 ch = Source.CharCodeAt(Index);
             }
 
             if (ch == '.')
             {
                 sb.Append(Source[Index++]);
-                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, out _));
-
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal, out _));
                 ch = Source.CharCodeAt(Index);
             }
 
@@ -1228,7 +1296,7 @@ namespace Esprima
 
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
                 {
-                    sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, out _));
+                    sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: true, out _));
                 }
                 else
                 {
@@ -1237,8 +1305,13 @@ namespace Esprima
             }
             else if (ch == 'n')
             {
+                if (nonOctal)
+                {
+                    ThrowUnexpectedToken();
+                }
+
                 Index++;
-                return ScanBigIntLiteral(start, sb.ToString().AsSpan(), NumberStyles.Integer);
+                return ScanBigIntLiteral(start, sb.ToString().AsSpan(), JavascriptNumberStyle.Integer);
             }
 
             if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
@@ -1289,7 +1362,7 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-literals-string-literals
 
-        public Token ScanStringLiteral()
+        public Token ScanStringLiteral(bool strict)
         {
             var start = Index;
             var quote = Source[start];
@@ -1364,7 +1437,10 @@ namespace Esprima
                             case '8':
                             case '9':
                                 str.Append(ch);
-                                TolerateUnexpectedToken();
+                                if (strict)
+                                {
+                                    TolerateUnexpectedToken();
+                                }
                                 break;
 
                             default:
@@ -1372,7 +1448,15 @@ namespace Esprima
                                 {
                                     var octToDec = OctalToDecimal(ch);
 
-                                    octal = octToDec.Octal || octal;
+                                    if (octToDec.Octal)
+                                    {
+                                        octal = true;
+                                        if (strict)
+                                        {
+                                            TolerateUnexpectedToken(Messages.StrictOctalLiteral);
+                                        }
+                                    }
+
                                     str.Append((char) octToDec.Code);
                                 }
                                 else
@@ -2460,7 +2544,9 @@ namespace Esprima
             };
         }
 
-        public Token Lex()
+        public Token Lex() => Lex(new LexOptions());
+
+        internal Token Lex(LexOptions options)
         {
             if (Eof())
             {
@@ -2478,7 +2564,7 @@ namespace Esprima
 
             if (Character.IsIdentifierStart(cp))
             {
-                return ScanIdentifier();
+                return ScanIdentifier(options.AllowIdentifierEscape);
             }
 
             // Very common: ( and ) and ;
@@ -2490,7 +2576,7 @@ namespace Esprima
             // String literal starts with single quote (U+0027) or double quote (U+0022).
             if (cp == 0x27 || cp == 0x22)
             {
-                return ScanStringLiteral();
+                return ScanStringLiteral(options.Strict);
             }
 
             // Dot (.) U+002E can also start a floating-point number, hence the need
@@ -2499,7 +2585,7 @@ namespace Esprima
             {
                 if (Character.IsDecimalDigit(Source.CharCodeAt(Index + 1)))
                 {
-                    return ScanNumericLiteral();
+                    return ScanNumericLiteral(options.Strict);
                 }
 
                 return ScanPunctuator();
@@ -2507,7 +2593,7 @@ namespace Esprima
 
             if (Character.IsDecimalDigit(cp))
             {
-                return ScanNumericLiteral();
+                return ScanNumericLiteral(options.Strict);
             }
 
             // Template literals start with ` (U+0060) for template head
@@ -2522,7 +2608,7 @@ namespace Esprima
             {
                 if (char.IsLetter(Source, Index)) // Character.IsIdentifierStart(CodePointAt(Index))
                 {
-                    return ScanIdentifier();
+                    return ScanIdentifier(options.AllowIdentifierEscape);
                 }
             }
 

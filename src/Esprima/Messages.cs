@@ -4,7 +4,6 @@
     public static class Messages
     {
         public const string AsyncFunctionInSingleStatementContext = "Async functions can only be declared at the top level or inside a block.";
-        public const string BadImportCallArity = "Unexpected token";
         public const string BadGetterArity = "Getter must not have any formal parameters";
         public const string BadSetterArity = "Setter must have exactly one formal parameter";
         public const string BadSetterRestParameter = "Setter function argument must not be a rest parameter";
@@ -41,18 +40,20 @@
         public const string NewlineAfterThrow = "Illegal newline after throw";
         public const string NoAsAfterImportNamespace = "Unexpected token";
         public const string NoCatchOrFinally = "Missing catch or finally after try";
-        public const string NumericSeperatorOneUnderscore = "Numeric separator must be exactly one underscore";
-        public const string NumericSeperatorNotAllowedHere = "Numeric separator is not allowed here";
+        public const string NumericSeparatorAfterLeadingZero = "Numeric separator can not be used after leading 0";
+        public const string NumericSeparatorNotAllowedHere = "Numeric separator is not allowed here";
+        public const string NumericSeparatorOneUnderscore = "Numeric separator must be exactly one underscore";
         public const string ParameterAfterRestParameter = "Rest parameter must be last formal parameter";
         public const string PropertyAfterRestProperty = "Unexpected token";
         public const string Redeclaration = "{0} \"{1}\" has already been declared";
-        public const string RegexLoneQuantifierBrackets = "Invalid regular expression: Lone quantifier brackets";
         public const string RegexIncompleteQuantifier = "Invalid regular expression: Incomplete quantifier";
-        public const string RegexUnterminatedGroup = "Invalid regular expression: Unterminated group";
-        public const string RegexUnterminatedCharacterClass = "Invalid regular expression: Unterminated character class";
+        public const string RegexLoneQuantifierBrackets = "Invalid regular expression: Lone quantifier brackets";
         public const string RegexUnmatchedOpenParen = "Invalid regular expression: Unmatched ')'";
+        public const string RegexUnterminatedCharacterClass = "Invalid regular expression: Unterminated character class";
+        public const string RegexUnterminatedGroup = "Invalid regular expression: Unterminated group";
         public const string StaticPrototype = "Classes may not have static property named prototype";
         public const string StrictCatchVariable = "Catch variable may not be eval or arguments in strict mode";
+        public const string StrictDecimalWithLeadingZero = "Decimals with leading zeros are not allowed in strict mode.";
         public const string StrictDelete = "Delete of an unqualified identifier in strict mode.";
         public const string StrictFunction = "In strict mode code, functions can only be declared at top level or inside a block";
         public const string StrictFunctionName = "Function name may not be eval or arguments in strict mode";
@@ -60,12 +61,13 @@
         public const string StrictLHSPostfix = "Postfix increment/decrement may not have eval or arguments operand in strict mode";
         public const string StrictLHSPrefix = "Prefix increment/decrement may not have eval or arguments operand in strict mode";
         public const string StrictModeWith = "Strict mode code may not include a with statement";
+        public const string StrictOctalEscape = "Octal escape sequences are not allowed in strict mode.";
         public const string StrictOctalLiteral = "Octal literals are not allowed in strict mode.";
         public const string StrictParamName = "Parameter name eval or arguments is not allowed in strict mode";
         public const string StrictReservedWord = "Use of future reserved word in strict mode";
         public const string StrictVarName = "Variable name may not be eval or arguments in strict mode";
-        public const string TemplateOctalLiteral = "Octal literals are not allowed in template strings.";
         public const string TemplateEscape89 = "\\8 and \\9 are not allowed in template strings.";
+        public const string TemplateOctalLiteral = "Octal literals are not allowed in template strings.";
         public const string UnexpectedEOS = "Unexpected end of input";
         public const string UnexpectedIdentifier = "Unexpected identifier";
         public const string UnexpectedNumber = "Unexpected number";
