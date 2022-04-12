@@ -939,7 +939,7 @@ namespace Esprima
             return false;
         }
 
-        private Property ParseObjectProperty(Token hasProto)
+        private Property ParseObjectProperty(ref bool hasProto)
         {
             var node = CreateNode();
             var token = _lookahead;
@@ -1015,13 +1015,12 @@ namespace Esprima
                 {
                     if (!computed && IsPropertyKey(key, "__proto__"))
                     {
-                        if (hasProto.BooleanValue)
+                        if (hasProto)
                         {
                             TolerateError(Messages.DuplicateProtoProperty);
                         }
 
-                        hasProto.Value = "true";
-                        hasProto.BooleanValue = true;
+                        hasProto = true;
                     }
 
                     NextToken();
@@ -1063,15 +1062,13 @@ namespace Esprima
             var node = CreateNode();
 
             var properties = new ArrayList<Expression>();
-            var hasProto = RentToken();
-            hasProto.Value = "false";
-            hasProto.BooleanValue = false;
+            var hasProto = false;
 
             Expect("{");
 
             while (!Match("}"))
             {
-                var property = Match("...") ? (Expression) ParseSpreadElement() : ParseObjectProperty(hasProto);
+                var property = Match("...") ? (Expression) ParseSpreadElement() : ParseObjectProperty(ref hasProto);
                 properties.Add(property);
 
                 if (!Match("}"))
@@ -1082,27 +1079,7 @@ namespace Esprima
 
             Expect("}");
 
-            ReturnToken(hasProto);
-
             return Finalize(node, new ObjectExpression(NodeList.From(ref properties)));
-        }
-
-        private Token? cacheToken;
-
-        private Token RentToken()
-        {
-            if (cacheToken != null)
-            {
-                cacheToken.Clear();
-                return cacheToken;
-            }
-
-            return new Token();
-        }
-
-        private void ReturnToken(Token t)
-        {
-            cacheToken = t;
         }
 
         // https://tc39.github.io/ecma262/#sec-template-literals
