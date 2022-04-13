@@ -56,12 +56,11 @@ namespace Esprima
         private static readonly HashSet<string> Keywords = new()
         {
             "if",
-            "in",
             "do",
             "var",
             "for",
             "foreach", // ADHOC
-            "in", // ADHOC
+            //"in" // ADHOC but only contextual
             "static", // ADHOC
             "attribute", // ADHOC
             "new",

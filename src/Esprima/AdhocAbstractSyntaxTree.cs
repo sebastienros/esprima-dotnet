@@ -2981,7 +2981,7 @@ namespace Esprima
                     var declarations = ParseVariableDeclarationList(ref inFor);
                     _context.AllowIn = previousAllowIn;
 
-                    if (forKeyword.Equals("foreach") && declarations.Count == 1 && declarations[0]!.Init == null && MatchKeyword("in"))
+                    if (forKeyword.Equals("foreach") && declarations.Count == 1 && declarations[0]!.Init == null && MatchContextualKeyword("in"))
                     {
                         left = Finalize(initNode, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
                         NextToken();
