@@ -1,11 +1,14 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Esprima.Ast;
 
 namespace Esprima;
 
-public enum TokenType
+public enum TokenType : byte
 {
+    Unknown,
     BooleanLiteral,
     EOF,
     Identifier,
@@ -18,40 +21,125 @@ public enum TokenType
     Template,
     BigIntLiteral,
 
-    Extension = int.MaxValue
-};
+    JsxIdentifier,
+    JsxText,
+    Extension
+}
 
-public class Token
+[StructLayout(LayoutKind.Auto)]
+public readonly record struct Token
 {
-    public TokenType Type;
-    public string? Literal;
-
-    public int Start; // Range[0]
-    public int End; // Range[1]
-    public int LineNumber;
-    public int LineStart;
-
-    public Range Range
+    private Token(
+        TokenType type,
+        object? value,
+        int start,
+        int end,
+        int lineNumber,
+        int lineStart,
+        bool octal = false,
+        char notEscapeSequenceHead = (char) 0,
+        bool head = false,
+        bool tail = false,
+        object? customValue = null)
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new Range(Start, End);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => value.Deconstruct(out Start, out End);
+        Type = type;
+        Octal = octal;
+        Start = start;
+        End = end;
+        LineNumber = lineNumber;
+        LineStart = lineStart;
+        Value = value;
+        NotEscapeSequenceHead = notEscapeSequenceHead;
+        Head = head;
+        Tail = tail;
+        _customValue = customValue;
     }
-    public Location Location;
 
-    // For NumericLiteral
-    public bool Octal;
-    public char? NotEscapeSequenceHead;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Token Create(TokenType type, object? value, int start, int end, int lineNumber, int lineStart)
+    {
+        return new Token(type, value, start, end, lineNumber, lineStart);
+    }
 
-    // For templates
-    public bool Head;
-    public bool Tail;
-    public string? RawTemplate;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Token CreateStringLiteral(string str, bool octal, int start, int end, int lineNumber, int lineStart)
+    {
+        return new Token(TokenType.StringLiteral, str, start, end, lineNumber, lineStart, octal);
+    }
 
-    public bool BooleanValue;
-    public double NumericValue;
-    public object? Value;
-    public RegexValue? RegexValue;
-    public BigInteger? BigIntValue;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Token CreateRegexLiteral(Regex? value, RegexValue regexValue, int start, int end, int lineNumber, int lineStart)
+    {
+        return new Token(TokenType.RegularExpression, value, start, end, lineNumber, lineStart, customValue: regexValue);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Token CreateNumericLiteral(double value, bool octal, int start, int end, int lineNumber, int lineStart)
+    {
+        return new Token(TokenType.NumericLiteral, value, start, end, lineNumber, lineStart, octal: octal);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Token CreateBigIntLiteral(BigInteger value, int start, int end, int lineNumber, int lineStart)
+    {
+        return new Token(TokenType.BigIntLiteral, value, start, end, lineNumber, lineStart);
+    }
+
+    internal static Token CreateEof(int index, int lineNumber, int lineStart)
+    {
+        return new Token(TokenType.EOF, value: null, start: index, end: index, lineNumber, lineStart);
+    }
+
+    internal static Token CreatePunctuator(string str, int start, int end, int lineNumber, int lineStart)
+    {
+        return new Token(TokenType.Punctuator, str, start, end, lineNumber, lineStart);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Token CreteTemplate(
+        string? cooked,
+        string rawTemplate,
+        bool head,
+        bool tail,
+        char notEscapeSequenceHead,
+        int start,
+        int end,
+        int lineNumber,
+        int lineStart)
+    {
+        return new Token(TokenType.Template, cooked, start, end, lineNumber, lineStart, notEscapeSequenceHead: notEscapeSequenceHead, customValue: rawTemplate, head: head, tail: tail);
+    }
+
+    public readonly TokenType Type;
+    public readonly bool Octal;
+
+    public readonly int Start; // Range[0]
+    public readonly int End; // Range[1]
+    public readonly int LineNumber;
+    public readonly int LineStart;
+
+    public readonly object? Value;
+
+    public readonly char NotEscapeSequenceHead;
+    public readonly bool Head;
+    public readonly bool Tail;
+
+    private readonly object? _customValue;
+    public string? RawTemplate => this.Type == TokenType.Template ? (string?) _customValue : null;
+    public RegexValue? RegexValue => this.Type == TokenType.RegularExpression ? (RegexValue?) _customValue : null;
+
+    internal Token ChangeType(TokenType newType)
+    {
+        return new Token(newType, Value, Start, End, LineNumber, LineStart, Octal, NotEscapeSequenceHead, Head, Tail, _customValue);
+    }
+}
+
+public class ParsedToken
+{
+    public TokenType Type { get; internal init; }
+    public string? Value { get; internal init; }
+    public int Start { get; internal init; }
+    public int End { get; internal init; }
+    public RegexValue? RegexValue { get; internal set; }
+    public Location Location { get; internal set; }
 }
