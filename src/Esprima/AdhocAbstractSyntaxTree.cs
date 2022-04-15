@@ -3152,7 +3152,7 @@ namespace Esprima
                         ThrowError<Statement>("Expected source file type to be string", fileToken.Value);
 
                     _fileName = fileToken.Value as string;
-                    _errorHandler.Source = _fileName;
+                    SetFileName(_fileName);
 
                     return new SourceFileStatement(fileToken.RawTemplate);
                 }
@@ -4470,6 +4470,12 @@ namespace Esprima
             return Finalize(node, new ImportDeclaration(NodeList.From(ref namespacePath), target));
         }
 
+        public void SetFileName(string fileName)
+        {
+            _fileName = fileName;
+            _errorHandler.Source = _fileName;
+        }
+
         private void ThrowError(string messageFormat, params object?[] values)
         {
             throw CreateError(messageFormat, values);
@@ -4489,6 +4495,7 @@ namespace Esprima
             var column = _lastMarker.Column + 1;
             return _errorHandler.CreateError(index, line, column, msg);
         }
+
 
         private void TolerateError(string messageFormat, params object?[] values)
         {
