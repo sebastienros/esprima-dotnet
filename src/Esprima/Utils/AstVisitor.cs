@@ -350,7 +350,7 @@ namespace Esprima.Utils
 
         protected internal virtual void VisitImport(Import import)
         {
-            if (import.Source != null)
+            if (import.Source is not null)
             {
                 Visit(import.Source);
             }
