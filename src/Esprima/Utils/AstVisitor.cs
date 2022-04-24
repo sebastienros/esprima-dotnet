@@ -593,14 +593,5 @@ namespace Esprima.Utils
                 Visit(body[i]);
             }
         }
-
-        protected internal virtual void VisitStaticBlock(StaticBlock blockStatement)
-        {
-            ref readonly var body = ref blockStatement.Body;
-            for (var i = 0; i < body.Count; i++)
-            {
-                Visit(body[i]);
-            }
-        }
     }
 }
