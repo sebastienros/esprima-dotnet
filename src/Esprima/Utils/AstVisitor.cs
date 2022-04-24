@@ -315,6 +315,11 @@ namespace Esprima.Utils
 
         protected internal virtual void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
         {
+            if (exportAllDeclaration.Exported is not null)
+            {
+                Visit(exportAllDeclaration.Exported);
+            }
+
             Visit(exportAllDeclaration.Source);
         }
 
