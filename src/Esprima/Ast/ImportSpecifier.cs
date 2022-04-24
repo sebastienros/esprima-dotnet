@@ -9,7 +9,7 @@ namespace Esprima.Ast
         /// </summary>
         public readonly Expression Imported;
 
-        public ImportSpecifier(Expression local, Expression imported) : base(local, Nodes.ImportSpecifier)
+        public ImportSpecifier(Identifier local, Expression imported) : base(local, Nodes.ImportSpecifier)
         {
             Imported = imported;
         }
