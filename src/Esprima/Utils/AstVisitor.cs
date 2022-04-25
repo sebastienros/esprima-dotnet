@@ -315,6 +315,11 @@ namespace Esprima.Utils
 
         protected internal virtual void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
         {
+            if (exportAllDeclaration.Exported is not null)
+            {
+                Visit(exportAllDeclaration.Exported);
+            }
+
             Visit(exportAllDeclaration.Source);
         }
 
@@ -345,7 +350,7 @@ namespace Esprima.Utils
 
         protected internal virtual void VisitImport(Import import)
         {
-            if (import.Source != null)
+            if (import.Source is not null)
             {
                 Visit(import.Source);
             }
@@ -581,15 +586,6 @@ namespace Esprima.Utils
         }
 
         protected internal virtual void VisitBlockStatement(BlockStatement blockStatement)
-        {
-            ref readonly var body = ref blockStatement.Body;
-            for (var i = 0; i < body.Count; i++)
-            {
-                Visit(body[i]);
-            }
-        }
-
-        protected internal virtual void VisitStaticBlock(StaticBlock blockStatement)
         {
             ref readonly var body = ref blockStatement.Body;
             for (var i = 0; i < body.Count; i++)
