@@ -4691,13 +4691,13 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            Expression local;
+            Identifier local;
             Expression imported;
 
             if (_lookahead.Type == TokenType.Identifier)
             {
-                imported = ParseVariableIdentifier(allowAwaitKeyword: true);
-                local = imported;
+                imported = local = ParseVariableIdentifier(allowAwaitKeyword: true);
+
                 if (MatchContextualKeyword("as"))
                 {
                     NextToken();
@@ -4710,7 +4710,6 @@ namespace Esprima
                     ? ParseModuleSpecifier()
                     : ParseIdentifierName();
 
-                local = imported;
                 if (MatchContextualKeyword("as"))
                 {
                     NextToken();
@@ -4719,6 +4718,7 @@ namespace Esprima
                 else
                 {
                     ThrowUnexpectedToken(NextToken());
+                    local = default!; // never executes, just keeps the compilery happy
                 }
             }
 
