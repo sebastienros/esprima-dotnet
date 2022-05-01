@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ public static class Program
         var projectRoot = Path.Combine(rootDirectory, "../../..");
 
         var allowListFile = Path.Combine(projectRoot, "allow-list.txt");
-        var lines = await File.ReadAllLinesAsync(allowListFile);
+        var lines = File.Exists(allowListFile) ? await File.ReadAllLinesAsync(allowListFile) : Array.Empty<string>();
         var knownFailing = new HashSet<string>(lines
             .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("#"))
         );
@@ -28,7 +29,7 @@ public static class Program
 
         // we materialize to give better feedback on progress
         var test262Files = new ConcurrentBag<Test262File>();
-
+    
         TestExecutionSummary? summary = null;
 
         AnsiConsole.Progress()
