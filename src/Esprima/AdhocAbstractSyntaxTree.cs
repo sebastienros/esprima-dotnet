@@ -4444,6 +4444,7 @@ namespace Esprima
                         else if (_lookahead.Type == TokenType.Identifier)
                         {
                             namespacePath.Push(ParseImportSpecifier());
+                            continue;
                         }
                         else
                             ThrowUnexpectedToken(_lookahead);
