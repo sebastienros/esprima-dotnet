@@ -7,7 +7,7 @@ namespace Esprima.Utils
     /// An AST visitor that raises events before and after visiting each node
     /// and its descendants.
     /// </summary>
-    public class AstVisitorEventSource : AstVisitor
+    public partial class AstVisitorEventSource : AstVisitor
     {
         public event EventHandler<Node>? VisitingNode;
         public event EventHandler<Node>? VisitedNode;

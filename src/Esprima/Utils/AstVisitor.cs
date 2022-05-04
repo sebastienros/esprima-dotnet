@@ -3,7 +3,7 @@ using Esprima.Ast;
 
 namespace Esprima.Utils
 {
-    public class AstVisitor
+    public partial class AstVisitor
     {
         public virtual void Visit(Node node)
         {

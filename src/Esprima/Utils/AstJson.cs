@@ -18,7 +18,7 @@ namespace Esprima.Utils
         Start
     }
 
-    public static class AstJson
+    public static partial class AstJson
     {
         public sealed class Options
         {
@@ -146,7 +146,7 @@ namespace Esprima.Utils
             visitor.Visit(node);
         }
 
-        private sealed class Visitor : AstVisitor
+        private sealed partial class Visitor : AstVisitor
         {
             private readonly JsonWriter _writer;
             private readonly ObservableStack<Node> _stack;

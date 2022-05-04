@@ -11,7 +11,7 @@ namespace Esprima
     /// <remarks>
     /// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
     /// </remarks>
-    public class JavaScriptParser
+    public partial class JavaScriptParser
     {
         private static readonly HashSet<string> AssignmentOperators = new()
         {
@@ -556,6 +556,11 @@ namespace Esprima
 
         private Expression ParsePrimaryExpression()
         {
+            if (_config.JSX && Match("<"))
+            {
+                return ParseJSXRoot();
+            }
+            
             var node = CreateNode();
 
             Expression expr;
@@ -4289,6 +4294,11 @@ namespace Esprima
 
         private bool IsStartOfExpression()
         {
+            if (_config.JSX && Match("<"))
+            {
+                return true;
+            }
+            
             var start = true;
 
             if (!(_lookahead.Value is string value))
