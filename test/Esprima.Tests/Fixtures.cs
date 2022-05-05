@@ -75,7 +75,7 @@ namespace Esprima.Test
         public void ExecuteTestCase(string fixture)
         {
 
-            var options = new ParserOptions { Tokens = true };
+            var options = new ParserOptions { Tokens = true, JSX = fixture.StartsWith("JSX") };
 
             string treeFilePath, failureFilePath, moduleFilePath;
             var jsFilePath = Path.Combine(GetFixturesPath(), "Fixtures", fixture);
@@ -163,7 +163,7 @@ namespace Esprima.Test
 
             invalid |=
                 filename.Contains("error") ||
-                filename.Contains("invalid") && !filename.Contains("invalid-yield-object-");
+                filename.Contains("invalid") && (!filename.Contains("invalid-yield-object-") && !filename.Contains("attribute-invalid-entity"));
 
             if (!invalid)
             {
