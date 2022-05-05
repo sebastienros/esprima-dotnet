@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Esprima.Ast;
 
 namespace Esprima.Utils
@@ -13,52 +12,18 @@ namespace Esprima.Utils
 
         protected internal virtual bool VisitNodeListAndIsNew<T>(in NodeList<T> nodes, out NodeList<T> newNodes) where T : Node
         {
-            List<T>? newNodeList = null;
-            for (var i = 0; i < nodes.Count; i++)
-            {
-                var newNode = Visit(nodes[i]);
-                if (newNodeList is not null)
-                {
-                    if (newNode is not null)
-                    {
-                        newNodeList.Add((T) newNode);
-                    }
-                }
-                else if (newNode != nodes[i])
-                {
-                    newNodeList = new List<T>();
-                    for (var j = 0; j < i; j++)
-                    {
-                        newNodeList.Add(nodes[j]);
-                    }
-                    if (newNode is not null)
-                    {
-                        newNodeList.Add((T) newNode);
-                    }
-                }
-            }
-
-            if (newNodeList is not null)
-            {
-                newNodes = new NodeList<T>(newNodeList);
-                return true;
-            }
-
             newNodes = nodes;
             return false;
         }
         
         protected internal virtual Program VisitProgram(Program program)
         {
-            if (VisitNodeListAndIsNew(program.Body, out var statements))
-            {
-                return program switch
-                {
-                    Module => new Module(statements),
-                    Script script => new Script(statements, script.Strict),
-                    _ => throw new NotImplementedException($"{program.SourceType} does not implemented yet.")
-                };
-            }
+            var isNewStatements = VisitNodeListAndIsNew(program.Body, out var statements);
+            return UpdateProgram(program, isNewStatements, ref statements);
+        }
+
+        protected virtual Program UpdateProgram(Program program, bool isNewStatements, ref NodeList<Statement> statements)
+        {
             return program;
         }
 
@@ -70,25 +35,24 @@ namespace Esprima.Utils
 
         protected internal virtual CatchClause VisitCatchClause(CatchClause catchClause)
         {
+            Expression? param = null;
+            BlockStatement body;
             if (catchClause.Param is not null)
             {
-                var param = Visit(catchClause.Param);
-                var body = Visit(catchClause.Body);
-                if (param == catchClause.Param && body == catchClause.Body)
-                {
-                    return catchClause;
-                }
-                return new CatchClause(param, body);
+                param = Visit(catchClause.Param);
+                body = Visit(catchClause.Body);
             }
             else
             {
-                var body = Visit(catchClause.Body);
-                if (body == catchClause.Body)
-                {
-                    return catchClause;
-                }
-                return new CatchClause(catchClause.Param, body);
+                body = Visit(catchClause.Body);
             }
+            
+            return UpdateCatchClause(catchClause, param, body);
+        }
+
+        protected virtual CatchClause UpdateCatchClause(CatchClause catchClause, Expression? param,  BlockStatement body)
+        {
+            return catchClause;
         }
 
         protected internal virtual FunctionDeclaration VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
@@ -99,51 +63,51 @@ namespace Esprima.Utils
                 id = Visit(functionDeclaration.Id);
             }
             
-            var isNew = VisitNodeListAndIsNew(functionDeclaration.Params, out var parameters);
-
+            var isNewParameters = VisitNodeListAndIsNew(functionDeclaration.Params, out var parameters);
             var body = Visit(functionDeclaration.Body);
+            return UpdateFunctionDeclaration(functionDeclaration, id, isNewParameters ,ref parameters, (body as BlockStatement)!);
+        }
 
-            if (id == functionDeclaration.Id && !isNew && body == functionDeclaration.Body)
-            {
-                return functionDeclaration;
-            }
-
-            return new FunctionDeclaration(id, parameters, (body as BlockStatement)!, functionDeclaration.Generator,
-                functionDeclaration.Strict, functionDeclaration.Async);
+        protected virtual FunctionDeclaration UpdateFunctionDeclaration(FunctionDeclaration functionDeclaration, Identifier? id,
+            bool isNewParameters, ref NodeList<Expression> parameters, BlockStatement body)
+        {
+            return functionDeclaration;
         }
 
         protected internal virtual WithStatement VisitWithStatement(WithStatement withStatement)
         {
             var obj = Visit(withStatement.Object);
             var body = Visit(withStatement.Body);
-            if (obj == withStatement.Object && body == withStatement.Body)
-            {
-                return withStatement;
-            }
+            return UpdateWithStatement(withStatement,obj, body);
+        }
 
-            return new WithStatement(obj, body);
+        protected virtual WithStatement UpdateWithStatement(WithStatement withStatement, Expression obj, Statement body)
+        {
+            return withStatement;
         }
 
         protected internal virtual WhileStatement VisitWhileStatement(WhileStatement whileStatement)
         {
             var test = Visit(whileStatement.Test);
             var body = Visit(whileStatement.Body);
+            return UpdateWhileStatement(whileStatement,test, body);
+        }
 
-            if (test == whileStatement.Test && body == whileStatement.Body)
-            {
-                return whileStatement;
-            }
-
-            return new WhileStatement(test, body);
+        protected virtual WhileStatement UpdateWhileStatement(WhileStatement whileStatement, Expression test,
+            Statement body)
+        {
+            return whileStatement;
         }
 
         protected internal virtual VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
         {
-            if (VisitNodeListAndIsNew(variableDeclaration.Declarations, out var declarations))
-            {
-                return new VariableDeclaration(declarations, variableDeclaration.Kind);
-            }
+            var isNewDeclarations = VisitNodeListAndIsNew(variableDeclaration.Declarations, out var declarations);
+            return UpdateVariableDeclaration(variableDeclaration, isNewDeclarations, ref declarations);
+        }
 
+        protected virtual VariableDeclaration UpdateVariableDeclaration(VariableDeclaration variableDeclaration,
+            bool isNewDeclarations, ref NodeList<VariableDeclarator> declarations)
+        {
             return variableDeclaration;
         }
 
@@ -163,35 +127,35 @@ namespace Esprima.Utils
                 finalizer = Visit(tryStatement.Finalizer);
             }
 
-            if (block == tryStatement.Block && handler == tryStatement.Handler && finalizer == tryStatement.Finalizer)
-            {
-                return tryStatement;
-            }
+            return UpdateTryStatement(tryStatement,block, handler, finalizer);
+        }
 
-            return new TryStatement(block, handler, finalizer);
+        protected virtual TryStatement UpdateTryStatement(TryStatement tryStatement, Statement block, CatchClause? handler, Statement? finalizer)
+        {
+            return tryStatement;
         }
 
         protected internal virtual ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
         {
             var argument = Visit(throwStatement.Argument);
-            if (argument == throwStatement.Argument)
-            {
-                return throwStatement;
-            }
-
-            return new ThrowStatement(argument);
+            return UpdateThrowStatement(throwStatement,argument);
         }
 
+        protected virtual ThrowStatement UpdateThrowStatement(ThrowStatement throwStatement, Expression argument)
+        {
+            return throwStatement;
+        }
+        
         protected internal virtual SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
         {
             var discriminant = Visit(switchStatement.Discriminant);
-            var isNew = VisitNodeListAndIsNew(switchStatement.Cases, out var cases);
-            if (discriminant == switchStatement.Discriminant && !isNew)
-            {
-                return switchStatement;
-            }
+            var isNewCases = VisitNodeListAndIsNew(switchStatement.Cases, out var cases);
+            return UpdateSwitchStatement(switchStatement,discriminant, isNewCases, ref cases);
+        }
 
-            return new SwitchStatement(discriminant, cases);
+        protected virtual SwitchStatement UpdateSwitchStatement(SwitchStatement switchStatement, Expression discriminant, bool isNewCases, ref NodeList<SwitchCase> cases)
+        {
+            return switchStatement;
         }
 
         protected internal virtual SwitchCase VisitSwitchCase(SwitchCase switchCase)
@@ -202,40 +166,42 @@ namespace Esprima.Utils
                 test = Visit(switchCase.Test);
             }
 
-            var isNew = VisitNodeListAndIsNew(switchCase.Consequent, out var consequent);
-            if (test == switchCase.Test && !isNew)
-            {
-                return switchCase;
-            }
-
-            return new SwitchCase(test, consequent);
+            var isNewConsequent = VisitNodeListAndIsNew(switchCase.Consequent, out var consequent);
+            return UpdateSwitchCase(switchCase,test, isNewConsequent, ref consequent);
         }
 
+        protected virtual SwitchCase UpdateSwitchCase(SwitchCase switchCase, Expression? test, bool isNewConsequent, ref NodeList<Statement> consequent)
+        {
+            return switchCase;
+        }
+        
         protected internal virtual ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
         {
+            Expression? argument = null;
             if (returnStatement.Argument is not null)
             {
-                var argument = Visit(returnStatement.Argument);
-                if (argument != returnStatement.Argument)
-                {
-                    return new ReturnStatement(argument);
-                }
+                argument = Visit(returnStatement.Argument);
             }
-            return returnStatement;
+            return UpdateReturnStatement(returnStatement, argument);
         }
 
+        protected virtual ReturnStatement UpdateReturnStatement(ReturnStatement returnStatement, Expression? argument)
+        {
+            return returnStatement;
+        }
+        
         protected internal virtual LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
         {
             var label = Visit(labeledStatement.Label);
             var body = Visit(labeledStatement.Body);
-            if (label == labeledStatement.Label && body == labeledStatement.Body)
-            {
-                return labeledStatement;
-            }
-
-            return new LabeledStatement(label, body);
+            return UpdateLabeledStatement(labeledStatement,label, body);
         }
 
+        protected virtual LabeledStatement UpdateLabeledStatement(LabeledStatement labeledStatement, Identifier label, Statement body)
+        {
+            return labeledStatement;
+        }
+        
         protected internal virtual IfStatement VisitIfStatement(IfStatement ifStatement)
         {
             var test = Visit(ifStatement.Test);
@@ -245,21 +211,29 @@ namespace Esprima.Utils
             {
                 alternate = Visit(ifStatement.Alternate);
             }
+            return UpdateIfStatement(ifStatement, test, consequent, alternate);
+        }
 
-            if (test == ifStatement.Test && consequent == ifStatement.Consequent && alternate == ifStatement.Alternate)
-            {
-                return ifStatement;
-            }
-
-            return new IfStatement(test, consequent, alternate);
+        protected virtual IfStatement UpdateIfStatement(IfStatement ifStatement, Expression test, Statement consequent, Statement? alternate)
+        {
+            return ifStatement;
         }
 
         protected internal virtual EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
+        {
+            return UpdateEmptyStatement(emptyStatement);
+        }
+        
+        protected virtual EmptyStatement UpdateEmptyStatement(EmptyStatement emptyStatement)
         {
             return emptyStatement;
         }
 
         protected internal virtual DebuggerStatement VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+        {
+            return UpdateDebuggerStatement(debuggerStatement);
+        }
+        protected virtual DebuggerStatement UpdateDebuggerStatement(DebuggerStatement debuggerStatement)
         {
             return debuggerStatement;
         }
@@ -267,14 +241,14 @@ namespace Esprima.Utils
         protected internal virtual ExpressionStatement VisitExpressionStatement(ExpressionStatement expressionStatement)
         {
             var expression = Visit(expressionStatement.Expression);
-            if (expression == expressionStatement.Expression)
-            {
-                return expressionStatement;
-            }
-
-            return new ExpressionStatement(expression);
+            return UpdateExpressionStatement(expressionStatement, expression);
         }
 
+        protected virtual ExpressionStatement UpdateExpressionStatement(ExpressionStatement expressionStatement, Expression expression)
+        {
+            return expressionStatement;
+        }
+        
         protected internal virtual ForStatement VisitForStatement(ForStatement forStatement)
         {
             StatementListItem? init = null;
@@ -296,152 +270,169 @@ namespace Esprima.Utils
             }
 
             var body = Visit(forStatement.Body);
-
-            if (init == forStatement.Init && test == forStatement.Test && update == forStatement.Update && body == forStatement.Body)
-            {
-                return forStatement;
-            }
-
-            return new ForStatement(init, test, update, body);
+            
+            return UpdateForStatement(forStatement, init, test, update, body);
         }
 
+        protected virtual ForStatement UpdateForStatement(ForStatement forStatement, StatementListItem? init, Expression? test, Expression? update, Statement body)
+        {
+            return forStatement;
+        }
+        
         protected internal virtual ForInStatement VisitForInStatement(ForInStatement forInStatement)
         {
             var left = Visit(forInStatement.Left);
             var right = Visit(forInStatement.Right);
             var body = Visit(forInStatement.Body);
-
-            if (left == forInStatement.Left && right == forInStatement.Right && body == forInStatement.Body)
-            {
-                return forInStatement;
-            }
-
-            return new ForInStatement(left, right, body);
+            return UpdateForInStatement(forInStatement, left, right, body);
         }
 
+        protected virtual ForInStatement UpdateForInStatement(ForInStatement forInStatement, Node left, Expression right, Statement body)
+        {
+            return forInStatement;
+        }
+        
         protected internal virtual DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
             var body = Visit(doWhileStatement.Body);
             var test = Visit(doWhileStatement.Test);
-            if (body == doWhileStatement.Body && test == doWhileStatement.Test)
-            {
-                return doWhileStatement;
-            }
+            return UpdateDoWhileStatement(doWhileStatement, body, test);
+        }
 
-            return new DoWhileStatement(body, test);
+        protected virtual DoWhileStatement UpdateDoWhileStatement(DoWhileStatement doWhileStatement, Statement body, Expression test)
+        {
+            return doWhileStatement;
         }
 
         protected internal virtual ArrowFunctionExpression VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
         {
-            var isNew = VisitNodeListAndIsNew(arrowFunctionExpression.Params, out var parameters);
+            var isNewParameters = VisitNodeListAndIsNew(arrowFunctionExpression.Params, out var parameters);
             var body = Visit(arrowFunctionExpression.Body);
-            if (!isNew && body == arrowFunctionExpression.Body)
-            {
-                return arrowFunctionExpression;
-            }
-
-            return new ArrowFunctionExpression(parameters, body, arrowFunctionExpression.Expression,
-                arrowFunctionExpression.Strict, arrowFunctionExpression.Async);
+            return UpdateArrowFunctionExpression(arrowFunctionExpression, isNewParameters, ref parameters, body);
         }
 
+        protected virtual ArrowFunctionExpression UpdateArrowFunctionExpression(
+            ArrowFunctionExpression arrowFunctionExpression, bool isNewParameters, ref NodeList<Expression> parameters, Node body)
+        {
+            return arrowFunctionExpression;
+        }
+        
         protected internal virtual UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
         {
             var argument = Visit(unaryExpression.Argument);
-            if (argument == unaryExpression.Argument)
-            {
-                return unaryExpression;
-            }
+            return UpdateUnaryExpression(unaryExpression, argument);
+        }
 
-            return new UnaryExpression(unaryExpression.Operator.ToString(), argument);
+        protected virtual UnaryExpression UpdateUnaryExpression(UnaryExpression unaryExpression, Expression argument)
+        {
+            return unaryExpression;
         }
 
         protected internal virtual UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
         {
             var argument = Visit(updateExpression.Argument);
-            if (argument == updateExpression.Argument)
-            {
-                return updateExpression;
-            }
+            return UpdateUpdateExpression(updateExpression, argument);
+        }
 
-            return new UpdateExpression(updateExpression.Operator.ToString(), argument, updateExpression.Prefix);
+        protected virtual UpdateExpression UpdateUpdateExpression(UpdateExpression updateExpression, Expression argument)
+        {
+            return updateExpression;
         }
 
         protected internal virtual ThisExpression VisitThisExpression(ThisExpression thisExpression)
+        {
+            return UpdateThisExpression(thisExpression);
+        }
+        
+        protected virtual ThisExpression UpdateThisExpression(ThisExpression thisExpression)
         {
             return thisExpression;
         }
 
         protected internal virtual SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
         {
-            if (VisitNodeListAndIsNew(sequenceExpression.Expressions, out var expressions))
-            {
-                return new SequenceExpression(expressions);
-            }
+            var isNewExpressions = VisitNodeListAndIsNew(sequenceExpression.Expressions, out var expressions);
+            return UpdateSequenceExpression(sequenceExpression, isNewExpressions, ref expressions);
+        }
 
+        protected virtual SequenceExpression UpdateSequenceExpression(SequenceExpression sequenceExpression, bool isNewExpressions, ref NodeList<Expression> expressions)
+        {
             return sequenceExpression;
         }
 
         protected internal virtual ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
         {
-            if (VisitNodeListAndIsNew(objectExpression.Properties, out var properties))
-            {
-                return new ObjectExpression(properties);
-            }
+            var isNewProperties = VisitNodeListAndIsNew(objectExpression.Properties, out var properties);
+            return UpdateObjectExpression(objectExpression, isNewProperties, ref properties);
+        }
 
+        protected virtual ObjectExpression UpdateObjectExpression(ObjectExpression objectExpression, bool isNewProperties, ref NodeList<Expression> properties)
+        {
             return objectExpression;
         }
 
         protected internal virtual NewExpression VisitNewExpression(NewExpression newExpression)
         {
             var callee = Visit(newExpression.Callee);
-            var isNew = VisitNodeListAndIsNew(newExpression.Arguments, out var arguments);
-            if (!isNew && callee == newExpression.Callee)
-            {
-                return newExpression;
-            }
-
-            return new NewExpression(callee, arguments);
+            var isNewArguments = VisitNodeListAndIsNew(newExpression.Arguments, out var arguments);
+            return UpdateNewExpression(newExpression, callee, isNewArguments, ref arguments);
         }
 
+        protected virtual NewExpression UpdateNewExpression(NewExpression newExpression, Expression callee, bool isNewArguments, ref NodeList<Expression> arguments)
+        {
+            return newExpression;
+        }
+        
         protected internal virtual MemberExpression VisitMemberExpression(MemberExpression memberExpression)
         {
-            var @object = Visit(memberExpression.Object);
+            var obj = Visit(memberExpression.Object);
             var property = Visit(memberExpression.Property);
-            if (@object == memberExpression.Object && property == memberExpression.Property)
-            {
-                return memberExpression;
-            }
+            return UpdateMemberExpression(memberExpression, obj, property);
+        }
 
-            return memberExpression.Computed switch
-            {
-                true => new ComputedMemberExpression(@object, property, memberExpression.Optional),
-                false => new StaticMemberExpression(@object, property, memberExpression.Optional),
-            };
+        protected virtual MemberExpression UpdateMemberExpression(MemberExpression memberExpression, Expression obj, Expression property)
+        {
+            return memberExpression;
         }
 
         protected internal virtual BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
         {
             var left = Visit(binaryExpression.Left);
             var right = Visit(binaryExpression.Right);
-            if (left == binaryExpression.Left && right == binaryExpression.Right)
-            {
-                return binaryExpression;
-            }
+            return UpdateLogicalExpression(binaryExpression, left, right);
+        }
 
-            return new BinaryExpression(binaryExpression.Operator.ToString(),left, right);
+        protected virtual BinaryExpression UpdateLogicalExpression(BinaryExpression binaryExpression, Expression left, Expression right)
+        {
+            return binaryExpression;
         }
 
         protected internal virtual Literal VisitLiteral(Literal literal)
+        {
+            return UpdateLiteral(literal);
+        }
+
+        protected virtual Literal UpdateLiteral(Literal literal)
         {
             return literal;
         }
 
         protected internal virtual Identifier VisitIdentifier(Identifier identifier)
         {
+            return UpdateIdentifier(identifier);
+        }
+
+        protected virtual Identifier UpdateIdentifier(Identifier identifier)
+        {
             return identifier;
         }
-      
+        
         protected internal virtual PrivateIdentifier VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+        {
+            return UpdatePrivateIdentifier(privateIdentifier);
+        }
+
+        protected virtual PrivateIdentifier UpdatePrivateIdentifier(PrivateIdentifier privateIdentifier)
         {
             return privateIdentifier;
         }
@@ -453,25 +444,15 @@ namespace Esprima.Utils
             {
                 id = Visit(function.Id);
             }
-            var isNew = VisitNodeListAndIsNew(function.Params, out var parameters);
+            var isNewParameters = VisitNodeListAndIsNew(function.Params, out var parameters);
 
             var body = Visit(function.Body);
+            return UpdateFunctionExpression(function, id, isNewParameters, ref parameters, body);
+        }
 
-            if (id == function.Id && !isNew && body == function.Body)
-            {
-                return function;
-            }
-
-            return function switch
-            {
-                ArrowFunctionExpression => new ArrowFunctionExpression(parameters, body, function.Expression,
-                    function.Strict, function.Async),
-                FunctionDeclaration => new FunctionDeclaration(id, parameters, (body as BlockStatement) !, function.Generator,
-                    function.Strict, function.Async),
-                FunctionExpression => new FunctionExpression(id, parameters, (body as BlockStatement) !, function.Generator,
-                    function.Strict, function.Async),
-                _ => throw new NotImplementedException($"{function.GetType().Name} does not implemented yet.")
-            };
+        protected virtual IFunction UpdateFunctionExpression(IFunction function, Identifier? id, bool isNewParameters, ref NodeList<Expression> parameters, Node body)
+        {
+            return function;
         }
 
         protected internal virtual PropertyDefinition VisitPropertyDefinition(PropertyDefinition propertyDefinition)
@@ -483,24 +464,23 @@ namespace Esprima.Utils
             {
                 value = Visit(propertyDefinition.Value);
             }
+            return UpdatePropertyDefinition(propertyDefinition, key, value);
+        }
 
-            if (key == propertyDefinition.Key && value == propertyDefinition.Value)
-            {
-                return propertyDefinition;
-            }
-
-            return new PropertyDefinition(key, propertyDefinition.Computed, value !, propertyDefinition.Static);
+        protected virtual PropertyDefinition UpdatePropertyDefinition(PropertyDefinition propertyDefinition, Expression key, Expression? value)
+        {
+            return propertyDefinition;
         }
 
         protected internal virtual ChainExpression VisitChainExpression(ChainExpression chainExpression)
         {
             var expression = Visit(chainExpression.Expression);
-            if (expression == chainExpression.Expression)
-            {
-                return chainExpression;
-            }
-            
-            return new ChainExpression(expression);
+            return UpdateChainExpression(chainExpression, expression);
+        }
+
+        protected virtual ChainExpression UpdateChainExpression(ChainExpression chainExpression, Expression expression)
+        {
+            return chainExpression;
         }
 
         protected internal virtual ClassExpression VisitClassExpression(ClassExpression classExpression)
@@ -518,26 +498,25 @@ namespace Esprima.Utils
             }
 
             var body = Visit(classExpression.Body);
+            return UpdateClassExpression(classExpression, id, superClass, body);
+        }
 
-            if (id == classExpression.Id && superClass == classExpression.SuperClass && body == classExpression.Body)
-            {
-                return classExpression;
-            }
-
-            return new ClassExpression(id, superClass, body);
+        protected virtual ClassExpression UpdateClassExpression(ClassExpression classExpression, Identifier? id, Expression? superClass, ClassBody body)
+        {
+            return classExpression;
         }
 
         protected internal virtual ExportDefaultDeclaration VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
         {
             var declaration = Visit(exportDefaultDeclaration.Declaration);
-            if (declaration == exportDefaultDeclaration.Declaration)
-            {
-                return exportDefaultDeclaration;
-            }
-
-            return new ExportDefaultDeclaration(declaration);
+            return UpdateExportDefaultDeclaration(exportDefaultDeclaration, declaration);
         }
 
+        protected virtual ExportDefaultDeclaration UpdateExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration, StatementListItem declaration)
+        {
+            return exportDefaultDeclaration;
+        }
+        
         protected internal virtual ExportAllDeclaration VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
         {
             Expression? exported = null; 
@@ -547,14 +526,15 @@ namespace Esprima.Utils
             }
 
             var source = Visit(exportAllDeclaration.Source);
-            if (exported == exportAllDeclaration.Exported && source == exportAllDeclaration.Source)
-            {
-                return exportAllDeclaration;
-            }
-
-            return new ExportAllDeclaration(source, exported);
+            return UpdateExportAllDeclaration(exportAllDeclaration, exported, source);
         }
 
+        protected virtual ExportAllDeclaration UpdateExportAllDeclaration(
+            ExportAllDeclaration exportAllDeclaration, Expression? exported, Literal source)
+        {
+            return exportAllDeclaration;
+        }
+        
         protected internal virtual ExportNamedDeclaration VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
         {
             StatementListItem? declaration = null;
@@ -563,119 +543,119 @@ namespace Esprima.Utils
                 declaration = Visit(exportNamedDeclaration.Declaration);
             }
 
-            var isNew = VisitNodeListAndIsNew(exportNamedDeclaration.Specifiers, out var specifiers);
+            var isNewSpecifiers = VisitNodeListAndIsNew(exportNamedDeclaration.Specifiers, out var specifiers);
 
             Literal? source = null;
             if (exportNamedDeclaration.Source is not null)
             {
                 source = Visit(exportNamedDeclaration.Source);
             }
+            
+            return UpdateExportNamedDeclaration(exportNamedDeclaration, declaration, isNewSpecifiers, ref specifiers, source);
+        }
 
-            if (declaration == exportNamedDeclaration.Declaration && !isNew && source == exportNamedDeclaration.Source)
-            {
-                return exportNamedDeclaration;
-            }
-
-            return new ExportNamedDeclaration(declaration, specifiers, source);
+        protected virtual ExportNamedDeclaration UpdateExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration, StatementListItem? declaration, bool isNewSpecifiers, ref NodeList<ExportSpecifier> specifiers, Literal? source)
+        {
+            return exportNamedDeclaration;
         }
 
         protected internal virtual ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
         {
             var local = Visit(exportSpecifier.Local);
             var exported = Visit(exportSpecifier.Exported);
-            if (local == exportSpecifier.Local && exported == exportSpecifier.Exported)
-            {
-                return exportSpecifier;
-            }
+            return UpdateExportSpecifier(exportSpecifier, local, exported);
+        }
 
-            return new ExportSpecifier(local, exported);
+        protected virtual ExportSpecifier UpdateExportSpecifier(ExportSpecifier exportSpecifier, Expression local, Expression exported)
+        {
+            return exportSpecifier;
         }
 
         protected internal virtual Import VisitImport(Import import)
         {
+            Expression? source = null;
             if (import.Source is not null)
             {
-                var source = Visit(import.Source);
-                if (source == import.Source)
-                {
-                    return import;
-                }
-                return new Import(source);
+                source = Visit(import.Source);
             }
+            return UpdateImport(import, source);
+        }
+
+        protected virtual Import UpdateImport(Import import, Expression? source)
+        {
             return import;
         }
 
         protected internal virtual ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
         {
-            var isNew = VisitNodeListAndIsNew(importDeclaration.Specifiers, out var specifiers);
+            var isNewSpecifiers = VisitNodeListAndIsNew(importDeclaration.Specifiers, out var specifiers);
             var source = Visit(importDeclaration.Source);
-            if (!isNew && source == importDeclaration.Source)
-            {
-                return importDeclaration;
-            }
+            return UpdateImportDeclaration(importDeclaration, isNewSpecifiers, ref specifiers, source);
+        }
 
-            return new ImportDeclaration(specifiers, source);
+        protected virtual ImportDeclaration UpdateImportDeclaration(ImportDeclaration importDeclaration, bool isNewSpecifiers, ref NodeList<ImportDeclarationSpecifier> specifiers, Literal source)
+        {
+            return importDeclaration;
         }
 
         protected internal virtual ImportNamespaceSpecifier VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
         {
             var local = Visit(importNamespaceSpecifier.Local);
-            if (local == importNamespaceSpecifier.Local)
-            {
-                return importNamespaceSpecifier;
-            }
-
-            return new ImportNamespaceSpecifier(local);
+            return UpdateImportNamespaceSpecifier(importNamespaceSpecifier, local);
         }
 
+        protected virtual ImportNamespaceSpecifier UpdateImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier, Identifier local)
+        {
+            return importNamespaceSpecifier;
+        }
+        
         protected internal virtual ImportDefaultSpecifier VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
         {
             var local = Visit(importDefaultSpecifier.Local);
-            if (local == importDefaultSpecifier.Local)
-            {
-                return importDefaultSpecifier;
-            }
+            return UpdateImportDefaultSpecifier(importDefaultSpecifier, local);
+        }
 
-            return new ImportDefaultSpecifier(local);
+        protected virtual ImportDefaultSpecifier UpdateImportDefaultSpecifier(
+            ImportDefaultSpecifier importDefaultSpecifier, Identifier local)
+        {
+            return importDefaultSpecifier;
         }
 
         protected internal virtual ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
         {
             var imported = Visit(importSpecifier.Imported);
             var local = Visit(importSpecifier.Local);
-            if (imported == importSpecifier.Imported && local == importSpecifier.Local)
-            {
-                return importSpecifier;
-            }
+            return UpdateImportSpecifier(importSpecifier, imported, local);
+        }
 
-            return new ImportSpecifier(local, imported);
+        protected virtual ImportSpecifier UpdateImportSpecifier(ImportSpecifier importSpecifier, Expression imported, Identifier local)
+        {
+            return importSpecifier;
         }
 
         protected internal virtual MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
         {
             var key = Visit(methodDefinition.Key);
             var value = Visit(methodDefinition.Value);
-
-            if (key == methodDefinition.Key && value == methodDefinition.Value)
-            {
-                return methodDefinition;
-            }
-
-            return new MethodDefinition(key, methodDefinition.Computed, (value as FunctionExpression)!, methodDefinition.Kind,
-                methodDefinition.Static);
+            return UpdateMethodDefinition(methodDefinition, key, value);
         }
 
+        protected virtual MethodDefinition UpdateMethodDefinition(MethodDefinition methodDefinition, Expression key, Expression value)
+        {
+            return methodDefinition;
+        }
+        
         protected internal virtual ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
         {
             var left = Visit(forOfStatement.Left);
             var right = Visit(forOfStatement.Right);
             var body = Visit(forOfStatement.Body);
-            if (left == forOfStatement.Left && right == forOfStatement.Right && body == forOfStatement.Body)
-            {
-                return forOfStatement;
-            }
+            return UpdateForOfStatement(forOfStatement, left, right, body);
+        }
 
-            return new ForOfStatement(left, right, body, forOfStatement.Await);
+        protected virtual ForOfStatement UpdateForOfStatement(ForOfStatement forOfStatement, Node left, Expression right, Statement body)
+        {
+            return forOfStatement;
         }
 
         protected internal virtual ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
@@ -693,54 +673,58 @@ namespace Esprima.Utils
             }
 
             var body = Visit(classDeclaration.Body);
-
-            if (id == classDeclaration.Id && superClass == classDeclaration.SuperClass && body == classDeclaration.Body)
-            {
-                return classDeclaration;
-            }
-
-            return new ClassDeclaration(id,superClass, body);
+            return UpdateClassDeclaration(classDeclaration, id, superClass, body);
         }
 
+        protected virtual ClassDeclaration UpdateClassDeclaration(ClassDeclaration classDeclaration, Identifier? id, Expression? superClass, ClassBody body)
+        {
+            return classDeclaration;
+        }
+        
         protected internal virtual ClassBody VisitClassBody(ClassBody classBody)
         {
-            if (VisitNodeListAndIsNew(classBody.Body, out var body))
-            {
-                return new ClassBody(body);
-            }
+            var isNewBody = VisitNodeListAndIsNew(classBody.Body, out var body);
+            return UpdateClassBody(classBody, isNewBody, ref body);
+        }
 
+        protected virtual ClassBody UpdateClassBody(ClassBody classBody, bool isNewBody, ref NodeList<Node> body)
+        {
             return classBody;
         }
 
         protected internal virtual YieldExpression VisitYieldExpression(YieldExpression yieldExpression)
         {
+            Expression? argument = null;
             if (yieldExpression.Argument is not null)
             {
-                var argument = Visit(yieldExpression.Argument);
-                if (argument == yieldExpression.Argument)
-                {
-                    return yieldExpression;
-                }
-
-                return new YieldExpression(argument, yieldExpression.Delegate);
+                argument = Visit(yieldExpression.Argument);
             }
-
-            return yieldExpression;
+            return UpdateYieldExpression(yieldExpression, argument);
         }
 
+        protected virtual YieldExpression UpdateYieldExpression(YieldExpression yieldExpression, Expression? argument)
+        {
+            return yieldExpression;
+        }
+        
         protected internal virtual TaggedTemplateExpression VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
         {
             var tag = Visit(taggedTemplateExpression.Tag);
             var quasi = Visit(taggedTemplateExpression.Quasi);
-            if (tag == taggedTemplateExpression.Tag && quasi == taggedTemplateExpression.Quasi)
-            {
-                return taggedTemplateExpression;
-            }
+            return UpdateTaggedTemplateExpression(taggedTemplateExpression, tag, quasi);
+        }
 
-            return new TaggedTemplateExpression(tag, quasi);
+        protected virtual TaggedTemplateExpression UpdateTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression, Expression tag, TemplateLiteral quasi)
+        {
+            return taggedTemplateExpression;
         }
 
         protected internal virtual Super VisitSuper(Super super)
+        {
+            return UpdateSuper(super);
+        }
+
+        protected virtual Super UpdateSuper(Super super)
         {
             return super;
         }
@@ -749,84 +733,92 @@ namespace Esprima.Utils
         {
             var meta = Visit(metaProperty.Meta);
             var property = Visit(metaProperty.Property);
-            if (meta == metaProperty.Meta && property == metaProperty.Property)
-            {
-                return metaProperty;
-            }
+            return UpdateMetaProperty(metaProperty, meta, property);
+        }
 
-            return new MetaProperty(meta, property);
+        protected virtual MetaProperty UpdateMetaProperty(MetaProperty metaProperty, Identifier meta, Identifier property)
+        {
+            return metaProperty;
         }
 
         protected internal virtual ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
         {
-            return arrowParameterPlaceHolder;
             // ArrowParameterPlaceHolder nodes never appear in the final tree and only used during the construction of a tree.
+            return UpdateArrowParameterPlaceHolder(arrowParameterPlaceHolder);
+        }
+
+        protected virtual ArrowParameterPlaceHolder UpdateArrowParameterPlaceHolder(
+            ArrowParameterPlaceHolder arrowParameterPlaceHolder)
+        {
+            return arrowParameterPlaceHolder;
         }
 
         protected internal virtual ObjectPattern VisitObjectPattern(ObjectPattern objectPattern)
         {
-            if (VisitNodeListAndIsNew(objectPattern.Properties, out var properties))
-            {
-                return new ObjectPattern(properties);
-            }
+            var isNewProperties = VisitNodeListAndIsNew(objectPattern.Properties, out var properties);
+            return UpdateObjectPattern(objectPattern, isNewProperties, ref properties);
+        }
 
+        protected virtual ObjectPattern UpdateObjectPattern(ObjectPattern objectPattern, bool isNewProperties, ref NodeList<Node> properties)
+        {
             return objectPattern;
         }
 
         protected internal virtual SpreadElement VisitSpreadElement(SpreadElement spreadElement)
         {
             var argument = Visit(spreadElement.Argument);
-            if (argument == spreadElement.Argument)
-            {
-                return spreadElement;
-            }
+            return UpdateSpreadElement(spreadElement, argument);
+        }
 
-            return new SpreadElement(argument);
+        protected virtual SpreadElement UpdateSpreadElement(SpreadElement spreadElement, Expression argument)
+        {
+            return spreadElement;
         }
 
         protected internal virtual AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
         {
             var left = Visit(assignmentPattern.Left);
             var right = Visit(assignmentPattern.Right);
-            if (left == assignmentPattern.Left && right == assignmentPattern.Right)
-            {
-                return assignmentPattern;
-            }
+            return UpdateAssignmentPattern(assignmentPattern, left, right);
+        }
 
-            return new AssignmentPattern(left, right);
+        protected virtual AssignmentPattern UpdateAssignmentPattern(AssignmentPattern assignmentPattern, Expression left, Expression right)
+        {
+            return assignmentPattern;
         }
 
         protected internal virtual ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
         {
-            if (VisitNodeListAndIsNew(arrayPattern.Elements, out var elements))
-            {
-                return new ArrayPattern(elements);
-            }
-
-            return arrayPattern;
+            var isNewElements = VisitNodeListAndIsNew(arrayPattern.Elements, out var elements); 
+            return UpdateArrayPattern(arrayPattern, isNewElements, ref elements);
         }
 
+        protected virtual ArrayPattern UpdateArrayPattern(ArrayPattern arrayPattern, bool isNewElements, ref NodeList<Expression?> elements)
+        {
+            return arrayPattern;
+        }
+        
         protected internal virtual VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
         {
             var id = Visit(variableDeclarator.Id);
+            Expression? init = null;
             if (variableDeclarator.Init is not null)
             {
-                var init = Visit(variableDeclarator.Init);
-                if (id == variableDeclarator.Id && init == variableDeclarator.Init)
-                {
-                    return variableDeclarator;
-                }
-
-                return new VariableDeclarator(id, init);
+                init = Visit(variableDeclarator.Init);
             }
-
-            return id == variableDeclarator.Id ? variableDeclarator : new VariableDeclarator(id, null);
+            
+            return UpdateVariableDeclarator(variableDeclarator, id, init);
         }
 
+        protected virtual VariableDeclarator UpdateVariableDeclarator(VariableDeclarator variableDeclarator, Expression id, Expression? init)
+        {
+            return variableDeclarator;
+        }
+        
         protected internal virtual TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
         {
-            ref readonly var quasis = ref templateLiteral.Quasis;
-            ref readonly var expressions = ref templateLiteral.Expressions;
+            var quasis = templateLiteral.Quasis;
+            var expressions = templateLiteral.Expressions;
 
             var n = expressions.Count;
 
@@ -837,12 +829,20 @@ namespace Esprima.Utils
             }
 
             Visit(quasis[n]);
-            
-            //TODO Umut
+            return UpdateTemplateLiteral(templateLiteral, ref quasis, ref expressions);
+        }
+
+        protected virtual TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral, ref NodeList<TemplateElement> quasis, ref NodeList<Expression> expressions)
+        {
             return templateLiteral;
         }
 
         protected internal virtual TemplateElement VisitTemplateElement(TemplateElement templateElement)
+        {
+            return UpdateTemplateElement(templateElement);
+        }
+        
+        protected virtual TemplateElement UpdateTemplateElement(TemplateElement templateElement)
         {
             return templateElement;
         }
@@ -850,36 +850,35 @@ namespace Esprima.Utils
         protected internal virtual RestElement VisitRestElement(RestElement restElement)
         {
             var argument = Visit(restElement.Argument);
-            if (argument == restElement.Argument)
-            {
-                return restElement;
-            }
+            return UpdateRestElement(restElement, argument);
+        }
 
-            return new RestElement(argument);
+        protected virtual RestElement UpdateRestElement(RestElement restElement, Expression argument)
+        {
+            return restElement;
         }
 
         protected internal virtual Property VisitProperty(Property property)
         {
             var key = Visit(property.Key);
             var value = Visit(property.Value);
-
-            if (key == property.Key && value == property.Value)
-            {
-                return property;
-            }
-
-            return new Property(property.Kind, key, property.Computed, value, property.Method, property.Shorthand);
+            return UpdateProperty(property, key, value);
         }
 
+        protected virtual Property UpdateProperty(Property property, Expression key, Expression value)
+        {
+            return property;
+        }
+        
         protected internal virtual AwaitExpression VisitAwaitExpression(AwaitExpression awaitExpression)
         {
             var argument = Visit(awaitExpression.Argument);
-            if (argument == awaitExpression.Argument)
-            {
-                return awaitExpression;
-            }
+            return UpdateAwaitExpression(awaitExpression, argument);
+        }
 
-            return new AwaitExpression(argument);
+        protected virtual AwaitExpression UpdateAwaitExpression(AwaitExpression awaitExpression, Expression argument)
+        {
+            return awaitExpression;
         }
 
         protected internal virtual ConditionalExpression VisitConditionalExpression(ConditionalExpression conditionalExpression)
@@ -887,96 +886,100 @@ namespace Esprima.Utils
             var test = Visit(conditionalExpression.Test);
             var consequent = Visit(conditionalExpression.Consequent);
             var alternate = Visit(conditionalExpression.Alternate);
-            if (test == conditionalExpression.Test && consequent == conditionalExpression.Consequent &&
-                alternate == conditionalExpression.Alternate)
-            {
-                return conditionalExpression;
-            }
+            return UpdateConditionalExpression(conditionalExpression, test, consequent, alternate);
+        }
 
-            return new ConditionalExpression(test, consequent, alternate);
+        protected virtual ConditionalExpression UpdateConditionalExpression(ConditionalExpression conditionalExpression, Expression test, Expression consequent, Expression alternate)
+        {
+            return conditionalExpression;
         }
 
         protected internal virtual CallExpression VisitCallExpression(CallExpression callExpression)
         {
-            var calleeNode = Visit(callExpression.Callee);
-            
-            if (VisitNodeListAndIsNew(callExpression.Arguments, out var arguments) == false && calleeNode == callExpression.Callee)
-            {
-                return callExpression;
-            }
-
-            return new CallExpression(calleeNode, arguments, callExpression.Optional);
+            var callee = Visit(callExpression.Callee);
+            var isNewArguments = VisitNodeListAndIsNew(callExpression.Arguments, out var arguments); 
+            return UpdateCallExpression(callExpression, callee, isNewArguments, ref arguments);
         }
 
+        protected virtual CallExpression UpdateCallExpression(CallExpression callExpression, Expression callee, bool isNewArguments, ref NodeList<Expression> arguments)
+        {
+            return callExpression;
+        }
+        
         protected internal virtual BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
         {
-            var leftNode = Visit(binaryExpression.Left);
-            var rightNode = Visit(binaryExpression.Right);
-            if (leftNode == binaryExpression.Left && rightNode == binaryExpression.Right)
-            {
-                return binaryExpression;
-            }
-            
-            return new BinaryExpression(binaryExpression.Operator.ToString(), leftNode, rightNode);
+            var left = Visit(binaryExpression.Left);
+            var right = Visit(binaryExpression.Right);
+            return UpdateBinaryExpression(binaryExpression, left, right);
         }
 
+        protected virtual BinaryExpression UpdateBinaryExpression(BinaryExpression binaryExpression, Expression left, Expression right)
+        {
+            return binaryExpression;
+        }
+        
         protected internal virtual ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
         {
-            if (VisitNodeListAndIsNew(arrayExpression.Elements, out var elements))
-            {
-                return new ArrayExpression(elements);
-            }
+            var isNewElements = VisitNodeListAndIsNew(arrayExpression.Elements, out var elements);
+            return UpdateArrayExpression(arrayExpression, isNewElements, ref elements);
+        }
 
+        protected virtual ArrayExpression UpdateArrayExpression(ArrayExpression arrayExpression, bool isNewElements, ref NodeList<Expression?> elements)
+        {
             return arrayExpression;
         }
 
         protected internal virtual AssignmentExpression VisitAssignmentExpression(AssignmentExpression assignmentExpression)
         {
-            var leftNode = Visit(assignmentExpression.Left);
-            var rightNode = Visit(assignmentExpression.Right);
-            if (leftNode == assignmentExpression.Left && rightNode == assignmentExpression.Right)
-            {
-                return assignmentExpression;
-            }
-            
-            return new AssignmentExpression(assignmentExpression.Operator.ToString(), leftNode, rightNode);
+            var left = Visit(assignmentExpression.Left);
+            var right = Visit(assignmentExpression.Right);
+            return UpdateAssignmentExpression(assignmentExpression, left, right);
         }
 
+        protected virtual AssignmentExpression UpdateAssignmentExpression(AssignmentExpression assignmentExpression, Expression left, Expression right)
+        {
+            return assignmentExpression;
+        }
+        
         protected internal virtual ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
         {
+            Identifier? label = null;
             if (continueStatement.Label is not null)
             {
-                var label = Visit(continueStatement.Label);
-                if (label != continueStatement.Label)
-                {
-                    return new ContinueStatement(label);
-                }
+                label = Visit(continueStatement.Label);
             }
-
-            return continueStatement;
+            
+            return UpdateContinueStatement(continueStatement, label);
         }
 
+        protected virtual ContinueStatement UpdateContinueStatement(ContinueStatement continueStatement, Identifier? label)
+        {
+            return continueStatement;
+        }
+        
         protected internal virtual BreakStatement VisitBreakStatement(BreakStatement breakStatement)
         {
+            Identifier? label = null;
             if (breakStatement.Label is not null)
             {
-                var label = Visit(breakStatement.Label);
-                if (label != breakStatement.Label)
-                {
-                    return new BreakStatement(label);
-                }
+                label = Visit(breakStatement.Label);
             }
+            return UpdateBreakStatement(breakStatement, label);
+        }
 
+        protected virtual BreakStatement UpdateBreakStatement(BreakStatement breakStatement, Identifier? label)
+        {
             return breakStatement;
         }
 
         protected internal virtual BlockStatement VisitBlockStatement(BlockStatement blockStatement)
         {
-            if (VisitNodeListAndIsNew(blockStatement.Body, out var body))
-            {
-                return new BlockStatement(body);
-            }
+            var isNewBody = VisitNodeListAndIsNew(blockStatement.Body, out var body);
+            return UpdateBlockStatement(blockStatement, isNewBody, ref body);
+        }
 
+        protected virtual BlockStatement UpdateBlockStatement(BlockStatement blockStatement, bool isNewBody, ref NodeList<Statement> body)
+        {
             return blockStatement;
         }
     }
