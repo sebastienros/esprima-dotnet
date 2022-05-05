@@ -129,8 +129,8 @@ namespace Esprima.Utils
             return variableDeclaration;
         }
 
-        protected override TryStatement UpdateTryStatement(TryStatement tryStatement, Statement block,
-            CatchClause? handler, Statement? finalizer)
+        protected override TryStatement UpdateTryStatement(TryStatement tryStatement, BlockStatement block,
+            CatchClause? handler, BlockStatement? finalizer)
         {
             if (block == tryStatement.Block && handler == tryStatement.Handler && finalizer == tryStatement.Finalizer)
             {
