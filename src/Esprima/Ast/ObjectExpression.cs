@@ -5,16 +5,16 @@ namespace Esprima.Ast
 {
     public sealed class ObjectExpression : Expression
     {
-        private readonly NodeList<Expression> _properties;
+        internal readonly NodeList<Expression> _properties;
 
         public ObjectExpression(in NodeList<Expression> properties) : base(Nodes.ObjectExpression)
         {
             _properties = properties;
         }
 
-        public ref readonly NodeList<Expression> Properties { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _properties; }
+        public ReadOnlySpan<Expression> Properties { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _properties.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Properties);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_properties);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -23,7 +23,7 @@ namespace Esprima.Ast
 
         public ObjectExpression UpdateWith(in NodeList<Expression> properties)
         {
-            if (NodeList.AreSame(properties, Properties))
+            if (NodeList.AreSame(properties, _properties))
             {
                 return this;
             }

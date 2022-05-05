@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class NewExpression : Expression
     {
-        private readonly NodeList<Expression> _arguments;
+        internal readonly NodeList<Expression> _arguments;
 
         public NewExpression(
             Expression callee,
@@ -17,9 +17,9 @@ namespace Esprima.Ast
         }
 
         public Expression Callee { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Expression> Arguments { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _arguments; }
+        public ReadOnlySpan<Expression> Arguments { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _arguments.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Callee, Arguments);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Callee, _arguments);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -28,7 +28,7 @@ namespace Esprima.Ast
 
         public NewExpression UpdateWith(Expression callee, in NodeList<Expression> arguments)
         {
-            if (callee == Callee && NodeList.AreSame(arguments, Arguments))
+            if (callee == Callee && NodeList.AreSame(arguments, _arguments))
             {
                 return this;
             }

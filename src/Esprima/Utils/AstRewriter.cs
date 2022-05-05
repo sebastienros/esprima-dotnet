@@ -28,11 +28,11 @@ public class AstRewriter : AstVisitor
             new InvalidOperationException($"When called from {callerName}, rewriting a node of type {nodeType} must return null or a non-null value of the same type. Alternatively, override {callerName} and change it to not visit children of this type.");
     }
 
-    public virtual bool VisitAndConvert<T>(in NodeList<T> nodes, out NodeList<T> newNodes, bool allowNullElement = false, [CallerMemberName] string? callerName = null)
+    public virtual bool VisitAndConvert<T>(ReadOnlySpan<T> nodes, out NodeList<T> newNodes, bool allowNullElement = false, [CallerMemberName] string? callerName = null)
         where T : Node?
     {
         List<T>? newNodeList = null;
-        for (var i = 0; i < nodes.Count; i++)
+        for (var i = 0; i < nodes.Length; i++)
         {
             var node = nodes[i];
 
@@ -60,7 +60,7 @@ public class AstRewriter : AstVisitor
             return true;
         }
 
-        newNodes = nodes;
+        newNodes = new NodeList<T>(nodes);
         return false;
     }
 

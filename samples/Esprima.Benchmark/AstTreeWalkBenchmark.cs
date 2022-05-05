@@ -61,8 +61,7 @@ namespace Esprima.Benchmark
                     {
                         if (variableDeclaration.Kind == VariableDeclarationKind.Var)
                         {
-                            ref readonly var nodeList = ref variableDeclaration.Declarations;
-                            foreach (var declaration in nodeList)
+                            foreach (var declaration in variableDeclaration.Declarations)
                             {
                                 _varNameCount++;
                             }
@@ -70,8 +69,7 @@ namespace Esprima.Benchmark
 
                         if (variableDeclaration.Kind != VariableDeclarationKind.Var)
                         {
-                            ref readonly var nodeList = ref variableDeclaration.Declarations;
-                            foreach (var declaration in nodeList)
+                            foreach (var declaration in variableDeclaration.Declarations)
                             {
                                 _lexicalNameCount++;
                             }

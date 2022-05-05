@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Runtime.CompilerServices;
+
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
@@ -11,12 +12,19 @@ namespace Esprima.Ast
 
         internal NodeList(ICollection<T> collection)
         {
-            collection ??= ThrowArgumentNullException<ICollection<T>>(nameof(collection));
-
             var count = _count = collection.Count;
             if ((_items = count == 0 ? null : new T[count]) != null)
             {
                 collection.CopyTo(_items, 0);
+            }
+        }
+
+        internal NodeList(ReadOnlySpan<T> collection)
+        {
+            var count = _count = collection.Length;
+            if ((_items = count == 0 ? null : new T[count]) != null)
+            {
+                collection.CopyTo(_items);
             }
         }
 
@@ -32,9 +40,10 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        public NodeList<Node?> AsNodes()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> AsSpan()
         {
-            return new NodeList<Node?>(_items /* conversion by co-variance! */, _count);
+            return new ReadOnlySpan<T>(_items, 0, _count);
         }
 
         public T this[int index]

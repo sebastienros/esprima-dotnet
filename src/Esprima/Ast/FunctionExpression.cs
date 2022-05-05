@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class FunctionExpression : Expression, IFunction
     {
-        private readonly NodeList<Expression> _params;
+        internal readonly NodeList<Expression> _params;
 
         public FunctionExpression(
             Identifier? id,
@@ -25,7 +25,7 @@ namespace Esprima.Ast
         }
 
         public Identifier? Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+        public ReadOnlySpan<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _params.AsSpan(); }
 
         public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         Node IFunction.Body => Body;
@@ -35,7 +35,7 @@ namespace Esprima.Ast
         public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, Params, Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _params, Body);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -44,7 +44,7 @@ namespace Esprima.Ast
 
         public FunctionExpression UpdateWith(Identifier? id, in NodeList<Expression> parameters, BlockStatement body)
         {
-            if (id == Id && NodeList.AreSame(parameters, Params) && body == Body)
+            if (id == Id && NodeList.AreSame(parameters, _params) && body == Body)
             {
                 return this;
             }

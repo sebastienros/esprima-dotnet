@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class VariableDeclaration : Declaration
     {
-        private readonly NodeList<VariableDeclarator> _declarations;
+        internal readonly NodeList<VariableDeclarator> _declarations;
 
         public VariableDeclaration(
             in NodeList<VariableDeclarator> declarations,
@@ -16,10 +16,10 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
-        public ref readonly NodeList<VariableDeclarator> Declarations { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _declarations; }
+        public ReadOnlySpan<VariableDeclarator> Declarations { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _declarations.AsSpan(); }
         public VariableDeclarationKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declarations);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_declarations);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -28,7 +28,7 @@ namespace Esprima.Ast
 
         public VariableDeclaration UpdateWith(in NodeList<VariableDeclarator> declarations)
         {
-            if (NodeList.AreSame(declarations, Declarations))
+            if (NodeList.AreSame(declarations, _declarations))
             {
                 return this;
             }

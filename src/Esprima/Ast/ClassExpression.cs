@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class ClassExpression : Expression, IClass
     {
-        private readonly NodeList<Decorator> _decorators;
+        internal readonly NodeList<Decorator> _decorators;
 
         public ClassExpression(
             Identifier? id,
@@ -25,7 +25,7 @@ namespace Esprima.Ast
         /// </remarks>
         public Expression? SuperClass { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ClassBody Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
+        public ReadOnlySpan<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _decorators.AsSpan(); }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
@@ -35,7 +35,7 @@ namespace Esprima.Ast
             yield return SuperClass;
             yield return Body;
 
-            foreach (var node in Decorators)
+            foreach (var node in _decorators)
             {
                 yield return node;
             }
@@ -48,7 +48,7 @@ namespace Esprima.Ast
 
         public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)
         {
-            if (id == Id && superClass == SuperClass && body == Body && NodeList.AreSame(decorators, Decorators))
+            if (id == Id && superClass == SuperClass && body == Body && NodeList.AreSame(decorators, _decorators))
             {
                 return this;
             }

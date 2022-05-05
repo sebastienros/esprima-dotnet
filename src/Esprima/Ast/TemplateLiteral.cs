@@ -5,8 +5,8 @@ namespace Esprima.Ast
 {
     public sealed class TemplateLiteral : Expression
     {
-        private readonly NodeList<TemplateElement> _quasis;
-        private readonly NodeList<Expression> _expressions;
+        internal readonly NodeList<TemplateElement> _quasis;
+        internal readonly NodeList<Expression> _expressions;
 
         public TemplateLiteral(
             in NodeList<TemplateElement> quasis,
@@ -17,8 +17,8 @@ namespace Esprima.Ast
             _expressions = expressions;
         }
 
-        public ref readonly NodeList<TemplateElement> Quasis { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _quasis; }
-        public ref readonly NodeList<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _expressions; }
+        public ReadOnlySpan<TemplateElement> Quasis { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _quasis.AsSpan(); }
+        public ReadOnlySpan<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _expressions.AsSpan(); }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
@@ -40,7 +40,7 @@ namespace Esprima.Ast
 
         public TemplateLiteral UpdateWith(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
         {
-            if (NodeList.AreSame(quasis, Quasis) && NodeList.AreSame(expressions, Expressions))
+            if (NodeList.AreSame(quasis, _quasis) && NodeList.AreSame(expressions, _expressions))
             {
                 return this;
             }

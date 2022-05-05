@@ -645,11 +645,11 @@ namespace Esprima
                             break;
                         case "@":
                             var decorators = ParseDecorators();
-                            
+
                             _context.Decorators = decorators;
                             var expression = ParsePrimaryExpression();
                             _context.Decorators = new ArrayList<Decorator>();
-                            
+
                             expr = Finalize(node, expression);
                             break;
                         default:
@@ -1076,7 +1076,7 @@ namespace Esprima
 
                 if (!Match("}") && (property is not Property {Method: true} || Match(",")))
                 {
-                    ExpectCommaSeparator();    
+                    ExpectCommaSeparator();
                 }
             }
 
@@ -1360,7 +1360,7 @@ namespace Esprima
 
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
-                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>().Expressions, false);
+                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>()._expressions, false);
                                 }
                                 else
                                 {
@@ -2212,8 +2212,8 @@ namespace Esprima
                 case Nodes.ArrowParameterPlaceHolder:
                     // TODO clean-up
                     var arrowParameterPlaceHolder = expr.As<ArrowParameterPlaceHolder>();
-                    parameters = new ArrayList<Expression>(arrowParameterPlaceHolder.Params.Count);
-                    parameters.AddRange(arrowParameterPlaceHolder.Params);
+                    parameters = new ArrayList<Expression>(arrowParameterPlaceHolder._params._count);
+                    parameters.AddRange(arrowParameterPlaceHolder._params);
                     asyncArrow = arrowParameterPlaceHolder.Async;
                     break;
                 default:
@@ -4398,19 +4398,19 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
             _context.IsAsync = previousIsAsync;
-            
+
             if (Match(";"))
             {
                 ThrowError(Messages.NoSemicolonAfterDecorator);
             }
-            
+
             return Finalize(node, new Decorator(expression));
         }
 
         private ArrayList<Decorator> ParseDecorators()
         {
             var decorators = new ArrayList<Decorator>();
-            
+
             while (Match("@"))
             {
                 decorators.Add(ParseDecorator());
@@ -4433,7 +4433,7 @@ namespace Esprima
             var isAsync = false;
             var isGenerator = false;
             var isPrivate = false;
-            
+
             var decorators = ParseDecorators();
 
             if (decorators.Count > 0)
@@ -4762,8 +4762,8 @@ namespace Esprima
             while (!Match("}"))
             {
                 var importAttribute = ParseImportAttribute();
-                
-                string? key = string.Empty; 
+
+                string? key = string.Empty;
                 switch (importAttribute.Key)
                 {
                     case Identifier identifier:
@@ -4778,7 +4778,7 @@ namespace Esprima
                 {
                     ThrowError(Messages.DuplicateAssertClauseProperty, key);
                 }
-                
+
                 attributes.Add(importAttribute);
                 if (!Match("}"))
                 {
@@ -4788,7 +4788,7 @@ namespace Esprima
             Expect("}");
             return attributes;
         }
-        
+
         private ImportAttribute ParseImportAttribute()
         {
             var node = CreateNode();
@@ -5103,7 +5103,7 @@ namespace Esprima
                 Literal? source = null;
                 var isExportFromIdentifier = false;
                 ArrayList<ImportAttribute> attributes = new();
-                
+
                 Expect("{");
                 while (!Match("}"))
                 {

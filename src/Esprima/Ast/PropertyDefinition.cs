@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class PropertyDefinition : ClassProperty
     {
-        private readonly NodeList<Decorator> _decorators;
+        internal readonly NodeList<Decorator> _decorators;
 
         public PropertyDefinition(
             Expression key,
@@ -24,7 +24,7 @@ namespace Esprima.Ast
         protected override Expression? GetValue() => Value;
 
         public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
+        public ReadOnlySpan<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _decorators.AsSpan(); }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
@@ -33,7 +33,7 @@ namespace Esprima.Ast
             yield return Key;
             yield return Value;
 
-            foreach (var node in Decorators)
+            foreach (var node in _decorators)
             {
                 yield return node;
             }
@@ -46,7 +46,7 @@ namespace Esprima.Ast
 
         public PropertyDefinition UpdateWith(Expression key, Expression? value, in NodeList<Decorator> decorators)
         {
-            if (key == Key && value == Value && NodeList.AreSame(decorators, Decorators))
+            if (key == Key && value == Value && NodeList.AreSame(decorators, _decorators))
             {
                 return this;
             }

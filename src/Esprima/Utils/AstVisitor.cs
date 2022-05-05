@@ -15,13 +15,11 @@ public class AstVisitor
 
     protected internal virtual object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
-        ref readonly var elements = ref arrayExpression.Elements;
-        for (var i = 0; i < elements.Count; i++)
+        foreach (var expression in arrayExpression.Elements)
         {
-            var expr = elements[i];
-            if (expr is not null)
+            if (expression is not null)
             {
-                Visit(expr);
+                Visit(expression);
             }
         }
 
@@ -30,13 +28,11 @@ public class AstVisitor
 
     protected internal virtual object? VisitArrayPattern(ArrayPattern arrayPattern)
     {
-        ref readonly var elements = ref arrayPattern.Elements;
-        for (var i = 0; i < elements.Count; i++)
+        foreach (var expression in arrayPattern.Elements)
         {
-            var expr = elements[i];
-            if (expr is not null)
+            if (expression is not null)
             {
-                Visit(expr);
+                Visit(expression);
             }
         }
 
@@ -45,10 +41,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
     {
-        ref readonly var parameters = ref arrowFunctionExpression.Params;
-        for (var i = 0; i < parameters.Count; i++)
+        foreach (var parameter in arrowFunctionExpression.Params)
         {
-            Visit(parameters[i]);
+            Visit(parameter);
         }
 
         Visit(arrowFunctionExpression.Body);
@@ -97,10 +92,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitBlockStatement(BlockStatement blockStatement)
     {
-        ref readonly var body = ref blockStatement.Body;
-        for (var i = 0; i < body.Count; i++)
+        foreach (var statement in blockStatement.Body)
         {
-            Visit(body[i]);
+            Visit(statement);
         }
 
         return blockStatement;
@@ -119,10 +113,9 @@ public class AstVisitor
     protected internal virtual object? VisitCallExpression(CallExpression callExpression)
     {
         Visit(callExpression.Callee);
-        ref readonly var arguments = ref callExpression.Arguments;
-        for (var i = 0; i < arguments.Count; i++)
+        foreach (var argument in callExpression.Arguments)
         {
-            Visit(arguments[i]);
+            Visit(argument);
         }
 
         return callExpression;
@@ -149,10 +142,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitClassBody(ClassBody classBody)
     {
-        ref readonly var body = ref classBody.Body;
-        for (var i = 0; i < body.Count; i++)
+        foreach (var statement in classBody.Body)
         {
-            Visit(body[i]);
+            Visit(statement);
         }
 
         return classBody;
@@ -172,10 +164,9 @@ public class AstVisitor
 
         Visit(classDeclaration.Body);
 
-        ref readonly var decorators = ref classDeclaration.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
+        foreach (var decorator in classDeclaration.Decorators)
         {
-            Visit(decorators[i]);
+            Visit(decorator);
         }
 
         return classDeclaration;
@@ -195,10 +186,9 @@ public class AstVisitor
 
         Visit(classExpression.Body);
 
-        ref readonly var decorators = ref classExpression.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
+        foreach (var decorator in classExpression.Decorators)
         {
-            Visit(decorators[i]);
+            Visit(decorator);
         }
 
         return classExpression;
@@ -257,10 +247,9 @@ public class AstVisitor
 
         Visit(exportAllDeclaration.Source);
 
-        ref readonly var assertions = ref exportAllDeclaration.Assertions;
-        for (var i = 0; i < assertions.Count; i++)
+        foreach (var assertion in exportAllDeclaration.Assertions)
         {
-            Visit(assertions[i]);
+            Visit(assertion);
         }
 
         return exportAllDeclaration;
@@ -280,10 +269,9 @@ public class AstVisitor
             Visit(exportNamedDeclaration.Declaration);
         }
 
-        ref readonly var specifiers = ref exportNamedDeclaration.Specifiers;
-        for (var i = 0; i < specifiers.Count; i++)
+        foreach (var specifier in exportNamedDeclaration.Specifiers)
         {
-            Visit(specifiers[i]);
+            Visit(specifier);
         }
 
         if (exportNamedDeclaration.Source is not null)
@@ -291,10 +279,9 @@ public class AstVisitor
             Visit(exportNamedDeclaration.Source);
         }
 
-        ref readonly var assertions = ref exportNamedDeclaration.Assertions;
-        for (var i = 0; i < assertions.Count; i++)
+        foreach (var assertion in exportNamedDeclaration.Assertions)
         {
-            Visit(assertions[i]);
+            Visit(assertion);
         }
 
         return exportNamedDeclaration;
@@ -372,10 +359,9 @@ public class AstVisitor
             Visit(functionDeclaration.Id);
         }
 
-        ref readonly var parameters = ref functionDeclaration.Params;
-        for (var i = 0; i < parameters.Count; i++)
+        foreach (var parameter in functionDeclaration.Params)
         {
-            Visit(parameters[i]);
+            Visit(parameter);
         }
 
         Visit(functionDeclaration.Body);
@@ -390,10 +376,9 @@ public class AstVisitor
             Visit(functionExpression.Id);
         }
 
-        ref readonly var parameters = ref functionExpression.Params;
-        for (var i = 0; i < parameters.Count; i++)
+        foreach (var parameter in functionExpression.Params)
         {
-            Visit(parameters[i]);
+            Visit(parameter);
         }
 
         Visit(functionExpression.Body);
@@ -440,18 +425,16 @@ public class AstVisitor
 
     protected internal virtual object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
-        ref readonly var specifiers = ref importDeclaration.Specifiers;
-        for (var i = 0; i < specifiers.Count; i++)
+        foreach (var specifier in importDeclaration.Specifiers)
         {
-            Visit(specifiers[i]);
+            Visit(specifier);
         }
 
         Visit(importDeclaration.Source);
 
-        ref readonly var assertions = ref importDeclaration.Assertions;
-        for (var i = 0; i < assertions.Count; i++)
+        foreach (var assertion in importDeclaration.Assertions)
         {
-            Visit(assertions[i]);
+            Visit(assertion);
         }
 
         return importDeclaration;
@@ -513,10 +496,9 @@ public class AstVisitor
         Visit(methodDefinition.Key);
         Visit(methodDefinition.Value);
 
-        ref readonly var decorators = ref methodDefinition.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
+        foreach (var decorator in methodDefinition.Decorators)
         {
-            Visit(decorators[i]);
+            Visit(decorator);
         }
 
         return methodDefinition;
@@ -525,10 +507,9 @@ public class AstVisitor
     protected internal virtual object? VisitNewExpression(NewExpression newExpression)
     {
         Visit(newExpression.Callee);
-        ref readonly var arguments = ref newExpression.Arguments;
-        for (var i = 0; i < arguments.Count; i++)
+        foreach (var argument in newExpression.Arguments)
         {
-            Visit(arguments[i]);
+            Visit(argument);
         }
 
         return newExpression;
@@ -536,10 +517,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitObjectExpression(ObjectExpression objectExpression)
     {
-        ref readonly var properties = ref objectExpression.Properties;
-        for (var i = 0; i < properties.Count; i++)
+        foreach (var property in objectExpression.Properties)
         {
-            Visit(properties[i]);
+            Visit(property);
         }
 
         return objectExpression;
@@ -547,10 +527,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitObjectPattern(ObjectPattern objectPattern)
     {
-        ref readonly var properties = ref objectPattern.Properties;
-        for (var i = 0; i < properties.Count; i++)
+        foreach (var property in objectPattern.Properties)
         {
-            Visit(properties[i]);
+            Visit(property);
         }
 
         return objectPattern;
@@ -563,10 +542,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitProgram(Program program)
     {
-        ref readonly var statements = ref program.Body;
-        for (var i = 0; i < statements.Count; i++)
+        foreach (var statement in program.Body)
         {
-            Visit(statements[i]);
+            Visit(statement);
         }
 
         return program;
@@ -589,10 +567,9 @@ public class AstVisitor
             Visit(propertyDefinition.Value);
         }
 
-        ref readonly var decorators = ref propertyDefinition.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
+        foreach (var decorator in propertyDefinition.Decorators)
         {
-            Visit(decorators[i]);
+            Visit(decorator);
         }
 
         return propertyDefinition;
@@ -617,10 +594,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitSequenceExpression(SequenceExpression sequenceExpression)
     {
-        ref readonly var expressions = ref sequenceExpression.Expressions;
-        for (var i = 0; i < expressions.Count; i++)
+        foreach (var expression in sequenceExpression.Expressions)
         {
-            Visit(expressions[i]);
+            Visit(expression);
         }
 
         return sequenceExpression;
@@ -635,10 +611,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitStaticBlock(StaticBlock staticBlock)
     {
-        ref readonly var body = ref staticBlock.Body;
-        for (var i = 0; i < body.Count; i++)
+        foreach (var statement in staticBlock.Body)
         {
-            Visit(body[i]);
+            Visit(statement);
         }
 
         return staticBlock;
@@ -656,10 +631,9 @@ public class AstVisitor
             Visit(switchCase.Test);
         }
 
-        ref readonly var consequent = ref switchCase.Consequent;
-        for (var i = 0; i < consequent.Count; i++)
+        foreach (var statement in switchCase.Consequent)
         {
-            Visit(consequent[i]);
+            Visit(statement);
         }
 
         return switchCase;
@@ -668,10 +642,9 @@ public class AstVisitor
     protected internal virtual object? VisitSwitchStatement(SwitchStatement switchStatement)
     {
         Visit(switchStatement.Discriminant);
-        ref readonly var cases = ref switchStatement.Cases;
-        for (var i = 0; i < cases.Count; i++)
+        foreach (var switchCase in switchStatement.Cases)
         {
-            Visit(cases[i]);
+            Visit(switchCase);
         }
 
         return switchStatement;
@@ -692,8 +665,8 @@ public class AstVisitor
 
     protected internal virtual object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
     {
-        ref readonly var quasis = ref templateLiteral.Quasis;
-        ref readonly var expressions = ref templateLiteral.Expressions;
+        var quasis = templateLiteral.Quasis;
+        var expressions = templateLiteral.Expressions;
 
         TemplateElement quasi;
         for (var i = 0; !(quasi = quasis[i]).Tail; i++)
@@ -743,10 +716,9 @@ public class AstVisitor
 
     protected internal virtual object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
     {
-        ref readonly var declarations = ref variableDeclaration.Declarations;
-        for (var i = 0; i < declarations.Count; i++)
+        foreach (var declaration in variableDeclaration.Declarations)
         {
-            Visit(declarations[i]);
+            Visit(declaration);
         }
 
         return variableDeclaration;

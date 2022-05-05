@@ -322,16 +322,29 @@ public class AstToJsonConverter : AstJson.IConverter
             Member(name, map[value]);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void Member<T>(string name, in NodeList<T> nodes) where T : Node?
         {
             Member(name, nodes, node => node);
         }
 
-        protected void Member<T>(string name, in NodeList<T> list, Func<T, Node?> nodeSelector) where T : Node?
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void Member<T>(string name, in NodeList<T> nodes, Func<T, Node?> nodeSelector) where T : Node?
+        {
+            Member(name, nodes.AsSpan(), nodeSelector);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void Member<T>(string name, ReadOnlySpan<T> nodes) where T : Node?
+        {
+            Member(name, nodes, node => node);
+        }
+
+        protected void Member<T>(string name, ReadOnlySpan<T> nodes, Func<T, Node?> nodeSelector) where T : Node?
         {
             Member(name);
             _writer.StartArray();
-            foreach (var item in list)
+            foreach (var item in nodes)
             {
                 Visit(nodeSelector(item));
             }
@@ -507,7 +520,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("id", classDeclaration.Id);
                 Member("superClass", classDeclaration.SuperClass);
                 Member("body", classDeclaration.Body);
-                if (classDeclaration.Decorators.Count > 0)
+                if (classDeclaration.Decorators.Length > 0)
                 {
                     Member("decorators", classDeclaration.Decorators);
                 }
@@ -523,7 +536,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("id", classExpression.Id);
                 Member("superClass", classExpression.SuperClass);
                 Member("body", classExpression.Body);
-                if (classExpression.Decorators.Count > 0)
+                if (classExpression.Decorators.Length > 0)
                 {
                     Member("decorators", classExpression.Decorators);
                 }
@@ -597,7 +610,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 if (!_testCompatibilityMode)
                 {
                     Member("exported", exportAllDeclaration.Exported);
-                    if (exportAllDeclaration.Assertions.Count > 0)
+                    if (exportAllDeclaration.Assertions.Length > 0)
                     {
                         Member("assertions", exportAllDeclaration.Assertions);
                     }
@@ -625,7 +638,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("specifiers", exportNamedDeclaration.Specifiers);
                 Member("source", exportNamedDeclaration.Source);
                 // original Esprima doesn't include this information yet
-                if (!_testCompatibilityMode && exportNamedDeclaration.Assertions.Count > 0)
+                if (!_testCompatibilityMode && exportNamedDeclaration.Assertions.Length > 0)
                 {
                     Member("assertions", exportNamedDeclaration.Assertions);
                 }
@@ -797,7 +810,7 @@ public class AstToJsonConverter : AstJson.IConverter
                     Location = new Location(import.Location.Start, new Position(import.Location.Start.Line, import.Location.Start.Column + importToken.Length)),
                     Range = new Ast.Range(import.Range.Start, import.Range.Start + importToken.Length)
                 };
-                var args = new NodeList<Expression>(new Expression[] { import.Source });
+                var args = new NodeList<Expression>((ReadOnlySpan<Expression>) new[] { import.Source });
                 var callExpression = new CallExpression(callee, args, optional: false)
                 {
                     Location = import.Location,
@@ -841,7 +854,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
                 Member("source", importDeclaration.Source);
                 // original Esprima doesn't include this information yet
-                if (importDeclaration.Assertions.Count > 0)
+                if (importDeclaration.Assertions.Length > 0)
                 {
                     Member("assertions", importDeclaration.Assertions);
                 }
@@ -980,7 +993,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("value", methodDefinition.Value);
                 Member("kind", methodDefinition.Kind);
                 Member("static", methodDefinition.Static);
-                if (methodDefinition.Decorators.Count > 0)
+                if (methodDefinition.Decorators.Length > 0)
                 {
                     Member("decorators", methodDefinition.Decorators);
                 }
@@ -1071,7 +1084,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("value", propertyDefinition.Value);
                 Member("kind", propertyDefinition.Kind);
                 Member("static", propertyDefinition.Static);
-                if (propertyDefinition.Decorators.Count > 0)
+                if (propertyDefinition.Decorators.Length > 0)
                 {
                     Member("decorators", propertyDefinition.Decorators);
                 }

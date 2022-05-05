@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class MethodDefinition : ClassProperty
     {
-        private readonly NodeList<Decorator> _decorators;
+        internal readonly NodeList<Decorator> _decorators;
 
         public MethodDefinition(
             Expression key,
@@ -25,7 +25,7 @@ namespace Esprima.Ast
         protected override Expression? GetValue() => Value;
 
         public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
+        public ReadOnlySpan<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _decorators.AsSpan(); }
 
         public override NodeCollection ChildNodes => new(Key, Value);
 
@@ -36,7 +36,7 @@ namespace Esprima.Ast
 
         public MethodDefinition UpdateWith(Expression key, FunctionExpression value, in NodeList<Decorator> decorators)
         {
-            if (key == Key && value == Value && NodeList.AreSame(decorators, Decorators))
+            if (key == Key && value == Value && NodeList.AreSame(decorators, _decorators))
             {
                 return this;
             }

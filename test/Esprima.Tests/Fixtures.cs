@@ -118,7 +118,7 @@ namespace Esprima.Test
             {
                 var parser = new JavaScriptParser(script);
                 var program = parser.ParseScript();
-                var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!;
+                var source = program.Body[0].As<VariableDeclaration>().Declarations[0].As<VariableDeclarator>().Init!.As<Literal>().StringValue!;
                 script = source;
             }
 

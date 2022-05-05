@@ -5,8 +5,8 @@ namespace Esprima.Ast
 {
     public sealed class ImportDeclaration : Declaration
     {
-        private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
-        private readonly NodeList<ImportAttribute> _assertions;
+        internal readonly NodeList<ImportDeclarationSpecifier> _specifiers;
+        internal readonly NodeList<ImportAttribute> _assertions;
 
         public ImportDeclaration(
             in NodeList<ImportDeclarationSpecifier> specifiers,
@@ -19,22 +19,22 @@ namespace Esprima.Ast
             _assertions = assertions;
         }
 
-        public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _specifiers; }
+        public ReadOnlySpan<ImportDeclarationSpecifier> Specifiers { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _specifiers.AsSpan(); }
         public Literal Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
+        public ReadOnlySpan<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _assertions.AsSpan(); }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
         private IEnumerable<Node?> CreateChildNodes()
         {
-            foreach (var node in Specifiers)
+            foreach (var node in _specifiers)
             {
                 yield return node;
             }
 
             yield return Source;
 
-            foreach (var node in Assertions)
+            foreach (var node in _assertions)
             {
                 yield return node;
             }
@@ -47,7 +47,7 @@ namespace Esprima.Ast
 
         public ImportDeclaration UpdateWith(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> assertions)
         {
-            if (NodeList.AreSame(specifiers, Specifiers) && source == Source && NodeList.AreSame(assertions, Assertions))
+            if (NodeList.AreSame(specifiers, _specifiers) && source == Source && NodeList.AreSame(assertions, _assertions))
             {
                 return this;
             }

@@ -5,7 +5,7 @@ namespace Esprima.Ast.Jsx;
 
 public sealed class JsxElement : JsxExpression
 {
-    private readonly NodeList<JsxExpression> _children;
+    internal readonly NodeList<JsxExpression> _children;
 
     public JsxElement(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement) : base(JsxNodeType.Element)
     {
@@ -16,9 +16,9 @@ public sealed class JsxElement : JsxExpression
 
     public Node OpeningElement { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Node? ClosingElement { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-    public ref readonly NodeList<JsxExpression> Children { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _children; }
+    public ReadOnlySpan<JsxExpression> Children { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _children.AsSpan(); }
 
-    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(OpeningElement, Children, ClosingElement);
+    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(OpeningElement, _children, ClosingElement);
 
     protected override object? Accept(IJsxAstVisitor visitor)
     {
@@ -27,7 +27,7 @@ public sealed class JsxElement : JsxExpression
 
     public JsxElement UpdateWith(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
     {
-        if (openingElement == OpeningElement && NodeList.AreSame(children, Children) && closingElement == ClosingElement)
+        if (openingElement == OpeningElement && NodeList.AreSame(children, _children) && closingElement == ClosingElement)
         {
             return this;
         }

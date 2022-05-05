@@ -1,5 +1,4 @@
 ﻿using Esprima.Ast;
-using Xunit;
 
 namespace Esprima.Tests
 {

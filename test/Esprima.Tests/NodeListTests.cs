@@ -1,8 +1,5 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using Esprima.Ast;
-using Xunit;
 
 namespace Esprima.Tests
 {

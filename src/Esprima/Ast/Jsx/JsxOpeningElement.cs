@@ -5,7 +5,7 @@ namespace Esprima.Ast.Jsx;
 
 public sealed class JsxOpeningElement : JsxExpression
 {
-    private readonly NodeList<JsxExpression> _attributes;
+    internal readonly NodeList<JsxExpression> _attributes;
 
     public JsxOpeningElement(JsxExpression name, bool selfClosing, in NodeList<JsxExpression> attributes) : base(JsxNodeType.OpeningElement)
     {
@@ -16,9 +16,9 @@ public sealed class JsxOpeningElement : JsxExpression
 
     public JsxExpression Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool SelfClosing { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-    public ref readonly NodeList<JsxExpression> Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _attributes; }
+    public ReadOnlySpan<JsxExpression> Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _attributes.AsSpan(); }
 
-    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Name, Attributes);
+    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Name, _attributes);
 
     protected override object? Accept(IJsxAstVisitor visitor)
     {
@@ -27,7 +27,7 @@ public sealed class JsxOpeningElement : JsxExpression
 
     public JsxOpeningElement UpdateWith(JsxExpression name, in NodeList<JsxExpression> attributes)
     {
-        if (name == Name && NodeList.AreSame(attributes, Attributes))
+        if (name == Name && NodeList.AreSame(attributes, _attributes))
         {
             return this;
         }

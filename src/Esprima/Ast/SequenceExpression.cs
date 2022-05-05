@@ -12,9 +12,9 @@ namespace Esprima.Ast
             _expressions = expressions;
         }
 
-        public ref readonly NodeList<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _expressions; }
+        public ReadOnlySpan<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _expressions.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Expressions);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_expressions);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -23,7 +23,7 @@ namespace Esprima.Ast
 
         public SequenceExpression UpdateWith(in NodeList<Expression> expressions)
         {
-            if (NodeList.AreSame(expressions, Expressions))
+            if (NodeList.AreSame(expressions, _expressions))
             {
                 return this;
             }

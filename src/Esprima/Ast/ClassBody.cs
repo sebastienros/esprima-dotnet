@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class ClassBody : Node
     {
-        private readonly NodeList<ClassElement> _body;
+        internal readonly NodeList<ClassElement> _body;
 
         public ClassBody(in NodeList<ClassElement> body) : base(Nodes.ClassBody)
         {
@@ -15,9 +15,9 @@ namespace Esprima.Ast
         /// <remarks>
         /// <see cref="MethodDefinition" /> | <see cref="PropertyDefinition" /> | <see cref="StaticBlock" />
         /// </remarks>
-        public ref readonly NodeList<ClassElement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
+        public ReadOnlySpan<ClassElement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _body.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -26,7 +26,7 @@ namespace Esprima.Ast
 
         public ClassBody UpdateWith(in NodeList<ClassElement> body)
         {
-            if (NodeList.AreSame(body, Body))
+            if (NodeList.AreSame(body, _body))
             {
                 return this;
             }

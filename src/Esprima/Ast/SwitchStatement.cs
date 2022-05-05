@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class SwitchStatement : Statement
     {
-        private readonly NodeList<SwitchCase> _cases;
+        internal readonly NodeList<SwitchCase> _cases;
 
         public SwitchStatement(Expression discriminant, in NodeList<SwitchCase> cases) : base(Nodes.SwitchStatement)
         {
@@ -14,9 +14,9 @@ namespace Esprima.Ast
         }
 
         public Expression Discriminant { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<SwitchCase> Cases { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _cases; }
+        public ReadOnlySpan<SwitchCase> Cases { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _cases.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Discriminant, Cases);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Discriminant, _cases);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -25,7 +25,7 @@ namespace Esprima.Ast
 
         public SwitchStatement UpdateWith(Expression discriminant, in NodeList<SwitchCase> cases)
         {
-            if (discriminant == Discriminant && NodeList.AreSame(cases, Cases))
+            if (discriminant == Discriminant && NodeList.AreSame(cases, _cases))
             {
                 return this;
             }

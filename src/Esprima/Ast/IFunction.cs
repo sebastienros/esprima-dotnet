@@ -6,7 +6,7 @@
     public interface IFunction
     {
         Identifier? Id { get; }
-        ref readonly NodeList<Expression> Params { get; }
+        ReadOnlySpan<Expression> Params { get; }
         Node Body { get; }
         bool Generator { get; }
         bool Expression { get; }

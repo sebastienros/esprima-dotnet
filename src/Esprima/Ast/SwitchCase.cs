@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class SwitchCase : Node
     {
-        private readonly NodeList<Statement> _consequent;
+        internal readonly NodeList<Statement> _consequent;
 
         public SwitchCase(Expression? test, in NodeList<Statement> consequent) : base(Nodes.SwitchCase)
         {
@@ -14,9 +14,9 @@ namespace Esprima.Ast
         }
 
         public Expression? Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Statement> Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _consequent; }
+        public ReadOnlySpan<Statement> Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _consequent.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Test, Consequent);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Test, _consequent);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -25,7 +25,7 @@ namespace Esprima.Ast
 
         public SwitchCase UpdateWith(Expression? test, in NodeList<Statement> consequent)
         {
-            if (test == Test && NodeList.AreSame(consequent, Consequent))
+            if (test == Test && NodeList.AreSame(consequent, _consequent))
             {
                 return this;
             }

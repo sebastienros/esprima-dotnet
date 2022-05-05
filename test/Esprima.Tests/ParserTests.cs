@@ -28,7 +28,7 @@ namespace Esprima.Tests
         {
             var parser = new JavaScriptParser("function p() {}");
             var program = parser.ParseScript();
-            var function = program.Body.First().As<FunctionDeclaration>();
+            var function = program.Body[0].As<FunctionDeclaration>();
 
             Assert.False(function.Strict);
         }
@@ -38,7 +38,7 @@ namespace Esprima.Tests
         {
             var parser = new JavaScriptParser("function p() { 'use strict'; }");
             var program = parser.ParseScript();
-            var function = program.Body.First().As<FunctionDeclaration>();
+            var function = program.Body[0].As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
         }
@@ -48,7 +48,7 @@ namespace Esprima.Tests
         {
             var parser = new JavaScriptParser("'use strict'; function p() {}");
             var program = parser.ParseScript();
-            var function = program.Body.Skip(1).First().As<FunctionDeclaration>();
+            var function = program.Body[1].As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
         }
@@ -58,7 +58,7 @@ namespace Esprima.Tests
         {
             var parser = new JavaScriptParser("function p() {'use strict'; return false;}");
             var program = parser.ParseScript();
-            var function = program.Body.First().As<FunctionDeclaration>();
+            var function = program.Body[0].As<FunctionDeclaration>();
 
             Assert.True(function.Strict);
         }
@@ -68,8 +68,8 @@ namespace Esprima.Tests
         {
             var parser = new JavaScriptParser("function p() {'use strict'; function q() { return; } return; }");
             var program = parser.ParseScript();
-            var p = program.Body.First().As<FunctionDeclaration>();
-            var q = p.Body.As<BlockStatement>().Body.Skip(1).First().As<FunctionDeclaration>();
+            var p = program.Body[0].As<FunctionDeclaration>();
+            var q = p.Body.As<BlockStatement>().Body[1].As<FunctionDeclaration>();
 
             Assert.Equal("p", p.Id?.Name);
             Assert.Equal("q", q.Id?.Name);
@@ -83,7 +83,7 @@ namespace Esprima.Tests
         {
             var parser = new JavaScriptParser("here: Hello();");
             var program = parser.ParseScript();
-            var labeledStatement = program.Body.First().As<LabeledStatement>();
+            var labeledStatement = program.Body[0].As<LabeledStatement>();
             var body = labeledStatement.Body;
 
             Assert.Equal(labeledStatement.Label, body.LabelSet);

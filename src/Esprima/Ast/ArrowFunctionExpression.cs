@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class ArrowFunctionExpression : Expression, IFunction
     {
-        private readonly NodeList<Expression> _params;
+        internal readonly NodeList<Expression> _params;
 
         public ArrowFunctionExpression(
             in NodeList<Expression> parameters,
@@ -23,7 +23,8 @@ namespace Esprima.Ast
         }
 
         Identifier? IFunction.Id => null;
-        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+        public ReadOnlySpan<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _params.AsSpan(); }
+
         /// <remarks>
         /// <see cref="BlockStatement" /> | <see cref="Ast.Expression" />
         /// </remarks>
@@ -33,7 +34,7 @@ namespace Esprima.Ast
         public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Params, Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_params, Body);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -42,7 +43,7 @@ namespace Esprima.Ast
 
         public ArrowFunctionExpression UpdateWith(in NodeList<Expression> parameters, Node body)
         {
-            if (NodeList.AreSame(parameters, Params) && body == Body)
+            if (NodeList.AreSame(parameters, _params) && body == Body)
             {
                 return this;
             }

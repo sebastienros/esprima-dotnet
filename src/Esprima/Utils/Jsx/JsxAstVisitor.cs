@@ -52,10 +52,9 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
     public virtual object? VisitJsxElement(JsxElement jsxElement)
     {
         _visitor.Visit(jsxElement.OpeningElement);
-        ref readonly var children = ref jsxElement.Children;
-        for (var i = 0; i < children.Count; i++)
+        foreach (var child in jsxElement.Children)
         {
-            _visitor.Visit(children[i]);
+            _visitor.Visit(child);
         }
 
         if (jsxElement.ClosingElement is not null)
@@ -102,10 +101,9 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
     public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         _visitor.Visit(jsxOpeningElement.Name);
-        ref readonly var attributes = ref jsxOpeningElement.Attributes;
-        for (var i = 0; i < attributes.Count; i++)
+        foreach (var attribute in jsxOpeningElement.Attributes)
         {
-            _visitor.Visit(attributes[i]);
+            _visitor.Visit(attribute);
         }
 
         return jsxOpeningElement;

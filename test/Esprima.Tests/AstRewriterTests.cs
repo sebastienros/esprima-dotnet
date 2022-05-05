@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 using Esprima.Ast.Jsx;
 using Esprima.Utils.Jsx;
 using Module = Esprima.Ast.Module;
@@ -204,8 +203,8 @@ sealed class TestRewriter : JsxAstRewriter
         return ForceNewObjectByControlType((Program) base.VisitProgram(program)!,
             node => program switch
             {
-                Module => new Module(node.Body),
-                Script script => new Script(node.Body, script.Strict),
+                Module => new Module(node._body),
+                Script script => new Script(node._body, script.Strict),
                 _ => throw new NotImplementedException($"{program.SourceType} does not implemented yet.")
             });
     }
@@ -219,7 +218,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
     {
         return ForceNewObjectByControlType((FunctionDeclaration) base.VisitFunctionDeclaration(functionDeclaration)!,
-            node => new FunctionDeclaration(node.Id, node.Params, node.Body, node.Generator, node.Strict, node.Async));
+            node => new FunctionDeclaration(node.Id, node._params, node.Body, node.Generator, node.Strict, node.Async));
     }
 
     protected internal override object? VisitWithStatement(WithStatement withStatement)
@@ -237,7 +236,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
     {
         return ForceNewObjectByControlType((VariableDeclaration) base.VisitVariableDeclaration(variableDeclaration)!,
-            node => new VariableDeclaration(node.Declarations, node.Kind));
+            node => new VariableDeclaration(node._declarations, node.Kind));
     }
 
     protected internal override object? VisitTryStatement(TryStatement tryStatement)
@@ -255,13 +254,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
     {
         return ForceNewObjectByControlType((SwitchStatement) base.VisitSwitchStatement(switchStatement)!,
-            node => new SwitchStatement(node.Discriminant, node.Cases));
+            node => new SwitchStatement(node.Discriminant, node._cases));
     }
 
     protected internal override object? VisitSwitchCase(SwitchCase switchCase)
     {
         return ForceNewObjectByControlType((SwitchCase) base.VisitSwitchCase(switchCase)!,
-            node => new SwitchCase(node.Test, node.Consequent));
+            node => new SwitchCase(node.Test, node._consequent));
     }
 
     protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
@@ -325,7 +324,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
     {
         return ForceNewObjectByControlType((ArrowFunctionExpression) base.VisitArrowFunctionExpression(arrowFunctionExpression)!,
-            node => new ArrowFunctionExpression(node.Params, node.Body, node.Expression, node.Strict, node.Async));
+            node => new ArrowFunctionExpression(node._params, node.Body, node.Expression, node.Strict, node.Async));
     }
 
     protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
@@ -347,19 +346,19 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
     {
         return ForceNewObjectByControlType((SequenceExpression) base.VisitSequenceExpression(sequenceExpression)!,
-            node => new SequenceExpression(node.Expressions));
+            node => new SequenceExpression(node._expressions));
     }
 
     protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
     {
         return ForceNewObjectByControlType((ObjectExpression) base.VisitObjectExpression(objectExpression)!,
-            node => new ObjectExpression(node.Properties));
+            node => new ObjectExpression(node._properties));
     }
 
     protected internal override object? VisitNewExpression(NewExpression newExpression)
     {
         return ForceNewObjectByControlType((NewExpression) base.VisitNewExpression(newExpression)!,
-            node => new NewExpression(node.Callee, node.Arguments));
+            node => new NewExpression(node.Callee, node._arguments));
     }
 
     protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
@@ -397,13 +396,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
         return ForceNewObjectByControlType((FunctionExpression) base.VisitFunctionExpression(functionExpression)!,
-            node => new FunctionExpression(node.Id, node.Params, node.Body, node.Generator, node.Strict, node.Async));
+            node => new FunctionExpression(node.Id, node._params, node.Body, node.Generator, node.Strict, node.Async));
     }
 
     protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
         return ForceNewObjectByControlType((PropertyDefinition) base.VisitPropertyDefinition(propertyDefinition)!,
-            node => new PropertyDefinition(node.Key, node.Computed, node.Value!, node.Static, node.Decorators));
+            node => new PropertyDefinition(node.Key, node.Computed, node.Value!, node.Static, node._decorators));
     }
 
     protected internal override object? VisitChainExpression(ChainExpression chainExpression)
@@ -415,7 +414,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
         return ForceNewObjectByControlType((ClassExpression) base.VisitClassExpression(classExpression)!,
-            node => new ClassExpression(node.Id, node.SuperClass, node.Body, node.Decorators));
+            node => new ClassExpression(node.Id, node.SuperClass, node.Body, node._decorators));
     }
 
     protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
@@ -427,13 +426,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
         return ForceNewObjectByControlType((ExportAllDeclaration) base.VisitExportAllDeclaration(exportAllDeclaration)!,
-            node => new ExportAllDeclaration(node.Source, node.Exported, exportAllDeclaration.Assertions));
+            node => new ExportAllDeclaration(node.Source, node.Exported, exportAllDeclaration._assertions));
     }
 
     protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
         return ForceNewObjectByControlType((ExportNamedDeclaration) base.VisitExportNamedDeclaration(exportNamedDeclaration)!,
-            node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source, exportNamedDeclaration.Assertions));
+            node => new ExportNamedDeclaration(node.Declaration, node._specifiers, node.Source, exportNamedDeclaration._assertions));
     }
 
     protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
@@ -451,7 +450,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         return ForceNewObjectByControlType((ImportDeclaration) base.VisitImportDeclaration(importDeclaration)!,
-            node => new ImportDeclaration(node.Specifiers, node.Source, importDeclaration.Assertions));
+            node => new ImportDeclaration(node._specifiers, node.Source, importDeclaration._assertions));
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
@@ -475,7 +474,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
         return ForceNewObjectByControlType((MethodDefinition) base.VisitMethodDefinition(methodDefinition)!,
-            node => new MethodDefinition(node.Key, node.Computed, node.Value, node.Kind, node.Static, node.Decorators));
+            node => new MethodDefinition(node.Key, node.Computed, node.Value, node.Kind, node.Static, node._decorators));
     }
 
     protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
@@ -487,13 +486,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
         return ForceNewObjectByControlType((ClassDeclaration) base.VisitClassDeclaration(classDeclaration)!,
-            node => new ClassDeclaration(node.Id, node.SuperClass, node.Body, node.Decorators));
+            node => new ClassDeclaration(node.Id, node.SuperClass, node.Body, node._decorators));
     }
 
     protected internal override object? VisitClassBody(ClassBody classBody)
     {
         return ForceNewObjectByControlType((ClassBody) base.VisitClassBody(classBody)!,
-            node => new ClassBody(node.Body));
+            node => new ClassBody(node._body));
     }
 
     protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
@@ -523,7 +522,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
     {
         return ForceNewObjectByControlType((ObjectPattern) base.VisitObjectPattern(objectPattern)!,
-            node => new ObjectPattern(node.Properties));
+            node => new ObjectPattern(node._properties));
     }
 
     protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
@@ -541,7 +540,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
     {
         return ForceNewObjectByControlType((ArrayPattern) base.VisitArrayPattern(arrayPattern)!,
-            node => new ArrayPattern(node.Elements));
+            node => new ArrayPattern(node._elements));
     }
 
     protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
@@ -553,7 +552,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
     {
         return ForceNewObjectByControlType((TemplateLiteral) base.VisitTemplateLiteral(templateLiteral)!,
-            node => new TemplateLiteral(node.Quasis, node.Expressions));
+            node => new TemplateLiteral(node._quasis, node._expressions));
     }
 
     protected internal override object? VisitTemplateElement(TemplateElement templateElement)
@@ -589,7 +588,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitCallExpression(CallExpression callExpression)
     {
         return ForceNewObjectByControlType((CallExpression) base.VisitCallExpression(callExpression)!,
-            node => new CallExpression(node.Callee, node.Arguments, callExpression.Optional));
+            node => new CallExpression(node.Callee, node._arguments, callExpression.Optional));
     }
 
     protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
@@ -601,7 +600,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
         return ForceNewObjectByControlType((ArrayExpression) base.VisitArrayExpression(arrayExpression)!,
-            node => new ArrayExpression(node.Elements));
+            node => new ArrayExpression(node._elements));
     }
 
     protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
@@ -625,13 +624,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
     {
         return ForceNewObjectByControlType((BlockStatement) base.VisitBlockStatement(blockStatement)!,
-            node => new BlockStatement(node.Body));
+            node => new BlockStatement(node._body));
     }
 
     protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
     {
         return ForceNewObjectByControlType((StaticBlock) base.VisitStaticBlock(staticBlock)!,
-            node => new StaticBlock(node.Body));
+            node => new StaticBlock(node._body));
     }
 
     public override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
@@ -643,7 +642,7 @@ sealed class TestRewriter : JsxAstRewriter
     public override object? VisitJsxElement(JsxElement jsxElement)
     {
         return ForceNewObjectByControlType((JsxElement) base.VisitJsxElement(jsxElement)!,
-            node => new JsxElement(node.OpeningElement, node.Children, node.ClosingElement));
+            node => new JsxElement(node.OpeningElement, node._children, node.ClosingElement));
     }
 
     public override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
@@ -697,7 +696,7 @@ sealed class TestRewriter : JsxAstRewriter
     public override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         return ForceNewObjectByControlType((JsxOpeningElement) base.VisitJsxOpeningElement(jsxOpeningElement)!,
-            node => new JsxOpeningElement(node.Name, node.SelfClosing, node.Attributes));
+            node => new JsxOpeningElement(node.Name, node.SelfClosing, node._attributes));
     }
 
     public override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)

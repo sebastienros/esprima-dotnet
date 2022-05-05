@@ -5,16 +5,16 @@ namespace Esprima.Ast
 {
     public sealed class ArrayExpression : Expression
     {
-        private readonly NodeList<Expression?> _elements;
+        internal readonly NodeList<Expression?> _elements;
 
         public ArrayExpression(in NodeList<Expression?> elements) : base(Nodes.ArrayExpression)
         {
             _elements = elements;
         }
 
-        public ref readonly NodeList<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
+        public ReadOnlySpan<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _elements.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Elements);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_elements);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -23,7 +23,7 @@ namespace Esprima.Ast
 
         public ArrayExpression UpdateWith(in NodeList<Expression?> elements)
         {
-            if (NodeList.AreSame(elements, Elements))
+            if (NodeList.AreSame(elements, _elements))
             {
                 return this;
             }

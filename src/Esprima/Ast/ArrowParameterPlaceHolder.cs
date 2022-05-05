@@ -7,7 +7,7 @@ namespace Esprima.Ast
     {
         public static readonly ArrowParameterPlaceHolder Empty = new(new NodeList<Expression>(), false);
 
-        private readonly NodeList<Expression> _params;
+        internal readonly NodeList<Expression> _params;
 
         public ArrowParameterPlaceHolder(
             in NodeList<Expression> parameters,
@@ -19,9 +19,9 @@ namespace Esprima.Ast
         }
 
         public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+        public ReadOnlySpan<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _params.AsSpan(); }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Params);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_params);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
