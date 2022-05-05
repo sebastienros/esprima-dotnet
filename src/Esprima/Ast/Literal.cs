@@ -52,9 +52,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
         {
-            visitor.VisitLiteral(this);
+            return visitor.VisitLiteral(this) as T;
         }
     }
 }

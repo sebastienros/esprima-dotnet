@@ -155,7 +155,7 @@ namespace Esprima.Utils
             VisitedNode?.Invoke(this, node);
         }
 
-        protected internal override void VisitProgram(Program program)
+        protected internal override Program VisitProgram(Program program)
         {
             VisitingProgram?.Invoke(this, program);
             base.VisitProgram(program);

@@ -311,25 +311,28 @@ namespace Esprima.Utils
                 }
             }
 
-            public override void Visit(Node? node)
+            public override TNode Visit<TNode>(TNode node) where TNode : class
             {
-                if (node != null)
+                if (node is not null)
                 {
-                    base.Visit(node);
+                    return base.Visit(node);
                 }
                 else
                 {
                     _writer.Null();
+                    return node;
                 }
             }
 
-            protected internal override void VisitProgram(Program program)
+            protected internal override Program VisitProgram(Program program)
             {
                 using (StartNodeObject(program))
                 {
                     Member("body", program.Body, e => (Node) e);
                     Member("sourceType", program.SourceType);
                 }
+
+                return base.VisitProgram(program);
             }
 
             [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
@@ -338,16 +341,18 @@ namespace Esprima.Utils
                 throw new NotSupportedException("Unknown node type: " + node.Type);
             }
 
-            protected internal override void VisitCatchClause(CatchClause catchClause)
+            protected internal override CatchClause VisitCatchClause(CatchClause catchClause)
             {
                 using (StartNodeObject(catchClause))
                 {
                     Member("param", catchClause.Param);
                     Member("body", catchClause.Body);
                 }
+
+                return base.VisitCatchClause(catchClause);
             }
 
-            protected internal override void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+            protected internal override FunctionDeclaration VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
             {
                 using (StartNodeObject(functionDeclaration))
                 {
@@ -358,36 +363,42 @@ namespace Esprima.Utils
                     Member("expression", functionDeclaration.Expression);
                     Member("async", functionDeclaration.Async);
                 }
+                
+                return base.VisitFunctionDeclaration(functionDeclaration);
             }
 
-            protected internal override void VisitWithStatement(WithStatement withStatement)
+            protected internal override WithStatement VisitWithStatement(WithStatement withStatement)
             {
                 using (StartNodeObject(withStatement))
                 {
                     Member("object", withStatement.Object);
                     Member("body", withStatement.Body);
                 }
+
+                return base.VisitWithStatement(withStatement);
             }
 
-            protected internal override void VisitWhileStatement(WhileStatement whileStatement)
+            protected internal override WhileStatement VisitWhileStatement(WhileStatement whileStatement)
             {
                 using (StartNodeObject(whileStatement))
                 {
                     Member("test", whileStatement.Test);
                     Member("body", whileStatement.Body);
                 }
+                return base.VisitWhileStatement(whileStatement);
             }
 
-            protected internal override void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+            protected internal override VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
             {
                 using (StartNodeObject(variableDeclaration))
                 {
                     Member("declarations", variableDeclaration.Declarations);
                     Member("kind", variableDeclaration.Kind);
                 }
+                return base.VisitVariableDeclaration(variableDeclaration);
             }
 
-            protected internal override void VisitTryStatement(TryStatement tryStatement)
+            protected internal override TryStatement VisitTryStatement(TryStatement tryStatement)
             {
                 using (StartNodeObject(tryStatement))
                 {
@@ -395,60 +406,67 @@ namespace Esprima.Utils
                     Member("handler", tryStatement.Handler);
                     Member("finalizer", tryStatement.Finalizer);
                 }
+                return base.VisitTryStatement(tryStatement);
             }
 
-            protected internal override void VisitThrowStatement(ThrowStatement throwStatement)
+            protected internal override ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
             {
                 using (StartNodeObject(throwStatement))
                 {
                     Member("argument", throwStatement.Argument);
                 }
+                return base.VisitThrowStatement(throwStatement);
             }
 
-            protected internal override void VisitAwaitExpression(AwaitExpression awaitExpression)
+            protected internal override AwaitExpression VisitAwaitExpression(AwaitExpression awaitExpression)
             {
                 using (StartNodeObject(awaitExpression))
                 {
                     Member("argument", awaitExpression.Argument);
                 }
+                return base.VisitAwaitExpression(awaitExpression);
             }
 
-            protected internal override void VisitSwitchStatement(SwitchStatement switchStatement)
+            protected internal override SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
             {
                 using (StartNodeObject(switchStatement))
                 {
                     Member("discriminant", switchStatement.Discriminant);
                     Member("cases", switchStatement.Cases);
                 }
+                return base.VisitSwitchStatement(switchStatement);
             }
 
-            protected internal override void VisitSwitchCase(SwitchCase switchCase)
+            protected internal override SwitchCase VisitSwitchCase(SwitchCase switchCase)
             {
                 using (StartNodeObject(switchCase))
                 {
                     Member("test", switchCase.Test);
                     Member("consequent", switchCase.Consequent, e => (Node) e);
                 }
+                return base.VisitSwitchCase(switchCase);
             }
 
-            protected internal override void VisitReturnStatement(ReturnStatement returnStatement)
+            protected internal override ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
             {
                 using (StartNodeObject(returnStatement))
                 {
                     Member("argument", returnStatement.Argument);
                 }
+                return base.VisitReturnStatement(returnStatement);
             }
 
-            protected internal override void VisitLabeledStatement(LabeledStatement labeledStatement)
+            protected internal override LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
             {
                 using (StartNodeObject(labeledStatement))
                 {
                     Member("label", labeledStatement.Label);
                     Member("body", labeledStatement.Body);
                 }
+                return base.VisitLabeledStatement(labeledStatement);
             }
 
-            protected internal override void VisitIfStatement(IfStatement ifStatement)
+            protected internal override IfStatement VisitIfStatement(IfStatement ifStatement)
             {
                 using (StartNodeObject(ifStatement))
                 {
@@ -456,19 +474,22 @@ namespace Esprima.Utils
                     Member("consequent", ifStatement.Consequent);
                     Member("alternate", ifStatement.Alternate);
                 }
+                return base.VisitIfStatement(ifStatement);
             }
 
-            protected internal override void VisitEmptyStatement(EmptyStatement emptyStatement)
+            protected internal override EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
             {
                 EmptyNodeObject(emptyStatement);
+                return base.VisitEmptyStatement(emptyStatement);
             }
 
-            protected internal override void VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+            protected internal override DebuggerStatement VisitDebuggerStatement(DebuggerStatement debuggerStatement)
             {
                 EmptyNodeObject(debuggerStatement);
+                return base.VisitDebuggerStatement(debuggerStatement);
             }
 
-            protected internal override void VisitExpressionStatement(ExpressionStatement expressionStatement)
+            protected internal override ExpressionStatement VisitExpressionStatement(ExpressionStatement expressionStatement)
             {
                 using (StartNodeObject(expressionStatement))
                 {
@@ -479,9 +500,10 @@ namespace Esprima.Utils
 
                     Member("expression", expressionStatement.Expression);
                 }
+                return base.VisitExpressionStatement(expressionStatement);
             }
 
-            protected internal override void VisitForStatement(ForStatement forStatement)
+            protected internal override ForStatement VisitForStatement(ForStatement forStatement)
             {
                 using (StartNodeObject(forStatement))
                 {
@@ -490,9 +512,10 @@ namespace Esprima.Utils
                     Member("update", forStatement.Update);
                     Member("body", forStatement.Body);
                 }
+                return base.VisitForStatement(forStatement);
             }
 
-            protected internal override void VisitForInStatement(ForInStatement forInStatement)
+            protected internal override ForInStatement VisitForInStatement(ForInStatement forInStatement)
             {
                 using (StartNodeObject(forInStatement))
                 {
@@ -501,18 +524,20 @@ namespace Esprima.Utils
                     Member("body", forInStatement.Body);
                     Member("each", false);
                 }
+                return base.VisitForInStatement(forInStatement);
             }
 
-            protected internal override void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+            protected internal override DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
             {
                 using (StartNodeObject(doWhileStatement))
                 {
                     Member("body", doWhileStatement.Body);
                     Member("test", doWhileStatement.Test);
                 }
+                return base.VisitDoWhileStatement(doWhileStatement);
             }
 
-            protected internal override void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+            protected internal override ArrowFunctionExpression VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
             {
                 using (StartNodeObject(arrowFunctionExpression))
                 {
@@ -523,9 +548,10 @@ namespace Esprima.Utils
                     Member("expression", arrowFunctionExpression.Expression);
                     Member("async", arrowFunctionExpression.Async);
                 }
+                return base.VisitArrowFunctionExpression(arrowFunctionExpression);
             }
 
-            protected internal override void VisitUnaryExpression(UnaryExpression unaryExpression)
+            protected internal override UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
             {
                 using (StartNodeObject(unaryExpression))
                 {
@@ -533,44 +559,50 @@ namespace Esprima.Utils
                     Member("argument", unaryExpression.Argument);
                     Member("prefix", unaryExpression.Prefix);
                 }
+                return base.VisitUnaryExpression(unaryExpression);
             }
 
-            protected internal override void VisitUpdateExpression(UpdateExpression updateExpression)
+            protected internal override UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
             {
                 VisitUnaryExpression(updateExpression);
+                return base.VisitUpdateExpression(updateExpression);
             }
 
-            protected internal override void VisitThisExpression(ThisExpression thisExpression)
+            protected internal override ThisExpression VisitThisExpression(ThisExpression thisExpression)
             {
                 EmptyNodeObject(thisExpression);
+                return base.VisitThisExpression(thisExpression);
             }
 
-            protected internal override void VisitSequenceExpression(SequenceExpression sequenceExpression)
+            protected internal override SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
             {
                 using (StartNodeObject(sequenceExpression))
                 {
                     Member("expressions", sequenceExpression.Expressions);
                 }
+                return base.VisitSequenceExpression(sequenceExpression);
             }
 
-            protected internal override void VisitObjectExpression(ObjectExpression objectExpression)
+            protected internal override ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
             {
                 using (StartNodeObject(objectExpression))
                 {
                     Member("properties", objectExpression.Properties);
                 }
+                return base.VisitObjectExpression(objectExpression);
             }
 
-            protected internal override void VisitNewExpression(NewExpression newExpression)
+            protected internal override NewExpression VisitNewExpression(NewExpression newExpression)
             {
                 using (StartNodeObject(newExpression))
                 {
                     Member("callee", newExpression.Callee);
                     Member("arguments", newExpression.Arguments, e => (Node) e);
                 }
+                return base.VisitNewExpression(newExpression);
             }
 
-            protected internal override void VisitMemberExpression(MemberExpression memberExpression)
+            protected internal override MemberExpression VisitMemberExpression(MemberExpression memberExpression)
             {
                 using (StartNodeObject(memberExpression))
                 {
@@ -579,14 +611,16 @@ namespace Esprima.Utils
                     Member("property", memberExpression.Property);
                     Member("optional", memberExpression.Optional);
                 }
+                return base.VisitMemberExpression(memberExpression);
             }
 
-            protected internal override void VisitLogicalExpression(BinaryExpression binaryExpression)
+            protected internal override BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
             {
                 VisitBinaryExpression(binaryExpression);
+                return base.VisitLogicalExpression(binaryExpression);
             }
 
-            protected internal override void VisitLiteral(Literal literal)
+            protected internal override Literal VisitLiteral(Literal literal)
             {
                 using (StartNodeObject(literal))
                 {
@@ -632,17 +666,19 @@ namespace Esprima.Utils
                         _writer.EndObject();
                     }
                 }
+                return base.VisitLiteral(literal);
             }
 
-            protected internal override void VisitIdentifier(Identifier identifier)
+            protected internal override Identifier VisitIdentifier(Identifier identifier)
             {
                 using (StartNodeObject(identifier))
                 {
                     Member("name", identifier.Name);
                 }
+                return base.VisitIdentifier(identifier);
             }
 
-            protected internal override void VisitFunctionExpression(IFunction function)
+            protected internal override IFunction VisitFunctionExpression(IFunction function)
             {
                 using (StartNodeObject((Node) function))
                 {
@@ -653,9 +689,10 @@ namespace Esprima.Utils
                     Member("expression", function.Expression);
                     Member("async", function.Async);
                 }
+                return base.VisitFunctionExpression(function);
             }
 
-            protected internal override void VisitClassExpression(ClassExpression classExpression)
+            protected internal override ClassExpression VisitClassExpression(ClassExpression classExpression)
             {
                 using (StartNodeObject(classExpression))
                 {
@@ -663,34 +700,38 @@ namespace Esprima.Utils
                     Member("superClass", classExpression.SuperClass);
                     Member("body", classExpression.Body);
                 }
+                return base.VisitClassExpression(classExpression);
             }
 
-            protected internal override void VisitChainExpression(ChainExpression chainExpression)
+            protected internal override ChainExpression VisitChainExpression(ChainExpression chainExpression)
             {
                 using (StartNodeObject(chainExpression))
                 {
                     Member("expression", chainExpression.Expression);
                 }
+                return base.VisitChainExpression(chainExpression);
             }
 
-            protected internal override void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+            protected internal override ExportDefaultDeclaration VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
             {
                 using (StartNodeObject(exportDefaultDeclaration))
                 {
                     Member("declaration", exportDefaultDeclaration.Declaration);
                 }
+                return base.VisitExportDefaultDeclaration(exportDefaultDeclaration);
             }
 
-            protected internal override void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+            protected internal override ExportAllDeclaration VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
             {
                 using (StartNodeObject(exportAllDeclaration))
                 {
                     Member("source", exportAllDeclaration.Source);
                     Member("exported", exportAllDeclaration.Exported);
                 }
+                return base.VisitExportAllDeclaration(exportAllDeclaration);
             }
 
-            protected internal override void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+            protected internal override ExportNamedDeclaration VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
             {
                 using (StartNodeObject(exportNamedDeclaration))
                 {
@@ -698,59 +739,66 @@ namespace Esprima.Utils
                     Member("specifiers", exportNamedDeclaration.Specifiers);
                     Member("source", exportNamedDeclaration.Source);
                 }
+                return base.VisitExportNamedDeclaration(exportNamedDeclaration);
             }
 
-            protected internal override void VisitExportSpecifier(ExportSpecifier exportSpecifier)
+            protected internal override ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
             {
                 using (StartNodeObject(exportSpecifier))
                 {
                     Member("exported", exportSpecifier.Exported);
                     Member("local", exportSpecifier.Local);
                 }
+                return base.VisitExportSpecifier(exportSpecifier);
             }
 
-            protected internal override void VisitImport(Import import)
+            protected internal override Import VisitImport(Import import)
             {
                 using (StartNodeObject(import))
                 {
                 }
+                return base.VisitImport(import);
             }
 
-            protected internal override void VisitImportDeclaration(ImportDeclaration importDeclaration)
+            protected internal override ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
             {
                 using (StartNodeObject(importDeclaration))
                 {
                     Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
                     Member("source", importDeclaration.Source);
                 }
+                return base.VisitImportDeclaration(importDeclaration);
             }
 
-            protected internal override void VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+            protected internal override ImportNamespaceSpecifier VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
             {
                 using (StartNodeObject(importNamespaceSpecifier))
                 {
                     Member("local", importNamespaceSpecifier.Local);
                 }
+                return base.VisitImportNamespaceSpecifier(importNamespaceSpecifier);
             }
 
-            protected internal override void VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+            protected internal override ImportDefaultSpecifier VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
             {
                 using (StartNodeObject(importDefaultSpecifier))
                 {
                     Member("local", importDefaultSpecifier.Local);
                 }
+                return base.VisitImportDefaultSpecifier(importDefaultSpecifier);
             }
 
-            protected internal override void VisitImportSpecifier(ImportSpecifier importSpecifier)
+            protected internal override ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
             {
                 using (StartNodeObject(importSpecifier))
                 {
                     Member("local", importSpecifier.Local);
                     Member("imported", importSpecifier.Imported);
                 }
+                return base.VisitImportSpecifier(importSpecifier);
             }
 
-            protected internal override void VisitMethodDefinition(MethodDefinition methodDefinition)
+            protected internal override MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
             {
                 using (StartNodeObject(methodDefinition))
                 {
@@ -760,9 +808,10 @@ namespace Esprima.Utils
                     Member("kind", methodDefinition.Kind);
                     Member("static", methodDefinition.Static);
                 }
+                return base.VisitMethodDefinition(methodDefinition);
             }
 
-            protected internal override void VisitForOfStatement(ForOfStatement forOfStatement)
+            protected internal override ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
             {
                 using (StartNodeObject(forOfStatement))
                 {
@@ -771,9 +820,10 @@ namespace Esprima.Utils
                     Member("right", forOfStatement.Right);
                     Member("body", forOfStatement.Body);
                 }
+                return base.VisitForOfStatement(forOfStatement);
             }
 
-            protected internal override void VisitClassDeclaration(ClassDeclaration classDeclaration)
+            protected internal override ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
             {
                 using (StartNodeObject(classDeclaration))
                 {
@@ -781,49 +831,55 @@ namespace Esprima.Utils
                     Member("superClass", classDeclaration.SuperClass);
                     Member("body", classDeclaration.Body);
                 }
+                return base.VisitClassDeclaration(classDeclaration);
             }
 
-            protected internal override void VisitClassBody(ClassBody classBody)
+            protected internal override ClassBody VisitClassBody(ClassBody classBody)
             {
                 using (StartNodeObject(classBody))
                 {
                     Member("body", classBody.Body);
                 }
+                return base.VisitClassBody(classBody);
             }
 
-            protected internal override void VisitYieldExpression(YieldExpression yieldExpression)
+            protected internal override YieldExpression VisitYieldExpression(YieldExpression yieldExpression)
             {
                 using (StartNodeObject(yieldExpression))
                 {
                     Member("argument", yieldExpression.Argument);
                     Member("delegate", yieldExpression.Delegate);
                 }
+                return base.VisitYieldExpression(yieldExpression);
             }
 
-            protected internal override void VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+            protected internal override TaggedTemplateExpression VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
             {
                 using (StartNodeObject(taggedTemplateExpression))
                 {
                     Member("tag", taggedTemplateExpression.Tag);
                     Member("quasi", taggedTemplateExpression.Quasi);
                 }
+                return base.VisitTaggedTemplateExpression(taggedTemplateExpression);
             }
 
-            protected internal override void VisitSuper(Super super)
+            protected internal override Super VisitSuper(Super super)
             {
                 EmptyNodeObject(super);
+                return base.VisitSuper(super);
             }
 
-            protected internal override void VisitMetaProperty(MetaProperty metaProperty)
+            protected internal override MetaProperty VisitMetaProperty(MetaProperty metaProperty)
             {
                 using (StartNodeObject(metaProperty))
                 {
                     Member("meta", metaProperty.Meta);
                     Member("property", metaProperty.Property);
                 }
+                return base.VisitMetaProperty(metaProperty);
             }
 
-            protected internal override void VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
+            protected internal override ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
             {
                 // Seems that ArrowParameterPlaceHolder nodes never appear
                 // in the final tree and only used during the construction of
@@ -832,58 +888,64 @@ namespace Esprima.Utils
                 throw new NotImplementedException();
             }
 
-            protected internal override void VisitObjectPattern(ObjectPattern objectPattern)
+            protected internal override ObjectPattern VisitObjectPattern(ObjectPattern objectPattern)
             {
                 using (StartNodeObject(objectPattern))
                 {
                     Member("properties", objectPattern.Properties);
                 }
+                return base.VisitObjectPattern(objectPattern);
             }
 
-            protected internal override void VisitSpreadElement(SpreadElement spreadElement)
+            protected internal override SpreadElement VisitSpreadElement(SpreadElement spreadElement)
             {
                 using (StartNodeObject(spreadElement))
                 {
                     Member("argument", spreadElement.Argument);
                 }
+                return base.VisitSpreadElement(spreadElement);
             }
 
-            protected internal override void VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+            protected internal override AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
             {
                 using (StartNodeObject(assignmentPattern))
                 {
                     Member("left", assignmentPattern.Left);
                     Member("right", assignmentPattern.Right);
                 }
+                return base.VisitAssignmentPattern(assignmentPattern);
             }
 
-            protected internal override void VisitArrayPattern(ArrayPattern arrayPattern)
+            protected internal override ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
             {
                 using (StartNodeObject(arrayPattern))
                 {
                     Member("elements", arrayPattern.Elements);
                 }
+                return base.VisitArrayPattern(arrayPattern);
             }
 
-            protected internal override void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+            protected internal override VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
             {
                 using (StartNodeObject(variableDeclarator))
                 {
                     Member("id", variableDeclarator.Id);
                     Member("init", variableDeclarator.Init);
                 }
+                return base.VisitVariableDeclarator(variableDeclarator);
             }
 
-            protected internal override void VisitTemplateLiteral(TemplateLiteral templateLiteral)
+            protected internal override TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
             {
                 using (StartNodeObject(templateLiteral))
                 {
                     Member("quasis", templateLiteral.Quasis);
                     Member("expressions", templateLiteral.Expressions);
                 }
+                return base.VisitTemplateLiteral(templateLiteral);
             }
 
-            protected internal override void VisitTemplateElement(TemplateElement templateElement)
+            protected internal override TemplateElement VisitTemplateElement(TemplateElement templateElement)
             {
                 using (StartNodeObject(templateElement))
                 {
@@ -894,17 +956,19 @@ namespace Esprima.Utils
                     _writer.EndObject();
                     Member("tail", templateElement.Tail);
                 }
+                return base.VisitTemplateElement(templateElement);
             }
 
-            protected internal override void VisitRestElement(RestElement restElement)
+            protected internal override RestElement VisitRestElement(RestElement restElement)
             {
                 using (StartNodeObject(restElement))
                 {
                     Member("argument", restElement.Argument);
                 }
+                return base.VisitRestElement(restElement);
             }
 
-            protected internal override void VisitProperty(Property property)
+            protected internal override Property VisitProperty(Property property)
             {
                 using (StartNodeObject(property))
                 {
@@ -915,9 +979,10 @@ namespace Esprima.Utils
                     Member("method", property.Method);
                     Member("shorthand", property.Shorthand);
                 }
+                return base.VisitProperty(property);
             }
 
-            protected internal override void VisitConditionalExpression(ConditionalExpression conditionalExpression)
+            protected internal override ConditionalExpression VisitConditionalExpression(ConditionalExpression conditionalExpression)
             {
                 using (StartNodeObject(conditionalExpression))
                 {
@@ -925,9 +990,10 @@ namespace Esprima.Utils
                     Member("consequent", conditionalExpression.Consequent);
                     Member("alternate", conditionalExpression.Alternate);
                 }
+                return base.VisitConditionalExpression(conditionalExpression);
             }
 
-            protected internal override void VisitCallExpression(CallExpression callExpression)
+            protected internal override CallExpression VisitCallExpression(CallExpression callExpression)
             {
                 using (StartNodeObject(callExpression))
                 {
@@ -935,9 +1001,10 @@ namespace Esprima.Utils
                     Member("arguments", callExpression.Arguments, e => e);
                     Member("optional", callExpression.Optional);
                 }
+                return base.VisitCallExpression(callExpression);
             }
 
-            protected internal override void VisitBinaryExpression(BinaryExpression binaryExpression)
+            protected internal override BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
             {
                 using (StartNodeObject(binaryExpression))
                 {
@@ -945,17 +1012,19 @@ namespace Esprima.Utils
                     Member("left", binaryExpression.Left);
                     Member("right", binaryExpression.Right);
                 }
+                return base.VisitBinaryExpression(binaryExpression);
             }
 
-            protected internal override void VisitArrayExpression(ArrayExpression arrayExpression)
+            protected internal override ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
             {
                 using (StartNodeObject(arrayExpression))
                 {
                     Member("elements", arrayExpression.Elements);
                 }
+                return base.VisitArrayExpression(arrayExpression);
             }
 
-            protected internal override void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+            protected internal override AssignmentExpression VisitAssignmentExpression(AssignmentExpression assignmentExpression)
             {
                 using (StartNodeObject(assignmentExpression))
                 {
@@ -963,30 +1032,34 @@ namespace Esprima.Utils
                     Member("left", assignmentExpression.Left);
                     Member("right", assignmentExpression.Right);
                 }
+                return base.VisitAssignmentExpression(assignmentExpression);
             }
 
-            protected internal override void VisitContinueStatement(ContinueStatement continueStatement)
+            protected internal override ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
             {
                 using (StartNodeObject(continueStatement))
                 {
                     Member("label", continueStatement.Label);
                 }
+                return base.VisitContinueStatement(continueStatement);
             }
 
-            protected internal override void VisitBreakStatement(BreakStatement breakStatement)
+            protected internal override BreakStatement VisitBreakStatement(BreakStatement breakStatement)
             {
                 using (StartNodeObject(breakStatement))
                 {
                     Member("label", breakStatement.Label);
                 }
+                return base.VisitBreakStatement(breakStatement);
             }
 
-            protected internal override void VisitBlockStatement(BlockStatement blockStatement)
+            protected internal override BlockStatement VisitBlockStatement(BlockStatement blockStatement)
             {
                 using (StartNodeObject(blockStatement))
                 {
                     Member("body", blockStatement.Body, e => (Statement) e);
                 }
+                return base.VisitBlockStatement(blockStatement);
             }
         }
     }
