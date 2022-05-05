@@ -311,7 +311,7 @@ namespace Esprima.Utils
                 }
             }
 
-            public override TNode Visit<TNode>(TNode node) where TNode : class
+            public override TNode? Visit<TNode>(TNode node) where TNode : class
             {
                 if (node is not null)
                 {
@@ -332,7 +332,7 @@ namespace Esprima.Utils
                     Member("sourceType", program.SourceType);
                 }
 
-                return base.VisitProgram(program);
+                return program;
             }
 
             [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
@@ -349,7 +349,7 @@ namespace Esprima.Utils
                     Member("body", catchClause.Body);
                 }
 
-                return base.VisitCatchClause(catchClause);
+                return catchClause;
             }
 
             protected internal override FunctionDeclaration VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
@@ -364,7 +364,7 @@ namespace Esprima.Utils
                     Member("async", functionDeclaration.Async);
                 }
                 
-                return base.VisitFunctionDeclaration(functionDeclaration);
+                return functionDeclaration;
             }
 
             protected internal override WithStatement VisitWithStatement(WithStatement withStatement)
@@ -375,7 +375,7 @@ namespace Esprima.Utils
                     Member("body", withStatement.Body);
                 }
 
-                return base.VisitWithStatement(withStatement);
+                return withStatement;
             }
 
             protected internal override WhileStatement VisitWhileStatement(WhileStatement whileStatement)
@@ -385,7 +385,7 @@ namespace Esprima.Utils
                     Member("test", whileStatement.Test);
                     Member("body", whileStatement.Body);
                 }
-                return base.VisitWhileStatement(whileStatement);
+                return whileStatement;
             }
 
             protected internal override VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
@@ -395,7 +395,7 @@ namespace Esprima.Utils
                     Member("declarations", variableDeclaration.Declarations);
                     Member("kind", variableDeclaration.Kind);
                 }
-                return base.VisitVariableDeclaration(variableDeclaration);
+                return variableDeclaration;
             }
 
             protected internal override TryStatement VisitTryStatement(TryStatement tryStatement)
@@ -406,7 +406,7 @@ namespace Esprima.Utils
                     Member("handler", tryStatement.Handler);
                     Member("finalizer", tryStatement.Finalizer);
                 }
-                return base.VisitTryStatement(tryStatement);
+                return tryStatement;
             }
 
             protected internal override ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
@@ -415,7 +415,7 @@ namespace Esprima.Utils
                 {
                     Member("argument", throwStatement.Argument);
                 }
-                return base.VisitThrowStatement(throwStatement);
+                return throwStatement;
             }
 
             protected internal override AwaitExpression VisitAwaitExpression(AwaitExpression awaitExpression)
@@ -424,7 +424,7 @@ namespace Esprima.Utils
                 {
                     Member("argument", awaitExpression.Argument);
                 }
-                return base.VisitAwaitExpression(awaitExpression);
+                return awaitExpression;
             }
 
             protected internal override SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
@@ -434,7 +434,7 @@ namespace Esprima.Utils
                     Member("discriminant", switchStatement.Discriminant);
                     Member("cases", switchStatement.Cases);
                 }
-                return base.VisitSwitchStatement(switchStatement);
+                return switchStatement;
             }
 
             protected internal override SwitchCase VisitSwitchCase(SwitchCase switchCase)
@@ -444,7 +444,7 @@ namespace Esprima.Utils
                     Member("test", switchCase.Test);
                     Member("consequent", switchCase.Consequent, e => (Node) e);
                 }
-                return base.VisitSwitchCase(switchCase);
+                return switchCase;
             }
 
             protected internal override ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
@@ -453,7 +453,7 @@ namespace Esprima.Utils
                 {
                     Member("argument", returnStatement.Argument);
                 }
-                return base.VisitReturnStatement(returnStatement);
+                return returnStatement;
             }
 
             protected internal override LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
@@ -463,7 +463,7 @@ namespace Esprima.Utils
                     Member("label", labeledStatement.Label);
                     Member("body", labeledStatement.Body);
                 }
-                return base.VisitLabeledStatement(labeledStatement);
+                return labeledStatement;
             }
 
             protected internal override IfStatement VisitIfStatement(IfStatement ifStatement)
@@ -474,19 +474,19 @@ namespace Esprima.Utils
                     Member("consequent", ifStatement.Consequent);
                     Member("alternate", ifStatement.Alternate);
                 }
-                return base.VisitIfStatement(ifStatement);
+                return ifStatement;
             }
 
             protected internal override EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
             {
                 EmptyNodeObject(emptyStatement);
-                return base.VisitEmptyStatement(emptyStatement);
+                return emptyStatement;
             }
 
             protected internal override DebuggerStatement VisitDebuggerStatement(DebuggerStatement debuggerStatement)
             {
                 EmptyNodeObject(debuggerStatement);
-                return base.VisitDebuggerStatement(debuggerStatement);
+                return debuggerStatement;
             }
 
             protected internal override ExpressionStatement VisitExpressionStatement(ExpressionStatement expressionStatement)
@@ -500,7 +500,7 @@ namespace Esprima.Utils
 
                     Member("expression", expressionStatement.Expression);
                 }
-                return base.VisitExpressionStatement(expressionStatement);
+                return expressionStatement;
             }
 
             protected internal override ForStatement VisitForStatement(ForStatement forStatement)
@@ -512,7 +512,7 @@ namespace Esprima.Utils
                     Member("update", forStatement.Update);
                     Member("body", forStatement.Body);
                 }
-                return base.VisitForStatement(forStatement);
+                return forStatement;
             }
 
             protected internal override ForInStatement VisitForInStatement(ForInStatement forInStatement)
@@ -524,7 +524,7 @@ namespace Esprima.Utils
                     Member("body", forInStatement.Body);
                     Member("each", false);
                 }
-                return base.VisitForInStatement(forInStatement);
+                return forInStatement;
             }
 
             protected internal override DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
@@ -534,7 +534,7 @@ namespace Esprima.Utils
                     Member("body", doWhileStatement.Body);
                     Member("test", doWhileStatement.Test);
                 }
-                return base.VisitDoWhileStatement(doWhileStatement);
+                return doWhileStatement;
             }
 
             protected internal override ArrowFunctionExpression VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
@@ -548,7 +548,7 @@ namespace Esprima.Utils
                     Member("expression", arrowFunctionExpression.Expression);
                     Member("async", arrowFunctionExpression.Async);
                 }
-                return base.VisitArrowFunctionExpression(arrowFunctionExpression);
+                return arrowFunctionExpression;
             }
 
             protected internal override UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
@@ -559,19 +559,19 @@ namespace Esprima.Utils
                     Member("argument", unaryExpression.Argument);
                     Member("prefix", unaryExpression.Prefix);
                 }
-                return base.VisitUnaryExpression(unaryExpression);
+                return unaryExpression;
             }
 
             protected internal override UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
             {
                 VisitUnaryExpression(updateExpression);
-                return base.VisitUpdateExpression(updateExpression);
+                return updateExpression;
             }
 
             protected internal override ThisExpression VisitThisExpression(ThisExpression thisExpression)
             {
                 EmptyNodeObject(thisExpression);
-                return base.VisitThisExpression(thisExpression);
+                return thisExpression;
             }
 
             protected internal override SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
@@ -580,7 +580,7 @@ namespace Esprima.Utils
                 {
                     Member("expressions", sequenceExpression.Expressions);
                 }
-                return base.VisitSequenceExpression(sequenceExpression);
+                return sequenceExpression;
             }
 
             protected internal override ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
@@ -589,7 +589,7 @@ namespace Esprima.Utils
                 {
                     Member("properties", objectExpression.Properties);
                 }
-                return base.VisitObjectExpression(objectExpression);
+                return objectExpression;
             }
 
             protected internal override NewExpression VisitNewExpression(NewExpression newExpression)
@@ -599,7 +599,7 @@ namespace Esprima.Utils
                     Member("callee", newExpression.Callee);
                     Member("arguments", newExpression.Arguments, e => (Node) e);
                 }
-                return base.VisitNewExpression(newExpression);
+                return newExpression;
             }
 
             protected internal override MemberExpression VisitMemberExpression(MemberExpression memberExpression)
@@ -611,13 +611,13 @@ namespace Esprima.Utils
                     Member("property", memberExpression.Property);
                     Member("optional", memberExpression.Optional);
                 }
-                return base.VisitMemberExpression(memberExpression);
+                return memberExpression;
             }
 
             protected internal override BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
             {
                 VisitBinaryExpression(binaryExpression);
-                return base.VisitLogicalExpression(binaryExpression);
+                return binaryExpression;
             }
 
             protected internal override Literal VisitLiteral(Literal literal)
@@ -666,7 +666,7 @@ namespace Esprima.Utils
                         _writer.EndObject();
                     }
                 }
-                return base.VisitLiteral(literal);
+                return literal;
             }
 
             protected internal override Identifier VisitIdentifier(Identifier identifier)
@@ -675,7 +675,7 @@ namespace Esprima.Utils
                 {
                     Member("name", identifier.Name);
                 }
-                return base.VisitIdentifier(identifier);
+                return identifier;
             }
 
             protected internal override IFunction VisitFunctionExpression(IFunction function)
@@ -689,7 +689,7 @@ namespace Esprima.Utils
                     Member("expression", function.Expression);
                     Member("async", function.Async);
                 }
-                return base.VisitFunctionExpression(function);
+                return function;
             }
 
             protected internal override ClassExpression VisitClassExpression(ClassExpression classExpression)
@@ -700,7 +700,7 @@ namespace Esprima.Utils
                     Member("superClass", classExpression.SuperClass);
                     Member("body", classExpression.Body);
                 }
-                return base.VisitClassExpression(classExpression);
+                return classExpression;
             }
 
             protected internal override ChainExpression VisitChainExpression(ChainExpression chainExpression)
@@ -709,7 +709,7 @@ namespace Esprima.Utils
                 {
                     Member("expression", chainExpression.Expression);
                 }
-                return base.VisitChainExpression(chainExpression);
+                return chainExpression;
             }
 
             protected internal override ExportDefaultDeclaration VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
@@ -718,7 +718,7 @@ namespace Esprima.Utils
                 {
                     Member("declaration", exportDefaultDeclaration.Declaration);
                 }
-                return base.VisitExportDefaultDeclaration(exportDefaultDeclaration);
+                return exportDefaultDeclaration;
             }
 
             protected internal override ExportAllDeclaration VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
@@ -728,7 +728,7 @@ namespace Esprima.Utils
                     Member("source", exportAllDeclaration.Source);
                     Member("exported", exportAllDeclaration.Exported);
                 }
-                return base.VisitExportAllDeclaration(exportAllDeclaration);
+                return exportAllDeclaration;
             }
 
             protected internal override ExportNamedDeclaration VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
@@ -739,7 +739,7 @@ namespace Esprima.Utils
                     Member("specifiers", exportNamedDeclaration.Specifiers);
                     Member("source", exportNamedDeclaration.Source);
                 }
-                return base.VisitExportNamedDeclaration(exportNamedDeclaration);
+                return exportNamedDeclaration;
             }
 
             protected internal override ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
@@ -749,7 +749,7 @@ namespace Esprima.Utils
                     Member("exported", exportSpecifier.Exported);
                     Member("local", exportSpecifier.Local);
                 }
-                return base.VisitExportSpecifier(exportSpecifier);
+                return exportSpecifier;
             }
 
             protected internal override Import VisitImport(Import import)
@@ -757,7 +757,7 @@ namespace Esprima.Utils
                 using (StartNodeObject(import))
                 {
                 }
-                return base.VisitImport(import);
+                return import;
             }
 
             protected internal override ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
@@ -767,7 +767,7 @@ namespace Esprima.Utils
                     Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
                     Member("source", importDeclaration.Source);
                 }
-                return base.VisitImportDeclaration(importDeclaration);
+                return importDeclaration;
             }
 
             protected internal override ImportNamespaceSpecifier VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
@@ -776,7 +776,7 @@ namespace Esprima.Utils
                 {
                     Member("local", importNamespaceSpecifier.Local);
                 }
-                return base.VisitImportNamespaceSpecifier(importNamespaceSpecifier);
+                return importNamespaceSpecifier;
             }
 
             protected internal override ImportDefaultSpecifier VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
@@ -785,7 +785,7 @@ namespace Esprima.Utils
                 {
                     Member("local", importDefaultSpecifier.Local);
                 }
-                return base.VisitImportDefaultSpecifier(importDefaultSpecifier);
+                return importDefaultSpecifier;
             }
 
             protected internal override ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
@@ -795,7 +795,7 @@ namespace Esprima.Utils
                     Member("local", importSpecifier.Local);
                     Member("imported", importSpecifier.Imported);
                 }
-                return base.VisitImportSpecifier(importSpecifier);
+                return importSpecifier;
             }
 
             protected internal override MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
@@ -808,7 +808,7 @@ namespace Esprima.Utils
                     Member("kind", methodDefinition.Kind);
                     Member("static", methodDefinition.Static);
                 }
-                return base.VisitMethodDefinition(methodDefinition);
+                return methodDefinition;
             }
 
             protected internal override ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
@@ -820,7 +820,7 @@ namespace Esprima.Utils
                     Member("right", forOfStatement.Right);
                     Member("body", forOfStatement.Body);
                 }
-                return base.VisitForOfStatement(forOfStatement);
+                return forOfStatement;
             }
 
             protected internal override ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
@@ -831,7 +831,7 @@ namespace Esprima.Utils
                     Member("superClass", classDeclaration.SuperClass);
                     Member("body", classDeclaration.Body);
                 }
-                return base.VisitClassDeclaration(classDeclaration);
+                return classDeclaration;
             }
 
             protected internal override ClassBody VisitClassBody(ClassBody classBody)
@@ -840,7 +840,7 @@ namespace Esprima.Utils
                 {
                     Member("body", classBody.Body);
                 }
-                return base.VisitClassBody(classBody);
+                return classBody;
             }
 
             protected internal override YieldExpression VisitYieldExpression(YieldExpression yieldExpression)
@@ -850,7 +850,7 @@ namespace Esprima.Utils
                     Member("argument", yieldExpression.Argument);
                     Member("delegate", yieldExpression.Delegate);
                 }
-                return base.VisitYieldExpression(yieldExpression);
+                return yieldExpression;
             }
 
             protected internal override TaggedTemplateExpression VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
@@ -860,13 +860,13 @@ namespace Esprima.Utils
                     Member("tag", taggedTemplateExpression.Tag);
                     Member("quasi", taggedTemplateExpression.Quasi);
                 }
-                return base.VisitTaggedTemplateExpression(taggedTemplateExpression);
+                return taggedTemplateExpression;
             }
 
             protected internal override Super VisitSuper(Super super)
             {
                 EmptyNodeObject(super);
-                return base.VisitSuper(super);
+                return super;
             }
 
             protected internal override MetaProperty VisitMetaProperty(MetaProperty metaProperty)
@@ -876,7 +876,7 @@ namespace Esprima.Utils
                     Member("meta", metaProperty.Meta);
                     Member("property", metaProperty.Property);
                 }
-                return base.VisitMetaProperty(metaProperty);
+                return metaProperty;
             }
 
             protected internal override ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
@@ -894,7 +894,7 @@ namespace Esprima.Utils
                 {
                     Member("properties", objectPattern.Properties);
                 }
-                return base.VisitObjectPattern(objectPattern);
+                return objectPattern;
             }
 
             protected internal override SpreadElement VisitSpreadElement(SpreadElement spreadElement)
@@ -903,7 +903,7 @@ namespace Esprima.Utils
                 {
                     Member("argument", spreadElement.Argument);
                 }
-                return base.VisitSpreadElement(spreadElement);
+                return spreadElement;
             }
 
             protected internal override AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
@@ -913,7 +913,7 @@ namespace Esprima.Utils
                     Member("left", assignmentPattern.Left);
                     Member("right", assignmentPattern.Right);
                 }
-                return base.VisitAssignmentPattern(assignmentPattern);
+                return assignmentPattern;
             }
 
             protected internal override ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
@@ -922,7 +922,7 @@ namespace Esprima.Utils
                 {
                     Member("elements", arrayPattern.Elements);
                 }
-                return base.VisitArrayPattern(arrayPattern);
+                return arrayPattern;
             }
 
             protected internal override VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
@@ -932,7 +932,7 @@ namespace Esprima.Utils
                     Member("id", variableDeclarator.Id);
                     Member("init", variableDeclarator.Init);
                 }
-                return base.VisitVariableDeclarator(variableDeclarator);
+                return variableDeclarator;
             }
 
             protected internal override TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
@@ -942,7 +942,7 @@ namespace Esprima.Utils
                     Member("quasis", templateLiteral.Quasis);
                     Member("expressions", templateLiteral.Expressions);
                 }
-                return base.VisitTemplateLiteral(templateLiteral);
+                return templateLiteral;
             }
 
             protected internal override TemplateElement VisitTemplateElement(TemplateElement templateElement)
@@ -956,7 +956,7 @@ namespace Esprima.Utils
                     _writer.EndObject();
                     Member("tail", templateElement.Tail);
                 }
-                return base.VisitTemplateElement(templateElement);
+                return templateElement;
             }
 
             protected internal override RestElement VisitRestElement(RestElement restElement)
@@ -965,7 +965,7 @@ namespace Esprima.Utils
                 {
                     Member("argument", restElement.Argument);
                 }
-                return base.VisitRestElement(restElement);
+                return restElement;
             }
 
             protected internal override Property VisitProperty(Property property)
@@ -979,7 +979,7 @@ namespace Esprima.Utils
                     Member("method", property.Method);
                     Member("shorthand", property.Shorthand);
                 }
-                return base.VisitProperty(property);
+                return property;
             }
 
             protected internal override ConditionalExpression VisitConditionalExpression(ConditionalExpression conditionalExpression)
@@ -990,7 +990,7 @@ namespace Esprima.Utils
                     Member("consequent", conditionalExpression.Consequent);
                     Member("alternate", conditionalExpression.Alternate);
                 }
-                return base.VisitConditionalExpression(conditionalExpression);
+                return conditionalExpression;
             }
 
             protected internal override CallExpression VisitCallExpression(CallExpression callExpression)
@@ -1001,7 +1001,7 @@ namespace Esprima.Utils
                     Member("arguments", callExpression.Arguments, e => e);
                     Member("optional", callExpression.Optional);
                 }
-                return base.VisitCallExpression(callExpression);
+                return callExpression;
             }
 
             protected internal override BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
@@ -1012,7 +1012,7 @@ namespace Esprima.Utils
                     Member("left", binaryExpression.Left);
                     Member("right", binaryExpression.Right);
                 }
-                return base.VisitBinaryExpression(binaryExpression);
+                return binaryExpression;
             }
 
             protected internal override ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
@@ -1021,7 +1021,7 @@ namespace Esprima.Utils
                 {
                     Member("elements", arrayExpression.Elements);
                 }
-                return base.VisitArrayExpression(arrayExpression);
+                return arrayExpression;
             }
 
             protected internal override AssignmentExpression VisitAssignmentExpression(AssignmentExpression assignmentExpression)
@@ -1032,7 +1032,7 @@ namespace Esprima.Utils
                     Member("left", assignmentExpression.Left);
                     Member("right", assignmentExpression.Right);
                 }
-                return base.VisitAssignmentExpression(assignmentExpression);
+                return assignmentExpression;
             }
 
             protected internal override ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
@@ -1041,7 +1041,7 @@ namespace Esprima.Utils
                 {
                     Member("label", continueStatement.Label);
                 }
-                return base.VisitContinueStatement(continueStatement);
+                return continueStatement;
             }
 
             protected internal override BreakStatement VisitBreakStatement(BreakStatement breakStatement)
@@ -1050,7 +1050,7 @@ namespace Esprima.Utils
                 {
                     Member("label", breakStatement.Label);
                 }
-                return base.VisitBreakStatement(breakStatement);
+                return breakStatement;
             }
 
             protected internal override BlockStatement VisitBlockStatement(BlockStatement blockStatement)
@@ -1059,7 +1059,7 @@ namespace Esprima.Utils
                 {
                     Member("body", blockStatement.Body, e => (Statement) e);
                 }
-                return base.VisitBlockStatement(blockStatement);
+                return blockStatement;
             }
         }
     }
