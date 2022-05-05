@@ -10,7 +10,7 @@ namespace Esprima.Utils
             return node.Accept<T>(this) ?? throw new NullReferenceException($"Visited node ({typeof(T).Name}) must not return irrelevant type.");
         }
 
-        protected internal virtual bool VisitNodeListAndIsNew<T>(in NodeList<T> nodes, out NodeList<T> newNodes) where T : Node
+        protected internal virtual bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes) where T : Node
         {
             for (var i = 0; i < nodes.Count; i++)		           
             { 
@@ -26,7 +26,7 @@ namespace Esprima.Utils
         
         protected internal virtual Program VisitProgram(Program program)
         {
-            var isNewStatements = VisitNodeListAndIsNew(program.Body, out var statements);
+            var isNewStatements = HasNodeListChanged(program.Body, out var statements);
             return UpdateProgram(program, isNewStatements, ref statements);
         }
 
@@ -57,7 +57,7 @@ namespace Esprima.Utils
                 id = Visit(functionDeclaration.Id);
             }
             
-            var isNewParameters = VisitNodeListAndIsNew(functionDeclaration.Params, out var parameters);
+            var isNewParameters = HasNodeListChanged(functionDeclaration.Params, out var parameters);
             var body = Visit(functionDeclaration.Body);
             return UpdateFunctionDeclaration(functionDeclaration, id, isNewParameters ,ref parameters, (body as BlockStatement)!);
         }
@@ -78,7 +78,7 @@ namespace Esprima.Utils
 
         protected internal virtual VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
         {
-            var isNewDeclarations = VisitNodeListAndIsNew(variableDeclaration.Declarations, out var declarations);
+            var isNewDeclarations = HasNodeListChanged(variableDeclaration.Declarations, out var declarations);
             return UpdateVariableDeclaration(variableDeclaration, isNewDeclarations, ref declarations);
         }
 
@@ -110,7 +110,7 @@ namespace Esprima.Utils
         protected internal virtual SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
         {
             var discriminant = Visit(switchStatement.Discriminant);
-            var isNewCases = VisitNodeListAndIsNew(switchStatement.Cases, out var cases);
+            var isNewCases = HasNodeListChanged(switchStatement.Cases, out var cases);
             return UpdateSwitchStatement(switchStatement,discriminant, isNewCases, ref cases);
         }
 
@@ -122,7 +122,7 @@ namespace Esprima.Utils
                 test = Visit(switchCase.Test);
             }
 
-            var isNewConsequent = VisitNodeListAndIsNew(switchCase.Consequent, out var consequent);
+            var isNewConsequent = HasNodeListChanged(switchCase.Consequent, out var consequent);
             return UpdateSwitchCase(switchCase,test, isNewConsequent, ref consequent);
         }
 
@@ -213,7 +213,7 @@ namespace Esprima.Utils
 
         protected internal virtual ArrowFunctionExpression VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
         {
-            var isNewParameters = VisitNodeListAndIsNew(arrowFunctionExpression.Params, out var parameters);
+            var isNewParameters = HasNodeListChanged(arrowFunctionExpression.Params, out var parameters);
             var body = Visit(arrowFunctionExpression.Body);
             return UpdateArrowFunctionExpression(arrowFunctionExpression, isNewParameters, ref parameters, body);
         }
@@ -237,20 +237,20 @@ namespace Esprima.Utils
 
         protected internal virtual SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
         {
-            var isNewExpressions = VisitNodeListAndIsNew(sequenceExpression.Expressions, out var expressions);
+            var isNewExpressions = HasNodeListChanged(sequenceExpression.Expressions, out var expressions);
             return UpdateSequenceExpression(sequenceExpression, isNewExpressions, ref expressions);
         }
 
         protected internal virtual ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
         {
-            var isNewProperties = VisitNodeListAndIsNew(objectExpression.Properties, out var properties);
+            var isNewProperties = HasNodeListChanged(objectExpression.Properties, out var properties);
             return UpdateObjectExpression(objectExpression, isNewProperties, ref properties);
         }
 
         protected internal virtual NewExpression VisitNewExpression(NewExpression newExpression)
         {
             var callee = Visit(newExpression.Callee);
-            var isNewArguments = VisitNodeListAndIsNew(newExpression.Arguments, out var arguments);
+            var isNewArguments = HasNodeListChanged(newExpression.Arguments, out var arguments);
             return UpdateNewExpression(newExpression, callee, isNewArguments, ref arguments);
         }
         
@@ -290,7 +290,7 @@ namespace Esprima.Utils
             {
                 id = Visit(function.Id);
             }
-            var isNewParameters = VisitNodeListAndIsNew(function.Params, out var parameters);
+            var isNewParameters = HasNodeListChanged(function.Params, out var parameters);
 
             var body = Visit(function.Body);
             return UpdateFunctionExpression(function, id, isNewParameters, ref parameters, body);
@@ -358,7 +358,7 @@ namespace Esprima.Utils
                 declaration = Visit(exportNamedDeclaration.Declaration);
             }
 
-            var isNewSpecifiers = VisitNodeListAndIsNew(exportNamedDeclaration.Specifiers, out var specifiers);
+            var isNewSpecifiers = HasNodeListChanged(exportNamedDeclaration.Specifiers, out var specifiers);
 
             Literal? source = null;
             if (exportNamedDeclaration.Source is not null)
@@ -388,7 +388,7 @@ namespace Esprima.Utils
 
         protected internal virtual ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
         {
-            var isNewSpecifiers = VisitNodeListAndIsNew(importDeclaration.Specifiers, out var specifiers);
+            var isNewSpecifiers = HasNodeListChanged(importDeclaration.Specifiers, out var specifiers);
             var source = Visit(importDeclaration.Source);
             return UpdateImportDeclaration(importDeclaration, isNewSpecifiers, ref specifiers, source);
         }
@@ -447,7 +447,7 @@ namespace Esprima.Utils
 
         protected internal virtual ClassBody VisitClassBody(ClassBody classBody)
         {
-            var isNewBody = VisitNodeListAndIsNew(classBody.Body, out var body);
+            var isNewBody = HasNodeListChanged(classBody.Body, out var body);
             return UpdateClassBody(classBody, isNewBody, ref body);
         }
 
@@ -488,7 +488,7 @@ namespace Esprima.Utils
 
         protected internal virtual ObjectPattern VisitObjectPattern(ObjectPattern objectPattern)
         {
-            var isNewProperties = VisitNodeListAndIsNew(objectPattern.Properties, out var properties);
+            var isNewProperties = HasNodeListChanged(objectPattern.Properties, out var properties);
             return UpdateObjectPattern(objectPattern, isNewProperties, ref properties);
         }
 
@@ -507,7 +507,7 @@ namespace Esprima.Utils
 
         protected internal virtual ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
         {
-            var isNewElements = VisitNodeListAndIsNew(arrayPattern.Elements, out var elements); 
+            var isNewElements = HasNodeListChanged(arrayPattern.Elements, out var elements); 
             return UpdateArrayPattern(arrayPattern, isNewElements, ref elements);
         }
 
@@ -575,7 +575,7 @@ namespace Esprima.Utils
         protected internal virtual CallExpression VisitCallExpression(CallExpression callExpression)
         {
             var callee = Visit(callExpression.Callee);
-            var isNewArguments = VisitNodeListAndIsNew(callExpression.Arguments, out var arguments); 
+            var isNewArguments = HasNodeListChanged(callExpression.Arguments, out var arguments); 
             return UpdateCallExpression(callExpression, callee, isNewArguments, ref arguments);
         }
         
@@ -588,7 +588,7 @@ namespace Esprima.Utils
 
         protected internal virtual ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
         {
-            var isNewElements = VisitNodeListAndIsNew(arrayExpression.Elements, out var elements);
+            var isNewElements = HasNodeListChanged(arrayExpression.Elements, out var elements);
             return UpdateArrayExpression(arrayExpression, isNewElements, ref elements);
         }
 
@@ -622,7 +622,7 @@ namespace Esprima.Utils
 
         protected internal virtual BlockStatement VisitBlockStatement(BlockStatement blockStatement)
         {
-            var isNewBody = VisitNodeListAndIsNew(blockStatement.Body, out var body);
+            var isNewBody = HasNodeListChanged(blockStatement.Body, out var body);
             return UpdateBlockStatement(blockStatement, isNewBody, ref body);
         }
     }

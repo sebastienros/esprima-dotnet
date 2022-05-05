@@ -6,31 +6,35 @@ namespace Esprima.Utils
 {
     public class AstConverter : AstVisitor
     {
-        protected internal override bool VisitNodeListAndIsNew<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
+        protected internal override bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
             where T : class
         {
             List<T>? newNodeList = null;
             for (var i = 0; i < nodes.Count; i++)
             {
-                var newNode = Visit(nodes[i]);
-                if (newNodeList is not null)
+                var node = nodes[i];
+                if (node is not null)
                 {
-                    if (newNode is not null)
+                    var newNode = Visit(node);
+                    if (newNodeList is not null)
                     {
-                        newNodeList.Add((T) newNode);
+                        if (newNode is not null)
+                        {
+                            newNodeList.Add((T) newNode);
+                        }
                     }
-                }
-                else if (newNode != nodes[i])
-                {
-                    newNodeList = new List<T>();
-                    for (var j = 0; j < i; j++)
+                    else if (newNode != nodes[i])
                     {
-                        newNodeList.Add(nodes[j]);
-                    }
+                        newNodeList = new List<T>();
+                        for (var j = 0; j < i; j++)
+                        {
+                            newNodeList.Add(nodes[j]);
+                        }
 
-                    if (newNode is not null)
-                    {
-                        newNodeList.Add((T) newNode);
+                        if (newNode is not null)
+                        {
+                            newNodeList.Add((T) newNode);
+                        }
                     }
                 }
             }
