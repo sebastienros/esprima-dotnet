@@ -4,14 +4,14 @@ namespace Esprima.Ast
 {
     public sealed class TryStatement : Statement
     {
-        public readonly Statement Block;
+        public readonly BlockStatement Block;
         public readonly CatchClause? Handler;
-        public readonly Statement? Finalizer;
+        public readonly BlockStatement? Finalizer;
 
         public TryStatement(
-            Statement block,
+            BlockStatement block,
             CatchClause? handler,
-            Statement? finalizer) :
+            BlockStatement? finalizer) :
             base(Nodes.TryStatement)
         {
             Block = block;
