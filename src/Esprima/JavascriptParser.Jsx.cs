@@ -34,7 +34,7 @@ namespace Esprima
                     var ns = elementName as JSXNamespacedName;
                     qualifiedName = GetQualifiedElementName(ns.Namespace) + ":" + GetQualifiedElementName(ns.Name);
                     break;
-                case Nodes.MemberExpression:
+                case Nodes.JSXMemberExpression:
                     var expr = elementName as JSXMemberExpression;
                     qualifiedName = GetQualifiedElementName(expr.Object) + "." + GetQualifiedElementName(expr.Property);
                     break;
@@ -813,7 +813,7 @@ namespace Esprima
 
         private JSXEmptyExpression ParseJSXEmptyExpression()
         {
-            var node = CreateJSXNode();
+            var node = CreateJSXChildNode();
             CollectComments();
             _lastMarker.Index = _scanner.Index;
             _lastMarker.Line = _scanner.LineNumber;
@@ -858,6 +858,17 @@ namespace Esprima
                     children.Add(child);
                 }
 
+                if (_scanner.Eof())
+                {
+                    ThrowUnexpectedToken(new Token
+                    {
+                        Type = TokenType.EOF,
+                        LineNumber = _scanner.LineNumber,
+                        LineStart = _scanner.LineStart,
+                        Start = _scanner.Index,
+                        End = _scanner.Index
+                    });
+                }
                 if (_scanner.Source[_scanner.Index] == '{')
                 {
                     var container = ParseJSXExpressionContainer();

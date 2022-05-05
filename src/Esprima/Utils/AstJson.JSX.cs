@@ -19,8 +19,8 @@ namespace Esprima.Utils
                 using (StartNodeObject(jsxElement))
                 {
                     Member("openingElement", jsxElement.OpeningElement);
-                    Member("closingElement", jsxElement.ClosingElement);
                     Member("children", jsxElement.Children);
+                    Member("closingElement", jsxElement.ClosingElement);
                 }
             }
 
@@ -53,7 +53,8 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(jsxText))
                 {
-                    Member("value", jsxText.Raw);
+                    Member("value", jsxText.Value);
+                    Member("raw", jsxText.Raw);
                 }
             }
 
@@ -68,6 +69,7 @@ namespace Esprima.Utils
             {
                 using (StartNodeObject(jsxOpeningFragment))
                 {
+                    Member("selfClosing", jsxOpeningFragment.SelfClosing);
                 }
             }
 
