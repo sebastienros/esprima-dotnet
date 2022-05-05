@@ -15,9 +15,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Test, Body);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
         {
-            return visitor.VisitWhileStatement(this);
+            return visitor.VisitWhileStatement(this) as T;
         }
     }
 }

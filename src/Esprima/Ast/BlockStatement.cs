@@ -18,11 +18,11 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Statement> Body => ref _body;
 
-        public sealed override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
 
-        protected internal sealed override Node Accept(AstVisitor visitor)
+        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
         {
-            return visitor.VisitBlockStatement(this);
+            return visitor.VisitBlockStatement(this) as T;
         }
     }
 }

@@ -1,1134 +1,1066 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
 using static Esprima.EsprimaExceptionHelper;
 
-namespace Esprima.Utils;
-
-public enum LocationMembersPlacement
+namespace Esprima.Utils
 {
-    End,
-    Start
-}
-
-public static partial class AstJson
-{
-    public sealed class Options
+    public enum LocationMembersPlacement
     {
-        public static readonly Options Default = new();
-
-        public bool IncludingLineColumn { get; private set; }
-        public bool IncludingRange { get; private set; }
-        public LocationMembersPlacement LocationMembersPlacement { get; private set; }
-
-        public Options() { }
-
-        private Options(Options options)
-        {
-            IncludingLineColumn = options.IncludingLineColumn;
-            IncludingRange = options.IncludingRange;
-            LocationMembersPlacement = options.LocationMembersPlacement;
-        }
-
-        public Options WithIncludingLineColumn(bool value)
-        {
-            return value == IncludingLineColumn ? this : new Options(this) { IncludingLineColumn = value };
-        }
-
-        public Options WithIncludingRange(bool value)
-        {
-            return value == IncludingRange ? this : new Options(this) { IncludingRange = value };
-        }
-
-        public Options WithLocationMembersPlacement(LocationMembersPlacement value)
-        {
-            return value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
-        }
+        End,
+        Start
     }
 
-    public static string ToJsonString(this Node node)
+    public static class AstJson
     {
-        return ToJsonString(node, indent: null);
-    }
-
-    public static string ToJsonString(this Node node, string? indent)
-    {
-        return ToJsonString(node, Options.Default, indent);
-    }
-
-    public static string ToJsonString(this Node node, Options options)
-    {
-        return ToJsonString(node, options, null);
-    }
-
-    public static string ToJsonString(this Node node, Options options, string? indent)
-    {
-        using (var writer = new StringWriter())
+        public sealed class Options
         {
-            WriteJson(node, writer, options, indent);
-            return writer.ToString();
-        }
-    }
+            public static readonly Options Default = new();
 
-    public static void WriteJson(this Node node, TextWriter writer)
-    {
-        WriteJson(node, writer, indent: null);
-    }
+            public bool IncludingLineColumn { get; private set; }
+            public bool IncludingRange { get; private set; }
+            public LocationMembersPlacement LocationMembersPlacement { get; private set; }
 
-    public static void WriteJson(this Node node, TextWriter writer, string? indent)
-    {
-        WriteJson(node, writer, Options.Default, indent);
-    }
+            public Options() { }
 
-    public static void WriteJson(this Node node, TextWriter writer, Options options)
-    {
-        WriteJson(node, writer, options, null);
-    }
-
-    public static void WriteJson(this Node node, TextWriter writer, Options options, string? indent)
-    {
-        if (node == null)
-        {
-            ThrowArgumentNullException(nameof(node));
-            return;
-        }
-
-        if (writer == null)
-        {
-            ThrowArgumentNullException(nameof(writer));
-            return;
-        }
-
-        if (options == null)
-        {
-            ThrowArgumentNullException(nameof(options));
-            return;
-        }
-
-        var visitor = new Visitor(new JsonTextWriter(writer, indent),
-            options.IncludingLineColumn, options.IncludingRange,
-            options.LocationMembersPlacement);
-
-        visitor.Visit(node);
-    }
-
-    public static void WriteJson(this Node node, JsonWriter writer, Options options)
-    {
-        if (node == null)
-        {
-            ThrowArgumentNullException(nameof(node));
-            return;
-        }
-
-        if (writer == null)
-        {
-            ThrowArgumentNullException(nameof(writer));
-            return;
-        }
-
-        if (options == null)
-        {
-            ThrowArgumentNullException(nameof(options));
-            return;
-        }
-
-        var visitor = new Visitor(writer,
-            options.IncludingLineColumn, options.IncludingRange,
-            options.LocationMembersPlacement);
-
-        visitor.Visit(node);
-    }
-
-    private sealed partial class Visitor : AstVisitor
-    {
-        private readonly JsonWriter _writer;
-        private readonly ObservableStack<Node> _stack;
-
-        public Visitor(JsonWriter writer,
-            bool includeLineColumn, bool includeRange,
-            LocationMembersPlacement locationMembersPlacement)
-        {
-            _writer = writer ?? ThrowArgumentNullException<JsonWriter>(nameof(writer));
-            _stack = new ObservableStack<Node>();
-
-            _stack.Pushed += node =>
+            private Options(Options options)
             {
-                _writer.StartObject();
+                IncludingLineColumn = options.IncludingLineColumn;
+                IncludingRange = options.IncludingRange;
+                LocationMembersPlacement = options.LocationMembersPlacement;
+            }
 
-                if ((includeLineColumn || includeRange)
-                    && locationMembersPlacement == LocationMembersPlacement.Start)
-                {
-                    WriteLocationInfo(node);
-                }
-
-                Member("type", node.Type.ToString());
-            };
-
-            _stack.Popped += node =>
+            public Options WithIncludingLineColumn(bool value)
             {
-                if ((includeLineColumn || includeRange)
-                    && locationMembersPlacement == LocationMembersPlacement.End)
-                {
-                    WriteLocationInfo(node);
-                }
+                return value == IncludingLineColumn ? this : new Options(this) { IncludingLineColumn = value };
+            }
 
-                _writer.EndObject();
-            };
-
-            void WriteLocationInfo(Node node)
+            public Options WithIncludingRange(bool value)
             {
-                if (node is ChainExpression)
-                {
-                    return;
-                }
+                return value == IncludingRange ? this : new Options(this) { IncludingRange = value };
+            }
 
-                if (includeRange)
-                {
-                    _writer.Member("range");
-                    _writer.StartArray();
-                    _writer.Number(node.Range.Start);
-                    _writer.Number(node.Range.End);
-                    _writer.EndArray();
-                }
+            public Options WithLocationMembersPlacement(LocationMembersPlacement value)
+            {
+                return value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
+            }
+        }
 
-                if (includeLineColumn)
-                {
-                    _writer.Member("loc");
-                    _writer.StartObject();
-                    _writer.Member("start");
-                    Write(node.Location.Start);
-                    _writer.Member("end");
-                    Write(node.Location.End);
-                    _writer.EndObject();
-                }
+        public static string ToJsonString(this Node node)
+        {
+            return ToJsonString(node, indent: null);
+        }
 
-                void Write(Position position)
+        public static string ToJsonString(this Node node, string? indent)
+        {
+            return ToJsonString(node, Options.Default, indent);
+        }
+
+        public static string ToJsonString(this Node node, Options options)
+        {
+            return ToJsonString(node, options, null);
+        }
+
+        public static string ToJsonString(this Node node, Options options, string? indent)
+        {
+            using (var writer = new StringWriter())
+            {
+                WriteJson(node, writer, options, indent);
+                return writer.ToString();
+            }
+        }
+
+        public static void WriteJson(this Node node, TextWriter writer)
+        {
+            WriteJson(node, writer, indent: null);
+        }
+
+        public static void WriteJson(this Node node, TextWriter writer, string? indent)
+        {
+            WriteJson(node, writer, Options.Default, indent);
+        }
+
+        public static void WriteJson(this Node node, TextWriter writer, Options options)
+        {
+            WriteJson(node, writer, options, null);
+        }
+
+        public static void WriteJson(this Node node, TextWriter writer, Options options, string? indent)
+        {
+            if (node == null)
+            {
+                ThrowArgumentNullException(nameof(node));
+                return;
+            }
+
+            if (writer == null)
+            {
+                ThrowArgumentNullException(nameof(writer));
+                return;
+            }
+
+            if (options == null)
+            {
+                ThrowArgumentNullException(nameof(options));
+                return;
+            }
+
+            var visitor = new Visitor(new JsonTextWriter(writer, indent),
+                options.IncludingLineColumn, options.IncludingRange,
+                options.LocationMembersPlacement);
+
+            visitor.Visit(node);
+        }
+
+        public static void WriteJson(this Node node, JsonWriter writer, Options options)
+        {
+            if (node == null)
+            {
+                ThrowArgumentNullException(nameof(node));
+                return;
+            }
+
+            if (writer == null)
+            {
+                ThrowArgumentNullException(nameof(writer));
+                return;
+            }
+
+            if (options == null)
+            {
+                ThrowArgumentNullException(nameof(options));
+                return;
+            }
+
+            var visitor = new Visitor(writer,
+                options.IncludingLineColumn, options.IncludingRange,
+                options.LocationMembersPlacement);
+
+            visitor.Visit(node);
+        }
+
+        private sealed class Visitor : AstVisitor
+        {
+            private readonly JsonWriter _writer;
+            private readonly ObservableStack<Node> _stack;
+
+            public Visitor(JsonWriter writer,
+                bool includeLineColumn, bool includeRange,
+                LocationMembersPlacement locationMembersPlacement)
+            {
+                _writer = writer ?? ThrowArgumentNullException<JsonWriter>(nameof(writer));
+                _stack = new ObservableStack<Node>();
+
+                _stack.Pushed += node =>
                 {
                     _writer.StartObject();
-                    Member("line", position.Line);
-                    Member("column", position.Column);
+
+                    if ((includeLineColumn || includeRange)
+                        && locationMembersPlacement == LocationMembersPlacement.Start)
+                    {
+                        WriteLocationInfo(node);
+                    }
+
+                    Member("type", node.Type.ToString());
+                };
+
+                _stack.Popped += node =>
+                {
+                    if ((includeLineColumn || includeRange)
+                        && locationMembersPlacement == LocationMembersPlacement.End)
+                    {
+                        WriteLocationInfo(node);
+                    }
+
                     _writer.EndObject();
-                }
-            }
-        }
+                };
 
-        private IDisposable StartNodeObject(Node node)
-        {
-            return _stack.Push(node);
-        }
-
-        private void EmptyNodeObject(Node node)
-        {
-            using (StartNodeObject(node)) { }
-        }
-
-        private void Member(string name)
-        {
-            _writer.Member(name);
-        }
-
-        private void Member(string name, Node? node)
-        {
-            Member(name);
-            Visit(node);
-        }
-
-        private void Member(string name, string? value)
-        {
-            Member(name);
-            _writer.String(value);
-        }
-
-        private void Member(string name, bool value)
-        {
-            Member(name);
-            _writer.Boolean(value);
-        }
-
-        private void Member(string name, int value)
-        {
-            Member(name);
-            _writer.Number(value);
-        }
-
-        private static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new();
-
-        private void Member<T>(string name, T value) where T : Enum
-        {
-            var map = (Dictionary<T, string>)
-                EnumMap.GetValue(value.GetType(),
-                    t => t.GetRuntimeFields()
-                        .Where(f => f.IsStatic)
-                        .ToDictionary(f => (T) f.GetValue(null),
-                            f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
-                                ? a.Value
-                                : f.Name.ToLowerInvariant()));
-            Member(name, map[value]);
-        }
-
-        private void Member<T>(string name, in NodeList<T> nodes) where T : Node?
-        {
-            Member(name, nodes, node => node);
-        }
-
-        private void Member<T>(string name, in NodeList<T> list, Func<T, Node?> nodeSelector) where T : Node?
-        {
-            Member(name);
-            _writer.StartArray();
-            foreach (var item in list)
-            {
-                Visit(nodeSelector(item));
-            }
-
-            _writer.EndArray();
-        }
-
-        private sealed class ObservableStack<T> : IDisposable
-        {
-            private readonly Stack<T> _stack = new();
-
-            public event Action<T>? Pushed;
-            public event Action<T>? Popped;
-
-            public IDisposable Push(T item)
-            {
-                _stack.Push(item);
-                Pushed?.Invoke(item);
-                return this;
-            }
-
-            public void Dispose()
-            {
-                var item = _stack.Pop();
-                Popped?.Invoke(item);
-            }
-        }
-
-        public override Node? Visit(Node? node)
-        {
-            if (node is not null)
-            {
-                return base.Visit(node);
-            }
-            else
-            {
-                _writer.Null();
-                return node !;
-            }
-        }
-
-        protected internal override Program VisitProgram(Program program)
-        {
-            using (StartNodeObject(program))
-            {
-                Member("body", program.Body, e => (Node) e);
-                Member("sourceType", program.SourceType);
-            }
-
-            return program;
-        }
-
-        [Obsolete(
-            "This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-        protected override void VisitUnknownNode(Node node)
-        {
-            throw new NotSupportedException("Unknown node type: " + node.Type);
-        }
-
-        protected internal override CatchClause VisitCatchClause(CatchClause catchClause)
-        {
-            using (StartNodeObject(catchClause))
-            {
-                Member("param", catchClause.Param);
-                Member("body", catchClause.Body);
-            }
-
-            return catchClause;
-        }
-
-        protected internal override FunctionDeclaration VisitFunctionDeclaration(
-            FunctionDeclaration functionDeclaration)
-        {
-            using (StartNodeObject(functionDeclaration))
-            {
-                Member("id", functionDeclaration.Id);
-                Member("params", functionDeclaration.Params);
-                Member("body", functionDeclaration.Body);
-                Member("generator", functionDeclaration.Generator);
-                Member("expression", functionDeclaration.Expression);
-                Member("async", functionDeclaration.Async);
-            }
-
-            return functionDeclaration;
-        }
-
-        protected internal override WithStatement VisitWithStatement(WithStatement withStatement)
-        {
-            using (StartNodeObject(withStatement))
-            {
-                Member("object", withStatement.Object);
-                Member("body", withStatement.Body);
-            }
-
-            return withStatement;
-        }
-
-        protected internal override WhileStatement VisitWhileStatement(WhileStatement whileStatement)
-        {
-            using (StartNodeObject(whileStatement))
-            {
-                Member("test", whileStatement.Test);
-                Member("body", whileStatement.Body);
-            }
-
-            return whileStatement;
-        }
-
-        protected internal override VariableDeclaration VisitVariableDeclaration(
-            VariableDeclaration variableDeclaration)
-        {
-            using (StartNodeObject(variableDeclaration))
-            {
-                Member("declarations", variableDeclaration.Declarations);
-                Member("kind", variableDeclaration.Kind);
-            }
-
-            return variableDeclaration;
-        }
-
-        protected internal override TryStatement VisitTryStatement(TryStatement tryStatement)
-        {
-            using (StartNodeObject(tryStatement))
-            {
-                Member("block", tryStatement.Block);
-                Member("handler", tryStatement.Handler);
-                Member("finalizer", tryStatement.Finalizer);
-            }
-
-            return tryStatement;
-        }
-
-        protected internal override ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
-        {
-            using (StartNodeObject(throwStatement))
-            {
-                Member("argument", throwStatement.Argument);
-            }
-
-            return throwStatement;
-        }
-
-        protected internal override AwaitExpression VisitAwaitExpression(AwaitExpression awaitExpression)
-        {
-            using (StartNodeObject(awaitExpression))
-            {
-                Member("argument", awaitExpression.Argument);
-            }
-
-            return awaitExpression;
-        }
-
-        protected internal override SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
-        {
-            using (StartNodeObject(switchStatement))
-            {
-                Member("discriminant", switchStatement.Discriminant);
-                Member("cases", switchStatement.Cases);
-            }
-
-            return switchStatement;
-        }
-
-        protected internal override SwitchCase VisitSwitchCase(SwitchCase switchCase)
-        {
-            using (StartNodeObject(switchCase))
-            {
-                Member("test", switchCase.Test);
-                Member("consequent", switchCase.Consequent, e => (Node) e);
-            }
-
-            return switchCase;
-        }
-
-        protected internal override ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
-        {
-            using (StartNodeObject(returnStatement))
-            {
-                Member("argument", returnStatement.Argument);
-            }
-
-            return returnStatement;
-        }
-
-        protected internal override LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
-        {
-            using (StartNodeObject(labeledStatement))
-            {
-                Member("label", labeledStatement.Label);
-                Member("body", labeledStatement.Body);
-            }
-
-            return labeledStatement;
-        }
-
-        protected internal override IfStatement VisitIfStatement(IfStatement ifStatement)
-        {
-            using (StartNodeObject(ifStatement))
-            {
-                Member("test", ifStatement.Test);
-                Member("consequent", ifStatement.Consequent);
-                Member("alternate", ifStatement.Alternate);
-            }
-
-            return ifStatement;
-        }
-
-        protected internal override EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
-        {
-            EmptyNodeObject(emptyStatement);
-            return emptyStatement;
-        }
-
-        protected internal override DebuggerStatement VisitDebuggerStatement(DebuggerStatement debuggerStatement)
-        {
-            EmptyNodeObject(debuggerStatement);
-            return debuggerStatement;
-        }
-
-        protected internal override ExpressionStatement VisitExpressionStatement(
-            ExpressionStatement expressionStatement)
-        {
-            using (StartNodeObject(expressionStatement))
-            {
-                if (expressionStatement is Directive d)
+                void WriteLocationInfo(Node node)
                 {
-                    Member("directive", d.Directiv);
-                }
+                    if (node is ChainExpression)
+                    {
+                        return;
+                    }
 
-                Member("expression", expressionStatement.Expression);
-            }
+                    if (includeRange)
+                    {
+                        _writer.Member("range");
+                        _writer.StartArray();
+                        _writer.Number(node.Range.Start);
+                        _writer.Number(node.Range.End);
+                        _writer.EndArray();
+                    }
 
-            return expressionStatement;
-        }
-
-        protected internal override ForStatement VisitForStatement(ForStatement forStatement)
-        {
-            using (StartNodeObject(forStatement))
-            {
-                Member("init", forStatement.Init);
-                Member("test", forStatement.Test);
-                Member("update", forStatement.Update);
-                Member("body", forStatement.Body);
-            }
-
-            return forStatement;
-        }
-
-        protected internal override ForInStatement VisitForInStatement(ForInStatement forInStatement)
-        {
-            using (StartNodeObject(forInStatement))
-            {
-                Member("left", forInStatement.Left);
-                Member("right", forInStatement.Right);
-                Member("body", forInStatement.Body);
-                Member("each", false);
-            }
-
-            return forInStatement;
-        }
-
-        protected internal override DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
-        {
-            using (StartNodeObject(doWhileStatement))
-            {
-                Member("body", doWhileStatement.Body);
-                Member("test", doWhileStatement.Test);
-            }
-
-            return doWhileStatement;
-        }
-
-        protected internal override ArrowFunctionExpression VisitArrowFunctionExpression(
-            ArrowFunctionExpression arrowFunctionExpression)
-        {
-            using (StartNodeObject(arrowFunctionExpression))
-            {
-                Member("id", arrowFunctionExpression.Id);
-                Member("params", arrowFunctionExpression.Params);
-                Member("body", arrowFunctionExpression.Body);
-                Member("generator", arrowFunctionExpression.Generator);
-                Member("expression", arrowFunctionExpression.Expression);
-                Member("async", arrowFunctionExpression.Async);
-            }
-
-            return arrowFunctionExpression;
-        }
-
-        protected internal override UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
-        {
-            using (StartNodeObject(unaryExpression))
-            {
-                Member("operator", unaryExpression.Operator);
-                Member("argument", unaryExpression.Argument);
-                Member("prefix", unaryExpression.Prefix);
-            }
-
-            return unaryExpression;
-        }
-
-        protected internal override UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
-        {
-            VisitUnaryExpression(updateExpression);
-            return updateExpression;
-        }
-
-        protected internal override ThisExpression VisitThisExpression(ThisExpression thisExpression)
-        {
-            EmptyNodeObject(thisExpression);
-            return thisExpression;
-        }
-
-        protected internal override SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
-        {
-            using (StartNodeObject(sequenceExpression))
-            {
-                Member("expressions", sequenceExpression.Expressions);
-            }
-
-            return sequenceExpression;
-        }
-
-        protected internal override ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
-        {
-            using (StartNodeObject(objectExpression))
-            {
-                Member("properties", objectExpression.Properties);
-            }
-
-            return objectExpression;
-        }
-
-        protected internal override NewExpression VisitNewExpression(NewExpression newExpression)
-        {
-            using (StartNodeObject(newExpression))
-            {
-                Member("callee", newExpression.Callee);
-                Member("arguments", newExpression.Arguments, e => (Node) e);
-            }
-
-            return newExpression;
-        }
-
-        protected internal override MemberExpression VisitMemberExpression(MemberExpression memberExpression)
-        {
-            using (StartNodeObject(memberExpression))
-            {
-                Member("computed", memberExpression.Computed);
-                Member("object", memberExpression.Object);
-                Member("property", memberExpression.Property);
-                Member("optional", memberExpression.Optional);
-            }
-
-            return memberExpression;
-        }
-
-        protected internal override BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
-        {
-            VisitBinaryExpression(binaryExpression);
-            return binaryExpression;
-        }
-
-        protected internal override Literal VisitLiteral(Literal literal)
-        {
-            using (StartNodeObject(literal))
-            {
-                _writer.Member("value");
-                var value = literal.Value;
-
-                switch (value)
-                {
-                    case null:
-                        if (literal.TokenType == TokenType.RegularExpression)
-                        {
-                            // This is how esprima.org actually renders regexes since it relies on Regex.toString
-                            _writer.String(literal.Raw);
-                        }
-                        else
-                        {
-                            _writer.Null();
-                        }
-
-                        break;
-                    case bool b:
-                        _writer.Boolean(b);
-                        break;
-                    case Regex _:
+                    if (includeLineColumn)
+                    {
+                        _writer.Member("loc");
                         _writer.StartObject();
+                        _writer.Member("start");
+                        Write(node.Location.Start);
+                        _writer.Member("end");
+                        Write(node.Location.End);
                         _writer.EndObject();
-                        break;
-                    case double d:
-                        _writer.Number(d);
-                        break;
-                    default:
-                        _writer.String(Convert.ToString(value, CultureInfo.InvariantCulture));
-                        break;
+                    }
+
+                    void Write(Position position)
+                    {
+                        _writer.StartObject();
+                        Member("line", position.Line);
+                        Member("column", position.Column);
+                        _writer.EndObject();
+                    }
                 }
+            }
 
-                Member("raw", literal.Raw);
+            private IDisposable StartNodeObject(Node node)
+            {
+                return _stack.Push(node);
+            }
 
-                if (literal.Regex != null)
+            private void EmptyNodeObject(Node node)
+            {
+                using (StartNodeObject(node)) { }
+            }
+
+            private void Member(string name)
+            {
+                _writer.Member(name);
+            }
+
+            private void Member(string name, Node? node)
+            {
+                Member(name);
+                Visit(node);
+            }
+
+            private void Member(string name, string? value)
+            {
+                Member(name);
+                _writer.String(value);
+            }
+
+            private void Member(string name, bool value)
+            {
+                Member(name);
+                _writer.Boolean(value);
+            }
+
+            private void Member(string name, int value)
+            {
+                Member(name);
+                _writer.Number(value);
+            }
+
+            private static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new();
+
+            private void Member<T>(string name, T value) where T : Enum
+            {
+                var map = (Dictionary<T, string>)
+                    EnumMap.GetValue(value.GetType(),
+                        t => t.GetRuntimeFields()
+                            .Where(f => f.IsStatic)
+                            .ToDictionary(f => (T) f.GetValue(null),
+                                f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
+                                    ? a.Value
+                                    : f.Name.ToLowerInvariant()));
+                Member(name, map[value]);
+            }
+
+            private void Member<T>(string name, in NodeList<T> nodes) where T : Node?
+            {
+                Member(name, nodes, node => node);
+            }
+
+            private void Member<T>(string name, in NodeList<T> list, Func<T, Node?> nodeSelector) where T : Node?
+            {
+                Member(name);
+                _writer.StartArray();
+                foreach (var item in list)
                 {
-                    _writer.Member("regex");
-                    _writer.StartObject();
-                    Member("pattern", literal.Regex.Pattern);
-                    Member("flags", literal.Regex.Flags);
-                    _writer.EndObject();
+                    Visit(nodeSelector(item));
+                }
+
+                _writer.EndArray();
+            }
+
+            private sealed class ObservableStack<T> : IDisposable
+            {
+                private readonly Stack<T> _stack = new();
+
+                public event Action<T>? Pushed;
+                public event Action<T>? Popped;
+
+                public IDisposable Push(T item)
+                {
+                    _stack.Push(item);
+                    Pushed?.Invoke(item);
+                    return this;
+                }
+
+                public void Dispose()
+                {
+                    var item = _stack.Pop();
+                    Popped?.Invoke(item);
                 }
             }
 
-            return literal;
-        }
-
-        protected internal override Identifier VisitIdentifier(Identifier identifier)
-        {
-            using (StartNodeObject(identifier))
+            public override TNode Visit<TNode>(TNode node) where TNode : class
             {
-                Member("name", identifier.Name);
+                if (node is not null)
+                {
+                    return base.Visit(node);
+                }
+                else
+                {
+                    _writer.Null();
+                    return node;
+                }
             }
 
-            return identifier;
-        }
-
-        protected internal override IFunction VisitFunctionExpression(IFunction function)
-        {
-            using (StartNodeObject((Node) function))
+            protected internal override Program VisitProgram(Program program)
             {
-                Member("id", function.Id);
-                Member("params", function.Params);
-                Member("body", function.Body);
-                Member("generator", function.Generator);
-                Member("expression", function.Expression);
-                Member("async", function.Async);
+                using (StartNodeObject(program))
+                {
+                    Member("body", program.Body, e => (Node) e);
+                    Member("sourceType", program.SourceType);
+                }
+
+                return base.VisitProgram(program);
             }
 
-            return function;
-        }
-
-        protected internal override ClassExpression VisitClassExpression(ClassExpression classExpression)
-        {
-            using (StartNodeObject(classExpression))
+            [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
+            protected override void VisitUnknownNode(Node node)
             {
-                Member("id", classExpression.Id);
-                Member("superClass", classExpression.SuperClass);
-                Member("body", classExpression.Body);
+                throw new NotSupportedException("Unknown node type: " + node.Type);
             }
 
-            return classExpression;
-        }
-
-        protected internal override ChainExpression VisitChainExpression(ChainExpression chainExpression)
-        {
-            using (StartNodeObject(chainExpression))
+            protected internal override CatchClause VisitCatchClause(CatchClause catchClause)
             {
-                Member("expression", chainExpression.Expression);
+                using (StartNodeObject(catchClause))
+                {
+                    Member("param", catchClause.Param);
+                    Member("body", catchClause.Body);
+                }
+
+                return base.VisitCatchClause(catchClause);
             }
 
-            return chainExpression;
-        }
-
-        protected internal override ExportDefaultDeclaration VisitExportDefaultDeclaration(
-            ExportDefaultDeclaration exportDefaultDeclaration)
-        {
-            using (StartNodeObject(exportDefaultDeclaration))
+            protected internal override FunctionDeclaration VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
             {
-                Member("declaration", exportDefaultDeclaration.Declaration);
+                using (StartNodeObject(functionDeclaration))
+                {
+                    Member("id", functionDeclaration.Id);
+                    Member("params", functionDeclaration.Params);
+                    Member("body", functionDeclaration.Body);
+                    Member("generator", functionDeclaration.Generator);
+                    Member("expression", functionDeclaration.Expression);
+                    Member("async", functionDeclaration.Async);
+                }
+                
+                return base.VisitFunctionDeclaration(functionDeclaration);
             }
 
-            return exportDefaultDeclaration;
-        }
-
-        protected internal override ExportAllDeclaration VisitExportAllDeclaration(
-            ExportAllDeclaration exportAllDeclaration)
-        {
-            using (StartNodeObject(exportAllDeclaration))
+            protected internal override WithStatement VisitWithStatement(WithStatement withStatement)
             {
-                Member("source", exportAllDeclaration.Source);
-                Member("exported", exportAllDeclaration.Exported);
+                using (StartNodeObject(withStatement))
+                {
+                    Member("object", withStatement.Object);
+                    Member("body", withStatement.Body);
+                }
+
+                return base.VisitWithStatement(withStatement);
             }
 
-            return exportAllDeclaration;
-        }
-
-        protected internal override ExportNamedDeclaration VisitExportNamedDeclaration(
-            ExportNamedDeclaration exportNamedDeclaration)
-        {
-            using (StartNodeObject(exportNamedDeclaration))
+            protected internal override WhileStatement VisitWhileStatement(WhileStatement whileStatement)
             {
-                Member("declaration", exportNamedDeclaration.Declaration);
-                Member("specifiers", exportNamedDeclaration.Specifiers);
-                Member("source", exportNamedDeclaration.Source);
+                using (StartNodeObject(whileStatement))
+                {
+                    Member("test", whileStatement.Test);
+                    Member("body", whileStatement.Body);
+                }
+                return base.VisitWhileStatement(whileStatement);
             }
 
-            return exportNamedDeclaration;
-        }
-
-        protected internal override ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
-        {
-            using (StartNodeObject(exportSpecifier))
+            protected internal override VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
             {
-                Member("exported", exportSpecifier.Exported);
-                Member("local", exportSpecifier.Local);
+                using (StartNodeObject(variableDeclaration))
+                {
+                    Member("declarations", variableDeclaration.Declarations);
+                    Member("kind", variableDeclaration.Kind);
+                }
+                return base.VisitVariableDeclaration(variableDeclaration);
             }
 
-            return exportSpecifier;
-        }
-
-        protected internal override Import VisitImport(Import import)
-        {
-            using (StartNodeObject(import))
+            protected internal override TryStatement VisitTryStatement(TryStatement tryStatement)
             {
+                using (StartNodeObject(tryStatement))
+                {
+                    Member("block", tryStatement.Block);
+                    Member("handler", tryStatement.Handler);
+                    Member("finalizer", tryStatement.Finalizer);
+                }
+                return base.VisitTryStatement(tryStatement);
             }
 
-            return import;
-        }
-
-        protected internal override ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
-        {
-            using (StartNodeObject(importDeclaration))
+            protected internal override ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
             {
-                Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
-                Member("source", importDeclaration.Source);
+                using (StartNodeObject(throwStatement))
+                {
+                    Member("argument", throwStatement.Argument);
+                }
+                return base.VisitThrowStatement(throwStatement);
             }
 
-            return importDeclaration;
-        }
-
-        protected internal override ImportNamespaceSpecifier VisitImportNamespaceSpecifier(
-            ImportNamespaceSpecifier importNamespaceSpecifier)
-        {
-            using (StartNodeObject(importNamespaceSpecifier))
+            protected internal override AwaitExpression VisitAwaitExpression(AwaitExpression awaitExpression)
             {
-                Member("local", importNamespaceSpecifier.Local);
+                using (StartNodeObject(awaitExpression))
+                {
+                    Member("argument", awaitExpression.Argument);
+                }
+                return base.VisitAwaitExpression(awaitExpression);
             }
 
-            return importNamespaceSpecifier;
-        }
-
-        protected internal override ImportDefaultSpecifier VisitImportDefaultSpecifier(
-            ImportDefaultSpecifier importDefaultSpecifier)
-        {
-            using (StartNodeObject(importDefaultSpecifier))
+            protected internal override SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
             {
-                Member("local", importDefaultSpecifier.Local);
+                using (StartNodeObject(switchStatement))
+                {
+                    Member("discriminant", switchStatement.Discriminant);
+                    Member("cases", switchStatement.Cases);
+                }
+                return base.VisitSwitchStatement(switchStatement);
             }
 
-            return importDefaultSpecifier;
-        }
-
-        protected internal override ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
-        {
-            using (StartNodeObject(importSpecifier))
+            protected internal override SwitchCase VisitSwitchCase(SwitchCase switchCase)
             {
-                Member("local", importSpecifier.Local);
-                Member("imported", importSpecifier.Imported);
+                using (StartNodeObject(switchCase))
+                {
+                    Member("test", switchCase.Test);
+                    Member("consequent", switchCase.Consequent, e => (Node) e);
+                }
+                return base.VisitSwitchCase(switchCase);
             }
 
-            return importSpecifier;
-        }
-
-        protected internal override MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
-        {
-            using (StartNodeObject(methodDefinition))
+            protected internal override ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
             {
-                Member("key", methodDefinition.Key);
-                Member("computed", methodDefinition.Computed);
-                Member("value", methodDefinition.Value);
-                Member("kind", methodDefinition.Kind);
-                Member("static", methodDefinition.Static);
+                using (StartNodeObject(returnStatement))
+                {
+                    Member("argument", returnStatement.Argument);
+                }
+                return base.VisitReturnStatement(returnStatement);
             }
 
-            return methodDefinition;
-        }
-
-        protected internal override ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
-        {
-            using (StartNodeObject(forOfStatement))
+            protected internal override LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
             {
-                Member("await", forOfStatement.Await);
-                Member("left", forOfStatement.Left);
-                Member("right", forOfStatement.Right);
-                Member("body", forOfStatement.Body);
+                using (StartNodeObject(labeledStatement))
+                {
+                    Member("label", labeledStatement.Label);
+                    Member("body", labeledStatement.Body);
+                }
+                return base.VisitLabeledStatement(labeledStatement);
             }
 
-            return forOfStatement;
-        }
-
-        protected internal override ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
-        {
-            using (StartNodeObject(classDeclaration))
+            protected internal override IfStatement VisitIfStatement(IfStatement ifStatement)
             {
-                Member("id", classDeclaration.Id);
-                Member("superClass", classDeclaration.SuperClass);
-                Member("body", classDeclaration.Body);
+                using (StartNodeObject(ifStatement))
+                {
+                    Member("test", ifStatement.Test);
+                    Member("consequent", ifStatement.Consequent);
+                    Member("alternate", ifStatement.Alternate);
+                }
+                return base.VisitIfStatement(ifStatement);
             }
 
-            return classDeclaration;
-        }
-
-        protected internal override ClassBody VisitClassBody(ClassBody classBody)
-        {
-            using (StartNodeObject(classBody))
+            protected internal override EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
             {
-                Member("body", classBody.Body);
+                EmptyNodeObject(emptyStatement);
+                return base.VisitEmptyStatement(emptyStatement);
             }
 
-            return classBody;
-        }
-
-        protected internal override YieldExpression VisitYieldExpression(YieldExpression yieldExpression)
-        {
-            using (StartNodeObject(yieldExpression))
+            protected internal override DebuggerStatement VisitDebuggerStatement(DebuggerStatement debuggerStatement)
             {
-                Member("argument", yieldExpression.Argument);
-                Member("delegate", yieldExpression.Delegate);
+                EmptyNodeObject(debuggerStatement);
+                return base.VisitDebuggerStatement(debuggerStatement);
             }
 
-            return yieldExpression;
-        }
-
-        protected internal override TaggedTemplateExpression VisitTaggedTemplateExpression(
-            TaggedTemplateExpression taggedTemplateExpression)
-        {
-            using (StartNodeObject(taggedTemplateExpression))
+            protected internal override ExpressionStatement VisitExpressionStatement(ExpressionStatement expressionStatement)
             {
-                Member("tag", taggedTemplateExpression.Tag);
-                Member("quasi", taggedTemplateExpression.Quasi);
+                using (StartNodeObject(expressionStatement))
+                {
+                    if (expressionStatement is Directive d)
+                    {
+                        Member("directive", d.Directiv);
+                    }
+
+                    Member("expression", expressionStatement.Expression);
+                }
+                return base.VisitExpressionStatement(expressionStatement);
             }
 
-            return taggedTemplateExpression;
-        }
-
-        protected internal override Super VisitSuper(Super super)
-        {
-            EmptyNodeObject(super);
-            return super;
-        }
-
-        protected internal override MetaProperty VisitMetaProperty(MetaProperty metaProperty)
-        {
-            using (StartNodeObject(metaProperty))
+            protected internal override ForStatement VisitForStatement(ForStatement forStatement)
             {
-                Member("meta", metaProperty.Meta);
-                Member("property", metaProperty.Property);
+                using (StartNodeObject(forStatement))
+                {
+                    Member("init", forStatement.Init);
+                    Member("test", forStatement.Test);
+                    Member("update", forStatement.Update);
+                    Member("body", forStatement.Body);
+                }
+                return base.VisitForStatement(forStatement);
             }
 
-            return metaProperty;
-        }
-
-        protected internal override ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(
-            ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-        {
-            // Seems that ArrowParameterPlaceHolder nodes never appear
-            // in the final tree and only used during the construction of
-            // a tree. If this assumption is wrong then best to just fail.
-
-            throw new NotImplementedException();
-        }
-
-        protected internal override ObjectPattern VisitObjectPattern(ObjectPattern objectPattern)
-        {
-            using (StartNodeObject(objectPattern))
+            protected internal override ForInStatement VisitForInStatement(ForInStatement forInStatement)
             {
-                Member("properties", objectPattern.Properties);
+                using (StartNodeObject(forInStatement))
+                {
+                    Member("left", forInStatement.Left);
+                    Member("right", forInStatement.Right);
+                    Member("body", forInStatement.Body);
+                    Member("each", false);
+                }
+                return base.VisitForInStatement(forInStatement);
             }
 
-            return objectPattern;
-        }
-
-        protected internal override SpreadElement VisitSpreadElement(SpreadElement spreadElement)
-        {
-            using (StartNodeObject(spreadElement))
+            protected internal override DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
             {
-                Member("argument", spreadElement.Argument);
+                using (StartNodeObject(doWhileStatement))
+                {
+                    Member("body", doWhileStatement.Body);
+                    Member("test", doWhileStatement.Test);
+                }
+                return base.VisitDoWhileStatement(doWhileStatement);
             }
 
-            return spreadElement;
-        }
-
-        protected internal override AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
-        {
-            using (StartNodeObject(assignmentPattern))
+            protected internal override ArrowFunctionExpression VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
             {
-                Member("left", assignmentPattern.Left);
-                Member("right", assignmentPattern.Right);
+                using (StartNodeObject(arrowFunctionExpression))
+                {
+                    Member("id", arrowFunctionExpression.Id);
+                    Member("params", arrowFunctionExpression.Params);
+                    Member("body", arrowFunctionExpression.Body);
+                    Member("generator", arrowFunctionExpression.Generator);
+                    Member("expression", arrowFunctionExpression.Expression);
+                    Member("async", arrowFunctionExpression.Async);
+                }
+                return base.VisitArrowFunctionExpression(arrowFunctionExpression);
             }
 
-            return assignmentPattern;
-        }
-
-        protected internal override ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
-        {
-            using (StartNodeObject(arrayPattern))
+            protected internal override UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
             {
-                Member("elements", arrayPattern.Elements);
+                using (StartNodeObject(unaryExpression))
+                {
+                    Member("operator", unaryExpression.Operator);
+                    Member("argument", unaryExpression.Argument);
+                    Member("prefix", unaryExpression.Prefix);
+                }
+                return base.VisitUnaryExpression(unaryExpression);
             }
 
-            return arrayPattern;
-        }
-
-        protected internal override VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
-        {
-            using (StartNodeObject(variableDeclarator))
+            protected internal override UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
             {
-                Member("id", variableDeclarator.Id);
-                Member("init", variableDeclarator.Init);
+                VisitUnaryExpression(updateExpression);
+                return base.VisitUpdateExpression(updateExpression);
             }
 
-            return variableDeclarator;
-        }
-
-        protected internal override TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
-        {
-            using (StartNodeObject(templateLiteral))
+            protected internal override ThisExpression VisitThisExpression(ThisExpression thisExpression)
             {
-                Member("quasis", templateLiteral.Quasis);
-                Member("expressions", templateLiteral.Expressions);
+                EmptyNodeObject(thisExpression);
+                return base.VisitThisExpression(thisExpression);
             }
 
-            return templateLiteral;
-        }
-
-        protected internal override TemplateElement VisitTemplateElement(TemplateElement templateElement)
-        {
-            using (StartNodeObject(templateElement))
+            protected internal override SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
             {
-                _writer.Member("value");
-                _writer.StartObject();
-                Member("raw", templateElement.Value.Raw);
-                Member("cooked", templateElement.Value.Cooked);
-                _writer.EndObject();
-                Member("tail", templateElement.Tail);
+                using (StartNodeObject(sequenceExpression))
+                {
+                    Member("expressions", sequenceExpression.Expressions);
+                }
+                return base.VisitSequenceExpression(sequenceExpression);
             }
 
-            return templateElement;
-        }
-
-        protected internal override RestElement VisitRestElement(RestElement restElement)
-        {
-            using (StartNodeObject(restElement))
+            protected internal override ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
             {
-                Member("argument", restElement.Argument);
+                using (StartNodeObject(objectExpression))
+                {
+                    Member("properties", objectExpression.Properties);
+                }
+                return base.VisitObjectExpression(objectExpression);
             }
 
-            return restElement;
-        }
-
-        protected internal override Property VisitProperty(Property property)
-        {
-            using (StartNodeObject(property))
+            protected internal override NewExpression VisitNewExpression(NewExpression newExpression)
             {
-                Member("key", property.Key);
-                Member("computed", property.Computed);
-                Member("value", property.Value);
-                Member("kind", property.Kind);
-                Member("method", property.Method);
-                Member("shorthand", property.Shorthand);
+                using (StartNodeObject(newExpression))
+                {
+                    Member("callee", newExpression.Callee);
+                    Member("arguments", newExpression.Arguments, e => (Node) e);
+                }
+                return base.VisitNewExpression(newExpression);
             }
 
-            return property;
-        }
-
-        protected internal override ConditionalExpression VisitConditionalExpression(
-            ConditionalExpression conditionalExpression)
-        {
-            using (StartNodeObject(conditionalExpression))
+            protected internal override MemberExpression VisitMemberExpression(MemberExpression memberExpression)
             {
-                Member("test", conditionalExpression.Test);
-                Member("consequent", conditionalExpression.Consequent);
-                Member("alternate", conditionalExpression.Alternate);
+                using (StartNodeObject(memberExpression))
+                {
+                    Member("computed", memberExpression.Computed);
+                    Member("object", memberExpression.Object);
+                    Member("property", memberExpression.Property);
+                    Member("optional", memberExpression.Optional);
+                }
+                return base.VisitMemberExpression(memberExpression);
             }
 
-            return conditionalExpression;
-        }
-
-        protected internal override CallExpression VisitCallExpression(CallExpression callExpression)
-        {
-            using (StartNodeObject(callExpression))
+            protected internal override BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
             {
-                Member("callee", callExpression.Callee);
-                Member("arguments", callExpression.Arguments, e => e);
-                Member("optional", callExpression.Optional);
+                VisitBinaryExpression(binaryExpression);
+                return base.VisitLogicalExpression(binaryExpression);
             }
 
-            return callExpression;
-        }
-
-        protected internal override BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
-        {
-            using (StartNodeObject(binaryExpression))
+            protected internal override Literal VisitLiteral(Literal literal)
             {
-                Member("operator", binaryExpression.Operator);
-                Member("left", binaryExpression.Left);
-                Member("right", binaryExpression.Right);
+                using (StartNodeObject(literal))
+                {
+                    _writer.Member("value");
+                    var value = literal.Value;
+
+                    switch (value)
+                    {
+                        case null:
+                            if (literal.TokenType == TokenType.RegularExpression)
+                            {
+                                // This is how esprima.org actually renders regexes since it relies on Regex.toString
+                                _writer.String(literal.Raw);
+                            }
+                            else
+                            {
+                                _writer.Null();
+                            }
+                            break;
+                        case bool b:
+                            _writer.Boolean(b);
+                            break;
+                        case Regex _:
+                            _writer.StartObject();
+                            _writer.EndObject();
+                            break;
+                        case double d:
+                            _writer.Number(d);
+                            break;
+                        default:
+                            _writer.String(Convert.ToString(value, CultureInfo.InvariantCulture));
+                            break;
+                    }
+
+                    Member("raw", literal.Raw);
+
+                    if (literal.Regex != null)
+                    {
+                        _writer.Member("regex");
+                        _writer.StartObject();
+                        Member("pattern", literal.Regex.Pattern);
+                        Member("flags", literal.Regex.Flags);
+                        _writer.EndObject();
+                    }
+                }
+                return base.VisitLiteral(literal);
             }
 
-            return binaryExpression;
-        }
-
-        protected internal override ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
-        {
-            using (StartNodeObject(arrayExpression))
+            protected internal override Identifier VisitIdentifier(Identifier identifier)
             {
-                Member("elements", arrayExpression.Elements);
+                using (StartNodeObject(identifier))
+                {
+                    Member("name", identifier.Name);
+                }
+                return base.VisitIdentifier(identifier);
             }
 
-            return arrayExpression;
-        }
-
-        protected internal override AssignmentExpression VisitAssignmentExpression(
-            AssignmentExpression assignmentExpression)
-        {
-            using (StartNodeObject(assignmentExpression))
+            protected internal override IFunction VisitFunctionExpression(IFunction function)
             {
-                Member("operator", assignmentExpression.Operator);
-                Member("left", assignmentExpression.Left);
-                Member("right", assignmentExpression.Right);
+                using (StartNodeObject((Node) function))
+                {
+                    Member("id", function.Id);
+                    Member("params", function.Params);
+                    Member("body", function.Body);
+                    Member("generator", function.Generator);
+                    Member("expression", function.Expression);
+                    Member("async", function.Async);
+                }
+                return base.VisitFunctionExpression(function);
             }
 
-            return assignmentExpression;
-        }
-
-        protected internal override ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
-        {
-            using (StartNodeObject(continueStatement))
+            protected internal override ClassExpression VisitClassExpression(ClassExpression classExpression)
             {
-                Member("label", continueStatement.Label);
+                using (StartNodeObject(classExpression))
+                {
+                    Member("id", classExpression.Id);
+                    Member("superClass", classExpression.SuperClass);
+                    Member("body", classExpression.Body);
+                }
+                return base.VisitClassExpression(classExpression);
             }
 
-            return continueStatement;
-        }
-
-        protected internal override BreakStatement VisitBreakStatement(BreakStatement breakStatement)
-        {
-            using (StartNodeObject(breakStatement))
+            protected internal override ChainExpression VisitChainExpression(ChainExpression chainExpression)
             {
-                Member("label", breakStatement.Label);
+                using (StartNodeObject(chainExpression))
+                {
+                    Member("expression", chainExpression.Expression);
+                }
+                return base.VisitChainExpression(chainExpression);
             }
 
-            return breakStatement;
-        }
-
-        protected internal override BlockStatement VisitBlockStatement(BlockStatement blockStatement)
-        {
-            using (StartNodeObject(blockStatement))
+            protected internal override ExportDefaultDeclaration VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
             {
-                Member("body", blockStatement.Body, e => (Statement) e);
+                using (StartNodeObject(exportDefaultDeclaration))
+                {
+                    Member("declaration", exportDefaultDeclaration.Declaration);
+                }
+                return base.VisitExportDefaultDeclaration(exportDefaultDeclaration);
             }
 
-            return blockStatement;
+            protected internal override ExportAllDeclaration VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+            {
+                using (StartNodeObject(exportAllDeclaration))
+                {
+                    Member("source", exportAllDeclaration.Source);
+                    Member("exported", exportAllDeclaration.Exported);
+                }
+                return base.VisitExportAllDeclaration(exportAllDeclaration);
+            }
+
+            protected internal override ExportNamedDeclaration VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+            {
+                using (StartNodeObject(exportNamedDeclaration))
+                {
+                    Member("declaration", exportNamedDeclaration.Declaration);
+                    Member("specifiers", exportNamedDeclaration.Specifiers);
+                    Member("source", exportNamedDeclaration.Source);
+                }
+                return base.VisitExportNamedDeclaration(exportNamedDeclaration);
+            }
+
+            protected internal override ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
+            {
+                using (StartNodeObject(exportSpecifier))
+                {
+                    Member("exported", exportSpecifier.Exported);
+                    Member("local", exportSpecifier.Local);
+                }
+                return base.VisitExportSpecifier(exportSpecifier);
+            }
+
+            protected internal override Import VisitImport(Import import)
+            {
+                using (StartNodeObject(import))
+                {
+                }
+                return base.VisitImport(import);
+            }
+
+            protected internal override ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
+            {
+                using (StartNodeObject(importDeclaration))
+                {
+                    Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
+                    Member("source", importDeclaration.Source);
+                }
+                return base.VisitImportDeclaration(importDeclaration);
+            }
+
+            protected internal override ImportNamespaceSpecifier VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+            {
+                using (StartNodeObject(importNamespaceSpecifier))
+                {
+                    Member("local", importNamespaceSpecifier.Local);
+                }
+                return base.VisitImportNamespaceSpecifier(importNamespaceSpecifier);
+            }
+
+            protected internal override ImportDefaultSpecifier VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+            {
+                using (StartNodeObject(importDefaultSpecifier))
+                {
+                    Member("local", importDefaultSpecifier.Local);
+                }
+                return base.VisitImportDefaultSpecifier(importDefaultSpecifier);
+            }
+
+            protected internal override ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
+            {
+                using (StartNodeObject(importSpecifier))
+                {
+                    Member("local", importSpecifier.Local);
+                    Member("imported", importSpecifier.Imported);
+                }
+                return base.VisitImportSpecifier(importSpecifier);
+            }
+
+            protected internal override MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
+            {
+                using (StartNodeObject(methodDefinition))
+                {
+                    Member("key", methodDefinition.Key);
+                    Member("computed", methodDefinition.Computed);
+                    Member("value", methodDefinition.Value);
+                    Member("kind", methodDefinition.Kind);
+                    Member("static", methodDefinition.Static);
+                }
+                return base.VisitMethodDefinition(methodDefinition);
+            }
+
+            protected internal override ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
+            {
+                using (StartNodeObject(forOfStatement))
+                {
+                    Member("await", forOfStatement.Await);
+                    Member("left", forOfStatement.Left);
+                    Member("right", forOfStatement.Right);
+                    Member("body", forOfStatement.Body);
+                }
+                return base.VisitForOfStatement(forOfStatement);
+            }
+
+            protected internal override ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
+            {
+                using (StartNodeObject(classDeclaration))
+                {
+                    Member("id", classDeclaration.Id);
+                    Member("superClass", classDeclaration.SuperClass);
+                    Member("body", classDeclaration.Body);
+                }
+                return base.VisitClassDeclaration(classDeclaration);
+            }
+
+            protected internal override ClassBody VisitClassBody(ClassBody classBody)
+            {
+                using (StartNodeObject(classBody))
+                {
+                    Member("body", classBody.Body);
+                }
+                return base.VisitClassBody(classBody);
+            }
+
+            protected internal override YieldExpression VisitYieldExpression(YieldExpression yieldExpression)
+            {
+                using (StartNodeObject(yieldExpression))
+                {
+                    Member("argument", yieldExpression.Argument);
+                    Member("delegate", yieldExpression.Delegate);
+                }
+                return base.VisitYieldExpression(yieldExpression);
+            }
+
+            protected internal override TaggedTemplateExpression VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+            {
+                using (StartNodeObject(taggedTemplateExpression))
+                {
+                    Member("tag", taggedTemplateExpression.Tag);
+                    Member("quasi", taggedTemplateExpression.Quasi);
+                }
+                return base.VisitTaggedTemplateExpression(taggedTemplateExpression);
+            }
+
+            protected internal override Super VisitSuper(Super super)
+            {
+                EmptyNodeObject(super);
+                return base.VisitSuper(super);
+            }
+
+            protected internal override MetaProperty VisitMetaProperty(MetaProperty metaProperty)
+            {
+                using (StartNodeObject(metaProperty))
+                {
+                    Member("meta", metaProperty.Meta);
+                    Member("property", metaProperty.Property);
+                }
+                return base.VisitMetaProperty(metaProperty);
+            }
+
+            protected internal override ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
+            {
+                // Seems that ArrowParameterPlaceHolder nodes never appear
+                // in the final tree and only used during the construction of
+                // a tree. If this assumption is wrong then best to just fail.
+
+                throw new NotImplementedException();
+            }
+
+            protected internal override ObjectPattern VisitObjectPattern(ObjectPattern objectPattern)
+            {
+                using (StartNodeObject(objectPattern))
+                {
+                    Member("properties", objectPattern.Properties);
+                }
+                return base.VisitObjectPattern(objectPattern);
+            }
+
+            protected internal override SpreadElement VisitSpreadElement(SpreadElement spreadElement)
+            {
+                using (StartNodeObject(spreadElement))
+                {
+                    Member("argument", spreadElement.Argument);
+                }
+                return base.VisitSpreadElement(spreadElement);
+            }
+
+            protected internal override AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+            {
+                using (StartNodeObject(assignmentPattern))
+                {
+                    Member("left", assignmentPattern.Left);
+                    Member("right", assignmentPattern.Right);
+                }
+                return base.VisitAssignmentPattern(assignmentPattern);
+            }
+
+            protected internal override ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
+            {
+                using (StartNodeObject(arrayPattern))
+                {
+                    Member("elements", arrayPattern.Elements);
+                }
+                return base.VisitArrayPattern(arrayPattern);
+            }
+
+            protected internal override VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+            {
+                using (StartNodeObject(variableDeclarator))
+                {
+                    Member("id", variableDeclarator.Id);
+                    Member("init", variableDeclarator.Init);
+                }
+                return base.VisitVariableDeclarator(variableDeclarator);
+            }
+
+            protected internal override TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
+            {
+                using (StartNodeObject(templateLiteral))
+                {
+                    Member("quasis", templateLiteral.Quasis);
+                    Member("expressions", templateLiteral.Expressions);
+                }
+                return base.VisitTemplateLiteral(templateLiteral);
+            }
+
+            protected internal override TemplateElement VisitTemplateElement(TemplateElement templateElement)
+            {
+                using (StartNodeObject(templateElement))
+                {
+                    _writer.Member("value");
+                    _writer.StartObject();
+                    Member("raw", templateElement.Value.Raw);
+                    Member("cooked", templateElement.Value.Cooked);
+                    _writer.EndObject();
+                    Member("tail", templateElement.Tail);
+                }
+                return base.VisitTemplateElement(templateElement);
+            }
+
+            protected internal override RestElement VisitRestElement(RestElement restElement)
+            {
+                using (StartNodeObject(restElement))
+                {
+                    Member("argument", restElement.Argument);
+                }
+                return base.VisitRestElement(restElement);
+            }
+
+            protected internal override Property VisitProperty(Property property)
+            {
+                using (StartNodeObject(property))
+                {
+                    Member("key", property.Key);
+                    Member("computed", property.Computed);
+                    Member("value", property.Value);
+                    Member("kind", property.Kind);
+                    Member("method", property.Method);
+                    Member("shorthand", property.Shorthand);
+                }
+                return base.VisitProperty(property);
+            }
+
+            protected internal override ConditionalExpression VisitConditionalExpression(ConditionalExpression conditionalExpression)
+            {
+                using (StartNodeObject(conditionalExpression))
+                {
+                    Member("test", conditionalExpression.Test);
+                    Member("consequent", conditionalExpression.Consequent);
+                    Member("alternate", conditionalExpression.Alternate);
+                }
+                return base.VisitConditionalExpression(conditionalExpression);
+            }
+
+            protected internal override CallExpression VisitCallExpression(CallExpression callExpression)
+            {
+                using (StartNodeObject(callExpression))
+                {
+                    Member("callee", callExpression.Callee);
+                    Member("arguments", callExpression.Arguments, e => e);
+                    Member("optional", callExpression.Optional);
+                }
+                return base.VisitCallExpression(callExpression);
+            }
+
+            protected internal override BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
+            {
+                using (StartNodeObject(binaryExpression))
+                {
+                    Member("operator", binaryExpression.Operator);
+                    Member("left", binaryExpression.Left);
+                    Member("right", binaryExpression.Right);
+                }
+                return base.VisitBinaryExpression(binaryExpression);
+            }
+
+            protected internal override ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
+            {
+                using (StartNodeObject(arrayExpression))
+                {
+                    Member("elements", arrayExpression.Elements);
+                }
+                return base.VisitArrayExpression(arrayExpression);
+            }
+
+            protected internal override AssignmentExpression VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+            {
+                using (StartNodeObject(assignmentExpression))
+                {
+                    Member("operator", assignmentExpression.Operator);
+                    Member("left", assignmentExpression.Left);
+                    Member("right", assignmentExpression.Right);
+                }
+                return base.VisitAssignmentExpression(assignmentExpression);
+            }
+
+            protected internal override ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
+            {
+                using (StartNodeObject(continueStatement))
+                {
+                    Member("label", continueStatement.Label);
+                }
+                return base.VisitContinueStatement(continueStatement);
+            }
+
+            protected internal override BreakStatement VisitBreakStatement(BreakStatement breakStatement)
+            {
+                using (StartNodeObject(breakStatement))
+                {
+                    Member("label", breakStatement.Label);
+                }
+                return base.VisitBreakStatement(breakStatement);
+            }
+
+            protected internal override BlockStatement VisitBlockStatement(BlockStatement blockStatement)
+            {
+                using (StartNodeObject(blockStatement))
+                {
+                    Member("body", blockStatement.Body, e => (Statement) e);
+                }
+                return base.VisitBlockStatement(blockStatement);
+            }
         }
     }
 }

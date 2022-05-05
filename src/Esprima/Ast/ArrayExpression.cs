@@ -15,9 +15,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield<Expression>(_elements!);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
         {
-            return visitor.VisitArrayExpression(this);
+            return visitor.VisitArrayExpression(this) as T;
         }
     }
 }

@@ -11,11 +11,11 @@ namespace Esprima.Ast
             Expression = expression;
         }
 
-        public sealed override NodeCollection ChildNodes => new(Expression);
+        public override NodeCollection ChildNodes => new(Expression);
 
-        protected internal sealed override Node Accept(AstVisitor visitor)
+        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
         {
-            return visitor.VisitExpressionStatement(this);
+            return visitor.VisitExpressionStatement(this) as T;
         }
     }
 }
