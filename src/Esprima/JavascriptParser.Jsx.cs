@@ -701,7 +701,7 @@ public partial class JavaScriptParser
         FinishJsx();
         if (Match("}"))
         {
-            TolerateError("JSX attributes mus only be assigned a non-empty expression");
+            TolerateError("JSX attributes must only be assigned a non-empty expression");
         }
 
         var expression = ParseAssignmentExpression();
