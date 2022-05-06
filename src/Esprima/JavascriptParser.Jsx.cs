@@ -711,8 +711,12 @@ public partial class JavaScriptParser
 
     private Expression ParseJsxAttributeValue()
     {
-        return MatchJsx("{") ? ParseJsxExpressionAttribute() :
-            MatchJsx("<") ? ParseJsxElement() : ParseJsxStringLiteralAttribute();
+        if (MatchJsx("{"))
+        {
+            return ParseJsxExpressionAttribute();
+        }
+
+        return MatchJsx("<") ? ParseJsxElement() : ParseJsxStringLiteralAttribute();
     }
 
     private JsxAttribute ParseJsxNameValueAttribute()
