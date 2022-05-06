@@ -4,11 +4,11 @@ using Esprima.Utils;
 namespace Esprima.Ast
 {
     [DebuggerDisplay("{Name,nq}")]
-    public sealed class JSXIdentifier : JSXExpression
+    public sealed class JsxIdentifier : JsxExpression
     {
         public readonly string Name;
 
-        public JSXIdentifier(string name) : base(Nodes.JSXIdentifier)
+        public JsxIdentifier(string name) : base(Nodes.JSXIdentifier)
         {
             Name = name;
         }
@@ -17,7 +17,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXIdentifier(this);
+            visitor.VisitJsxIdentifier(this);
         }
     }
 }

@@ -2,11 +2,11 @@
 
 namespace Esprima.Ast
 {
-    public sealed class JSXExpressionContainer : JSXExpression
+    public sealed class JsxExpressionContainer : JsxExpression
     {
         public readonly Expression Expression;
 
-        public JSXExpressionContainer(Expression expression) : base(Nodes.JSXExpressionContainer)
+        public JsxExpressionContainer(Expression expression) : base(Nodes.JSXExpressionContainer)
         {
             Expression = expression;
         }
@@ -15,7 +15,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXExpressionContainer(this);
+            visitor.VisitJsxExpressionContainer(this);
         }
     }
 }

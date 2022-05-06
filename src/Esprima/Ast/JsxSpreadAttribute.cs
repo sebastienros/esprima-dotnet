@@ -2,11 +2,11 @@
 
 namespace Esprima.Ast
 {
-    public sealed class JSXSpreadAttribute : JSXExpression
+    public sealed class JsxSpreadAttribute : JsxExpression
     {
         public readonly Expression Argument;
 
-        public JSXSpreadAttribute(Expression argument) : base(Nodes.JSXSpreadAttribute)
+        public JsxSpreadAttribute(Expression argument) : base(Nodes.JSXSpreadAttribute)
         {
             Argument = argument;
         }
@@ -15,7 +15,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXSpreadAttribute(this);
+            visitor.VisitJsxSpreadAttribute(this);
         }
     }
 }

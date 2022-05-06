@@ -4,12 +4,12 @@ using Esprima.Utils;
 namespace Esprima.Ast
 {
     [DebuggerDisplay("{Namespace,nq}.{Name,nq}")]
-    public sealed class JSXNamespacedName : JSXExpression
+    public sealed class JsxNamespacedName : JsxExpression
     {
-        public readonly JSXIdentifier Name;
-        public readonly JSXIdentifier Namespace;
+        public readonly JsxIdentifier Name;
+        public readonly JsxIdentifier Namespace;
 
-        public JSXNamespacedName(JSXIdentifier @namespace,JSXIdentifier name) : base(Nodes.JSXNamespacedName)
+        public JsxNamespacedName(JsxIdentifier @namespace,JsxIdentifier name) : base(Nodes.JSXNamespacedName)
         {
             Name = name;
             Namespace = @namespace;
@@ -19,7 +19,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXNamespacedName(this);
+            visitor.VisitJsxNamespacedName(this);
         }
     }
 }

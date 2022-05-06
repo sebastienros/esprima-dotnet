@@ -16,8 +16,8 @@ namespace Esprima
         RegularExpression,
         Template,
         BigIntLiteral,
-        JSXIdentifier = 100,
-        JSXText
+        JsxIdentifier = 100,
+        JsxText
     };
 
     public class Token

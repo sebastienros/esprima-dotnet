@@ -2,11 +2,11 @@
 
 namespace Esprima.Ast
 {
-    public sealed class JSXClosingElement : JSXExpression
+    public sealed class JsxClosingElement : JsxExpression
     {
-        public readonly JSXExpression Name;
+        public readonly JsxExpression Name;
 
-        public JSXClosingElement(JSXExpression name) : base(Nodes.JSXClosingElement)
+        public JsxClosingElement(JsxExpression name) : base(Nodes.JSXClosingElement)
         {
             Name = name;
         }
@@ -14,7 +14,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXClosingElement(this);
+            visitor.VisitJsxClosingElement(this);
         }
     }
 }

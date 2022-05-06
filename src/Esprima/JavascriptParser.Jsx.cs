@@ -13,29 +13,29 @@ namespace Esprima
     /// </remarks>
     public partial class JavaScriptParser
     {
-        private class MetaJSXElement
+        private class MetaJsxElement
         {
             public Marker Node;
-            public JSXExpression Opening;
-            public JSXExpression? Closing;
-            public List<JSXExpression>? Children = new();
+            public JsxExpression Opening;
+            public JsxExpression? Closing;
+            public List<JsxExpression>? Children = new();
         }
 
-        private static string? GetQualifiedElementName(JSXExpression elementName)
+        private static string? GetQualifiedElementName(JsxExpression elementName)
         {
             string? qualifiedName;
             switch (elementName.Type)
             {
                 case Nodes.JSXIdentifier:
-                    var id = elementName as JSXIdentifier;
+                    var id = elementName as JsxIdentifier;
                     qualifiedName = id.Name;
                     break;
                 case Nodes.JSXNamespacedName:
-                    var ns = elementName as JSXNamespacedName;
+                    var ns = elementName as JsxNamespacedName;
                     qualifiedName = GetQualifiedElementName(ns.Namespace) + ":" + GetQualifiedElementName(ns.Name);
                     break;
                 case Nodes.JSXMemberExpression:
-                    var expr = elementName as JSXMemberExpression;
+                    var expr = elementName as JsxMemberExpression;
                     qualifiedName = GetQualifiedElementName(expr.Object) + "." + GetQualifiedElementName(expr.Property);
                     break;
                 default:
@@ -302,22 +302,22 @@ namespace Esprima
             { "rang", "\u27E9" }
         };
 
-        private void StartJSX()
+        private void StartJsx()
         {
             _scanner.Index = _startMarker.Index;
             _scanner.LineNumber = _startMarker.Line;
             _scanner.LineStart = _startMarker.Index - _startMarker.Column;
         }
 
-        private void FinishJSX()
+        private void FinishJsx()
         {
             NextToken();
         }
 
-        private void ReEnterJSX()
+        private void ReEnterJsx()
         {
-            StartJSX();
-            ExpectJSX("}");
+            StartJsx();
+            ExpectJsx("}");
 
             if (_config.Tokens)
             {
@@ -325,13 +325,13 @@ namespace Esprima
             }
         }
 
-        private Marker CreateJSXNode()
+        private Marker CreateJsxNode()
         {
             CollectComments();
             return new Marker(_scanner.Index, _scanner.LineNumber, _scanner.Index - _scanner.LineStart);
         }
 
-        private Marker CreateJSXChildNode()
+        private Marker CreateJsxChildNode()
         {
             return new Marker(_scanner.Index, _scanner.LineNumber, _scanner.Index - _scanner.LineStart);
         }
@@ -401,7 +401,7 @@ namespace Esprima
             return result;
         }
 
-        private Token LexJSX()
+        private Token LexJsx()
         {
             var cp = (int) _scanner.Source[_scanner.Index];
 
@@ -513,7 +513,7 @@ namespace Esprima
                 var id = _scanner.Source.Slice(start, _scanner.Index);
                 return new()
                 {
-                    Type = TokenType.JSXIdentifier,
+                    Type = TokenType.JsxIdentifier,
                     Value = id,
                     LineNumber = _scanner.LineNumber,
                     LineStart = _scanner.LineStart,
@@ -525,13 +525,13 @@ namespace Esprima
             return this._scanner.Lex();
         }
 
-        private Token NextJSXToken()
+        private Token NextJsxToken()
         {
             CollectComments();
             _startMarker.Index = _scanner.Index;
             _startMarker.Line = _scanner.LineNumber;
             _startMarker.Column = _scanner.Index - _scanner.LineStart;
-            var token = this.LexJSX();
+            var token = this.LexJsx();
             _lastMarker.Index = _scanner.Index;
             _lastMarker.Line = _scanner.LineNumber;
             _lastMarker.Column = _scanner.Index - _scanner.LineStart;
@@ -544,7 +544,7 @@ namespace Esprima
             return token;
         }
 
-        private Token NextJSXText()
+        private Token NextJsxText()
         {
             _startMarker.Index = _scanner.Index;
             _startMarker.Line = _scanner.LineNumber;
@@ -582,7 +582,7 @@ namespace Esprima
 
             var token = new Token()
             {
-                Type = TokenType.JSXText,
+                Type = TokenType.JsxText,
                 Value = text,
                 LineNumber = _scanner.LineNumber,
                 LineStart = _scanner.LineStart,
@@ -598,80 +598,80 @@ namespace Esprima
             return token;
         }
 
-        private Token PeekJSXToken()
+        private Token PeekJsxToken()
         {
             var state = _scanner.SaveState();
             _scanner.ScanComments();
-            var next = LexJSX();
+            var next = LexJsx();
             _scanner.RestoreState(state);
             return next;
         }
 
-        private void ExpectJSX(string value)
+        private void ExpectJsx(string value)
         {
-            var token = this.NextJSXToken();
+            var token = this.NextJsxToken();
             if (token.Type != TokenType.Punctuator || token.Value is string val && val != value)
             {
                 ThrowUnexpectedToken(token);
             }
         }
 
-        private bool MatchJSX(string value)
+        private bool MatchJsx(string value)
         {
-            var next = this.PeekJSXToken();
+            var next = this.PeekJsxToken();
             return next.Type == TokenType.Punctuator && next.Value is string val && val == value;
         }
 
-        private JSXIdentifier ParseJSXIdentifier()
+        private JsxIdentifier ParseJsxIdentifier()
         {
-            var node = CreateJSXNode();
-            var token = NextJSXToken();
-            if (token.Type != TokenType.JSXIdentifier)
+            var node = CreateJsxNode();
+            var token = NextJsxToken();
+            if (token.Type != TokenType.JsxIdentifier)
             {
                 ThrowUnexpectedToken(token);
             }
 
-            return Finalize(node, new JSXIdentifier(token.Value as string));
+            return Finalize(node, new JsxIdentifier(token.Value as string));
         }
 
-        private JSXExpression ParseJSXElementName()
+        private JsxExpression ParseJsxElementName()
         {
-            var node = CreateJSXNode();
-            JSXExpression elementName = ParseJSXIdentifier();
+            var node = CreateJsxNode();
+            JsxExpression elementName = ParseJsxIdentifier();
 
-            if (MatchJSX(":"))
+            if (MatchJsx(":"))
             {
-                var namesapace = elementName as JSXIdentifier;
-                ExpectJSX(":");
-                var name = ParseJSXIdentifier();
-                elementName = Finalize(node, new JSXNamespacedName(namesapace, name));
+                var namesapace = elementName as JsxIdentifier;
+                ExpectJsx(":");
+                var name = ParseJsxIdentifier();
+                elementName = Finalize(node, new JsxNamespacedName(namesapace, name));
             }
-            else if (MatchJSX("."))
+            else if (MatchJsx("."))
             {
-                while (MatchJSX("."))
+                while (MatchJsx("."))
                 {
                     var @object = elementName;
-                    ExpectJSX(".");
-                    var property = ParseJSXIdentifier();
-                    elementName = Finalize(node, new JSXMemberExpression(@object, property));
+                    ExpectJsx(".");
+                    var property = ParseJsxIdentifier();
+                    elementName = Finalize(node, new JsxMemberExpression(@object, property));
                 }
             }
 
             return elementName;
         }
 
-        private JSXExpression ParseJSXAttributeName()
+        private JsxExpression ParseJsxAttributeName()
         {
-            var node = CreateJSXNode();
-            JSXExpression attributeName;
-            JSXExpression identifier = ParseJSXIdentifier();
+            var node = CreateJsxNode();
+            JsxExpression attributeName;
+            JsxExpression identifier = ParseJsxIdentifier();
 
-            if (MatchJSX(":"))
+            if (MatchJsx(":"))
             {
-                var namesapace = identifier as JSXIdentifier;
-                ExpectJSX(":");
-                var name = ParseJSXIdentifier();
-                attributeName = Finalize(node, new JSXNamespacedName(namesapace, name));
+                var namesapace = identifier as JsxIdentifier;
+                ExpectJsx(":");
+                var name = ParseJsxIdentifier();
+                attributeName = Finalize(node, new JsxNamespacedName(namesapace, name));
             }
             else
             {
@@ -682,10 +682,10 @@ namespace Esprima
         }
 
         //400
-        private Literal ParseJSXStringLiteralAttribute()
+        private Literal ParseJsxStringLiteralAttribute()
         {
-            var node = CreateJSXNode();
-            var token = NextJSXToken();
+            var node = CreateJsxNode();
+            var token = NextJsxToken();
             if (token.Type != TokenType.StringLiteral)
             {
                 ThrowUnexpectedToken(token);
@@ -695,166 +695,166 @@ namespace Esprima
             return Finalize(node, new Literal(token.Value as string, raw));
         }
 
-        private JSXExpressionContainer ParseJSXExpressionAttribute()
+        private JsxExpressionContainer ParseJsxExpressionAttribute()
         {
-            var node = CreateJSXNode();
-            ExpectJSX("{");
-            FinishJSX();
+            var node = CreateJsxNode();
+            ExpectJsx("{");
+            FinishJsx();
             if (Match("}"))
             {
                 TolerateError("JSX attributes mus only be assigned a non-empty expression");
             }
 
             var expression = ParseAssignmentExpression();
-            ReEnterJSX();
-            return Finalize(node, new JSXExpressionContainer(expression));
+            ReEnterJsx();
+            return Finalize(node, new JsxExpressionContainer(expression));
         }
 
-        private Expression ParseJSXAttributeValue()
+        private Expression ParseJsxAttributeValue()
         {
-            return MatchJSX("{") ? ParseJSXExpressionAttribute() :
-                MatchJSX("<") ? ParseJSXElement() : ParseJSXStringLiteralAttribute();
+            return MatchJsx("{") ? ParseJsxExpressionAttribute() :
+                MatchJsx("<") ? ParseJsxElement() : ParseJsxStringLiteralAttribute();
         }
 
-        private JSXAttribute ParseJSXNameValueAttribute()
+        private JsxAttribute ParseJsxNameValueAttribute()
         {
-            var node = CreateJSXNode();
-            var name = ParseJSXAttributeName();
+            var node = CreateJsxNode();
+            var name = ParseJsxAttributeName();
             Expression value = null;
-            if (MatchJSX("="))
+            if (MatchJsx("="))
             {
-                ExpectJSX("=");
-                value = ParseJSXAttributeValue();
+                ExpectJsx("=");
+                value = ParseJsxAttributeValue();
             }
 
-            return Finalize(node, new JSXAttribute(name, value));
+            return Finalize(node, new JsxAttribute(name, value));
         }
 
-        private JSXSpreadAttribute ParseJSXSpreadAttribute()
+        private JsxSpreadAttribute ParseJsxSpreadAttribute()
         {
-            var node = CreateJSXNode();
-            ExpectJSX("{");
-            ExpectJSX("...");
+            var node = CreateJsxNode();
+            ExpectJsx("{");
+            ExpectJsx("...");
 
-            FinishJSX();
+            FinishJsx();
             var argument = ParseAssignmentExpression();
-            ReEnterJSX();
-            return Finalize(node, new JSXSpreadAttribute(argument));
+            ReEnterJsx();
+            return Finalize(node, new JsxSpreadAttribute(argument));
         }
 
-        private NodeList<JSXExpression> ParseJSXAttributes()
+        private NodeList<JsxExpression> ParseJsxAttributes()
         {
-            List<JSXExpression> attributes = new();
+            List<JsxExpression> attributes = new();
 
-            while (!MatchJSX("/") && !MatchJSX(">"))
+            while (!MatchJsx("/") && !MatchJsx(">"))
             {
-                JSXExpression attribute = MatchJSX("{") ? ParseJSXSpreadAttribute() : ParseJSXNameValueAttribute();
+                JsxExpression attribute = MatchJsx("{") ? ParseJsxSpreadAttribute() : ParseJsxNameValueAttribute();
                 attributes.Add(attribute);
             }
 
-            return new NodeList<JSXExpression>(attributes);
+            return new NodeList<JsxExpression>(attributes);
         }
 
-        private JSXExpression ParseJSXOpeningElement()
+        private JsxExpression ParseJsxOpeningElement()
         {
-            var node = CreateJSXNode();
+            var node = CreateJsxNode();
 
-            ExpectJSX("<");
-            if (MatchJSX(">"))
+            ExpectJsx("<");
+            if (MatchJsx(">"))
             {
-                ExpectJSX(">");
-                return Finalize(node, new JSXOpeningFragment(false));
+                ExpectJsx(">");
+                return Finalize(node, new JsxOpeningFragment(false));
             }
 
-            var name = ParseJSXElementName();
-            var attributes = ParseJSXAttributes();
-            var selfClosing = MatchJSX("/");
+            var name = ParseJsxElementName();
+            var attributes = ParseJsxAttributes();
+            var selfClosing = MatchJsx("/");
             if (selfClosing)
             {
-                ExpectJSX("/");
+                ExpectJsx("/");
             }
 
-            ExpectJSX(">");
+            ExpectJsx(">");
 
-            return Finalize(node, new JSXOpeningElement(name, selfClosing, attributes));
+            return Finalize(node, new JsxOpeningElement(name, selfClosing, attributes));
         }
 
-        private JSXExpression ParseJSXBoundartElement()
+        private JsxExpression ParseJsxBoundartElement()
         {
-            var node = CreateJSXNode();
+            var node = CreateJsxNode();
 
-            ExpectJSX("<");
-            if (MatchJSX("/"))
+            ExpectJsx("<");
+            if (MatchJsx("/"))
             {
-                ExpectJSX("/");
-                if (MatchJSX(">"))
+                ExpectJsx("/");
+                if (MatchJsx(">"))
                 {
-                    ExpectJSX(">");
-                    return Finalize(node, new JSXClosingFragment());
+                    ExpectJsx(">");
+                    return Finalize(node, new JsxClosingFragment());
                 }
 
-                var elementName = ParseJSXElementName();
-                ExpectJSX(">");
-                return Finalize(node, new JSXClosingElement(elementName));
+                var elementName = ParseJsxElementName();
+                ExpectJsx(">");
+                return Finalize(node, new JsxClosingElement(elementName));
             }
 
-            var name = ParseJSXElementName();
-            var attributes = ParseJSXAttributes();
-            var selfClosing = MatchJSX("/");
+            var name = ParseJsxElementName();
+            var attributes = ParseJsxAttributes();
+            var selfClosing = MatchJsx("/");
             if (selfClosing)
             {
-                ExpectJSX("/");
+                ExpectJsx("/");
             }
 
-            ExpectJSX(">");
+            ExpectJsx(">");
 
-            return Finalize(node, new JSXOpeningElement(name, selfClosing, attributes));
+            return Finalize(node, new JsxOpeningElement(name, selfClosing, attributes));
         }
 
-        private JSXEmptyExpression ParseJSXEmptyExpression()
+        private JsxEmptyExpression ParseJsxEmptyExpression()
         {
-            var node = CreateJSXChildNode();
+            var node = CreateJsxChildNode();
             CollectComments();
             _lastMarker.Index = _scanner.Index;
             _lastMarker.Line = _scanner.LineNumber;
             _lastMarker.Column = _scanner.Index - _scanner.LineStart;
 
-            return Finalize(node, new JSXEmptyExpression());
+            return Finalize(node, new JsxEmptyExpression());
         }
 
-        private JSXExpressionContainer ParseJSXExpressionContainer()
+        private JsxExpressionContainer ParseJsxExpressionContainer()
         {
-            var node = CreateJSXNode();
-            ExpectJSX("{");
+            var node = CreateJsxNode();
+            ExpectJsx("{");
 
             Expression expression;
-            if (MatchJSX("}"))
+            if (MatchJsx("}"))
             {
-                expression = ParseJSXEmptyExpression();
-                ExpectJSX("}");
+                expression = ParseJsxEmptyExpression();
+                ExpectJsx("}");
             }
             else
             {
-                FinishJSX();
+                FinishJsx();
                 expression = ParseAssignmentExpression();
-                ReEnterJSX();
+                ReEnterJsx();
             }
 
-            return Finalize(node, new JSXExpressionContainer(expression));
+            return Finalize(node, new JsxExpressionContainer(expression));
         }
 
-        private NodeList<JSXExpression> ParseJSXChildren()
+        private NodeList<JsxExpression> ParseJsxChildren()
         {
-            var children = new List<JSXExpression>();
+            var children = new List<JsxExpression>();
 
             while (!_scanner.Eof())
             {
-                var node = CreateJSXChildNode();
-                var token = NextJSXText();
+                var node = CreateJsxChildNode();
+                var token = NextJsxText();
                 if (token.Start < token.End)
                 {
                     var raw = GetTokenRaw(token);
-                    var child = Finalize(node, new JSXText(token.Value as string, raw));
+                    var child = Finalize(node, new JsxText(token.Value as string, raw));
                     children.Add(child);
                 }
 
@@ -871,7 +871,7 @@ namespace Esprima
                 }
                 if (_scanner.Source[_scanner.Index] == '{')
                 {
-                    var container = ParseJSXExpressionContainer();
+                    var container = ParseJsxExpressionContainer();
                     children.Add(container);
                 }
                 else
@@ -880,43 +880,43 @@ namespace Esprima
                 }
             }
 
-            return new NodeList<JSXExpression>(children);
+            return new NodeList<JsxExpression>(children);
         }
 
-        private MetaJSXElement ParseComplexJSXElement(MetaJSXElement el)
+        private MetaJsxElement ParseComplexJsxElement(MetaJsxElement el)
         {
-            var stack = new List<MetaJSXElement>();
+            var stack = new List<MetaJsxElement>();
 
             while (!_scanner.Eof())
             {
-                el.Children.AddRange(ParseJSXChildren());
-                var node = CreateJSXChildNode();
-                var element = ParseJSXBoundartElement();
+                el.Children.AddRange(ParseJsxChildren());
+                var node = CreateJsxChildNode();
+                var element = ParseJsxBoundartElement();
 
                 if (element.Type == Nodes.JSXOpeningElement)
                 {
-                    var opening = element as JSXOpeningElement;
+                    var opening = element as JsxOpeningElement;
                     if (opening.SelfClosing)
                     {
                         var child = Finalize(node,
-                            new JSXElement(opening, NodeList.Create(Enumerable.Empty<JSXExpression>()), null));
+                            new JsxElement(opening, NodeList.Create(Enumerable.Empty<JsxExpression>()), null));
                         el.Children.Add(child);
                     }
                     else
                     {
                         stack.Add(el);
-                        el = new MetaJSXElement
+                        el = new MetaJsxElement
                         {
-                            Node = node, Opening = opening, Closing = null, Children = new List<JSXExpression>()
+                            Node = node, Opening = opening, Closing = null, Children = new List<JsxExpression>()
                         };
                     }
                 }
 
                 if (element.Type == Nodes.JSXClosingElement)
                 {
-                    el.Closing = element as JSXClosingElement;
-                    var open = GetQualifiedElementName((el.Opening as JSXOpeningElement).Name);
-                    var close = GetQualifiedElementName((el.Closing as JSXClosingElement).Name);
+                    el.Closing = element as JsxClosingElement;
+                    var open = GetQualifiedElementName((el.Opening as JsxOpeningElement).Name);
+                    var close = GetQualifiedElementName((el.Closing as JsxClosingElement).Name);
                     if (open != close)
                     {
                         TolerateError($"Expected corresponding JSX closing tag for {open}");
@@ -925,7 +925,7 @@ namespace Esprima
                     if (stack.Count > 0)
                     {
                         var child = Finalize(el.Node,
-                            new JSXElement(el.Opening, NodeList.Create(el.Children), el.Closing));
+                            new JsxElement(el.Opening, NodeList.Create(el.Children), el.Closing));
                         el = stack[stack.Count - 1];
                         el.Children.Add(child);
                         stack.RemoveAt(stack.Count - 1);
@@ -938,7 +938,7 @@ namespace Esprima
 
                 if (element.Type == Nodes.JSXClosingFragment)
                 {
-                    el.Closing = element as JSXClosingFragment;
+                    el.Closing = element as JsxClosingFragment;
                     if (el.Opening.Type != Nodes.JSXOpeningFragment)
                     {
                         TolerateError("Expected corresponding JSX closing tag for jsx fragment");
@@ -953,17 +953,17 @@ namespace Esprima
             return el;
         }
 
-        private JSXElement ParseJSXElement()
+        private JsxElement ParseJsxElement()
         {
-            var node = CreateJSXNode();
+            var node = CreateJsxNode();
 
-            var opening = ParseJSXOpeningElement();
-            List<JSXExpression> children = new();
-            JSXExpression? closing = null;
+            var opening = ParseJsxOpeningElement();
+            List<JsxExpression> children = new();
+            JsxExpression? closing = null;
 
-            if (opening is JSXOpeningElement { SelfClosing: false } or JSXOpeningFragment { SelfClosing: false })
+            if (opening is JsxOpeningElement { SelfClosing: false } or JsxOpeningFragment { SelfClosing: false })
             {
-                var el = ParseComplexJSXElement(new MetaJSXElement
+                var el = ParseComplexJsxElement(new MetaJsxElement
                 {
                     Node = node, Opening = opening, Closing = closing, Children = children
                 });
@@ -971,19 +971,19 @@ namespace Esprima
                 closing = el.Closing;
             }
 
-            return Finalize(node, new JSXElement(opening, NodeList.Create(children), closing));
+            return Finalize(node, new JsxElement(opening, NodeList.Create(children), closing));
         }
 
-        private JSXElement ParseJSXRoot()
+        private JsxElement ParseJsxRoot()
         {
             if (_config.Tokens)
             {
                 _tokens.RemoveAt(_tokens.Count - 1);
             }
 
-            StartJSX();
-            var element = ParseJSXElement();
-            FinishJSX();
+            StartJsx();
+            var element = ParseJsxElement();
+            FinishJsx();
             return element;
         }
     }

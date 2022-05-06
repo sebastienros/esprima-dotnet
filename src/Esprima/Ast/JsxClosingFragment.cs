@@ -2,10 +2,10 @@
 
 namespace Esprima.Ast
 {
-    public sealed class JSXClosingFragment : JSXExpression
+    public sealed class JsxClosingFragment : JsxExpression
     {
 
-        public JSXClosingFragment() : base(Nodes.JSXClosingFragment)
+        public JsxClosingFragment() : base(Nodes.JSXClosingFragment)
         {
         }
 
@@ -13,7 +13,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXClosingFragment(this);
+            visitor.VisitJsxClosingFragment(this);
         }
     }
 }

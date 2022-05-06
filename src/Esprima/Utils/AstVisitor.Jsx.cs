@@ -4,30 +4,30 @@ namespace Esprima.Utils
 {
     public partial class AstVisitor
     {
-        protected internal virtual void VisitJSXMemberExpression(JSXMemberExpression jsxMemberExpression)
+        protected internal virtual void VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
         {
             Visit(jsxMemberExpression.Object);
             Visit(jsxMemberExpression.Property);
         }
 
-        protected internal virtual void VisitJSXText(JSXText jsxText)
+        protected internal virtual void VisitJsxText(JsxText jsxText)
         {
         }
 
-        protected internal virtual void VisitJSXOpeningFragment(JSXOpeningFragment jsxOpeningFragment)
+        protected internal virtual void VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
         {
         }
 
-        protected internal virtual void VisitJSXClosingFragment(JSXClosingFragment jsxClosingFragment)
+        protected internal virtual void VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
         {
         }
 
 
-        protected internal virtual void VisitJSXIdentifier(JSXIdentifier jsxIdentifier)
+        protected internal virtual void VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
         {
         }
 
-        protected internal virtual void VisitJSXElement(JSXElement jsxElement)
+        protected internal virtual void VisitJsxElement(JsxElement jsxElement)
         {
             Visit(jsxElement.OpeningElement);
             ref readonly var children = ref jsxElement.Children;
@@ -42,7 +42,7 @@ namespace Esprima.Utils
             }
         }
 
-        protected internal virtual void VisitJSXOpeningElement(JSXOpeningElement jsxOpeningElement)
+        protected internal virtual void VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
         {
             Visit(jsxOpeningElement.Name);
             ref readonly var attributes = ref jsxOpeningElement.Attributes;
@@ -52,27 +52,27 @@ namespace Esprima.Utils
             }
         }
 
-        protected internal virtual void VisitJSXClosingElement(JSXClosingElement jsxClosingElement)
+        protected internal virtual void VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
         {
             Visit(jsxClosingElement.Name);
         }
 
-        protected internal virtual void VisitJSXEmptyExpression(JSXEmptyExpression jsxEmptyExpression)
+        protected internal virtual void VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
         {
         }
 
-        protected internal virtual void VisitJSXNamespacedName(JSXNamespacedName jsxNamespacedName)
+        protected internal virtual void VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
         {
             Visit(jsxNamespacedName.Name);
             Visit(jsxNamespacedName.Namespace);
         }
 
-        protected internal virtual void VisitJSXSpreadAttribute(JSXSpreadAttribute jsxSpreadAttribute)
+        protected internal virtual void VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
         {
             Visit(jsxSpreadAttribute.Argument);
         }
 
-        protected internal virtual void VisitJSXAttribute(JSXAttribute jsxAttribute)
+        protected internal virtual void VisitJsxAttribute(JsxAttribute jsxAttribute)
         {
             Visit(jsxAttribute.Name);
             if (jsxAttribute.Value is not null)
@@ -81,7 +81,7 @@ namespace Esprima.Utils
             }
         }
 
-        protected internal virtual void VisitJSXExpressionContainer(JSXExpressionContainer jsxExpressionContainer)
+        protected internal virtual void VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
         {
             Visit(jsxExpressionContainer.Expression);
         }

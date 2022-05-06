@@ -2,9 +2,9 @@
 
 namespace Esprima.Ast
 {
-    public sealed class JSXEmptyExpression : JSXExpression
+    public sealed class JsxEmptyExpression : JsxExpression
     {
-        public JSXEmptyExpression() : base(Nodes.JSXEmptyExpression)
+        public JsxEmptyExpression() : base(Nodes.JSXEmptyExpression)
         {
         }
 
@@ -12,7 +12,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXEmptyExpression(this);
+            visitor.VisitJsxEmptyExpression(this);
         }
     }
 }

@@ -2,11 +2,11 @@
 
 namespace Esprima.Ast
 {
-    public sealed class JSXOpeningFragment : JSXExpression
+    public sealed class JsxOpeningFragment : JsxExpression
     {
         public readonly bool SelfClosing;
 
-        public JSXOpeningFragment(bool selfClosing) : base(Nodes.JSXOpeningFragment)
+        public JsxOpeningFragment(bool selfClosing) : base(Nodes.JSXOpeningFragment)
         {
             SelfClosing = selfClosing;
         }
@@ -15,7 +15,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXOpeningFragment(this);
+            visitor.VisitJsxOpeningFragment(this);
         }
     }
 }

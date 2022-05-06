@@ -75,7 +75,7 @@ namespace Esprima.Test
         public void ExecuteTestCase(string fixture)
         {
 
-            var options = new ParserOptions { Tokens = true, JSX = fixture.StartsWith("JSX") };
+            var options = new ParserOptions { Tokens = true, Jsx = fixture.StartsWith("JSX") };
 
             string treeFilePath, failureFilePath, moduleFilePath;
             var jsFilePath = Path.Combine(GetFixturesPath(), "Fixtures", fixture);

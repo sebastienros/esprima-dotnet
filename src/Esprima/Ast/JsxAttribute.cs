@@ -2,12 +2,12 @@
 
 namespace Esprima.Ast
 {
-    public sealed class JSXAttribute : JSXExpression
+    public sealed class JsxAttribute : JsxExpression
     {
-        public readonly JSXExpression Name;
+        public readonly JsxExpression Name;
         public readonly Expression? Value;
 
-        public JSXAttribute(JSXExpression name, Expression? value) : base(Nodes.JSXAttribute)
+        public JsxAttribute(JsxExpression name, Expression? value) : base(Nodes.JSXAttribute)
         {
             Name = name;
             Value = value;
@@ -17,7 +17,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXAttribute(this);
+            visitor.VisitJsxAttribute(this);
         }
     }
 }

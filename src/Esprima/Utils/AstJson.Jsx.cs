@@ -6,7 +6,7 @@ namespace Esprima.Utils
     {
         private sealed partial class Visitor
         {
-            protected internal override void VisitJSXSpreadAttribute(JSXSpreadAttribute jsxSpreadAttribute)
+            protected internal override void VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
             {
                 using (StartNodeObject(jsxSpreadAttribute))
                 {
@@ -14,7 +14,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXElement(JSXElement jsxElement)
+            protected internal override void VisitJsxElement(JsxElement jsxElement)
             {
                 using (StartNodeObject(jsxElement))
                 {
@@ -24,7 +24,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXAttribute(JSXAttribute jsxAttribute)
+            protected internal override void VisitJsxAttribute(JsxAttribute jsxAttribute)
             {
                 using (StartNodeObject(jsxAttribute))
                 {
@@ -33,7 +33,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXIdentifier(JSXIdentifier jsxIdentifier)
+            protected internal override void VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
             {
                 using (StartNodeObject(jsxIdentifier))
                 {
@@ -41,7 +41,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXClosingElement(JSXClosingElement jsxClosingElement)
+            protected internal override void VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
             {
                 using (StartNodeObject(jsxClosingElement))
                 {
@@ -49,7 +49,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXText(JSXText jsxText)
+            protected internal override void VisitJsxText(JsxText jsxText)
             {
                 using (StartNodeObject(jsxText))
                 {
@@ -58,14 +58,14 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXClosingFragment(JSXClosingFragment jsxClosingFragment)
+            protected internal override void VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
             {
                 using (StartNodeObject(jsxClosingFragment))
                 {
                 }
             }
 
-            protected internal override void VisitJSXOpeningFragment(JSXOpeningFragment jsxOpeningFragment)
+            protected internal override void VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
             {
                 using (StartNodeObject(jsxOpeningFragment))
                 {
@@ -73,7 +73,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXOpeningElement(JSXOpeningElement jsxOpeningElement)
+            protected internal override void VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
             {
                 using (StartNodeObject(jsxOpeningElement))
                 {
@@ -83,7 +83,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXNamespacedName(JSXNamespacedName jsxNamespacedName)
+            protected internal override void VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
             {
                 using (StartNodeObject(jsxNamespacedName))
                 {
@@ -92,7 +92,7 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXMemberExpression(JSXMemberExpression jsxMemberExpression)
+            protected internal override void VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
             {
                 using (StartNodeObject(jsxMemberExpression))
                 {
@@ -101,14 +101,14 @@ namespace Esprima.Utils
                 }
             }
 
-            protected internal override void VisitJSXEmptyExpression(JSXEmptyExpression jsxEmptyExpression)
+            protected internal override void VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
             {
                 using (StartNodeObject(jsxEmptyExpression))
                 {
                 }
             }
 
-            protected internal override void VisitJSXExpressionContainer(JSXExpressionContainer jsxExpressionContainer)
+            protected internal override void VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
             {
                 using (StartNodeObject(jsxExpressionContainer))
                 {

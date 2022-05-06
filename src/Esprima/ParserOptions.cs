@@ -57,6 +57,6 @@
         /// <summary>
         /// Gets or sets jsx parser.
         /// </summary>
-        public bool JSX { get; set; } = false;
+        public bool Jsx { get; set; } = false;
     }
 }

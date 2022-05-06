@@ -4,12 +4,12 @@ using Esprima.Utils;
 namespace Esprima.Ast
 {
     [DebuggerDisplay("{Raw,nq}")]
-    public class JSXText : JSXExpression
+    public class JsxText : JsxExpression
     {
         public readonly string? Value;
         public readonly string Raw;
         
-        public JSXText(string? value, string raw) : base(Nodes.JSXText)
+        public JsxText(string? value, string raw) : base(Nodes.JSXText)
         { 
             Value = value;
             Raw = raw;
@@ -19,7 +19,7 @@ namespace Esprima.Ast
 
         protected internal override void Accept(AstVisitor visitor)
         {
-            visitor.VisitJSXText(this);
+            visitor.VisitJsxText(this);
         }
     }
 }

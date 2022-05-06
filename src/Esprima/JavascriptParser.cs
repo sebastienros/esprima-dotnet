@@ -556,9 +556,9 @@ namespace Esprima
 
         private Expression ParsePrimaryExpression()
         {
-            if (_config.JSX && Match("<"))
+            if (_config.Jsx && Match("<"))
             {
-                return ParseJSXRoot();
+                return ParseJsxRoot();
             }
             
             var node = CreateNode();
@@ -4294,7 +4294,7 @@ namespace Esprima
 
         private bool IsStartOfExpression()
         {
-            if (_config.JSX && Match("<"))
+            if (_config.Jsx && Match("<"))
             {
                 return true;
             }
