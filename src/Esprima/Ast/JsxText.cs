@@ -1,25 +1,24 @@
 ﻿using System.Diagnostics;
 using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+[DebuggerDisplay("{Raw,nq}")]
+public class JsxText : JsxExpression
 {
-    [DebuggerDisplay("{Raw,nq}")]
-    public class JsxText : JsxExpression
-    {
-        public readonly string? Value;
-        public readonly string Raw;
+    public readonly string? Value;
+    public readonly string Raw;
         
-        public JsxText(string? value, string raw) : base(Nodes.JSXText)
-        { 
-            Value = value;
-            Raw = raw;
-        }
+    public JsxText(string? value, string raw) : base(Nodes.JSXText)
+    { 
+        Value = value;
+        Raw = raw;
+    }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+    public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-        protected internal override void Accept(AstVisitor visitor)
-        {
-            visitor.VisitJsxText(this);
-        }
+    protected internal override void Accept(AstVisitor visitor)
+    {
+        visitor.VisitJsxText(this);
     }
 }

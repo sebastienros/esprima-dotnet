@@ -1,12 +1,11 @@
-﻿namespace Esprima.Ast
+﻿namespace Esprima.Ast;
+
+/// <summary>
+/// A Jsx expression. 
+/// </summary>
+public abstract class JsxExpression : Expression
 {
-    /// <summary>
-    /// A Jsx expression. 
-    /// </summary>
-    public abstract class JsxExpression : Expression
+    protected JsxExpression(Nodes type) : base(type)
     {
-        protected JsxExpression(Nodes type) : base(type)
-        {
-        }
     }
 }

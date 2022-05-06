@@ -1,21 +1,20 @@
 ﻿using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class JsxSpreadAttribute : JsxExpression
 {
-    public sealed class JsxSpreadAttribute : JsxExpression
+    public readonly Expression Argument;
+
+    public JsxSpreadAttribute(Expression argument) : base(Nodes.JSXSpreadAttribute)
     {
-        public readonly Expression Argument;
+        Argument = argument;
+    }
 
-        public JsxSpreadAttribute(Expression argument) : base(Nodes.JSXSpreadAttribute)
-        {
-            Argument = argument;
-        }
+    public override NodeCollection ChildNodes => new(Argument);
 
-        public override NodeCollection ChildNodes => new(Argument);
-
-        protected internal override void Accept(AstVisitor visitor)
-        {
-            visitor.VisitJsxSpreadAttribute(this);
-        }
+    protected internal override void Accept(AstVisitor visitor)
+    {
+        visitor.VisitJsxSpreadAttribute(this);
     }
 }

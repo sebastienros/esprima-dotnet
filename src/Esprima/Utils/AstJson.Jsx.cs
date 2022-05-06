@@ -1,119 +1,118 @@
 ﻿using Esprima.Ast;
 
-namespace Esprima.Utils
+namespace Esprima.Utils;
+
+public static partial class AstJson
 {
-    public static partial class AstJson
+    private sealed partial class Visitor
     {
-        private sealed partial class Visitor
+        protected internal override void VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
         {
-            protected internal override void VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+            using (StartNodeObject(jsxSpreadAttribute))
             {
-                using (StartNodeObject(jsxSpreadAttribute))
-                {
-                    Member("argument", jsxSpreadAttribute.Argument);
-                }
+                Member("argument", jsxSpreadAttribute.Argument);
             }
+        }
 
-            protected internal override void VisitJsxElement(JsxElement jsxElement)
+        protected internal override void VisitJsxElement(JsxElement jsxElement)
+        {
+            using (StartNodeObject(jsxElement))
             {
-                using (StartNodeObject(jsxElement))
-                {
-                    Member("openingElement", jsxElement.OpeningElement);
-                    Member("children", jsxElement.Children);
-                    Member("closingElement", jsxElement.ClosingElement);
-                }
+                Member("openingElement", jsxElement.OpeningElement);
+                Member("children", jsxElement.Children);
+                Member("closingElement", jsxElement.ClosingElement);
             }
+        }
 
-            protected internal override void VisitJsxAttribute(JsxAttribute jsxAttribute)
+        protected internal override void VisitJsxAttribute(JsxAttribute jsxAttribute)
+        {
+            using (StartNodeObject(jsxAttribute))
             {
-                using (StartNodeObject(jsxAttribute))
-                {
-                    Member("name", jsxAttribute.Name);
-                    Member("value", jsxAttribute.Value);
-                }
+                Member("name", jsxAttribute.Name);
+                Member("value", jsxAttribute.Value);
             }
+        }
 
-            protected internal override void VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+        protected internal override void VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+        {
+            using (StartNodeObject(jsxIdentifier))
             {
-                using (StartNodeObject(jsxIdentifier))
-                {
-                    Member("name", jsxIdentifier.Name);
-                }
+                Member("name", jsxIdentifier.Name);
             }
+        }
 
-            protected internal override void VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+        protected internal override void VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+        {
+            using (StartNodeObject(jsxClosingElement))
             {
-                using (StartNodeObject(jsxClosingElement))
-                {
-                    Member("name", jsxClosingElement.Name);
-                }
+                Member("name", jsxClosingElement.Name);
             }
+        }
 
-            protected internal override void VisitJsxText(JsxText jsxText)
+        protected internal override void VisitJsxText(JsxText jsxText)
+        {
+            using (StartNodeObject(jsxText))
             {
-                using (StartNodeObject(jsxText))
-                {
-                    Member("value", jsxText.Value);
-                    Member("raw", jsxText.Raw);
-                }
+                Member("value", jsxText.Value);
+                Member("raw", jsxText.Raw);
             }
+        }
 
-            protected internal override void VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+        protected internal override void VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+        {
+            using (StartNodeObject(jsxClosingFragment))
             {
-                using (StartNodeObject(jsxClosingFragment))
-                {
-                }
             }
+        }
 
-            protected internal override void VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+        protected internal override void VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+        {
+            using (StartNodeObject(jsxOpeningFragment))
             {
-                using (StartNodeObject(jsxOpeningFragment))
-                {
-                    Member("selfClosing", jsxOpeningFragment.SelfClosing);
-                }
+                Member("selfClosing", jsxOpeningFragment.SelfClosing);
             }
+        }
 
-            protected internal override void VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+        protected internal override void VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+        {
+            using (StartNodeObject(jsxOpeningElement))
             {
-                using (StartNodeObject(jsxOpeningElement))
-                {
-                    Member("name", jsxOpeningElement.Name);
-                    Member("selfClosing", jsxOpeningElement.SelfClosing);
-                    Member("attributes", jsxOpeningElement.Attributes);
-                }
+                Member("name", jsxOpeningElement.Name);
+                Member("selfClosing", jsxOpeningElement.SelfClosing);
+                Member("attributes", jsxOpeningElement.Attributes);
             }
+        }
 
-            protected internal override void VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+        protected internal override void VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+        {
+            using (StartNodeObject(jsxNamespacedName))
             {
-                using (StartNodeObject(jsxNamespacedName))
-                {
-                    Member("namespace", jsxNamespacedName.Namespace);
-                    Member("name", jsxNamespacedName.Name);
-                }
+                Member("namespace", jsxNamespacedName.Namespace);
+                Member("name", jsxNamespacedName.Name);
             }
+        }
 
-            protected internal override void VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+        protected internal override void VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+        {
+            using (StartNodeObject(jsxMemberExpression))
             {
-                using (StartNodeObject(jsxMemberExpression))
-                {
-                    Member("object", jsxMemberExpression.Object);
-                    Member("property", jsxMemberExpression.Property);
-                }
+                Member("object", jsxMemberExpression.Object);
+                Member("property", jsxMemberExpression.Property);
             }
+        }
 
-            protected internal override void VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+        protected internal override void VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+        {
+            using (StartNodeObject(jsxEmptyExpression))
             {
-                using (StartNodeObject(jsxEmptyExpression))
-                {
-                }
             }
+        }
 
-            protected internal override void VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+        protected internal override void VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+        {
+            using (StartNodeObject(jsxExpressionContainer))
             {
-                using (StartNodeObject(jsxExpressionContainer))
-                {
-                    Member("expression",jsxExpressionContainer.Expression);
-                }
+                Member("expression",jsxExpressionContainer.Expression);
             }
         }
     }

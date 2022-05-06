@@ -1,23 +1,22 @@
 ﻿using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class JsxAttribute : JsxExpression
 {
-    public sealed class JsxAttribute : JsxExpression
+    public readonly JsxExpression Name;
+    public readonly Expression? Value;
+
+    public JsxAttribute(JsxExpression name, Expression? value) : base(Nodes.JSXAttribute)
     {
-        public readonly JsxExpression Name;
-        public readonly Expression? Value;
+        Name = name;
+        Value = value;
+    }
 
-        public JsxAttribute(JsxExpression name, Expression? value) : base(Nodes.JSXAttribute)
-        {
-            Name = name;
-            Value = value;
-        }
+    public override NodeCollection ChildNodes => new(Name,Value);
 
-        public override NodeCollection ChildNodes => new(Name,Value);
-
-        protected internal override void Accept(AstVisitor visitor)
-        {
-            visitor.VisitJsxAttribute(this);
-        }
+    protected internal override void Accept(AstVisitor visitor)
+    {
+        visitor.VisitJsxAttribute(this);
     }
 }
