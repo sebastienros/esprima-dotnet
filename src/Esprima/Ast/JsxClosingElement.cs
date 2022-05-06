@@ -10,6 +10,7 @@ public sealed class JsxClosingElement : JsxExpression
     {
         Name = name;
     }
+    
     public override NodeCollection ChildNodes => new(Name);
 
     protected internal override void Accept(AstVisitor visitor)

@@ -16,7 +16,8 @@ public sealed class JsxOpeningElement : JsxExpression
     }
 
     public ref readonly NodeList<JsxExpression> Attributes => ref _attributes;
-    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Name,_attributes);
+    
+    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Name, _attributes);
 
     protected internal override void Accept(AstVisitor visitor)
     {

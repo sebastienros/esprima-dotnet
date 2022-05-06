@@ -681,7 +681,6 @@ public partial class JavaScriptParser
         return attributeName;
     }
 
-    //400
     private Literal ParseJsxStringLiteralAttribute()
     {
         var node = CreateJsxNode();
