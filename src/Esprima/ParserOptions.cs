@@ -55,7 +55,7 @@
         public bool AdaptRegexp { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets jsx parser.
+        /// Gets or sets whether to parse script as JSX code.
         /// </summary>
         public bool Jsx { get; set; } = false;
     }
