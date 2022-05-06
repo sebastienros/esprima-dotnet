@@ -4,7 +4,7 @@ using Esprima.Ast;
 
 namespace Esprima.Utils
 {
-    public class AstConverter : AstVisitor
+    public abstract class AstConverter : AstVisitor
     {
         protected internal override bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
             where T : class
