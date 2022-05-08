@@ -8,6 +8,7 @@
     <AssemblyOriginatorKeyFile>../../src/Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
