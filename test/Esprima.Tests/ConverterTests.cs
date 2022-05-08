@@ -12,12 +12,12 @@ public class ConverterTests
 {
     private static Module ParseExpression(string code, bool jsx = false)
     {
-        return new JavaScriptParser(code, new ParserOptions() { Jsx = jsx }).ParseModule();
+        return new JavaScriptParser(code, new ParserOptions(){ Jsx = jsx }).ParseModule();
     }
 
-    private static object? FindNearTypeOfDescendTyped(Type type, Node node)
+    private static T? FindNearTypeOfDescend<T>(Node node) where T : Node
     {
-        return node.DescendantNodesAndSelf().FirstOrDefault(descendantNode => descendantNode.GetType() == type);
+        return node.DescendantNodesAndSelf().OfType<T>().FirstOrDefault(_ => true, null);
     }
 
     [Fact]
@@ -109,22 +109,25 @@ public class ConverterTests
     public void CanUpdateAll(Type type, string code)
     {
         // Arrange
+        var findNearMethod = (Node node) => typeof(ConverterTests)
+            .GetMethod("FindNearTypeOfDescend", BindingFlags.NonPublic | BindingFlags.Static)
+            .MakeGenericMethod(type).Invoke(null, new[] { node });
         var visitor = new TestConverter(type);
 
         var program = ParseExpression(code);
-        var node = FindNearTypeOfDescendTyped(type, program);
+        var node = findNearMethod(program);
 
         // Act
         var programResult = visitor.Visit(program);
-        var nodeResult = FindNearTypeOfDescendTyped(type, programResult);
+        var nodeResult = findNearMethod(programResult);
 
         // Assert
         Assert.IsType(program.GetType(), programResult);
         Assert.NotSame(program, programResult);
-        Assert.IsType(node!.GetType(), nodeResult);
+        Assert.IsType(node.GetType(), nodeResult);
         Assert.NotSame(node, nodeResult);
     }
-
+    
     [Theory]
     [InlineData(typeof(JsxMemberExpression), "var a = (< a . b >< / a . b >)")]
     [InlineData(typeof(JsxText), "var a = (<a>TEXT</a>)")]
@@ -142,22 +145,25 @@ public class ConverterTests
     public void CanUpdateAllForJsx(Type type, string code)
     {
         // Arrange
+        var findNearMethod = (Node node) => typeof(ConverterTests)
+            .GetMethod("FindNearTypeOfDescend", BindingFlags.NonPublic | BindingFlags.Static)
+            .MakeGenericMethod(type).Invoke(null, new[] { node });
         var visitor = new TestConverter(type);
 
         var program = ParseExpression(code, true);
-        var node = FindNearTypeOfDescendTyped(type, program);
+        var node = findNearMethod(program);
 
         // Act
         var programResult = visitor.Visit(program);
-        var nodeResult = FindNearTypeOfDescendTyped(type, programResult);
+        var nodeResult = findNearMethod(programResult);
 
         // Assert
         Assert.IsType(program.GetType(), programResult);
         Assert.NotSame(program, programResult);
-        Assert.IsType(node!.GetType(), nodeResult);
+        Assert.IsType(node.GetType(), nodeResult);
         Assert.NotSame(node, nodeResult);
     }
-
+    
     [Theory]
     [InlineData(typeof(ExportDefaultDeclaration), "export default (1 + 2);")]
     [InlineData(typeof(ExportAllDeclaration), "export * from 'foo';")]
@@ -170,19 +176,22 @@ public class ConverterTests
     public void CanUpdateModuleNodes(Type type, string code)
     {
         // Arrange
+        var findNearMethod = (Node node) => typeof(ConverterTests)
+            .GetMethod("FindNearTypeOfDescend", BindingFlags.NonPublic | BindingFlags.Static)
+            .MakeGenericMethod(type).Invoke(null, new[] { node });
         var visitor = new TestConverter(type);
 
         var program = ParseExpression(code, true);
-        var node = FindNearTypeOfDescendTyped(type, program);
+        var node = findNearMethod(program);
 
         // Act
         var programResult = visitor.Visit(program);
-        var nodeResult = FindNearTypeOfDescendTyped(type, programResult);
+        var nodeResult = findNearMethod(programResult);
 
         // Assert
         Assert.IsType(program.GetType(), programResult);
         Assert.NotSame(program, programResult);
-        Assert.IsType(node!.GetType(), nodeResult);
+        Assert.IsType(node.GetType(), nodeResult);
         Assert.NotSame(node, nodeResult);
     }
 }
@@ -198,7 +207,7 @@ sealed class TestConverter : AstConverter
 
     private T ForceNewObjectByControlType<T>(T node, T @new)
     {
-        return _controlType == node?.GetType() ? @new : node;
+        return _controlType == node.GetType() ? @new : node;
     }
 
     protected override Program UpdateProgram(Program program, bool isNewStatements,
@@ -213,7 +222,7 @@ sealed class TestConverter : AstConverter
             });
     }
 
-    protected override CatchClause UpdateCatchClause(CatchClause catchClause, Expression? param, BlockStatement body)
+    protected override CatchClause UpdateCatchClause(CatchClause catchClause, Expression param, BlockStatement body)
     {
         return ForceNewObjectByControlType(base.UpdateCatchClause(catchClause, param, body),
             new CatchClause(param, body));
@@ -243,8 +252,8 @@ sealed class TestConverter : AstConverter
     }
 
     protected override TryStatement UpdateTryStatement(TryStatement tryStatement, BlockStatement block,
-        CatchClause? handler,
-        BlockStatement? finalizer)
+        CatchClause handler,
+        BlockStatement finalizer)
     {
         return ForceNewObjectByControlType(base.UpdateTryStatement(tryStatement, block, handler, finalizer),
             new TryStatement(block, handler, finalizer));
@@ -425,9 +434,9 @@ sealed class TestConverter : AstConverter
             {
                 ArrowFunctionExpression => new ArrowFunctionExpression(parameters, body, function.Expression,
                     function.Strict, function.Async),
-                FunctionExpression => new FunctionExpression(id, parameters, (body as BlockStatement) !,
+                FunctionExpression => new FunctionExpression(id, parameters, body as BlockStatement,
                     function.Generator, function.Strict, function.Async),
-                FunctionDeclaration => new FunctionDeclaration(id, parameters, (body as BlockStatement) !,
+                FunctionDeclaration => new FunctionDeclaration(id, parameters, body as BlockStatement,
                     function.Generator, function.Strict, function.Async),
                 _ => function
             });
@@ -437,7 +446,7 @@ sealed class TestConverter : AstConverter
         Expression key, Expression? value)
     {
         return ForceNewObjectByControlType(base.UpdatePropertyDefinition(propertyDefinition, key, value),
-            new PropertyDefinition(key, propertyDefinition.Computed, value !, propertyDefinition.Static));
+            new PropertyDefinition(key, propertyDefinition.Computed, value, propertyDefinition.Static));
     }
 
     protected override ChainExpression UpdateChainExpression(ChainExpression chainExpression, Expression expression)
@@ -522,7 +531,7 @@ sealed class TestConverter : AstConverter
         Expression value)
     {
         return ForceNewObjectByControlType(base.UpdateMethodDefinition(methodDefinition, key, value),
-            new MethodDefinition(key, methodDefinition.Computed, (value as FunctionExpression) !, methodDefinition.Kind,
+            new MethodDefinition(key, methodDefinition.Computed, value as FunctionExpression, methodDefinition.Kind,
                 methodDefinition.Static));
     }
 
@@ -614,9 +623,9 @@ sealed class TestConverter : AstConverter
     }
 
     protected override TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral,
-        bool isNewQuasis, ref NodeList<TemplateElement> quasis, bool isNewExpression, ref NodeList<Expression> expressions)
+        ref NodeList<TemplateElement> quasis, ref NodeList<Expression> expressions)
     {
-        return ForceNewObjectByControlType(base.UpdateTemplateLiteral(templateLiteral, isNewQuasis ,ref quasis, isNewExpression, ref expressions),
+        return ForceNewObjectByControlType(base.UpdateTemplateLiteral(templateLiteral, ref quasis, ref expressions),
             new TemplateLiteral(quasis, expressions));
     }
 
@@ -702,7 +711,7 @@ sealed class TestConverter : AstConverter
     }
 
     protected override JsxAttribute UpdateJsxAttribute(JsxAttribute jsxAttribute, JsxExpression name,
-        Expression? value)
+        Expression value)
     {
         return ForceNewObjectByControlType(base.UpdateJsxAttribute(jsxAttribute, name, value),
             new JsxAttribute(name, value));
@@ -710,7 +719,7 @@ sealed class TestConverter : AstConverter
 
     protected override JsxElement UpdateJsxElement(JsxElement jsxElement, Node openingElement, bool isNewChildren,
         ref NodeList<JsxExpression> children,
-        Node? closingElement)
+        Node closingElement)
     {
         return ForceNewObjectByControlType(
             base.UpdateJsxElement(jsxElement, openingElement, isNewChildren, ref children, closingElement),

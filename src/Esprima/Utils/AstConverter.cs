@@ -680,14 +680,11 @@ public abstract partial class AstConverter : AstVisitor
         return new VariableDeclarator(id, init);
     }
 
-    protected override TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral, bool isNewQuasis, ref NodeList<TemplateElement> quasis, bool isNewExpression, ref NodeList<Expression> expressions)
+    protected override TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral,
+        ref NodeList<TemplateElement> quasis, ref NodeList<Expression> expressions)
     {
-        if (!isNewQuasis && !isNewExpression)
-        {
-            return templateLiteral;
-        }
-        
-        return new TemplateLiteral(quasis, expressions);
+        //TODO Umut
+        return templateLiteral;
     }
 
     protected override TemplateElement UpdateTemplateElement(TemplateElement templateElement)
