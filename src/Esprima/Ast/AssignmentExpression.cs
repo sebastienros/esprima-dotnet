@@ -35,9 +35,17 @@ namespace Esprima.Ast
             string op,
             Expression left,
             Expression right) :
+            this(ParseAssignmentOperator(op), left, right)
+        {
+        }
+        
+        internal AssignmentExpression(
+            AssignmentOperator op,
+            Expression left,
+            Expression right) :
             base(Nodes.AssignmentExpression)
         {
-            Operator = ParseAssignmentOperator(op);
+            Operator = op;
             Left = left;
             Right = right;
         }

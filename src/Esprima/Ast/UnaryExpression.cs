@@ -25,10 +25,18 @@ namespace Esprima.Ast
         public UnaryExpression(string? op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
         {
         }
-
-        protected UnaryExpression(Nodes type, string? op, Expression arg) : base(type)
+        
+        internal UnaryExpression(UnaryOperator op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
         {
-            Operator = ParseUnaryOperator(op);
+        }
+
+        protected UnaryExpression(Nodes type, string? op, Expression arg) : this(type, ParseUnaryOperator(op), arg)
+        {
+        }
+        
+        protected UnaryExpression(Nodes type, UnaryOperator op, Expression arg) : base(type)
+        {
+            Operator = op;
             Argument = arg;
             Prefix = true;
         }
