@@ -50,9 +50,9 @@ namespace Esprima.Ast
             Regex = new RegexValue(pattern, flags);
         }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        public sealed override NodeCollection ChildNodes => NodeCollection.Empty;
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal sealed override void Accept(AstVisitor visitor)
         {
             visitor.VisitLiteral(this);
         }

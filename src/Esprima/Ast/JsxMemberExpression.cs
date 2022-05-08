@@ -7,9 +7,9 @@ public sealed class JsxMemberExpression : JsxExpression
     public readonly JsxExpression Object;
     public readonly JsxIdentifier Property;
 
-    public JsxMemberExpression(JsxExpression @object, JsxIdentifier property) : base(Nodes.JSXMemberExpression)
+    public JsxMemberExpression(JsxExpression obj, JsxIdentifier property) : base(Nodes.JSXMemberExpression)
     {
-        Object = @object;
+        Object = obj;
         Property = property;
     }
 

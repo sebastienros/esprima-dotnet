@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Esprima
+﻿namespace Esprima
 {
     /// <summary>
     /// Error handler that collects errors that have been seen during the parsing.

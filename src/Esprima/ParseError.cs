@@ -2,7 +2,7 @@
 
 namespace Esprima
 {
-    public class ParseError
+    public sealed class ParseError
     {
         public string Description { get; }
         public string? Source { get; }

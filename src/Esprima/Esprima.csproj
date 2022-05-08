@@ -1,12 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Standard-compliant ECMAScript 2019 parser (also known as JavaScript).</Description>
-    <Copyright>Sebastien Ros</Copyright>
     <AssemblyName>Esprima</AssemblyName>
     <AssemblyTitle>Esprima .NET</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
     <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
-    <Authors>Sebastien Ros</Authors>
     <TargetFrameworks>net462;netstandard2.0;netstandard2.1</TargetFrameworks>
     <AssemblyOriginatorKeyFile>../Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -15,14 +13,6 @@
     <PackageProjectUrl>https://github.com/sebastienros/esprima-dotnet</PackageProjectUrl>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <Version>2.0.0-beta-$(BuildNumber)</Version>
-
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -38,4 +28,8 @@
     <PackageReference Include="System.Memory" Version="4.5.4" Condition=" '$(TargetFramework)' != 'netstandard2.1'" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
+  
 </Project>

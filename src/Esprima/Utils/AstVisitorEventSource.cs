@@ -1,5 +1,4 @@
-﻿using System;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 
 namespace Esprima.Utils;
 

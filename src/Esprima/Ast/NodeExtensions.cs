@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using static Esprima.EsprimaExceptionHelper;
 using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
 
