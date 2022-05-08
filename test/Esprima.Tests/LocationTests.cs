@@ -2,8 +2,6 @@
 
 namespace Esprima.Tests
 {
-    using System;
-
     public class LocationTests
     {
         [Theory]

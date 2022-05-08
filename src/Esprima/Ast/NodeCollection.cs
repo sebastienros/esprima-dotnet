@@ -1,7 +1,6 @@
 ﻿#nullable disable
 
 using System.Collections;
-using System.Collections.Generic;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast

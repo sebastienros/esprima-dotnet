@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Esprima
+﻿namespace Esprima
 {
     internal static class EsprimaExceptionHelper
     {

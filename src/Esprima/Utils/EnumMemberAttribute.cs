@@ -24,8 +24,6 @@
 
 #endregion
 
-using System;
-
 namespace Esprima.Utils
 {
     // System.Runtime.Serialization;

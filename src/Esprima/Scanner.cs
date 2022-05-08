@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,7 +7,7 @@ using Esprima.Ast;
 
 namespace Esprima
 {
-    public class SourceLocation
+    public sealed class SourceLocation
     {
         public Position? Start;
         public Position? End;
@@ -38,7 +36,7 @@ namespace Esprima
         }
     }
 
-    public class Scanner
+    public sealed class Scanner
     {
         private readonly IErrorHandler _errorHandler;
         private readonly bool _trackComment;

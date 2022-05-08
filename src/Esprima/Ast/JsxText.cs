@@ -4,7 +4,7 @@ using Esprima.Utils;
 namespace Esprima.Ast;
 
 [DebuggerDisplay("{Raw,nq}")]
-public class JsxText : JsxExpression
+public sealed class JsxText : JsxExpression
 {
     public readonly string? Value;
     public readonly string Raw;

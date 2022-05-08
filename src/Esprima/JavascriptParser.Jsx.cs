@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 
 namespace Esprima;
 
@@ -13,12 +10,24 @@ namespace Esprima;
 /// </remarks>
 public partial class JavaScriptParser
 {
-    private class MetaJsxElement
+    private sealed class MetaJsxElement
     {
-        public Marker Node;
-        public JsxExpression Opening;
+        public MetaJsxElement(
+            Marker node,
+            JsxExpression opening,
+            JsxExpression? closing,
+            List<JsxExpression> children)
+        {
+            Node = node;
+            Opening = opening;
+            Closing = closing;
+            Children = children;
+        }
+
+        public readonly Marker Node;
+        public readonly JsxExpression Opening;
         public JsxExpression? Closing;
-        public List<JsxExpression>? Children = new();
+        public readonly List<JsxExpression> Children;
     }
 
     private static string? GetQualifiedElementName(JsxExpression elementName)
@@ -27,15 +36,15 @@ public partial class JavaScriptParser
         switch (elementName.Type)
         {
             case Nodes.JSXIdentifier:
-                var id = elementName as JsxIdentifier;
+                var id = (JsxIdentifier) elementName;
                 qualifiedName = id.Name;
                 break;
             case Nodes.JSXNamespacedName:
-                var ns = elementName as JsxNamespacedName;
+                var ns = (JsxNamespacedName) elementName;
                 qualifiedName = GetQualifiedElementName(ns.Namespace) + ":" + GetQualifiedElementName(ns.Name);
                 break;
             case Nodes.JSXMemberExpression:
-                var expr = elementName as JsxMemberExpression;
+                var expr = (JsxMemberExpression) elementName;
                 qualifiedName = GetQualifiedElementName(expr.Object) + "." + GetQualifiedElementName(expr.Property);
                 break;
             default:
@@ -631,7 +640,7 @@ public partial class JavaScriptParser
             ThrowUnexpectedToken(token);
         }
 
-        return Finalize(node, new JsxIdentifier(token.Value as string));
+        return Finalize(node, new JsxIdentifier((string) token.Value!));
     }
 
     private JsxExpression ParseJsxElementName()
@@ -641,19 +650,19 @@ public partial class JavaScriptParser
 
         if (MatchJsx(":"))
         {
-            var namesapace = elementName as JsxIdentifier;
+            var ns = (JsxIdentifier) elementName;
             ExpectJsx(":");
             var name = ParseJsxIdentifier();
-            elementName = Finalize(node, new JsxNamespacedName(namesapace, name));
+            elementName = Finalize(node, new JsxNamespacedName(ns, name));
         }
         else if (MatchJsx("."))
         {
             while (MatchJsx("."))
             {
-                var @object = elementName;
+                var obj = elementName;
                 ExpectJsx(".");
                 var property = ParseJsxIdentifier();
-                elementName = Finalize(node, new JsxMemberExpression(@object, property));
+                elementName = Finalize(node, new JsxMemberExpression(obj, property));
             }
         }
 
@@ -668,10 +677,10 @@ public partial class JavaScriptParser
 
         if (MatchJsx(":"))
         {
-            var namesapace = identifier as JsxIdentifier;
+            var ns = (JsxIdentifier) identifier;
             ExpectJsx(":");
             var name = ParseJsxIdentifier();
-            attributeName = Finalize(node, new JsxNamespacedName(namesapace, name));
+            attributeName = Finalize(node, new JsxNamespacedName(ns, name));
         }
         else
         {
@@ -723,7 +732,7 @@ public partial class JavaScriptParser
     {
         var node = CreateJsxNode();
         var name = ParseJsxAttributeName();
-        Expression value = null;
+        Expression? value = null;
         if (MatchJsx("="))
         {
             ExpectJsx("=");
@@ -846,9 +855,9 @@ public partial class JavaScriptParser
         return Finalize(node, new JsxExpressionContainer(expression));
     }
 
-    private NodeList<JsxExpression> ParseJsxChildren()
+    private ArrayList<JsxExpression> ParseJsxChildren()
     {
-        var children = new List<JsxExpression>();
+        var children = new ArrayList<JsxExpression>();
 
         while (!_scanner.Eof())
         {
@@ -883,7 +892,7 @@ public partial class JavaScriptParser
             }
         }
 
-        return new NodeList<JsxExpression>(children);
+        return children;
     }
 
     private MetaJsxElement ParseComplexJsxElement(MetaJsxElement el)
@@ -898,7 +907,7 @@ public partial class JavaScriptParser
 
             if (element.Type == Nodes.JSXOpeningElement)
             {
-                var opening = element as JsxOpeningElement;
+                var opening = (JsxOpeningElement) element;
                 if (opening.SelfClosing)
                 {
                     var child = Finalize(node,
@@ -908,18 +917,15 @@ public partial class JavaScriptParser
                 else
                 {
                     stack.Add(el);
-                    el = new MetaJsxElement
-                    {
-                        Node = node, Opening = opening, Closing = null, Children = new List<JsxExpression>()
-                    };
+                    el = new MetaJsxElement(node, opening, closing: null, children: new List<JsxExpression>());
                 }
             }
 
             if (element.Type == Nodes.JSXClosingElement)
             {
                 el.Closing = element as JsxClosingElement;
-                var open = GetQualifiedElementName((el.Opening as JsxOpeningElement).Name);
-                var close = GetQualifiedElementName((el.Closing as JsxClosingElement).Name);
+                var open = GetQualifiedElementName(((JsxOpeningElement) el.Opening).Name);
+                var close = GetQualifiedElementName(((JsxClosingElement) el.Closing!).Name);
                 if (open != close)
                 {
                     TolerateError($"Expected corresponding JSX closing tag for {open}");
@@ -966,10 +972,7 @@ public partial class JavaScriptParser
 
         if (opening is JsxOpeningElement { SelfClosing: false } or JsxOpeningFragment { SelfClosing: false })
         {
-            var el = ParseComplexJsxElement(new MetaJsxElement
-            {
-                Node = node, Opening = opening, Closing = closing, Children = children
-            });
+            var el = ParseComplexJsxElement(new MetaJsxElement(node, opening, closing, children));
             children = el.Children;
             closing = el.Closing;
         }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Esprima.Ast;
 
 namespace Esprima
@@ -5139,7 +5137,7 @@ namespace Esprima
             }
         }
 
-        private class ParsedParameters
+        private sealed class ParsedParameters
         {
             private HashSet<string?>? paramSet;
             public Token? FirstRestricted;

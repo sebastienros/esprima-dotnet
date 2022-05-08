@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Esprima.Ast;
 using Esprima.Test;
 using Xunit;
 

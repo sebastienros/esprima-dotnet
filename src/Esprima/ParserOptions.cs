@@ -3,7 +3,7 @@
     /// <summary>
     /// Parser options.
     /// </summary>
-    public class ParserOptions
+    public sealed class ParserOptions
     {
         /// <summary>
         /// Create a new <see cref="ParserOptions" /> instance.
