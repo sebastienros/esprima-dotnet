@@ -7,6 +7,7 @@
     <DefineConstants Condition="'$(Checked)' == true or $(Configuration) == 'Debug'">$(DefineConstants);LOCATION_ASSERTS</DefineConstants>
     <AssemblyOriginatorKeyFile>../../src/Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
