@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     [Flags]
     public enum PropertyKind

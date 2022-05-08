@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Esprima.Ast;
 using Esprima.Test;
 using Xunit;
 
@@ -191,7 +191,7 @@ namespace Esprima.Tests
         public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
         {
             var scanner = new Scanner("", new ParserOptions { AdaptRegexp = true });
-            var regex = scanner.ParseRegex("\\$", "gm");
+            var regex = scanner.ParseRegex("\\$", "gm", TimeSpan.FromSeconds(10));
             Assert.NotNull(regex);
         }
 

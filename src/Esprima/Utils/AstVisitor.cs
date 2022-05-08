@@ -1,39 +1,44 @@
-﻿using System;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 
 namespace Esprima.Utils
 {
     public partial class AstVisitor
     {
-        public virtual T Visit<T>(T node) where T:Node
+        public virtual T Visit<T>(T? node) where T : Node
         {
-            return node.Accept<T>(this) ?? throw new NullReferenceException($"Visited node ({typeof(T).Name}) must not return irrelevant type.");
+            return node?.Accept<T>(this) ??
+                   throw new NullReferenceException(
+                       $"Visited node ({typeof(T).Name}) must not return irrelevant type.");
         }
 
-        protected internal virtual bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes) where T : Node
+        protected internal virtual bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
+            where T : Node?
         {
-            for (var i = 0; i < nodes.Count; i++)		           
-            { 
+            for (var i = 0; i < nodes.Count; i++)
+            {
                 var node = nodes[i];
                 if (node is not null)
                 {
-                    Visit(node);
+                    Visit(node as Node);
                 }
             }
+
             newNodes = nodes;
             return false;
         }
-        
+
         protected internal virtual Program VisitProgram(Program program)
         {
             var isNewStatements = HasNodeListChanged(program.Body, out var statements);
             return UpdateProgram(program, isNewStatements, ref statements);
         }
 
-        [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
+        [Obsolete(
+            "This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
         protected virtual void VisitUnknownNode(Node node)
         {
-            throw new NotImplementedException($"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
+            throw new NotImplementedException(
+                $"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
         }
 
         protected internal virtual CatchClause VisitCatchClause(CatchClause catchClause)
@@ -44,7 +49,7 @@ namespace Esprima.Utils
             {
                 param = Visit(catchClause.Param);
             }
-            
+
             body = Visit(catchClause.Body);
             return UpdateCatchClause(catchClause, param, body);
         }
@@ -56,24 +61,25 @@ namespace Esprima.Utils
             {
                 id = Visit(functionDeclaration.Id);
             }
-            
+
             var isNewParameters = HasNodeListChanged(functionDeclaration.Params, out var parameters);
             var body = Visit(functionDeclaration.Body);
-            return UpdateFunctionDeclaration(functionDeclaration, id, isNewParameters ,ref parameters, (body as BlockStatement)!);
+            return UpdateFunctionDeclaration(functionDeclaration, id, isNewParameters, ref parameters,
+                (body as BlockStatement)!);
         }
 
         protected internal virtual WithStatement VisitWithStatement(WithStatement withStatement)
         {
             var obj = Visit(withStatement.Object);
             var body = Visit(withStatement.Body);
-            return UpdateWithStatement(withStatement,obj, body);
+            return UpdateWithStatement(withStatement, obj, body);
         }
 
         protected internal virtual WhileStatement VisitWhileStatement(WhileStatement whileStatement)
         {
             var test = Visit(whileStatement.Test);
             var body = Visit(whileStatement.Body);
-            return UpdateWhileStatement(whileStatement,test, body);
+            return UpdateWhileStatement(whileStatement, test, body);
         }
 
         protected internal virtual VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
@@ -98,20 +104,20 @@ namespace Esprima.Utils
                 finalizer = Visit(tryStatement.Finalizer);
             }
 
-            return UpdateTryStatement(tryStatement,block, handler, finalizer);
+            return UpdateTryStatement(tryStatement, block, handler, finalizer);
         }
 
         protected internal virtual ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
         {
             var argument = Visit(throwStatement.Argument);
-            return UpdateThrowStatement(throwStatement,argument);
+            return UpdateThrowStatement(throwStatement, argument);
         }
 
         protected internal virtual SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
         {
             var discriminant = Visit(switchStatement.Discriminant);
             var isNewCases = HasNodeListChanged(switchStatement.Cases, out var cases);
-            return UpdateSwitchStatement(switchStatement,discriminant, isNewCases, ref cases);
+            return UpdateSwitchStatement(switchStatement, discriminant, isNewCases, ref cases);
         }
 
         protected internal virtual SwitchCase VisitSwitchCase(SwitchCase switchCase)
@@ -123,7 +129,7 @@ namespace Esprima.Utils
             }
 
             var isNewConsequent = HasNodeListChanged(switchCase.Consequent, out var consequent);
-            return UpdateSwitchCase(switchCase,test, isNewConsequent, ref consequent);
+            return UpdateSwitchCase(switchCase, test, isNewConsequent, ref consequent);
         }
 
         protected internal virtual ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
@@ -133,14 +139,15 @@ namespace Esprima.Utils
             {
                 argument = Visit(returnStatement.Argument);
             }
+
             return UpdateReturnStatement(returnStatement, argument);
         }
-        
+
         protected internal virtual LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
         {
             var label = Visit(labeledStatement.Label);
             var body = Visit(labeledStatement.Body);
-            return UpdateLabeledStatement(labeledStatement,label, body);
+            return UpdateLabeledStatement(labeledStatement, label, body);
         }
 
         protected internal virtual IfStatement VisitIfStatement(IfStatement ifStatement)
@@ -152,6 +159,7 @@ namespace Esprima.Utils
             {
                 alternate = Visit(ifStatement.Alternate);
             }
+
             return UpdateIfStatement(ifStatement, test, consequent, alternate);
         }
 
@@ -164,13 +172,13 @@ namespace Esprima.Utils
         {
             return UpdateDebuggerStatement(debuggerStatement);
         }
-        
+
         protected internal virtual ExpressionStatement VisitExpressionStatement(ExpressionStatement expressionStatement)
         {
             var expression = Visit(expressionStatement.Expression);
             return UpdateExpressionStatement(expressionStatement, expression);
         }
-        
+
         protected internal virtual ForStatement VisitForStatement(ForStatement forStatement)
         {
             StatementListItem? init = null;
@@ -192,10 +200,10 @@ namespace Esprima.Utils
             }
 
             var body = Visit(forStatement.Body);
-            
+
             return UpdateForStatement(forStatement, init, test, update, body);
         }
-        
+
         protected internal virtual ForInStatement VisitForInStatement(ForInStatement forInStatement)
         {
             var left = Visit(forInStatement.Left);
@@ -203,7 +211,7 @@ namespace Esprima.Utils
             var body = Visit(forInStatement.Body);
             return UpdateForInStatement(forInStatement, left, right, body);
         }
-        
+
         protected internal virtual DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
             var body = Visit(doWhileStatement.Body);
@@ -211,13 +219,14 @@ namespace Esprima.Utils
             return UpdateDoWhileStatement(doWhileStatement, body, test);
         }
 
-        protected internal virtual ArrowFunctionExpression VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+        protected internal virtual ArrowFunctionExpression VisitArrowFunctionExpression(
+            ArrowFunctionExpression arrowFunctionExpression)
         {
             var isNewParameters = HasNodeListChanged(arrowFunctionExpression.Params, out var parameters);
             var body = Visit(arrowFunctionExpression.Body);
             return UpdateArrowFunctionExpression(arrowFunctionExpression, isNewParameters, ref parameters, body);
         }
-        
+
         protected internal virtual UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
         {
             var argument = Visit(unaryExpression.Argument);
@@ -253,7 +262,7 @@ namespace Esprima.Utils
             var isNewArguments = HasNodeListChanged(newExpression.Arguments, out var arguments);
             return UpdateNewExpression(newExpression, callee, isNewArguments, ref arguments);
         }
-        
+
         protected internal virtual MemberExpression VisitMemberExpression(MemberExpression memberExpression)
         {
             var obj = Visit(memberExpression.Object);
@@ -290,6 +299,7 @@ namespace Esprima.Utils
             {
                 id = Visit(function.Id);
             }
+
             var isNewParameters = HasNodeListChanged(function.Params, out var parameters);
 
             var body = Visit(function.Body);
@@ -305,6 +315,7 @@ namespace Esprima.Utils
             {
                 value = Visit(propertyDefinition.Value);
             }
+
             return UpdatePropertyDefinition(propertyDefinition, key, value);
         }
 
@@ -332,15 +343,17 @@ namespace Esprima.Utils
             return UpdateClassExpression(classExpression, id, superClass, body);
         }
 
-        protected internal virtual ExportDefaultDeclaration VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+        protected internal virtual ExportDefaultDeclaration VisitExportDefaultDeclaration(
+            ExportDefaultDeclaration exportDefaultDeclaration)
         {
             var declaration = Visit(exportDefaultDeclaration.Declaration);
             return UpdateExportDefaultDeclaration(exportDefaultDeclaration, declaration);
         }
-        
-        protected internal virtual ExportAllDeclaration VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+
+        protected internal virtual ExportAllDeclaration VisitExportAllDeclaration(
+            ExportAllDeclaration exportAllDeclaration)
         {
-            Expression? exported = null; 
+            Expression? exported = null;
             if (exportAllDeclaration.Exported is not null)
             {
                 exported = Visit(exportAllDeclaration.Exported);
@@ -349,8 +362,9 @@ namespace Esprima.Utils
             var source = Visit(exportAllDeclaration.Source);
             return UpdateExportAllDeclaration(exportAllDeclaration, exported, source);
         }
-        
-        protected internal virtual ExportNamedDeclaration VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+
+        protected internal virtual ExportNamedDeclaration VisitExportNamedDeclaration(
+            ExportNamedDeclaration exportNamedDeclaration)
         {
             StatementListItem? declaration = null;
             if (exportNamedDeclaration.Declaration is not null)
@@ -365,8 +379,9 @@ namespace Esprima.Utils
             {
                 source = Visit(exportNamedDeclaration.Source);
             }
-            
-            return UpdateExportNamedDeclaration(exportNamedDeclaration, declaration, isNewSpecifiers, ref specifiers, source);
+
+            return UpdateExportNamedDeclaration(exportNamedDeclaration, declaration, isNewSpecifiers, ref specifiers,
+                source);
         }
 
         protected internal virtual ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
@@ -383,6 +398,7 @@ namespace Esprima.Utils
             {
                 source = Visit(import.Source);
             }
+
             return UpdateImport(import, source);
         }
 
@@ -393,13 +409,15 @@ namespace Esprima.Utils
             return UpdateImportDeclaration(importDeclaration, isNewSpecifiers, ref specifiers, source);
         }
 
-        protected internal virtual ImportNamespaceSpecifier VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+        protected internal virtual ImportNamespaceSpecifier VisitImportNamespaceSpecifier(
+            ImportNamespaceSpecifier importNamespaceSpecifier)
         {
             var local = Visit(importNamespaceSpecifier.Local);
             return UpdateImportNamespaceSpecifier(importNamespaceSpecifier, local);
         }
-        
-        protected internal virtual ImportDefaultSpecifier VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+
+        protected internal virtual ImportDefaultSpecifier VisitImportDefaultSpecifier(
+            ImportDefaultSpecifier importDefaultSpecifier)
         {
             var local = Visit(importDefaultSpecifier.Local);
             return UpdateImportDefaultSpecifier(importDefaultSpecifier, local);
@@ -418,7 +436,7 @@ namespace Esprima.Utils
             var value = Visit(methodDefinition.Value);
             return UpdateMethodDefinition(methodDefinition, key, value);
         }
-        
+
         protected internal virtual ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
         {
             var left = Visit(forOfStatement.Left);
@@ -438,7 +456,7 @@ namespace Esprima.Utils
             Expression? superClass = null;
             if (classDeclaration.SuperClass is not null)
             {
-                superClass =  Visit(classDeclaration.SuperClass);
+                superClass = Visit(classDeclaration.SuperClass);
             }
 
             var body = Visit(classDeclaration.Body);
@@ -458,10 +476,12 @@ namespace Esprima.Utils
             {
                 argument = Visit(yieldExpression.Argument);
             }
+
             return UpdateYieldExpression(yieldExpression, argument);
         }
-        
-        protected internal virtual TaggedTemplateExpression VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+
+        protected internal virtual TaggedTemplateExpression VisitTaggedTemplateExpression(
+            TaggedTemplateExpression taggedTemplateExpression)
         {
             var tag = Visit(taggedTemplateExpression.Tag);
             var quasi = Visit(taggedTemplateExpression.Quasi);
@@ -480,7 +500,8 @@ namespace Esprima.Utils
             return UpdateMetaProperty(metaProperty, meta, property);
         }
 
-        protected internal virtual ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
+        protected internal virtual ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(
+            ArrowParameterPlaceHolder arrowParameterPlaceHolder)
         {
             // ArrowParameterPlaceHolder nodes never appear in the final tree and only used during the construction of a tree.
             return UpdateArrowParameterPlaceHolder(arrowParameterPlaceHolder);
@@ -507,7 +528,7 @@ namespace Esprima.Utils
 
         protected internal virtual ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
         {
-            var isNewElements = HasNodeListChanged(arrayPattern.Elements, out var elements); 
+            var isNewElements = HasNodeListChanged(arrayPattern.Elements, out var elements);
             return UpdateArrayPattern(arrayPattern, isNewElements, ref elements);
         }
 
@@ -519,7 +540,7 @@ namespace Esprima.Utils
             {
                 init = Visit(variableDeclarator.Init);
             }
-            
+
             return UpdateVariableDeclarator(variableDeclarator, id, init);
         }
 
@@ -544,7 +565,7 @@ namespace Esprima.Utils
         {
             return UpdateTemplateElement(templateElement);
         }
-        
+
         protected internal virtual RestElement VisitRestElement(RestElement restElement)
         {
             var argument = Visit(restElement.Argument);
@@ -564,7 +585,8 @@ namespace Esprima.Utils
             return UpdateAwaitExpression(awaitExpression, argument);
         }
 
-        protected internal virtual ConditionalExpression VisitConditionalExpression(ConditionalExpression conditionalExpression)
+        protected internal virtual ConditionalExpression VisitConditionalExpression(
+            ConditionalExpression conditionalExpression)
         {
             var test = Visit(conditionalExpression.Test);
             var consequent = Visit(conditionalExpression.Consequent);
@@ -575,10 +597,10 @@ namespace Esprima.Utils
         protected internal virtual CallExpression VisitCallExpression(CallExpression callExpression)
         {
             var callee = Visit(callExpression.Callee);
-            var isNewArguments = HasNodeListChanged(callExpression.Arguments, out var arguments); 
+            var isNewArguments = HasNodeListChanged(callExpression.Arguments, out var arguments);
             return UpdateCallExpression(callExpression, callee, isNewArguments, ref arguments);
         }
-        
+
         protected internal virtual BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
         {
             var left = Visit(binaryExpression.Left);
@@ -592,7 +614,8 @@ namespace Esprima.Utils
             return UpdateArrayExpression(arrayExpression, isNewElements, ref elements);
         }
 
-        protected internal virtual AssignmentExpression VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+        protected internal virtual AssignmentExpression VisitAssignmentExpression(
+            AssignmentExpression assignmentExpression)
         {
             var left = Visit(assignmentExpression.Left);
             var right = Visit(assignmentExpression.Right);
@@ -606,7 +629,7 @@ namespace Esprima.Utils
             {
                 label = Visit(continueStatement.Label);
             }
-            
+
             return UpdateContinueStatement(continueStatement, label);
         }
 
@@ -617,6 +640,7 @@ namespace Esprima.Utils
             {
                 label = Visit(breakStatement.Label);
             }
+
             return UpdateBreakStatement(breakStatement, label);
         }
 

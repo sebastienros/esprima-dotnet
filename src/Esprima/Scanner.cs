@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,7 +7,7 @@ using Esprima.Ast;
 
 namespace Esprima
 {
-    public class SourceLocation
+    public sealed class SourceLocation
     {
         public Position? Start;
         public Position? End;
@@ -38,11 +36,12 @@ namespace Esprima
         }
     }
 
-    public class Scanner
+    public sealed class Scanner
     {
         private readonly IErrorHandler _errorHandler;
         private readonly bool _trackComment;
         private readonly bool _adaptRegexp;
+        private readonly TimeSpan _regexTimeout;
         private readonly int _length;
 
         public readonly string Source;
@@ -150,6 +149,7 @@ namespace Esprima
         {
             Source = code;
             _adaptRegexp = options.AdaptRegexp;
+            _regexTimeout = options.RegexTimeout;
             _errorHandler = options.ErrorHandler;
             _trackComment = options.Comment;
 
@@ -175,7 +175,7 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool Eof()
+        internal bool Eof()
         {
             return Index >= _length;
         }
@@ -1738,12 +1738,12 @@ namespace Esprima
         }
 
         /// <summary>
-        /// Converts an ECMAScript regular expression to a <see cref="Regex"/> instance.
+        /// Converts an ECMAScript regular expression to a <see cref="Regex"/> instance and tries to adapt regex
+        /// to work in .NET when possible.
         /// </summary>
-        public Regex ParseRegex(string pattern, string flags)
+        public Regex ParseRegex(string pattern, string flags, TimeSpan matchTimeout)
         {
             var tmp = pattern;
-            var self = this;
 
             var isUnicode = flags.IndexOf('u') >= 0;
 
@@ -1800,9 +1800,9 @@ namespace Esprima
             // \u is a valid escape sequence in JS, but not in .NET
             // search for any of these that are not valid \uxxxx values
 
-            tmp = Regex.Replace(tmp, @"(\\+)u(?![a-fA-F0-9]{4})", (match) =>
+            tmp = Regex.Replace(tmp, @"(\\+)u(?![a-fA-F0-9]{4})", static match =>
             {
-                return new String('\\', match.Groups[1].Value.Length / 2 * 2) + 'u';
+                return new string('\\', match.Groups[1].Value.Length / 2 * 2) + 'u';
             });
 
             // First, detect invalid regular expressions.
@@ -1810,7 +1810,7 @@ namespace Esprima
 
             try
             {
-                new Regex(tmp, options);
+                new Regex(tmp, options, matchTimeout);
             }
             catch
             {
@@ -1818,7 +1818,7 @@ namespace Esprima
 
                 try
                 {
-                    new Regex(tmp, options);
+                    new Regex(tmp, options, matchTimeout);
                 }
                 catch (Exception ex)
                 {
@@ -1850,7 +1850,7 @@ namespace Esprima
 
             pattern = newPattern;
 
-            return new Regex(pattern, options);
+            return new Regex(pattern, options, matchTimeout);
         }
 
         /// <summary>
@@ -2470,7 +2470,9 @@ namespace Esprima
             return new Token { Value = body.Substring(1, body.Length - 2), Literal = body };
         }
 
-        public Token ScanRegExpFlags()
+        private readonly record struct RegExpFlagsScanResult(string Flags, string Literal);
+        
+        private RegExpFlagsScanResult ScanRegExpFlags()
         {
             var str = "";
             var flags = "";
@@ -2520,7 +2522,7 @@ namespace Esprima
                 }
             }
 
-            return new Token { Value = flags, Literal = str };
+            return new (flags, str);
         }
 
         public Token ScanRegExp()
@@ -2528,15 +2530,14 @@ namespace Esprima
             var start = Index;
 
             var body = ScanRegExpBody();
-            var flags = ScanRegExpFlags();
-            var flagsValue = (string) flags.Value!;
+            var (flags, literal) = ScanRegExpFlags();
 
             return new Token
             {
                 Type = TokenType.RegularExpression,
-                Value = _adaptRegexp ? ParseRegex((string) body.Value!, flagsValue) : null,
-                Literal = body.Literal + flags.Literal,
-                RegexValue = new RegexValue((string) body.Value!, flagsValue),
+                Value = _adaptRegexp ? ParseRegex((string) body.Value!, flags, _regexTimeout) : null,
+                Literal = body.Literal + literal,
+                RegexValue = new RegexValue((string) body.Value!, flags),
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,

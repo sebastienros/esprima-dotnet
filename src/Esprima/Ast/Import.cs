@@ -10,7 +10,7 @@ namespace Esprima.Ast
         {
         }
 
-        public Import(Expression source) : base(Nodes.Import)
+        public Import(Expression? source) : base(Nodes.Import)
         {
             Source = source;
         }

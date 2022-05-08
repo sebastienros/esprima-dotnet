@@ -50,7 +50,7 @@ namespace Esprima.Ast
             };
         }
 
-        public override NodeCollection ChildNodes => new(Argument);
+        public sealed override NodeCollection ChildNodes => new(Argument);
 
         protected internal override T? Accept<T>(AstVisitor visitor) where T : class
         {

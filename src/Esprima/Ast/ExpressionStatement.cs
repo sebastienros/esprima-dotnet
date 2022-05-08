@@ -11,9 +11,9 @@ namespace Esprima.Ast
             Expression = expression;
         }
 
-        public override NodeCollection ChildNodes => new(Expression);
+        public sealed override NodeCollection ChildNodes => new(Expression);
 
-        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+        protected internal sealed override T? Accept<T>(AstVisitor visitor) where T : class
         {
             return visitor.VisitExpressionStatement(this) as T;
         }

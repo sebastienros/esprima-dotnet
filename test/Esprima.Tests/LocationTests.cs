@@ -1,9 +1,8 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace Esprima.Tests
 {
-    using System;
-
     public class LocationTests
     {
         [Theory]

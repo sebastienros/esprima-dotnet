@@ -16,12 +16,9 @@
 
 #endregion
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using static Esprima.EsprimaExceptionHelper;
 using SysArray = System.Array;
 

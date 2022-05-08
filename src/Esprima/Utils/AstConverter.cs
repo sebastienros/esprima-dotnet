@@ -1,40 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 
 namespace Esprima.Utils
 {
     public abstract class AstConverter : AstVisitor
     {
         protected internal override bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
-            where T : class
         {
             List<T>? newNodeList = null;
             for (var i = 0; i < nodes.Count; i++)
             {
                 var node = nodes[i];
-                if (node is not null)
+                if (node is null || node is not Node nodeCast)
                 {
-                    var newNode = Visit(node);
-                    if (newNodeList is not null)
-                    {
-                        if (newNode is not null)
-                        {
-                            newNodeList.Add((T) newNode);
-                        }
-                    }
-                    else if (newNode != nodes[i])
-                    {
-                        newNodeList = new List<T>();
-                        for (var j = 0; j < i; j++)
-                        {
-                            newNodeList.Add(nodes[j]);
-                        }
+                    continue;
+                }
 
-                        if (newNode is not null)
-                        {
-                            newNodeList.Add((T) newNode);
-                        }
+                var newNode = Visit(nodeCast);
+                if (newNodeList is not null)
+                {
+                    if (newNode is not null)
+                    {
+                        newNodeList.Add((T) newNode);
+                    }
+                }
+                else if (newNode != nodes[i])
+                {
+                    newNodeList = new List<T>();
+                    for (var j = 0; j < i; j++)
+                    {
+                        newNodeList.Add(nodes[j]);
+                    }
+
+                    if (newNode is not null)
+                    {
+                        newNodeList.Add((T) newNode);
                     }
                 }
             }

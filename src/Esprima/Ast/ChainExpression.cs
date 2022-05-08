@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public class ChainExpression : Expression
+    public sealed class ChainExpression : Expression
     {
         /// <summary>
         /// CallExpression | ComputedMemberExpression | StaticMemberExpression
