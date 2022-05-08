@@ -1,771 +1,814 @@
 ﻿using Esprima.Ast;
 
-namespace Esprima.Utils
+namespace Esprima.Utils;
+
+public abstract partial class AstConverter : AstVisitor
 {
-    public abstract class AstConverter : AstVisitor
+    protected internal override bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
     {
-        protected internal override bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
+        List<T>? newNodeList = null;
+        for (var i = 0; i < nodes.Count; i++)
         {
-            List<T>? newNodeList = null;
-            for (var i = 0; i < nodes.Count; i++)
+            var node = nodes[i];
+            if (node is null || node is not Node nodeCast)
             {
-                var node = nodes[i];
-                if (node is null || node is not Node nodeCast)
-                {
-                    continue;
-                }
-
-                var newNode = Visit(nodeCast);
-                if (newNodeList is not null)
-                {
-                    if (newNode is not null)
-                    {
-                        newNodeList.Add((T) newNode);
-                    }
-                }
-                else if (newNode != nodes[i])
-                {
-                    newNodeList = new List<T>();
-                    for (var j = 0; j < i; j++)
-                    {
-                        newNodeList.Add(nodes[j]);
-                    }
-
-                    if (newNode is not null)
-                    {
-                        newNodeList.Add((T) newNode);
-                    }
-                }
+                continue;
             }
 
+            var newNode = Visit(nodeCast);
             if (newNodeList is not null)
             {
-                newNodes = new NodeList<T>(newNodeList);
-                return true;
-            }
-
-            newNodes = nodes;
-            return false;
-        }
-
-        protected override Program UpdateProgram(Program program, bool isNewStatements,
-            ref NodeList<Statement> statements)
-        {
-            if (!isNewStatements)
-            {
-                return program;
-            }
-
-            return program switch
-            {
-                Module => new Module(statements),
-                Script script => new Script(statements, script.Strict),
-                _ => throw new NotImplementedException($"{program.SourceType} does not implemented yet.")
-            };
-        }
-
-        protected override CatchClause UpdateCatchClause(CatchClause catchClause, Expression? param,
-            BlockStatement body)
-        {
-            if (param is not null)
-            {
-                if (param == catchClause.Param && body == catchClause.Body)
+                if (newNode is not null)
                 {
-                    return catchClause;
+                    newNodeList.Add((T) newNode);
+                }
+            }
+            else if (newNode != nodeCast)
+            {
+                newNodeList = new List<T>();
+                for (var j = 0; j < i; j++)
+                {
+                    newNodeList.Add(nodes[j]);
                 }
 
-                return new CatchClause(param, body);
+                if (newNode is not null)
+                {
+                    newNodeList.Add((T) newNode);
+                }
             }
+        }
 
-            if (body == catchClause.Body)
+        if (newNodeList is not null)
+        {
+            newNodes = new NodeList<T>(newNodeList);
+            return true;
+        }
+
+        newNodes = nodes;
+        return false;
+    }
+
+    protected override Program UpdateProgram(Program program, bool isNewStatements,
+        ref NodeList<Statement> statements)
+    {
+        if (!isNewStatements)
+        {
+            return program;
+        }
+
+        return program switch
+        {
+            Module => new Module(statements),
+            Script script => new Script(statements, script.Strict),
+            _ => throw new NotImplementedException($"{program.SourceType} does not implemented yet.")
+        };
+    }
+
+    protected override CatchClause UpdateCatchClause(CatchClause catchClause, Expression? param,
+        BlockStatement body)
+    {
+        if (param is not null)
+        {
+            if (param == catchClause.Param && body == catchClause.Body)
             {
                 return catchClause;
             }
 
-            return new CatchClause(catchClause.Param, body);
+            return new CatchClause(param, body);
         }
 
-        protected override FunctionDeclaration UpdateFunctionDeclaration(FunctionDeclaration functionDeclaration,
-            Identifier? id,
-            bool isNewParameters, ref NodeList<Expression> parameters, BlockStatement body)
+        if (body == catchClause.Body)
         {
-            if (!isNewParameters && id == functionDeclaration.Id && body == functionDeclaration.Body)
-            {
-                return functionDeclaration;
-            }
-
-            return new FunctionDeclaration(id, parameters, body, functionDeclaration.Generator,
-                functionDeclaration.Strict, functionDeclaration.Async);
+            return catchClause;
         }
-
-        protected override WithStatement UpdateWithStatement(WithStatement withStatement, Expression obj,
-            Statement body)
-        {
-            if (obj == withStatement.Object && body == withStatement.Body)
-            {
-                return withStatement;
-            }
 
-            return new WithStatement(obj, body);
-        }
+        return new CatchClause(catchClause.Param, body);
+    }
 
-        protected override WhileStatement UpdateWhileStatement(WhileStatement whileStatement, Expression test,
-            Statement body)
+    protected override FunctionDeclaration UpdateFunctionDeclaration(FunctionDeclaration functionDeclaration,
+        Identifier? id,
+        bool isNewParameters, ref NodeList<Expression> parameters, BlockStatement body)
+    {
+        if (!isNewParameters && id == functionDeclaration.Id && body == functionDeclaration.Body)
         {
-            if (test == whileStatement.Test && body == whileStatement.Body)
-            {
-                return whileStatement;
-            }
-
-            return new WhileStatement(test, body);
+            return functionDeclaration;
         }
 
-        protected override VariableDeclaration UpdateVariableDeclaration(VariableDeclaration variableDeclaration,
-            bool isNewDeclarations,
-            ref NodeList<VariableDeclarator> declarations)
-        {
-            if (isNewDeclarations)
-            {
-                return new VariableDeclaration(declarations, variableDeclaration.Kind);
-            }
+        return new FunctionDeclaration(id, parameters, body, functionDeclaration.Generator,
+            functionDeclaration.Strict, functionDeclaration.Async);
+    }
 
-            return variableDeclaration;
+    protected override WithStatement UpdateWithStatement(WithStatement withStatement, Expression obj,
+        Statement body)
+    {
+        if (obj == withStatement.Object && body == withStatement.Body)
+        {
+            return withStatement;
         }
 
-        protected override TryStatement UpdateTryStatement(TryStatement tryStatement, BlockStatement block,
-            CatchClause? handler, BlockStatement? finalizer)
-        {
-            if (block == tryStatement.Block && handler == tryStatement.Handler && finalizer == tryStatement.Finalizer)
-            {
-                return tryStatement;
-            }
+        return new WithStatement(obj, body);
+    }
 
-            return new TryStatement(block, handler, finalizer);
+    protected override WhileStatement UpdateWhileStatement(WhileStatement whileStatement, Expression test,
+        Statement body)
+    {
+        if (test == whileStatement.Test && body == whileStatement.Body)
+        {
+            return whileStatement;
         }
 
-        protected override ThrowStatement UpdateThrowStatement(ThrowStatement throwStatement, Expression argument)
-        {
-            if (argument == throwStatement.Argument)
-            {
-                return throwStatement;
-            }
+        return new WhileStatement(test, body);
+    }
 
-            return new ThrowStatement(argument);
+    protected override VariableDeclaration UpdateVariableDeclaration(VariableDeclaration variableDeclaration,
+        bool isNewDeclarations,
+        ref NodeList<VariableDeclarator> declarations)
+    {
+        if (isNewDeclarations)
+        {
+            return new VariableDeclaration(declarations, variableDeclaration.Kind);
         }
 
-        protected override SwitchStatement UpdateSwitchStatement(SwitchStatement switchStatement,
-            Expression discriminant, bool isNewCases,
-            ref NodeList<SwitchCase> cases)
-        {
-            if (discriminant == switchStatement.Discriminant && !isNewCases)
-            {
-                return switchStatement;
-            }
+        return variableDeclaration;
+    }
 
-            return new SwitchStatement(discriminant, cases);
+    protected override TryStatement UpdateTryStatement(TryStatement tryStatement, BlockStatement block,
+        CatchClause? handler, BlockStatement? finalizer)
+    {
+        if (block == tryStatement.Block && handler == tryStatement.Handler && finalizer == tryStatement.Finalizer)
+        {
+            return tryStatement;
         }
 
-        protected override SwitchCase UpdateSwitchCase(SwitchCase switchCase, Expression? test, bool isNewConsequent, ref NodeList<Statement> consequent)
-        {
-            if (test == switchCase.Test && !isNewConsequent)
-            {
-                return switchCase;
-            }
+        return new TryStatement(block, handler, finalizer);
+    }
 
-            return new SwitchCase(test, consequent);
+    protected override ThrowStatement UpdateThrowStatement(ThrowStatement throwStatement, Expression argument)
+    {
+        if (argument == throwStatement.Argument)
+        {
+            return throwStatement;
         }
 
-        protected override ReturnStatement UpdateReturnStatement(ReturnStatement returnStatement, Expression? argument)
+        return new ThrowStatement(argument);
+    }
+
+    protected override SwitchStatement UpdateSwitchStatement(SwitchStatement switchStatement,
+        Expression discriminant, bool isNewCases,
+        ref NodeList<SwitchCase> cases)
+    {
+        if (discriminant == switchStatement.Discriminant && !isNewCases)
         {
-            if (argument == returnStatement.Argument)
-            {
-                return returnStatement;
-            }
-            
-            return new ReturnStatement(argument);
+            return switchStatement;
         }
 
-        protected override LabeledStatement UpdateLabeledStatement(LabeledStatement labeledStatement, Identifier label, Statement body)
-        {
-            
-            if (label == labeledStatement.Label && body == labeledStatement.Body)
-            {
-                return labeledStatement;
-            }
+        return new SwitchStatement(discriminant, cases);
+    }
 
-            return new LabeledStatement(label, body);
+    protected override SwitchCase UpdateSwitchCase(SwitchCase switchCase, Expression? test, bool isNewConsequent,
+        ref NodeList<Statement> consequent)
+    {
+        if (test == switchCase.Test && !isNewConsequent)
+        {
+            return switchCase;
         }
 
-        protected override IfStatement UpdateIfStatement(IfStatement ifStatement, Expression test, Statement consequent, Statement? alternate)
-        {
-            if (test == ifStatement.Test && consequent == ifStatement.Consequent && alternate == ifStatement.Alternate)
-            {
-                return ifStatement;
-            }
+        return new SwitchCase(test, consequent);
+    }
 
-            return new IfStatement(test, consequent, alternate);
-        }
-        
-        protected override EmptyStatement UpdateEmptyStatement(EmptyStatement emptyStatement)
+    protected override ReturnStatement UpdateReturnStatement(ReturnStatement returnStatement, Expression? argument)
+    {
+        if (argument == returnStatement.Argument)
         {
-            return emptyStatement;
+            return returnStatement;
         }
-        
-        protected override DebuggerStatement UpdateDebuggerStatement(DebuggerStatement debuggerStatement)
+
+        return new ReturnStatement(argument);
+    }
+
+    protected override LabeledStatement UpdateLabeledStatement(LabeledStatement labeledStatement, Identifier label,
+        Statement body)
+    {
+        if (label == labeledStatement.Label && body == labeledStatement.Body)
         {
-            return debuggerStatement;
+            return labeledStatement;
         }
 
-        protected override ExpressionStatement UpdateExpressionStatement(ExpressionStatement expressionStatement, Expression expression)
-        {
-            if (expression == expressionStatement.Expression)
-            {
-                return expressionStatement;
-            }
+        return new LabeledStatement(label, body);
+    }
 
-            return new ExpressionStatement(expression);
+    protected override IfStatement UpdateIfStatement(IfStatement ifStatement, Expression test, Statement consequent,
+        Statement? alternate)
+    {
+        if (test == ifStatement.Test && consequent == ifStatement.Consequent && alternate == ifStatement.Alternate)
+        {
+            return ifStatement;
         }
 
-        protected override ForStatement UpdateForStatement(ForStatement forStatement, StatementListItem? init, Expression? test,
-            Expression? update, Statement body)
-        {
-            if (init == forStatement.Init && test == forStatement.Test && update == forStatement.Update && body == forStatement.Body)
-            {
-                return forStatement;
-            }
+        return new IfStatement(test, consequent, alternate);
+    }
 
-            return new ForStatement(init, test, update, body);
-        }
+    protected override EmptyStatement UpdateEmptyStatement(EmptyStatement emptyStatement)
+    {
+        return emptyStatement;
+    }
 
-        protected override ForInStatement UpdateForInStatement(ForInStatement forInStatement, Node left, Expression right, Statement body)
-        {
-            if (left == forInStatement.Left && right == forInStatement.Right && body == forInStatement.Body)
-            {
-                return forInStatement;
-            }
+    protected override DebuggerStatement UpdateDebuggerStatement(DebuggerStatement debuggerStatement)
+    {
+        return debuggerStatement;
+    }
 
-            return new ForInStatement(left, right, body);
+    protected override ExpressionStatement UpdateExpressionStatement(ExpressionStatement expressionStatement,
+        Expression expression)
+    {
+        if (expression == expressionStatement.Expression)
+        {
+            return expressionStatement;
         }
 
-        protected override DoWhileStatement UpdateDoWhileStatement(DoWhileStatement doWhileStatement, Statement body, Expression test)
-        {
-            if (body == doWhileStatement.Body && test == doWhileStatement.Test)
-            {
-                return doWhileStatement;
-            }
+        return new ExpressionStatement(expression);
+    }
 
-            return new DoWhileStatement(body, test);
+    protected override ForStatement UpdateForStatement(ForStatement forStatement, StatementListItem? init,
+        Expression? test,
+        Expression? update, Statement body)
+    {
+        if (init == forStatement.Init && test == forStatement.Test && update == forStatement.Update &&
+            body == forStatement.Body)
+        {
+            return forStatement;
         }
 
-        protected override ArrowFunctionExpression UpdateArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression,
-            bool isNewParameters, ref NodeList<Expression> parameters, Node body)
-        {
-            if (!isNewParameters && body == arrowFunctionExpression.Body)
-            {
-                return arrowFunctionExpression;
-            }
+        return new ForStatement(init, test, update, body);
+    }
 
-            return new ArrowFunctionExpression(parameters, body, arrowFunctionExpression.Expression,
-                arrowFunctionExpression.Strict, arrowFunctionExpression.Async);
+    protected override ForInStatement UpdateForInStatement(ForInStatement forInStatement, Node left, Expression right,
+        Statement body)
+    {
+        if (left == forInStatement.Left && right == forInStatement.Right && body == forInStatement.Body)
+        {
+            return forInStatement;
         }
 
-        protected override UnaryExpression UpdateUnaryExpression(UnaryExpression unaryExpression, Expression argument)
-        {
-            if (argument == unaryExpression.Argument)
-            {
-                return unaryExpression;
-            }
+        return new ForInStatement(left, right, body);
+    }
 
-            return new UnaryExpression(unaryExpression.Operator.ToString(), argument);
+    protected override DoWhileStatement UpdateDoWhileStatement(DoWhileStatement doWhileStatement, Statement body,
+        Expression test)
+    {
+        if (body == doWhileStatement.Body && test == doWhileStatement.Test)
+        {
+            return doWhileStatement;
         }
 
-        protected override UpdateExpression UpdateUpdateExpression(UpdateExpression updateExpression, Expression argument)
-        {
-            if (argument == updateExpression.Argument)
-            {
-                return updateExpression;
-            }
+        return new DoWhileStatement(body, test);
+    }
 
-            return new UpdateExpression(updateExpression.Operator.ToString(), argument, updateExpression.Prefix);
+    protected override ArrowFunctionExpression UpdateArrowFunctionExpression(
+        ArrowFunctionExpression arrowFunctionExpression,
+        bool isNewParameters, ref NodeList<Expression> parameters, Node body)
+    {
+        if (!isNewParameters && body == arrowFunctionExpression.Body)
+        {
+            return arrowFunctionExpression;
         }
+
+        return new ArrowFunctionExpression(parameters, body, arrowFunctionExpression.Expression,
+            arrowFunctionExpression.Strict, arrowFunctionExpression.Async);
+    }
 
-        protected override ThisExpression UpdateThisExpression(ThisExpression thisExpression)
+    protected override UnaryExpression UpdateUnaryExpression(UnaryExpression unaryExpression, Expression argument)
+    {
+        if (argument == unaryExpression.Argument)
         {
-            return thisExpression;
+            return unaryExpression;
         }
 
-        protected override SequenceExpression UpdateSequenceExpression(SequenceExpression sequenceExpression, bool isNewExpressions,
-            ref NodeList<Expression> expressions)
-        {
-            if(isNewExpressions)
-            {
-                return new SequenceExpression(expressions);
-            }
+        return new UnaryExpression(unaryExpression.Operator, argument);
+    }
 
-            return sequenceExpression;
+    protected override UpdateExpression UpdateUpdateExpression(UpdateExpression updateExpression, Expression argument)
+    {
+        if (argument == updateExpression.Argument)
+        {
+            return updateExpression;
         }
 
-        protected override ObjectExpression UpdateObjectExpression(ObjectExpression objectExpression, bool isNewProperties,
-            ref NodeList<Expression> properties)
-        {
-            if (isNewProperties)
-            {
-                return new ObjectExpression(properties);
-            }
+        return new UpdateExpression(updateExpression.Operator, argument, updateExpression.Prefix);
+    }
 
-            return objectExpression;
-        }
+    protected override ThisExpression UpdateThisExpression(ThisExpression thisExpression)
+    {
+        return thisExpression;
+    }
 
-        protected override NewExpression UpdateNewExpression(NewExpression newExpression, Expression callee, bool isNewArguments,
-            ref NodeList<Expression> arguments)
+    protected override SequenceExpression UpdateSequenceExpression(SequenceExpression sequenceExpression,
+        bool isNewExpressions,
+        ref NodeList<Expression> expressions)
+    {
+        if (isNewExpressions)
         {
-            if (!isNewArguments && callee == newExpression.Callee)
-            {
-                return newExpression;
-            }
-
-            return new NewExpression(callee, arguments);
+            return new SequenceExpression(expressions);
         }
 
-        protected override MemberExpression UpdateMemberExpression(MemberExpression memberExpression, Expression obj, Expression property)
-        {
-            if (obj == memberExpression.Object && property == memberExpression.Property)
-            {
-                return memberExpression;
-            }
+        return sequenceExpression;
+    }
 
-            return memberExpression.Computed switch
-            {
-                true => new ComputedMemberExpression(obj, property, memberExpression.Optional),
-                false => new StaticMemberExpression(obj, property, memberExpression.Optional),
-            };
+    protected override ObjectExpression UpdateObjectExpression(ObjectExpression objectExpression, bool isNewProperties,
+        ref NodeList<Expression> properties)
+    {
+        if (isNewProperties)
+        {
+            return new ObjectExpression(properties);
         }
 
-        protected override BinaryExpression UpdateLogicalExpression(BinaryExpression binaryExpression, Expression left, Expression right)
-        {
-            if (left == binaryExpression.Left && right == binaryExpression.Right)
-            {
-                return binaryExpression;
-            }
+        return objectExpression;
+    }
 
-            return new BinaryExpression(binaryExpression.Operator.ToString(),left, right);
+    protected override NewExpression UpdateNewExpression(NewExpression newExpression, Expression callee,
+        bool isNewArguments,
+        ref NodeList<Expression> arguments)
+    {
+        if (!isNewArguments && callee == newExpression.Callee)
+        {
+            return newExpression;
         }
 
-        protected override Literal UpdateLiteral(Literal literal)
+        return new NewExpression(callee, arguments);
+    }
+
+    protected override MemberExpression UpdateMemberExpression(MemberExpression memberExpression, Expression obj,
+        Expression property)
+    {
+        if (obj == memberExpression.Object && property == memberExpression.Property)
         {
-            return literal;
+            return memberExpression;
         }
 
-        protected override Identifier UpdateIdentifier(Identifier identifier)
+        return memberExpression.Computed switch
         {
-            return identifier;
-        }
+            true => new ComputedMemberExpression(obj, property, memberExpression.Optional),
+            false => new StaticMemberExpression(obj, property, memberExpression.Optional),
+        };
+    }
 
-        protected override PrivateIdentifier UpdatePrivateIdentifier(PrivateIdentifier privateIdentifier)
+    protected override BinaryExpression UpdateLogicalExpression(BinaryExpression binaryExpression, Expression left,
+        Expression right)
+    {
+        if (left == binaryExpression.Left && right == binaryExpression.Right)
         {
-            return privateIdentifier;
+            return binaryExpression;
         }
 
-        protected override IFunction UpdateFunctionExpression(IFunction function, Identifier? id, bool isNewParameters, ref NodeList<Expression> parameters,
-            Node body)
-        {
-            if (id == function.Id && !isNewParameters && body == function.Body)
-            {
-                return function;
-            }
+        return new BinaryExpression(binaryExpression.Operator, left, right);
+    }
 
-            return function switch
-            {
-                ArrowFunctionExpression => new ArrowFunctionExpression(parameters, body, function.Expression,
-                    function.Strict, function.Async),
-                FunctionDeclaration => new FunctionDeclaration(id, parameters, (body as BlockStatement) !, function.Generator,
-                    function.Strict, function.Async),
-                FunctionExpression => new FunctionExpression(id, parameters, (body as BlockStatement) !, function.Generator,
-                    function.Strict, function.Async),
-                _ => throw new NotImplementedException($"{function.GetType().Name} does not implemented yet.")
-            };
-        }
+    protected override Literal UpdateLiteral(Literal literal)
+    {
+        return literal;
+    }
 
-        protected override PropertyDefinition UpdatePropertyDefinition(PropertyDefinition propertyDefinition, Expression key, Expression? value)
-        {
-            if (key == propertyDefinition.Key && value == propertyDefinition.Value)
-            {
-                return propertyDefinition;
-            }
+    protected override Identifier UpdateIdentifier(Identifier identifier)
+    {
+        return identifier;
+    }
 
-            return new PropertyDefinition(key, propertyDefinition.Computed, value !, propertyDefinition.Static);
-        }
+    protected override PrivateIdentifier UpdatePrivateIdentifier(PrivateIdentifier privateIdentifier)
+    {
+        return privateIdentifier;
+    }
 
-        protected override ChainExpression UpdateChainExpression(ChainExpression chainExpression, Expression expression)
+    protected override IFunction UpdateFunctionExpression(IFunction function, Identifier? id, bool isNewParameters,
+        ref NodeList<Expression> parameters,
+        Node body)
+    {
+        if (id == function.Id && !isNewParameters && body == function.Body)
         {
-            if (expression == chainExpression.Expression)
-            {
-                return chainExpression;
-            }
-            
-            return new ChainExpression(expression);
+            return function;
         }
 
-        protected override ClassExpression UpdateClassExpression(ClassExpression classExpression, Identifier? id, Expression? superClass,
-            ClassBody body)
+        return function switch
         {
-            if (id == classExpression.Id && superClass == classExpression.SuperClass && body == classExpression.Body)
-            {
-                return classExpression;
-            }
+            ArrowFunctionExpression => new ArrowFunctionExpression(parameters, body, function.Expression,
+                function.Strict, function.Async),
+            FunctionDeclaration => new FunctionDeclaration(id, parameters, (body as BlockStatement) !,
+                function.Generator,
+                function.Strict, function.Async),
+            FunctionExpression => new FunctionExpression(id, parameters, (body as BlockStatement) !, function.Generator,
+                function.Strict, function.Async),
+            _ => throw new NotImplementedException($"{function.GetType().Name} does not implemented yet.")
+        };
+    }
 
-            return new ClassExpression(id, superClass, body);
-        }
-
-        protected override ExportDefaultDeclaration UpdateExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration,
-            StatementListItem declaration)
+    protected override PropertyDefinition UpdatePropertyDefinition(PropertyDefinition propertyDefinition,
+        Expression key, Expression? value)
+    {
+        if (key == propertyDefinition.Key && value == propertyDefinition.Value)
         {
-            if (declaration == exportDefaultDeclaration.Declaration)
-            {
-                return exportDefaultDeclaration;
-            }
-
-            return new ExportDefaultDeclaration(declaration);
+            return propertyDefinition;
         }
 
-        protected override ExportAllDeclaration UpdateExportAllDeclaration(ExportAllDeclaration exportAllDeclaration, Expression? exported,
-            Literal source)
-        {
-            if (exported == exportAllDeclaration.Exported && source == exportAllDeclaration.Source)
-            {
-                return exportAllDeclaration;
-            }
+        return new PropertyDefinition(key, propertyDefinition.Computed, value !, propertyDefinition.Static);
+    }
 
-            return new ExportAllDeclaration(source, exported);
+    protected override ChainExpression UpdateChainExpression(ChainExpression chainExpression, Expression expression)
+    {
+        if (expression == chainExpression.Expression)
+        {
+            return chainExpression;
         }
 
-        protected override ExportNamedDeclaration UpdateExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration,
-            StatementListItem? declaration, bool isNewSpecifiers, ref NodeList<ExportSpecifier> specifiers, Literal? source)
-        {
-            if (declaration == exportNamedDeclaration.Declaration && !isNewSpecifiers && source == exportNamedDeclaration.Source)
-            {
-                return exportNamedDeclaration;
-            }
+        return new ChainExpression(expression);
+    }
 
-            return new ExportNamedDeclaration(declaration, specifiers, source);
+    protected override ClassExpression UpdateClassExpression(ClassExpression classExpression, Identifier? id,
+        Expression? superClass,
+        ClassBody body)
+    {
+        if (id == classExpression.Id && superClass == classExpression.SuperClass && body == classExpression.Body)
+        {
+            return classExpression;
         }
 
-        protected override ExportSpecifier UpdateExportSpecifier(ExportSpecifier exportSpecifier, Expression local, Expression exported)
-        {
-            if (local == exportSpecifier.Local && exported == exportSpecifier.Exported)
-            {
-                return exportSpecifier;
-            }
+        return new ClassExpression(id, superClass, body);
+    }
 
-            return new ExportSpecifier(local, exported);
+    protected override ExportDefaultDeclaration UpdateExportDefaultDeclaration(
+        ExportDefaultDeclaration exportDefaultDeclaration,
+        StatementListItem declaration)
+    {
+        if (declaration == exportDefaultDeclaration.Declaration)
+        {
+            return exportDefaultDeclaration;
         }
 
-        protected override Import UpdateImport(Import import, Expression? source)
+        return new ExportDefaultDeclaration(declaration);
+    }
+
+    protected override ExportAllDeclaration UpdateExportAllDeclaration(ExportAllDeclaration exportAllDeclaration,
+        Expression? exported,
+        Literal source)
+    {
+        if (exported == exportAllDeclaration.Exported && source == exportAllDeclaration.Source)
         {
-            if (source == import.Source)
-            {
-                return import;
-            }
-            return new Import(source);
+            return exportAllDeclaration;
         }
 
-        protected override ImportDeclaration UpdateImportDeclaration(ImportDeclaration importDeclaration, bool isNewSpecifiers,
-            ref NodeList<ImportDeclarationSpecifier> specifiers, Literal source)
-        {
-            if (!isNewSpecifiers && source == importDeclaration.Source)
-            {
-                return importDeclaration;
-            }
+        return new ExportAllDeclaration(source, exported);
+    }
 
-            return new ImportDeclaration(specifiers, source);
+    protected override ExportNamedDeclaration UpdateExportNamedDeclaration(
+        ExportNamedDeclaration exportNamedDeclaration,
+        StatementListItem? declaration, bool isNewSpecifiers, ref NodeList<ExportSpecifier> specifiers, Literal? source)
+    {
+        if (declaration == exportNamedDeclaration.Declaration && !isNewSpecifiers &&
+            source == exportNamedDeclaration.Source)
+        {
+            return exportNamedDeclaration;
         }
 
-        protected override ImportNamespaceSpecifier UpdateImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier,
-            Identifier local)
-        {
-            if (local == importNamespaceSpecifier.Local)
-            {
-                return importNamespaceSpecifier;
-            }
+        return new ExportNamedDeclaration(declaration, specifiers, source);
+    }
 
-            return new ImportNamespaceSpecifier(local);
+    protected override ExportSpecifier UpdateExportSpecifier(ExportSpecifier exportSpecifier, Expression local,
+        Expression exported)
+    {
+        if (local == exportSpecifier.Local && exported == exportSpecifier.Exported)
+        {
+            return exportSpecifier;
         }
 
-        protected override ImportDefaultSpecifier UpdateImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier, Identifier local)
-        {
-            if (local == importDefaultSpecifier.Local)
-            {
-                return importDefaultSpecifier;
-            }
+        return new ExportSpecifier(local, exported);
+    }
 
-            return new ImportDefaultSpecifier(local);
+    protected override Import UpdateImport(Import import, Expression? source)
+    {
+        if (source == import.Source)
+        {
+            return import;
         }
 
-        protected override ImportSpecifier UpdateImportSpecifier(ImportSpecifier importSpecifier, Expression imported, Identifier local)
-        {
-            if (imported == importSpecifier.Imported && local == importSpecifier.Local)
-            {
-                return importSpecifier;
-            }
+        return new Import(source);
+    }
 
-            return new ImportSpecifier(local, imported);
+    protected override ImportDeclaration UpdateImportDeclaration(ImportDeclaration importDeclaration,
+        bool isNewSpecifiers,
+        ref NodeList<ImportDeclarationSpecifier> specifiers, Literal source)
+    {
+        if (!isNewSpecifiers && source == importDeclaration.Source)
+        {
+            return importDeclaration;
         }
 
-        protected override MethodDefinition UpdateMethodDefinition(MethodDefinition methodDefinition, Expression key, Expression value)
-        {
-            if (key == methodDefinition.Key && value == methodDefinition.Value)
-            {
-                return methodDefinition;
-            }
+        return new ImportDeclaration(specifiers, source);
+    }
 
-            return new MethodDefinition(key, methodDefinition.Computed, (value as FunctionExpression)!, methodDefinition.Kind,
-                methodDefinition.Static);
+    protected override ImportNamespaceSpecifier UpdateImportNamespaceSpecifier(
+        ImportNamespaceSpecifier importNamespaceSpecifier,
+        Identifier local)
+    {
+        if (local == importNamespaceSpecifier.Local)
+        {
+            return importNamespaceSpecifier;
         }
 
-        protected override ForOfStatement UpdateForOfStatement(ForOfStatement forOfStatement, Node left, Expression right, Statement body)
-        {
-            if (left == forOfStatement.Left && right == forOfStatement.Right && body == forOfStatement.Body)
-            {
-                return forOfStatement;
-            }
+        return new ImportNamespaceSpecifier(local);
+    }
 
-            return new ForOfStatement(left, right, body, forOfStatement.Await);
+    protected override ImportDefaultSpecifier UpdateImportDefaultSpecifier(
+        ImportDefaultSpecifier importDefaultSpecifier, Identifier local)
+    {
+        if (local == importDefaultSpecifier.Local)
+        {
+            return importDefaultSpecifier;
         }
 
-        protected override ClassDeclaration UpdateClassDeclaration(ClassDeclaration classDeclaration, Identifier? id, Expression? superClass,
-            ClassBody body)
-        {
-            if (id == classDeclaration.Id && superClass == classDeclaration.SuperClass && body == classDeclaration.Body)
-            {
-                return classDeclaration;
-            }
+        return new ImportDefaultSpecifier(local);
+    }
 
-            return new ClassDeclaration(id,superClass, body);
+    protected override ImportSpecifier UpdateImportSpecifier(ImportSpecifier importSpecifier, Expression imported,
+        Identifier local)
+    {
+        if (imported == importSpecifier.Imported && local == importSpecifier.Local)
+        {
+            return importSpecifier;
         }
 
-        protected override ClassBody UpdateClassBody(ClassBody classBody, bool isNewBody, ref NodeList<Node> body)
-        {
-            if (isNewBody)
-            {
-                return new ClassBody(body);
-            }
+        return new ImportSpecifier(local, imported);
+    }
 
-            return classBody;
+    protected override MethodDefinition UpdateMethodDefinition(MethodDefinition methodDefinition, Expression key,
+        Expression value)
+    {
+        if (key == methodDefinition.Key && value == methodDefinition.Value)
+        {
+            return methodDefinition;
         }
 
-        protected override YieldExpression UpdateYieldExpression(YieldExpression yieldExpression, Expression? argument)
-        {
-            if (argument == yieldExpression.Argument)
-            {
-                return yieldExpression;
-            }
+        return new MethodDefinition(key, methodDefinition.Computed, (value as FunctionExpression)!,
+            methodDefinition.Kind,
+            methodDefinition.Static);
+    }
 
-            return new YieldExpression(argument, yieldExpression.Delegate);
+    protected override ForOfStatement UpdateForOfStatement(ForOfStatement forOfStatement, Node left, Expression right,
+        Statement body)
+    {
+        if (left == forOfStatement.Left && right == forOfStatement.Right && body == forOfStatement.Body)
+        {
+            return forOfStatement;
         }
 
-        protected override TaggedTemplateExpression UpdateTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression,
-            Expression tag, TemplateLiteral quasi)
-        {
-            if (tag == taggedTemplateExpression.Tag && quasi == taggedTemplateExpression.Quasi)
-            {
-                return taggedTemplateExpression;
-            }
+        return new ForOfStatement(left, right, body, forOfStatement.Await);
+    }
 
-            return new TaggedTemplateExpression(tag, quasi);
+    protected override ClassDeclaration UpdateClassDeclaration(ClassDeclaration classDeclaration, Identifier? id,
+        Expression? superClass,
+        ClassBody body)
+    {
+        if (id == classDeclaration.Id && superClass == classDeclaration.SuperClass && body == classDeclaration.Body)
+        {
+            return classDeclaration;
         }
 
-        protected override Super UpdateSuper(Super super)
+        return new ClassDeclaration(id, superClass, body);
+    }
+
+    protected override ClassBody UpdateClassBody(ClassBody classBody, bool isNewBody, ref NodeList<Node> body)
+    {
+        if (isNewBody)
         {
-            return super;
+            return new ClassBody(body);
         }
 
-        protected override MetaProperty UpdateMetaProperty(MetaProperty metaProperty, Identifier meta, Identifier property)
-        {
-            if (meta == metaProperty.Meta && property == metaProperty.Property)
-            {
-                return metaProperty;
-            }
+        return classBody;
+    }
 
-            return new MetaProperty(meta, property);
+    protected override YieldExpression UpdateYieldExpression(YieldExpression yieldExpression, Expression? argument)
+    {
+        if (argument == yieldExpression.Argument)
+        {
+            return yieldExpression;
         }
+
+        return new YieldExpression(argument, yieldExpression.Delegate);
+    }
 
-        protected override ArrowParameterPlaceHolder UpdateArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
+    protected override TaggedTemplateExpression UpdateTaggedTemplateExpression(
+        TaggedTemplateExpression taggedTemplateExpression,
+        Expression tag, TemplateLiteral quasi)
+    {
+        if (tag == taggedTemplateExpression.Tag && quasi == taggedTemplateExpression.Quasi)
         {
-            return arrowParameterPlaceHolder;
+            return taggedTemplateExpression;
         }
 
-        protected override ObjectPattern UpdateObjectPattern(ObjectPattern objectPattern, bool isNewProperties, ref NodeList<Node> properties)
-        {
-            if (isNewProperties)
-            {
-                return new ObjectPattern(properties);
-            }
+        return new TaggedTemplateExpression(tag, quasi);
+    }
 
-            return objectPattern;
-        }
+    protected override Super UpdateSuper(Super super)
+    {
+        return super;
+    }
 
-        protected override SpreadElement UpdateSpreadElement(SpreadElement spreadElement, Expression argument)
+    protected override MetaProperty UpdateMetaProperty(MetaProperty metaProperty, Identifier meta, Identifier property)
+    {
+        if (meta == metaProperty.Meta && property == metaProperty.Property)
         {
-            if (argument == spreadElement.Argument)
-            {
-                return spreadElement;
-            }
-
-            return new SpreadElement(argument);
+            return metaProperty;
         }
 
-        protected override AssignmentPattern UpdateAssignmentPattern(AssignmentPattern assignmentPattern, Expression left, Expression right)
-        {
-            if (left == assignmentPattern.Left && right == assignmentPattern.Right)
-            {
-                return assignmentPattern;
-            }
+        return new MetaProperty(meta, property);
+    }
 
-            return new AssignmentPattern(left, right);
-        }
+    protected override ArrowParameterPlaceHolder UpdateArrowParameterPlaceHolder(
+        ArrowParameterPlaceHolder arrowParameterPlaceHolder)
+    {
+        return arrowParameterPlaceHolder;
+    }
 
-        protected override ArrayPattern UpdateArrayPattern(ArrayPattern arrayPattern, bool isNewElements, ref NodeList<Expression?> elements)
+    protected override ObjectPattern UpdateObjectPattern(ObjectPattern objectPattern, bool isNewProperties,
+        ref NodeList<Node> properties)
+    {
+        if (isNewProperties)
         {
-            if (isNewElements)
-            {
-                return new ArrayPattern(elements);
-            }
-
-            return arrayPattern;
+            return new ObjectPattern(properties);
         }
 
-        protected override VariableDeclarator UpdateVariableDeclarator(VariableDeclarator variableDeclarator, Expression id, Expression? init)
-        {
-            if (id == variableDeclarator.Id && init == variableDeclarator.Init)
-            {
-                return variableDeclarator;
-            }
+        return objectPattern;
+    }
 
-            return new VariableDeclarator(id, init);
+    protected override SpreadElement UpdateSpreadElement(SpreadElement spreadElement, Expression argument)
+    {
+        if (argument == spreadElement.Argument)
+        {
+            return spreadElement;
         }
+
+        return new SpreadElement(argument);
+    }
 
-        protected override TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral, ref NodeList<TemplateElement> quasis, ref NodeList<Expression> expressions)
+    protected override AssignmentPattern UpdateAssignmentPattern(AssignmentPattern assignmentPattern, Expression left,
+        Expression right)
+    {
+        if (left == assignmentPattern.Left && right == assignmentPattern.Right)
         {
-            //TODO Umut
-            return templateLiteral;
+            return assignmentPattern;
         }
 
-        protected override TemplateElement UpdateTemplateElement(TemplateElement templateElement)
+        return new AssignmentPattern(left, right);
+    }
+
+    protected override ArrayPattern UpdateArrayPattern(ArrayPattern arrayPattern, bool isNewElements,
+        ref NodeList<Expression?> elements)
+    {
+        if (isNewElements)
         {
-            return templateElement;
+            return new ArrayPattern(elements);
         }
 
-        protected override RestElement UpdateRestElement(RestElement restElement, Expression argument)
-        {
-            if (argument == restElement.Argument)
-            {
-                return restElement;
-            }
+        return arrayPattern;
+    }
 
-            return new RestElement(argument);
+    protected override VariableDeclarator UpdateVariableDeclarator(VariableDeclarator variableDeclarator, Expression id,
+        Expression? init)
+    {
+        if (id == variableDeclarator.Id && init == variableDeclarator.Init)
+        {
+            return variableDeclarator;
         }
 
-        protected override Property UpdateProperty(Property property, Expression key, Expression value)
-        {
-            if (key == property.Key && value == property.Value)
-            {
-                return property;
-            }
+        return new VariableDeclarator(id, init);
+    }
 
-            return new Property(property.Kind, key, property.Computed, value, property.Method, property.Shorthand);
-        }
+    protected override TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral,
+        ref NodeList<TemplateElement> quasis, ref NodeList<Expression> expressions)
+    {
+        //TODO Umut
+        return templateLiteral;
+    }
 
-        protected override AwaitExpression UpdateAwaitExpression(AwaitExpression awaitExpression, Expression argument)
-        {
-            if (argument == awaitExpression.Argument)
-            {
-                return awaitExpression;
-            }
+    protected override TemplateElement UpdateTemplateElement(TemplateElement templateElement)
+    {
+        return templateElement;
+    }
 
-            return new AwaitExpression(argument);
+    protected override RestElement UpdateRestElement(RestElement restElement, Expression argument)
+    {
+        if (argument == restElement.Argument)
+        {
+            return restElement;
         }
 
-        protected override ConditionalExpression UpdateConditionalExpression(ConditionalExpression conditionalExpression, Expression test,
-            Expression consequent, Expression alternate)
-        {
-            if (test == conditionalExpression.Test && consequent == conditionalExpression.Consequent &&
-                alternate == conditionalExpression.Alternate)
-            {
-                return conditionalExpression;
-            }
+        return new RestElement(argument);
+    }
 
-            return new ConditionalExpression(test, consequent, alternate);
+    protected override Property UpdateProperty(Property property, Expression key, Expression value)
+    {
+        if (key == property.Key && value == property.Value)
+        {
+            return property;
         }
 
-        protected override CallExpression UpdateCallExpression(CallExpression callExpression, Expression callee, bool isNewArguments,
-            ref NodeList<Expression> arguments)
-        {
-            if (!isNewArguments&& callee == callExpression.Callee)
-            {
-                return callExpression;
-            }
+        return new Property(property.Kind, key, property.Computed, value, property.Method, property.Shorthand);
+    }
 
-            return new CallExpression(callee, arguments, callExpression.Optional);
+    protected override AwaitExpression UpdateAwaitExpression(AwaitExpression awaitExpression, Expression argument)
+    {
+        if (argument == awaitExpression.Argument)
+        {
+            return awaitExpression;
         }
 
-        protected override BinaryExpression UpdateBinaryExpression(BinaryExpression binaryExpression, Expression left, Expression right)
+        return new AwaitExpression(argument);
+    }
+
+    protected override ConditionalExpression UpdateConditionalExpression(ConditionalExpression conditionalExpression,
+        Expression test,
+        Expression consequent, Expression alternate)
+    {
+        if (test == conditionalExpression.Test && consequent == conditionalExpression.Consequent &&
+            alternate == conditionalExpression.Alternate)
         {
-            if (left == binaryExpression.Left && right == binaryExpression.Right)
-            {
-                return binaryExpression;
-            }
-            
-            return new BinaryExpression(binaryExpression.Operator.ToString(), left, right);
+            return conditionalExpression;
         }
 
-        protected override ArrayExpression UpdateArrayExpression(ArrayExpression arrayExpression, bool isNewElements, ref NodeList<Expression?> elements)
-        {
-            if (isNewElements)
-            {
-                return new ArrayExpression(elements);
-            }
+        return new ConditionalExpression(test, consequent, alternate);
+    }
 
-            return arrayExpression;
+    protected override CallExpression UpdateCallExpression(CallExpression callExpression, Expression callee,
+        bool isNewArguments,
+        ref NodeList<Expression> arguments)
+    {
+        if (!isNewArguments && callee == callExpression.Callee)
+        {
+            return callExpression;
         }
+
+        return new CallExpression(callee, arguments, callExpression.Optional);
+    }
 
-        protected override AssignmentExpression UpdateAssignmentExpression(AssignmentExpression assignmentExpression, Expression left,
-            Expression right)
+    protected override BinaryExpression UpdateBinaryExpression(BinaryExpression binaryExpression, Expression left,
+        Expression right)
+    {
+        if (left == binaryExpression.Left && right == binaryExpression.Right)
         {
-            if (left == assignmentExpression.Left && right == assignmentExpression.Right)
-            {
-                return assignmentExpression;
-            }
-            
-            return new AssignmentExpression(assignmentExpression.Operator.ToString(), left, right);
+            return binaryExpression;
         }
 
-        protected override ContinueStatement UpdateContinueStatement(ContinueStatement continueStatement, Identifier? label)
+        return new BinaryExpression(binaryExpression.Operator, left, right);
+    }
+
+    protected override ArrayExpression UpdateArrayExpression(ArrayExpression arrayExpression, bool isNewElements,
+        ref NodeList<Expression?> elements)
+    {
+        if (isNewElements)
         {
-            if (label != continueStatement.Label)
-            {
-                return new ContinueStatement(label);
-            }
+            return new ArrayExpression(elements);
+        }
 
-            return continueStatement;
+        return arrayExpression;
+    }
+
+    protected override AssignmentExpression UpdateAssignmentExpression(AssignmentExpression assignmentExpression,
+        Expression left,
+        Expression right)
+    {
+        if (left == assignmentExpression.Left && right == assignmentExpression.Right)
+        {
+            return assignmentExpression;
         }
 
-        protected override BreakStatement UpdateBreakStatement(BreakStatement breakStatement, Identifier? label)
+        return new AssignmentExpression(assignmentExpression.Operator, left, right);
+    }
+
+    protected override ContinueStatement UpdateContinueStatement(ContinueStatement continueStatement, Identifier? label)
+    {
+        if (label != continueStatement.Label)
         {
-            if (label != breakStatement.Label)
-            {
-                return new BreakStatement(label);
-            }
-            return breakStatement;
+            return new ContinueStatement(label);
         }
+
+        return continueStatement;
+    }
 
-        protected override BlockStatement UpdateBlockStatement(BlockStatement blockStatement, bool isNewBody, ref NodeList<Statement> body)
+    protected override BreakStatement UpdateBreakStatement(BreakStatement breakStatement, Identifier? label)
+    {
+        if (label != breakStatement.Label)
         {
-            if (isNewBody)
-            {
-                return new BlockStatement(body);
-            }
+            return new BreakStatement(label);
+        }
+
+        return breakStatement;
+    }
 
-            return blockStatement;
+    protected override BlockStatement UpdateBlockStatement(BlockStatement blockStatement, bool isNewBody,
+        ref NodeList<Statement> body)
+    {
+        if (isNewBody)
+        {
+            return new BlockStatement(body);
         }
+
+        return blockStatement;
     }
 }
