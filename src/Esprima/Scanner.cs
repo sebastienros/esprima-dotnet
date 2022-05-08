@@ -175,7 +175,7 @@ namespace Esprima
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool Eof()
+        internal bool Eof()
         {
             return Index >= _length;
         }

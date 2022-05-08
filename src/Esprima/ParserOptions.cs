@@ -53,5 +53,10 @@
         /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one.
         /// </summary>
         public bool AdaptRegexp { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets whether to parse script as JSX code.
+        /// </summary>
+        public bool Jsx { get; set; } = false;
     }
 }
