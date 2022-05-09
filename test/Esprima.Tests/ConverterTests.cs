@@ -15,16 +15,9 @@ public class ConverterTests
         return new JavaScriptParser(code, new ParserOptions() { Jsx = jsx }).ParseModule();
     }
 
-    private static T? FindNearTypeOfDescend<T>(Node node) where T : Node
-    {
-        return node.DescendantNodesAndSelf().OfType<T>().FirstOrDefault(_ => true, null);
-    }
-
     private static object? FindNearTypeOfDescendTyped(Type type, Node node)
     {
-        return typeof(ConverterTests)
-            ?.GetMethod("FindNearTypeOfDescend", BindingFlags.NonPublic | BindingFlags.Static)
-            ?.MakeGenericMethod(type)?.Invoke(null, new[] { node });;
+        return node.DescendantNodesAndSelf().FirstOrDefault(descendantNode => descendantNode.GetType() == type);
     }
 
     [Fact]
