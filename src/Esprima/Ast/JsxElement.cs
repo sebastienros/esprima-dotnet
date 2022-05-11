@@ -19,8 +19,8 @@ public sealed class JsxElement : JsxExpression
     
     public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(OpeningElement, _children, ClosingElement);
 
-    protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+    protected internal override Node Accept(AstVisitor visitor)
     {
-        return visitor.VisitJsxElement(this) as T;
+        return visitor.VisitJsxElement(this);
     }
 }

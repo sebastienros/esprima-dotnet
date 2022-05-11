@@ -307,7 +307,7 @@ public static partial class AstJson
             }
         }
 
-        public override TNode Visit<TNode>(TNode? node) where TNode : class
+        public override Node? Visit(Node? node)
         {
             if (node is not null)
             {

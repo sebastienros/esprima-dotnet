@@ -86,15 +86,15 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Left, Right);
 
-        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+        protected internal override Node Accept(AstVisitor visitor)
         {
             if (Type == Nodes.LogicalExpression)
             {
-                return visitor.VisitLogicalExpression(this) as T;
+                return visitor.VisitLogicalExpression(this);
             }
             else
             {
-                return visitor.VisitBinaryExpression(this) as T;
+                return visitor.VisitBinaryExpression(this);
             }
         }
     }

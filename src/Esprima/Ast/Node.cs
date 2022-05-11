@@ -15,6 +15,6 @@ namespace Esprima.Ast
 
         public abstract NodeCollection ChildNodes { get; }
 
-        protected internal abstract T? Accept<T>(AstVisitor visitor) where T : class;
+        protected internal abstract Node Accept(AstVisitor visitor);
     }
 }

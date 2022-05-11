@@ -13,8 +13,8 @@ public sealed class JsxExpressionContainer : JsxExpression
 
     public override NodeCollection ChildNodes => new(Expression);
 
-    protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+    protected internal override Node Accept(AstVisitor visitor)
     {
-        return visitor.VisitJsxExpressionContainer(this) as T;
+        return visitor.VisitJsxExpressionContainer(this);
     }
 }

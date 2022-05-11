@@ -12,9 +12,9 @@ namespace Esprima.Ast
 
         public abstract ref readonly NodeList<Statement> Body { get; }
 
-        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+        protected internal override Node Accept(AstVisitor visitor)
         {
-            return visitor.VisitProgram(this) as T;
+            return visitor.VisitProgram(this);
         }
     }
 }

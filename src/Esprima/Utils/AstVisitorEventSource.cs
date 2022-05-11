@@ -147,7 +147,7 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<BlockStatement>? VisitingBlockStatement;
     public event EventHandler<BlockStatement>? VisitedBlockStatement;
 
-    public override T Visit<T>(T? node) where T : class
+    public override Node? Visit(Node? node)
     {
         VisitingNode?.Invoke(this, node !);
         var result = base.Visit(node);

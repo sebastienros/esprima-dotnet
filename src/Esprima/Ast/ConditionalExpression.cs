@@ -20,9 +20,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Test, Consequent, Alternate);
 
-        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+        protected internal override Node Accept(AstVisitor visitor)
         {
-            return visitor.VisitConditionalExpression(this) as T;
+            return visitor.VisitConditionalExpression(this);
         }
     }
 }
