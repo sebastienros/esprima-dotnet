@@ -22,9 +22,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Exported, Local);
 
-        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+        protected internal override Node Accept(AstVisitor visitor)
         {
-            return visitor.VisitExportSpecifier(this) as T;
+            return visitor.VisitExportSpecifier(this);
         }
     }
 }

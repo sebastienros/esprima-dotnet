@@ -50,11 +50,11 @@ namespace Esprima.Ast
             Regex = new RegexValue(pattern, flags);
         }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        public sealed override NodeCollection ChildNodes => NodeCollection.Empty;
 
-        protected internal override T? Accept<T>(AstVisitor visitor) where T : class
+        protected internal sealed override Node Accept(AstVisitor visitor)
         {
-            return visitor.VisitLiteral(this) as T;
+            return visitor.VisitLiteral(this);
         }
     }
 }

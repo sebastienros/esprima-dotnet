@@ -4,11 +4,9 @@ namespace Esprima.Utils;
 
 public partial class AstVisitor
 {
-    public virtual T Visit<T>(T? node) where T : Node
+    public virtual Node? Visit(Node? node)
     {
-        return node?.Accept<T>(this) ??
-               throw new NullReferenceException(
-                   $"Visited node ({typeof(T).Name}) must not return irrelevant type.");
+        return node?.Accept(this);
     }
 
     protected internal virtual bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
@@ -44,14 +42,13 @@ public partial class AstVisitor
     protected internal virtual CatchClause VisitCatchClause(CatchClause catchClause)
     {
         Expression? param = null;
-        BlockStatement body;
         if (catchClause.Param is not null)
         {
-            param = Visit(catchClause.Param);
+            param = Visit(catchClause.Param) as Expression;
         }
 
-        body = Visit(catchClause.Body);
-        return UpdateCatchClause(catchClause, param, body);
+        BlockStatement? body = Visit(catchClause.Body) as BlockStatement;
+        return UpdateCatchClause(catchClause, param, body !);
     }
 
     protected internal virtual FunctionDeclaration VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
@@ -59,27 +56,26 @@ public partial class AstVisitor
         Identifier? id = null;
         if (functionDeclaration.Id is not null)
         {
-            id = Visit(functionDeclaration.Id);
+            id = Visit(functionDeclaration.Id) as Identifier;
         }
 
         var isNewParameters = HasNodeListChanged(functionDeclaration.Params, out var parameters);
-        var body = Visit(functionDeclaration.Body);
-        return UpdateFunctionDeclaration(functionDeclaration, id, isNewParameters, ref parameters,
-            (body as BlockStatement)!);
+        BlockStatement? body = Visit(functionDeclaration.Body) as BlockStatement;
+        return UpdateFunctionDeclaration(functionDeclaration, id, isNewParameters, ref parameters, body!);
     }
 
     protected internal virtual WithStatement VisitWithStatement(WithStatement withStatement)
     {
-        var obj = Visit(withStatement.Object);
-        var body = Visit(withStatement.Body);
-        return UpdateWithStatement(withStatement, obj, body);
+        var obj = Visit(withStatement.Object) as Expression;
+        var body = Visit(withStatement.Body) as Statement;
+        return UpdateWithStatement(withStatement, obj!, body!);
     }
 
     protected internal virtual WhileStatement VisitWhileStatement(WhileStatement whileStatement)
     {
-        var test = Visit(whileStatement.Test);
-        var body = Visit(whileStatement.Body);
-        return UpdateWhileStatement(whileStatement, test, body);
+        var test = Visit(whileStatement.Test) as Expression;
+        var body = Visit(whileStatement.Body) as Statement;
+        return UpdateWhileStatement(whileStatement, test!, body!);
     }
 
     protected internal virtual VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
@@ -90,34 +86,34 @@ public partial class AstVisitor
 
     protected internal virtual TryStatement VisitTryStatement(TryStatement tryStatement)
     {
-        var block = Visit(tryStatement.Block);
+        var block = Visit(tryStatement.Block) as BlockStatement;
 
         CatchClause? handler = null;
         if (tryStatement.Handler is not null)
         {
-            handler = Visit(tryStatement.Handler);
+            handler = Visit(tryStatement.Handler) as CatchClause;
         }
 
         BlockStatement? finalizer = null;
         if (tryStatement.Finalizer is not null)
         {
-            finalizer = Visit(tryStatement.Finalizer);
+            finalizer = Visit(tryStatement.Finalizer) as BlockStatement;
         }
 
-        return UpdateTryStatement(tryStatement, block, handler, finalizer);
+        return UpdateTryStatement(tryStatement, block!, handler, finalizer);
     }
 
     protected internal virtual ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
     {
-        var argument = Visit(throwStatement.Argument);
-        return UpdateThrowStatement(throwStatement, argument);
+        var argument = Visit(throwStatement.Argument) as Expression;
+        return UpdateThrowStatement(throwStatement, argument!);
     }
 
     protected internal virtual SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
     {
-        var discriminant = Visit(switchStatement.Discriminant);
+        var discriminant = Visit(switchStatement.Discriminant) as Expression;
         var isNewCases = HasNodeListChanged(switchStatement.Cases, out var cases);
-        return UpdateSwitchStatement(switchStatement, discriminant, isNewCases, ref cases);
+        return UpdateSwitchStatement(switchStatement, discriminant!, isNewCases, ref cases);
     }
 
     protected internal virtual SwitchCase VisitSwitchCase(SwitchCase switchCase)
@@ -125,7 +121,7 @@ public partial class AstVisitor
         Expression? test = null;
         if (switchCase.Test is not null)
         {
-            test = Visit(switchCase.Test);
+            test = Visit(switchCase.Test) as Expression;
         }
 
         var isNewConsequent = HasNodeListChanged(switchCase.Consequent, out var consequent);
@@ -137,7 +133,7 @@ public partial class AstVisitor
         Expression? argument = null;
         if (returnStatement.Argument is not null)
         {
-            argument = Visit(returnStatement.Argument);
+            argument = Visit(returnStatement.Argument) as Expression;
         }
 
         return UpdateReturnStatement(returnStatement, argument);
@@ -145,22 +141,22 @@ public partial class AstVisitor
 
     protected internal virtual LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
     {
-        var label = Visit(labeledStatement.Label);
-        var body = Visit(labeledStatement.Body);
-        return UpdateLabeledStatement(labeledStatement, label, body);
+        var label = Visit(labeledStatement.Label) as Identifier;
+        var body = Visit(labeledStatement.Body) as Statement;
+        return UpdateLabeledStatement(labeledStatement, label!, body!);
     }
 
     protected internal virtual IfStatement VisitIfStatement(IfStatement ifStatement)
     {
-        var test = Visit(ifStatement.Test);
-        var consequent = Visit(ifStatement.Consequent);
+        var test = Visit(ifStatement.Test) as Expression;
+        var consequent = Visit(ifStatement.Consequent) as Statement;
         Statement? alternate = null;
         if (ifStatement.Alternate is not null)
         {
-            alternate = Visit(ifStatement.Alternate);
+            alternate = Visit(ifStatement.Alternate) as Statement;
         }
 
-        return UpdateIfStatement(ifStatement, test, consequent, alternate);
+        return UpdateIfStatement(ifStatement, test!, consequent!, alternate);
     }
 
     protected internal virtual EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
@@ -175,8 +171,8 @@ public partial class AstVisitor
 
     protected internal virtual ExpressionStatement VisitExpressionStatement(ExpressionStatement expressionStatement)
     {
-        var expression = Visit(expressionStatement.Expression);
-        return UpdateExpressionStatement(expressionStatement, expression);
+        var expression = Visit(expressionStatement.Expression) as Expression;
+        return UpdateExpressionStatement(expressionStatement, expression!);
     }
 
     protected internal virtual ForStatement VisitForStatement(ForStatement forStatement)
@@ -184,39 +180,39 @@ public partial class AstVisitor
         StatementListItem? init = null;
         if (forStatement.Init is not null)
         {
-            init = Visit(forStatement.Init);
+            init = Visit(forStatement.Init) as StatementListItem;
         }
 
         Expression? test = null;
         if (forStatement.Test is not null)
         {
-            test = Visit(forStatement.Test);
+            test = Visit(forStatement.Test) as Expression;
         }
 
         Expression? update = null;
         if (forStatement.Update is not null)
         {
-            update = Visit(forStatement.Update);
+            update = Visit(forStatement.Update) as Expression;
         }
 
-        var body = Visit(forStatement.Body);
+        var body = Visit(forStatement.Body) as Statement;
 
-        return UpdateForStatement(forStatement, init, test, update, body);
+        return UpdateForStatement(forStatement, init, test, update, body!);
     }
 
     protected internal virtual ForInStatement VisitForInStatement(ForInStatement forInStatement)
     {
         var left = Visit(forInStatement.Left);
-        var right = Visit(forInStatement.Right);
-        var body = Visit(forInStatement.Body);
-        return UpdateForInStatement(forInStatement, left, right, body);
+        var right = Visit(forInStatement.Right) as Expression;
+        var body = Visit(forInStatement.Body) as Statement;
+        return UpdateForInStatement(forInStatement, left!, right!, body!);
     }
 
     protected internal virtual DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
     {
-        var body = Visit(doWhileStatement.Body);
-        var test = Visit(doWhileStatement.Test);
-        return UpdateDoWhileStatement(doWhileStatement, body, test);
+        var body = Visit(doWhileStatement.Body) as Statement;
+        var test = Visit(doWhileStatement.Test) as Expression;
+        return UpdateDoWhileStatement(doWhileStatement, body!, test!);
     }
 
     protected internal virtual ArrowFunctionExpression VisitArrowFunctionExpression(
@@ -224,19 +220,19 @@ public partial class AstVisitor
     {
         var isNewParameters = HasNodeListChanged(arrowFunctionExpression.Params, out var parameters);
         var body = Visit(arrowFunctionExpression.Body);
-        return UpdateArrowFunctionExpression(arrowFunctionExpression, isNewParameters, ref parameters, body);
+        return UpdateArrowFunctionExpression(arrowFunctionExpression, isNewParameters, ref parameters, body!);
     }
 
     protected internal virtual UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
     {
-        var argument = Visit(unaryExpression.Argument);
-        return UpdateUnaryExpression(unaryExpression, argument);
+        var argument = Visit(unaryExpression.Argument) as Expression;
+        return UpdateUnaryExpression(unaryExpression, argument!);
     }
 
     protected internal virtual UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
     {
-        var argument = Visit(updateExpression.Argument);
-        return UpdateUpdateExpression(updateExpression, argument);
+        var argument = Visit(updateExpression.Argument) as Expression;
+        return UpdateUpdateExpression(updateExpression, argument!);
     }
 
     protected internal virtual ThisExpression VisitThisExpression(ThisExpression thisExpression)
@@ -258,23 +254,23 @@ public partial class AstVisitor
 
     protected internal virtual NewExpression VisitNewExpression(NewExpression newExpression)
     {
-        var callee = Visit(newExpression.Callee);
+        var callee = Visit(newExpression.Callee) as Expression;
         var isNewArguments = HasNodeListChanged(newExpression.Arguments, out var arguments);
-        return UpdateNewExpression(newExpression, callee, isNewArguments, ref arguments);
+        return UpdateNewExpression(newExpression, callee!, isNewArguments, ref arguments);
     }
 
     protected internal virtual MemberExpression VisitMemberExpression(MemberExpression memberExpression)
     {
-        var obj = Visit(memberExpression.Object);
-        var property = Visit(memberExpression.Property);
-        return UpdateMemberExpression(memberExpression, obj, property);
+        var obj = Visit(memberExpression.Object) as Expression;
+        var property = Visit(memberExpression.Property) as Expression;
+        return UpdateMemberExpression(memberExpression, obj!, property!);
     }
 
     protected internal virtual BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
     {
-        var left = Visit(binaryExpression.Left);
-        var right = Visit(binaryExpression.Right);
-        return UpdateLogicalExpression(binaryExpression, left, right);
+        var left = Visit(binaryExpression.Left) as Expression;
+        var right = Visit(binaryExpression.Right) as Expression;
+        return UpdateLogicalExpression(binaryExpression, left!, right!);
     }
 
     protected internal virtual Literal VisitLiteral(Literal literal)
@@ -297,32 +293,32 @@ public partial class AstVisitor
         Identifier? id = null;
         if (function.Id is not null)
         {
-            id = Visit(function.Id);
+            id = Visit(function.Id) as Identifier;
         }
 
         var isNewParameters = HasNodeListChanged(function.Params, out var parameters);
 
-        var body = Visit(function.Body);
-        return UpdateFunctionExpression(function, id, isNewParameters, ref parameters, body);
+        var body = Visit(function.Body) as Node;
+        return UpdateFunctionExpression(function, id, isNewParameters, ref parameters, body!);
     }
 
     protected internal virtual PropertyDefinition VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
-        var key = Visit(propertyDefinition.Key);
+        var key = Visit(propertyDefinition.Key) as Expression;
 
         Expression? value = null;
         if (propertyDefinition.Value is not null)
         {
-            value = Visit(propertyDefinition.Value);
+            value = Visit(propertyDefinition.Value) as Expression;
         }
 
-        return UpdatePropertyDefinition(propertyDefinition, key, value);
+        return UpdatePropertyDefinition(propertyDefinition, key!, value);
     }
 
     protected internal virtual ChainExpression VisitChainExpression(ChainExpression chainExpression)
     {
-        var expression = Visit(chainExpression.Expression);
-        return UpdateChainExpression(chainExpression, expression);
+        var expression = Visit(chainExpression.Expression) as Expression;
+        return UpdateChainExpression(chainExpression, expression!);
     }
 
     protected internal virtual ClassExpression VisitClassExpression(ClassExpression classExpression)
@@ -330,24 +326,24 @@ public partial class AstVisitor
         Identifier? id = null;
         if (classExpression.Id is not null)
         {
-            id = Visit(classExpression.Id);
+            id = Visit(classExpression.Id) as Identifier;
         }
 
         Expression? superClass = null;
         if (classExpression.SuperClass is not null)
         {
-            superClass = Visit(classExpression.SuperClass);
+            superClass = Visit(classExpression.SuperClass) as Expression;
         }
 
-        var body = Visit(classExpression.Body);
-        return UpdateClassExpression(classExpression, id, superClass, body);
+        var body = Visit(classExpression.Body) as ClassBody;
+        return UpdateClassExpression(classExpression, id, superClass, body!);
     }
 
     protected internal virtual ExportDefaultDeclaration VisitExportDefaultDeclaration(
         ExportDefaultDeclaration exportDefaultDeclaration)
     {
-        var declaration = Visit(exportDefaultDeclaration.Declaration);
-        return UpdateExportDefaultDeclaration(exportDefaultDeclaration, declaration);
+        var declaration = Visit(exportDefaultDeclaration.Declaration) as StatementListItem;
+        return UpdateExportDefaultDeclaration(exportDefaultDeclaration, declaration!);
     }
 
     protected internal virtual ExportAllDeclaration VisitExportAllDeclaration(
@@ -356,11 +352,11 @@ public partial class AstVisitor
         Expression? exported = null;
         if (exportAllDeclaration.Exported is not null)
         {
-            exported = Visit(exportAllDeclaration.Exported);
+            exported = Visit(exportAllDeclaration.Exported) as Expression;
         }
 
-        var source = Visit(exportAllDeclaration.Source);
-        return UpdateExportAllDeclaration(exportAllDeclaration, exported, source);
+        var source = Visit(exportAllDeclaration.Source) as Literal;
+        return UpdateExportAllDeclaration(exportAllDeclaration, exported, source!);
     }
 
     protected internal virtual ExportNamedDeclaration VisitExportNamedDeclaration(
@@ -369,7 +365,7 @@ public partial class AstVisitor
         StatementListItem? declaration = null;
         if (exportNamedDeclaration.Declaration is not null)
         {
-            declaration = Visit(exportNamedDeclaration.Declaration);
+            declaration = Visit(exportNamedDeclaration.Declaration) as StatementListItem;
         }
 
         var isNewSpecifiers = HasNodeListChanged(exportNamedDeclaration.Specifiers, out var specifiers);
@@ -377,7 +373,7 @@ public partial class AstVisitor
         Literal? source = null;
         if (exportNamedDeclaration.Source is not null)
         {
-            source = Visit(exportNamedDeclaration.Source);
+            source = Visit(exportNamedDeclaration.Source) as Literal;
         }
 
         return UpdateExportNamedDeclaration(exportNamedDeclaration, declaration, isNewSpecifiers, ref specifiers,
@@ -386,9 +382,9 @@ public partial class AstVisitor
 
     protected internal virtual ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
     {
-        var local = Visit(exportSpecifier.Local);
-        var exported = Visit(exportSpecifier.Exported);
-        return UpdateExportSpecifier(exportSpecifier, local, exported);
+        var local = Visit(exportSpecifier.Local) as Expression;
+        var exported = Visit(exportSpecifier.Exported) as Expression;
+        return UpdateExportSpecifier(exportSpecifier, local!, exported!);
     }
 
     protected internal virtual Import VisitImport(Import import)
@@ -396,7 +392,7 @@ public partial class AstVisitor
         Expression? source = null;
         if (import.Source is not null)
         {
-            source = Visit(import.Source);
+            source = Visit(import.Source) as Expression;
         }
 
         return UpdateImport(import, source);
@@ -405,44 +401,44 @@ public partial class AstVisitor
     protected internal virtual ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         var isNewSpecifiers = HasNodeListChanged(importDeclaration.Specifiers, out var specifiers);
-        var source = Visit(importDeclaration.Source);
-        return UpdateImportDeclaration(importDeclaration, isNewSpecifiers, ref specifiers, source);
+        var source = Visit(importDeclaration.Source) as Literal;
+        return UpdateImportDeclaration(importDeclaration, isNewSpecifiers, ref specifiers, source!);
     }
 
     protected internal virtual ImportNamespaceSpecifier VisitImportNamespaceSpecifier(
         ImportNamespaceSpecifier importNamespaceSpecifier)
     {
-        var local = Visit(importNamespaceSpecifier.Local);
-        return UpdateImportNamespaceSpecifier(importNamespaceSpecifier, local);
+        var local = Visit(importNamespaceSpecifier.Local) as Identifier;
+        return UpdateImportNamespaceSpecifier(importNamespaceSpecifier, local!);
     }
 
     protected internal virtual ImportDefaultSpecifier VisitImportDefaultSpecifier(
         ImportDefaultSpecifier importDefaultSpecifier)
     {
-        var local = Visit(importDefaultSpecifier.Local);
-        return UpdateImportDefaultSpecifier(importDefaultSpecifier, local);
+        var local = Visit(importDefaultSpecifier.Local) as Identifier;
+        return UpdateImportDefaultSpecifier(importDefaultSpecifier, local!);
     }
 
     protected internal virtual ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
     {
-        var imported = Visit(importSpecifier.Imported);
-        var local = Visit(importSpecifier.Local);
-        return UpdateImportSpecifier(importSpecifier, imported, local);
+        var imported = Visit(importSpecifier.Imported) as Expression;
+        var local = Visit(importSpecifier.Local) as Identifier;
+        return UpdateImportSpecifier(importSpecifier, imported!, local!);
     }
 
     protected internal virtual MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
     {
-        var key = Visit(methodDefinition.Key);
-        var value = Visit(methodDefinition.Value);
-        return UpdateMethodDefinition(methodDefinition, key, value);
+        var key = Visit(methodDefinition.Key) as Expression;
+        var value = Visit(methodDefinition.Value) as Expression;
+        return UpdateMethodDefinition(methodDefinition, key!, value!);
     }
 
     protected internal virtual ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
     {
         var left = Visit(forOfStatement.Left);
-        var right = Visit(forOfStatement.Right);
-        var body = Visit(forOfStatement.Body);
-        return UpdateForOfStatement(forOfStatement, left, right, body);
+        var right = Visit(forOfStatement.Right) as Expression;
+        var body = Visit(forOfStatement.Body) as Statement;
+        return UpdateForOfStatement(forOfStatement, left!, right!, body!);
     }
 
     protected internal virtual ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
@@ -450,17 +446,17 @@ public partial class AstVisitor
         Identifier? id = null;
         if (classDeclaration.Id is not null)
         {
-            id = Visit(classDeclaration.Id);
+            id = Visit(classDeclaration.Id) as Identifier;
         }
 
         Expression? superClass = null;
         if (classDeclaration.SuperClass is not null)
         {
-            superClass = Visit(classDeclaration.SuperClass);
+            superClass = Visit(classDeclaration.SuperClass) as Expression;
         }
 
-        var body = Visit(classDeclaration.Body);
-        return UpdateClassDeclaration(classDeclaration, id, superClass, body);
+        var body = Visit(classDeclaration.Body) as ClassBody;
+        return UpdateClassDeclaration(classDeclaration, id, superClass, body!);
     }
 
     protected internal virtual ClassBody VisitClassBody(ClassBody classBody)
@@ -474,7 +470,7 @@ public partial class AstVisitor
         Expression? argument = null;
         if (yieldExpression.Argument is not null)
         {
-            argument = Visit(yieldExpression.Argument);
+            argument = Visit(yieldExpression.Argument) as Expression;
         }
 
         return UpdateYieldExpression(yieldExpression, argument);
@@ -483,9 +479,9 @@ public partial class AstVisitor
     protected internal virtual TaggedTemplateExpression VisitTaggedTemplateExpression(
         TaggedTemplateExpression taggedTemplateExpression)
     {
-        var tag = Visit(taggedTemplateExpression.Tag);
-        var quasi = Visit(taggedTemplateExpression.Quasi);
-        return UpdateTaggedTemplateExpression(taggedTemplateExpression, tag, quasi);
+        var tag = Visit(taggedTemplateExpression.Tag) as Expression;
+        var quasi = Visit(taggedTemplateExpression.Quasi) as TemplateLiteral;
+        return UpdateTaggedTemplateExpression(taggedTemplateExpression, tag!, quasi!);
     }
 
     protected internal virtual Super VisitSuper(Super super)
@@ -495,9 +491,9 @@ public partial class AstVisitor
 
     protected internal virtual MetaProperty VisitMetaProperty(MetaProperty metaProperty)
     {
-        var meta = Visit(metaProperty.Meta);
-        var property = Visit(metaProperty.Property);
-        return UpdateMetaProperty(metaProperty, meta, property);
+        var meta = Visit(metaProperty.Meta) as Identifier;
+        var property = Visit(metaProperty.Property) as Identifier;
+        return UpdateMetaProperty(metaProperty, meta!, property!);
     }
 
     protected internal virtual ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(
@@ -515,15 +511,15 @@ public partial class AstVisitor
 
     protected internal virtual SpreadElement VisitSpreadElement(SpreadElement spreadElement)
     {
-        var argument = Visit(spreadElement.Argument);
-        return UpdateSpreadElement(spreadElement, argument);
+        var argument = Visit(spreadElement.Argument) as Expression;
+        return UpdateSpreadElement(spreadElement, argument!);
     }
 
     protected internal virtual AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
     {
-        var left = Visit(assignmentPattern.Left);
-        var right = Visit(assignmentPattern.Right);
-        return UpdateAssignmentPattern(assignmentPattern, left, right);
+        var left = Visit(assignmentPattern.Left) as Expression;
+        var right = Visit(assignmentPattern.Right) as Expression;
+        return UpdateAssignmentPattern(assignmentPattern, left!, right!);
     }
 
     protected internal virtual ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
@@ -534,14 +530,14 @@ public partial class AstVisitor
 
     protected internal virtual VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
     {
-        var id = Visit(variableDeclarator.Id);
+        var id = Visit(variableDeclarator.Id) as Expression;
         Expression? init = null;
         if (variableDeclarator.Init is not null)
         {
-            init = Visit(variableDeclarator.Init);
+            init = Visit(variableDeclarator.Init) as Expression;
         }
 
-        return UpdateVariableDeclarator(variableDeclarator, id, init);
+        return UpdateVariableDeclarator(variableDeclarator, id!, init);
     }
 
     protected internal virtual TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
@@ -568,44 +564,44 @@ public partial class AstVisitor
 
     protected internal virtual RestElement VisitRestElement(RestElement restElement)
     {
-        var argument = Visit(restElement.Argument);
-        return UpdateRestElement(restElement, argument);
+        var argument = Visit(restElement.Argument) as Expression;
+        return UpdateRestElement(restElement, argument!);
     }
 
     protected internal virtual Property VisitProperty(Property property)
     {
-        var key = Visit(property.Key);
-        var value = Visit(property.Value);
-        return UpdateProperty(property, key, value);
+        var key = Visit(property.Key) as Expression;
+        var value = Visit(property.Value) as Expression;
+        return UpdateProperty(property, key!, value!);
     }
 
     protected internal virtual AwaitExpression VisitAwaitExpression(AwaitExpression awaitExpression)
     {
-        var argument = Visit(awaitExpression.Argument);
-        return UpdateAwaitExpression(awaitExpression, argument);
+        var argument = Visit(awaitExpression.Argument) as Expression;
+        return UpdateAwaitExpression(awaitExpression, argument!);
     }
 
     protected internal virtual ConditionalExpression VisitConditionalExpression(
         ConditionalExpression conditionalExpression)
     {
-        var test = Visit(conditionalExpression.Test);
-        var consequent = Visit(conditionalExpression.Consequent);
-        var alternate = Visit(conditionalExpression.Alternate);
-        return UpdateConditionalExpression(conditionalExpression, test, consequent, alternate);
+        var test = Visit(conditionalExpression.Test) as Expression;
+        var consequent = Visit(conditionalExpression.Consequent) as Expression;
+        var alternate = Visit(conditionalExpression.Alternate) as Expression;
+        return UpdateConditionalExpression(conditionalExpression, test!, consequent!, alternate!);
     }
 
     protected internal virtual CallExpression VisitCallExpression(CallExpression callExpression)
     {
-        var callee = Visit(callExpression.Callee);
+        var callee = Visit(callExpression.Callee) as Expression;
         var isNewArguments = HasNodeListChanged(callExpression.Arguments, out var arguments);
-        return UpdateCallExpression(callExpression, callee, isNewArguments, ref arguments);
+        return UpdateCallExpression(callExpression, callee!, isNewArguments, ref arguments);
     }
 
     protected internal virtual BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
     {
-        var left = Visit(binaryExpression.Left);
-        var right = Visit(binaryExpression.Right);
-        return UpdateBinaryExpression(binaryExpression, left, right);
+        var left = Visit(binaryExpression.Left) as Expression;
+        var right = Visit(binaryExpression.Right) as Expression;
+        return UpdateBinaryExpression(binaryExpression, left!, right!);
     }
 
     protected internal virtual ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
@@ -617,9 +613,9 @@ public partial class AstVisitor
     protected internal virtual AssignmentExpression VisitAssignmentExpression(
         AssignmentExpression assignmentExpression)
     {
-        var left = Visit(assignmentExpression.Left);
-        var right = Visit(assignmentExpression.Right);
-        return UpdateAssignmentExpression(assignmentExpression, left, right);
+        var left = Visit(assignmentExpression.Left) as Expression;
+        var right = Visit(assignmentExpression.Right) as Expression;
+        return UpdateAssignmentExpression(assignmentExpression, left!, right!);
     }
 
     protected internal virtual ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
@@ -627,7 +623,7 @@ public partial class AstVisitor
         Identifier? label = null;
         if (continueStatement.Label is not null)
         {
-            label = Visit(continueStatement.Label);
+            label = Visit(continueStatement.Label) as Identifier;
         }
 
         return UpdateContinueStatement(continueStatement, label);
@@ -638,7 +634,7 @@ public partial class AstVisitor
         Identifier? label = null;
         if (breakStatement.Label is not null)
         {
-            label = Visit(breakStatement.Label);
+            label = Visit(breakStatement.Label) as Identifier;
         }
 
         return UpdateBreakStatement(breakStatement, label);
