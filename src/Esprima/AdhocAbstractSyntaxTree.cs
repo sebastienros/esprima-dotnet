@@ -1038,7 +1038,7 @@ namespace Esprima
                 ThrowTemplateLiteralEarlyErrors(token);
             }
 
-            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value! };
+            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value!, HasHexEscape = token.HasHexEscape };
 
             return Finalize(node, new TemplateElement(value, token.Tail));
         }
@@ -1057,7 +1057,7 @@ namespace Esprima
                 ThrowTemplateLiteralEarlyErrors(token);
             }
 
-            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value! };
+            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value!, HasHexEscape = token.HasHexEscape };
 
             return Finalize(node, new TemplateElement(value, token.Tail));
         }

@@ -49,6 +49,7 @@ namespace Esprima
         public bool Head;
         public bool Tail;
         public string? RawTemplate;
+        public bool HasHexEscape;
 
         public bool BooleanValue;
         public object NumericValue;

@@ -17,6 +17,7 @@ namespace Esprima.Ast
         {
             public string? Cooked;
             public string Raw = "";
+            public bool HasHexEscape;
         }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;

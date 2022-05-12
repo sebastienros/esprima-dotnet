@@ -1572,6 +1572,7 @@ namespace Esprima
             var tail = false;
             char? notEscapeSequenceHead = null;
             var rawOffset = 2;
+            bool hasHexEscape = false;
 
             ++Index;
 
@@ -1652,6 +1653,7 @@ namespace Esprima
                                 else
                                 {
                                     cooked.Append(unescaped2);
+                                    hasHexEscape = true;
                                 }
 
                                 break;
@@ -1737,6 +1739,7 @@ namespace Esprima
                 Head = head,
                 Tail = tail,
                 NotEscapeSequenceHead = notEscapeSequenceHead,
+                HasHexEscape = hasHexEscape,
                 LineNumber = LineNumber,
                 LineStart = LineStart,
                 Start = start,
