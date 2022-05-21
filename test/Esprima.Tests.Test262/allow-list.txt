@@ -2055,7 +2055,6 @@ test/language/expressions/function/early-errors/invalid-names-member-expression-
 test/language/expressions/function/early-errors/invalid-names-member-expression-this.js(default)
 test/language/expressions/function/early-errors/invalid-names-member-expression-this.js(strict mode)
 test/language/expressions/generators/param-dflt-yield.js(default)
-test/language/expressions/import.meta/import-meta-is-an-ordinary-object.js(strict mode)
 test/language/expressions/in/private-field-in-nested.js(default)
 test/language/expressions/in/private-field-in-nested.js(strict mode)
 test/language/expressions/in/private-field-invalid-assignment-reference.js(default)
