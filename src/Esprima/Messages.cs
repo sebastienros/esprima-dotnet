@@ -3,12 +3,15 @@
 // Error messages should be identical to V8.
 public static class Messages
 {
+    public const string ArgumentsNotAllowedInClassInitializer = "'arguments' is not allowed in class field initializer or static initialization block";
     public const string AsyncFunctionInSingleStatementContext = "Async functions can only be declared at the top level or inside a block.";
     public const string BadGetterArity = "Getter must not have any formal parameters";
     public const string BadSetterArity = "Setter must have exactly one formal parameter";
     public const string BadSetterRestParameter = "Setter function argument must not be a rest parameter";
+    public const string CannotUseAwaitAsIdentifierInAsyncFunction = "Cannot use 'await' as identifier inside an async function";
     public const string CannotUseImportMetaOutsideAModule = "Cannot use 'import.meta' outside a module";
     public const string CannotUseImportWithNew = "Cannot use new with import";
+    public const string ConstructorClassFieldName = "Classes may not have a field named 'constructor'";
     public const string ConstructorIsAsync = "Class constructor may not be an async method";
     public const string ConstructorSpecialMethod = "Class constructor may not be an accessor";
     public const string DeclarationMissingInitializer = "Missing initializer in {0} declaration";
@@ -54,6 +57,7 @@ public static class Messages
     public const string RegexUnmatchedOpenParen = "Invalid regular expression: Unmatched ')'";
     public const string RegexUnterminatedCharacterClass = "Invalid regular expression: Unterminated character class";
     public const string RegexUnterminatedGroup = "Invalid regular expression: Unterminated group";
+    public const string StaticConstructor = "Classes may not have static property named constructor";
     public const string StaticPrototype = "Classes may not have static property named prototype";
     public const string StrictCatchVariable = "Catch variable may not be eval or arguments in strict mode";
     public const string StrictDecimalWithLeadingZero = "Decimals with leading zeros are not allowed in strict mode.";

@@ -17,7 +17,7 @@ public class AstVisitorEventSourceTests
 
         var visitor = new AstVisitorEventSource();
         MemberExpression? memberExpression = null;
-        var identifiers = new System.Collections.Generic.List<Identifier>();
+        var identifiers = new List<Identifier>();
         visitor.VisitingMemberExpression += (_, arg) => memberExpression = arg;
         visitor.VisitedIdentifier += (_, arg) => identifiers.Add(arg);
         visitor.Visit(expression);

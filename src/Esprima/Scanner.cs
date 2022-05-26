@@ -1942,7 +1942,7 @@ public sealed partial class Scanner
 
     private string ConvertUnicodeRegexRanges(string pattern)
     {
-        if (String.IsNullOrEmpty(pattern))
+        if (string.IsNullOrEmpty(pattern))
         {
             return pattern;
         }
@@ -2042,7 +2042,7 @@ public sealed partial class Scanner
 
         // Each char or special notation (\s, \d, ...) is converted to a char range such they can be sorted, groupped or inverted.
 
-        if (String.IsNullOrEmpty(set))
+        if (string.IsNullOrEmpty(set))
         {
             sb.Append("[]");
             return;

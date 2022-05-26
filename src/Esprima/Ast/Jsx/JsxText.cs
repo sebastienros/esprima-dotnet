@@ -1,10 +1,8 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
-[DebuggerDisplay("{Raw,nq}")]
 public sealed class JsxText : JsxExpression
 {
     public JsxText(string? value, string raw) : base(JsxNodeType.Text)

@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+﻿using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -25,6 +25,7 @@ public enum TokenType : byte
     Extension = byte.MaxValue
 }
 
+[DebuggerDisplay("{Type,nq} {Value,nq}")]
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct Token
 {

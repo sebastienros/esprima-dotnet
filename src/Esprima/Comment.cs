@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Esprima;
 
@@ -8,6 +9,7 @@ public enum CommentType
     Line
 }
 
+[DebuggerDisplay("{Type,nq} {Slice,nq}")]
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct Comment
 {

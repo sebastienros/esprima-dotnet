@@ -1,10 +1,8 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
-[DebuggerDisplay("{Name,nq}")]
 public sealed class JsxIdentifier : JsxExpression
 {
     public JsxIdentifier(string name) : base(JsxNodeType.Identifier)

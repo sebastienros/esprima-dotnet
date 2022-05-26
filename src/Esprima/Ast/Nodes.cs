@@ -78,4 +78,4 @@ public enum Nodes
     ClassExpression,
 
     Extension = int.MaxValue
-};
+}
