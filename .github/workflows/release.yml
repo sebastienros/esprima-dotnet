@@ -29,7 +29,7 @@ jobs:
       run: dotnet tool restore && dotnet test262 generate && dotnet run -c Release -- --update-allow-list
 
     - name: Test
-      run: dotnet test --configuration Release --framework net6.0 --logger "GitHubActions;report-warnings=false"
+      run: dotnet test --configuration Release --framework net6.0 --logger GitHubActions
 
     - name: Pack with dotnet
       run: |
