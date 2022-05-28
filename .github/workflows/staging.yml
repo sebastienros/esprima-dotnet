@@ -32,7 +32,7 @@ jobs:
       run: dotnet tool restore && dotnet test262 generate && dotnet run -c Release -- --update-allow-list
 
     - name: Test
-      run: dotnet test --configuration Release --logger:"console;verbosity=quiet"
+      run: dotnet test --configuration Release --logger "GitHubActions;report-warnings=false"
 
     - name: Pack with dotnet
       run: dotnet pack --output artifacts --configuration Release -p:PackageVersion=3.0.0-preview-$GITHUB_RUN_NUMBER
