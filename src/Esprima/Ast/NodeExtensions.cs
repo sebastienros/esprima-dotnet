@@ -39,7 +39,10 @@ namespace Esprima.Ast
                 var node = nodes[0];
                 nodes.RemoveAt(0);
                 yield return node;
-                nodes.InsertRange(0, node.ChildNodes);
+                if (node is not null)
+                {
+                    nodes.InsertRange(0, node.ChildNodes);
+                }
             }
         }
 

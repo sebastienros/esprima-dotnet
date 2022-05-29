@@ -558,7 +558,7 @@ namespace Esprima
             {
                 return ParseJsxRoot();
             }
-            
+
             var node = CreateNode();
 
             Expression expr;
@@ -1466,9 +1466,9 @@ namespace Esprima
                     return ThrowUnexpectedToken<Expression>(_lookahead);
                 }
             }
-            else if (MatchKeyword("import"))
+            else if (MatchImportCall())
             {
-                return ThrowUnexpectedToken<Expression>(_lookahead);
+                return ThrowUnexpectedToken<Expression>(_lookahead, Messages.CannotUseImportWithNew);
             }
             else
             {
@@ -1543,7 +1543,7 @@ namespace Esprima
             _context.IsAssignmentTarget = true;
             var source = this.parseAssignmentExpression();
             _context.IsAssignmentTarget = previousIsAssignmentTarget;
-            
+
             if (!this.Match(")") && this._config.Tolerant)
             {
                 this.TolerateUnexpectedToken(this.NextToken());
@@ -4145,12 +4145,12 @@ namespace Esprima
             while (true)
             {
                 var token = _lookahead;
-                
+
                 if (firstRestricted == null && token.Octal)
                 {
                     firstRestricted = token;
                 }
-                
+
                 if (token.Type != TokenType.StringLiteral)
                 {
                     break;
@@ -4175,7 +4175,7 @@ namespace Esprima
                     }
                 }
             }
-            
+
             if (_context.Strict && firstRestricted != null)
             {
                 TolerateUnexpectedToken(firstRestricted, Messages.StrictOctalLiteral);
@@ -4296,7 +4296,7 @@ namespace Esprima
             {
                 return true;
             }
-            
+
             var start = true;
 
             if (!(_lookahead.Value is string value))
@@ -4658,7 +4658,7 @@ namespace Esprima
             var previousAllowSuper = _context.AllowSuper;
             _context.Strict = true;
             _context.AllowSuper = true;
-            
+
             ExpectKeyword("class");
             var id = _lookahead.Type == TokenType.Identifier
                 ? ParseVariableIdentifier()
