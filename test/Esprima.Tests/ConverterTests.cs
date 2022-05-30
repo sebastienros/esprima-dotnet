@@ -614,9 +614,9 @@ sealed class TestConverter : AstConverter
     }
 
     protected override TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral,
-        ref NodeList<TemplateElement> quasis, ref NodeList<Expression> expressions)
+        bool isNewQuasis, ref NodeList<TemplateElement> quasis, bool isNewExpression, ref NodeList<Expression> expressions)
     {
-        return ForceNewObjectByControlType(base.UpdateTemplateLiteral(templateLiteral, ref quasis, ref expressions),
+        return ForceNewObjectByControlType(base.UpdateTemplateLiteral(templateLiteral, isNewQuasis ,ref quasis, isNewExpression, ref expressions),
             new TemplateLiteral(quasis, expressions));
     }
 

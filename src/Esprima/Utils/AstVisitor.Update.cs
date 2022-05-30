@@ -301,7 +301,7 @@ namespace Esprima.Utils
             return variableDeclarator;
         }
         
-        protected virtual TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral, ref NodeList<TemplateElement> quasis, ref NodeList<Expression> expressions)
+        protected virtual TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral, bool isNewQuasis, ref NodeList<TemplateElement> quasis, bool isNewExpression, ref NodeList<Expression> expressions)
         {
             return templateLiteral;
         }
