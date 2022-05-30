@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using Esprima.Ast;
+using Esprima.Test;
 using Xunit;
 
 namespace Esprima.Tests
@@ -306,6 +308,20 @@ class aa {
     }
 }";
             new JavaScriptParser(Code).ParseScript();
+        }
+
+        [Fact]
+        public void DescendantNodesShouldHandleNullNodes()
+        {
+            var source = File.ReadAllText(Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "3rdparty", "raptor_frida_ios_trace.js"));
+            var parser = new JavaScriptParser(source);
+            var script = parser.ParseScript();
+
+            var variableDeclarations = script.ChildNodes
+                .SelectMany(z => z.DescendantNodesAndSelf().OfType<VariableDeclaration>())
+                .ToList();
+
+            Assert.Equal(8, variableDeclarations.Count);
         }
     }
 }

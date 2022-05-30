@@ -474,6 +474,30 @@ namespace Esprima
                         break;
                     }
                 }
+                else if (Index == 0 && ch == '#')
+                {
+                    if (Source[Index + 1] != '!')
+                    {
+                        ThrowUnexpectedToken();
+                    }
+
+                    // hashbang
+                    Index += 2;
+                    while (!Eof())
+                    {
+                        ch = Source.CharCodeAt(Index);
+                        if (ch == '/' && Source.CharCodeAt(Index + 1) == '*')
+                        {
+                            ThrowUnexpectedToken();
+                        }
+
+                        Index++;
+                        if (Character.IsLineTerminator(ch))
+                        {
+                            break;
+                        }
+                    }
+                }
                 else
                 {
                     break;
@@ -1096,18 +1120,18 @@ namespace Esprima
             }
 
             var ch = Source.CharCodeAt(Index);
-            
+
             if (ch == 'n')
             {
                 if (isLegacyOctalDigital)
                 {
                     ThrowUnexpectedToken();
                 }
-           
+
                 Index++;
                 return ScanBigIntLiteral(start, number.AsSpan(), JavascriptNumberStyle.Octal);
             }
-            
+
             if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
             {
                 ThrowUnexpectedToken();
@@ -2257,7 +2281,7 @@ namespace Esprima
                 }
 
                 // Special char range?
-                // 
+                //
                 if (c == '\\' && i + 1 < range.Length)
                 {
                     c = range[++i];
@@ -2471,7 +2495,7 @@ namespace Esprima
         }
 
         private readonly record struct RegExpFlagsScanResult(string Flags, string Literal);
-        
+
         private RegExpFlagsScanResult ScanRegExpFlags()
         {
             var str = "";
