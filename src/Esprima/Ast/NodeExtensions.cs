@@ -88,7 +88,7 @@ namespace Esprima.Ast
                         return true;
                     }
 
-                    if (Search(childNode))
+                    if (childNode is not null && Search(childNode))
                     {
                         return true;
                     }
