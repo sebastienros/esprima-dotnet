@@ -323,5 +323,19 @@ class aa {
 
             Assert.Equal(8, variableDeclarations.Count);
         }
+        
+        [Fact]
+        public void AncestorNodesShouldHandleNullNodes()
+        {
+            var source = File.ReadAllText(Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "JSX", "fragment-with-child.js"));
+            var parser = new JavaScriptParser(source, new ParserOptions(){ Jsx = true });
+            var script = parser.ParseScript();
+
+            var variableDeclarations = script.DescendantNodesAndSelf()
+                .SelectMany(z => z.AncestorNodesAndSelf(script))
+                .ToList();
+
+            Assert.Equal(28, variableDeclarations.Count);
+        }
     }
 }
