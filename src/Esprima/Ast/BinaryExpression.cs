@@ -43,7 +43,7 @@ namespace Esprima.Ast
         {
         }
 
-        private BinaryExpression(BinaryOperator op, Expression left, Expression right) :
+        internal BinaryExpression(BinaryOperator op, Expression left, Expression right) :
             base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr || op == BinaryOperator.NullishCoalescing ? Nodes.LogicalExpression : Nodes.BinaryExpression)
         {
             Operator = op;

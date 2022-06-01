@@ -542,19 +542,10 @@ public partial class AstVisitor
 
     protected internal virtual TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
     {
-        var quasis = templateLiteral.Quasis;
-        var expressions = templateLiteral.Expressions;
+        var isNewQuasis = HasNodeListChanged(templateLiteral.Quasis, out var quasis);
+        var isNewExpressions = HasNodeListChanged(templateLiteral.Expressions, out var expressions);
 
-        var n = expressions.Count;
-
-        for (var i = 0; i < n; i++)
-        {
-            Visit(quasis[i]);
-            Visit(expressions[i]);
-        }
-
-        Visit(quasis[n]);
-        return UpdateTemplateLiteral(templateLiteral, ref quasis, ref expressions);
+        return UpdateTemplateLiteral(templateLiteral, isNewQuasis, ref quasis, isNewExpressions, ref expressions);
     }
 
     protected internal virtual TemplateElement VisitTemplateElement(TemplateElement templateElement)
