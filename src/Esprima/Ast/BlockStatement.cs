@@ -20,9 +20,9 @@ namespace Esprima.Ast
 
         public sealed override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
 
-        protected internal sealed override void Accept(AstVisitor visitor)
+        protected internal sealed override Node Accept(AstVisitor visitor)
         {
-            visitor.VisitBlockStatement(this);
+            return visitor.VisitBlockStatement(this);
         }
     }
 }

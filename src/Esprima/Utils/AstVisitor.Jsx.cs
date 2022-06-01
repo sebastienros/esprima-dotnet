@@ -4,85 +4,93 @@ namespace Esprima.Utils;
 
 public partial class AstVisitor
 {
-    protected internal virtual void VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    protected internal virtual JsxMemberExpression VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
-        Visit(jsxMemberExpression.Object);
-        Visit(jsxMemberExpression.Property);
+        var obj = Visit(jsxMemberExpression.Object) as JsxExpression;
+        var property = Visit(jsxMemberExpression.Property) as JsxIdentifier;
+        return UpdateJsxMemberExpression(jsxMemberExpression, obj!, property!);
     }
 
-    protected internal virtual void VisitJsxText(JsxText jsxText)
+    protected internal virtual JsxText VisitJsxText(JsxText jsxText)
     {
+        return UpdateJsxText(jsxText);
     }
 
-    protected internal virtual void VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    protected internal virtual JsxOpeningFragment VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
+        return UpdateJsxOpeningFragment(jsxOpeningFragment);
     }
 
-    protected internal virtual void VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    protected internal virtual JsxClosingFragment VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
+        return UpdateJsxClosingFragment(jsxClosingFragment);
     }
 
-
-    protected internal virtual void VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    protected internal virtual JsxIdentifier VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
+        return UpdateJsxIdentifier(jsxIdentifier);
     }
 
-    protected internal virtual void VisitJsxElement(JsxElement jsxElement)
+    protected internal virtual JsxElement VisitJsxElement(JsxElement jsxElement)
     {
-        Visit(jsxElement.OpeningElement);
-        ref readonly var children = ref jsxElement.Children;
-        for (var i = 0; i < children.Count; i++)
-        {
-            Visit(children[i]);
-        }
-
+        var openingElement = Visit(jsxElement.OpeningElement);
+        var isNewChildren = HasNodeListChanged(jsxElement.Children, out var children);
+        Node? closingElement = null;
         if (jsxElement.ClosingElement is not null)
         {
-            Visit(jsxElement.ClosingElement);
+            closingElement = Visit(jsxElement.ClosingElement);
         }
+
+        return UpdateJsxElement(jsxElement, openingElement!, isNewChildren, ref children, closingElement);
     }
 
-    protected internal virtual void VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    protected internal virtual JsxOpeningElement VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
-        Visit(jsxOpeningElement.Name);
-        ref readonly var attributes = ref jsxOpeningElement.Attributes;
-        for (var i = 0; i < attributes.Count; i++)
-        {
-            Visit(attributes[i]);
-        }
+        var name = Visit(jsxOpeningElement.Name) as JsxExpression;
+        var isNewAttributes = HasNodeListChanged(jsxOpeningElement.Attributes, out var attributes);
+        return UpdateJsxOpeningElement(jsxOpeningElement, name!, isNewAttributes, ref attributes);
     }
 
-    protected internal virtual void VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    protected internal virtual JsxClosingElement VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
-        Visit(jsxClosingElement.Name);
+        var name = Visit(jsxClosingElement.Name) as JsxExpression;
+        return UpdateJsxClosingElement(jsxClosingElement, name!);
     }
 
-    protected internal virtual void VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    protected internal virtual JsxEmptyExpression VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
+        return UpdateJsxEmptyExpression(jsxEmptyExpression);
     }
 
-    protected internal virtual void VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    protected internal virtual JsxNamespacedName VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
-        Visit(jsxNamespacedName.Name);
-        Visit(jsxNamespacedName.Namespace);
+        var name = Visit(jsxNamespacedName.Name) as JsxIdentifier;
+        var @namespace = Visit(jsxNamespacedName.Namespace) as JsxIdentifier;
+        return UpdateJsxNamespacedName(jsxNamespacedName, name!, @namespace!);
     }
 
-    protected internal virtual void VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    protected internal virtual JsxSpreadAttribute VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
-        Visit(jsxSpreadAttribute.Argument);
+        var argument = Visit(jsxSpreadAttribute.Argument) as JsxExpression;
+        return UpdateJsxSpreadAttribute(jsxSpreadAttribute, argument!);
     }
 
-    protected internal virtual void VisitJsxAttribute(JsxAttribute jsxAttribute)
+    protected internal virtual JsxAttribute VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
-        Visit(jsxAttribute.Name);
+        var name = Visit(jsxAttribute.Name) as JsxExpression;
+        Expression? value = null;
         if (jsxAttribute.Value is not null)
         {
-            Visit(jsxAttribute.Value);
+            value = Visit(jsxAttribute.Value) as Expression;
         }
+
+        return UpdateJsxAttribute(jsxAttribute, name!, value);
     }
 
-    protected internal virtual void VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    protected internal virtual JsxExpressionContainer VisitJsxExpressionContainer(
+        JsxExpressionContainer jsxExpressionContainer)
     {
-        Visit(jsxExpressionContainer.Expression);
+        var expression = Visit(jsxExpressionContainer.Expression) as Expression;
+        return UpdateJsxExpressionContainer(jsxExpressionContainer, expression!);
     }
 }

@@ -13,8 +13,8 @@ public sealed class JsxOpeningFragment : JsxExpression
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected internal override void Accept(AstVisitor visitor)
+    protected internal override Node Accept(AstVisitor visitor)
     {
-        visitor.VisitJsxOpeningFragment(this);
+        return visitor.VisitJsxOpeningFragment(this);
     }
 }

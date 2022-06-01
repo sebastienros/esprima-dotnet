@@ -11,8 +11,8 @@ public sealed class JsxClosingFragment : JsxExpression
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected internal override void Accept(AstVisitor visitor)
+    protected internal override Node Accept(AstVisitor visitor)
     {
-        visitor.VisitJsxClosingFragment(this);
+        return visitor.VisitJsxClosingFragment(this);
     }
 }

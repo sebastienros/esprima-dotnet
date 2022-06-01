@@ -15,8 +15,8 @@ public sealed class JsxAttribute : JsxExpression
 
     public override NodeCollection ChildNodes => new(Name,Value);
 
-    protected internal override void Accept(AstVisitor visitor)
+    protected internal override Node Accept(AstVisitor visitor)
     {
-        visitor.VisitJsxAttribute(this);
+        return visitor.VisitJsxAttribute(this);
     }
 }

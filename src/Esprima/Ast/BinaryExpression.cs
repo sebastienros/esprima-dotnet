@@ -43,7 +43,7 @@ namespace Esprima.Ast
         {
         }
 
-        private BinaryExpression(BinaryOperator op, Expression left, Expression right) :
+        internal BinaryExpression(BinaryOperator op, Expression left, Expression right) :
             base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr || op == BinaryOperator.NullishCoalescing ? Nodes.LogicalExpression : Nodes.BinaryExpression)
         {
             Operator = op;
@@ -86,15 +86,15 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Left, Right);
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal override Node Accept(AstVisitor visitor)
         {
             if (Type == Nodes.LogicalExpression)
             {
-                visitor.VisitLogicalExpression(this);
+                return visitor.VisitLogicalExpression(this);
             }
             else
             {
-                visitor.VisitBinaryExpression(this);
+                return visitor.VisitBinaryExpression(this);
             }
         }
     }

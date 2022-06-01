@@ -35,9 +35,17 @@ namespace Esprima.Ast
             string op,
             Expression left,
             Expression right) :
+            this(ParseAssignmentOperator(op), left, right)
+        {
+        }
+        
+        internal AssignmentExpression(
+            AssignmentOperator op,
+            Expression left,
+            Expression right) :
             base(Nodes.AssignmentExpression)
         {
-            Operator = ParseAssignmentOperator(op);
+            Operator = op;
             Left = left;
             Right = right;
         }
@@ -69,9 +77,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Left, Right);
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal override Node Accept(AstVisitor visitor)
         {
-            visitor.VisitAssignmentExpression(this);
+            return visitor.VisitAssignmentExpression(this);
         }
     }
 }

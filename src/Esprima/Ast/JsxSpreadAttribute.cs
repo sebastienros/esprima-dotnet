@@ -13,8 +13,8 @@ public sealed class JsxSpreadAttribute : JsxExpression
 
     public override NodeCollection ChildNodes => new(Argument);
 
-    protected internal override void Accept(AstVisitor visitor)
+    protected internal override Node Accept(AstVisitor visitor)
     {
-        visitor.VisitJsxSpreadAttribute(this);
+        return visitor.VisitJsxSpreadAttribute(this);
     }
 }

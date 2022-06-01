@@ -17,8 +17,8 @@ public sealed class JsxNamespacedName : JsxExpression
 
     public override NodeCollection ChildNodes => new(Name, Namespace);
 
-    protected internal override void Accept(AstVisitor visitor)
+    protected internal override Node Accept(AstVisitor visitor)
     {
-        visitor.VisitJsxNamespacedName(this);
+        return visitor.VisitJsxNamespacedName(this);
     }
 }

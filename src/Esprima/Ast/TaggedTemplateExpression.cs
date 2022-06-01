@@ -15,9 +15,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Tag, Quasi);
 
-        protected internal override void Accept(AstVisitor visitor)
+        protected internal override Node Accept(AstVisitor visitor)
         {
-            visitor.VisitTaggedTemplateExpression(this);
+            return visitor.VisitTaggedTemplateExpression(this);
         }
     }
 }
