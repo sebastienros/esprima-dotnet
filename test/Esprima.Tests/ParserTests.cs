@@ -337,5 +337,38 @@ class aa {
 
             Assert.Equal(28, variableDeclarations.Count);
         }
+        
+        [Theory] 
+        [InlineData("`a`", "a")]
+        [InlineData("`a${b}`", "a", "b")]
+        [InlineData("`a${b}c`", "a", "b", "c")]
+        public void TemplateLiteralChildNodesShouldCorrectOrder(string source, params string[] correctOrder)
+        {
+            var parser = new JavaScriptParser(source);
+            var script = parser.ParseScript();
+            var templateLiteral = script.DescendantNodes().OfType<TemplateLiteral>().First();
+
+            for (var index = 0; index < correctOrder.Length; index++)
+            {
+                var raw = correctOrder[index];
+                var rawFromNode = GetRawItem(templateLiteral.ChildNodes[index]);
+                Assert.Equal(raw,rawFromNode);
+            }
+
+            static string GetRawItem(Node item)
+            {
+                if (item is TemplateElement element)
+                {
+                    return element.Value.Raw;
+                }
+                
+                if (item is Identifier identifier)
+                {
+                    return identifier.Name;
+                }
+
+                return string.Empty;
+            }
+        }
     }
 }

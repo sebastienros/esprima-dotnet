@@ -19,11 +19,22 @@ namespace Esprima.Ast
         public ref readonly NodeList<TemplateElement> Quasis => ref _quasis;
         public ref readonly NodeList<Expression> Expressions => ref _expressions;
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_quasis, _expressions);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
         protected internal override Node Accept(AstVisitor visitor)
         {
             return visitor.VisitTemplateLiteral(this);
+        }
+
+        private IEnumerable<Node> CreateChildNodes()
+        {
+            var i = 0;
+            while (!_quasis[i].Tail)
+            {
+                yield return _quasis[i];
+                yield return _expressions[i++];
+            }
+            yield return _quasis[i];
         }
     }
 }
