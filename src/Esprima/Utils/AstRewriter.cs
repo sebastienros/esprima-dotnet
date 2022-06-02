@@ -3,7 +3,7 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public abstract partial class AstConverter : AstVisitor
+public abstract partial class AstRewriter : AstVisitor
 {
     public virtual T VisitAndConvert<T>(T node, bool allowNull = false, [CallerMemberName] string? callerName = null)
         where T : Node?

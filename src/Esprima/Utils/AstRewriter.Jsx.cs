@@ -2,7 +2,7 @@
 
 namespace Esprima.Utils;
 
-public abstract partial class AstConverter
+public abstract partial class AstRewriter
 {
     protected internal override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {

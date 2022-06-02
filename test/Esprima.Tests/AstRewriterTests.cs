@@ -9,7 +9,7 @@ using Module = Esprima.Ast.Module;
 
 namespace Esprima.Tests;
 
-public class ConverterTests
+public class AstRewriterTests
 {
     private static Module ParseExpression(string code, bool jsx = false)
     {
@@ -27,7 +27,7 @@ public class ConverterTests
         // Arrange
         var parser = new JavaScriptParser("return true;");
         var program = parser.ParseScript();
-        var visitor = new TestConverter(typeof(Script));
+        var visitor = new TestRewriter(typeof(Script));
 
         // Act
         var result = visitor.Visit(program);
@@ -42,7 +42,7 @@ public class ConverterTests
         // Arrange
         var parser = new JavaScriptParser("return true;");
         var program = parser.ParseModule();
-        var visitor = new TestConverter(typeof(Module));
+        var visitor = new TestRewriter(typeof(Module));
 
         // Act
         var result = visitor.Visit(program);
@@ -110,7 +110,7 @@ public class ConverterTests
     public void CanUpdateAll(Type type, string code)
     {
         // Arrange
-        var visitor = new TestConverter(type);
+        var visitor = new TestRewriter(type);
 
         var program = ParseExpression(code);
         var node = FindNearTypeOfDescendTyped(type, program);
@@ -143,7 +143,7 @@ public class ConverterTests
     public void CanUpdateAllForJsx(Type type, string code)
     {
         // Arrange
-        var visitor = new TestConverter(type);
+        var visitor = new TestRewriter(type);
 
         var program = ParseExpression(code, true);
         var node = FindNearTypeOfDescendTyped(type, program);
@@ -171,7 +171,7 @@ public class ConverterTests
     public void CanUpdateModuleNodes(Type type, string code)
     {
         // Arrange
-        var visitor = new TestConverter(type);
+        var visitor = new TestRewriter(type);
 
         var program = ParseExpression(code, true);
         var node = FindNearTypeOfDescendTyped(type, program);
@@ -188,11 +188,11 @@ public class ConverterTests
     }
 }
 
-sealed class TestConverter : AstConverter
+sealed class TestRewriter : AstRewriter
 {
     private readonly Type _controlType;
 
-    public TestConverter(Type controlType)
+    public TestRewriter(Type controlType)
     {
         _controlType = controlType;
     }
