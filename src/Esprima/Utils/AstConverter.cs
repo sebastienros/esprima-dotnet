@@ -5,640 +5,44 @@ namespace Esprima.Utils;
 
 public abstract partial class AstConverter : AstVisitor
 {
-    public T VisitAndConvert<T>(T node, [CallerMemberName] string? callerName = null) where T : Node
+    public virtual T VisitAndConvert<T>(T node, bool allowNull = false, [CallerMemberName] string? callerName = null)
+        where T : Node?
     {
-        node = (Visit(node) as T)!;
         if (node is null)
         {
-            throw new InvalidOperationException($"When called from {callerName}, rewriting a node of type '{typeof(T)}' must return a non-null value of the same type. Alternatively, override {callerName} and change it to not visit children of this type.");
+            return allowNull ? null! : throw new ArgumentNullException(nameof(node));
         }
-        return node;
-    }
 
-    protected internal override object? VisitProgram(Program program)
-    {
-        var isNewStatements = HasNodeListChanged(program.Body, out var statements);
-        return UpdateProgram(program, isNewStatements, ref statements);
-    }
-
-    [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-    protected internal override object? VisitUnknownNode(Node node)
-    {
-        throw new NotImplementedException(
-            $"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
-    }
-
-    protected internal override object? VisitCatchClause(CatchClause catchClause)
-    {
-        Expression? param = null;
-        if (catchClause.Param is not null)
+        return Visit(node) switch
         {
-            param = Visit(catchClause.Param) as Expression;
-        }
+            T convertedNode => convertedNode,
+            null when allowNull => null!,
+            null => throw MustRewriteToSameNodeNonNullable(typeof(T), callerName),
+            _ => throw (allowNull ? MustRewriteToSameNodeNullable(typeof(T), callerName) : MustRewriteToSameNodeNonNullable(typeof(T), callerName))
+        };
 
-        BlockStatement? body = Visit(catchClause.Body) as BlockStatement;
-        return UpdateCatchClause(catchClause, param, body!);
-    }
-
-    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
-    {
-        Identifier? id = null;
-        if (functionDeclaration.Id is not null)
-        {
-            id = Visit(functionDeclaration.Id) as Identifier;
-        }
-
-        var isNewParameters = HasNodeListChanged(functionDeclaration.Params, out var parameters);
-        BlockStatement? body = Visit(functionDeclaration.Body) as BlockStatement;
-        return UpdateFunctionDeclaration(functionDeclaration, id, isNewParameters, ref parameters, body!);
-    }
-
-    protected internal override object? VisitWithStatement(WithStatement withStatement)
-    {
-        var obj = Visit(withStatement.Object) as Expression;
-        var body = Visit(withStatement.Body) as Statement;
-        return UpdateWithStatement(withStatement, obj!, body!);
-    }
-
-    protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
-    {
-        var test = Visit(whileStatement.Test) as Expression;
-        var body = Visit(whileStatement.Body) as Statement;
-        return UpdateWhileStatement(whileStatement, test!, body!);
-    }
-
-    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
-    {
-        var isNewDeclarations = HasNodeListChanged(variableDeclaration.Declarations, out var declarations);
-        return UpdateVariableDeclaration(variableDeclaration, isNewDeclarations, ref declarations);
-    }
-
-    protected internal override object? VisitTryStatement(TryStatement tryStatement)
-    {
-        var block = Visit(tryStatement.Block) as BlockStatement;
-
-        CatchClause? handler = null;
-        if (tryStatement.Handler is not null)
-        {
-            handler = Visit(tryStatement.Handler) as CatchClause;
-        }
-
-        BlockStatement? finalizer = null;
-        if (tryStatement.Finalizer is not null)
-        {
-            finalizer = Visit(tryStatement.Finalizer) as BlockStatement;
-        }
-
-        return UpdateTryStatement(tryStatement, block!, handler, finalizer);
-    }
-
-    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
-    {
-        var argument = Visit(throwStatement.Argument) as Expression;
-        return UpdateThrowStatement(throwStatement, argument!);
-    }
-
-    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
-    {
-        var discriminant = Visit(switchStatement.Discriminant) as Expression;
-        var isNewCases = HasNodeListChanged(switchStatement.Cases, out var cases);
-        return UpdateSwitchStatement(switchStatement, discriminant!, isNewCases, ref cases);
-    }
-
-    protected internal override object? VisitSwitchCase(SwitchCase switchCase)
-    {
-        Expression? test = null;
-        if (switchCase.Test is not null)
-        {
-            test = Visit(switchCase.Test) as Expression;
-        }
-
-        var isNewConsequent = HasNodeListChanged(switchCase.Consequent, out var consequent);
-        return UpdateSwitchCase(switchCase, test, isNewConsequent, ref consequent);
-    }
-
-    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
-    {
-        Expression? argument = null;
-        if (returnStatement.Argument is not null)
-        {
-            argument = Visit(returnStatement.Argument) as Expression;
-        }
-
-        return UpdateReturnStatement(returnStatement, argument);
-    }
-
-    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
-    {
-        var label = Visit(labeledStatement.Label) as Identifier;
-        var body = Visit(labeledStatement.Body) as Statement;
-        return UpdateLabeledStatement(labeledStatement, label!, body!);
-    }
-
-    protected internal override object? VisitIfStatement(IfStatement ifStatement)
-    {
-        var test = Visit(ifStatement.Test) as Expression;
-        var consequent = Visit(ifStatement.Consequent) as Statement;
-        Statement? alternate = null;
-        if (ifStatement.Alternate is not null)
-        {
-            alternate = Visit(ifStatement.Alternate) as Statement;
-        }
-
-        return UpdateIfStatement(ifStatement, test!, consequent!, alternate);
-    }
-
-    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
-    {
-        return UpdateEmptyStatement(emptyStatement);
-    }
-
-    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
-    {
-        return UpdateDebuggerStatement(debuggerStatement);
-    }
-
-    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
-    {
-        var expression = Visit(expressionStatement.Expression) as Expression;
-        return UpdateExpressionStatement(expressionStatement, expression!);
-    }
-
-    protected internal override object? VisitForStatement(ForStatement forStatement)
-    {
-        StatementListItem? init = null;
-        if (forStatement.Init is not null)
-        {
-            init = Visit(forStatement.Init) as StatementListItem;
-        }
-
-        Expression? test = null;
-        if (forStatement.Test is not null)
-        {
-            test = Visit(forStatement.Test) as Expression;
-        }
-
-        Expression? update = null;
-        if (forStatement.Update is not null)
-        {
-            update = Visit(forStatement.Update) as Expression;
-        }
-
-        var body = Visit(forStatement.Body) as Statement;
-
-        return UpdateForStatement(forStatement, init, test, update, body!);
-    }
-
-    protected internal override object? VisitForInStatement(ForInStatement forInStatement)
-    {
-        var left = Visit(forInStatement.Left) as Node;
-        var right = Visit(forInStatement.Right) as Expression;
-        var body = Visit(forInStatement.Body) as Statement;
-        return UpdateForInStatement(forInStatement, left!, right!, body!);
-    }
-
-    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
-    {
-        var body = Visit(doWhileStatement.Body) as Statement;
-        var test = Visit(doWhileStatement.Test) as Expression;
-        return UpdateDoWhileStatement(doWhileStatement, body!, test!);
-    }
-
-    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
-    {
-        var isNewParameters = HasNodeListChanged(arrowFunctionExpression.Params, out var parameters);
-        var body = Visit(arrowFunctionExpression.Body) as Node;
-        return UpdateArrowFunctionExpression(arrowFunctionExpression, isNewParameters, ref parameters, body!);
-    }
-
-    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
-    {
-        var argument = Visit(unaryExpression.Argument) as Expression;
-        return UpdateUnaryExpression(unaryExpression, argument!);
-    }
-
-    protected internal override object? VisitUpdateExpression(UpdateExpression updateExpression)
-    {
-        var argument = Visit(updateExpression.Argument) as Expression;
-        return UpdateUpdateExpression(updateExpression, argument!);
-    }
-
-    protected internal override object? VisitThisExpression(ThisExpression thisExpression)
-    {
-        return UpdateThisExpression(thisExpression);
-    }
-
-    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
-    {
-        var isNewExpressions = HasNodeListChanged(sequenceExpression.Expressions, out var expressions);
-        return UpdateSequenceExpression(sequenceExpression, isNewExpressions, ref expressions);
-    }
-
-    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
-    {
-        var isNewProperties = HasNodeListChanged(objectExpression.Properties, out var properties);
-        return UpdateObjectExpression(objectExpression, isNewProperties, ref properties);
-    }
-
-    protected internal override object? VisitNewExpression(NewExpression newExpression)
-    {
-        var callee = Visit(newExpression.Callee) as Expression;
-        var isNewArguments = HasNodeListChanged(newExpression.Arguments, out var arguments);
-        return UpdateNewExpression(newExpression, callee!, isNewArguments, ref arguments);
-    }
-
-    protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
-    {
-        var obj = Visit(memberExpression.Object) as Expression;
-        var property = Visit(memberExpression.Property) as Expression;
-        return UpdateMemberExpression(memberExpression, obj!, property!);
-    }
-
-    protected internal override object? VisitLogicalExpression(BinaryExpression binaryExpression)
-    {
-        var left = Visit(binaryExpression.Left) as Expression;
-        var right = Visit(binaryExpression.Right) as Expression;
-        return UpdateLogicalExpression(binaryExpression, left!, right!);
-    }
-
-    protected internal override object? VisitLiteral(Literal literal)
-    {
-        return UpdateLiteral(literal);
-    }
-
-    protected internal override object? VisitIdentifier(Identifier identifier)
-    {
-        return UpdateIdentifier(identifier);
-    }
-
-    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
-    {
-        return UpdatePrivateIdentifier(privateIdentifier);
-    }
-
-    protected internal override object? VisitFunctionExpression(IFunction function)
-    {
-        Identifier? id = null;
-        if (function.Id is not null)
-        {
-            id = Visit(function.Id) as Identifier;
-        }
-
-        var isNewParameters = HasNodeListChanged(function.Params, out var parameters);
-
-        var body = Visit(function.Body) as Node;
-        return (Node)UpdateFunctionExpression(function, id, isNewParameters, ref parameters, body!);
-    }
-
-    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
-    {
-        var key = Visit(propertyDefinition.Key) as Expression;
-
-        Expression? value = null;
-        if (propertyDefinition.Value is not null)
-        {
-            value = Visit(propertyDefinition.Value) as Expression;
-        }
-
-        return UpdatePropertyDefinition(propertyDefinition, key!, value);
-    }
-
-    protected internal override object? VisitChainExpression(ChainExpression chainExpression)
-    {
-        var expression = Visit(chainExpression.Expression) as Expression;
-        return UpdateChainExpression(chainExpression, expression!);
-    }
-
-    protected internal override object? VisitClassExpression(ClassExpression classExpression)
-    {
-        Identifier? id = null;
-        if (classExpression.Id is not null)
-        {
-            id = Visit(classExpression.Id) as Identifier;
-        }
-
-        Expression? superClass = null;
-        if (classExpression.SuperClass is not null)
-        {
-            superClass = Visit(classExpression.SuperClass) as Expression;
-        }
-
-        var body = Visit(classExpression.Body) as ClassBody;
-        return UpdateClassExpression(classExpression, id, superClass, body!);
-    }
-
-    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
-    {
-        var declaration = Visit(exportDefaultDeclaration.Declaration) as StatementListItem;
-        return UpdateExportDefaultDeclaration(exportDefaultDeclaration, declaration!);
-    }
-
-    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
-    {
-        Expression? exported = null;
-        if (exportAllDeclaration.Exported is not null)
-        {
-            exported = Visit(exportAllDeclaration.Exported) as Expression;
-        }
-
-        var source = Visit(exportAllDeclaration.Source) as Literal;
-        return UpdateExportAllDeclaration(exportAllDeclaration, exported, source!);
-    }
-
-    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
-    {
-        StatementListItem? declaration = null;
-        if (exportNamedDeclaration.Declaration is not null)
-        {
-            declaration = Visit(exportNamedDeclaration.Declaration) as StatementListItem;
-        }
-
-        var isNewSpecifiers = HasNodeListChanged(exportNamedDeclaration.Specifiers, out var specifiers);
-
-        Literal? source = null;
-        if (exportNamedDeclaration.Source is not null)
-        {
-            source = Visit(exportNamedDeclaration.Source) as Literal;
-        }
-
-        return UpdateExportNamedDeclaration(exportNamedDeclaration, declaration, isNewSpecifiers, ref specifiers,
-            source);
-    }
-
-    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
-    {
-        var local = Visit(exportSpecifier.Local) as Expression;
-        var exported = Visit(exportSpecifier.Exported) as Expression;
-        return UpdateExportSpecifier(exportSpecifier, local!, exported!);
-    }
-
-    protected internal override object? VisitImport(Import import)
-    {
-        Expression? source = null;
-        if (import.Source is not null)
-        {
-            source = Visit(import.Source) as Expression;
-        }
-
-        return UpdateImport(import, source);
-    }
-
-    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
-    {
-        var isNewSpecifiers = HasNodeListChanged(importDeclaration.Specifiers, out var specifiers);
-        var source = Visit(importDeclaration.Source) as Literal;
-        return UpdateImportDeclaration(importDeclaration, isNewSpecifiers, ref specifiers, source!);
-    }
-
-    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
-    {
-        var local = Visit(importNamespaceSpecifier.Local) as Identifier;
-        return UpdateImportNamespaceSpecifier(importNamespaceSpecifier, local!);
-    }
-
-    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
-    {
-        var local = Visit(importDefaultSpecifier.Local) as Identifier;
-        return UpdateImportDefaultSpecifier(importDefaultSpecifier, local!);
-    }
-
-    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
-    {
-        var imported = Visit(importSpecifier.Imported) as Expression;
-        var local = Visit(importSpecifier.Local) as Identifier;
-        return UpdateImportSpecifier(importSpecifier, imported!, local!);
-    }
-
-    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
-    {
-        var key = Visit(methodDefinition.Key) as Expression;
-        var value = Visit(methodDefinition.Value) as Expression;
-        return UpdateMethodDefinition(methodDefinition, key!, value!);
-    }
-
-    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
-    {
-        var left = Visit(forOfStatement.Left) as Node;
-        var right = Visit(forOfStatement.Right) as Expression;
-        var body = Visit(forOfStatement.Body) as Statement;
-        return UpdateForOfStatement(forOfStatement, left!, right!, body!);
-    }
-
-    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
-    {
-        Identifier? id = null;
-        if (classDeclaration.Id is not null)
-        {
-            id = Visit(classDeclaration.Id) as Identifier;
-        }
-
-        Expression? superClass = null;
-        if (classDeclaration.SuperClass is not null)
-        {
-            superClass = Visit(classDeclaration.SuperClass) as Expression;
-        }
-
-        var body = Visit(classDeclaration.Body) as ClassBody;
-        return UpdateClassDeclaration(classDeclaration, id, superClass, body!);
-    }
-
-    protected internal override object? VisitClassBody(ClassBody classBody)
-    {
-        var isNewBody = HasNodeListChanged(classBody.Body, out var body);
-        return UpdateClassBody(classBody, isNewBody, ref body);
-    }
-
-    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
-    {
-        Expression? argument = null;
-        if (yieldExpression.Argument is not null)
-        {
-            argument = Visit(yieldExpression.Argument) as Expression;
-        }
-
-        return UpdateYieldExpression(yieldExpression, argument);
-    }
-
-    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
-    {
-        var tag = Visit(taggedTemplateExpression.Tag) as Expression;
-        var quasi = Visit(taggedTemplateExpression.Quasi) as TemplateLiteral;
-        return UpdateTaggedTemplateExpression(taggedTemplateExpression, tag!, quasi!);
-    }
-
-    protected internal override object? VisitSuper(Super super)
-    {
-        return UpdateSuper(super);
-    }
-
-    protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
-    {
-        var meta = Visit(metaProperty.Meta) as Identifier;
-        var property = Visit(metaProperty.Property) as Identifier;
-        return UpdateMetaProperty(metaProperty, meta!, property!);
-    }
-
-    protected internal override object? VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-    {
-        // ArrowParameterPlaceHolder nodes never appear in the final tree and only used during the construction of a tree.
-        return UpdateArrowParameterPlaceHolder(arrowParameterPlaceHolder);
-    }
-
-    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
-    {
-        var isNewProperties = HasNodeListChanged(objectPattern.Properties, out var properties);
-        return UpdateObjectPattern(objectPattern, isNewProperties, ref properties);
-    }
-
-    protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
-    {
-        var argument = Visit(spreadElement.Argument) as Expression;
-        return UpdateSpreadElement(spreadElement, argument!);
-    }
-
-    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
-    {
-        var left = Visit(assignmentPattern.Left) as Expression;
-        var right = Visit(assignmentPattern.Right) as Expression;
-        return UpdateAssignmentPattern(assignmentPattern, left!, right!);
-    }
-
-    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
-    {
-        var isNewElements = HasNodeListChanged(arrayPattern.Elements, out var elements);
-        return UpdateArrayPattern(arrayPattern, isNewElements, ref elements);
-    }
-
-    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
-    {
-        var id = Visit(variableDeclarator.Id) as Expression;
-        Expression? init = null;
-        if (variableDeclarator.Init is not null)
-        {
-            init = Visit(variableDeclarator.Init) as Expression;
-        }
-
-        return UpdateVariableDeclarator(variableDeclarator, id!, init);
-    }
-
-    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
-    {
-        var isNewQuasis = HasNodeListChanged(templateLiteral.Quasis, out var quasis);
-        var isNewExpressions = HasNodeListChanged(templateLiteral.Expressions, out var expressions);
-
-        return UpdateTemplateLiteral(templateLiteral, isNewQuasis, ref quasis, isNewExpressions, ref expressions);
-    }
-
-    protected internal override object? VisitTemplateElement(TemplateElement templateElement)
-    {
-        return UpdateTemplateElement(templateElement);
-    }
-
-    protected internal override object? VisitRestElement(RestElement restElement)
-    {
-        var argument = Visit(restElement.Argument) as Expression;
-        return UpdateRestElement(restElement, argument!);
-    }
+        static Exception MustRewriteToSameNodeNonNullable(Type nodeType, string? callerName) =>
+            new InvalidOperationException($"When called from {callerName}, rewriting a node of type {nodeType} must return a non-null value of the same type. Alternatively, override {callerName} and change it to not visit children of this type.");
 
-    protected internal override object? VisitProperty(Property property)
-    {
-        var key = Visit(property.Key) as Expression;
-        var value = Visit(property.Value) as Expression;
-        return UpdateProperty(property, key!, value!);
+        static Exception MustRewriteToSameNodeNullable(Type nodeType, string? callerName) =>
+            new InvalidOperationException($"When called from {callerName}, rewriting a node of type {nodeType} must return null or a non-null value of the same type. Alternatively, override {callerName} and change it to not visit children of this type.");
     }
-
-    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
-    {
-        var argument = Visit(awaitExpression.Argument) as Expression;
-        return UpdateAwaitExpression(awaitExpression, argument!);
-    }
-
-    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
-    {
-        var test = Visit(conditionalExpression.Test) as Expression;
-        var consequent = Visit(conditionalExpression.Consequent) as Expression;
-        var alternate = Visit(conditionalExpression.Alternate) as Expression;
-        return UpdateConditionalExpression(conditionalExpression, test!, consequent!, alternate!);
-    }
-
-    protected internal override object? VisitCallExpression(CallExpression callExpression)
-    {
-        var callee = Visit(callExpression.Callee) as Expression;
-        var isNewArguments = HasNodeListChanged(callExpression.Arguments, out var arguments);
-        return UpdateCallExpression(callExpression, callee!, isNewArguments, ref arguments);
-    }
-
-    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
-    {
-        var left = Visit(binaryExpression.Left) as Expression;
-        var right = Visit(binaryExpression.Right) as Expression;
-        return UpdateBinaryExpression(binaryExpression, left!, right!);
-    }
-
-    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
-    {
-        var isNewElements = HasNodeListChanged(arrayExpression.Elements, out var elements);
-        return UpdateArrayExpression(arrayExpression, isNewElements, ref elements);
-    }
-
-    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
-    {
-        var left = Visit(assignmentExpression.Left) as Expression;
-        var right = Visit(assignmentExpression.Right) as Expression;
-        return UpdateAssignmentExpression(assignmentExpression, left!, right!);
-    }
-
-    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
-    {
-        Identifier? label = null;
-        if (continueStatement.Label is not null)
-        {
-            label = Visit(continueStatement.Label) as Identifier;
-        }
-
-        return UpdateContinueStatement(continueStatement, label);
-    }
-
-    protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
-    {
-        Identifier? label = null;
-        if (breakStatement.Label is not null)
-        {
-            label = Visit(breakStatement.Label) as Identifier;
-        }
-
-        return UpdateBreakStatement(breakStatement, label);
-    }
-
-    protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
-    {
-        var isNewBody = HasNodeListChanged(blockStatement.Body, out var body);
-        return UpdateBlockStatement(blockStatement, isNewBody, ref body);
-    }
-
-    #region Update methods
 
-    protected virtual bool HasNodeListChanged<T>(in NodeList<T> nodes, out NodeList<T> newNodes)
+    public virtual bool VisitAndConvert<T>(in NodeList<T> nodes, out NodeList<T> newNodes, bool allowNullElement = false, [CallerMemberName] string? callerName = null)
         where T : Node?
     {
         List<T>? newNodeList = null;
         for (var i = 0; i < nodes.Count; i++)
         {
             var node = nodes[i];
-            if (node is null || node is not Node nodeCast)
-            {
-                continue;
-            }
 
-            var newNode = Visit(nodeCast);
+            var newNode = VisitAndConvert(node, allowNull: allowNullElement, callerName);
+
             if (newNodeList is not null)
             {
-                if (newNode is not null)
-                {
-                    newNodeList.Add((T) newNode);
-                }
+                newNodeList.Add(newNode);
             }
-            else if (newNode != nodeCast)
+            else if (newNode != node)
             {
                 newNodeList = new List<T>();
                 for (var j = 0; j < i; j++)
@@ -646,10 +50,7 @@ public abstract partial class AstConverter : AstVisitor
                     newNodeList.Add(nodes[j]);
                 }
 
-                if (newNode is not null)
-                {
-                    newNodeList.Add((T) newNode);
-                }
+                newNodeList.Add(newNode);
             }
         }
 
@@ -663,772 +64,494 @@ public abstract partial class AstConverter : AstVisitor
         return false;
     }
 
-    protected virtual Program UpdateProgram(Program program, bool isNewStatements,
-        ref NodeList<Statement> statements)
+    protected internal override object? VisitProgram(Program program)
     {
-        if (!isNewStatements)
-        {
-            return program;
-        }
+        VisitAndConvert(program.Body, out var body);
 
-        return program switch
-        {
-            Module => new Module(statements),
-            Script script => new Script(statements, script.Strict),
-            _ => throw new NotImplementedException($"{program.SourceType} does not implemented yet.")
-        };
+        return program.Update(body);
     }
 
-    protected virtual CatchClause UpdateCatchClause(CatchClause catchClause, Expression? param,
-        BlockStatement body)
+    [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
+    protected internal override object? VisitUnknownNode(Node node)
     {
-        if (param is not null)
-        {
-            if (param == catchClause.Param && body == catchClause.Body)
-            {
-                return catchClause;
-            }
-
-            return new CatchClause(param, body);
-        }
-
-        if (body == catchClause.Body)
-        {
-            return catchClause;
-        }
-
-        return new CatchClause(catchClause.Param, body);
+        throw new NotImplementedException(
+            $"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
     }
 
-    protected virtual FunctionDeclaration UpdateFunctionDeclaration(FunctionDeclaration functionDeclaration,
-        Identifier? id,
-        bool isNewParameters, ref NodeList<Expression> parameters, BlockStatement body)
+    protected internal override object? VisitCatchClause(CatchClause catchClause)
     {
-        if (!isNewParameters && id == functionDeclaration.Id && body == functionDeclaration.Body)
-        {
-            return functionDeclaration;
-        }
+        var param = VisitAndConvert(catchClause.Param, allowNull: true);
+        var body = VisitAndConvert(catchClause.Body);
 
-        return new FunctionDeclaration(id, parameters, body, functionDeclaration.Generator,
-            functionDeclaration.Strict, functionDeclaration.Async);
+        return catchClause.Update(param, body);
     }
 
-    protected virtual WithStatement UpdateWithStatement(WithStatement withStatement, Expression obj,
-        Statement body)
+    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
     {
-        if (obj == withStatement.Object && body == withStatement.Body)
-        {
-            return withStatement;
-        }
+        var id = VisitAndConvert(functionDeclaration.Id, allowNull: true);
+        VisitAndConvert(functionDeclaration.Params, out var parameters);
+        var body = VisitAndConvert((BlockStatement) functionDeclaration.Body);
 
-        return new WithStatement(obj, body);
+        return functionDeclaration.Update(id, parameters, body);
     }
 
-    protected virtual WhileStatement UpdateWhileStatement(WhileStatement whileStatement, Expression test,
-        Statement body)
+    protected internal override object? VisitWithStatement(WithStatement withStatement)
     {
-        if (test == whileStatement.Test && body == whileStatement.Body)
-        {
-            return whileStatement;
-        }
+        var obj = VisitAndConvert(withStatement.Object);
+        var body = VisitAndConvert(withStatement.Body);
 
-        return new WhileStatement(test, body);
+        return withStatement.Update(obj, body);
     }
 
-    protected virtual VariableDeclaration UpdateVariableDeclaration(VariableDeclaration variableDeclaration,
-        bool isNewDeclarations,
-        ref NodeList<VariableDeclarator> declarations)
+    protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
     {
-        if (isNewDeclarations)
-        {
-            return new VariableDeclaration(declarations, variableDeclaration.Kind);
-        }
+        var test = VisitAndConvert(whileStatement.Test);
+        var body = VisitAndConvert(whileStatement.Body);
 
-        return variableDeclaration;
+        return whileStatement.Update(test, body);
     }
 
-    protected virtual TryStatement UpdateTryStatement(TryStatement tryStatement, BlockStatement block,
-        CatchClause? handler, BlockStatement? finalizer)
+    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
     {
-        if (block == tryStatement.Block && handler == tryStatement.Handler && finalizer == tryStatement.Finalizer)
-        {
-            return tryStatement;
-        }
+        VisitAndConvert(variableDeclaration.Declarations, out var declarations);
 
-        return new TryStatement(block, handler, finalizer);
+        return variableDeclaration.Update(declarations);
     }
 
-    protected virtual ThrowStatement UpdateThrowStatement(ThrowStatement throwStatement, Expression argument)
+    protected internal override object? VisitTryStatement(TryStatement tryStatement)
     {
-        if (argument == throwStatement.Argument)
-        {
-            return throwStatement;
-        }
+        var block = VisitAndConvert(tryStatement.Block);
+        var handler = VisitAndConvert(tryStatement.Handler, allowNull: true);
+        var finalizer = VisitAndConvert(tryStatement.Finalizer, allowNull: true);
 
-        return new ThrowStatement(argument);
+        return tryStatement.Update(block, handler, finalizer);
     }
 
-    protected virtual SwitchStatement UpdateSwitchStatement(SwitchStatement switchStatement,
-        Expression discriminant, bool isNewCases,
-        ref NodeList<SwitchCase> cases)
+    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
     {
-        if (discriminant == switchStatement.Discriminant && !isNewCases)
-        {
-            return switchStatement;
-        }
+        var argument = VisitAndConvert(throwStatement.Argument);
 
-        return new SwitchStatement(discriminant, cases);
+        return throwStatement.Update(argument);
     }
 
-    protected virtual SwitchCase UpdateSwitchCase(SwitchCase switchCase, Expression? test, bool isNewConsequent,
-        ref NodeList<Statement> consequent)
+    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
     {
-        if (test == switchCase.Test && !isNewConsequent)
-        {
-            return switchCase;
-        }
+        var discriminant = VisitAndConvert(switchStatement.Discriminant);
+        VisitAndConvert(switchStatement.Cases, out var cases);
 
-        return new SwitchCase(test, consequent);
+        return switchStatement.Update(discriminant, cases);
     }
 
-    protected virtual ReturnStatement UpdateReturnStatement(ReturnStatement returnStatement, Expression? argument)
+    protected internal override object? VisitSwitchCase(SwitchCase switchCase)
     {
-        if (argument == returnStatement.Argument)
-        {
-            return returnStatement;
-        }
+        var test = VisitAndConvert(switchCase.Test, allowNull: true);
+        VisitAndConvert(switchCase.Consequent, out var consequent);
 
-        return new ReturnStatement(argument);
+        return switchCase.Update(test, consequent);
     }
 
-    protected virtual LabeledStatement UpdateLabeledStatement(LabeledStatement labeledStatement, Identifier label,
-        Statement body)
+    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
     {
-        if (label == labeledStatement.Label && body == labeledStatement.Body)
-        {
-            return labeledStatement;
-        }
+        var argument = VisitAndConvert(returnStatement.Argument, allowNull: true);
 
-        return new LabeledStatement(label, body);
+        return returnStatement.Update(argument);
     }
 
-    protected virtual IfStatement UpdateIfStatement(IfStatement ifStatement, Expression test, Statement consequent,
-        Statement? alternate)
+    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
     {
-        if (test == ifStatement.Test && consequent == ifStatement.Consequent && alternate == ifStatement.Alternate)
-        {
-            return ifStatement;
-        }
+        var label = VisitAndConvert(labeledStatement.Label);
+        var body = VisitAndConvert(labeledStatement.Body);
 
-        return new IfStatement(test, consequent, alternate);
+        return labeledStatement.Update(label, body);
     }
 
-    protected virtual EmptyStatement UpdateEmptyStatement(EmptyStatement emptyStatement)
+    protected internal override object? VisitIfStatement(IfStatement ifStatement)
     {
-        return emptyStatement;
-    }
+        var test = VisitAndConvert(ifStatement.Test);
+        var consequent = VisitAndConvert(ifStatement.Consequent);
+        var alternate = VisitAndConvert(ifStatement.Alternate, allowNull: true);
 
-    protected virtual DebuggerStatement UpdateDebuggerStatement(DebuggerStatement debuggerStatement)
-    {
-        return debuggerStatement;
+        return ifStatement.Update(test, consequent, alternate);
     }
 
-    protected virtual ExpressionStatement UpdateExpressionStatement(ExpressionStatement expressionStatement,
-        Expression expression)
+    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
     {
-        if (expression == expressionStatement.Expression)
-        {
-            return expressionStatement;
-        }
+        var expression = VisitAndConvert(expressionStatement.Expression);
 
-        return new ExpressionStatement(expression);
+        return expressionStatement.Update(expression);
     }
 
-    protected virtual ForStatement UpdateForStatement(ForStatement forStatement, StatementListItem? init,
-        Expression? test,
-        Expression? update, Statement body)
+    protected internal override object? VisitForStatement(ForStatement forStatement)
     {
-        if (init == forStatement.Init && test == forStatement.Test && update == forStatement.Update &&
-            body == forStatement.Body)
-        {
-            return forStatement;
-        }
+        var init = VisitAndConvert(forStatement.Init, allowNull: true);
+        var test = VisitAndConvert(forStatement.Test, allowNull: true);
+        var update = VisitAndConvert(forStatement.Update, allowNull: true);
+        var body = VisitAndConvert(forStatement.Body);
 
-        return new ForStatement(init, test, update, body);
+        return forStatement.Update(init, test, update, body);
     }
 
-    protected virtual ForInStatement UpdateForInStatement(ForInStatement forInStatement, Node left, Expression right,
-        Statement body)
+    protected internal override object? VisitForInStatement(ForInStatement forInStatement)
     {
-        if (left == forInStatement.Left && right == forInStatement.Right && body == forInStatement.Body)
-        {
-            return forInStatement;
-        }
+        var left = VisitAndConvert(forInStatement.Left);
+        var right = VisitAndConvert(forInStatement.Right);
+        var body = VisitAndConvert(forInStatement.Body);
 
-        return new ForInStatement(left, right, body);
+        return forInStatement.Update(left, right, body);
     }
 
-    protected virtual DoWhileStatement UpdateDoWhileStatement(DoWhileStatement doWhileStatement, Statement body,
-        Expression test)
+    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
     {
-        if (body == doWhileStatement.Body && test == doWhileStatement.Test)
-        {
-            return doWhileStatement;
-        }
+        var body = VisitAndConvert(doWhileStatement.Body);
+        var test = VisitAndConvert(doWhileStatement.Test);
 
-        return new DoWhileStatement(body, test);
+        return doWhileStatement.Update(body, test);
     }
 
-    protected virtual ArrowFunctionExpression UpdateArrowFunctionExpression(
-        ArrowFunctionExpression arrowFunctionExpression,
-        bool isNewParameters, ref NodeList<Expression> parameters, Node body)
+    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
     {
-        if (!isNewParameters && body == arrowFunctionExpression.Body)
-        {
-            return arrowFunctionExpression;
-        }
+        VisitAndConvert(arrowFunctionExpression.Params, out var parameters);
+        var body = VisitAndConvert(arrowFunctionExpression.Body);
 
-        return new ArrowFunctionExpression(parameters, body, arrowFunctionExpression.Expression,
-            arrowFunctionExpression.Strict, arrowFunctionExpression.Async);
+        return arrowFunctionExpression.Update(parameters, body);
     }
 
-    protected virtual UnaryExpression UpdateUnaryExpression(UnaryExpression unaryExpression, Expression argument)
+    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
     {
-        if (argument == unaryExpression.Argument)
-        {
-            return unaryExpression;
-        }
+        var argument = VisitAndConvert(unaryExpression.Argument);
 
-        return new UnaryExpression(unaryExpression.Operator, argument);
+        return unaryExpression.Update(argument);
     }
 
-    protected virtual UpdateExpression UpdateUpdateExpression(UpdateExpression updateExpression, Expression argument)
+    protected internal override object? VisitUpdateExpression(UpdateExpression updateExpression)
     {
-        if (argument == updateExpression.Argument)
-        {
-            return updateExpression;
-        }
-
-        return new UpdateExpression(updateExpression.Operator, argument, updateExpression.Prefix);
-    }
+        var argument = VisitAndConvert(updateExpression.Argument);
 
-    protected virtual ThisExpression UpdateThisExpression(ThisExpression thisExpression)
-    {
-        return thisExpression;
+        return updateExpression.Update(argument);
     }
 
-    protected virtual SequenceExpression UpdateSequenceExpression(SequenceExpression sequenceExpression,
-        bool isNewExpressions,
-        ref NodeList<Expression> expressions)
+    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
     {
-        if (isNewExpressions)
-        {
-            return new SequenceExpression(expressions);
-        }
+        VisitAndConvert(sequenceExpression.Expressions, out var expressions);
 
-        return sequenceExpression;
+        return sequenceExpression.Update(expressions);
     }
 
-    protected virtual ObjectExpression UpdateObjectExpression(ObjectExpression objectExpression, bool isNewProperties,
-        ref NodeList<Expression> properties)
+    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
     {
-        if (isNewProperties)
-        {
-            return new ObjectExpression(properties);
-        }
+        VisitAndConvert(objectExpression.Properties, out var properties);
 
-        return objectExpression;
+        return objectExpression.Update(properties);
     }
 
-    protected virtual NewExpression UpdateNewExpression(NewExpression newExpression, Expression callee,
-        bool isNewArguments,
-        ref NodeList<Expression> arguments)
+    protected internal override object? VisitNewExpression(NewExpression newExpression)
     {
-        if (!isNewArguments && callee == newExpression.Callee)
-        {
-            return newExpression;
-        }
+        var callee = VisitAndConvert(newExpression.Callee);
+        VisitAndConvert(newExpression.Arguments, out var arguments);
 
-        return new NewExpression(callee, arguments);
+        return newExpression.Update(callee, arguments);
     }
 
-    protected virtual MemberExpression UpdateMemberExpression(MemberExpression memberExpression, Expression obj,
-        Expression property)
+    protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
     {
-        if (obj == memberExpression.Object && property == memberExpression.Property)
-        {
-            return memberExpression;
-        }
+        var obj = VisitAndConvert(memberExpression.Object);
+        var property = VisitAndConvert(memberExpression.Property);
 
-        return memberExpression.Computed switch
-        {
-            true => new ComputedMemberExpression(obj, property, memberExpression.Optional),
-            false => new StaticMemberExpression(obj, property, memberExpression.Optional),
-        };
+        return memberExpression.Update(obj, property);
     }
 
-    protected virtual BinaryExpression UpdateLogicalExpression(BinaryExpression binaryExpression, Expression left,
-        Expression right)
+    protected internal override object? VisitLogicalExpression(BinaryExpression binaryExpression)
     {
-        if (left == binaryExpression.Left && right == binaryExpression.Right)
-        {
-            return binaryExpression;
-        }
-
-        return new BinaryExpression(binaryExpression.Operator, left, right);
-    }
+        var left = VisitAndConvert(binaryExpression.Left);
+        var right = VisitAndConvert(binaryExpression.Right);
 
-    protected virtual Literal UpdateLiteral(Literal literal)
-    {
-        return literal;
+        return binaryExpression.Update(left, right);
     }
 
-    protected virtual Identifier UpdateIdentifier(Identifier identifier)
+    protected internal override object? VisitFunctionExpression(IFunction function)
     {
-        return identifier;
-    }
+        var id = VisitAndConvert(function.Id, allowNull: true);
+        VisitAndConvert(function.Params, out var parameters);
+        var body = VisitAndConvert((BlockStatement) function.Body);
 
-    protected virtual PrivateIdentifier UpdatePrivateIdentifier(PrivateIdentifier privateIdentifier)
-    {
-        return privateIdentifier;
+        return ((FunctionExpression) function).Update(id, parameters, body);
     }
 
-    protected virtual IFunction UpdateFunctionExpression(IFunction function, Identifier? id, bool isNewParameters,
-        ref NodeList<Expression> parameters,
-        Node body)
+    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
-        if (id == function.Id && !isNewParameters && body == function.Body)
-        {
-            return function;
-        }
+        var key = VisitAndConvert(propertyDefinition.Key);
+        var value = VisitAndConvert(propertyDefinition.Value, allowNull: true);
 
-        return function switch
-        {
-            ArrowFunctionExpression => new ArrowFunctionExpression(parameters, body, function.Expression,
-                function.Strict, function.Async),
-            FunctionDeclaration => new FunctionDeclaration(id, parameters, (body as BlockStatement) !,
-                function.Generator,
-                function.Strict, function.Async),
-            FunctionExpression => new FunctionExpression(id, parameters, (body as BlockStatement) !, function.Generator,
-                function.Strict, function.Async),
-            _ => throw new NotImplementedException($"{function.GetType().Name} does not implemented yet.")
-        };
+        return propertyDefinition.Update(key, value);
     }
 
-    protected virtual PropertyDefinition UpdatePropertyDefinition(PropertyDefinition propertyDefinition,
-        Expression key, Expression? value)
+    protected internal override object? VisitChainExpression(ChainExpression chainExpression)
     {
-        if (key == propertyDefinition.Key && value == propertyDefinition.Value)
-        {
-            return propertyDefinition;
-        }
+        var expression = VisitAndConvert(chainExpression.Expression);
 
-        return new PropertyDefinition(key, propertyDefinition.Computed, value !, propertyDefinition.Static);
+        return chainExpression.Update(expression);
     }
 
-    protected virtual ChainExpression UpdateChainExpression(ChainExpression chainExpression, Expression expression)
+    protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
-        if (expression == chainExpression.Expression)
-        {
-            return chainExpression;
-        }
+        var id = VisitAndConvert(classExpression.Id, allowNull: true);
+        var superClass = VisitAndConvert(classExpression.SuperClass, allowNull: true);
+        var body = VisitAndConvert(classExpression.Body);
 
-        return new ChainExpression(expression);
+        return classExpression.Update(id, superClass, body);
     }
 
-    protected virtual ClassExpression UpdateClassExpression(ClassExpression classExpression, Identifier? id,
-        Expression? superClass,
-        ClassBody body)
+    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
     {
-        if (id == classExpression.Id && superClass == classExpression.SuperClass && body == classExpression.Body)
-        {
-            return classExpression;
-        }
+        var declaration = VisitAndConvert(exportDefaultDeclaration.Declaration);
 
-        return new ClassExpression(id, superClass, body);
+        return exportDefaultDeclaration.Update(declaration);
     }
 
-    protected virtual ExportDefaultDeclaration UpdateExportDefaultDeclaration(
-        ExportDefaultDeclaration exportDefaultDeclaration,
-        StatementListItem declaration)
+    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
-        if (declaration == exportDefaultDeclaration.Declaration)
-        {
-            return exportDefaultDeclaration;
-        }
+        var exported = VisitAndConvert(exportAllDeclaration.Exported, allowNull: true);
+        var source = VisitAndConvert(exportAllDeclaration.Source);
 
-        return new ExportDefaultDeclaration(declaration);
+        return exportAllDeclaration.Update(exported, source);
     }
 
-    protected virtual ExportAllDeclaration UpdateExportAllDeclaration(ExportAllDeclaration exportAllDeclaration,
-        Expression? exported,
-        Literal source)
+    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
-        if (exported == exportAllDeclaration.Exported && source == exportAllDeclaration.Source)
-        {
-            return exportAllDeclaration;
-        }
+        var declaration = VisitAndConvert(exportNamedDeclaration.Declaration, allowNull: true);
+        VisitAndConvert(exportNamedDeclaration.Specifiers, out var specifiers);
+        var source = VisitAndConvert(exportNamedDeclaration.Source, allowNull: true);
 
-        return new ExportAllDeclaration(source, exported);
+        return exportNamedDeclaration.Update(declaration, specifiers, source);
     }
 
-    protected virtual ExportNamedDeclaration UpdateExportNamedDeclaration(
-        ExportNamedDeclaration exportNamedDeclaration,
-        StatementListItem? declaration, bool isNewSpecifiers, ref NodeList<ExportSpecifier> specifiers, Literal? source)
+    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
     {
-        if (declaration == exportNamedDeclaration.Declaration && !isNewSpecifiers &&
-            source == exportNamedDeclaration.Source)
-        {
-            return exportNamedDeclaration;
-        }
+        var local = VisitAndConvert(exportSpecifier.Local);
+        var exported = VisitAndConvert(exportSpecifier.Exported);
 
-        return new ExportNamedDeclaration(declaration, specifiers, source);
+        return exportSpecifier.Update(local, exported);
     }
 
-    protected virtual ExportSpecifier UpdateExportSpecifier(ExportSpecifier exportSpecifier, Expression local,
-        Expression exported)
+    protected internal override object? VisitImport(Import import)
     {
-        if (local == exportSpecifier.Local && exported == exportSpecifier.Exported)
-        {
-            return exportSpecifier;
-        }
+        var source = VisitAndConvert(import.Source, allowNull: true);
 
-        return new ExportSpecifier(local, exported);
+        return import.Update(source);
     }
 
-    protected virtual Import UpdateImport(Import import, Expression? source)
+    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
-        if (source == import.Source)
-        {
-            return import;
-        }
-
-        return new Import(source);
-    }
+        VisitAndConvert(importDeclaration.Specifiers, out var specifiers);
 
-    protected virtual ImportDeclaration UpdateImportDeclaration(ImportDeclaration importDeclaration,
-        bool isNewSpecifiers,
-        ref NodeList<ImportDeclarationSpecifier> specifiers, Literal source)
-    {
-        if (!isNewSpecifiers && source == importDeclaration.Source)
-        {
-            return importDeclaration;
-        }
+        var source = VisitAndConvert(importDeclaration.Source);
 
-        return new ImportDeclaration(specifiers, source);
+        return importDeclaration.Update(specifiers, source);
     }
 
-    protected virtual ImportNamespaceSpecifier UpdateImportNamespaceSpecifier(
-        ImportNamespaceSpecifier importNamespaceSpecifier,
-        Identifier local)
+    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
     {
-        if (local == importNamespaceSpecifier.Local)
-        {
-            return importNamespaceSpecifier;
-        }
+        var local = VisitAndConvert(importNamespaceSpecifier.Local);
 
-        return new ImportNamespaceSpecifier(local);
+        return importNamespaceSpecifier.Update(local);
     }
 
-    protected virtual ImportDefaultSpecifier UpdateImportDefaultSpecifier(
-        ImportDefaultSpecifier importDefaultSpecifier, Identifier local)
+    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
     {
-        if (local == importDefaultSpecifier.Local)
-        {
-            return importDefaultSpecifier;
-        }
+        var local = VisitAndConvert(importDefaultSpecifier.Local);
 
-        return new ImportDefaultSpecifier(local);
+        return importDefaultSpecifier.Update(local);
     }
 
-    protected virtual ImportSpecifier UpdateImportSpecifier(ImportSpecifier importSpecifier, Expression imported,
-        Identifier local)
+    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
     {
-        if (imported == importSpecifier.Imported && local == importSpecifier.Local)
-        {
-            return importSpecifier;
-        }
+        var imported = VisitAndConvert(importSpecifier.Imported);
+        var local = VisitAndConvert(importSpecifier.Local);
 
-        return new ImportSpecifier(local, imported);
+        return importSpecifier.Update(imported, local);
     }
 
-    protected virtual MethodDefinition UpdateMethodDefinition(MethodDefinition methodDefinition, Expression key,
-        Expression value)
+    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
-        if (key == methodDefinition.Key && value == methodDefinition.Value)
-        {
-            return methodDefinition;
-        }
+        var key = VisitAndConvert(methodDefinition.Key);
+        var value = VisitAndConvert((FunctionExpression) methodDefinition.Value);
 
-        return new MethodDefinition(key, methodDefinition.Computed, (value as FunctionExpression)!,
-            methodDefinition.Kind,
-            methodDefinition.Static);
+        return methodDefinition.Update(key, value);
     }
 
-    protected virtual ForOfStatement UpdateForOfStatement(ForOfStatement forOfStatement, Node left, Expression right,
-        Statement body)
+    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
     {
-        if (left == forOfStatement.Left && right == forOfStatement.Right && body == forOfStatement.Body)
-        {
-            return forOfStatement;
-        }
+        var left = VisitAndConvert(forOfStatement.Left);
+        var right = VisitAndConvert(forOfStatement.Right);
+        var body = VisitAndConvert(forOfStatement.Body);
 
-        return new ForOfStatement(left, right, body, forOfStatement.Await);
+        return forOfStatement.Update(left, right, body);
     }
 
-    protected virtual ClassDeclaration UpdateClassDeclaration(ClassDeclaration classDeclaration, Identifier? id,
-        Expression? superClass,
-        ClassBody body)
+    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
-        if (id == classDeclaration.Id && superClass == classDeclaration.SuperClass && body == classDeclaration.Body)
-        {
-            return classDeclaration;
-        }
+        var id = VisitAndConvert(classDeclaration.Id, allowNull: true);
+        var superClass = VisitAndConvert(classDeclaration.SuperClass, allowNull: true);
+        var body = VisitAndConvert(classDeclaration.Body);
 
-        return new ClassDeclaration(id, superClass, body);
+        return classDeclaration.Update(id, superClass, body);
     }
 
-    protected virtual ClassBody UpdateClassBody(ClassBody classBody, bool isNewBody, ref NodeList<Node> body)
+    protected internal override object? VisitClassBody(ClassBody classBody)
     {
-        if (isNewBody)
-        {
-            return new ClassBody(body);
-        }
+        VisitAndConvert(classBody.Body, out var body);
 
-        return classBody;
+        return classBody.Update(body);
     }
 
-    protected virtual YieldExpression UpdateYieldExpression(YieldExpression yieldExpression, Expression? argument)
+    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
     {
-        if (argument == yieldExpression.Argument)
-        {
-            return yieldExpression;
-        }
+        var argument = VisitAndConvert(yieldExpression.Argument, allowNull: true);
 
-        return new YieldExpression(argument, yieldExpression.Delegate);
+        return yieldExpression.Update(argument);
     }
 
-    protected virtual TaggedTemplateExpression UpdateTaggedTemplateExpression(
-        TaggedTemplateExpression taggedTemplateExpression,
-        Expression tag, TemplateLiteral quasi)
+    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
     {
-        if (tag == taggedTemplateExpression.Tag && quasi == taggedTemplateExpression.Quasi)
-        {
-            return taggedTemplateExpression;
-        }
-
-        return new TaggedTemplateExpression(tag, quasi);
-    }
+        var tag = VisitAndConvert(taggedTemplateExpression.Tag);
+        var quasi = VisitAndConvert(taggedTemplateExpression.Quasi);
 
-    protected virtual Super UpdateSuper(Super super)
-    {
-        return super;
+        return taggedTemplateExpression.Update(tag, quasi);
     }
 
-    protected virtual MetaProperty UpdateMetaProperty(MetaProperty metaProperty, Identifier meta, Identifier property)
+    protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
     {
-        if (meta == metaProperty.Meta && property == metaProperty.Property)
-        {
-            return metaProperty;
-        }
-
-        return new MetaProperty(meta, property);
-    }
+        var meta = VisitAndConvert(metaProperty.Meta);
+        var property = VisitAndConvert(metaProperty.Property);
 
-    protected virtual ArrowParameterPlaceHolder UpdateArrowParameterPlaceHolder(
-        ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-    {
-        return arrowParameterPlaceHolder;
+        return metaProperty.Update(meta, property);
     }
 
-    protected virtual ObjectPattern UpdateObjectPattern(ObjectPattern objectPattern, bool isNewProperties,
-        ref NodeList<Node> properties)
+    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
     {
-        if (isNewProperties)
-        {
-            return new ObjectPattern(properties);
-        }
+        VisitAndConvert(objectPattern.Properties, out var properties);
 
-        return objectPattern;
+        return objectPattern.Update(properties);
     }
 
-    protected virtual SpreadElement UpdateSpreadElement(SpreadElement spreadElement, Expression argument)
+    protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
     {
-        if (argument == spreadElement.Argument)
-        {
-            return spreadElement;
-        }
+        var argument = VisitAndConvert(spreadElement.Argument);
 
-        return new SpreadElement(argument);
+        return spreadElement.Update(argument);
     }
 
-    protected virtual AssignmentPattern UpdateAssignmentPattern(AssignmentPattern assignmentPattern, Expression left,
-        Expression right)
+    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
     {
-        if (left == assignmentPattern.Left && right == assignmentPattern.Right)
-        {
-            return assignmentPattern;
-        }
+        var left = VisitAndConvert(assignmentPattern.Left);
+        var right = VisitAndConvert(assignmentPattern.Right);
 
-        return new AssignmentPattern(left, right);
+        return assignmentPattern.Update(left, right);
     }
 
-    protected virtual ArrayPattern UpdateArrayPattern(ArrayPattern arrayPattern, bool isNewElements,
-        ref NodeList<Expression?> elements)
+    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
     {
-        if (isNewElements)
-        {
-            return new ArrayPattern(elements);
-        }
+        VisitAndConvert(arrayPattern.Elements, out var elements, allowNullElement: true);
 
-        return arrayPattern;
+        return arrayPattern.Update(elements);
     }
 
-    protected virtual VariableDeclarator UpdateVariableDeclarator(VariableDeclarator variableDeclarator, Expression id,
-        Expression? init)
+    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
     {
-        if (id == variableDeclarator.Id && init == variableDeclarator.Init)
-        {
-            return variableDeclarator;
-        }
+        var id = VisitAndConvert(variableDeclarator.Id);
+        var init = VisitAndConvert(variableDeclarator.Init, allowNull: true);
 
-        return new VariableDeclarator(id, init);
+        return variableDeclarator.Update(id, init);
     }
 
-    protected virtual TemplateLiteral UpdateTemplateLiteral(TemplateLiteral templateLiteral, bool isNewQuasis, ref NodeList<TemplateElement> quasis, bool isNewExpression, ref NodeList<Expression> expressions)
+    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
     {
-        if (!isNewQuasis && !isNewExpression)
-        {
-            return templateLiteral;
-        }
-        
-        return new TemplateLiteral(quasis, expressions);
-    }
+        VisitAndConvert(templateLiteral.Quasis, out var quasis);
+        VisitAndConvert(templateLiteral.Expressions, out var expressions);
 
-    protected virtual TemplateElement UpdateTemplateElement(TemplateElement templateElement)
-    {
-        return templateElement;
+        return templateLiteral.Update(quasis, expressions);
     }
 
-    protected virtual RestElement UpdateRestElement(RestElement restElement, Expression argument)
+    protected internal override object? VisitRestElement(RestElement restElement)
     {
-        if (argument == restElement.Argument)
-        {
-            return restElement;
-        }
+        var argument = VisitAndConvert(restElement.Argument);
 
-        return new RestElement(argument);
+        return restElement.Update(argument);
     }
 
-    protected virtual Property UpdateProperty(Property property, Expression key, Expression value)
+    protected internal override object? VisitProperty(Property property)
     {
-        if (key == property.Key && value == property.Value)
-        {
-            return property;
-        }
+        var key = VisitAndConvert(property.Key);
+        var value = VisitAndConvert(property.Value);
 
-        return new Property(property.Kind, key, property.Computed, value, property.Method, property.Shorthand);
+        return property.Update(key, value);
     }
 
-    protected virtual AwaitExpression UpdateAwaitExpression(AwaitExpression awaitExpression, Expression argument)
+    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
     {
-        if (argument == awaitExpression.Argument)
-        {
-            return awaitExpression;
-        }
+        var argument = VisitAndConvert(awaitExpression.Argument);
 
-        return new AwaitExpression(argument);
+        return awaitExpression.Update(argument);
     }
 
-    protected virtual ConditionalExpression UpdateConditionalExpression(ConditionalExpression conditionalExpression,
-        Expression test,
-        Expression consequent, Expression alternate)
+    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
     {
-        if (test == conditionalExpression.Test && consequent == conditionalExpression.Consequent &&
-            alternate == conditionalExpression.Alternate)
-        {
-            return conditionalExpression;
-        }
+        var test = VisitAndConvert(conditionalExpression.Test);
+        var consequent = VisitAndConvert(conditionalExpression.Consequent);
+        var alternate = VisitAndConvert(conditionalExpression.Alternate);
 
-        return new ConditionalExpression(test, consequent, alternate);
+        return conditionalExpression.Update(test, consequent, alternate);
     }
 
-    protected virtual CallExpression UpdateCallExpression(CallExpression callExpression, Expression callee,
-        bool isNewArguments,
-        ref NodeList<Expression> arguments)
+    protected internal override object? VisitCallExpression(CallExpression callExpression)
     {
-        if (!isNewArguments && callee == callExpression.Callee)
-        {
-            return callExpression;
-        }
+        var callee = VisitAndConvert(callExpression.Callee);
+        VisitAndConvert(callExpression.Arguments, out var arguments);
 
-        return new CallExpression(callee, arguments, callExpression.Optional);
+        return callExpression.Update(callee, arguments);
     }
 
-    protected virtual BinaryExpression UpdateBinaryExpression(BinaryExpression binaryExpression, Expression left,
-        Expression right)
+    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
     {
-        if (left == binaryExpression.Left && right == binaryExpression.Right)
-        {
-            return binaryExpression;
-        }
+        var left = VisitAndConvert(binaryExpression.Left);
+        var right = VisitAndConvert(binaryExpression.Right);
 
-        return new BinaryExpression(binaryExpression.Operator, left, right);
+        return binaryExpression.Update(left, right);
     }
 
-    protected virtual ArrayExpression UpdateArrayExpression(ArrayExpression arrayExpression, bool isNewElements,
-        ref NodeList<Expression?> elements)
+    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
-        if (isNewElements)
-        {
-            return new ArrayExpression(elements);
-        }
+        VisitAndConvert(arrayExpression.Elements, out var elements, allowNullElement: true);
 
-        return arrayExpression;
+        return arrayExpression.Update(elements);
     }
 
-    protected virtual AssignmentExpression UpdateAssignmentExpression(AssignmentExpression assignmentExpression,
-        Expression left,
-        Expression right)
+    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
     {
-        if (left == assignmentExpression.Left && right == assignmentExpression.Right)
-        {
-            return assignmentExpression;
-        }
+        var left = VisitAndConvert(assignmentExpression.Left);
+        var right = VisitAndConvert(assignmentExpression.Right);
 
-        return new AssignmentExpression(assignmentExpression.Operator, left, right);
+        return assignmentExpression.Update(left, right);
     }
 
-    protected virtual ContinueStatement UpdateContinueStatement(ContinueStatement continueStatement, Identifier? label)
+    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
     {
-        if (label != continueStatement.Label)
-        {
-            return new ContinueStatement(label);
-        }
+        var label = VisitAndConvert(continueStatement.Label, allowNull: true);
 
-        return continueStatement;
+        return continueStatement.Update(label);
     }
 
-    protected virtual BreakStatement UpdateBreakStatement(BreakStatement breakStatement, Identifier? label)
+    protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
     {
-        if (label != breakStatement.Label)
-        {
-            return new BreakStatement(label);
-        }
+        var label = VisitAndConvert(breakStatement.Label, allowNull: true);
 
-        return breakStatement;
+        return breakStatement.Update(label);
     }
 
-    protected virtual BlockStatement UpdateBlockStatement(BlockStatement blockStatement, bool isNewBody,
-        ref NodeList<Statement> body)
+    protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
     {
-        if (isNewBody)
-        {
-            return new BlockStatement(body);
-        }
+        VisitAndConvert(blockStatement.Body, out var body);
 
-        return blockStatement;
+        return blockStatement.Update(body);
     }
-
-    #endregion
 }

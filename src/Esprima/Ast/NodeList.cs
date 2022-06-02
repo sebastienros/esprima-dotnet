@@ -204,5 +204,10 @@ namespace Esprima.Ast
                     }
             }
         }
+
+        internal static bool AreSame<T>(in NodeList<T> nodeList1, in NodeList<T> nodeList2) where T : Node
+        {
+            return nodeList1._items == nodeList2._items;
+        }
     }
 }
