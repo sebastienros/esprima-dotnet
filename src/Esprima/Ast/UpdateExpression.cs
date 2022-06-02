@@ -13,10 +13,5 @@ namespace Esprima.Ast
         {
             Prefix = prefix;
         }
-
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitUpdateExpression(this);
-        }
     }
 }

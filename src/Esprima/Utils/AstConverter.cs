@@ -223,13 +223,6 @@ public abstract partial class AstConverter : AstVisitor
         return unaryExpression.Update(argument);
     }
 
-    protected internal override object? VisitUpdateExpression(UpdateExpression updateExpression)
-    {
-        var argument = VisitAndConvert(updateExpression.Argument);
-
-        return updateExpression.Update(argument);
-    }
-
     protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
     {
         VisitAndConvert(sequenceExpression.Expressions, out var expressions);
@@ -260,21 +253,13 @@ public abstract partial class AstConverter : AstVisitor
         return memberExpression.Update(obj, property);
     }
 
-    protected internal override object? VisitLogicalExpression(BinaryExpression binaryExpression)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
-        var left = VisitAndConvert(binaryExpression.Left);
-        var right = VisitAndConvert(binaryExpression.Right);
+        var id = VisitAndConvert(functionExpression.Id, allowNull: true);
+        VisitAndConvert(functionExpression.Params, out var parameters);
+        var body = VisitAndConvert((BlockStatement) functionExpression.Body);
 
-        return binaryExpression.Update(left, right);
-    }
-
-    protected internal override object? VisitFunctionExpression(IFunction function)
-    {
-        var id = VisitAndConvert(function.Id, allowNull: true);
-        VisitAndConvert(function.Params, out var parameters);
-        var body = VisitAndConvert((BlockStatement) function.Body);
-
-        return ((FunctionExpression) function).Update(id, parameters, body);
+        return functionExpression.Update(id, parameters, body);
     }
 
     protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)

@@ -574,12 +574,6 @@ public static partial class AstJson
             return unaryExpression;
         }
 
-        protected internal override object? VisitUpdateExpression(UpdateExpression updateExpression)
-        {
-            VisitUnaryExpression(updateExpression);
-            return updateExpression;
-        }
-
         protected internal override object? VisitThisExpression(ThisExpression thisExpression)
         {
             EmptyNodeObject(thisExpression);
@@ -628,12 +622,6 @@ public static partial class AstJson
             }
 
             return memberExpression;
-        }
-
-        protected internal override object? VisitLogicalExpression(BinaryExpression binaryExpression)
-        {
-            VisitBinaryExpression(binaryExpression);
-            return binaryExpression;
         }
 
         protected internal override object? VisitLiteral(Literal literal)
@@ -697,19 +685,19 @@ public static partial class AstJson
             return identifier;
         }
 
-        protected internal override object? VisitFunctionExpression(IFunction function)
+        protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
         {
-            using (StartNodeObject((Node) function))
+            using (StartNodeObject(functionExpression))
             {
-                Member("id", function.Id);
-                Member("params", function.Params);
-                Member("body", function.Body);
-                Member("generator", function.Generator);
-                Member("expression", function.Expression);
-                Member("async", function.Async);
+                Member("id", functionExpression.Id);
+                Member("params", functionExpression.Params);
+                Member("body", functionExpression.Body);
+                Member("generator", functionExpression.Generator);
+                Member("expression", functionExpression.Expression);
+                Member("async", functionExpression.Async);
             }
 
-            return (Node) function;
+            return functionExpression;
         }
 
         protected internal override object? VisitClassExpression(ClassExpression classExpression)
@@ -915,15 +903,6 @@ public static partial class AstJson
             }
 
             return metaProperty;
-        }
-
-        protected internal override object? VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-        {
-            // Seems that ArrowParameterPlaceHolder nodes never appear
-            // in the final tree and only used during the construction of
-            // a tree. If this assumption is wrong then best to just fail.
-
-            throw new NotImplementedException();
         }
 
         protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)

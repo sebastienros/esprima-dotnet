@@ -54,8 +54,6 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<ArrowFunctionExpression>? VisitedArrowFunctionExpression;
     public event EventHandler<UnaryExpression>? VisitingUnaryExpression;
     public event EventHandler<UnaryExpression>? VisitedUnaryExpression;
-    public event EventHandler<UpdateExpression>? VisitingUpdateExpression;
-    public event EventHandler<UpdateExpression>? VisitedUpdateExpression;
     public event EventHandler<ThisExpression>? VisitingThisExpression;
     public event EventHandler<ThisExpression>? VisitedThisExpression;
     public event EventHandler<SequenceExpression>? VisitingSequenceExpression;
@@ -66,14 +64,12 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<NewExpression>? VisitedNewExpression;
     public event EventHandler<MemberExpression>? VisitingMemberExpression;
     public event EventHandler<MemberExpression>? VisitedMemberExpression;
-    public event EventHandler<BinaryExpression>? VisitingLogicalExpression;
-    public event EventHandler<BinaryExpression>? VisitedLogicalExpression;
     public event EventHandler<Literal>? VisitingLiteral;
     public event EventHandler<Literal>? VisitedLiteral;
     public event EventHandler<Identifier>? VisitingIdentifier;
     public event EventHandler<Identifier>? VisitedIdentifier;
-    public event EventHandler<IFunction>? VisitingFunctionExpression;
-    public event EventHandler<IFunction>? VisitedFunctionExpression;
+    public event EventHandler<FunctionExpression>? VisitingFunctionExpression;
+    public event EventHandler<FunctionExpression>? VisitedFunctionExpression;
     public event EventHandler<ChainExpression>? VisitingChainExpression;
     public event EventHandler<ChainExpression>? VisitedChainExpression;
     public event EventHandler<ClassExpression>? VisitingClassExpression;
@@ -332,14 +328,6 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override object? VisitUpdateExpression(UpdateExpression updateExpression)
-    {
-        VisitingUpdateExpression?.Invoke(this, updateExpression);
-        var result = base.VisitUpdateExpression(updateExpression);
-        VisitedUpdateExpression?.Invoke(this, updateExpression);
-        return result;
-    }
-
     protected internal override object? VisitThisExpression(ThisExpression thisExpression)
     {
         VisitingThisExpression?.Invoke(this, thisExpression);
@@ -380,14 +368,6 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override object? VisitLogicalExpression(BinaryExpression binaryExpression)
-    {
-        VisitingLogicalExpression?.Invoke(this, binaryExpression);
-        var result = base.VisitLogicalExpression(binaryExpression);
-        VisitedLogicalExpression?.Invoke(this, binaryExpression);
-        return result;
-    }
-
     protected internal override object? VisitLiteral(Literal literal)
     {
         VisitingLiteral?.Invoke(this, literal);
@@ -404,11 +384,11 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override object? VisitFunctionExpression(IFunction function)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
-        VisitingFunctionExpression?.Invoke(this, function);
-        var result = base.VisitFunctionExpression(function);
-        VisitedFunctionExpression?.Invoke(this, function);
+        VisitingFunctionExpression?.Invoke(this, functionExpression);
+        var result = base.VisitFunctionExpression(functionExpression);
+        VisitedFunctionExpression?.Invoke(this, functionExpression);
         return result;
     }
 

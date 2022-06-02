@@ -88,14 +88,7 @@ namespace Esprima.Ast
 
         protected internal override object? Accept(AstVisitor visitor)
         {
-            if (Type == Nodes.LogicalExpression)
-            {
-                return visitor.VisitLogicalExpression(this);
-            }
-            else
-            {
-                return visitor.VisitBinaryExpression(this);
-            }
+            return visitor.VisitBinaryExpression(this);
         }
     }
 }

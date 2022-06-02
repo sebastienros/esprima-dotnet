@@ -240,13 +240,6 @@ public partial class AstVisitor
         return unaryExpression;
     }
 
-    protected internal virtual object? VisitUpdateExpression(UpdateExpression updateExpression)
-    {
-        Visit(updateExpression.Argument);
-
-        return updateExpression;
-    }
-
     protected internal virtual object? VisitThisExpression(ThisExpression thisExpression)
     {
         return thisExpression;
@@ -294,14 +287,6 @@ public partial class AstVisitor
         return memberExpression;
     }
 
-    protected internal virtual object? VisitLogicalExpression(BinaryExpression binaryExpression)
-    {
-        Visit(binaryExpression.Left);
-        Visit(binaryExpression.Right);
-
-        return binaryExpression;
-    }
-
     protected internal virtual object? VisitLiteral(Literal literal)
     {
         return literal;
@@ -317,22 +302,22 @@ public partial class AstVisitor
         return privateIdentifier;
     }
 
-    protected internal virtual object? VisitFunctionExpression(IFunction function)
+    protected internal virtual object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
-        if (function.Id is not null)
+        if (functionExpression.Id is not null)
         {
-            Visit(function.Id);
+            Visit(functionExpression.Id);
         }
 
-        ref readonly var parameters = ref function.Params;
+        ref readonly var parameters = ref functionExpression.Params;
         for (var i = 0; i < parameters.Count; i++)
         {
             Visit(parameters[i]);
         }
 
-        Visit(function.Body);
+        Visit(functionExpression.Body);
 
-        return (Node)function;
+        return functionExpression;
     }
 
     protected internal virtual object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
@@ -542,9 +527,10 @@ public partial class AstVisitor
 
     protected internal virtual object? VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
     {
-        // ArrowParameterPlaceHolder nodes never appear in the final tree and only used during the construction of a tree.
+        // Seems that ArrowParameterPlaceHolder nodes never appear in the final tree and only used during the construction of a tree.
+        // Though we provide the VisitArrowParameterPlaceHolder method for inheritors in case they still needed it.
 
-        return arrowParameterPlaceHolder;
+        throw new NotImplementedException();
     }
 
     protected internal virtual object? VisitObjectPattern(ObjectPattern objectPattern)
@@ -604,15 +590,13 @@ public partial class AstVisitor
         ref readonly var quasis = ref templateLiteral.Quasis;
         ref readonly var expressions = ref templateLiteral.Expressions;
 
-        var n = expressions.Count;
-
-        for (var i = 0; i < n; i++)
+        TemplateElement quasi;
+        for (var i = 0; !(quasi = quasis[i]).Tail; i++)
         {
-            Visit(quasis[i]);
+            Visit(quasi);
             Visit(expressions[i]);
         }
-
-        Visit(quasis[n]);
+        Visit(quasi);
 
         return templateLiteral;
     }

@@ -200,17 +200,11 @@ namespace Esprima.Utils
                 return unaryExpression;
             }
 
-            return new UnaryExpression(unaryExpression.Operator, argument);
-        }
-
-        public static UpdateExpression Update(this UpdateExpression updateExpression, Expression argument)
-        {
-            if (argument == updateExpression.Argument)
+            return unaryExpression switch
             {
-                return updateExpression;
-            }
-
-            return new UpdateExpression(updateExpression.Operator, argument, updateExpression.Prefix);
+                UpdateExpression => new UpdateExpression(unaryExpression.Operator, argument, unaryExpression.Prefix),
+                _ => new UnaryExpression(unaryExpression.Operator, argument)
+            };
         }
 
         public static SequenceExpression Update(this SequenceExpression sequenceExpression, in NodeList<Expression> expressions)

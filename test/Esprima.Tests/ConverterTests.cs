@@ -334,13 +334,11 @@ sealed class TestConverter : AstConverter
     protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
     {
         return ForceNewObjectByControlType((UnaryExpression) base.VisitUnaryExpression(unaryExpression)!,
-            node => new UnaryExpression(node.Operator, node.Argument));
-    }
-
-    protected internal override object? VisitUpdateExpression(UpdateExpression updateExpression)
-    {
-        return ForceNewObjectByControlType((UpdateExpression) base.VisitUpdateExpression(updateExpression)!,
-            node => new UpdateExpression(node.Operator, node.Argument, node.Prefix));
+            node => node.Type switch
+            {
+                Nodes.UpdateExpression => new UpdateExpression(node.Operator, node.Argument, node.Prefix),
+                _ => new UnaryExpression(node.Operator, node.Argument)
+            });
     }
 
     protected internal override object? VisitThisExpression(ThisExpression thisExpression)
@@ -377,12 +375,6 @@ sealed class TestConverter : AstConverter
             });
     }
 
-    protected internal override object? VisitLogicalExpression(BinaryExpression binaryExpression)
-    {
-        return ForceNewObjectByControlType((BinaryExpression) base.VisitLogicalExpression(binaryExpression)!,
-            node => new BinaryExpression(node.Operator, node.Left, node.Right));
-    }
-
     protected internal override object? VisitLiteral(Literal literal)
     {
         return ForceNewObjectByControlType((Literal) base.VisitLiteral(literal)!,
@@ -406,9 +398,9 @@ sealed class TestConverter : AstConverter
             node => new PrivateIdentifier(node.Name));
     }
 
-    protected internal override object? VisitFunctionExpression(IFunction function)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
-        return ForceNewObjectByControlType((FunctionExpression) base.VisitFunctionExpression(function)!,
+        return ForceNewObjectByControlType((FunctionExpression) base.VisitFunctionExpression(functionExpression)!,
             node => new FunctionExpression(node.Id, node.Params, (BlockStatement) node.Body, node.Generator, node.Strict, node.Async));
     }
 
@@ -530,12 +522,6 @@ sealed class TestConverter : AstConverter
     {
         return ForceNewObjectByControlType((MetaProperty) base.VisitMetaProperty(metaProperty)!,
             node => new MetaProperty(node.Meta, node.Property));
-    }
-
-    protected internal override object? VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-    {
-        return ForceNewObjectByControlType((ArrowParameterPlaceHolder) base.VisitArrowParameterPlaceHolder(arrowParameterPlaceHolder)!,
-            node => new ArrowParameterPlaceHolder(node.Params, node.Async));
     }
 
     protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)

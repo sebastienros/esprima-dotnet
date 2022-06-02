@@ -58,7 +58,7 @@ namespace Esprima.Tests
             var visitor = new AstVisitorEventSource();
             UpdateExpression updateExpression = null;
             Identifier argument = null;
-            visitor.VisitingUpdateExpression += (_, arg) => updateExpression = arg;
+            visitor.VisitingUnaryExpression += (_, arg) => updateExpression = (UpdateExpression) arg;
             visitor.VisitedIdentifier += (_, arg) => argument = arg;
             visitor.Visit(expression);
 
