@@ -4,34 +4,34 @@ namespace Esprima.Utils;
 
 public partial class AstVisitorEventSource
 {
-    public event EventHandler<Node>? VisitingJsxSpreadAttribute;
-    public event EventHandler<Node>? VisitedJsxSpreadAttribute;
-    public event EventHandler<Node>? VisitingJsxElement;
-    public event EventHandler<Node>? VisitedJsxElement;
-    public event EventHandler<Node>? VisitingJsxAttribute;
-    public event EventHandler<Node>? VisitedJsxAttribute;
-    public event EventHandler<Node>? VisitingJsxIdentifier;
-    public event EventHandler<Node>? VisitedJsxIdentifier;
-    public event EventHandler<Node>? VisitingJsxClosingElement;
-    public event EventHandler<Node>? VisitedJsxClosingElement;
-    public event EventHandler<Node>? VisitingJsxText;
-    public event EventHandler<Node>? VisitedJsxText;
-    public event EventHandler<Node>? VisitingJsxClosingFragment;
-    public event EventHandler<Node>? VisitedJsxClosingFragment;
-    public event EventHandler<Node>? VisitingJsxOpeningFragment;
-    public event EventHandler<Node>? VisitedJsxOpeningFragment;
-    public event EventHandler<Node>? VisitingJsxOpeningElement;
-    public event EventHandler<Node>? VisitedJsxOpeningElement;
-    public event EventHandler<Node>? VisitingJsxNamespacedName;
-    public event EventHandler<Node>? VisitedJsxNamespacedName;
-    public event EventHandler<Node>? VisitingJsxMemberExpression;
-    public event EventHandler<Node>? VisitedJsxMemberExpression;
-    public event EventHandler<Node>? VisitingJsxEmptyExpression;
-    public event EventHandler<Node>? VisitedJsxEmptyExpression;
-    public event EventHandler<Node>? VisitingJsxExpressionContainer;
-    public event EventHandler<Node>? VisitedJsxExpressionContainer;
-        
-    protected internal override JsxSpreadAttribute VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    public event EventHandler<JsxSpreadAttribute>? VisitingJsxSpreadAttribute;
+    public event EventHandler<JsxSpreadAttribute>? VisitedJsxSpreadAttribute;
+    public event EventHandler<JsxElement>? VisitingJsxElement;
+    public event EventHandler<JsxElement>? VisitedJsxElement;
+    public event EventHandler<JsxAttribute>? VisitingJsxAttribute;
+    public event EventHandler<JsxAttribute>? VisitedJsxAttribute;
+    public event EventHandler<JsxIdentifier>? VisitingJsxIdentifier;
+    public event EventHandler<JsxIdentifier>? VisitedJsxIdentifier;
+    public event EventHandler<JsxClosingElement>? VisitingJsxClosingElement;
+    public event EventHandler<JsxClosingElement>? VisitedJsxClosingElement;
+    public event EventHandler<JsxText>? VisitingJsxText;
+    public event EventHandler<JsxText>? VisitedJsxText;
+    public event EventHandler<JsxClosingFragment>? VisitingJsxClosingFragment;
+    public event EventHandler<JsxClosingFragment>? VisitedJsxClosingFragment;
+    public event EventHandler<JsxOpeningFragment>? VisitingJsxOpeningFragment;
+    public event EventHandler<JsxOpeningFragment>? VisitedJsxOpeningFragment;
+    public event EventHandler<JsxOpeningElement>? VisitingJsxOpeningElement;
+    public event EventHandler<JsxOpeningElement>? VisitedJsxOpeningElement;
+    public event EventHandler<JsxNamespacedName>? VisitingJsxNamespacedName;
+    public event EventHandler<JsxNamespacedName>? VisitedJsxNamespacedName;
+    public event EventHandler<JsxMemberExpression>? VisitingJsxMemberExpression;
+    public event EventHandler<JsxMemberExpression>? VisitedJsxMemberExpression;
+    public event EventHandler<JsxEmptyExpression>? VisitingJsxEmptyExpression;
+    public event EventHandler<JsxEmptyExpression>? VisitedJsxEmptyExpression;
+    public event EventHandler<JsxExpressionContainer>? VisitingJsxExpressionContainer;
+    public event EventHandler<JsxExpressionContainer>? VisitedJsxExpressionContainer;
+
+    protected internal override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         VisitingJsxSpreadAttribute?.Invoke(this, jsxSpreadAttribute);
         var node = base.VisitJsxSpreadAttribute(jsxSpreadAttribute);
@@ -39,7 +39,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxElement VisitJsxElement(JsxElement jsxElement)
+    protected internal override object? VisitJsxElement(JsxElement jsxElement)
     {
         VisitingJsxElement?.Invoke(this, jsxElement);
         var node = base.VisitJsxElement(jsxElement);
@@ -47,7 +47,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxAttribute VisitJsxAttribute(JsxAttribute jsxAttribute)
+    protected internal override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
         VisitingJsxAttribute?.Invoke(this, jsxAttribute);
         var node = base.VisitJsxAttribute(jsxAttribute);
@@ -55,7 +55,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxIdentifier VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    protected internal override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
         VisitingJsxIdentifier?.Invoke(this, jsxIdentifier);
         var node = base.VisitJsxIdentifier(jsxIdentifier);
@@ -63,7 +63,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxClosingElement VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    protected internal override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
         VisitingJsxClosingElement?.Invoke(this, jsxClosingElement);
         var node = base.VisitJsxClosingElement(jsxClosingElement);
@@ -71,7 +71,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxText VisitJsxText(JsxText jsxText)
+    protected internal override object? VisitJsxText(JsxText jsxText)
     {
         VisitingJsxText?.Invoke(this, jsxText);
         var node = base.VisitJsxText(jsxText);
@@ -79,7 +79,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxClosingFragment VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    protected internal override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         VisitingJsxClosingFragment?.Invoke(this, jsxClosingFragment);
         var node = base.VisitJsxClosingFragment(jsxClosingFragment);
@@ -87,7 +87,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxOpeningFragment VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    protected internal override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
         VisitingJsxOpeningFragment?.Invoke(this, jsxOpeningFragment);
         var node = base.VisitJsxOpeningFragment(jsxOpeningFragment);
@@ -95,7 +95,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxOpeningElement VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    protected internal override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         VisitingJsxOpeningElement?.Invoke(this, jsxOpeningElement);
         var node = base.VisitJsxOpeningElement(jsxOpeningElement);
@@ -103,7 +103,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxNamespacedName VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    protected internal override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
         VisitingJsxNamespacedName?.Invoke(this, jsxNamespacedName);
         var node = base.VisitJsxNamespacedName(jsxNamespacedName);
@@ -111,7 +111,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxMemberExpression VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    protected internal override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
         VisitingJsxMemberExpression?.Invoke(this, jsxMemberExpression);
         var node = base.VisitJsxMemberExpression(jsxMemberExpression);
@@ -119,7 +119,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxEmptyExpression VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    protected internal override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
         VisitingJsxEmptyExpression?.Invoke(this, jsxEmptyExpression);
         var node = base.VisitJsxEmptyExpression(jsxEmptyExpression);
@@ -127,7 +127,7 @@ public partial class AstVisitorEventSource
         return node;
     }
 
-    protected internal override JsxExpressionContainer VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    protected internal override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
         VisitingJsxExpressionContainer?.Invoke(this, jsxExpressionContainer);
         var node = base.VisitJsxExpressionContainer(jsxExpressionContainer);

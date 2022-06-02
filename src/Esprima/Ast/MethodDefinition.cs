@@ -21,7 +21,7 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitMethodDefinition(this);
         }

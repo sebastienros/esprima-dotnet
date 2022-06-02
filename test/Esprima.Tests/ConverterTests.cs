@@ -115,7 +115,7 @@ public class ConverterTests
         var node = FindNearTypeOfDescendTyped(type, program);
 
         // Act
-        var programResult = visitor.Visit(program);
+        var programResult = visitor.VisitAndConvert(program);
         var nodeResult = FindNearTypeOfDescendTyped(type, programResult);
 
         // Assert
@@ -148,7 +148,7 @@ public class ConverterTests
         var node = FindNearTypeOfDescendTyped(type, program);
 
         // Act
-        var programResult = visitor.Visit(program);
+        var programResult = visitor.VisitAndConvert(program);
         var nodeResult = FindNearTypeOfDescendTyped(type, programResult);
 
         // Assert
@@ -176,7 +176,7 @@ public class ConverterTests
         var node = FindNearTypeOfDescendTyped(type, program);
 
         // Act
-        var programResult = visitor.Visit(program);
+        var programResult = visitor.VisitAndConvert(program);
         var nodeResult = FindNearTypeOfDescendTyped(type, programResult);
 
         // Assert

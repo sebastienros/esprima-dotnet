@@ -13,7 +13,7 @@ namespace Esprima.Ast
 
         public sealed override NodeCollection ChildNodes => new(Expression);
 
-        protected internal sealed override Node Accept(AstVisitor visitor)
+        protected internal sealed override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitExpressionStatement(this);
         }

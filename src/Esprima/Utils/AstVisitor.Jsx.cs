@@ -4,93 +4,105 @@ namespace Esprima.Utils;
 
 public partial class AstVisitor
 {
-    protected internal virtual JsxMemberExpression VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    protected internal virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
-        var obj = Visit(jsxMemberExpression.Object) as JsxExpression;
-        var property = Visit(jsxMemberExpression.Property) as JsxIdentifier;
-        return UpdateJsxMemberExpression(jsxMemberExpression, obj!, property!);
+        Visit(jsxMemberExpression.Object);
+        Visit(jsxMemberExpression.Property);
+
+        return jsxMemberExpression;
     }
 
-    protected internal virtual JsxText VisitJsxText(JsxText jsxText)
+    protected internal virtual object? VisitJsxText(JsxText jsxText)
     {
-        return UpdateJsxText(jsxText);
+        return jsxText;
     }
 
-    protected internal virtual JsxOpeningFragment VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    protected internal virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
-        return UpdateJsxOpeningFragment(jsxOpeningFragment);
+        return jsxOpeningFragment;
     }
 
-    protected internal virtual JsxClosingFragment VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    protected internal virtual object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
-        return UpdateJsxClosingFragment(jsxClosingFragment);
+        return jsxClosingFragment;
     }
 
-    protected internal virtual JsxIdentifier VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    protected internal virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
-        return UpdateJsxIdentifier(jsxIdentifier);
+        return jsxIdentifier;
     }
 
-    protected internal virtual JsxElement VisitJsxElement(JsxElement jsxElement)
+    protected internal virtual object? VisitJsxElement(JsxElement jsxElement)
     {
-        var openingElement = Visit(jsxElement.OpeningElement);
-        var isNewChildren = HasNodeListChanged(jsxElement.Children, out var children);
-        Node? closingElement = null;
+        Visit(jsxElement.OpeningElement);
+        ref readonly var children = ref jsxElement.Children;
+        for (var i = 0; i < children.Count; i++)
+        {
+            Visit(children[i]);
+        }
+
         if (jsxElement.ClosingElement is not null)
         {
-            closingElement = Visit(jsxElement.ClosingElement);
+            Visit(jsxElement.ClosingElement);
         }
 
-        return UpdateJsxElement(jsxElement, openingElement!, isNewChildren, ref children, closingElement);
+        return jsxElement;
     }
 
-    protected internal virtual JsxOpeningElement VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    protected internal virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
-        var name = Visit(jsxOpeningElement.Name) as JsxExpression;
-        var isNewAttributes = HasNodeListChanged(jsxOpeningElement.Attributes, out var attributes);
-        return UpdateJsxOpeningElement(jsxOpeningElement, name!, isNewAttributes, ref attributes);
+        Visit(jsxOpeningElement.Name);
+        ref readonly var attributes = ref jsxOpeningElement.Attributes;
+        for (var i = 0; i < attributes.Count; i++)
+        {
+            Visit(attributes[i]);
+        }
+
+        return jsxOpeningElement;
     }
 
-    protected internal virtual JsxClosingElement VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    protected internal virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
-        var name = Visit(jsxClosingElement.Name) as JsxExpression;
-        return UpdateJsxClosingElement(jsxClosingElement, name!);
+        Visit(jsxClosingElement.Name);
+
+        return jsxClosingElement;
     }
 
-    protected internal virtual JsxEmptyExpression VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    protected internal virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
-        return UpdateJsxEmptyExpression(jsxEmptyExpression);
+        return jsxEmptyExpression;
     }
 
-    protected internal virtual JsxNamespacedName VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    protected internal virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
-        var name = Visit(jsxNamespacedName.Name) as JsxIdentifier;
-        var @namespace = Visit(jsxNamespacedName.Namespace) as JsxIdentifier;
-        return UpdateJsxNamespacedName(jsxNamespacedName, name!, @namespace!);
+        Visit(jsxNamespacedName.Name);
+        Visit(jsxNamespacedName.Namespace);
+
+        return jsxNamespacedName;
     }
 
-    protected internal virtual JsxSpreadAttribute VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    protected internal virtual object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
-        var argument = Visit(jsxSpreadAttribute.Argument) as JsxExpression;
-        return UpdateJsxSpreadAttribute(jsxSpreadAttribute, argument!);
+        Visit(jsxSpreadAttribute.Argument);
+
+        return jsxSpreadAttribute;
     }
 
-    protected internal virtual JsxAttribute VisitJsxAttribute(JsxAttribute jsxAttribute)
+    protected internal virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
-        var name = Visit(jsxAttribute.Name) as JsxExpression;
-        Expression? value = null;
+        Visit(jsxAttribute.Name);
         if (jsxAttribute.Value is not null)
         {
-            value = Visit(jsxAttribute.Value) as Expression;
+            Visit(jsxAttribute.Value);
         }
 
-        return UpdateJsxAttribute(jsxAttribute, name!, value);
+        return jsxAttribute;
     }
 
-    protected internal virtual JsxExpressionContainer VisitJsxExpressionContainer(
-        JsxExpressionContainer jsxExpressionContainer)
+    protected internal virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
-        var expression = Visit(jsxExpressionContainer.Expression) as Expression;
-        return UpdateJsxExpressionContainer(jsxExpressionContainer, expression!);
+        Visit(jsxExpressionContainer.Expression);
+
+        return jsxExpressionContainer;
     }
 }
