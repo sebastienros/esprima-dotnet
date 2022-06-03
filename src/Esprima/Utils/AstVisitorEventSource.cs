@@ -68,8 +68,12 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<Literal>? VisitedLiteral;
     public event EventHandler<Identifier>? VisitingIdentifier;
     public event EventHandler<Identifier>? VisitedIdentifier;
+    public event EventHandler<PrivateIdentifier>? VisitingPrivateIdentifier;
+    public event EventHandler<PrivateIdentifier>? VisitedPrivateIdentifier;
     public event EventHandler<FunctionExpression>? VisitingFunctionExpression;
     public event EventHandler<FunctionExpression>? VisitedFunctionExpression;
+    public event EventHandler<PropertyDefinition>? VisitingPropertyDefinition;
+    public event EventHandler<PropertyDefinition>? VisitedPropertyDefinition;
     public event EventHandler<ChainExpression>? VisitingChainExpression;
     public event EventHandler<ChainExpression>? VisitedChainExpression;
     public event EventHandler<ClassExpression>? VisitingClassExpression;
@@ -126,6 +130,8 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<RestElement>? VisitedRestElement;
     public event EventHandler<Property>? VisitingProperty;
     public event EventHandler<Property>? VisitedProperty;
+    public event EventHandler<AwaitExpression>? VisitingAwaitExpression;
+    public event EventHandler<AwaitExpression>? VisitedAwaitExpression;
     public event EventHandler<ConditionalExpression>? VisitingConditionalExpression;
     public event EventHandler<ConditionalExpression>? VisitedConditionalExpression;
     public event EventHandler<CallExpression>? VisitingCallExpression;
@@ -384,11 +390,27 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
+    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+    {
+        VisitingPrivateIdentifier?.Invoke(this, privateIdentifier);
+        var result = base.VisitPrivateIdentifier(privateIdentifier);
+        VisitedPrivateIdentifier?.Invoke(this, privateIdentifier);
+        return result;
+    }
+
     protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
         VisitingFunctionExpression?.Invoke(this, functionExpression);
         var result = base.VisitFunctionExpression(functionExpression);
         VisitedFunctionExpression?.Invoke(this, functionExpression);
+        return result;
+    }
+
+    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+    {
+        VisitingPropertyDefinition?.Invoke(this, propertyDefinition);
+        var result = base.VisitPropertyDefinition(propertyDefinition);
+        VisitedPropertyDefinition?.Invoke(this, propertyDefinition);
         return result;
     }
 
@@ -613,6 +635,14 @@ public partial class AstVisitorEventSource : AstVisitor
         VisitingProperty?.Invoke(this, property);
         var result = base.VisitProperty(property);
         VisitedProperty?.Invoke(this, property);
+        return result;
+    }
+
+    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
+    {
+        VisitingAwaitExpression?.Invoke(this, awaitExpression);
+        var result = base.VisitAwaitExpression(awaitExpression);
+        VisitedAwaitExpression?.Invoke(this, awaitExpression);
         return result;
     }
 
