@@ -738,6 +738,9 @@ public static partial class AstJson
             {
                 Member("source", exportAllDeclaration.Source);
                 Member("exported", exportAllDeclaration.Exported);
+                if(exportAllDeclaration.Assertions.Count > 0) {
+                    Member("assertions", exportAllDeclaration.Assertions);
+                }
             }
 
             return exportAllDeclaration;
@@ -750,6 +753,9 @@ public static partial class AstJson
                 Member("declaration", exportNamedDeclaration.Declaration);
                 Member("specifiers", exportNamedDeclaration.Specifiers);
                 Member("source", exportNamedDeclaration.Source);
+                if(exportNamedDeclaration.Assertions.Count > 0) {
+                    Member("assertions", exportNamedDeclaration.Assertions);
+                }
             }
 
             return exportNamedDeclaration;
@@ -770,9 +776,23 @@ public static partial class AstJson
         {
             using (StartNodeObject(import))
             {
+                if(import.Attributes is not null) {
+                    Member("attributes", import.Attributes);
+                }
             }
 
             return import;
+        }
+        
+        protected internal override ImportAttribute VisitImportAttribute(ImportAttribute importAttribute)
+        {
+            using (StartNodeObject(importAttribute))
+            {
+                Member("key", importAttribute.Key);
+                Member("value", importAttribute.Value);
+            }
+
+            return importAttribute;
         }
 
         protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
@@ -781,6 +801,9 @@ public static partial class AstJson
             {
                 Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
                 Member("source", importDeclaration.Source);
+                if(importDeclaration.Assertions.Count > 0) {
+                    Member("assertions", importDeclaration.Assertions);
+                }
             }
 
             return importDeclaration;
