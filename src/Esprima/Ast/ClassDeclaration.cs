@@ -1,4 +1,4 @@
-﻿using Esprima.Utils;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -7,7 +7,10 @@ namespace Esprima.Ast
         public readonly Identifier? Id;
         Identifier? IClass.Id => Id;
 
-        public readonly Expression? SuperClass; // Identifier || CallExpression
+        /// <summary>
+        /// <see cref="Identifier" /> | <see cref="CallExpression" />
+        /// </summary>
+        public readonly Expression? SuperClass;
         Expression? IClass.SuperClass => SuperClass;
 
         public readonly ClassBody Body;

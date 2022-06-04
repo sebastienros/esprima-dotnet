@@ -5,7 +5,7 @@ namespace Esprima.Ast
     public sealed class ChainExpression : Expression
     {
         /// <summary>
-        /// CallExpression | ComputedMemberExpression | StaticMemberExpression
+        /// <see cref="CallExpression" /> | <see cref="ComputedMemberExpression" />| <see cref="StaticMemberExpression" />
         /// </summary>
         public readonly Expression Expression;
 

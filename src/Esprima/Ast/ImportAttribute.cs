@@ -5,7 +5,7 @@ namespace Esprima.Ast;
 public sealed class ImportAttribute : Node
 {
     /// <summary>
-    /// Identifier | Literal
+    /// <see cref="Identifier" /> | <see cref="Literal" />
     /// </summary>
     public readonly Expression Key;
     public readonly Literal Value;
