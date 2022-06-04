@@ -15,9 +15,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Argument);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitYieldExpression(this);
+        }
+
+        public YieldExpression UpdateWith(Expression? argument)
+        {
+            if (argument == Argument)
+            {
+                return this;
+            }
+
+            return new YieldExpression(argument, Delegate);
         }
     }
 }

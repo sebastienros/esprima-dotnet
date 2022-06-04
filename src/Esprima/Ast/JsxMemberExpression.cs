@@ -15,8 +15,18 @@ public sealed class JsxMemberExpression : JsxExpression
 
     public override NodeCollection ChildNodes => new(Object, Property);
         
-    protected internal override Node Accept(AstVisitor visitor)
+    protected internal override object? Accept(AstVisitor visitor)
     {
         return visitor.VisitJsxMemberExpression(this);
+    }
+
+    public JsxMemberExpression UpdateWith(JsxExpression obj, JsxIdentifier property)
+    {
+        if (obj == Object && property == Property)
+        {
+            return this;
+        }
+
+        return new JsxMemberExpression(obj, property);
     }
 }

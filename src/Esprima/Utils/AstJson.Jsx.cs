@@ -6,7 +6,7 @@ public static partial class AstJson
 {
     private sealed partial class Visitor
     {
-        protected internal override JsxSpreadAttribute VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+        protected internal override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
         {
             using (StartNodeObject(jsxSpreadAttribute))
             {
@@ -16,7 +16,7 @@ public static partial class AstJson
             return jsxSpreadAttribute;
         }
 
-        protected internal override JsxElement VisitJsxElement(JsxElement jsxElement)
+        protected internal override object? VisitJsxElement(JsxElement jsxElement)
         {
             using (StartNodeObject(jsxElement))
             {
@@ -28,7 +28,7 @@ public static partial class AstJson
             return jsxElement;
         }
 
-        protected internal override JsxAttribute VisitJsxAttribute(JsxAttribute jsxAttribute)
+        protected internal override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
         {
             using (StartNodeObject(jsxAttribute))
             {
@@ -39,7 +39,7 @@ public static partial class AstJson
             return jsxAttribute;
         }
 
-        protected internal override JsxIdentifier VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+        protected internal override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
         {
             using (StartNodeObject(jsxIdentifier))
             {
@@ -49,7 +49,7 @@ public static partial class AstJson
             return jsxIdentifier;
         }
 
-        protected internal override JsxClosingElement VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+        protected internal override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
         {
             using (StartNodeObject(jsxClosingElement))
             {
@@ -59,7 +59,7 @@ public static partial class AstJson
             return jsxClosingElement;
         }
 
-        protected internal override JsxText VisitJsxText(JsxText jsxText)
+        protected internal override object? VisitJsxText(JsxText jsxText)
         {
             using (StartNodeObject(jsxText))
             {
@@ -70,7 +70,7 @@ public static partial class AstJson
             return jsxText;
         }
 
-        protected internal override JsxClosingFragment VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+        protected internal override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
         {
             using (StartNodeObject(jsxClosingFragment))
             {
@@ -79,7 +79,7 @@ public static partial class AstJson
             return jsxClosingFragment;
         }
 
-        protected internal override JsxOpeningFragment VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+        protected internal override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
         {
             using (StartNodeObject(jsxOpeningFragment))
             {
@@ -89,7 +89,7 @@ public static partial class AstJson
             return jsxOpeningFragment;
         }
 
-        protected internal override JsxOpeningElement VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+        protected internal override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
         {
             using (StartNodeObject(jsxOpeningElement))
             {
@@ -101,7 +101,7 @@ public static partial class AstJson
             return jsxOpeningElement;
         }
 
-        protected internal override JsxNamespacedName VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+        protected internal override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
         {
             using (StartNodeObject(jsxNamespacedName))
             {
@@ -112,7 +112,7 @@ public static partial class AstJson
             return jsxNamespacedName;
         }
 
-        protected internal override JsxMemberExpression VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+        protected internal override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
         {
             using (StartNodeObject(jsxMemberExpression))
             {
@@ -123,7 +123,7 @@ public static partial class AstJson
             return jsxMemberExpression;
         }
 
-        protected internal override JsxEmptyExpression VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+        protected internal override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
         {
             using (StartNodeObject(jsxEmptyExpression))
             {
@@ -132,7 +132,7 @@ public static partial class AstJson
             return jsxEmptyExpression;
         }
 
-        protected internal override JsxExpressionContainer VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+        protected internal override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
         {
             using (StartNodeObject(jsxExpressionContainer))
             {

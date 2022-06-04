@@ -25,9 +25,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Id, SuperClass, Body);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitClassExpression(this);
+        }
+
+        public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body)
+        {
+            if (id == Id && superClass == SuperClass && body == Body)
+            {
+                return this;
+            }
+
+            return new ClassExpression(id, superClass, body);
         }
     }
 }

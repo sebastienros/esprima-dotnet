@@ -15,9 +15,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Left, Right);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitAssignmentPattern(this);
+        }
+
+        public AssignmentPattern UpdateWith(Expression left, Expression right)
+        {
+            if (left == Left && right == Right)
+            {
+                return this;
+            }
+
+            return new AssignmentPattern(left, right);
         }
     }
 }

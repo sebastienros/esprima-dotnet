@@ -25,9 +25,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Init, Test, Update, Body);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitForStatement(this);
+        }
+
+        public ForStatement UpdateWith(StatementListItem? init, Expression? test, Expression? update, Statement body)
+        {
+            if (init == Init && test == Test && update == Update && body == Body)
+            {
+                return this;
+            }
+
+            return new ForStatement(init, test, update, body);
         }
     }
 }

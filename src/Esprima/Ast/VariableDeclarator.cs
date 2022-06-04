@@ -16,9 +16,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Id, Init);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitVariableDeclarator(this);
+        }
+
+        public VariableDeclarator UpdateWith(Expression id, Expression? init)
+        {
+            if (id == Id && init == Init)
+            {
+                return this;
+            }
+
+            return new VariableDeclarator(id, init);
         }
     }
 }

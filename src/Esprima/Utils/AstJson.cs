@@ -307,7 +307,7 @@ public static partial class AstJson
             }
         }
 
-        public override Node? Visit(Node? node)
+        public override object? Visit(Node? node)
         {
             if (node is not null)
             {
@@ -316,11 +316,11 @@ public static partial class AstJson
             else
             {
                 _writer.Null();
-                return node !;
+                return node!;
             }
         }
 
-        protected internal override Program VisitProgram(Program program)
+        protected internal override object? VisitProgram(Program program)
         {
             using (StartNodeObject(program))
             {
@@ -331,14 +331,13 @@ public static partial class AstJson
             return program;
         }
 
-        [Obsolete(
-            "This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-        protected override void VisitUnknownNode(Node node)
+        [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
+        protected internal override object? VisitUnknownNode(Node node)
         {
             throw new NotSupportedException("Unknown node type: " + node.Type);
         }
 
-        protected internal override CatchClause VisitCatchClause(CatchClause catchClause)
+        protected internal override object? VisitCatchClause(CatchClause catchClause)
         {
             using (StartNodeObject(catchClause))
             {
@@ -349,8 +348,7 @@ public static partial class AstJson
             return catchClause;
         }
 
-        protected internal override FunctionDeclaration VisitFunctionDeclaration(
-            FunctionDeclaration functionDeclaration)
+        protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
         {
             using (StartNodeObject(functionDeclaration))
             {
@@ -365,7 +363,7 @@ public static partial class AstJson
             return functionDeclaration;
         }
 
-        protected internal override WithStatement VisitWithStatement(WithStatement withStatement)
+        protected internal override object? VisitWithStatement(WithStatement withStatement)
         {
             using (StartNodeObject(withStatement))
             {
@@ -376,7 +374,7 @@ public static partial class AstJson
             return withStatement;
         }
 
-        protected internal override WhileStatement VisitWhileStatement(WhileStatement whileStatement)
+        protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
         {
             using (StartNodeObject(whileStatement))
             {
@@ -387,8 +385,7 @@ public static partial class AstJson
             return whileStatement;
         }
 
-        protected internal override VariableDeclaration VisitVariableDeclaration(
-            VariableDeclaration variableDeclaration)
+        protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
         {
             using (StartNodeObject(variableDeclaration))
             {
@@ -399,7 +396,7 @@ public static partial class AstJson
             return variableDeclaration;
         }
 
-        protected internal override TryStatement VisitTryStatement(TryStatement tryStatement)
+        protected internal override object? VisitTryStatement(TryStatement tryStatement)
         {
             using (StartNodeObject(tryStatement))
             {
@@ -411,7 +408,7 @@ public static partial class AstJson
             return tryStatement;
         }
 
-        protected internal override ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
+        protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
         {
             using (StartNodeObject(throwStatement))
             {
@@ -421,7 +418,7 @@ public static partial class AstJson
             return throwStatement;
         }
 
-        protected internal override AwaitExpression VisitAwaitExpression(AwaitExpression awaitExpression)
+        protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
         {
             using (StartNodeObject(awaitExpression))
             {
@@ -431,7 +428,7 @@ public static partial class AstJson
             return awaitExpression;
         }
 
-        protected internal override SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
+        protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
         {
             using (StartNodeObject(switchStatement))
             {
@@ -442,7 +439,7 @@ public static partial class AstJson
             return switchStatement;
         }
 
-        protected internal override SwitchCase VisitSwitchCase(SwitchCase switchCase)
+        protected internal override object? VisitSwitchCase(SwitchCase switchCase)
         {
             using (StartNodeObject(switchCase))
             {
@@ -453,7 +450,7 @@ public static partial class AstJson
             return switchCase;
         }
 
-        protected internal override ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
+        protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
         {
             using (StartNodeObject(returnStatement))
             {
@@ -463,7 +460,7 @@ public static partial class AstJson
             return returnStatement;
         }
 
-        protected internal override LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
+        protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
         {
             using (StartNodeObject(labeledStatement))
             {
@@ -474,7 +471,7 @@ public static partial class AstJson
             return labeledStatement;
         }
 
-        protected internal override IfStatement VisitIfStatement(IfStatement ifStatement)
+        protected internal override object? VisitIfStatement(IfStatement ifStatement)
         {
             using (StartNodeObject(ifStatement))
             {
@@ -486,20 +483,19 @@ public static partial class AstJson
             return ifStatement;
         }
 
-        protected internal override EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
+        protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
         {
             EmptyNodeObject(emptyStatement);
             return emptyStatement;
         }
 
-        protected internal override DebuggerStatement VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+        protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
         {
             EmptyNodeObject(debuggerStatement);
             return debuggerStatement;
         }
 
-        protected internal override ExpressionStatement VisitExpressionStatement(
-            ExpressionStatement expressionStatement)
+        protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
         {
             using (StartNodeObject(expressionStatement))
             {
@@ -514,7 +510,7 @@ public static partial class AstJson
             return expressionStatement;
         }
 
-        protected internal override ForStatement VisitForStatement(ForStatement forStatement)
+        protected internal override object? VisitForStatement(ForStatement forStatement)
         {
             using (StartNodeObject(forStatement))
             {
@@ -527,7 +523,7 @@ public static partial class AstJson
             return forStatement;
         }
 
-        protected internal override ForInStatement VisitForInStatement(ForInStatement forInStatement)
+        protected internal override object? VisitForInStatement(ForInStatement forInStatement)
         {
             using (StartNodeObject(forInStatement))
             {
@@ -540,7 +536,7 @@ public static partial class AstJson
             return forInStatement;
         }
 
-        protected internal override DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+        protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
         {
             using (StartNodeObject(doWhileStatement))
             {
@@ -551,8 +547,7 @@ public static partial class AstJson
             return doWhileStatement;
         }
 
-        protected internal override ArrowFunctionExpression VisitArrowFunctionExpression(
-            ArrowFunctionExpression arrowFunctionExpression)
+        protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
         {
             using (StartNodeObject(arrowFunctionExpression))
             {
@@ -567,7 +562,7 @@ public static partial class AstJson
             return arrowFunctionExpression;
         }
 
-        protected internal override UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
+        protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
         {
             using (StartNodeObject(unaryExpression))
             {
@@ -579,19 +574,13 @@ public static partial class AstJson
             return unaryExpression;
         }
 
-        protected internal override UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
-        {
-            VisitUnaryExpression(updateExpression);
-            return updateExpression;
-        }
-
-        protected internal override ThisExpression VisitThisExpression(ThisExpression thisExpression)
+        protected internal override object? VisitThisExpression(ThisExpression thisExpression)
         {
             EmptyNodeObject(thisExpression);
             return thisExpression;
         }
 
-        protected internal override SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
+        protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
         {
             using (StartNodeObject(sequenceExpression))
             {
@@ -601,7 +590,7 @@ public static partial class AstJson
             return sequenceExpression;
         }
 
-        protected internal override ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
+        protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
         {
             using (StartNodeObject(objectExpression))
             {
@@ -611,7 +600,7 @@ public static partial class AstJson
             return objectExpression;
         }
 
-        protected internal override NewExpression VisitNewExpression(NewExpression newExpression)
+        protected internal override object? VisitNewExpression(NewExpression newExpression)
         {
             using (StartNodeObject(newExpression))
             {
@@ -622,7 +611,7 @@ public static partial class AstJson
             return newExpression;
         }
 
-        protected internal override MemberExpression VisitMemberExpression(MemberExpression memberExpression)
+        protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
         {
             using (StartNodeObject(memberExpression))
             {
@@ -635,13 +624,7 @@ public static partial class AstJson
             return memberExpression;
         }
 
-        protected internal override BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
-        {
-            VisitBinaryExpression(binaryExpression);
-            return binaryExpression;
-        }
-
-        protected internal override Literal VisitLiteral(Literal literal)
+        protected internal override object? VisitLiteral(Literal literal)
         {
             using (StartNodeObject(literal))
             {
@@ -692,7 +675,7 @@ public static partial class AstJson
             return literal;
         }
 
-        protected internal override Identifier VisitIdentifier(Identifier identifier)
+        protected internal override object? VisitIdentifier(Identifier identifier)
         {
             using (StartNodeObject(identifier))
             {
@@ -702,22 +685,22 @@ public static partial class AstJson
             return identifier;
         }
 
-        protected internal override IFunction VisitFunctionExpression(IFunction function)
+        protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
         {
-            using (StartNodeObject((Node) function))
+            using (StartNodeObject(functionExpression))
             {
-                Member("id", function.Id);
-                Member("params", function.Params);
-                Member("body", function.Body);
-                Member("generator", function.Generator);
-                Member("expression", function.Expression);
-                Member("async", function.Async);
+                Member("id", functionExpression.Id);
+                Member("params", functionExpression.Params);
+                Member("body", functionExpression.Body);
+                Member("generator", functionExpression.Generator);
+                Member("expression", functionExpression.Expression);
+                Member("async", functionExpression.Async);
             }
 
-            return function;
+            return functionExpression;
         }
 
-        protected internal override ClassExpression VisitClassExpression(ClassExpression classExpression)
+        protected internal override object? VisitClassExpression(ClassExpression classExpression)
         {
             using (StartNodeObject(classExpression))
             {
@@ -729,7 +712,7 @@ public static partial class AstJson
             return classExpression;
         }
 
-        protected internal override ChainExpression VisitChainExpression(ChainExpression chainExpression)
+        protected internal override object? VisitChainExpression(ChainExpression chainExpression)
         {
             using (StartNodeObject(chainExpression))
             {
@@ -739,8 +722,7 @@ public static partial class AstJson
             return chainExpression;
         }
 
-        protected internal override ExportDefaultDeclaration VisitExportDefaultDeclaration(
-            ExportDefaultDeclaration exportDefaultDeclaration)
+        protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
         {
             using (StartNodeObject(exportDefaultDeclaration))
             {
@@ -750,8 +732,7 @@ public static partial class AstJson
             return exportDefaultDeclaration;
         }
 
-        protected internal override ExportAllDeclaration VisitExportAllDeclaration(
-            ExportAllDeclaration exportAllDeclaration)
+        protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
         {
             using (StartNodeObject(exportAllDeclaration))
             {
@@ -762,8 +743,7 @@ public static partial class AstJson
             return exportAllDeclaration;
         }
 
-        protected internal override ExportNamedDeclaration VisitExportNamedDeclaration(
-            ExportNamedDeclaration exportNamedDeclaration)
+        protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
         {
             using (StartNodeObject(exportNamedDeclaration))
             {
@@ -775,7 +755,7 @@ public static partial class AstJson
             return exportNamedDeclaration;
         }
 
-        protected internal override ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
+        protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
         {
             using (StartNodeObject(exportSpecifier))
             {
@@ -786,7 +766,7 @@ public static partial class AstJson
             return exportSpecifier;
         }
 
-        protected internal override Import VisitImport(Import import)
+        protected internal override object? VisitImport(Import import)
         {
             using (StartNodeObject(import))
             {
@@ -795,7 +775,7 @@ public static partial class AstJson
             return import;
         }
 
-        protected internal override ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
+        protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
         {
             using (StartNodeObject(importDeclaration))
             {
@@ -806,8 +786,7 @@ public static partial class AstJson
             return importDeclaration;
         }
 
-        protected internal override ImportNamespaceSpecifier VisitImportNamespaceSpecifier(
-            ImportNamespaceSpecifier importNamespaceSpecifier)
+        protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
         {
             using (StartNodeObject(importNamespaceSpecifier))
             {
@@ -817,8 +796,7 @@ public static partial class AstJson
             return importNamespaceSpecifier;
         }
 
-        protected internal override ImportDefaultSpecifier VisitImportDefaultSpecifier(
-            ImportDefaultSpecifier importDefaultSpecifier)
+        protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
         {
             using (StartNodeObject(importDefaultSpecifier))
             {
@@ -828,7 +806,7 @@ public static partial class AstJson
             return importDefaultSpecifier;
         }
 
-        protected internal override ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
+        protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
         {
             using (StartNodeObject(importSpecifier))
             {
@@ -839,7 +817,7 @@ public static partial class AstJson
             return importSpecifier;
         }
 
-        protected internal override MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
+        protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
         {
             using (StartNodeObject(methodDefinition))
             {
@@ -853,7 +831,7 @@ public static partial class AstJson
             return methodDefinition;
         }
 
-        protected internal override ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
+        protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
         {
             using (StartNodeObject(forOfStatement))
             {
@@ -866,7 +844,7 @@ public static partial class AstJson
             return forOfStatement;
         }
 
-        protected internal override ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
+        protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
         {
             using (StartNodeObject(classDeclaration))
             {
@@ -878,7 +856,7 @@ public static partial class AstJson
             return classDeclaration;
         }
 
-        protected internal override ClassBody VisitClassBody(ClassBody classBody)
+        protected internal override object? VisitClassBody(ClassBody classBody)
         {
             using (StartNodeObject(classBody))
             {
@@ -888,7 +866,7 @@ public static partial class AstJson
             return classBody;
         }
 
-        protected internal override YieldExpression VisitYieldExpression(YieldExpression yieldExpression)
+        protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
         {
             using (StartNodeObject(yieldExpression))
             {
@@ -899,8 +877,7 @@ public static partial class AstJson
             return yieldExpression;
         }
 
-        protected internal override TaggedTemplateExpression VisitTaggedTemplateExpression(
-            TaggedTemplateExpression taggedTemplateExpression)
+        protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
         {
             using (StartNodeObject(taggedTemplateExpression))
             {
@@ -911,13 +888,13 @@ public static partial class AstJson
             return taggedTemplateExpression;
         }
 
-        protected internal override Super VisitSuper(Super super)
+        protected internal override object? VisitSuper(Super super)
         {
             EmptyNodeObject(super);
             return super;
         }
 
-        protected internal override MetaProperty VisitMetaProperty(MetaProperty metaProperty)
+        protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
         {
             using (StartNodeObject(metaProperty))
             {
@@ -928,17 +905,7 @@ public static partial class AstJson
             return metaProperty;
         }
 
-        protected internal override ArrowParameterPlaceHolder VisitArrowParameterPlaceHolder(
-            ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-        {
-            // Seems that ArrowParameterPlaceHolder nodes never appear
-            // in the final tree and only used during the construction of
-            // a tree. If this assumption is wrong then best to just fail.
-
-            throw new NotImplementedException();
-        }
-
-        protected internal override ObjectPattern VisitObjectPattern(ObjectPattern objectPattern)
+        protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
         {
             using (StartNodeObject(objectPattern))
             {
@@ -948,7 +915,7 @@ public static partial class AstJson
             return objectPattern;
         }
 
-        protected internal override SpreadElement VisitSpreadElement(SpreadElement spreadElement)
+        protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
         {
             using (StartNodeObject(spreadElement))
             {
@@ -958,7 +925,7 @@ public static partial class AstJson
             return spreadElement;
         }
 
-        protected internal override AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+        protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
         {
             using (StartNodeObject(assignmentPattern))
             {
@@ -969,7 +936,7 @@ public static partial class AstJson
             return assignmentPattern;
         }
 
-        protected internal override ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
+        protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
         {
             using (StartNodeObject(arrayPattern))
             {
@@ -979,7 +946,7 @@ public static partial class AstJson
             return arrayPattern;
         }
 
-        protected internal override VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+        protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
         {
             using (StartNodeObject(variableDeclarator))
             {
@@ -990,7 +957,7 @@ public static partial class AstJson
             return variableDeclarator;
         }
 
-        protected internal override TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
+        protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
         {
             using (StartNodeObject(templateLiteral))
             {
@@ -1001,7 +968,7 @@ public static partial class AstJson
             return templateLiteral;
         }
 
-        protected internal override TemplateElement VisitTemplateElement(TemplateElement templateElement)
+        protected internal override object? VisitTemplateElement(TemplateElement templateElement)
         {
             using (StartNodeObject(templateElement))
             {
@@ -1016,7 +983,7 @@ public static partial class AstJson
             return templateElement;
         }
 
-        protected internal override RestElement VisitRestElement(RestElement restElement)
+        protected internal override object? VisitRestElement(RestElement restElement)
         {
             using (StartNodeObject(restElement))
             {
@@ -1026,7 +993,7 @@ public static partial class AstJson
             return restElement;
         }
 
-        protected internal override Property VisitProperty(Property property)
+        protected internal override object? VisitProperty(Property property)
         {
             using (StartNodeObject(property))
             {
@@ -1041,8 +1008,7 @@ public static partial class AstJson
             return property;
         }
 
-        protected internal override ConditionalExpression VisitConditionalExpression(
-            ConditionalExpression conditionalExpression)
+        protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
         {
             using (StartNodeObject(conditionalExpression))
             {
@@ -1054,7 +1020,7 @@ public static partial class AstJson
             return conditionalExpression;
         }
 
-        protected internal override CallExpression VisitCallExpression(CallExpression callExpression)
+        protected internal override object? VisitCallExpression(CallExpression callExpression)
         {
             using (StartNodeObject(callExpression))
             {
@@ -1066,7 +1032,7 @@ public static partial class AstJson
             return callExpression;
         }
 
-        protected internal override BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
+        protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
         {
             using (StartNodeObject(binaryExpression))
             {
@@ -1078,7 +1044,7 @@ public static partial class AstJson
             return binaryExpression;
         }
 
-        protected internal override ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
+        protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
         {
             using (StartNodeObject(arrayExpression))
             {
@@ -1088,8 +1054,7 @@ public static partial class AstJson
             return arrayExpression;
         }
 
-        protected internal override AssignmentExpression VisitAssignmentExpression(
-            AssignmentExpression assignmentExpression)
+        protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
         {
             using (StartNodeObject(assignmentExpression))
             {
@@ -1101,7 +1066,7 @@ public static partial class AstJson
             return assignmentExpression;
         }
 
-        protected internal override ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
+        protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
         {
             using (StartNodeObject(continueStatement))
             {
@@ -1111,7 +1076,7 @@ public static partial class AstJson
             return continueStatement;
         }
 
-        protected internal override BreakStatement VisitBreakStatement(BreakStatement breakStatement)
+        protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
         {
             using (StartNodeObject(breakStatement))
             {
@@ -1121,7 +1086,7 @@ public static partial class AstJson
             return breakStatement;
         }
 
-        protected internal override BlockStatement VisitBlockStatement(BlockStatement blockStatement)
+        protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
         {
             using (StartNodeObject(blockStatement))
             {

@@ -52,7 +52,7 @@ namespace Esprima.Ast
 
         public sealed override NodeCollection ChildNodes => NodeCollection.Empty;
 
-        protected internal sealed override Node Accept(AstVisitor visitor)
+        protected internal sealed override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitLiteral(this);
         }

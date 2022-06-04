@@ -17,8 +17,18 @@ public sealed class JsxNamespacedName : JsxExpression
 
     public override NodeCollection ChildNodes => new(Name, Namespace);
 
-    protected internal override Node Accept(AstVisitor visitor)
+    protected internal override object? Accept(AstVisitor visitor)
     {
         return visitor.VisitJsxNamespacedName(this);
+    }
+
+    public JsxNamespacedName UpdateWith(JsxIdentifier name, JsxIdentifier @namespace)
+    {
+        if (name == Name && @namespace == Namespace)
+        {
+            return this;
+        }
+
+        return new JsxNamespacedName(@namespace, name);
     }
 }

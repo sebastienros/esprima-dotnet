@@ -15,9 +15,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Meta, Property);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitMetaProperty(this);
+        }
+
+        public MetaProperty UpdateWith(Identifier meta, Identifier property)
+        {
+            if (meta == Meta && property == Property)
+            {
+                return this;
+            }
+
+            return new MetaProperty(meta, property);
         }
     }
 }

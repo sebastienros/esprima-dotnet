@@ -12,9 +12,21 @@ namespace Esprima.Ast
 
         public abstract ref readonly NodeList<Statement> Body { get; }
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitProgram(this);
+        }
+
+        protected abstract Program Rewrite(in NodeList<Statement> body);
+
+        public Program UpdateWith(in NodeList<Statement> body)
+        {
+            if (NodeList.AreSame(body, Body))
+            {
+                return this;
+            }
+
+            return Rewrite(body);
         }
     }
 }

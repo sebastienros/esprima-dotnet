@@ -21,10 +21,19 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitMethodDefinition(this);
         }
-        
+
+        public MethodDefinition UpdateWith(Expression key, FunctionExpression value)
+        {
+            if (key == Key && value == Value)
+            {
+                return this;
+            }
+
+            return new MethodDefinition(key, Computed, value, Kind, Static);
+        }
     }
 }

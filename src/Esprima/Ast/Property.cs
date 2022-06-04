@@ -24,9 +24,19 @@ namespace Esprima.Ast
             Shorthand = shorthand;
         }
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitProperty(this);
+        }
+
+        public Property UpdateWith(Expression key, Expression value)
+        {
+            if (key == Key && value == Value)
+            {
+                return this;
+            }
+
+            return new Property(Kind, key, Computed, value, Method, Shorthand);
         }
     }
 }

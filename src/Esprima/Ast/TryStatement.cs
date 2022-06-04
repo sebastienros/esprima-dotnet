@@ -21,9 +21,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Block, Handler, Finalizer);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitTryStatement(this);
+        }
+
+        public TryStatement UpdateWith(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
+        {
+            if (block == Block && handler == Handler && finalizer == Finalizer)
+            {
+                return this;
+            }
+
+            return new TryStatement(block, handler, finalizer);
         }
     }
 }

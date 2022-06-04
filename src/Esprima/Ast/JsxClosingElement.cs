@@ -13,8 +13,18 @@ public sealed class JsxClosingElement : JsxExpression
     
     public override NodeCollection ChildNodes => new(Name);
 
-    protected internal override Node Accept(AstVisitor visitor)
+    protected internal override object? Accept(AstVisitor visitor)
     {
         return visitor.VisitJsxClosingElement(this);
+    }
+
+    public JsxClosingElement UpdateWith(JsxExpression name)
+    {
+        if (name == Name)
+        {
+            return this;
+        }
+
+        return new JsxClosingElement(name);
     }
 }

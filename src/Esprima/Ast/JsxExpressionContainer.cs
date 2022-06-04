@@ -13,8 +13,18 @@ public sealed class JsxExpressionContainer : JsxExpression
 
     public override NodeCollection ChildNodes => new(Expression);
 
-    protected internal override Node Accept(AstVisitor visitor)
+    protected internal override object? Accept(AstVisitor visitor)
     {
         return visitor.VisitJsxExpressionContainer(this);
+    }
+
+    public JsxExpressionContainer UpdateWith(Expression expression)
+    {
+        if (expression == Expression)
+        {
+            return this;
+        }
+
+        return new JsxExpressionContainer(expression);
     }
 }

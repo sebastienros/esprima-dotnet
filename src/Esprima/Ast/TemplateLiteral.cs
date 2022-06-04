@@ -21,9 +21,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitTemplateLiteral(this);
+        }
+
+        public TemplateLiteral UpdateWith(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
+        {
+            if (NodeList.AreSame(quasis, Quasis) && NodeList.AreSame(expressions, Expressions))
+            {
+                return this;
+            }
+
+            return new TemplateLiteral(quasis, expressions);
         }
 
         private IEnumerable<Node> CreateChildNodes()

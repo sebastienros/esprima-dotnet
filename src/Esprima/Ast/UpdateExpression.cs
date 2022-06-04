@@ -8,15 +8,15 @@ namespace Esprima.Ast
         {
             Prefix = prefix;
         }
-        
+
         internal UpdateExpression(UnaryOperator op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg)
         {
             Prefix = prefix;
         }
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected override UnaryExpression Rewrite(Expression argument)
         {
-            return visitor.VisitUpdateExpression(this);
+            return new UpdateExpression(Operator, argument, Prefix);
         }
     }
 }

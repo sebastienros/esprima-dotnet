@@ -25,7 +25,7 @@ namespace Esprima.Ast
         public UnaryExpression(string? op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
         {
         }
-        
+
         internal UnaryExpression(UnaryOperator op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
         {
         }
@@ -33,7 +33,7 @@ namespace Esprima.Ast
         protected UnaryExpression(Nodes type, string? op, Expression arg) : this(type, ParseUnaryOperator(op), arg)
         {
         }
-        
+
         protected UnaryExpression(Nodes type, UnaryOperator op, Expression arg) : base(type)
         {
             Operator = op;
@@ -60,9 +60,24 @@ namespace Esprima.Ast
 
         public sealed override NodeCollection ChildNodes => new(Argument);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitUnaryExpression(this);
+        }
+
+        protected virtual UnaryExpression Rewrite(Expression argument)
+        {
+            return new UnaryExpression(Operator, argument);
+        }
+
+        public UnaryExpression UpdateWith(Expression argument)
+        {
+            if (argument == Argument)
+            {
+                return this;
+            }
+
+            return Rewrite(argument);
         }
     }
 }

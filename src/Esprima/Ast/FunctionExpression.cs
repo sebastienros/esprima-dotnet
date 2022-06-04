@@ -34,9 +34,19 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
 
-        protected internal override Node Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor)
         {
-            return (visitor.VisitFunctionExpression(this) as Node)!;
+            return visitor.VisitFunctionExpression(this);
+        }
+
+        public FunctionExpression UpdateWith(Identifier? id, in NodeList<Expression> parameters, BlockStatement body)
+        {
+            if (id == Id && NodeList.AreSame(parameters, Params) && body == Body)
+            {
+                return this;
+            }
+
+            return new FunctionExpression(id, parameters, body, Generator, Strict, Async);
         }
     }
 }

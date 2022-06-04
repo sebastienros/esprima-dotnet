@@ -54,8 +54,6 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<ArrowFunctionExpression>? VisitedArrowFunctionExpression;
     public event EventHandler<UnaryExpression>? VisitingUnaryExpression;
     public event EventHandler<UnaryExpression>? VisitedUnaryExpression;
-    public event EventHandler<UpdateExpression>? VisitingUpdateExpression;
-    public event EventHandler<UpdateExpression>? VisitedUpdateExpression;
     public event EventHandler<ThisExpression>? VisitingThisExpression;
     public event EventHandler<ThisExpression>? VisitedThisExpression;
     public event EventHandler<SequenceExpression>? VisitingSequenceExpression;
@@ -66,14 +64,16 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<NewExpression>? VisitedNewExpression;
     public event EventHandler<MemberExpression>? VisitingMemberExpression;
     public event EventHandler<MemberExpression>? VisitedMemberExpression;
-    public event EventHandler<BinaryExpression>? VisitingLogicalExpression;
-    public event EventHandler<BinaryExpression>? VisitedLogicalExpression;
     public event EventHandler<Literal>? VisitingLiteral;
     public event EventHandler<Literal>? VisitedLiteral;
     public event EventHandler<Identifier>? VisitingIdentifier;
     public event EventHandler<Identifier>? VisitedIdentifier;
-    public event EventHandler<IFunction>? VisitingFunctionExpression;
-    public event EventHandler<IFunction>? VisitedFunctionExpression;
+    public event EventHandler<PrivateIdentifier>? VisitingPrivateIdentifier;
+    public event EventHandler<PrivateIdentifier>? VisitedPrivateIdentifier;
+    public event EventHandler<FunctionExpression>? VisitingFunctionExpression;
+    public event EventHandler<FunctionExpression>? VisitedFunctionExpression;
+    public event EventHandler<PropertyDefinition>? VisitingPropertyDefinition;
+    public event EventHandler<PropertyDefinition>? VisitedPropertyDefinition;
     public event EventHandler<ChainExpression>? VisitingChainExpression;
     public event EventHandler<ChainExpression>? VisitedChainExpression;
     public event EventHandler<ClassExpression>? VisitingClassExpression;
@@ -130,6 +130,8 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<RestElement>? VisitedRestElement;
     public event EventHandler<Property>? VisitingProperty;
     public event EventHandler<Property>? VisitedProperty;
+    public event EventHandler<AwaitExpression>? VisitingAwaitExpression;
+    public event EventHandler<AwaitExpression>? VisitedAwaitExpression;
     public event EventHandler<ConditionalExpression>? VisitingConditionalExpression;
     public event EventHandler<ConditionalExpression>? VisitedConditionalExpression;
     public event EventHandler<CallExpression>? VisitingCallExpression;
@@ -147,16 +149,15 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<BlockStatement>? VisitingBlockStatement;
     public event EventHandler<BlockStatement>? VisitedBlockStatement;
 
-    public override Node? Visit(Node? node)
+    public override object? Visit(Node node)
     {
-        VisitingNode?.Invoke(this, node !);
+        VisitingNode?.Invoke(this, node);
         var result = base.Visit(node);
-        VisitedNode?.Invoke(this, node !);
+        VisitedNode?.Invoke(this, node);
         return result;
     }
 
-
-    protected internal override Program VisitProgram(Program program)
+    protected internal override object? VisitProgram(Program program)
     {
         VisitingProgram?.Invoke(this, program);
         var result = base.VisitProgram(program);
@@ -164,16 +165,16 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    [Obsolete(
-        "This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-    protected override void VisitUnknownNode(Node node)
+    [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
+    protected internal override object? VisitUnknownNode(Node node)
     {
         VisitingUnknownNode?.Invoke(this, node);
-        base.VisitUnknownNode(node);
+        var result = base.VisitUnknownNode(node);
         VisitedUnknownNode?.Invoke(this, node);
+        return result;
     }
 
-    protected internal override CatchClause VisitCatchClause(CatchClause catchClause)
+    protected internal override object? VisitCatchClause(CatchClause catchClause)
     {
         VisitingCatchClause?.Invoke(this, catchClause);
         var result = base.VisitCatchClause(catchClause);
@@ -181,7 +182,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override FunctionDeclaration VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
     {
         VisitingFunctionDeclaration?.Invoke(this, functionDeclaration);
         var result = base.VisitFunctionDeclaration(functionDeclaration);
@@ -189,7 +190,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override WithStatement VisitWithStatement(WithStatement withStatement)
+    protected internal override object? VisitWithStatement(WithStatement withStatement)
     {
         VisitingWithStatement?.Invoke(this, withStatement);
         var result = base.VisitWithStatement(withStatement);
@@ -197,7 +198,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override WhileStatement VisitWhileStatement(WhileStatement whileStatement)
+    protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
     {
         VisitingWhileStatement?.Invoke(this, whileStatement);
         var result = base.VisitWhileStatement(whileStatement);
@@ -205,7 +206,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override VariableDeclaration VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
     {
         VisitingVariableDeclaration?.Invoke(this, variableDeclaration);
         var result = base.VisitVariableDeclaration(variableDeclaration);
@@ -213,7 +214,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override TryStatement VisitTryStatement(TryStatement tryStatement)
+    protected internal override object? VisitTryStatement(TryStatement tryStatement)
     {
         VisitingTryStatement?.Invoke(this, tryStatement);
         var result = base.VisitTryStatement(tryStatement);
@@ -221,7 +222,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ThrowStatement VisitThrowStatement(ThrowStatement throwStatement)
+    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
     {
         VisitingThrowStatement?.Invoke(this, throwStatement);
         var result = base.VisitThrowStatement(throwStatement);
@@ -229,7 +230,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override SwitchStatement VisitSwitchStatement(SwitchStatement switchStatement)
+    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
     {
         VisitingSwitchStatement?.Invoke(this, switchStatement);
         var result = base.VisitSwitchStatement(switchStatement);
@@ -237,7 +238,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override SwitchCase VisitSwitchCase(SwitchCase switchCase)
+    protected internal override object? VisitSwitchCase(SwitchCase switchCase)
     {
         VisitingSwitchCase?.Invoke(this, switchCase);
         var result = base.VisitSwitchCase(switchCase);
@@ -245,7 +246,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ReturnStatement VisitReturnStatement(ReturnStatement returnStatement)
+    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
     {
         VisitingReturnStatement?.Invoke(this, returnStatement);
         var result = base.VisitReturnStatement(returnStatement);
@@ -253,7 +254,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override LabeledStatement VisitLabeledStatement(LabeledStatement labeledStatement)
+    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
     {
         VisitingLabeledStatement?.Invoke(this, labeledStatement);
         var result = base.VisitLabeledStatement(labeledStatement);
@@ -261,7 +262,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override IfStatement VisitIfStatement(IfStatement ifStatement)
+    protected internal override object? VisitIfStatement(IfStatement ifStatement)
     {
         VisitingIfStatement?.Invoke(this, ifStatement);
         var result = base.VisitIfStatement(ifStatement);
@@ -269,7 +270,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override EmptyStatement VisitEmptyStatement(EmptyStatement emptyStatement)
+    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
     {
         VisitingEmptyStatement?.Invoke(this, emptyStatement);
         var result = base.VisitEmptyStatement(emptyStatement);
@@ -277,7 +278,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override DebuggerStatement VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
     {
         VisitingDebuggerStatement?.Invoke(this, debuggerStatement);
         var result = base.VisitDebuggerStatement(debuggerStatement);
@@ -285,7 +286,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ExpressionStatement VisitExpressionStatement(ExpressionStatement expressionStatement)
+    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
     {
         VisitingExpressionStatement?.Invoke(this, expressionStatement);
         var result = base.VisitExpressionStatement(expressionStatement);
@@ -293,7 +294,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ForStatement VisitForStatement(ForStatement forStatement)
+    protected internal override object? VisitForStatement(ForStatement forStatement)
     {
         VisitingForStatement?.Invoke(this, forStatement);
         var result = base.VisitForStatement(forStatement);
@@ -301,7 +302,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ForInStatement VisitForInStatement(ForInStatement forInStatement)
+    protected internal override object? VisitForInStatement(ForInStatement forInStatement)
     {
         VisitingForInStatement?.Invoke(this, forInStatement);
         var result = base.VisitForInStatement(forInStatement);
@@ -309,7 +310,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override DoWhileStatement VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
     {
         VisitingDoWhileStatement?.Invoke(this, doWhileStatement);
         var result = base.VisitDoWhileStatement(doWhileStatement);
@@ -317,8 +318,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ArrowFunctionExpression VisitArrowFunctionExpression(
-        ArrowFunctionExpression arrowFunctionExpression)
+    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
     {
         VisitingArrowFunctionExpression?.Invoke(this, arrowFunctionExpression);
         var result = base.VisitArrowFunctionExpression(arrowFunctionExpression);
@@ -326,7 +326,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override UnaryExpression VisitUnaryExpression(UnaryExpression unaryExpression)
+    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
     {
         VisitingUnaryExpression?.Invoke(this, unaryExpression);
         var result = base.VisitUnaryExpression(unaryExpression);
@@ -334,15 +334,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override UpdateExpression VisitUpdateExpression(UpdateExpression updateExpression)
-    {
-        VisitingUpdateExpression?.Invoke(this, updateExpression);
-        var result = base.VisitUpdateExpression(updateExpression);
-        VisitedUpdateExpression?.Invoke(this, updateExpression);
-        return result;
-    }
-
-    protected internal override ThisExpression VisitThisExpression(ThisExpression thisExpression)
+    protected internal override object? VisitThisExpression(ThisExpression thisExpression)
     {
         VisitingThisExpression?.Invoke(this, thisExpression);
         var result = base.VisitThisExpression(thisExpression);
@@ -350,7 +342,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override SequenceExpression VisitSequenceExpression(SequenceExpression sequenceExpression)
+    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
     {
         VisitingSequenceExpression?.Invoke(this, sequenceExpression);
         var result = base.VisitSequenceExpression(sequenceExpression);
@@ -358,7 +350,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ObjectExpression VisitObjectExpression(ObjectExpression objectExpression)
+    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
     {
         VisitingObjectExpression?.Invoke(this, objectExpression);
         var result = base.VisitObjectExpression(objectExpression);
@@ -366,7 +358,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override NewExpression VisitNewExpression(NewExpression newExpression)
+    protected internal override object? VisitNewExpression(NewExpression newExpression)
     {
         VisitingNewExpression?.Invoke(this, newExpression);
         var result = base.VisitNewExpression(newExpression);
@@ -374,7 +366,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override MemberExpression VisitMemberExpression(MemberExpression memberExpression)
+    protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
     {
         VisitingMemberExpression?.Invoke(this, memberExpression);
         var result = base.VisitMemberExpression(memberExpression);
@@ -382,15 +374,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override BinaryExpression VisitLogicalExpression(BinaryExpression binaryExpression)
-    {
-        VisitingLogicalExpression?.Invoke(this, binaryExpression);
-        var result = base.VisitLogicalExpression(binaryExpression);
-        VisitedLogicalExpression?.Invoke(this, binaryExpression);
-        return result;
-    }
-
-    protected internal override Literal VisitLiteral(Literal literal)
+    protected internal override object? VisitLiteral(Literal literal)
     {
         VisitingLiteral?.Invoke(this, literal);
         var result = base.VisitLiteral(literal);
@@ -398,7 +382,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override Identifier VisitIdentifier(Identifier identifier)
+    protected internal override object? VisitIdentifier(Identifier identifier)
     {
         VisitingIdentifier?.Invoke(this, identifier);
         var result = base.VisitIdentifier(identifier);
@@ -406,15 +390,31 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override IFunction VisitFunctionExpression(IFunction function)
+    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
     {
-        VisitingFunctionExpression?.Invoke(this, function);
-        var result = base.VisitFunctionExpression(function);
-        VisitedFunctionExpression?.Invoke(this, function);
+        VisitingPrivateIdentifier?.Invoke(this, privateIdentifier);
+        var result = base.VisitPrivateIdentifier(privateIdentifier);
+        VisitedPrivateIdentifier?.Invoke(this, privateIdentifier);
         return result;
     }
 
-    protected internal override ChainExpression VisitChainExpression(ChainExpression chainExpression)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
+    {
+        VisitingFunctionExpression?.Invoke(this, functionExpression);
+        var result = base.VisitFunctionExpression(functionExpression);
+        VisitedFunctionExpression?.Invoke(this, functionExpression);
+        return result;
+    }
+
+    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+    {
+        VisitingPropertyDefinition?.Invoke(this, propertyDefinition);
+        var result = base.VisitPropertyDefinition(propertyDefinition);
+        VisitedPropertyDefinition?.Invoke(this, propertyDefinition);
+        return result;
+    }
+
+    protected internal override object? VisitChainExpression(ChainExpression chainExpression)
     {
         VisitingChainExpression?.Invoke(this, chainExpression);
         var result = base.VisitChainExpression(chainExpression);
@@ -422,7 +422,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ClassExpression VisitClassExpression(ClassExpression classExpression)
+    protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
         VisitingClassExpression?.Invoke(this, classExpression);
         var result = base.VisitClassExpression(classExpression);
@@ -430,8 +430,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ExportDefaultDeclaration VisitExportDefaultDeclaration(
-        ExportDefaultDeclaration exportDefaultDeclaration)
+    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
     {
         VisitingExportDefaultDeclaration?.Invoke(this, exportDefaultDeclaration);
         var result = base.VisitExportDefaultDeclaration(exportDefaultDeclaration);
@@ -439,8 +438,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ExportAllDeclaration VisitExportAllDeclaration(
-        ExportAllDeclaration exportAllDeclaration)
+    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
         VisitingExportAllDeclaration?.Invoke(this, exportAllDeclaration);
         var result = base.VisitExportAllDeclaration(exportAllDeclaration);
@@ -448,8 +446,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ExportNamedDeclaration VisitExportNamedDeclaration(
-        ExportNamedDeclaration exportNamedDeclaration)
+    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
         VisitingExportNamedDeclaration?.Invoke(this, exportNamedDeclaration);
         var result = base.VisitExportNamedDeclaration(exportNamedDeclaration);
@@ -457,7 +454,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ExportSpecifier VisitExportSpecifier(ExportSpecifier exportSpecifier)
+    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
     {
         VisitingExportSpecifier?.Invoke(this, exportSpecifier);
         var result = base.VisitExportSpecifier(exportSpecifier);
@@ -465,7 +462,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override Import VisitImport(Import import)
+    protected internal override object? VisitImport(Import import)
     {
         VisitingImport?.Invoke(this, import);
         var result = base.VisitImport(import);
@@ -473,7 +470,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ImportDeclaration VisitImportDeclaration(ImportDeclaration importDeclaration)
+    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         VisitingImportDeclaration?.Invoke(this, importDeclaration);
         var result = base.VisitImportDeclaration(importDeclaration);
@@ -481,8 +478,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ImportNamespaceSpecifier VisitImportNamespaceSpecifier(
-        ImportNamespaceSpecifier importNamespaceSpecifier)
+    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
     {
         VisitingImportNamespaceSpecifier?.Invoke(this, importNamespaceSpecifier);
         var result = base.VisitImportNamespaceSpecifier(importNamespaceSpecifier);
@@ -490,8 +486,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ImportDefaultSpecifier VisitImportDefaultSpecifier(
-        ImportDefaultSpecifier importDefaultSpecifier)
+    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
     {
         VisitingImportDefaultSpecifier?.Invoke(this, importDefaultSpecifier);
         var result = base.VisitImportDefaultSpecifier(importDefaultSpecifier);
@@ -499,7 +494,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ImportSpecifier VisitImportSpecifier(ImportSpecifier importSpecifier)
+    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
     {
         VisitingImportSpecifier?.Invoke(this, importSpecifier);
         var result = base.VisitImportSpecifier(importSpecifier);
@@ -507,7 +502,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override MethodDefinition VisitMethodDefinition(MethodDefinition methodDefinition)
+    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
         VisitingMethodDefinition?.Invoke(this, methodDefinition);
         var result = base.VisitMethodDefinition(methodDefinition);
@@ -515,7 +510,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ForOfStatement VisitForOfStatement(ForOfStatement forOfStatement)
+    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
     {
         VisitingForOfStatement?.Invoke(this, forOfStatement);
         var result = base.VisitForOfStatement(forOfStatement);
@@ -523,7 +518,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ClassDeclaration VisitClassDeclaration(ClassDeclaration classDeclaration)
+    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
         VisitingClassDeclaration?.Invoke(this, classDeclaration);
         var result = base.VisitClassDeclaration(classDeclaration);
@@ -531,7 +526,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ClassBody VisitClassBody(ClassBody classBody)
+    protected internal override object? VisitClassBody(ClassBody classBody)
     {
         VisitingClassBody?.Invoke(this, classBody);
         var result = base.VisitClassBody(classBody);
@@ -539,7 +534,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override YieldExpression VisitYieldExpression(YieldExpression yieldExpression)
+    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
     {
         VisitingYieldExpression?.Invoke(this, yieldExpression);
         var result = base.VisitYieldExpression(yieldExpression);
@@ -547,8 +542,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override TaggedTemplateExpression VisitTaggedTemplateExpression(
-        TaggedTemplateExpression taggedTemplateExpression)
+    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
     {
         VisitingTaggedTemplateExpression?.Invoke(this, taggedTemplateExpression);
         var result = base.VisitTaggedTemplateExpression(taggedTemplateExpression);
@@ -556,7 +550,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override Super VisitSuper(Super super)
+    protected internal override object? VisitSuper(Super super)
     {
         VisitingSuper?.Invoke(this, super);
         var result = base.VisitSuper(super);
@@ -564,7 +558,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override MetaProperty VisitMetaProperty(MetaProperty metaProperty)
+    protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
     {
         VisitingMetaProperty?.Invoke(this, metaProperty);
         var result = base.VisitMetaProperty(metaProperty);
@@ -572,7 +566,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ObjectPattern VisitObjectPattern(ObjectPattern objectPattern)
+    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
     {
         VisitingObjectPattern?.Invoke(this, objectPattern);
         var result = base.VisitObjectPattern(objectPattern);
@@ -580,7 +574,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override SpreadElement VisitSpreadElement(SpreadElement spreadElement)
+    protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
     {
         VisitingSpreadElement?.Invoke(this, spreadElement);
         var result = base.VisitSpreadElement(spreadElement);
@@ -588,7 +582,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override AssignmentPattern VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
     {
         VisitingAssignmentPattern?.Invoke(this, assignmentPattern);
         var result = base.VisitAssignmentPattern(assignmentPattern);
@@ -596,7 +590,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ArrayPattern VisitArrayPattern(ArrayPattern arrayPattern)
+    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
     {
         VisitingArrayPattern?.Invoke(this, arrayPattern);
         var result = base.VisitArrayPattern(arrayPattern);
@@ -604,7 +598,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override VariableDeclarator VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
     {
         VisitingVariableDeclarator?.Invoke(this, variableDeclarator);
         var result = base.VisitVariableDeclarator(variableDeclarator);
@@ -612,7 +606,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override TemplateLiteral VisitTemplateLiteral(TemplateLiteral templateLiteral)
+    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
     {
         VisitingTemplateLiteral?.Invoke(this, templateLiteral);
         var result = base.VisitTemplateLiteral(templateLiteral);
@@ -620,7 +614,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override TemplateElement VisitTemplateElement(TemplateElement templateElement)
+    protected internal override object? VisitTemplateElement(TemplateElement templateElement)
     {
         VisitingTemplateElement?.Invoke(this, templateElement);
         var result = base.VisitTemplateElement(templateElement);
@@ -628,7 +622,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override RestElement VisitRestElement(RestElement restElement)
+    protected internal override object? VisitRestElement(RestElement restElement)
     {
         VisitingRestElement?.Invoke(this, restElement);
         var result = base.VisitRestElement(restElement);
@@ -636,7 +630,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override Property VisitProperty(Property property)
+    protected internal override object? VisitProperty(Property property)
     {
         VisitingProperty?.Invoke(this, property);
         var result = base.VisitProperty(property);
@@ -644,8 +638,15 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ConditionalExpression VisitConditionalExpression(
-        ConditionalExpression conditionalExpression)
+    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
+    {
+        VisitingAwaitExpression?.Invoke(this, awaitExpression);
+        var result = base.VisitAwaitExpression(awaitExpression);
+        VisitedAwaitExpression?.Invoke(this, awaitExpression);
+        return result;
+    }
+
+    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
     {
         VisitingConditionalExpression?.Invoke(this, conditionalExpression);
         var result = base.VisitConditionalExpression(conditionalExpression);
@@ -653,7 +654,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override CallExpression VisitCallExpression(CallExpression callExpression)
+    protected internal override object? VisitCallExpression(CallExpression callExpression)
     {
         VisitingCallExpression?.Invoke(this, callExpression);
         var result = base.VisitCallExpression(callExpression);
@@ -661,7 +662,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override BinaryExpression VisitBinaryExpression(BinaryExpression binaryExpression)
+    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
     {
         VisitingBinaryExpression?.Invoke(this, binaryExpression);
         var result = base.VisitBinaryExpression(binaryExpression);
@@ -669,7 +670,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ArrayExpression VisitArrayExpression(ArrayExpression arrayExpression)
+    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
         VisitingArrayExpression?.Invoke(this, arrayExpression);
         var result = base.VisitArrayExpression(arrayExpression);
@@ -677,8 +678,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override AssignmentExpression VisitAssignmentExpression(
-        AssignmentExpression assignmentExpression)
+    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
     {
         VisitingAssignmentExpression?.Invoke(this, assignmentExpression);
         var result = base.VisitAssignmentExpression(assignmentExpression);
@@ -686,7 +686,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override ContinueStatement VisitContinueStatement(ContinueStatement continueStatement)
+    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
     {
         VisitingContinueStatement?.Invoke(this, continueStatement);
         var result = base.VisitContinueStatement(continueStatement);
@@ -694,7 +694,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override BreakStatement VisitBreakStatement(BreakStatement breakStatement)
+    protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
     {
         VisitingBreakStatement?.Invoke(this, breakStatement);
         var result = base.VisitBreakStatement(breakStatement);
@@ -702,7 +702,7 @@ public partial class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override BlockStatement VisitBlockStatement(BlockStatement blockStatement)
+    protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
     {
         VisitingBlockStatement?.Invoke(this, blockStatement);
         var result = base.VisitBlockStatement(blockStatement);
