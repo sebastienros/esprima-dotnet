@@ -784,7 +784,7 @@ public static partial class AstJson
             return import;
         }
         
-        protected internal override ImportAttribute VisitImportAttribute(ImportAttribute importAttribute)
+        protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
         {
             using (StartNodeObject(importAttribute))
             {
