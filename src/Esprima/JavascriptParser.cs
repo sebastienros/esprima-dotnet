@@ -4712,9 +4712,30 @@ namespace Esprima
 
             NextToken();
             Expect("{");
+
+            var paramMap = new Dictionary<string?, bool>();
             while (!Match("}"))
             {
-                attributes.Add(ParseImportAttribute());
+                var importAttribute = ParseImportAttribute();
+                
+                string? key = string.Empty; 
+                switch (importAttribute.Key)
+                {
+                    case Identifier identifier:
+                        key = identifier.Name;
+                        break;
+                    case Literal literal:
+                        key = literal.StringValue;
+                        break;
+                }
+
+                if (paramMap.ContainsKey(key))
+                {
+                    ThrowError(Messages.DuplicateAssertClauseProperty, key);
+                }
+                paramMap.Add(key, true);
+                
+                attributes.Add(importAttribute);
                 if (!Match("}"))
                 {
                     ExpectCommaSeparator();
@@ -4727,11 +4748,8 @@ namespace Esprima
         private ImportAttribute ParseImportAttribute()
         {
             var node = CreateNode();
-            if (_lookahead.Type != TokenType.Identifier) {
-                ThrowUnexpectedToken(NextToken());
-            }
 
-            Expression key = ParseIdentifierName();
+            Expression key = ParseObjectPropertyKey();
             if (!Match(":"))
             {
                 ThrowUnexpectedToken(NextToken());

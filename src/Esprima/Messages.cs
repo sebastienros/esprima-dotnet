@@ -18,6 +18,7 @@
         public const string DuplicateConstructor = "A class may only have one constructor";
         public const string DuplicateParameter = "Duplicate parameter name not allowed in this context";
         public const string DuplicateProtoProperty = "Duplicate __proto__ fields are not allowed in object literals";
+        public const string DuplicateAssertClauseProperty = "Assert clause may not have duplicate keys {0}";
         public const string ForInOfLoopInitializer = "'{0} loop variable declaration may not have an initializer";
         public const string GeneratorInLegacyContext = "Generator declarations are not allowed in legacy contexts";
         public const string IllegalBreak = "Illegal break statement";
