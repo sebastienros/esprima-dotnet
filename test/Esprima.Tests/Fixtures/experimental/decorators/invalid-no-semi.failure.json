@@ -1,0 +1,6 @@
+{
+  "index": 5,
+  "lineNumber": 2,
+  "column": 6,
+  "message": "Decorators must not be followed by a semicolon."
+}
