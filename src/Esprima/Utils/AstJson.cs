@@ -347,6 +347,11 @@ public class AstToJsonConverter : AstJson.IConverter
             {
                 Member("body", program.Body, e => (Node) e);
                 Member("sourceType", program.SourceType);
+
+                if (program is Script s)
+                {
+                    Member("strict", s.Strict);
+                }
             }
 
             return program;
@@ -377,6 +382,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("body", functionDeclaration.Body);
                 Member("generator", functionDeclaration.Generator);
                 Member("expression", functionDeclaration.Expression);
+                Member("strict", functionDeclaration.Strict);
                 Member("async", functionDeclaration.Async);
             }
 
@@ -576,6 +582,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("body", arrowFunctionExpression.Body);
                 Member("generator", arrowFunctionExpression.Generator);
                 Member("expression", arrowFunctionExpression.Expression);
+                Member("strict", arrowFunctionExpression.Strict);
                 Member("async", arrowFunctionExpression.Async);
             }
 
@@ -705,6 +712,16 @@ public class AstToJsonConverter : AstJson.IConverter
             return identifier;
         }
 
+        protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+        {
+            using (StartNodeObject(privateIdentifier))
+            {
+                Member("name", privateIdentifier.Name);
+            }
+
+            return privateIdentifier;
+        }
+
         protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
         {
             using (StartNodeObject(functionExpression))
@@ -714,10 +731,25 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("body", functionExpression.Body);
                 Member("generator", functionExpression.Generator);
                 Member("expression", functionExpression.Expression);
+                Member("strict", functionExpression.Strict);
                 Member("async", functionExpression.Async);
             }
 
             return functionExpression;
+        }
+
+        protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+        {
+            using (StartNodeObject(propertyDefinition))
+            {
+                Member("key", propertyDefinition.Key);
+                Member("computed", propertyDefinition.Computed);
+                Member("value", propertyDefinition.Value);
+                Member("kind", propertyDefinition.Kind);
+                Member("static", propertyDefinition.Static);
+            }
+
+            return propertyDefinition;
         }
 
         protected internal override object? VisitDecorator(Decorator decorator)
@@ -741,7 +773,7 @@ public class AstToJsonConverter : AstJson.IConverter
                     Member("decorators", accessorProperty.Decorators);
                 }
             }
-            
+
             return accessorProperty;
         }
 
@@ -827,6 +859,8 @@ public class AstToJsonConverter : AstJson.IConverter
         {
             using (StartNodeObject(import))
             {
+                Member("source", import.Source);
+
                 if (import.Attributes is not null)
                 {
                     Member("attributes", import.Attributes);
@@ -835,7 +869,7 @@ public class AstToJsonConverter : AstJson.IConverter
 
             return import;
         }
-        
+
         protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
         {
             using (StartNodeObject(importAttribute))
