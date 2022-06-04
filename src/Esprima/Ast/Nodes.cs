@@ -68,6 +68,7 @@
         ImportSpecifier,
         ImportDefaultSpecifier,
         ImportNamespaceSpecifier,
+        ImportAttribute,
         ImportDeclaration,
         ExportSpecifier,
         ExportNamedDeclaration,

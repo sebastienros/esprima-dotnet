@@ -5,31 +5,33 @@ namespace Esprima.Ast
     public sealed class Import : Expression
     {
         public readonly Expression? Source;
+        public readonly Expression? Attributes;
 
         public Import() : base(Nodes.Import)
         {
         }
 
-        public Import(Expression? source) : base(Nodes.Import)
+        public Import(Expression? source, Expression? attributes) : base(Nodes.Import)
         {
             Source = source;
+            Attributes = attributes;
         }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        public override NodeCollection ChildNodes => new(Source, Attributes);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitImport(this);
         }
 
-        public Import UpdateWith(Expression? source)
+        public Import UpdateWith(Expression? source, Expression? attributes)
         {
-            if (source == Source)
+            if (source == Source && attributes == Attributes)
             {
                 return this;
             }
 
-            return new Import(source);
+            return new Import(source, attributes);
         }
     }
 }

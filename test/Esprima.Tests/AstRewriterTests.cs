@@ -431,13 +431,13 @@ sealed class TestRewriter : AstRewriter
     protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
         return ForceNewObjectByControlType((ExportAllDeclaration) base.VisitExportAllDeclaration(exportAllDeclaration)!,
-            node => new ExportAllDeclaration(node.Source, node.Exported));
+            node => new ExportAllDeclaration(node.Source, node.Exported, exportAllDeclaration.Assertions));
     }
 
     protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
         return ForceNewObjectByControlType((ExportNamedDeclaration) base.VisitExportNamedDeclaration(exportNamedDeclaration)!,
-            node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source));
+            node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source, exportNamedDeclaration.Assertions));
     }
 
     protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
@@ -449,13 +449,13 @@ sealed class TestRewriter : AstRewriter
     protected internal override object? VisitImport(Import import)
     {
         return ForceNewObjectByControlType((Import) base.VisitImport(import)!,
-            node => new Import(node.Source));
+            node => new Import(node.Source, import.Attributes));
     }
 
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         return ForceNewObjectByControlType((ImportDeclaration) base.VisitImportDeclaration(importDeclaration)!,
-            node => new ImportDeclaration(node.Specifiers, node.Source));
+            node => new ImportDeclaration(node.Specifiers, node.Source, importDeclaration.Assertions));
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)

@@ -24,7 +24,7 @@ public static class Program
         );
 
         // this should be same in both Test262Harness.settings.json and here
-        const string Sha = "08a9fc2b974f83a9835174cede20a7935f126015";
+        const string Sha = "53d6cd6d463df461e1c506e0d2be4e36de0ef6fa";
         var stream = await Test262StreamExtensions.FromGitHub(Sha);
 
         // we materialize to give better feedback on progress
