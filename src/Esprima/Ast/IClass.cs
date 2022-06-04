@@ -9,5 +9,6 @@
         Expression? SuperClass { get; }
         ClassBody Body { get; }
         NodeCollection ChildNodes { get; }
+        NodeList<Decorator> Decorators { get; }
     }
 }

@@ -57,6 +57,8 @@ namespace Esprima
             public bool Strict;
             public bool AllowIdentifierEscape;
 
+            public ArrayList<Decorator> Decorators;
+
             public HashSet<string?> LabelSet;
         }
 
@@ -646,6 +648,15 @@ namespace Esprima
                             NextToken();
                             expr = Finalize(node, new PrivateIdentifier((string?) NextToken().Value));
                             break;
+                        case "@":
+                            var decorators = ParseDecorators();
+                            
+                            _context.Decorators = decorators;
+                            var expression = ParsePrimaryExpression();
+                            _context.Decorators = new ArrayList<Decorator>();
+                            
+                            expr = Finalize(node, expression);
+                            break;
                         default:
                             return ThrowUnexpectedToken<Expression>(NextToken());
                     }
@@ -1060,9 +1071,9 @@ namespace Esprima
                 var property = Match("...") ? (Expression) ParseSpreadElement() : ParseObjectProperty(ref hasProto);
                 properties.Add(property);
 
-                if (!Match("}"))
+                if (!Match("}") && (property is not Property {Method: true} || Match(",")))
                 {
-                    ExpectCommaSeparator();
+                    ExpectCommaSeparator();    
                 }
             }
 
@@ -4381,6 +4392,43 @@ namespace Esprima
             return Finalize(node, new StaticBlock(NodeList.From(ref block)));
         }
 
+        private Decorator ParseDecorator()
+        {
+            var node = CreateNode();
+
+            Expect("@");
+            var previousStrict = _context.Strict;
+            var previousAllowYield = _context.AllowYield;
+            var previousIsAsync = _context.IsAsync;
+            _context.Strict = false;
+            _context.AllowYield = true;
+            _context.IsAsync = false;
+
+            var expression = IsolateCoverGrammar(parseLeftHandSideExpressionAllowCall);
+            _context.Strict = previousStrict;
+            _context.AllowYield = previousAllowYield;
+            _context.IsAsync = previousIsAsync;
+            
+            if (Match(";"))
+            {
+                ThrowError(Messages.NoSemicolonAfterDecorator);
+            }
+            
+            return Finalize(node, new Decorator(expression));
+        }
+
+        private ArrayList<Decorator> ParseDecorators()
+        {
+            var decorators = new ArrayList<Decorator>();
+            
+            while (Match("@"))
+            {
+                decorators.Add(ParseDecorator());
+            }
+
+            return decorators;
+        }
+
         private Node ParseClassElement(ref bool hasConstructor)
         {
             var token = _lookahead;
@@ -4395,6 +4443,13 @@ namespace Esprima
             var isAsync = false;
             var isGenerator = false;
             var isPrivate = false;
+            
+            var decorators = ParseDecorators();
+
+            if (decorators.Count > 0)
+            {
+                token = _lookahead;
+            }
 
             if (Match("*"))
             {
@@ -4592,10 +4647,10 @@ namespace Esprima
             if (kind == PropertyKind.Property)
             {
                 ConsumeSemicolon();
-                return Finalize(node, new PropertyDefinition(key!, computed, value!, isStatic));
+                return Finalize(node, new PropertyDefinition(key!, computed, value!, isStatic, NodeList.From(ref decorators)));
             }
 
-            return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic));
+            return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic, NodeList.From(ref decorators)));
         }
 
         private ArrayList<Node> ParseClassElementList()
@@ -4655,7 +4710,7 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowSuper = previousAllowSuper;
 
-            return Finalize(node, new ClassDeclaration(id, superClass, classBody));
+            return Finalize(node, new ClassDeclaration(id, superClass, classBody, NodeList.From(ref _context.Decorators)));
         }
 
         private ClassExpression ParseClassExpression()
@@ -4683,7 +4738,7 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowSuper = previousAllowSuper;
 
-            return Finalize(node, new ClassExpression(id, superClass, classBody));
+            return Finalize(node, new ClassExpression(id, superClass, classBody, NodeList.From(ref _context.Decorators)));
         }
 
         // https://tc39.github.io/ecma262/#sec-imports

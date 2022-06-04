@@ -2,6 +2,7 @@
 {
     public enum Nodes
     {
+        AccessorProperty,
         AssignmentExpression,
         ArrayExpression,
         BlockStatement,
@@ -14,6 +15,7 @@
         ContinueStatement,
         DoWhileStatement,
         DebuggerStatement,
+        Decorator,
         EmptyStatement,
         ExpressionStatement,
         ForStatement,
