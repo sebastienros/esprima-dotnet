@@ -297,8 +297,9 @@ public abstract partial class AstRewriter : AstVisitor
     {
         var exported = VisitAndConvert(exportAllDeclaration.Exported, allowNull: true);
         var source = VisitAndConvert(exportAllDeclaration.Source);
+        VisitAndConvert(exportAllDeclaration.Assertions, out var assertions);
 
-        return exportAllDeclaration.UpdateWith(exported, source);
+        return exportAllDeclaration.UpdateWith(exported, source, assertions);
     }
 
     protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
@@ -306,8 +307,9 @@ public abstract partial class AstRewriter : AstVisitor
         var declaration = VisitAndConvert(exportNamedDeclaration.Declaration, allowNull: true);
         VisitAndConvert(exportNamedDeclaration.Specifiers, out var specifiers);
         var source = VisitAndConvert(exportNamedDeclaration.Source, allowNull: true);
+        VisitAndConvert(exportNamedDeclaration.Assertions, out var assertions);
 
-        return exportNamedDeclaration.UpdateWith(declaration, specifiers, source);
+        return exportNamedDeclaration.UpdateWith(declaration, specifiers, source, assertions);
     }
 
     protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
@@ -321,8 +323,17 @@ public abstract partial class AstRewriter : AstVisitor
     protected internal override object? VisitImport(Import import)
     {
         var source = VisitAndConvert(import.Source, allowNull: true);
+        var attributes = VisitAndConvert(import.Attributes, allowNull: true);
 
-        return import.UpdateWith(source);
+        return import.UpdateWith(source, attributes);
+    }
+    
+    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
+    {
+        var key = VisitAndConvert(importAttribute.Key);
+        var value = VisitAndConvert(importAttribute.Value);
+
+        return importAttribute.UpdateWith(key, value);
     }
 
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
@@ -330,8 +341,10 @@ public abstract partial class AstRewriter : AstVisitor
         VisitAndConvert(importDeclaration.Specifiers, out var specifiers);
 
         var source = VisitAndConvert(importDeclaration.Source);
+        
+        VisitAndConvert(importDeclaration.Assertions, out var assertions);
 
-        return importDeclaration.UpdateWith(specifiers, source);
+        return importDeclaration.UpdateWith(specifiers, source, assertions);
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)

@@ -1542,6 +1542,14 @@ namespace Esprima
             var previousIsAssignmentTarget = _context.IsAssignmentTarget;
             _context.IsAssignmentTarget = true;
             var source = this.parseAssignmentExpression();
+
+            Expression? attributes = null;
+            if (Match(","))
+            {
+                NextToken();
+                attributes = ParseObjectInitializer();
+            }
+            
             _context.IsAssignmentTarget = previousIsAssignmentTarget;
 
             if (!this.Match(")") && this._config.Tolerant)
@@ -1557,7 +1565,7 @@ namespace Esprima
                 }
             }
 
-            return Finalize(node, new Import(source));
+            return Finalize(node, new Import(source, attributes));
         }
 
         private bool MatchImportMeta()
@@ -4694,6 +4702,49 @@ namespace Esprima
             return Finalize(node, new Literal((string?) token.Value, raw));
         }
 
+        private ArrayList<ImportAttribute> ParseImportAttributes()
+        {
+            var attributes = new ArrayList<ImportAttribute>();
+            if (_lookahead.Value is not ("assert"))
+            {
+                return attributes;
+            }
+
+            NextToken();
+            Expect("{");
+            while (!Match("}"))
+            {
+                attributes.Add(ParseImportAttribute());
+                if (!Match("}"))
+                {
+                    ExpectCommaSeparator();
+                }
+            }
+            Expect("}");
+            return attributes;
+        }
+        
+        private ImportAttribute ParseImportAttribute()
+        {
+            var node = CreateNode();
+            if (_lookahead.Type != TokenType.Identifier) {
+                ThrowUnexpectedToken(NextToken());
+            }
+
+            Expression key = ParseIdentifierName();
+            if (!Match(":"))
+            {
+                ThrowUnexpectedToken(NextToken());
+            }
+
+            NextToken();
+            var literalToken = NextToken();
+            var raw = GetTokenRaw(literalToken);
+            Literal value = Finalize(node, new Literal((string?)literalToken.Value, raw));
+
+            return Finalize(node, new ImportAttribute(key, value));
+        }
+
         // import {<foo as bar>} ...;
         private ImportSpecifier ParseImportSpecifier()
         {
@@ -4844,9 +4895,10 @@ namespace Esprima
                 src = ParseModuleSpecifier();
             }
 
+            var attributes = ParseImportAttributes();
             ConsumeSemicolon();
 
-            return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src));
+            return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src, NodeList.From(ref attributes)));
         }
 
         // https://tc39.github.io/ecma262/#sec-exports
@@ -4951,8 +5003,9 @@ namespace Esprima
 
                 NextToken();
                 var src = ParseModuleSpecifier();
+                var attributes = ParseImportAttributes();
                 ConsumeSemicolon();
-                exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported));
+                exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported, NodeList.From(ref attributes)));
             }
             else if (_lookahead.Type == TokenType.Keyword)
             {
@@ -4974,20 +5027,21 @@ namespace Esprima
                         declaration = ThrowUnexpectedToken<StatementListItem>(_lookahead);
                         break;
                 }
-
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null));
+                
+                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
             }
             else if (MatchAsyncFunction())
             {
                 var declaration = ParseFunctionDeclaration();
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null));
+                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
             }
             else
             {
                 var specifiers = new ArrayList<ExportSpecifier>();
                 Literal? source = null;
                 var isExportFromIdentifier = false;
-
+                ArrayList<ImportAttribute> attributes = new();
+                
                 Expect("{");
                 while (!Match("}"))
                 {
@@ -5007,6 +5061,7 @@ namespace Esprima
                     // export {foo} from 'foo';
                     NextToken();
                     source = ParseModuleSpecifier();
+                    attributes = ParseImportAttributes();
                     ConsumeSemicolon();
                 }
                 else if (isExportFromIdentifier)
@@ -5021,7 +5076,7 @@ namespace Esprima
                     ConsumeSemicolon();
                 }
 
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(null, NodeList.From(ref specifiers), source));
+                exportDeclaration = Finalize(node, new ExportNamedDeclaration(null, NodeList.From(ref specifiers), source, NodeList.From(ref attributes)));
             }
 
             return exportDeclaration;

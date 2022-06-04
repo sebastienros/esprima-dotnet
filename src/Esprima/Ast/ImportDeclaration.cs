@@ -8,13 +8,16 @@ namespace Esprima.Ast
 
         public readonly Literal Source;
 
+        public readonly NodeList<ImportAttribute> Assertions;
         public ImportDeclaration(
             in NodeList<ImportDeclarationSpecifier> specifiers,
-            Literal source)
+            Literal source,
+            in NodeList<ImportAttribute> assertions)
             : base(Nodes.ImportDeclaration)
         {
             _specifiers = specifiers;
             Source = source;
+            Assertions = assertions;
         }
 
         public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers => ref _specifiers;
@@ -26,14 +29,14 @@ namespace Esprima.Ast
             return visitor.VisitImportDeclaration(this);
         }
 
-        public ImportDeclaration UpdateWith(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source)
+        public ImportDeclaration UpdateWith(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> assertions)
         {
-            if (NodeList.AreSame(specifiers, Specifiers) && source == Source)
+            if (NodeList.AreSame(specifiers, Specifiers) && source == Source && NodeList.AreSame(assertions, Assertions))
             {
                 return this;
             }
 
-            return new ImportDeclaration(specifiers, source);
+            return new ImportDeclaration(specifiers, source, assertions);
         }
     }
 }

@@ -8,16 +8,19 @@ namespace Esprima.Ast
 
         public readonly StatementListItem? Declaration;
         public readonly Literal? Source;
-
+        public readonly NodeList<ImportAttribute> Assertions;
+        
         public ExportNamedDeclaration(
             StatementListItem? declaration,
             in NodeList<ExportSpecifier> specifiers,
-            Literal? source)
+            Literal? source,
+            in NodeList<ImportAttribute> assertions)
             : base(Nodes.ExportNamedDeclaration)
         {
             Declaration = declaration;
             _specifiers = specifiers;
             Source = source;
+            Assertions = assertions;
         }
 
         public ref readonly NodeList<ExportSpecifier> Specifiers => ref _specifiers;
@@ -29,14 +32,14 @@ namespace Esprima.Ast
             return visitor.VisitExportNamedDeclaration(this);
         }
 
-        public ExportNamedDeclaration UpdateWith(StatementListItem? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source)
+        public ExportNamedDeclaration UpdateWith(StatementListItem? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
         {
-            if (declaration == Declaration && NodeList.AreSame(specifiers, Specifiers) && source == Source)
+            if (declaration == Declaration && NodeList.AreSame(specifiers, Specifiers) && source == Source && NodeList.AreSame(assertions, Assertions))
             {
                 return this;
             }
 
-            return new ExportNamedDeclaration(declaration, specifiers, source);
+            return new ExportNamedDeclaration(declaration, specifiers, source, assertions);
         }
     }
 }
