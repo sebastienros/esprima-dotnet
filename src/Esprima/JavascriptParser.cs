@@ -4713,7 +4713,7 @@ namespace Esprima
             NextToken();
             Expect("{");
 
-            var paramMap = new Dictionary<string?, bool>();
+            var parameterSet = new HashSet<string?>();
             while (!Match("}"))
             {
                 var importAttribute = ParseImportAttribute();
@@ -4729,11 +4729,10 @@ namespace Esprima
                         break;
                 }
 
-                if (paramMap.ContainsKey(key))
+                if (!parameterSet.Add(key))
                 {
                     ThrowError(Messages.DuplicateAssertClauseProperty, key);
                 }
-                paramMap.Add(key, true);
                 
                 attributes.Add(importAttribute);
                 if (!Match("}"))
