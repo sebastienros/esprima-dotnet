@@ -1,8 +1,5 @@
-﻿using System.IO;
-using System.Linq;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 using Esprima.Test;
-using Xunit;
 
 namespace Esprima.Tests
 {
@@ -74,8 +71,8 @@ namespace Esprima.Tests
             var p = program.Body.First().As<FunctionDeclaration>();
             var q = p.Body.As<BlockStatement>().Body.Skip(1).First().As<FunctionDeclaration>();
 
-            Assert.Equal("p", p.Id.Name);
-            Assert.Equal("q", q.Id.Name);
+            Assert.Equal("p", p.Id?.Name);
+            Assert.Equal("q", q.Id?.Name);
 
             Assert.True(p.Strict);
             Assert.True(q.Strict);
@@ -103,7 +100,7 @@ namespace Esprima.Tests
             var literal = expression as Literal;
 
             Assert.NotNull(literal);
-            Assert.Equal(expected, literal.NumericValue);
+            Assert.Equal(expected, literal?.NumericValue);
         }
 
         [Theory]
@@ -323,7 +320,7 @@ class aa {
 
             Assert.Equal(8, variableDeclarations.Count);
         }
-        
+
         [Fact]
         public void AncestorNodesShouldHandleNullNodes()
         {
@@ -337,8 +334,8 @@ class aa {
 
             Assert.Equal(28, variableDeclarations.Count);
         }
-        
-        [Theory] 
+
+        [Theory]
         [InlineData("`a`", "a")]
         [InlineData("`a${b}`", "a", "b")]
         [InlineData("`a${b}c`", "a", "b", "c")]
@@ -355,13 +352,13 @@ class aa {
                 Assert.Equal(raw,rawFromNode);
             }
 
-            static string GetRawItem(Node item)
+            static string? GetRawItem(Node item)
             {
                 if (item is TemplateElement element)
                 {
                     return element.Value.Raw;
                 }
-                
+
                 if (item is Identifier identifier)
                 {
                     return identifier.Name;

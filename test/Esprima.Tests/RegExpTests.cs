@@ -1,10 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using Esprima.Test;
-using Xunit;
 
 namespace Esprima.Tests
 {
@@ -21,7 +17,7 @@ namespace Esprima.Tests
         {
             var options = new ParserOptions { AdaptRegexp = true };
             var token = new Scanner(code, options).ScanRegExp();
-            return (Regex) token.Value;
+            return (Regex) token.Value!;
         }
 
         [Theory]

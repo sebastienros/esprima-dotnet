@@ -55,7 +55,7 @@ namespace Esprima.Tests
         }
 
         public BreakingCollection(int count) :
-            this(Enumerable.Repeat(default(T), count).ToList())
+            this(Enumerable.Repeat(default(T)!, count).ToList())
         {
         }
 

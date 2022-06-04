@@ -9,7 +9,7 @@ namespace Esprima.Tests
         public void CanParseSeperators()
         {
             var script = new JavaScriptParser("var foo=12_3_456").ParseScript();
-            Assert.Equal(123456, (double) ((Literal) ((VariableDeclaration) script.Body[0]).Declarations[0].Init).Value);
+            Assert.Equal(123456, (double) ((Literal) ((VariableDeclaration) script.Body[0]).Declarations[0].Init!).Value!);
         }
 
         [Fact]

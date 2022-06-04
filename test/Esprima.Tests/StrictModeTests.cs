@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 using Xunit;
 
 namespace Esprima.Tests
@@ -19,7 +18,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var f = function() { 'use strict'; }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var function = (FunctionExpression) variable.Declarations.First().Init;
+            var function = (FunctionExpression) variable.Declarations.First().Init!;
             Assert.True(function.Strict);
         }
 
@@ -28,7 +27,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var f = () => { 'use strict'; }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var function = (ArrowFunctionExpression) variable.Declarations.First().Init;
+            var function = (ArrowFunctionExpression) variable.Declarations.First().Init!;
             Assert.True(function.Strict);
         }
 
@@ -37,7 +36,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var obj = { method() { 'use strict'; } }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var objectExpression = (ObjectExpression) variable.Declarations.First().Init;
+            var objectExpression = (ObjectExpression) variable.Declarations.First().Init!;
             var property = (Property) objectExpression.Properties.First();
             var function = (FunctionExpression) property.Value;
             Assert.True(function.Strict);
@@ -48,7 +47,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var obj = { async method() { 'use strict'; } }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var objectExpression = (ObjectExpression) variable.Declarations.First().Init;
+            var objectExpression = (ObjectExpression) variable.Declarations.First().Init!;
             var property = (Property) objectExpression.Properties.First();
             var function = (FunctionExpression) property.Value;
             Assert.True(function.Strict);
@@ -59,7 +58,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var obj = { async method() { } }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var objectExpression = (ObjectExpression) variable.Declarations.First().Init;
+            var objectExpression = (ObjectExpression) variable.Declarations.First().Init!;
             var property = (Property) objectExpression.Properties.First();
             var function = (FunctionExpression) property.Value;
             Assert.False(function.Strict);
@@ -70,7 +69,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var obj = { get prop() { 'use strict'; } }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var objectExpression = (ObjectExpression) variable.Declarations.First().Init;
+            var objectExpression = (ObjectExpression) variable.Declarations.First().Init!;
             var property = (Property) objectExpression.Properties.First();
             var function = (FunctionExpression) property.Value;
             Assert.True(function.Strict);
@@ -81,7 +80,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var obj = { set prop(val) { 'use strict'; } }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var objectExpression = (ObjectExpression) variable.Declarations.First().Init;
+            var objectExpression = (ObjectExpression) variable.Declarations.First().Init!;
             var property = (Property) objectExpression.Properties.First();
             var function = (FunctionExpression) property.Value;
             Assert.True(function.Strict);
@@ -100,7 +99,7 @@ namespace Esprima.Tests
         {
             var script = new JavaScriptParser("var f = function*() { 'use strict'; yield 1; }").ParseScript();
             var variable = (VariableDeclaration) script.Body.First();
-            var function = (FunctionExpression) variable.Declarations.First().Init;
+            var function = (FunctionExpression) variable.Declarations.First().Init!;
             Assert.True(function.Strict);
         }
     }
