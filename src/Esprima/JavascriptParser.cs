@@ -9,7 +9,7 @@ namespace Esprima
     /// <remarks>
     /// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
     /// </remarks>
-    public partial class JavaScriptParser
+    public class JavaScriptParser
     {
         private static readonly HashSet<string> AssignmentOperators = new()
         {
@@ -62,17 +62,17 @@ namespace Esprima
             public HashSet<string?> LabelSet;
         }
 
-        private Token _lookahead = null!;
-        private readonly Context _context;
-        private readonly Marker _startMarker;
-        private readonly Marker _lastMarker;
-        private readonly Scanner _scanner;
-        private readonly IErrorHandler _errorHandler;
-        private readonly ParserOptions _config;
-        private bool _hasLineTerminator;
-        private readonly Action<Node>? _action;
+        private protected Token _lookahead = null!;
+        private protected readonly Context _context;
+        private protected readonly Marker _startMarker;
+        private protected readonly Marker _lastMarker;
+        private protected readonly Scanner _scanner;
+        private protected readonly IErrorHandler _errorHandler;
+        private protected readonly ParserOptions _config;
+        private protected bool _hasLineTerminator;
+        private protected readonly Action<Node>? _action;
 
-        private readonly List<Token> _tokens = new();
+        private protected readonly List<Token> _tokens = new();
 
         /// <summary>
         /// Returns the list of tokens that were parsed.
@@ -212,7 +212,7 @@ namespace Esprima
             return Finalize(node, new Script(NodeList.From(ref body), _context.Strict));
         }
 
-        private void CollectComments()
+        private protected void CollectComments()
         {
             if (!_config.Comment)
             {
@@ -243,12 +243,12 @@ namespace Esprima
         /// <summary>
         /// From internal representation to an external structure
         /// </summary>
-        private string GetTokenRaw(Token token)
+        private protected string GetTokenRaw(Token token)
         {
             return _scanner.Source.Slice(token.Start, token.End);
         }
 
-        private Token ConvertToken(Token token)
+        private protected Token ConvertToken(Token token)
         {
             Token t;
 
@@ -267,7 +267,7 @@ namespace Esprima
             return t;
         }
 
-        private Token NextToken(bool allowIdentifierEscape = false)
+        private protected Token NextToken(bool allowIdentifierEscape = false)
         {
             var token = _lookahead;
 
@@ -348,7 +348,7 @@ namespace Esprima
             return new Marker(token.Start, line, column);
         }
 
-        private T Finalize<T>(Marker marker, T node) where T : Node
+        private protected T Finalize<T>(Marker marker, T node) where T : Node
         {
             node.Range = new Esprima.Ast.Range(marker.Index, _lastMarker.Index);
 
@@ -422,7 +422,7 @@ namespace Esprima
         /// Return true if the next token matches the specified punctuator.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool Match(string value)
+        private protected bool Match(string value)
         {
             return _lookahead.Type == TokenType.Punctuator && value.Equals(_lookahead.Value);
         }
@@ -554,13 +554,8 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-primary-expression
 
-        private Expression ParsePrimaryExpression()
+        private protected virtual Expression ParsePrimaryExpression()
         {
-            if (_config.Jsx && Match("<"))
-            {
-                return ParseJsxRoot();
-            }
-
             var node = CreateNode();
 
             Expression expr;
@@ -2292,7 +2287,7 @@ namespace Esprima
         private const int MaxAssignmentDepth = 100;
         private int _assignmentDepth = 0;
 
-        private Expression ParseAssignmentExpression()
+        private protected Expression ParseAssignmentExpression()
         {
             Expression expr;
 
@@ -4319,13 +4314,8 @@ namespace Esprima
             "yield"
         };
 
-        private bool IsStartOfExpression()
+        private protected virtual bool IsStartOfExpression()
         {
-            if (_config.Jsx && Match("<"))
-            {
-                return true;
-            }
-
             var start = true;
 
             if (!(_lookahead.Value is string value))
@@ -5164,12 +5154,12 @@ namespace Esprima
             return exportDeclaration;
         }
 
-        private void ThrowError(string messageFormat, params object?[] values)
+        private protected void ThrowError(string messageFormat, params object?[] values)
         {
             throw CreateError(messageFormat, values);
         }
 
-        private T ThrowError<T>(string messageFormat, params object?[] values)
+        private protected T ThrowError<T>(string messageFormat, params object?[] values)
         {
             throw CreateError(messageFormat, values);
         }
@@ -5184,7 +5174,7 @@ namespace Esprima
             return _errorHandler.CreateError(index, line, column, msg);
         }
 
-        private void TolerateError(string messageFormat, params object?[] values)
+        private protected void TolerateError(string messageFormat, params object?[] values)
         {
             var msg = string.Format(messageFormat, values);
 
@@ -5251,17 +5241,17 @@ namespace Esprima
             }
         }
 
-        private void ThrowUnexpectedToken(Token? token = null, string? message = null)
+        private protected void ThrowUnexpectedToken(Token? token = null, string? message = null)
         {
             throw UnexpectedTokenError(token, message);
         }
 
-        private T ThrowUnexpectedToken<T>(Token? token = null, string? message = null)
+        private protected T ThrowUnexpectedToken<T>(Token? token = null, string? message = null)
         {
             throw UnexpectedTokenError(token, message);
         }
 
-        private void TolerateUnexpectedToken(Token token, string? message = null)
+        private protected void TolerateUnexpectedToken(Token token, string? message = null)
         {
             _errorHandler.Tolerate(UnexpectedTokenError(token, message));
         }

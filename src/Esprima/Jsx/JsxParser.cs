@@ -1,14 +1,15 @@
 ﻿using Esprima.Ast;
 
-namespace Esprima;
+namespace Esprima.Jsx;
 
 /// <summary>
-/// Provides JavaScript parsing capabilities.
+/// Provides JSX parsing capabilities.
 /// </summary>
 /// <remarks>
-/// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
+/// Use the <see cref="JavaScriptParser.ParseScript" />, <see cref="JavaScriptParser.ParseModule" /> or
+/// <see cref="JavaScriptParser.ParseExpression" /> methods to parse the JSX code.
 /// </remarks>
-public partial class JavaScriptParser
+public class JsxParser : JavaScriptParser
 {
     private sealed class MetaJsxElement
     {
@@ -28,31 +29,6 @@ public partial class JavaScriptParser
         public readonly JsxExpression Opening;
         public JsxExpression? Closing;
         public readonly List<JsxExpression> Children;
-    }
-
-    private static string? GetQualifiedElementName(JsxExpression elementName)
-    {
-        string? qualifiedName;
-        switch (elementName.Type)
-        {
-            case Nodes.JSXIdentifier:
-                var id = (JsxIdentifier) elementName;
-                qualifiedName = id.Name;
-                break;
-            case Nodes.JSXNamespacedName:
-                var ns = (JsxNamespacedName) elementName;
-                qualifiedName = GetQualifiedElementName(ns.Namespace) + ":" + GetQualifiedElementName(ns.Name);
-                break;
-            case Nodes.JSXMemberExpression:
-                var expr = (JsxMemberExpression) elementName;
-                qualifiedName = GetQualifiedElementName(expr.Object) + "." + GetQualifiedElementName(expr.Property);
-                break;
-            default:
-                qualifiedName = null;
-                break;
-        }
-
-        return qualifiedName;
     }
 
     private static readonly Dictionary<string, string> XHTMLEntities = new(StringComparer.InvariantCulture)
@@ -311,6 +287,28 @@ public partial class JavaScriptParser
         { "rang", "\u27E9" }
     };
 
+    public JsxParser(string code) : this(code, new JsxParserOptions())
+    {
+    }
+
+    public JsxParser(string code, JsxParserOptions options) : base(code, options)
+    {
+    }
+
+    public JsxParser(string code, JsxParserOptions options, Action<Node>? action) : base(code, options, action)
+    {
+    }
+
+    private protected override Expression ParsePrimaryExpression()
+    {
+        return Match("<") ? ParseJsxRoot() : base.ParsePrimaryExpression();
+    }
+
+    private protected override bool IsStartOfExpression()
+    {
+        return Match("<") || base.IsStartOfExpression();
+    }
+
     private void StartJsx()
     {
         _scanner.Index = _startMarker.Index;
@@ -520,9 +518,9 @@ public partial class JavaScriptParser
             }
 
             var id = _scanner.Source.Slice(start, _scanner.Index);
-            return new()
+            return new JsxToken()
             {
-                Type = TokenType.JsxIdentifier,
+                Type = JsxTokenType.JsxIdentifier,
                 Value = id,
                 LineNumber = _scanner.LineNumber,
                 LineStart = _scanner.LineStart,
@@ -589,9 +587,9 @@ public partial class JavaScriptParser
         _lastMarker.Line = _scanner.LineNumber;
         _lastMarker.Column = _scanner.Index - _scanner.LineStart;
 
-        var token = new Token()
+        var token = new JsxToken()
         {
-            Type = TokenType.JsxText,
+            Type = JsxTokenType.JsxText,
             Value = text,
             LineNumber = _scanner.LineNumber,
             LineStart = _scanner.LineStart,
@@ -635,7 +633,7 @@ public partial class JavaScriptParser
     {
         var node = CreateJsxNode();
         var token = NextJsxToken();
-        if (token.Type != TokenType.JsxIdentifier)
+        if (token is not JsxToken jsxToken || jsxToken.Type != JsxTokenType.JsxIdentifier)
         {
             ThrowUnexpectedToken(token);
         }
@@ -991,5 +989,30 @@ public partial class JavaScriptParser
         var element = ParseJsxElement();
         FinishJsx();
         return element;
+    }
+
+    private static string? GetQualifiedElementName(JsxExpression elementName)
+    {
+        string? qualifiedName;
+        switch (elementName.Type)
+        {
+            case Nodes.JSXIdentifier:
+                var id = (JsxIdentifier) elementName;
+                qualifiedName = id.Name;
+                break;
+            case Nodes.JSXNamespacedName:
+                var ns = (JsxNamespacedName) elementName;
+                qualifiedName = GetQualifiedElementName(ns.Namespace) + ":" + GetQualifiedElementName(ns.Name);
+                break;
+            case Nodes.JSXMemberExpression:
+                var expr = (JsxMemberExpression) elementName;
+                qualifiedName = GetQualifiedElementName(expr.Object) + "." + GetQualifiedElementName(expr.Property);
+                break;
+            default:
+                qualifiedName = null;
+                break;
+        }
+
+        return qualifiedName;
     }
 }

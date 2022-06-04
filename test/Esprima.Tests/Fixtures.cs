@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Esprima.Ast;
+using Esprima.Jsx;
 using Esprima.Utils;
 using Newtonsoft.Json.Linq;
 
@@ -20,9 +21,9 @@ namespace Esprima.Test
             var program = parser.ParseScript();
         }
 
-        private static string ParseAndFormat(SourceType sourceType, string source, ParserOptions options)
+        private static string ParseAndFormat(SourceType sourceType, string source, ParserOptions options, Func<string, ParserOptions, JavaScriptParser> parserFactory)
         {
-            var parser = new JavaScriptParser(source, options);
+            var parser = parserFactory(source, options);
             var program = sourceType == SourceType.Script ? (Program) parser.ParseScript() : parser.ParseModule();
             const string indent = "  ";
             return program.ToJsonString(
@@ -69,8 +70,11 @@ namespace Esprima.Test
         [MemberData(nameof(SourceFiles), "Fixtures")]
         public void ExecuteTestCase(string fixture)
         {
+            var (options, parserFactory) = fixture.StartsWith("JSX") ?
+                (new JsxParserOptions(), (src, opts) => new JsxParser(src, (JsxParserOptions) opts)) :
+                (new ParserOptions(), new Func<string, ParserOptions, JavaScriptParser>((src, opts) => new JavaScriptParser(src, opts)));
 
-            var options = new ParserOptions { Tokens = true, Jsx = fixture.StartsWith("JSX") };
+            options.Tokens = true;
 
             string treeFilePath, failureFilePath, moduleFilePath;
             var jsFilePath = Path.Combine(GetFixturesPath(), "Fixtures", fixture);
@@ -123,7 +127,7 @@ namespace Esprima.Test
                 expected = File.ReadAllText(moduleFilePath);
                 if (WriteBackExpectedTree)
                 {
-                    var actual = ParseAndFormat(sourceType, script, options);
+                    var actual = ParseAndFormat(sourceType, script, options, parserFactory);
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(moduleFilePath, actual);
                 }
@@ -134,7 +138,7 @@ namespace Esprima.Test
                 if (WriteBackExpectedTree)
 
                 {
-                    var actual = ParseAndFormat(sourceType, script, options);
+                    var actual = ParseAndFormat(sourceType, script, options, parserFactory);
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(treeFilePath, actual);
                 }
@@ -145,7 +149,7 @@ namespace Esprima.Test
                 expected = File.ReadAllText(failureFilePath);
                 if (WriteBackExpectedTree)
                 {
-                    var actual = ParseAndFormat(sourceType, script, options);
+                    var actual = ParseAndFormat(sourceType, script, options, parserFactory);
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(failureFilePath, actual);
                 }
@@ -165,7 +169,7 @@ namespace Esprima.Test
             {
                 options.Tolerant = true;
 
-                var actual = ParseAndFormat(sourceType, script, options);
+                var actual = ParseAndFormat(sourceType, script, options, parserFactory);
                 CompareTrees(actual, expected, jsFilePath);
             }
             else
@@ -173,7 +177,7 @@ namespace Esprima.Test
                 options.Tolerant = false;
 
                 // TODO: check the accuracy of the message and of the location
-                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, options));
+                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, options, parserFactory));
             }
         }
 

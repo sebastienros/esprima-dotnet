@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using Esprima.Ast;
+using Esprima.Jsx;
 using Esprima.Utils;
 using Xunit;
 using Module = Esprima.Ast.Module;
@@ -13,7 +14,7 @@ public class AstRewriterTests
 {
     private static Module ParseExpression(string code, bool jsx = false)
     {
-        return new JavaScriptParser(code, new ParserOptions() { Jsx = jsx }).ParseModule();
+        return new JsxParser(code, new JsxParserOptions()).ParseModule();
     }
 
     private static object? FindNearTypeOfDescendTyped(Type type, Node node)
