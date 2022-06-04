@@ -77,18 +77,7 @@
         ExportAllDeclaration,
         ExportDefaultDeclaration,
         ClassExpression,
-        JSXAttribute,
-        JSXClosingElement,
-        JSXClosingFragment,
-        JSXElement,
-        JSXEmptyExpression,
-        JSXExpressionContainer,
-        JSXIdentifier,
-        JSXMemberExpression,
-        JSXNamespacedName,
-        JSXOpeningElement,
-        JSXOpeningFragment,
-        JSXSpreadAttribute,
-        JSXText
+
+        Extension = int.MaxValue
     };
 }

@@ -1,16 +1,17 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxClosingElement : JsxExpression
 {
     public readonly JsxExpression Name;
 
-    public JsxClosingElement(JsxExpression name) : base(Nodes.JSXClosingElement)
+    public JsxClosingElement(JsxExpression name) : base(JsxNodeType.ClosingElement)
     {
         Name = name;
     }
-    
+
     public override NodeCollection ChildNodes => new(Name);
 
     protected internal override object? Accept(AstVisitor visitor)

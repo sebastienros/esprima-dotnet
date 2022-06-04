@@ -1,10 +1,11 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxEmptyExpression : JsxExpression
 {
-    public JsxEmptyExpression() : base(Nodes.JSXEmptyExpression)
+    public JsxEmptyExpression() : base(JsxNodeType.EmptyExpression)
     {
     }
 

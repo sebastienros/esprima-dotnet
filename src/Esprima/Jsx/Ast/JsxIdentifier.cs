@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics;
+using Esprima.Ast;
 using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 [DebuggerDisplay("{Name,nq}")]
 public sealed class JsxIdentifier : JsxExpression
 {
     public readonly string Name;
 
-    public JsxIdentifier(string name) : base(Nodes.JSXIdentifier)
+    public JsxIdentifier(string name) : base(JsxNodeType.Identifier)
     {
         Name = name;
     }

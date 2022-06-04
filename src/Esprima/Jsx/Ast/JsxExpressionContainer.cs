@@ -1,12 +1,13 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxExpressionContainer : JsxExpression
 {
     public readonly Expression Expression;
 
-    public JsxExpressionContainer(Expression expression) : base(Nodes.JSXExpressionContainer)
+    public JsxExpressionContainer(Expression expression) : base(JsxNodeType.ExpressionContainer)
     {
         Expression = expression;
     }

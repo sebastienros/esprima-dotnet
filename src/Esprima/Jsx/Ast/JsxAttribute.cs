@@ -1,13 +1,14 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxAttribute : JsxExpression
 {
     public readonly JsxExpression Name;
     public readonly Expression? Value;
 
-    public JsxAttribute(JsxExpression name, Expression? value) : base(Nodes.JSXAttribute)
+    public JsxAttribute(JsxExpression name, Expression? value) : base(JsxNodeType.Attribute)
     {
         Name = name;
         Value = value;

@@ -1,11 +1,11 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxClosingFragment : JsxExpression
 {
-
-    public JsxClosingFragment() : base(Nodes.JSXClosingFragment)
+    public JsxClosingFragment() : base(JsxNodeType.ClosingFragment)
     {
     }
 

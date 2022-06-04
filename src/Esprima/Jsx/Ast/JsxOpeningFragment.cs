@@ -1,12 +1,13 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxOpeningFragment : JsxExpression
 {
     public readonly bool SelfClosing;
 
-    public JsxOpeningFragment(bool selfClosing) : base(Nodes.JSXOpeningFragment)
+    public JsxOpeningFragment(bool selfClosing) : base(JsxNodeType.OpeningFragment)
     {
         SelfClosing = selfClosing;
     }

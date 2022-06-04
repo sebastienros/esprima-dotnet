@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
+using Esprima.Ast;
 using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 [DebuggerDisplay("{Raw,nq}")]
 public sealed class JsxText : JsxExpression
@@ -9,7 +10,7 @@ public sealed class JsxText : JsxExpression
     public readonly string? Value;
     public readonly string Raw;
 
-    public JsxText(string? value, string raw) : base(Nodes.JSXText)
+    public JsxText(string? value, string raw) : base(JsxNodeType.Text)
     {
         Value = value;
         Raw = raw;

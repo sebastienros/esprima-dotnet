@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Reflection;
 using Esprima.Ast;
 using Esprima.Jsx;
+using Esprima.Jsx.Ast;
 using Esprima.Utils;
 using Xunit;
 using Module = Esprima.Ast.Module;

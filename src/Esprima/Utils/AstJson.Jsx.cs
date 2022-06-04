@@ -1,4 +1,5 @@
 ﻿using Esprima.Ast;
+using Esprima.Jsx.Ast;
 
 namespace Esprima.Utils;
 

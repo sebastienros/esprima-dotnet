@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
+using Esprima.Ast;
 using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 [DebuggerDisplay("{Namespace,nq}.{Name,nq}")]
 public sealed class JsxNamespacedName : JsxExpression
@@ -9,7 +10,7 @@ public sealed class JsxNamespacedName : JsxExpression
     public readonly JsxIdentifier Name;
     public readonly JsxIdentifier Namespace;
 
-    public JsxNamespacedName(JsxIdentifier @namespace,JsxIdentifier name) : base(Nodes.JSXNamespacedName)
+    public JsxNamespacedName(JsxIdentifier @namespace,JsxIdentifier name) : base(JsxNodeType.NamespacedName)
     {
         Name = name;
         Namespace = @namespace;

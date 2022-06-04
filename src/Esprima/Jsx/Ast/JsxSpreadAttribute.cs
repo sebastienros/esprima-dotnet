@@ -1,12 +1,13 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxSpreadAttribute : JsxExpression
 {
     public readonly Expression Argument;
 
-    public JsxSpreadAttribute(Expression argument) : base(Nodes.JSXSpreadAttribute)
+    public JsxSpreadAttribute(Expression argument) : base(JsxNodeType.SpreadAttribute)
     {
         Argument = argument;
     }

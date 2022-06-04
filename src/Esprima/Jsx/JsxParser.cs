@@ -1,4 +1,5 @@
 ﻿using Esprima.Ast;
+using Esprima.Jsx.Ast;
 
 namespace Esprima.Jsx;
 
@@ -903,7 +904,7 @@ public class JsxParser : JavaScriptParser
             var node = CreateJsxChildNode();
             var element = ParseJsxBoundartElement();
 
-            if (element.Type == Nodes.JSXOpeningElement)
+            if (element.Type == JsxNodeType.OpeningElement)
             {
                 var opening = (JsxOpeningElement) element;
                 if (opening.SelfClosing)
@@ -919,7 +920,7 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            if (element.Type == Nodes.JSXClosingElement)
+            if (element.Type == JsxNodeType.ClosingElement)
             {
                 el.Closing = element as JsxClosingElement;
                 var open = GetQualifiedElementName(((JsxOpeningElement) el.Opening).Name);
@@ -943,10 +944,10 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            if (element.Type == Nodes.JSXClosingFragment)
+            if (element.Type == JsxNodeType.ClosingFragment)
             {
                 el.Closing = element as JsxClosingFragment;
-                if (el.Opening.Type != Nodes.JSXOpeningFragment)
+                if (el.Opening.Type != JsxNodeType.OpeningFragment)
                 {
                     TolerateError("Expected corresponding JSX closing tag for jsx fragment");
                 }
@@ -996,15 +997,15 @@ public class JsxParser : JavaScriptParser
         string? qualifiedName;
         switch (elementName.Type)
         {
-            case Nodes.JSXIdentifier:
+            case JsxNodeType.Identifier:
                 var id = (JsxIdentifier) elementName;
                 qualifiedName = id.Name;
                 break;
-            case Nodes.JSXNamespacedName:
+            case JsxNodeType.NamespacedName:
                 var ns = (JsxNamespacedName) elementName;
                 qualifiedName = GetQualifiedElementName(ns.Namespace) + ":" + GetQualifiedElementName(ns.Name);
                 break;
-            case Nodes.JSXMemberExpression:
+            case JsxNodeType.MemberExpression:
                 var expr = (JsxMemberExpression) elementName;
                 qualifiedName = GetQualifiedElementName(expr.Object) + "." + GetQualifiedElementName(expr.Property);
                 break;

@@ -1,6 +1,7 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Ast;
+namespace Esprima.Jsx.Ast;
 
 public sealed class JsxElement : JsxExpression
 {
@@ -8,7 +9,7 @@ public sealed class JsxElement : JsxExpression
     public readonly Node? ClosingElement;
     private readonly NodeList<JsxExpression> _children;
 
-    public JsxElement(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement) : base(Nodes.JSXElement)
+    public JsxElement(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement) : base(JsxNodeType.Element)
     {
         OpeningElement = openingElement;
         ClosingElement = closingElement;
@@ -16,7 +17,7 @@ public sealed class JsxElement : JsxExpression
     }
 
     public ref readonly NodeList<JsxExpression> Children => ref _children;
-    
+
     public override NodeCollection ChildNodes => ClosingElement is null ? GenericChildNodeYield.Yield(OpeningElement, _children) : GenericChildNodeYield.Yield(OpeningElement, _children, ClosingElement);
 
     protected internal override object? Accept(AstVisitor visitor)
