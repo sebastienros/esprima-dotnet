@@ -1,9 +1,13 @@
-﻿using Esprima.Ast;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public partial class AstVisitor
+public class AstVisitor
 {
+    private static Exception UnsupportedNodeType(Type nodeType, [CallerMemberName] string? callerName = null) =>
+        new NotImplementedException($"The visitor does not support nodes of type {nodeType}. You can override {callerName} to handle this case.");
+
     public virtual object? Visit(Node node)
     {
         return node.Accept(this);
@@ -18,12 +22,6 @@ public partial class AstVisitor
         }
 
         return program;
-    }
-
-    [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-    protected internal virtual object? VisitUnknownNode(Node node)
-    {
-        throw new NotImplementedException($"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
     }
 
     protected internal virtual object? VisitCatchClause(CatchClause catchClause)
@@ -587,7 +585,7 @@ public partial class AstVisitor
         // Seems that ArrowParameterPlaceHolder nodes never appear in the final tree and only used during the construction of a tree.
         // Though we provide the VisitArrowParameterPlaceHolder method for inheritors in case they still needed it.
 
-        throw new NotImplementedException();
+        throw UnsupportedNodeType(arrowParameterPlaceHolder.GetType());
     }
 
     protected internal virtual object? VisitObjectPattern(ObjectPattern objectPattern)
@@ -766,5 +764,15 @@ public partial class AstVisitor
         }
 
         return blockStatement;
+    }
+
+    protected internal virtual object? VisitExtension(Node node)
+    {
+        // Node type Extension is used to represent extensions to the standard AST (for example, see JSX parsing).
+        // Nodes of this type never appear in the tree returned by the core parser (JavaScriptParser),
+        // thus the visitor doesn't deal with this type by default. Inheritors either need to override this method,
+        // or inherit from another visitor which was built to handle extension nodes (e.g. JsxAstVisitor in the case of JSX).
+
+        throw UnsupportedNodeType(node.GetType());
     }
 }

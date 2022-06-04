@@ -1,5 +1,5 @@
 ﻿using Esprima.Ast;
-using Esprima.Utils;
+using Esprima.Jsx.Utils;
 
 namespace Esprima.Jsx.Ast;
 
@@ -14,9 +14,9 @@ public sealed class JsxAttribute : JsxExpression
         Value = value;
     }
 
-    public override NodeCollection ChildNodes => new(Name,Value);
+    public override NodeCollection ChildNodes => new(Name, Value);
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxAttribute(this);
     }

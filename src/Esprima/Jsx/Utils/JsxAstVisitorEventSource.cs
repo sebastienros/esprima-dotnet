@@ -1,8 +1,9 @@
 ﻿using Esprima.Jsx.Ast;
+using Esprima.Utils;
 
-namespace Esprima.Utils;
+namespace Esprima.Jsx.Utils;
 
-public partial class AstVisitorEventSource
+public class JsxAstVisitorEventSource : AstVisitorEventSource, IJsxAstVisitor
 {
     public event EventHandler<JsxSpreadAttribute>? VisitingJsxSpreadAttribute;
     public event EventHandler<JsxSpreadAttribute>? VisitedJsxSpreadAttribute;
@@ -31,106 +32,113 @@ public partial class AstVisitorEventSource
     public event EventHandler<JsxExpressionContainer>? VisitingJsxExpressionContainer;
     public event EventHandler<JsxExpressionContainer>? VisitedJsxExpressionContainer;
 
-    protected internal override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    private readonly IJsxAstVisitor _jsxVisitor;
+
+    public JsxAstVisitorEventSource()
+    {
+        _jsxVisitor = JsxAstVisitor.CreateJsxVisitorFor(this);
+    }
+
+    public virtual object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         VisitingJsxSpreadAttribute?.Invoke(this, jsxSpreadAttribute);
-        var node = base.VisitJsxSpreadAttribute(jsxSpreadAttribute);
+        var node = _jsxVisitor.VisitJsxSpreadAttribute(jsxSpreadAttribute);
         VisitedJsxSpreadAttribute?.Invoke(this, jsxSpreadAttribute);
         return node;
     }
 
-    protected internal override object? VisitJsxElement(JsxElement jsxElement)
+    public virtual object? VisitJsxElement(JsxElement jsxElement)
     {
         VisitingJsxElement?.Invoke(this, jsxElement);
-        var node = base.VisitJsxElement(jsxElement);
+        var node = _jsxVisitor.VisitJsxElement(jsxElement);
         VisitedJsxElement?.Invoke(this, jsxElement);
         return node;
     }
 
-    protected internal override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
         VisitingJsxAttribute?.Invoke(this, jsxAttribute);
-        var node = base.VisitJsxAttribute(jsxAttribute);
+        var node = _jsxVisitor.VisitJsxAttribute(jsxAttribute);
         VisitedJsxAttribute?.Invoke(this, jsxAttribute);
         return node;
     }
 
-    protected internal override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
         VisitingJsxIdentifier?.Invoke(this, jsxIdentifier);
-        var node = base.VisitJsxIdentifier(jsxIdentifier);
+        var node = _jsxVisitor.VisitJsxIdentifier(jsxIdentifier);
         VisitedJsxIdentifier?.Invoke(this, jsxIdentifier);
         return node;
     }
 
-    protected internal override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
         VisitingJsxClosingElement?.Invoke(this, jsxClosingElement);
-        var node = base.VisitJsxClosingElement(jsxClosingElement);
+        var node = _jsxVisitor.VisitJsxClosingElement(jsxClosingElement);
         VisitedJsxClosingElement?.Invoke(this, jsxClosingElement);
         return node;
     }
 
-    protected internal override object? VisitJsxText(JsxText jsxText)
+    public virtual object? VisitJsxText(JsxText jsxText)
     {
         VisitingJsxText?.Invoke(this, jsxText);
-        var node = base.VisitJsxText(jsxText);
+        var node = _jsxVisitor.VisitJsxText(jsxText);
         VisitedJsxText?.Invoke(this, jsxText);
         return node;
     }
 
-    protected internal override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    public virtual object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         VisitingJsxClosingFragment?.Invoke(this, jsxClosingFragment);
-        var node = base.VisitJsxClosingFragment(jsxClosingFragment);
+        var node = _jsxVisitor.VisitJsxClosingFragment(jsxClosingFragment);
         VisitedJsxClosingFragment?.Invoke(this, jsxClosingFragment);
         return node;
     }
 
-    protected internal override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
         VisitingJsxOpeningFragment?.Invoke(this, jsxOpeningFragment);
-        var node = base.VisitJsxOpeningFragment(jsxOpeningFragment);
+        var node = _jsxVisitor.VisitJsxOpeningFragment(jsxOpeningFragment);
         VisitedJsxOpeningFragment?.Invoke(this, jsxOpeningFragment);
         return node;
     }
 
-    protected internal override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         VisitingJsxOpeningElement?.Invoke(this, jsxOpeningElement);
-        var node = base.VisitJsxOpeningElement(jsxOpeningElement);
+        var node = _jsxVisitor.VisitJsxOpeningElement(jsxOpeningElement);
         VisitedJsxOpeningElement?.Invoke(this, jsxOpeningElement);
         return node;
     }
 
-    protected internal override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    public virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
         VisitingJsxNamespacedName?.Invoke(this, jsxNamespacedName);
-        var node = base.VisitJsxNamespacedName(jsxNamespacedName);
+        var node = _jsxVisitor.VisitJsxNamespacedName(jsxNamespacedName);
         VisitedJsxNamespacedName?.Invoke(this, jsxNamespacedName);
         return node;
     }
 
-    protected internal override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
         VisitingJsxMemberExpression?.Invoke(this, jsxMemberExpression);
-        var node = base.VisitJsxMemberExpression(jsxMemberExpression);
+        var node = _jsxVisitor.VisitJsxMemberExpression(jsxMemberExpression);
         VisitedJsxMemberExpression?.Invoke(this, jsxMemberExpression);
         return node;
     }
 
-    protected internal override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    public virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
         VisitingJsxEmptyExpression?.Invoke(this, jsxEmptyExpression);
-        var node = base.VisitJsxEmptyExpression(jsxEmptyExpression);
+        var node = _jsxVisitor.VisitJsxEmptyExpression(jsxEmptyExpression);
         VisitedJsxEmptyExpression?.Invoke(this, jsxEmptyExpression);
         return node;
     }
 
-    protected internal override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
         VisitingJsxExpressionContainer?.Invoke(this, jsxExpressionContainer);
-        var node = base.VisitJsxExpressionContainer(jsxExpressionContainer);
+        var node = _jsxVisitor.VisitJsxExpressionContainer(jsxExpressionContainer);
         VisitedJsxExpressionContainer?.Invoke(this, jsxExpressionContainer);
         return node;
     }

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Esprima.Ast;
-using Esprima.Utils;
+using Esprima.Jsx.Utils;
 
 namespace Esprima.Jsx.Ast;
 
@@ -16,7 +16,7 @@ public sealed class JsxIdentifier : JsxExpression
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxIdentifier(this);
     }

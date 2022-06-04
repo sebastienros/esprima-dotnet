@@ -1,5 +1,5 @@
 ﻿using Esprima.Ast;
-using Esprima.Utils;
+using Esprima.Jsx.Utils;
 
 namespace Esprima.Jsx.Ast;
 
@@ -20,7 +20,7 @@ public sealed class JsxOpeningElement : JsxExpression
 
     public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Name, _attributes);
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxOpeningElement(this);
     }

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Esprima.Ast;
 using Esprima.Jsx;
+using Esprima.Jsx.Utils;
 using Esprima.Utils;
 using Newtonsoft.Json.Linq;
 
@@ -21,7 +22,8 @@ namespace Esprima.Test
             var program = parser.ParseScript();
         }
 
-        private static string ParseAndFormat(SourceType sourceType, string source, ParserOptions options, Func<string, ParserOptions, JavaScriptParser> parserFactory)
+        private static string ParseAndFormat(SourceType sourceType, string source, ParserOptions options, Func<string, ParserOptions, JavaScriptParser> parserFactory,
+            AstJson.IConverter converter)
         {
             var parser = parserFactory(source, options);
             var program = sourceType == SourceType.Script ? (Program) parser.ParseScript() : parser.ParseModule();
@@ -30,7 +32,8 @@ namespace Esprima.Test
                 AstJson.Options.Default
                     .WithIncludingLineColumn(true)
                     .WithIncludingRange(true),
-                indent
+                indent,
+                converter
             );
         }
 
@@ -70,9 +73,13 @@ namespace Esprima.Test
         [MemberData(nameof(SourceFiles), "Fixtures")]
         public void ExecuteTestCase(string fixture)
         {
-            var (options, parserFactory) = fixture.StartsWith("JSX") ?
-                (new JsxParserOptions(), (src, opts) => new JsxParser(src, (JsxParserOptions) opts)) :
-                (new ParserOptions(), new Func<string, ParserOptions, JavaScriptParser>((src, opts) => new JavaScriptParser(src, opts)));
+            var (options, parserFactory, converter) = fixture.StartsWith("JSX") ?
+                (new JsxParserOptions(),
+                    (src, opts) => new JsxParser(src, (JsxParserOptions) opts),
+                    JsxAstToJsonConverter.Default) :
+                (new ParserOptions(),
+                    new Func<string, ParserOptions, JavaScriptParser>((src, opts) => new JavaScriptParser(src, opts)),
+                    AstToJsonConverter.Default);
 
             options.Tokens = true;
 
@@ -127,7 +134,7 @@ namespace Esprima.Test
                 expected = File.ReadAllText(moduleFilePath);
                 if (WriteBackExpectedTree)
                 {
-                    var actual = ParseAndFormat(sourceType, script, options, parserFactory);
+                    var actual = ParseAndFormat(sourceType, script, options, parserFactory, converter);
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(moduleFilePath, actual);
                 }
@@ -138,7 +145,7 @@ namespace Esprima.Test
                 if (WriteBackExpectedTree)
 
                 {
-                    var actual = ParseAndFormat(sourceType, script, options, parserFactory);
+                    var actual = ParseAndFormat(sourceType, script, options, parserFactory, converter);
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(treeFilePath, actual);
                 }
@@ -149,7 +156,7 @@ namespace Esprima.Test
                 expected = File.ReadAllText(failureFilePath);
                 if (WriteBackExpectedTree)
                 {
-                    var actual = ParseAndFormat(sourceType, script, options, parserFactory);
+                    var actual = ParseAndFormat(sourceType, script, options, parserFactory, converter);
                     if (!CompareTreesInternal(actual, expected))
                         File.WriteAllText(failureFilePath, actual);
                 }
@@ -169,7 +176,7 @@ namespace Esprima.Test
             {
                 options.Tolerant = true;
 
-                var actual = ParseAndFormat(sourceType, script, options, parserFactory);
+                var actual = ParseAndFormat(sourceType, script, options, parserFactory, converter);
                 CompareTrees(actual, expected, jsFilePath);
             }
             else
@@ -177,7 +184,7 @@ namespace Esprima.Test
                 options.Tolerant = false;
 
                 // TODO: check the accuracy of the message and of the location
-                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, options, parserFactory));
+                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, options, parserFactory, converter));
             }
         }
 

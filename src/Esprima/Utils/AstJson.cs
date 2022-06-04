@@ -14,7 +14,7 @@ public enum LocationMembersPlacement
     Start
 }
 
-public static partial class AstJson
+public static class AstJson
 {
     public sealed class Options
     {
@@ -49,73 +49,51 @@ public static partial class AstJson
         }
     }
 
-    public static string ToJsonString(this Node node)
+    public interface IConverter
     {
-        return ToJsonString(node, indent: null);
+        void WriteJson(Node node, JsonWriter writer, Options options);
     }
 
-    public static string ToJsonString(this Node node, string? indent)
+    public static string ToJsonString(this Node node, IConverter? converter = null)
     {
-        return ToJsonString(node, Options.Default, indent);
+        return ToJsonString(node, indent: null, converter);
     }
 
-    public static string ToJsonString(this Node node, Options options)
+    public static string ToJsonString(this Node node, string? indent, IConverter? converter = null)
     {
-        return ToJsonString(node, options, null);
+        return ToJsonString(node, Options.Default, indent, converter);
     }
 
-    public static string ToJsonString(this Node node, Options options, string? indent)
+    public static string ToJsonString(this Node node, Options options, IConverter? converter = null)
+    {
+        return ToJsonString(node, options, null, converter);
+    }
+
+    public static string ToJsonString(this Node node, Options options, string? indent, IConverter? converter = null)
     {
         using (var writer = new StringWriter())
         {
-            WriteJson(node, writer, options, indent);
+            WriteJson(node, writer, options, indent, converter);
             return writer.ToString();
         }
     }
 
-    public static void WriteJson(this Node node, TextWriter writer)
+    public static void WriteJson(this Node node, TextWriter writer, IConverter? converter = null)
     {
-        WriteJson(node, writer, indent: null);
+        WriteJson(node, writer, indent: null, converter);
     }
 
-    public static void WriteJson(this Node node, TextWriter writer, string? indent)
+    public static void WriteJson(this Node node, TextWriter writer, string? indent, IConverter? converter = null)
     {
-        WriteJson(node, writer, Options.Default, indent);
+        WriteJson(node, writer, Options.Default, indent, converter);
     }
 
-    public static void WriteJson(this Node node, TextWriter writer, Options options)
+    public static void WriteJson(this Node node, TextWriter writer, Options options, IConverter? converter = null)
     {
-        WriteJson(node, writer, options, null);
+        WriteJson(node, writer, options, null, converter);
     }
 
-    public static void WriteJson(this Node node, TextWriter writer, Options options, string? indent)
-    {
-        if (node == null)
-        {
-            ThrowArgumentNullException(nameof(node));
-            return;
-        }
-
-        if (writer == null)
-        {
-            ThrowArgumentNullException(nameof(writer));
-            return;
-        }
-
-        if (options == null)
-        {
-            ThrowArgumentNullException(nameof(options));
-            return;
-        }
-
-        var visitor = new Visitor(new JsonTextWriter(writer, indent),
-            options.IncludingLineColumn, options.IncludingRange,
-            options.LocationMembersPlacement);
-
-        visitor.Visit(node);
-    }
-
-    public static void WriteJson(this Node node, JsonWriter writer, Options options)
+    public static void WriteJson(this Node node, TextWriter writer, Options options, string? indent, IConverter? converter = null)
     {
         if (node == null)
         {
@@ -135,19 +113,57 @@ public static partial class AstJson
             return;
         }
 
-        var visitor = new Visitor(writer,
-            options.IncludingLineColumn, options.IncludingRange,
-            options.LocationMembersPlacement);
-
-        visitor.Visit(node);
+        (converter ?? AstToJsonConverter.Default).WriteJson(node, new JsonTextWriter(writer, indent), options);
     }
 
-    private sealed partial class Visitor : AstVisitor
+    public static void WriteJson(this Node node, JsonWriter writer, Options options, IConverter? converter = null)
+    {
+        if (node == null)
+        {
+            ThrowArgumentNullException(nameof(node));
+            return;
+        }
+
+        if (writer == null)
+        {
+            ThrowArgumentNullException(nameof(writer));
+            return;
+        }
+
+        if (options == null)
+        {
+            ThrowArgumentNullException(nameof(options));
+            return;
+        }
+
+        (converter ?? AstToJsonConverter.Default).WriteJson(node, writer, options);
+    }
+}
+
+public class AstToJsonConverter : AstJson.IConverter
+{
+    public static readonly AstToJsonConverter Default = new();
+
+    private protected AstToJsonConverter() { }
+
+    private protected virtual VisitorBase CreateVisitor(JsonWriter writer, AstJson.Options options)
+    {
+        return new Visitor(writer,
+            options.IncludingLineColumn, options.IncludingRange,
+            options.LocationMembersPlacement);
+    }
+
+    public void WriteJson(Node node, JsonWriter writer, AstJson.Options options)
+    {
+        CreateVisitor(writer, options).Visit(node);
+    }
+
+    private protected abstract class VisitorBase : AstVisitor
     {
         private readonly JsonWriter _writer;
         private readonly ObservableStack<Node> _stack;
 
-        public Visitor(JsonWriter writer,
+        public VisitorBase(JsonWriter writer,
             bool includeLineColumn, bool includeRange,
             LocationMembersPlacement locationMembersPlacement)
         {
@@ -164,7 +180,7 @@ public static partial class AstJson
                     WriteLocationInfo(node);
                 }
 
-                Member("type", node.Type.ToString());
+                Member("type", GetNodeType(node));
             };
 
             _stack.Popped += node =>
@@ -215,40 +231,45 @@ public static partial class AstJson
             }
         }
 
-        private IDisposable StartNodeObject(Node node)
+        protected virtual string GetNodeType(Node node)
+        {
+            return node.Type.ToString();
+        }
+
+        protected IDisposable StartNodeObject(Node node)
         {
             return _stack.Push(node);
         }
 
-        private void EmptyNodeObject(Node node)
+        protected void EmptyNodeObject(Node node)
         {
             using (StartNodeObject(node)) { }
         }
 
-        private void Member(string name)
+        protected void Member(string name)
         {
             _writer.Member(name);
         }
 
-        private void Member(string name, Node? node)
+        protected void Member(string name, Node? node)
         {
             Member(name);
             Visit(node);
         }
 
-        private void Member(string name, string? value)
+        protected void Member(string name, string? value)
         {
             Member(name);
             _writer.String(value);
         }
 
-        private void Member(string name, bool value)
+        protected void Member(string name, bool value)
         {
             Member(name);
             _writer.Boolean(value);
         }
 
-        private void Member(string name, int value)
+        protected void Member(string name, int value)
         {
             Member(name);
             _writer.Number(value);
@@ -256,7 +277,7 @@ public static partial class AstJson
 
         private static readonly ConditionalWeakTable<Type, IDictionary> EnumMap = new();
 
-        private void Member<T>(string name, T value) where T : Enum
+        protected void Member<T>(string name, T value) where T : Enum
         {
             var map = (Dictionary<T, string>)
                 EnumMap.GetValue(value.GetType(),
@@ -269,12 +290,12 @@ public static partial class AstJson
             Member(name, map[value]);
         }
 
-        private void Member<T>(string name, in NodeList<T> nodes) where T : Node?
+        protected void Member<T>(string name, in NodeList<T> nodes) where T : Node?
         {
             Member(name, nodes, node => node);
         }
 
-        private void Member<T>(string name, in NodeList<T> list, Func<T, Node?> nodeSelector) where T : Node?
+        protected void Member<T>(string name, in NodeList<T> list, Func<T, Node?> nodeSelector) where T : Node?
         {
             Member(name);
             _writer.StartArray();
@@ -331,8 +352,7 @@ public static partial class AstJson
             return program;
         }
 
-        [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-        protected internal override object? VisitUnknownNode(Node node)
+        protected internal override object? VisitExtension(Node node)
         {
             throw new NotSupportedException("Unknown node type: " + node.Type);
         }
@@ -1158,6 +1178,14 @@ public static partial class AstJson
             }
 
             return blockStatement;
+        }
+    }
+
+    private sealed class Visitor : VisitorBase
+    {
+        public Visitor(JsonWriter writer, bool includeLineColumn, bool includeRange, LocationMembersPlacement locationMembersPlacement)
+            : base(writer, includeLineColumn, includeRange, locationMembersPlacement)
+        {
         }
     }
 }
