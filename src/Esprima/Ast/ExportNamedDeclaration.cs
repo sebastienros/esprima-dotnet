@@ -25,7 +25,7 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<ExportSpecifier> Specifiers => ref _specifiers;
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declaration, _specifiers, Source);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -40,6 +40,27 @@ namespace Esprima.Ast
             }
 
             return new ExportNamedDeclaration(declaration, specifiers, source, assertions);
+        }
+                
+        private IEnumerable<Node> CreateChildNodes()
+        {
+            if(Declaration is not null){
+                yield return Declaration;
+            }
+            
+            foreach (var node in _specifiers)
+            {
+                yield return node;
+            }
+
+            if(Source is not null){
+                yield return Source;
+            }
+            
+            foreach (var node in Assertions)
+            {
+                yield return node;
+            }
         }
     }
 }

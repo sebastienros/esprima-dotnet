@@ -17,7 +17,7 @@ namespace Esprima.Ast
             Attributes = attributes;
         }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        public override NodeCollection ChildNodes => new(Source, Attributes);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
