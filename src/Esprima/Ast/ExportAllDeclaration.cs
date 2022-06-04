@@ -45,7 +45,8 @@ namespace Esprima.Ast
         {
             yield return Source;
             
-            if(Exported is not null){
+            if (Exported is not null)
+            {
                 yield return Exported;
             }
             

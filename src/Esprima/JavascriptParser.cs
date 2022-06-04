@@ -5027,7 +5027,7 @@ namespace Esprima
                         declaration = ThrowUnexpectedToken<StatementListItem>(_lookahead);
                         break;
                 }
-                
+
                 exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
             }
             else if (MatchAsyncFunction())
