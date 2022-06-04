@@ -26,6 +26,16 @@ namespace Esprima.Ast
             return visitor.VisitTemplateLiteral(this);
         }
 
+        public TemplateLiteral UpdateWith(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
+        {
+            if (NodeList.AreSame(quasis, Quasis) && NodeList.AreSame(expressions, Expressions))
+            {
+                return this;
+            }
+
+            return new TemplateLiteral(quasis, expressions);
+        }
+
         private IEnumerable<Node> CreateChildNodes()
         {
             var i = 0;

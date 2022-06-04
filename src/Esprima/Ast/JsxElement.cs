@@ -23,4 +23,14 @@ public sealed class JsxElement : JsxExpression
     {
         return visitor.VisitJsxElement(this);
     }
+
+    public JsxElement UpdateWith(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
+    {
+        if (openingElement == OpeningElement && NodeList.AreSame(children, Children) && closingElement == ClosingElement)
+        {
+            return this;
+        }
+
+        return new JsxElement(openingElement, children, closingElement);
+    }
 }

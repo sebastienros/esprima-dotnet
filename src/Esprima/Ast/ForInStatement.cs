@@ -24,5 +24,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitForInStatement(this);
         }
+
+        public ForInStatement UpdateWith(Node left, Expression right, Statement body)
+        {
+            if (left == Left && right == Right && body == Body)
+            {
+                return this;
+            }
+
+            return new ForInStatement(left, right, body);
+        }
     }
 }

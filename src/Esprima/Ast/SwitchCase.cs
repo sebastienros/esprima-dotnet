@@ -21,5 +21,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitSwitchCase(this);
         }
+
+        public SwitchCase UpdateWith(Expression? test, in NodeList<Statement> consequent)
+        {
+            if (test == Test && NodeList.AreSame(consequent, Consequent))
+            {
+                return this;
+            }
+
+            return new SwitchCase(test, consequent);
+        }
     }
 }

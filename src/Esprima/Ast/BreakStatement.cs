@@ -17,5 +17,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitBreakStatement(this);
         }
+
+        public BreakStatement UpdateWith(Identifier? label)
+        {
+            if (label == Label)
+            {
+                return this;
+            }
+
+            return new BreakStatement(label);
+        }
     }
 }

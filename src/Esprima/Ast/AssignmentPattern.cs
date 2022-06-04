@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitAssignmentPattern(this);
         }
+
+        public AssignmentPattern UpdateWith(Expression left, Expression right)
+        {
+            if (left == Left && right == Right)
+            {
+                return this;
+            }
+
+            return new AssignmentPattern(left, right);
+        }
     }
 }

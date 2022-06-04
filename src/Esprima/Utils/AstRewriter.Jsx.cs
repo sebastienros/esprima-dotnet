@@ -9,7 +9,7 @@ public abstract partial class AstRewriter
         var obj = VisitAndConvert(jsxMemberExpression.Object);
         var property = VisitAndConvert(jsxMemberExpression.Property);
 
-        return jsxMemberExpression.Update(obj, property);
+        return jsxMemberExpression.UpdateWith(obj, property);
     }
 
     protected internal override object? VisitJsxElement(JsxElement jsxElement)
@@ -18,7 +18,7 @@ public abstract partial class AstRewriter
         VisitAndConvert(jsxElement.Children, out var children);
         var closingElement = VisitAndConvert(jsxElement.ClosingElement, allowNull: true);
 
-        return jsxElement.Update(openingElement, children, closingElement);
+        return jsxElement.UpdateWith(openingElement, children, closingElement);
     }
 
     protected internal override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
@@ -26,14 +26,14 @@ public abstract partial class AstRewriter
         var name = VisitAndConvert(jsxOpeningElement.Name);
         VisitAndConvert(jsxOpeningElement.Attributes, out var attributes);
 
-        return jsxOpeningElement.Update(name, attributes);
+        return jsxOpeningElement.UpdateWith(name, attributes);
     }
 
     protected internal override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
         var name = VisitAndConvert(jsxClosingElement.Name);
 
-        return jsxClosingElement.Update(name);
+        return jsxClosingElement.UpdateWith(name);
     }
 
     protected internal override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
@@ -41,14 +41,14 @@ public abstract partial class AstRewriter
         var name = VisitAndConvert(jsxNamespacedName.Name);
         var @namespace = VisitAndConvert(jsxNamespacedName.Namespace);
 
-        return jsxNamespacedName.Update(name, @namespace);
+        return jsxNamespacedName.UpdateWith(name, @namespace);
     }
 
     protected internal override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         var argument = VisitAndConvert(jsxSpreadAttribute.Argument);
 
-        return jsxSpreadAttribute.Update(argument);
+        return jsxSpreadAttribute.UpdateWith(argument);
     }
 
     protected internal override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
@@ -56,13 +56,13 @@ public abstract partial class AstRewriter
         var name = VisitAndConvert(jsxAttribute.Name);
         var value = VisitAndConvert(jsxAttribute.Value, allowNull: true);
 
-        return jsxAttribute.Update(name, value);
+        return jsxAttribute.UpdateWith(name, value);
     }
 
     protected internal override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
         var expression = VisitAndConvert(jsxExpressionContainer.Expression);
 
-        return jsxExpressionContainer.Update(expression);
+        return jsxExpressionContainer.UpdateWith(expression);
     }
 }

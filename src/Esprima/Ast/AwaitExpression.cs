@@ -17,5 +17,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitAwaitExpression(this);
         }
+
+        public AwaitExpression UpdateWith(Expression argument)
+        {
+            if (argument == Argument)
+            {
+                return this;
+            }
+
+            return new AwaitExpression(argument);
+        }
     }
 }

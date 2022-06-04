@@ -29,5 +29,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitForStatement(this);
         }
+
+        public ForStatement UpdateWith(StatementListItem? init, Expression? test, Expression? update, Statement body)
+        {
+            if (init == Init && test == Test && update == Update && body == Body)
+            {
+                return this;
+            }
+
+            return new ForStatement(init, test, update, body);
+        }
     }
 }

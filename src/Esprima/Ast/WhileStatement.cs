@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitWhileStatement(this);
         }
+
+        public WhileStatement UpdateWith(Expression test, Statement body)
+        {
+            if (test == Test && body == Body)
+            {
+                return this;
+            }
+
+            return new WhileStatement(test, body);
+        }
     }
 }

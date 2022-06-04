@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitArrayExpression(this);
         }
+
+        public ArrayExpression UpdateWith(in NodeList<Expression?> elements)
+        {
+            if (NodeList.AreSame(elements, Elements))
+            {
+                return this;
+            }
+
+            return new ArrayExpression(elements);
+        }
     }
 }

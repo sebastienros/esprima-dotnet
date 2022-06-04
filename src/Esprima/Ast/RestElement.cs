@@ -21,5 +21,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitRestElement(this);
         }
+
+        public RestElement UpdateWith(Expression argument)
+        {
+            if (argument == Argument)
+            {
+                return this;
+            }
+
+            return new RestElement(argument);
+        }
     }
 }

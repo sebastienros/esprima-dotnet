@@ -17,5 +17,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitExportDefaultDeclaration(this);
         }
+
+        public ExportDefaultDeclaration UpdateWith(StatementListItem declaration)
+        {
+            if (declaration == Declaration)
+            {
+                return this;
+            }
+
+            return new ExportDefaultDeclaration(declaration);
+        }
     }
 }

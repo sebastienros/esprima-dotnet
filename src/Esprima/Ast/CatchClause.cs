@@ -20,5 +20,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitCatchClause(this);
         }
+
+        public CatchClause UpdateWith(Expression? param, BlockStatement body)
+        {
+            if (param == Param && body == Body)
+            {
+                return this;
+            }
+
+            return new CatchClause(param, body);
+        }
     }
 }

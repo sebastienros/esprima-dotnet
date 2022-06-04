@@ -17,4 +17,14 @@ public sealed class JsxExpressionContainer : JsxExpression
     {
         return visitor.VisitJsxExpressionContainer(this);
     }
+
+    public JsxExpressionContainer UpdateWith(Expression expression)
+    {
+        if (expression == Expression)
+        {
+            return this;
+        }
+
+        return new JsxExpressionContainer(expression);
+    }
 }

@@ -6,5 +6,10 @@
             : base(obj, property, true, optional)
         {
         }
+
+        protected override MemberExpression Rewrite(Expression obj, Expression property)
+        {
+            return new ComputedMemberExpression(obj, property, Optional);
+        }
     }
 }

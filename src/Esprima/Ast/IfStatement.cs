@@ -25,5 +25,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitIfStatement(this);
         }
+
+        public IfStatement UpdateWith(Expression test, Statement consequent, Statement? alternate)
+        {
+            if (test == Test && consequent == Consequent && alternate == Alternate)
+            {
+                return this;
+            }
+
+            return new IfStatement(test, consequent, alternate);
+        }
     }
 }

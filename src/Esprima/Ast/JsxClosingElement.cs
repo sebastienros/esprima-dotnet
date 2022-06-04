@@ -17,4 +17,14 @@ public sealed class JsxClosingElement : JsxExpression
     {
         return visitor.VisitJsxClosingElement(this);
     }
+
+    public JsxClosingElement UpdateWith(JsxExpression name)
+    {
+        if (name == Name)
+        {
+            return this;
+        }
+
+        return new JsxClosingElement(name);
+    }
 }

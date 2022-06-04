@@ -24,5 +24,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitConditionalExpression(this);
         }
+
+        public ConditionalExpression UpdateWith(Expression test, Expression consequent, Expression alternate)
+        {
+            if (test == Test && consequent == Consequent && alternate == Alternate)
+            {
+                return this;
+            }
+
+            return new ConditionalExpression(test, consequent, alternate);
+        }
     }
 }

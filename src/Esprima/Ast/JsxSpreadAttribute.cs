@@ -17,4 +17,14 @@ public sealed class JsxSpreadAttribute : JsxExpression
     {
         return visitor.VisitJsxSpreadAttribute(this);
     }
+
+    public JsxSpreadAttribute UpdateWith(Expression argument)
+    {
+        if (argument == Argument)
+        {
+            return this;
+        }
+
+        return new JsxSpreadAttribute(argument);
+    }
 }

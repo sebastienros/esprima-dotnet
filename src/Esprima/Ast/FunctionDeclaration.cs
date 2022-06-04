@@ -40,5 +40,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitFunctionDeclaration(this);
         }
+
+        public FunctionDeclaration UpdateWith(Identifier? id, in NodeList<Expression> parameters, BlockStatement body)
+        {
+            if (id == Id && NodeList.AreSame(parameters, Params) && body == Body)
+            {
+                return this;
+            }
+
+            return new FunctionDeclaration(id, parameters, body, Generator, Strict, Async);
+        }
     }
 }

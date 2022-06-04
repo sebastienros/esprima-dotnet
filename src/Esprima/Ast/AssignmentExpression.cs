@@ -81,5 +81,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitAssignmentExpression(this);
         }
+
+        public AssignmentExpression UpdateWith(Expression left, Expression right)
+        {
+            if (left == Left && right == Right)
+            {
+                return this;
+            }
+
+            return new AssignmentExpression(Operator, left, right);
+        }
     }
 }

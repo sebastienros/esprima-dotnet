@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitYieldExpression(this);
         }
+
+        public YieldExpression UpdateWith(Expression? argument)
+        {
+            if (argument == Argument)
+            {
+                return this;
+            }
+
+            return new YieldExpression(argument, Delegate);
+        }
     }
 }

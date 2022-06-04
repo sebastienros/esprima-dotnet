@@ -17,5 +17,20 @@ namespace Esprima.Ast
         {
             return visitor.VisitExpressionStatement(this);
         }
+
+        protected virtual ExpressionStatement Rewrite(Expression expression)
+        {
+            return new ExpressionStatement(expression);
+        }
+
+        public ExpressionStatement UpdateWith(Expression expression)
+        {
+            if (expression == Expression)
+            {
+                return this;
+            }
+
+            return Rewrite(expression);
+        }
     }
 }

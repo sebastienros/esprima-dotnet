@@ -23,4 +23,14 @@ public sealed class JsxOpeningElement : JsxExpression
     {
         return visitor.VisitJsxOpeningElement(this);
     }
+
+    public JsxOpeningElement UpdateWith(JsxExpression name, in NodeList<JsxExpression> attributes)
+    {
+        if (name == Name && NodeList.AreSame(attributes, Attributes))
+        {
+            return this;
+        }
+
+        return new JsxOpeningElement(name, SelfClosing, attributes);
+    }
 }

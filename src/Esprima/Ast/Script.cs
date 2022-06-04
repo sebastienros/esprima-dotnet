@@ -19,5 +19,10 @@
         public override ref readonly NodeList<Statement> Body => ref _body;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+
+        protected override Program Rewrite(in NodeList<Statement> body)
+        {
+            return new Script(body, Strict);
+        }
     }
 }

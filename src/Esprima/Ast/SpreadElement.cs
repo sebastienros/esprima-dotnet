@@ -17,5 +17,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitSpreadElement(this);
         }
+
+        public SpreadElement UpdateWith(Expression argument)
+        {
+            if (argument == Argument)
+            {
+                return this;
+            }
+
+            return new SpreadElement(argument);
+        }
     }
 }

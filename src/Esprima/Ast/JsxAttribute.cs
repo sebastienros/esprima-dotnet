@@ -19,4 +19,14 @@ public sealed class JsxAttribute : JsxExpression
     {
         return visitor.VisitJsxAttribute(this);
     }
+
+    public JsxAttribute UpdateWith(JsxExpression name, Expression? value)
+    {
+        if (name == Name && value == Value)
+        {
+            return this;
+        }
+
+        return new JsxAttribute(name, value);
+    }
 }

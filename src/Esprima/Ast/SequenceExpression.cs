@@ -24,5 +24,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitSequenceExpression(this);
         }
+
+        public SequenceExpression UpdateWith(in NodeList<Expression> expressions)
+        {
+            if (NodeList.AreSame(expressions, Expressions))
+            {
+                return this;
+            }
+
+            return new SequenceExpression(expressions);
+        }
     }
 }

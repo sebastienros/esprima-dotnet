@@ -22,5 +22,16 @@ namespace Esprima.Ast
         {
             return visitor.VisitSwitchStatement(this);
         }
+
+        public SwitchStatement UpdateWith(Expression discriminant, in NodeList<SwitchCase> cases)
+        {
+            if (discriminant == Discriminant && NodeList.AreSame(cases, Cases))
+            {
+                return this;
+            }
+
+            return new SwitchStatement(discriminant, cases);
+        }
+
     }
 }

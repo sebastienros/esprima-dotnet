@@ -20,5 +20,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitVariableDeclarator(this);
         }
+
+        public VariableDeclarator UpdateWith(Expression id, Expression? init)
+        {
+            if (id == Id && init == Init)
+            {
+                return this;
+            }
+
+            return new VariableDeclarator(id, init);
+        }
     }
 }

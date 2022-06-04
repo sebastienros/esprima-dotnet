@@ -24,5 +24,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitVariableDeclaration(this);
         }
+
+        public VariableDeclaration UpdateWith(in NodeList<VariableDeclarator> declarations)
+        {
+            if (NodeList.AreSame(declarations, Declarations))
+            {
+                return this;
+            }
+
+            return new VariableDeclaration(declarations, Kind);
+        }
     }
 }

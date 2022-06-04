@@ -27,5 +27,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitCallExpression(this);
         }
+
+        public CallExpression UpdateWith(Expression callee, in NodeList<Expression> arguments)
+        {
+            if (callee == Callee && NodeList.AreSame(arguments, Arguments))
+            {
+                return this;
+            }
+
+            return new CallExpression(callee, arguments, Optional);
+        }
     }
 }

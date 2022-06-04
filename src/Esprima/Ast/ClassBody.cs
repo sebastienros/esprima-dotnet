@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitClassBody(this);
         }
+
+        public ClassBody UpdateWith(in NodeList<Node> body)
+        {
+            if (NodeList.AreSame(body, Body))
+            {
+                return this;
+            }
+
+            return new ClassBody(body);
+        }
     }
 }

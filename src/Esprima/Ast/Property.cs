@@ -28,5 +28,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitProperty(this);
         }
+
+        public Property UpdateWith(Expression key, Expression value)
+        {
+            if (key == Key && value == Value)
+            {
+                return this;
+            }
+
+            return new Property(Kind, key, Computed, value, Method, Shorthand);
+        }
     }
 }

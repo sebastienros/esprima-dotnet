@@ -20,5 +20,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitChainExpression(this);
         }
+
+        public ChainExpression UpdateWith(Expression expression)
+        {
+            if (expression == Expression)
+            {
+                return this;
+            }
+
+            return new ChainExpression(expression);
+        }
     }
 }

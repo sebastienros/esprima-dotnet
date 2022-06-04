@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitWithStatement(this);
         }
+
+        public WithStatement UpdateWith(Expression obj, Statement body)
+        {
+            if (obj == Object && body == Body)
+            {
+                return this;
+            }
+
+            return new WithStatement(obj, body);
+        }
     }
 }

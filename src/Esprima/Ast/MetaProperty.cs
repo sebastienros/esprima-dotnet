@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitMetaProperty(this);
         }
+
+        public MetaProperty UpdateWith(Identifier meta, Identifier property)
+        {
+            if (meta == Meta && property == Property)
+            {
+                return this;
+            }
+
+            return new MetaProperty(meta, property);
+        }
     }
 }

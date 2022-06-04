@@ -90,5 +90,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitBinaryExpression(this);
         }
+
+        public BinaryExpression UpdateWith(Expression left, Expression right)
+        {
+            if (left == Left && right == Right)
+            {
+                return this;
+            }
+
+            return new BinaryExpression(Operator, left, right);
+        }
     }
 }

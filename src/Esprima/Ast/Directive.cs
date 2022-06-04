@@ -8,5 +8,10 @@
         {
             Directiv = directive;
         }
+
+        protected override ExpressionStatement Rewrite(Expression expression)
+        {
+            return new Directive(expression, Directiv);
+        }
     }
 }

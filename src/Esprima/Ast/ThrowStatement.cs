@@ -17,5 +17,16 @@ namespace Esprima.Ast
         {
             return visitor.VisitThrowStatement(this);
         }
+
+        public ThrowStatement UpdateWith(Expression argument)
+        {
+            if (argument == Argument)
+            {
+                return this;
+            }
+
+            return new ThrowStatement(argument);
+        }
+
     }
 }

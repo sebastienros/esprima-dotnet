@@ -26,5 +26,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitExportSpecifier(this);
         }
+
+        public ExportSpecifier UpdateWith(Expression local, Expression exported)
+        {
+            if (local == Local && exported == Exported)
+            {
+                return this;
+            }
+
+            return new ExportSpecifier(local, exported);
+        }
     }
 }

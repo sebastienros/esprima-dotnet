@@ -29,5 +29,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitClassExpression(this);
         }
+
+        public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body)
+        {
+            if (id == Id && superClass == SuperClass && body == Body)
+            {
+                return this;
+            }
+
+            return new ClassExpression(id, superClass, body);
+        }
     }
 }

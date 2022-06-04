@@ -25,5 +25,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitImportDeclaration(this);
         }
+
+        public ImportDeclaration UpdateWith(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source)
+        {
+            if (NodeList.AreSame(specifiers, Specifiers) && source == Source)
+            {
+                return this;
+            }
+
+            return new ImportDeclaration(specifiers, source);
+        }
     }
 }

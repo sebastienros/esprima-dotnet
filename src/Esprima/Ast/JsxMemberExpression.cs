@@ -19,4 +19,14 @@ public sealed class JsxMemberExpression : JsxExpression
     {
         return visitor.VisitJsxMemberExpression(this);
     }
+
+    public JsxMemberExpression UpdateWith(JsxExpression obj, JsxIdentifier property)
+    {
+        if (obj == Object && property == Property)
+        {
+            return this;
+        }
+
+        return new JsxMemberExpression(obj, property);
+    }
 }

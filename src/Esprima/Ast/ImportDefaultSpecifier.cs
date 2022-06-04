@@ -14,5 +14,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitImportDefaultSpecifier(this);
         }
+
+        public ImportDefaultSpecifier UpdateWith(Identifier local)
+        {
+            if (local == Local)
+            {
+                return this;
+            }
+
+            return new ImportDefaultSpecifier(local);
+        }
     }
 }

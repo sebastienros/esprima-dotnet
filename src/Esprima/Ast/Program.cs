@@ -16,5 +16,17 @@ namespace Esprima.Ast
         {
             return visitor.VisitProgram(this);
         }
+
+        protected abstract Program Rewrite(in NodeList<Statement> body);
+
+        public Program UpdateWith(in NodeList<Statement> body)
+        {
+            if (NodeList.AreSame(body, Body))
+            {
+                return this;
+            }
+
+            return Rewrite(body);
+        }
     }
 }

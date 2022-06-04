@@ -25,5 +25,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitTryStatement(this);
         }
+
+        public TryStatement UpdateWith(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
+        {
+            if (block == Block && handler == Handler && finalizer == Finalizer)
+            {
+                return this;
+            }
+
+            return new TryStatement(block, handler, finalizer);
+        }
     }
 }

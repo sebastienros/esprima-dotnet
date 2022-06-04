@@ -27,5 +27,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitExportAllDeclaration(this);
         }
+
+        public ExportAllDeclaration UpdateWith(Expression? exported, Literal source)
+        {
+            if (exported == Exported && source == Source)
+            {
+                return this;
+            }
+
+            return new ExportAllDeclaration(source, exported);
+        }
     }
 }

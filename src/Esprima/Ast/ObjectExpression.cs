@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitObjectExpression(this);
         }
+
+        public ObjectExpression UpdateWith(in NodeList<Expression> properties)
+        {
+            if (NodeList.AreSame(properties, Properties))
+            {
+                return this;
+            }
+
+            return new ObjectExpression(properties);
+        }
     }
 }

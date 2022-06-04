@@ -25,6 +25,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitMethodDefinition(this);
         }
-        
+
+        public MethodDefinition UpdateWith(Expression key, FunctionExpression value)
+        {
+            if (key == Key && value == Value)
+            {
+                return this;
+            }
+
+            return new MethodDefinition(key, Computed, value, Kind, Static);
+        }
     }
 }

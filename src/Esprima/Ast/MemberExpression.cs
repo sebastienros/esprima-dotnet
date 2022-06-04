@@ -26,5 +26,17 @@ namespace Esprima.Ast
         {
             return visitor.VisitMemberExpression(this);
         }
+
+        protected abstract MemberExpression Rewrite(Expression obj, Expression property);
+
+        public MemberExpression UpdateWith(Expression obj, Expression property)
+        {
+            if (obj == Object && property == Property)
+            {
+                return this;
+            }
+
+            return Rewrite(obj, property);
+        }
     }
 }

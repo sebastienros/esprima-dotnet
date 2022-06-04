@@ -21,5 +21,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitImport(this);
         }
+
+        public Import UpdateWith(Expression? source)
+        {
+            if (source == Source)
+            {
+                return this;
+            }
+
+            return new Import(source);
+        }
     }
 }

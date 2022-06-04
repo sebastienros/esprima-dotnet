@@ -21,4 +21,14 @@ public sealed class JsxNamespacedName : JsxExpression
     {
         return visitor.VisitJsxNamespacedName(this);
     }
+
+    public JsxNamespacedName UpdateWith(JsxIdentifier name, JsxIdentifier @namespace)
+    {
+        if (name == Name && @namespace == Namespace)
+        {
+            return this;
+        }
+
+        return new JsxNamespacedName(@namespace, name);
+    }
 }

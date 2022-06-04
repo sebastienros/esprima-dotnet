@@ -20,5 +20,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitLabeledStatement(this);
         }
+
+        public LabeledStatement UpdateWith(Identifier label, Statement body)
+        {
+            if (label == Label && body == Body)
+            {
+                return this;
+            }
+
+            return new LabeledStatement(label, body);
+        }
     }
 }

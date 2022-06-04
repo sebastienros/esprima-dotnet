@@ -27,5 +27,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitClassDeclaration(this);
         }
+
+        public ClassDeclaration UpdateWith(Identifier? id, Expression? superClass, ClassBody body)
+        {
+            if (id == Id && superClass == SuperClass && body == Body)
+            {
+                return this;
+            }
+
+            return new ClassDeclaration(id, superClass, body);
+        }
     }
 }

@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitObjectPattern(this);
         }
+
+        public ObjectPattern UpdateWith(in NodeList<Node> properties)
+        {
+            if (NodeList.AreSame(properties, Properties))
+            {
+                return this;
+            }
+
+            return new ObjectPattern(properties);
+        }
     }
 }

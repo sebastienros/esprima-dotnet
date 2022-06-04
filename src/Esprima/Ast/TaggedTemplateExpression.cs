@@ -19,5 +19,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitTaggedTemplateExpression(this);
         }
+
+        public TaggedTemplateExpression UpdateWith(Expression tag, TemplateLiteral quasi)
+        {
+            if (tag == Tag && quasi == Quasi)
+            {
+                return this;
+            }
+
+            return new TaggedTemplateExpression(tag, quasi);
+        }
     }
 }

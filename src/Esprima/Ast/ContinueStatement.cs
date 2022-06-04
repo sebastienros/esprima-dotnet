@@ -17,5 +17,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitContinueStatement(this);
         }
+
+        public ContinueStatement UpdateWith(Identifier? label)
+        {
+            if (label == Label)
+            {
+                return this;
+            }
+
+            return new ContinueStatement(label);
+        }
     }
 }

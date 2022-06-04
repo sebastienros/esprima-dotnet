@@ -28,5 +28,15 @@ namespace Esprima.Ast
         {
             return visitor.VisitExportNamedDeclaration(this);
         }
+
+        public ExportNamedDeclaration UpdateWith(StatementListItem? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source)
+        {
+            if (declaration == Declaration && NodeList.AreSame(specifiers, Specifiers) && source == Source)
+            {
+                return this;
+            }
+
+            return new ExportNamedDeclaration(declaration, specifiers, source);
+        }
     }
 }
