@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using Esprima.Ast;
 using Esprima.Utils;
 using Newtonsoft.Json.Linq;
-using Xunit;
 
 namespace Esprima.Test
 {
@@ -79,17 +74,18 @@ namespace Esprima.Test
 
             string treeFilePath, failureFilePath, moduleFilePath;
             var jsFilePath = Path.Combine(GetFixturesPath(), "Fixtures", fixture);
+            var jsFileDirectoryName = Path.GetDirectoryName(jsFilePath)!;
             if (jsFilePath.EndsWith(".source.js"))
             {
-                treeFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".tree.json";
-                failureFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".failure.json";
-                moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".module.json";
+                treeFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".tree.json";
+                failureFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".failure.json";
+                moduleFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".module.json";
             }
             else
             {
-                treeFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".tree.json";
-                failureFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".failure.json";
-                moduleFilePath = Path.Combine(Path.GetDirectoryName(jsFilePath), Path.GetFileNameWithoutExtension(jsFilePath)) + ".module.json";
+                treeFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(jsFilePath)) + ".tree.json";
+                failureFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(jsFilePath)) + ".failure.json";
+                moduleFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(jsFilePath)) + ".module.json";
             }
 
             var script = File.ReadAllText(jsFilePath);
@@ -97,7 +93,7 @@ namespace Esprima.Test
             {
                 var parser = new JavaScriptParser(script);
                 var program = parser.ParseScript();
-                var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init.As<Literal>().StringValue;
+                var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!;
                 script = source;
             }
 
@@ -201,8 +197,8 @@ namespace Esprima.Test
             var assemblyPath = typeof(Fixtures).GetTypeInfo().Assembly.Location;
             var assemblyDirectory = new FileInfo(assemblyPath).Directory;
 #endif
-            var root = assemblyDirectory.Parent.Parent.Parent.FullName;
-            return root;
+            var root = assemblyDirectory?.Parent?.Parent?.Parent?.FullName;
+            return root ?? "";
         }
 
         [Fact]

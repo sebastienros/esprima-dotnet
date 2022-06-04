@@ -12,7 +12,7 @@
     <PackageTags>javascript, parser, ecmascript</PackageTags>
     <PackageProjectUrl>https://github.com/sebastienros/esprima-dotnet</PackageProjectUrl>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
-    <Version>2.0.0-beta-$(BuildNumber)</Version>
+    <Version>3.0.0-beta-$(BuildNumber)</Version>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -31,5 +31,5 @@
   <ItemGroup>
     <Using Remove="System.Net.Http" />
   </ItemGroup>
-  
+
 </Project>
