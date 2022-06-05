@@ -968,6 +968,11 @@ namespace Esprima
             var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
             if (token.Type == TokenType.Identifier && !isAsync && "get".Equals(token.Value) && lookaheadPropertyKey)
             {
+                if (!"get".Equals(GetTokenRaw(token)))
+                {
+                    TolerateError(Messages.InvalidUnicodeKeyword, "get");
+                }
+
                 kind = PropertyKind.Get;
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
@@ -981,6 +986,11 @@ namespace Esprima
             }
             else if (token.Type == TokenType.Identifier && !isAsync && "set".Equals(token.Value) && lookaheadPropertyKey)
             {
+                if (!"set".Equals(GetTokenRaw(token)))
+                {
+                    TolerateError(Messages.InvalidUnicodeKeyword, "set");
+                }
+
                 kind = PropertyKind.Set;
                 computed = Match("[");
                 key = ParseObjectPropertyKey();
