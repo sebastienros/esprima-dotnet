@@ -1,5 +1,4 @@
 ﻿using Esprima.Ast;
-using Esprima.Jsx;
 using Esprima.Test;
 
 namespace Esprima.Tests

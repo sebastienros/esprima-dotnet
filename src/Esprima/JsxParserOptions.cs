@@ -1,4 +1,4 @@
-﻿namespace Esprima.Jsx;
+﻿namespace Esprima;
 
 public class JsxParserOptions : ParserOptions
 {

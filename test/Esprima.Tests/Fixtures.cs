@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
 using Esprima.Ast;
-using Esprima.Jsx;
-using Esprima.Jsx.Utils;
 using Esprima.Utils;
+using Esprima.Utils.Jsx;
 using Newtonsoft.Json.Linq;
 
 namespace Esprima.Test

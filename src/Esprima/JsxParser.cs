@@ -1,7 +1,7 @@
 ﻿using Esprima.Ast;
-using Esprima.Jsx.Ast;
+using Esprima.Ast.Jsx;
 
-namespace Esprima.Jsx;
+namespace Esprima;
 
 /// <summary>
 /// Provides JSX parsing capabilities.

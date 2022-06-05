@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics;
-using Esprima.Ast;
-using Esprima.Jsx.Utils;
+using Esprima.Utils.Jsx;
 
-namespace Esprima.Jsx.Ast;
+namespace Esprima.Ast.Jsx;
 
 [DebuggerDisplay("{Raw,nq}")]
 public sealed class JsxText : JsxExpression

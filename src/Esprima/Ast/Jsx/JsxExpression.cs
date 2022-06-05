@@ -1,8 +1,7 @@
-﻿using Esprima.Ast;
-using Esprima.Jsx.Utils;
-using Esprima.Utils;
+﻿using Esprima.Utils;
+using Esprima.Utils.Jsx;
 
-namespace Esprima.Jsx.Ast;
+namespace Esprima.Ast.Jsx;
 
 /// <summary>
 /// A Jsx expression.

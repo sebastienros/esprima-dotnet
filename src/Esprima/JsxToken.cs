@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Esprima.Jsx
+namespace Esprima
 {
     public enum JsxTokenType
     {

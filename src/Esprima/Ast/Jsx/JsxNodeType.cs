@@ -1,4 +1,4 @@
-﻿namespace Esprima.Jsx.Ast;
+﻿namespace Esprima.Ast.Jsx;
 
 public enum JsxNodeType
 {

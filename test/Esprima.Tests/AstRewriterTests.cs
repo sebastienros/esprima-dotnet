@@ -1,13 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
+﻿using System.Numerics;
 using Esprima.Ast;
-using Esprima.Jsx;
-using Esprima.Jsx.Ast;
-using Esprima.Jsx.Utils;
-using Esprima.Utils;
-using Xunit;
+using Esprima.Ast.Jsx;
+using Esprima.Utils.Jsx;
 using Module = Esprima.Ast.Module;
 
 namespace Esprima.Tests;

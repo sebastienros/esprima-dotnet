@@ -1,6 +1,6 @@
-﻿using Esprima.Jsx.Ast;
+﻿using Esprima.Ast.Jsx;
 
-namespace Esprima.Jsx.Utils;
+namespace Esprima.Utils.Jsx;
 
 public interface IJsxAstVisitor
 {

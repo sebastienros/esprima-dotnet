@@ -1,7 +1,6 @@
-﻿using Esprima.Jsx.Ast;
-using Esprima.Utils;
+﻿using Esprima.Ast.Jsx;
 
-namespace Esprima.Jsx.Utils;
+namespace Esprima.Utils.Jsx;
 
 public class JsxAstVisitorEventSource : AstVisitorEventSource, IJsxAstVisitor
 {
