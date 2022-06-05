@@ -3,7 +3,7 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public abstract partial class AstRewriter : AstVisitor
+public class AstRewriter : AstVisitor
 {
     public virtual T VisitAndConvert<T>(T node, bool allowNull = false, [CallerMemberName] string? callerName = null)
         where T : Node?
@@ -69,13 +69,6 @@ public abstract partial class AstRewriter : AstVisitor
         VisitAndConvert(program.Body, out var body);
 
         return program.UpdateWith(body);
-    }
-
-    [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-    protected internal override object? VisitUnknownNode(Node node)
-    {
-        throw new NotImplementedException(
-            $"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
     }
 
     protected internal override object? VisitCatchClause(CatchClause catchClause)

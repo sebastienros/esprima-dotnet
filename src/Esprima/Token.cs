@@ -16,11 +16,11 @@ namespace Esprima
         RegularExpression,
         Template,
         BigIntLiteral,
-        JsxIdentifier = 100,
-        JsxText
+
+        Extension = int.MaxValue
     };
 
-    public sealed class Token
+    public class Token
     {
         public TokenType Type;
         public string? Literal;

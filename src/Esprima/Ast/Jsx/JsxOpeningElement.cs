@@ -1,6 +1,6 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Utils.Jsx;
 
-namespace Esprima.Ast;
+namespace Esprima.Ast.Jsx;
 
 public sealed class JsxOpeningElement : JsxExpression
 {
@@ -8,7 +8,7 @@ public sealed class JsxOpeningElement : JsxExpression
     public readonly bool SelfClosing;
     private readonly NodeList<JsxExpression> _attributes;
 
-    public JsxOpeningElement(JsxExpression name, bool selfClosing, in NodeList<JsxExpression> attributes) : base(Nodes.JSXOpeningElement)
+    public JsxOpeningElement(JsxExpression name, bool selfClosing, in NodeList<JsxExpression> attributes) : base(JsxNodeType.OpeningElement)
     {
         Name = name;
         SelfClosing = selfClosing;
@@ -16,10 +16,10 @@ public sealed class JsxOpeningElement : JsxExpression
     }
 
     public ref readonly NodeList<JsxExpression> Attributes => ref _attributes;
-    
+
     public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Name, _attributes);
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxOpeningElement(this);
     }

@@ -325,7 +325,7 @@ class aa {
         public void AncestorNodesShouldHandleNullNodes()
         {
             var source = File.ReadAllText(Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "JSX", "fragment-with-child.js"));
-            var parser = new JavaScriptParser(source, new ParserOptions(){ Jsx = true });
+            var parser = new JsxParser(source, new JsxParserOptions());
             var script = parser.ParseScript();
 
             var variableDeclarations = script.DescendantNodesAndSelf()

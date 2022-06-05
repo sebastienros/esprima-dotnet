@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using Esprima.Utils;
+using Esprima.Utils.Jsx;
 
-namespace Esprima.Ast;
+namespace Esprima.Ast.Jsx;
 
 [DebuggerDisplay("{Namespace,nq}.{Name,nq}")]
 public sealed class JsxNamespacedName : JsxExpression
@@ -9,7 +9,7 @@ public sealed class JsxNamespacedName : JsxExpression
     public readonly JsxIdentifier Name;
     public readonly JsxIdentifier Namespace;
 
-    public JsxNamespacedName(JsxIdentifier @namespace,JsxIdentifier name) : base(Nodes.JSXNamespacedName)
+    public JsxNamespacedName(JsxIdentifier @namespace,JsxIdentifier name) : base(JsxNodeType.NamespacedName)
     {
         Name = name;
         Namespace = @namespace;
@@ -17,7 +17,7 @@ public sealed class JsxNamespacedName : JsxExpression
 
     public override NodeCollection ChildNodes => new(Name, Namespace);
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxNamespacedName(this);
     }

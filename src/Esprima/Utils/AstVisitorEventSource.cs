@@ -6,14 +6,12 @@ namespace Esprima.Utils;
 /// An AST visitor that raises events before and after visiting each node
 /// and its descendants.
 /// </summary>
-public partial class AstVisitorEventSource : AstVisitor
+public class AstVisitorEventSource : AstVisitor
 {
     public event EventHandler<Node>? VisitingNode;
     public event EventHandler<Node>? VisitedNode;
     public event EventHandler<Program>? VisitingProgram;
     public event EventHandler<Program>? VisitedProgram;
-    public event EventHandler<Node>? VisitingUnknownNode;
-    public event EventHandler<Node>? VisitedUnknownNode;
     public event EventHandler<CatchClause>? VisitingCatchClause;
     public event EventHandler<CatchClause>? VisitedCatchClause;
     public event EventHandler<FunctionDeclaration>? VisitingFunctionDeclaration;
@@ -166,15 +164,6 @@ public partial class AstVisitorEventSource : AstVisitor
         VisitingProgram?.Invoke(this, program);
         var result = base.VisitProgram(program);
         VisitedProgram?.Invoke(this, program);
-        return result;
-    }
-
-    [Obsolete("This method may be removed in a future version as it will not be called anymore due to employing double dispatch (instead of switch dispatch).")]
-    protected internal override object? VisitUnknownNode(Node node)
-    {
-        VisitingUnknownNode?.Invoke(this, node);
-        var result = base.VisitUnknownNode(node);
-        VisitedUnknownNode?.Invoke(this, node);
         return result;
     }
 

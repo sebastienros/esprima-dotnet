@@ -1,10 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
+﻿using System.Numerics;
 using Esprima.Ast;
-using Esprima.Utils;
-using Xunit;
+using Esprima.Ast.Jsx;
+using Esprima.Utils.Jsx;
 using Module = Esprima.Ast.Module;
 
 namespace Esprima.Tests;
@@ -13,7 +10,7 @@ public class AstRewriterTests
 {
     private static Module ParseExpression(string code, bool jsx = false)
     {
-        return new JavaScriptParser(code, new ParserOptions() { Jsx = jsx }).ParseModule();
+        return new JsxParser(code, new JsxParserOptions()).ParseModule();
     }
 
     private static object? FindNearTypeOfDescendTyped(Type type, Node node)
@@ -188,7 +185,7 @@ public class AstRewriterTests
     }
 }
 
-sealed class TestRewriter : AstRewriter
+sealed class TestRewriter : JsxAstRewriter
 {
     private readonly Type _controlType;
 
@@ -636,79 +633,79 @@ sealed class TestRewriter : AstRewriter
             });
     }
 
-    protected internal override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+    public override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
         return ForceNewObjectByControlType((JsxAttribute) base.VisitJsxAttribute(jsxAttribute)!,
             node => new JsxAttribute(node.Name, node.Value));
     }
 
-    protected internal override object? VisitJsxElement(JsxElement jsxElement)
+    public override object? VisitJsxElement(JsxElement jsxElement)
     {
         return ForceNewObjectByControlType((JsxElement) base.VisitJsxElement(jsxElement)!,
             node => new JsxElement(node.OpeningElement, node.Children, node.ClosingElement));
     }
 
-    protected internal override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    public override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
         return ForceNewObjectByControlType((JsxIdentifier) base.VisitJsxIdentifier(jsxIdentifier)!,
             node => new JsxIdentifier(node.Name));
     }
 
-    protected internal override object? VisitJsxText(JsxText jsxText)
+    public override object? VisitJsxText(JsxText jsxText)
     {
         return ForceNewObjectByControlType((JsxText) base.VisitJsxText(jsxText)!,
             node => new JsxText(node.Value, node.Raw));
     }
 
-    protected internal override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    public override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
         return ForceNewObjectByControlType((JsxClosingElement) base.VisitJsxClosingElement(jsxClosingElement)!,
             node => new JsxClosingElement(node.Name));
     }
 
-    protected internal override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    public override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         return ForceNewObjectByControlType((JsxClosingFragment) base.VisitJsxClosingFragment(jsxClosingFragment)!,
             node => new JsxClosingFragment());
     }
 
-    protected internal override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    public override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
         return ForceNewObjectByControlType((JsxEmptyExpression) base.VisitJsxEmptyExpression(jsxEmptyExpression)!,
             node => new JsxEmptyExpression());
     }
 
-    protected internal override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    public override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
         return ForceNewObjectByControlType((JsxExpressionContainer) base.VisitJsxExpressionContainer(jsxExpressionContainer)!,
             node => new JsxExpressionContainer(node.Expression));
     }
 
-    protected internal override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    public override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
         return ForceNewObjectByControlType((JsxMemberExpression) base.VisitJsxMemberExpression(jsxMemberExpression)!,
             node => new JsxMemberExpression(node.Object, node.Property));
     }
 
-    protected internal override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    public override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
         return ForceNewObjectByControlType((JsxNamespacedName) base.VisitJsxNamespacedName(jsxNamespacedName)!,
             node => new JsxNamespacedName(node.Namespace, node.Name));
     }
 
-    protected internal override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    public override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         return ForceNewObjectByControlType((JsxOpeningElement) base.VisitJsxOpeningElement(jsxOpeningElement)!,
             node => new JsxOpeningElement(node.Name, node.SelfClosing, node.Attributes));
     }
 
-    protected internal override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    public override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
         return ForceNewObjectByControlType((JsxOpeningFragment) base.VisitJsxOpeningFragment(jsxOpeningFragment)!,
             node => new JsxOpeningFragment(node.SelfClosing));
     }
 
-    protected internal override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    public override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         return ForceNewObjectByControlType((JsxSpreadAttribute) base.VisitJsxSpreadAttribute(jsxSpreadAttribute)!,
             node => new JsxSpreadAttribute(node.Argument));

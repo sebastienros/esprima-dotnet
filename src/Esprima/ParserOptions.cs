@@ -3,7 +3,7 @@
     /// <summary>
     /// Parser options.
     /// </summary>
-    public sealed class ParserOptions
+    public class ParserOptions
     {
         /// <summary>
         /// Create a new <see cref="ParserOptions" /> instance.
@@ -58,10 +58,5 @@
         /// Default timeout for created regexes, defaults to 10 seconds.
         /// </summary>
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromSeconds(10);
-
-        /// <summary>
-        /// Gets or sets whether to parse script as JSX code.
-        /// </summary>
-        public bool Jsx { get; set; } = false;
     }
 }

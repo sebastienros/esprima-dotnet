@@ -1,21 +1,21 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Utils.Jsx;
 
-namespace Esprima.Ast;
+namespace Esprima.Ast.Jsx;
 
 public sealed class JsxMemberExpression : JsxExpression
 {
     public readonly JsxExpression Object;
     public readonly JsxIdentifier Property;
 
-    public JsxMemberExpression(JsxExpression obj, JsxIdentifier property) : base(Nodes.JSXMemberExpression)
+    public JsxMemberExpression(JsxExpression obj, JsxIdentifier property) : base(JsxNodeType.MemberExpression)
     {
         Object = obj;
         Property = property;
     }
 
     public override NodeCollection ChildNodes => new(Object, Property);
-        
-    protected internal override object? Accept(AstVisitor visitor)
+
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxMemberExpression(this);
     }

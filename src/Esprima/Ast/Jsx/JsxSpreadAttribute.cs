@@ -1,19 +1,19 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Utils.Jsx;
 
-namespace Esprima.Ast;
+namespace Esprima.Ast.Jsx;
 
 public sealed class JsxSpreadAttribute : JsxExpression
 {
     public readonly Expression Argument;
 
-    public JsxSpreadAttribute(Expression argument) : base(Nodes.JSXSpreadAttribute)
+    public JsxSpreadAttribute(Expression argument) : base(JsxNodeType.SpreadAttribute)
     {
         Argument = argument;
     }
 
     public override NodeCollection ChildNodes => new(Argument);
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxSpreadAttribute(this);
     }

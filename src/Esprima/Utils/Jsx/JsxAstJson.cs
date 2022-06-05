@@ -1,12 +1,41 @@
 ﻿using Esprima.Ast;
+using Esprima.Ast.Jsx;
 
-namespace Esprima.Utils;
+namespace Esprima.Utils.Jsx;
 
-public static partial class AstJson
+public sealed class JsxAstToJsonConverter : AstToJsonConverter
 {
-    private sealed partial class Visitor
+    public static new readonly JsxAstToJsonConverter Default = new();
+
+    private JsxAstToJsonConverter() { }
+
+    private protected override VisitorBase CreateVisitor(JsonWriter writer, AstJson.Options options)
     {
-        protected internal override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+        return new Visitor(writer,
+            options.IncludingLineColumn, options.IncludingRange,
+            options.LocationMembersPlacement);
+    }
+
+    private sealed class Visitor : VisitorBase, IJsxAstVisitor
+    {
+        public Visitor(JsonWriter writer, bool includeLineColumn, bool includeRange, LocationMembersPlacement locationMembersPlacement)
+            : base(writer, includeLineColumn, includeRange, locationMembersPlacement)
+        {
+        }
+
+        protected override string GetNodeType(Node node)
+        {
+            if (node is JsxExpression jsxExpression)
+            {
+                // Due to the borrowed test fixtures, it's important to use the 'JSX' prefix to stay consistent with the naming used by original Esprima
+                // (see https://github.com/jquery/esprima/blob/4.0.1/src/jsx-nodes.ts).
+                return "JSX" + jsxExpression.Type.ToString();
+            }
+
+            return base.GetNodeType(node);
+        }
+
+        object? IJsxAstVisitor.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
         {
             using (StartNodeObject(jsxSpreadAttribute))
             {
@@ -16,7 +45,7 @@ public static partial class AstJson
             return jsxSpreadAttribute;
         }
 
-        protected internal override object? VisitJsxElement(JsxElement jsxElement)
+        object? IJsxAstVisitor.VisitJsxElement(JsxElement jsxElement)
         {
             using (StartNodeObject(jsxElement))
             {
@@ -28,7 +57,7 @@ public static partial class AstJson
             return jsxElement;
         }
 
-        protected internal override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+        object? IJsxAstVisitor.VisitJsxAttribute(JsxAttribute jsxAttribute)
         {
             using (StartNodeObject(jsxAttribute))
             {
@@ -39,7 +68,7 @@ public static partial class AstJson
             return jsxAttribute;
         }
 
-        protected internal override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+        object? IJsxAstVisitor.VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
         {
             using (StartNodeObject(jsxIdentifier))
             {
@@ -49,7 +78,7 @@ public static partial class AstJson
             return jsxIdentifier;
         }
 
-        protected internal override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+        object? IJsxAstVisitor.VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
         {
             using (StartNodeObject(jsxClosingElement))
             {
@@ -59,7 +88,7 @@ public static partial class AstJson
             return jsxClosingElement;
         }
 
-        protected internal override object? VisitJsxText(JsxText jsxText)
+        object? IJsxAstVisitor.VisitJsxText(JsxText jsxText)
         {
             using (StartNodeObject(jsxText))
             {
@@ -70,7 +99,7 @@ public static partial class AstJson
             return jsxText;
         }
 
-        protected internal override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+        object? IJsxAstVisitor.VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
         {
             using (StartNodeObject(jsxClosingFragment))
             {
@@ -79,7 +108,7 @@ public static partial class AstJson
             return jsxClosingFragment;
         }
 
-        protected internal override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+        object? IJsxAstVisitor.VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
         {
             using (StartNodeObject(jsxOpeningFragment))
             {
@@ -89,7 +118,7 @@ public static partial class AstJson
             return jsxOpeningFragment;
         }
 
-        protected internal override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+        object? IJsxAstVisitor.VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
         {
             using (StartNodeObject(jsxOpeningElement))
             {
@@ -101,7 +130,7 @@ public static partial class AstJson
             return jsxOpeningElement;
         }
 
-        protected internal override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+        object? IJsxAstVisitor.VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
         {
             using (StartNodeObject(jsxNamespacedName))
             {
@@ -112,7 +141,7 @@ public static partial class AstJson
             return jsxNamespacedName;
         }
 
-        protected internal override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+        object? IJsxAstVisitor.VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
         {
             using (StartNodeObject(jsxMemberExpression))
             {
@@ -123,7 +152,7 @@ public static partial class AstJson
             return jsxMemberExpression;
         }
 
-        protected internal override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+        object? IJsxAstVisitor.VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
         {
             using (StartNodeObject(jsxEmptyExpression))
             {
@@ -132,11 +161,11 @@ public static partial class AstJson
             return jsxEmptyExpression;
         }
 
-        protected internal override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+        object? IJsxAstVisitor.VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
         {
             using (StartNodeObject(jsxExpressionContainer))
             {
-                Member("expression",jsxExpressionContainer.Expression);
+                Member("expression", jsxExpressionContainer.Expression);
             }
 
             return jsxExpressionContainer;

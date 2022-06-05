@@ -1,16 +1,16 @@
-﻿using Esprima.Utils;
+﻿using Esprima.Utils.Jsx;
 
-namespace Esprima.Ast;
+namespace Esprima.Ast.Jsx;
 
 public sealed class JsxEmptyExpression : JsxExpression
 {
-    public JsxEmptyExpression() : base(Nodes.JSXEmptyExpression)
+    public JsxEmptyExpression() : base(JsxNodeType.EmptyExpression)
     {
     }
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor)
     {
         return visitor.VisitJsxEmptyExpression(this);
     }
