@@ -11,6 +11,9 @@ namespace Esprima.Ast
             _body = body;
         }
 
+        /// <summary>
+        /// <see cref="MethodDefinition" /> | <see cref="PropertyDefinition" /> | <see cref="StaticBlock" /> | <see cref="AccessorProperty" />
+        /// </summary>
         public ref readonly NodeList<Node> Body => ref _body;
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);

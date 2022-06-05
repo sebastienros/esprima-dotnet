@@ -5,7 +5,7 @@ namespace Esprima.Ast
     public sealed class ImportSpecifier : ImportDeclarationSpecifier
     {
         /// <summary>
-        /// Identifier | StringLiteral
+        /// <see cref="Identifier" /> | StringLiteral <see cref="Literal" />
         /// </summary>
         public readonly Expression Imported;
 

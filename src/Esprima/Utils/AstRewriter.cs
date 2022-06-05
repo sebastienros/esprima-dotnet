@@ -266,8 +266,9 @@ public abstract partial class AstRewriter : AstVisitor
     {
         var key = VisitAndConvert(propertyDefinition.Key);
         var value = VisitAndConvert(propertyDefinition.Value, allowNull: true);
+        VisitAndConvert(propertyDefinition.Decorators, out var decorators);
 
-        return propertyDefinition.UpdateWith(key, value);
+        return propertyDefinition.UpdateWith(key, value, decorators);
     }
 
     protected internal override object? VisitChainExpression(ChainExpression chainExpression)
@@ -277,13 +278,30 @@ public abstract partial class AstRewriter : AstVisitor
         return chainExpression.UpdateWith(expression);
     }
 
+    protected internal override object? VisitDecorator(Decorator decorator)
+    {
+        var expression = VisitAndConvert(decorator.Expression);
+
+        return decorator.UpdateWith(expression);
+    }
+
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        var key = VisitAndConvert(accessorProperty.Key);
+        var value = VisitAndConvert(accessorProperty.Value);
+        VisitAndConvert(accessorProperty.Decorators, out var decorators);
+
+        return accessorProperty.UpdateWith(key, value, decorators);
+    }
+
     protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
         var id = VisitAndConvert(classExpression.Id, allowNull: true);
         var superClass = VisitAndConvert(classExpression.SuperClass, allowNull: true);
         var body = VisitAndConvert(classExpression.Body);
+        VisitAndConvert(classExpression.Decorators, out var decorators);
 
-        return classExpression.UpdateWith(id, superClass, body);
+        return classExpression.UpdateWith(id, superClass, body, decorators);
     }
 
     protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
@@ -373,8 +391,9 @@ public abstract partial class AstRewriter : AstVisitor
     {
         var key = VisitAndConvert(methodDefinition.Key);
         var value = VisitAndConvert((FunctionExpression) methodDefinition.Value);
+        VisitAndConvert(methodDefinition.Decorators, out var decorators);
 
-        return methodDefinition.UpdateWith(key, value);
+        return methodDefinition.UpdateWith(key, value, decorators);
     }
 
     protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
@@ -391,8 +410,9 @@ public abstract partial class AstRewriter : AstVisitor
         var id = VisitAndConvert(classDeclaration.Id, allowNull: true);
         var superClass = VisitAndConvert(classDeclaration.SuperClass, allowNull: true);
         var body = VisitAndConvert(classDeclaration.Body);
+        VisitAndConvert(classDeclaration.Decorators, out var decorators);
 
-        return classDeclaration.UpdateWith(id, superClass, body);
+        return classDeclaration.UpdateWith(id, superClass, body, decorators);
     }
 
     protected internal override object? VisitClassBody(ClassBody classBody)

@@ -148,6 +148,10 @@ public partial class AstVisitorEventSource : AstVisitor
     public event EventHandler<BreakStatement>? VisitedBreakStatement;
     public event EventHandler<BlockStatement>? VisitingBlockStatement;
     public event EventHandler<BlockStatement>? VisitedBlockStatement;
+    public event EventHandler<AccessorProperty>? VisitingAccessorProperty;
+    public event EventHandler<AccessorProperty>? VisitedAccessorProperty;
+    public event EventHandler<Decorator>? VisitingDecorator;
+    public event EventHandler<Decorator>? VisitedDecorator;
 
     public override object? Visit(Node node)
     {
@@ -419,6 +423,22 @@ public partial class AstVisitorEventSource : AstVisitor
         VisitingChainExpression?.Invoke(this, chainExpression);
         var result = base.VisitChainExpression(chainExpression);
         VisitedChainExpression?.Invoke(this, chainExpression);
+        return result;
+    }
+
+    protected internal override object? VisitDecorator(Decorator decorator)
+    {
+        VisitingDecorator?.Invoke(this, decorator);
+        var result = base.VisitDecorator(decorator);
+        VisitedDecorator?.Invoke(this, decorator);
+        return result;
+    }
+
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        VisitingAccessorProperty?.Invoke(this, accessorProperty);
+        var result = base.VisitAccessorProperty(accessorProperty);
+        VisitedAccessorProperty?.Invoke(this, accessorProperty);
         return result;
     }
 

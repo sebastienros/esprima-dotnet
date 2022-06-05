@@ -13,31 +13,56 @@ namespace Esprima.Ast
         public readonly ClassBody Body;
         ClassBody IClass.Body => Body;
 
+        public readonly NodeList<Decorator> Decorators;
+        NodeList<Decorator> IClass.Decorators => Decorators;
+
         public ClassExpression(
             Identifier? id,
             Expression? superClass,
-            ClassBody body) : base(Nodes.ClassExpression)
+            ClassBody body,
+            in NodeList<Decorator> decorators) : base(Nodes.ClassExpression)
         {
             Id = id;
             SuperClass = superClass;
             Body = body;
+            Decorators = decorators;
         }
 
-        public override NodeCollection ChildNodes => new(Id, SuperClass, Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitClassExpression(this);
         }
 
-        public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body)
+        public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)
         {
-            if (id == Id && superClass == SuperClass && body == Body)
+            if (id == Id && superClass == SuperClass && body == Body && NodeList.AreSame(decorators, Decorators))
             {
                 return this;
             }
 
-            return new ClassExpression(id, superClass, body);
+            return new ClassExpression(id, superClass, body, Decorators);
+        }
+
+        private IEnumerable<Node> CreateChildNodes()
+        {
+            if (Id is not null)
+            {
+                yield return Id;
+            }
+
+            if (SuperClass is not null)
+            {
+                yield return SuperClass;
+            }
+
+            yield return Body;
+
+            foreach (var node in Decorators)
+            {
+                yield return node;
+            }
         }
     }
 }

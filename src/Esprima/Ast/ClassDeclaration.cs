@@ -7,35 +7,62 @@ namespace Esprima.Ast
         public readonly Identifier? Id;
         Identifier? IClass.Id => Id;
 
-        public readonly Expression? SuperClass; // Identifier || CallExpression
+        /// <summary>
+        /// <see cref="Identifier" /> | <see cref="CallExpression" />
+        /// </summary>
+        public readonly Expression? SuperClass;
         Expression? IClass.SuperClass => SuperClass;
 
         public readonly ClassBody Body;
         ClassBody IClass.Body => Body;
 
-        public ClassDeclaration(Identifier? id, Expression? superClass, ClassBody body) :
+        public readonly NodeList<Decorator> Decorators;
+        NodeList<Decorator> IClass.Decorators => Decorators;
+
+        public ClassDeclaration(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators) :
             base(Nodes.ClassDeclaration)
         {
             Id = id;
             SuperClass = superClass;
             Body = body;
+            Decorators = decorators;
         }
 
-        public override NodeCollection ChildNodes => new(Id, SuperClass, Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitClassDeclaration(this);
         }
 
-        public ClassDeclaration UpdateWith(Identifier? id, Expression? superClass, ClassBody body)
+        public ClassDeclaration UpdateWith(Identifier? id, Expression? superClass, ClassBody body,  in NodeList<Decorator> decorators)
         {
-            if (id == Id && superClass == SuperClass && body == Body)
+            if (id == Id && superClass == SuperClass && body == Body && NodeList.AreSame(decorators, Decorators))
             {
                 return this;
             }
 
-            return new ClassDeclaration(id, superClass, body);
+            return new ClassDeclaration(id, superClass, body, decorators);
+        }
+        
+        private IEnumerable<Node> CreateChildNodes()
+        {
+            if (Id is not null)
+            {
+                yield return Id;
+            }
+
+            if (SuperClass is not null)
+            {
+                yield return SuperClass;
+            }
+
+            yield return Body;
+
+            foreach (var node in Decorators)
+            {
+                yield return node;
+            }
         }
     }
 }

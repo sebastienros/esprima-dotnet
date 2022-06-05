@@ -700,6 +700,31 @@ public static partial class AstJson
             return functionExpression;
         }
 
+        protected internal override object? VisitDecorator(Decorator decorator)
+        {
+            using (StartNodeObject(decorator))
+            {
+                Member("expression", decorator.Expression);
+            }
+
+            return decorator;
+        }
+
+        protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+        {
+            using (StartNodeObject(accessorProperty))
+            {
+                Member("key", accessorProperty.Key);
+                Member("value", accessorProperty.Value);
+                if (accessorProperty.Decorators.Count > 0)
+                {
+                    Member("decorators", accessorProperty.Decorators);
+                }
+            }
+            
+            return accessorProperty;
+        }
+
         protected internal override object? VisitClassExpression(ClassExpression classExpression)
         {
             using (StartNodeObject(classExpression))
@@ -707,6 +732,10 @@ public static partial class AstJson
                 Member("id", classExpression.Id);
                 Member("superClass", classExpression.SuperClass);
                 Member("body", classExpression.Body);
+                if (classExpression.Decorators.Count > 0)
+                {
+                    Member("decorators", classExpression.Decorators);
+                }
             }
 
             return classExpression;
@@ -853,6 +882,10 @@ public static partial class AstJson
                 Member("value", methodDefinition.Value);
                 Member("kind", methodDefinition.Kind);
                 Member("static", methodDefinition.Static);
+                if (methodDefinition.Decorators.Count > 0)
+                {
+                    Member("decorators", methodDefinition.Decorators);
+                }
             }
 
             return methodDefinition;
@@ -878,6 +911,10 @@ public static partial class AstJson
                 Member("id", classDeclaration.Id);
                 Member("superClass", classDeclaration.SuperClass);
                 Member("body", classDeclaration.Body);
+                if (classDeclaration.Decorators.Count > 0)
+                {
+                    Member("decorators", classDeclaration.Decorators);
+                }
             }
 
             return classDeclaration;

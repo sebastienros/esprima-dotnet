@@ -870,6 +870,7 @@ namespace Esprima
                 case ']':
                 case ':':
                 case '~':
+                case '@':
                     ++Index;
                     break;
 

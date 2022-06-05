@@ -7,7 +7,7 @@ namespace Esprima.Ast
         public readonly Literal Source;
 
         /// <summary>
-        /// Identifier | StringLiteral
+        /// <see cref="Identifier" /> | StringLiteral <see cref="Literal" />
         /// </summary>
         public readonly Expression? Exported;
         

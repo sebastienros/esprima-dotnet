@@ -5,12 +5,12 @@ namespace Esprima.Ast
     public sealed class ExportSpecifier : Statement
     {
         /// <summary>
-        /// Identifier | StringLiteral
+        /// <see cref="Identifier" /> | <see cref="Literal" />
         /// </summary>
         public readonly Expression Exported;
 
         /// <summary>
-        /// Identifier | StringLiteral
+        /// <see cref="Identifier" /> | StringLiteral <see cref="Literal" />
         /// </summary>
         public readonly Expression Local;
 

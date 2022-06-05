@@ -28,6 +28,7 @@
         public const string IllegalLanguageModeDirective = "Illegal 'use strict' directive in function with non-simple parameter list";
         public const string IllegalReturn = "Illegal return statement";
         public const string InvalidEscapedReservedWord = "Keyword must not contain escaped characters";
+        public const string NoSemicolonAfterDecorator = "Decorators must not be followed by a semicolon.";
         public const string InvalidHexEscapeSequence = "Invalid hexadecimal escape sequence";
         public const string InvalidLHSInAssignment = "Invalid left-hand side in assignment";
         public const string InvalidLHSInForIn = "Invalid left-hand side in for-in";

@@ -407,7 +407,7 @@ sealed class TestRewriter : AstRewriter
     protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
         return ForceNewObjectByControlType((PropertyDefinition) base.VisitPropertyDefinition(propertyDefinition)!,
-            node => new PropertyDefinition(node.Key, propertyDefinition.Computed, node.Value!, propertyDefinition.Static));
+            node => new PropertyDefinition(node.Key, node.Computed, node.Value!, node.Static, node.Decorators));
     }
 
     protected internal override object? VisitChainExpression(ChainExpression chainExpression)
@@ -419,7 +419,7 @@ sealed class TestRewriter : AstRewriter
     protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
         return ForceNewObjectByControlType((ClassExpression) base.VisitClassExpression(classExpression)!,
-            node => new ClassExpression(node.Id, node.SuperClass, node.Body));
+            node => new ClassExpression(node.Id, node.SuperClass, node.Body, node.Decorators));
     }
 
     protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
@@ -479,7 +479,7 @@ sealed class TestRewriter : AstRewriter
     protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
         return ForceNewObjectByControlType((MethodDefinition) base.VisitMethodDefinition(methodDefinition)!,
-            node => new MethodDefinition(node.Key, node.Computed, (FunctionExpression) node.Value, node.Kind, node.Static));
+            node => new MethodDefinition(node.Key, node.Computed, (FunctionExpression) node.Value, node.Kind, node.Static, node.Decorators));
     }
 
     protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
@@ -491,7 +491,7 @@ sealed class TestRewriter : AstRewriter
     protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
         return ForceNewObjectByControlType((ClassDeclaration) base.VisitClassDeclaration(classDeclaration)!,
-            node => new ClassDeclaration(node.Id, node.SuperClass, node.Body));
+            node => new ClassDeclaration(node.Id, node.SuperClass, node.Body, node.Decorators));
     }
 
     protected internal override object? VisitClassBody(ClassBody classBody)
