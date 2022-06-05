@@ -82,5 +82,6 @@
         public const string UnexpectedTokenIllegal = "Unexpected token ILLEGAL";
         public const string UnknownLabel = "Undefined label \"{0}\"";
         public const string UnterminatedRegExp = "Invalid regular expression= missing /";
+        public const string InvalidUnicodeKeyword = "The `{0}` contextual keyword must not contain Unicode escape sequences.";
     }
 }
