@@ -4,7 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <GenerateProgramFile>false</GenerateProgramFile>
-        <GeneratedTestSuiteDir>$(MSBuildThisFileDirectory)Generated</GeneratedTestSuiteDir>
+        <GeneratedTestSuiteDir>Generated</GeneratedTestSuiteDir>
     </PropertyGroup>
 
     <ItemGroup>
@@ -30,7 +30,8 @@
     </ItemGroup>
 
     <!-- Based on the idea presented at https://mhut.ch/journal/2015/06/30/build-time-code-generation-in-msbuild -->
-    <Target Name="GenerateTestSuite" DependsOnTargets="_GenerateTestSuite" BeforeTargets="BeforeBuild;BeforeRebuild" Condition="!Exists($(GeneratedTestSuiteDir))">
+    <Target Name="GenerateTestSuite" DependsOnTargets="_GenerateTestSuite" BeforeTargets="BeforeBuild"
+            Condition="!Exists($([System.IO.Path]::Combine($(MSBuildThisFileDirectory), $(GeneratedTestSuiteDir))))">
       <ItemGroup>
         <Compile Include="$(GeneratedTestSuiteDir)\**\*.cs" />
       </ItemGroup>
@@ -39,6 +40,17 @@
     <Target Name="_GenerateTestSuite">
       <Exec Command="dotnet tool restore" />
       <Exec Command="dotnet test262 generate" />
+    </Target>
+
+    <Target Name="DeleteTestSuite" DependsOnTargets="_DeleteTestSuite" AfterTargets="AfterClean"
+            Condition="Exists($([System.IO.Path]::Combine($(MSBuildThisFileDirectory), $(GeneratedTestSuiteDir))))">
+      <RemoveDir Directories="$(GeneratedTestSuiteDir)" />
+    </Target>
+
+    <Target Name="_DeleteTestSuite">
+      <ItemGroup>
+        <Compile Remove="$(GeneratedTestSuiteDir)\**\*.cs" />
+      </ItemGroup>
     </Target>
 
 </Project>
