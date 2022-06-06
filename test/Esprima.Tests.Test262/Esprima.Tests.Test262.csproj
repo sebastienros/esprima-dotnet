@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <GenerateProgramFile>false</GenerateProgramFile>
+        <GeneratedTestSuiteDir>$(MSBuildThisFileDirectory)Generated</GeneratedTestSuiteDir>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,5 +28,17 @@
     <ItemGroup>
       <Content Include=".config\dotnet-tools.json" />
     </ItemGroup>
+
+    <!-- Based on the idea presented at https://mhut.ch/journal/2015/06/30/build-time-code-generation-in-msbuild -->
+    <Target Name="GenerateTestSuite" DependsOnTargets="_GenerateTestSuite" BeforeTargets="BeforeBuild;BeforeRebuild" Condition="!Exists($(GeneratedTestSuiteDir))">
+      <ItemGroup>
+        <Compile Include="$(GeneratedTestSuiteDir)\**\*.cs" />
+      </ItemGroup>
+    </Target>
+
+    <Target Name="_GenerateTestSuite">
+      <Exec Command="dotnet tool restore" />
+      <Exec Command="dotnet test262 generate" />
+    </Target>
 
 </Project>
