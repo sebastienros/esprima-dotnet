@@ -176,7 +176,6 @@ public class AstToJsonConverter : AstJson.IConverter
         private protected readonly bool _includeRange;
         private protected readonly LocationMembersPlacement _locationMembersPlacement;
         private protected readonly bool _testCompatibilityMode;
-        private readonly ObservableStack<Node> _stack;
 
         public VisitorBase(JsonWriter writer, AstJson.Options options)
         {
@@ -186,68 +185,6 @@ public class AstToJsonConverter : AstJson.IConverter
             _includeRange = options.IncludingRange;
             _locationMembersPlacement = options.LocationMembersPlacement;
             _testCompatibilityMode = options.TestCompatibilityMode;
-
-            _stack = new ObservableStack<Node>();
-
-            _stack.Pushed += node =>
-            {
-                _writer.StartObject();
-
-                if ((_includeLineColumn || _includeRange)
-                    && _locationMembersPlacement == LocationMembersPlacement.Start)
-                {
-                    WriteLocationInfo(node);
-                }
-
-                Member("type", GetNodeType(node));
-            };
-
-            _stack.Popped += node =>
-            {
-                if ((_includeLineColumn || _includeRange)
-                    && _locationMembersPlacement == LocationMembersPlacement.End)
-                {
-                    WriteLocationInfo(node);
-                }
-
-                _writer.EndObject();
-            };
-
-            void WriteLocationInfo(Node node)
-            {
-                if (node is ChainExpression)
-                {
-                    return;
-                }
-
-                if (_includeRange)
-                {
-                    _writer.Member("range");
-                    _writer.StartArray();
-                    _writer.Number(node.Range.Start);
-                    _writer.Number(node.Range.End);
-                    _writer.EndArray();
-                }
-
-                if (_includeLineColumn)
-                {
-                    _writer.Member("loc");
-                    _writer.StartObject();
-                    _writer.Member("start");
-                    Write(node.Location.Start);
-                    _writer.Member("end");
-                    Write(node.Location.End);
-                    _writer.EndObject();
-                }
-
-                void Write(Position position)
-                {
-                    _writer.StartObject();
-                    Member("line", position.Line);
-                    Member("column", position.Column);
-                    _writer.EndObject();
-                }
-            }
         }
 
         protected virtual string GetNodeType(Node node)
@@ -255,9 +192,87 @@ public class AstToJsonConverter : AstJson.IConverter
             return node.Type.ToString();
         }
 
-        protected IDisposable StartNodeObject(Node node)
+        private void WriteLocationInfo(Node node)
         {
-            return _stack.Push(node);
+            if (node is ChainExpression)
+            {
+                return;
+            }
+
+            if (_includeRange)
+            {
+                _writer.Member("range");
+                _writer.StartArray();
+                _writer.Number(node.Range.Start);
+                _writer.Number(node.Range.End);
+                _writer.EndArray();
+            }
+
+            if (_includeLineColumn)
+            {
+                _writer.Member("loc");
+                _writer.StartObject();
+                _writer.Member("start");
+                Write(node.Location.Start);
+                _writer.Member("end");
+                Write(node.Location.End);
+                _writer.EndObject();
+            }
+
+            void Write(Position position)
+            {
+                _writer.StartObject();
+                Member("line", position.Line);
+                Member("column", position.Column);
+                _writer.EndObject();
+            }
+        }
+
+        private void OnStartNodeObject(Node node)
+        {
+            _writer.StartObject();
+
+            if ((_includeLineColumn || _includeRange)
+                && _locationMembersPlacement == LocationMembersPlacement.Start)
+            {
+                WriteLocationInfo(node);
+            }
+
+            Member("type", GetNodeType(node));
+        }
+
+        private void OnFinishNodeObject(Node node)
+        {
+            if ((_includeLineColumn || _includeRange)
+                && _locationMembersPlacement == LocationMembersPlacement.End)
+            {
+                WriteLocationInfo(node);
+            }
+
+            _writer.EndObject();
+        }
+
+        protected readonly struct NodeObjectDisposable : IDisposable
+        {
+            private readonly VisitorBase _visitor;
+            private readonly Node _node;
+
+            public NodeObjectDisposable(VisitorBase visitor, Node node)
+            {
+                _visitor = visitor;
+                _node = node;
+            }
+
+            public void Dispose()
+            {
+                _visitor.OnFinishNodeObject(_node);
+            }
+        }
+
+        protected NodeObjectDisposable StartNodeObject(Node node)
+        {
+            OnStartNodeObject(node);
+            return new NodeObjectDisposable(this, node);
         }
 
         protected void EmptyNodeObject(Node node)
@@ -324,27 +339,6 @@ public class AstToJsonConverter : AstJson.IConverter
             }
 
             _writer.EndArray();
-        }
-
-        private sealed class ObservableStack<T> : IDisposable
-        {
-            private readonly Stack<T> _stack = new();
-
-            public event Action<T>? Pushed;
-            public event Action<T>? Popped;
-
-            public IDisposable Push(T item)
-            {
-                _stack.Push(item);
-                Pushed?.Invoke(item);
-                return this;
-            }
-
-            public void Dispose()
-            {
-                var item = _stack.Pop();
-                Popped?.Invoke(item);
-            }
         }
 
         public override object? Visit(Node? node)
