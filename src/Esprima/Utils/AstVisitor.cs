@@ -350,7 +350,7 @@ public class AstVisitor
 
         if (accessorProperty.Value is not null)
         {
-            Visit(accessorProperty.Value);    
+            Visit(accessorProperty.Value);
         }
 
         ref readonly var decorators = ref accessorProperty.Decorators;
@@ -441,11 +441,8 @@ public class AstVisitor
 
     protected internal virtual object? VisitImport(Import import)
     {
-        if (import.Source is not null)
-        {
-            Visit(import.Source);
-        }
-        
+        Visit(import.Source);
+
         if (import.Attributes is not null)
         {
             Visit(import.Attributes);

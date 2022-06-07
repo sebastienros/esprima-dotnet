@@ -333,12 +333,12 @@ public class AstRewriter : AstVisitor
 
     protected internal override object? VisitImport(Import import)
     {
-        var source = VisitAndConvert(import.Source, allowNull: true);
+        var source = VisitAndConvert(import.Source);
         var attributes = VisitAndConvert(import.Attributes, allowNull: true);
 
         return import.UpdateWith(source, attributes);
     }
-    
+
     protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
     {
         var key = VisitAndConvert(importAttribute.Key);
@@ -352,7 +352,7 @@ public class AstRewriter : AstVisitor
         VisitAndConvert(importDeclaration.Specifiers, out var specifiers);
 
         var source = VisitAndConvert(importDeclaration.Source);
-        
+
         VisitAndConvert(importDeclaration.Assertions, out var assertions);
 
         return importDeclaration.UpdateWith(specifiers, source, assertions);

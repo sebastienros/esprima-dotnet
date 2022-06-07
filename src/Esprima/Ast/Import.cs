@@ -4,14 +4,14 @@ namespace Esprima.Ast
 {
     public sealed class Import : Expression
     {
-        public readonly Expression? Source;
+        public readonly Expression Source;
         public readonly Expression? Attributes;
 
-        public Import() : base(Nodes.Import)
+        public Import(Expression source) : this(source, null)
         {
         }
 
-        public Import(Expression? source, Expression? attributes) : base(Nodes.Import)
+        public Import(Expression source, Expression? attributes) : base(Nodes.Import)
         {
             Source = source;
             Attributes = attributes;
@@ -24,7 +24,7 @@ namespace Esprima.Ast
             return visitor.VisitImport(this);
         }
 
-        public Import UpdateWith(Expression? source, Expression? attributes)
+        public Import UpdateWith(Expression source, Expression? attributes)
         {
             if (source == Source && attributes == Attributes)
             {
