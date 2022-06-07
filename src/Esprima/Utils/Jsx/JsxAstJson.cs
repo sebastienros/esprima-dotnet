@@ -11,15 +11,13 @@ public sealed class JsxAstToJsonConverter : AstToJsonConverter
 
     private protected override VisitorBase CreateVisitor(JsonWriter writer, AstJson.Options options)
     {
-        return new Visitor(writer,
-            options.IncludingLineColumn, options.IncludingRange,
-            options.LocationMembersPlacement);
+        return new Visitor(writer, options);
     }
 
     private sealed class Visitor : VisitorBase, IJsxAstVisitor
     {
-        public Visitor(JsonWriter writer, bool includeLineColumn, bool includeRange, LocationMembersPlacement locationMembersPlacement)
-            : base(writer, includeLineColumn, includeRange, locationMembersPlacement)
+        public Visitor(JsonWriter writer, AstJson.Options options)
+            : base(writer, options)
         {
         }
 

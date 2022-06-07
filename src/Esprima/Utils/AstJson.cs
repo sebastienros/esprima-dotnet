@@ -23,6 +23,14 @@ public static class AstJson
         public bool IncludingLineColumn { get; private set; }
         public bool IncludingRange { get; private set; }
         public LocationMembersPlacement LocationMembersPlacement { get; private set; }
+        /// <summary>
+        /// This switch is intended for enabling a compatibility mode for <see cref="AstToJsonConverter"/> to build a JSON output
+        /// which matches the format of the test fixtures of the original Esprima project.
+        /// </summary>
+        /// <remarks>
+        /// However this is just partially implemented currently because not the original fixtures are used now.
+        /// </remarks>
+        internal bool TestCompatibilityMode { get; private set; }
 
         public Options() { }
 
@@ -46,6 +54,11 @@ public static class AstJson
         public Options WithLocationMembersPlacement(LocationMembersPlacement value)
         {
             return value == LocationMembersPlacement ? this : new Options(this) { LocationMembersPlacement = value };
+        }
+
+        internal Options WithTestCompatibilityMode(bool value)
+        {
+            return value == TestCompatibilityMode ? this : new Options(this) { TestCompatibilityMode = value };
         }
     }
 
@@ -148,9 +161,7 @@ public class AstToJsonConverter : AstJson.IConverter
 
     private protected virtual VisitorBase CreateVisitor(JsonWriter writer, AstJson.Options options)
     {
-        return new Visitor(writer,
-            options.IncludingLineColumn, options.IncludingRange,
-            options.LocationMembersPlacement);
+        return new Visitor(writer, options);
     }
 
     public void WriteJson(Node node, JsonWriter writer, AstJson.Options options)
@@ -161,21 +172,29 @@ public class AstToJsonConverter : AstJson.IConverter
     private protected abstract class VisitorBase : AstVisitor
     {
         private readonly JsonWriter _writer;
+        private protected readonly bool _includeLineColumn;
+        private protected readonly bool _includeRange;
+        private protected readonly LocationMembersPlacement _locationMembersPlacement;
+        private protected readonly bool _testCompatibilityMode;
         private readonly ObservableStack<Node> _stack;
 
-        public VisitorBase(JsonWriter writer,
-            bool includeLineColumn, bool includeRange,
-            LocationMembersPlacement locationMembersPlacement)
+        public VisitorBase(JsonWriter writer, AstJson.Options options)
         {
             _writer = writer ?? ThrowArgumentNullException<JsonWriter>(nameof(writer));
+
+            _includeLineColumn = options.IncludingLineColumn;
+            _includeRange = options.IncludingRange;
+            _locationMembersPlacement = options.LocationMembersPlacement;
+            _testCompatibilityMode = options.TestCompatibilityMode;
+
             _stack = new ObservableStack<Node>();
 
             _stack.Pushed += node =>
             {
                 _writer.StartObject();
 
-                if ((includeLineColumn || includeRange)
-                    && locationMembersPlacement == LocationMembersPlacement.Start)
+                if ((_includeLineColumn || _includeRange)
+                    && _locationMembersPlacement == LocationMembersPlacement.Start)
                 {
                     WriteLocationInfo(node);
                 }
@@ -185,8 +204,8 @@ public class AstToJsonConverter : AstJson.IConverter
 
             _stack.Popped += node =>
             {
-                if ((includeLineColumn || includeRange)
-                    && locationMembersPlacement == LocationMembersPlacement.End)
+                if ((_includeLineColumn || _includeRange)
+                    && _locationMembersPlacement == LocationMembersPlacement.End)
                 {
                     WriteLocationInfo(node);
                 }
@@ -201,7 +220,7 @@ public class AstToJsonConverter : AstJson.IConverter
                     return;
                 }
 
-                if (includeRange)
+                if (_includeRange)
                 {
                     _writer.Member("range");
                     _writer.StartArray();
@@ -210,7 +229,7 @@ public class AstToJsonConverter : AstJson.IConverter
                     _writer.EndArray();
                 }
 
-                if (includeLineColumn)
+                if (_includeLineColumn)
                 {
                     _writer.Member("loc");
                     _writer.StartObject();
@@ -347,6 +366,11 @@ public class AstToJsonConverter : AstJson.IConverter
             {
                 Member("body", program.Body, e => (Node) e);
                 Member("sourceType", program.SourceType);
+
+                if (!_testCompatibilityMode && program is Script s)
+                {
+                    Member("strict", s.Strict);
+                }
             }
 
             return program;
@@ -377,6 +401,10 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("body", functionDeclaration.Body);
                 Member("generator", functionDeclaration.Generator);
                 Member("expression", functionDeclaration.Expression);
+                if (!_testCompatibilityMode)
+                {
+                    Member("strict", functionDeclaration.Strict);
+                }
                 Member("async", functionDeclaration.Async);
             }
 
@@ -576,6 +604,10 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("body", arrowFunctionExpression.Body);
                 Member("generator", arrowFunctionExpression.Generator);
                 Member("expression", arrowFunctionExpression.Expression);
+                if (!_testCompatibilityMode)
+                {
+                    Member("strict", arrowFunctionExpression.Strict);
+                }
                 Member("async", arrowFunctionExpression.Async);
             }
 
@@ -705,6 +737,16 @@ public class AstToJsonConverter : AstJson.IConverter
             return identifier;
         }
 
+        protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+        {
+            using (StartNodeObject(privateIdentifier))
+            {
+                Member("name", privateIdentifier.Name);
+            }
+
+            return privateIdentifier;
+        }
+
         protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
         {
             using (StartNodeObject(functionExpression))
@@ -714,10 +756,28 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("body", functionExpression.Body);
                 Member("generator", functionExpression.Generator);
                 Member("expression", functionExpression.Expression);
+                if (!_testCompatibilityMode)
+                {
+                    Member("strict", functionExpression.Strict);
+                }
                 Member("async", functionExpression.Async);
             }
 
             return functionExpression;
+        }
+
+        protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+        {
+            using (StartNodeObject(propertyDefinition))
+            {
+                Member("key", propertyDefinition.Key);
+                Member("computed", propertyDefinition.Computed);
+                Member("value", propertyDefinition.Value);
+                Member("kind", propertyDefinition.Kind);
+                Member("static", propertyDefinition.Static);
+            }
+
+            return propertyDefinition;
         }
 
         protected internal override object? VisitDecorator(Decorator decorator)
@@ -741,7 +801,7 @@ public class AstToJsonConverter : AstJson.IConverter
                     Member("decorators", accessorProperty.Decorators);
                 }
             }
-            
+
             return accessorProperty;
         }
 
@@ -827,15 +887,20 @@ public class AstToJsonConverter : AstJson.IConverter
         {
             using (StartNodeObject(import))
             {
-                if (import.Attributes is not null)
+                if (!_testCompatibilityMode)
                 {
-                    Member("attributes", import.Attributes);
+                    Member("source", import.Source);
+
+                    if (import.Attributes is not null)
+                    {
+                        Member("attributes", import.Attributes);
+                    }
                 }
             }
 
             return import;
         }
-        
+
         protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
         {
             using (StartNodeObject(importAttribute))
@@ -1183,8 +1248,8 @@ public class AstToJsonConverter : AstJson.IConverter
 
     private sealed class Visitor : VisitorBase
     {
-        public Visitor(JsonWriter writer, bool includeLineColumn, bool includeRange, LocationMembersPlacement locationMembersPlacement)
-            : base(writer, includeLineColumn, includeRange, locationMembersPlacement)
+        public Visitor(JsonWriter writer, AstJson.Options options)
+            : base(writer, options)
         {
         }
     }

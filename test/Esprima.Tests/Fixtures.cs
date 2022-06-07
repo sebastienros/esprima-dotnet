@@ -30,7 +30,8 @@ namespace Esprima.Test
             return program.ToJsonString(
                 AstJson.Options.Default
                     .WithIncludingLineColumn(true)
-                    .WithIncludingRange(true),
+                    .WithIncludingRange(true)
+                    .WithTestCompatibilityMode(true),
                 indent,
                 converter
             );
