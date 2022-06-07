@@ -383,7 +383,7 @@ public class AstRewriter : AstVisitor
     protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
         var key = VisitAndConvert(methodDefinition.Key);
-        var value = VisitAndConvert((FunctionExpression) methodDefinition.Value);
+        var value = VisitAndConvert(methodDefinition.Value);
         VisitAndConvert(methodDefinition.Decorators, out var decorators);
 
         return methodDefinition.UpdateWith(key, value, decorators);

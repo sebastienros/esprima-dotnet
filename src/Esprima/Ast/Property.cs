@@ -4,6 +4,9 @@ namespace Esprima.Ast
 {
     public sealed class Property : ClassProperty
     {
+        public new Expression Value;
+        protected override Expression? GetValue() => Value;
+
         public readonly bool Method;
         public readonly bool Shorthand;
 
@@ -14,12 +17,9 @@ namespace Esprima.Ast
             Expression value,
             bool method,
             bool shorthand)
-            : base(Nodes.Property)
+            : base(Nodes.Property, kind, key, computed)
         {
-            Key = key;
-            Computed = computed;
             Value = value;
-            Kind = kind;
             Method = method;
             Shorthand = shorthand;
         }

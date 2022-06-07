@@ -47,7 +47,7 @@
             },
             "computed": false,
             "value": null,
-            "kind": "none",
+            "kind": "property",
             "static": false,
             "range": [
               10,

@@ -4,6 +4,9 @@ namespace Esprima.Ast
 {
     public sealed class MethodDefinition : ClassProperty
     {
+        public new readonly FunctionExpression Value;
+        protected override Expression? GetValue() => Value;
+
         public readonly bool Static;
         public readonly NodeList<Decorator> Decorators;
 
@@ -14,13 +17,10 @@ namespace Esprima.Ast
             PropertyKind kind,
             bool isStatic,
             in NodeList<Decorator> decorators)
-            : base(Nodes.MethodDefinition)
+            : base(Nodes.MethodDefinition, kind, key, computed)
         {
             Static = isStatic;
-            Key = key;
-            Computed = computed;
             Value = value;
-            Kind = kind;
             Decorators = decorators;
         }
 

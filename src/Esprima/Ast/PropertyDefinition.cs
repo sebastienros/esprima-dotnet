@@ -4,20 +4,21 @@ namespace Esprima.Ast
 {
     public sealed class PropertyDefinition : ClassProperty
     {
+        public new readonly Expression? Value;
+        protected override Expression? GetValue() => Value;
+
         public readonly bool Static;
         public readonly NodeList<Decorator> Decorators;
 
         public PropertyDefinition(
             Expression key,
             bool computed,
-            Expression value,
+            Expression? value,
             bool isStatic,
             in NodeList<Decorator> decorators)
-            : base(Nodes.PropertyDefinition)
+            : base(Nodes.PropertyDefinition, PropertyKind.Property, key, computed)
         {
             Static = isStatic;
-            Key = key;
-            Computed = computed;
             Value = value;
             Decorators = decorators;
         }
@@ -34,7 +35,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new PropertyDefinition(key, Computed, value!, Static, decorators);
+            return new PropertyDefinition(key, Computed, value, Static, decorators);
         }
     }
 }
