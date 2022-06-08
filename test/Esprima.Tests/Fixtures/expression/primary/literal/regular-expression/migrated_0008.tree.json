@@ -9,10 +9,6 @@
                     "id": {
                         "type": "Identifier",
                         "name": "x",
-                        "range": [
-                            4,
-                            5
-                        ],                        
                         "loc": {
                             "start": {
                                 "line": 1,
@@ -32,10 +28,6 @@
                             "pattern": "[a-c]",
                             "flags": "i"
                         },
-                        "range": [
-                            8,
-                            16
-                        ],
                         "loc": {
                             "start": {
                                 "line": 1,
@@ -47,10 +39,6 @@
                             }
                         }
                     },
-                    "range": [
-                        4,
-                        16
-                    ],
                     "loc": {
                         "start": {
                             "line": 1,
@@ -64,10 +52,6 @@
                 }
             ],
             "kind": "var",
-            "range": [
-                0,
-                16
-            ],
             "loc": {
                 "start": {
                     "line": 1,
@@ -142,10 +126,6 @@
                 }
             }
         }
-    ],
-    "range": [
-        0,
-        16
     ],
     "loc": {
         "start": {

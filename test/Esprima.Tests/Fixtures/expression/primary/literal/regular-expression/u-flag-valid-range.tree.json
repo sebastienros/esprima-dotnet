@@ -26,7 +26,7 @@
                     },
                     "init": {
                         "type": "Literal",
-                        "value": { },
+                        "value": null,
                         "raw": "/[\\u{61}-b][\\u0061-b][a-\\u{62}][a-\\u0062]\\u{1ffff}/u",
                         "regex": {
                             "pattern": "[\\u{61}-b][\\u0061-b][a-\\u{62}][a-\\u0062]\\u{1ffff}",

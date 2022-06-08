@@ -1,4 +1,5 @@
-* text eol=lf
+*.js text eol=lf
 
-**migrated_0017* text eol=crlf
-**multiline_string_literal* text eol=crlf
+expression/primary/literal/string/migrated_0017.js eol=crlf
+expression/binary/multiline_string_literal.js eol=crlf
+JSX/multiline-crlf-text.js eol=crlf
