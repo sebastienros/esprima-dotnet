@@ -476,7 +476,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
         return ForceNewObjectByControlType((MethodDefinition) base.VisitMethodDefinition(methodDefinition)!,
-            node => new MethodDefinition(node.Key, node.Computed, (FunctionExpression) node.Value, node.Kind, node.Static, node.Decorators));
+            node => new MethodDefinition(node.Key, node.Computed, node.Value, node.Kind, node.Static, node.Decorators));
     }
 
     protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
