@@ -29,11 +29,9 @@
             "properties": [
               {
                 "type": "Property",
-                "method": false,
-                "shorthand": false,
-                "kind": "init",
                 "key": {
                   "type": "MemberExpression",
+                  "computed": false,
                   "object": {
                     "type": "Identifier",
                     "name": "Symbol",
@@ -70,7 +68,6 @@
                       }
                     }
                   },
-                  "computed": false,
                   "optional": false,
                   "range": [
                     11,
@@ -106,6 +103,9 @@
                     }
                   }
                 },
+                "kind": "init",
+                "method": false,
+                "shorthand": false,
                 "range": [
                   10,
                   38
@@ -171,6 +171,7 @@
     }
   ],
   "sourceType": "script",
+  "strict": false,
   "range": [
     0,
     40
