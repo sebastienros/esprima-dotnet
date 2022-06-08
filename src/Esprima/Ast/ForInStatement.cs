@@ -32,7 +32,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ForInStatement(left, right, body);
+            return new ForInStatement(left, right, body).SetAdditionalInfo(this);
         }
     }
 }

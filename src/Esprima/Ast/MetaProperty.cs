@@ -27,7 +27,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new MetaProperty(meta, property);
+            return new MetaProperty(meta, property).SetAdditionalInfo(this);
         }
     }
 }

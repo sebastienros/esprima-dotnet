@@ -30,7 +30,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return Rewrite(expression);
+            return Rewrite(expression).SetAdditionalInfo(this);
         }
     }
 }

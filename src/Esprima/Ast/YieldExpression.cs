@@ -27,7 +27,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new YieldExpression(argument, Delegate);
+            return new YieldExpression(argument, Delegate).SetAdditionalInfo(this);
         }
     }
 }

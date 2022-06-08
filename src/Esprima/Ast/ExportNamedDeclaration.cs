@@ -9,7 +9,7 @@ namespace Esprima.Ast
         public readonly StatementListItem? Declaration;
         public readonly Literal? Source;
         public readonly NodeList<ImportAttribute> Assertions;
-        
+
         public ExportNamedDeclaration(
             StatementListItem? declaration,
             in NodeList<ExportSpecifier> specifiers,
@@ -39,24 +39,26 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ExportNamedDeclaration(declaration, specifiers, source, assertions);
+            return new ExportNamedDeclaration(declaration, specifiers, source, assertions).SetAdditionalInfo(this);
         }
-                
+
         private IEnumerable<Node> CreateChildNodes()
         {
-            if(Declaration is not null){
+            if (Declaration is not null)
+            {
                 yield return Declaration;
             }
-            
+
             foreach (var node in _specifiers)
             {
                 yield return node;
             }
 
-            if(Source is not null){
+            if (Source is not null)
+            {
                 yield return Source;
             }
-            
+
             foreach (var node in Assertions)
             {
                 yield return node;

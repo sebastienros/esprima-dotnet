@@ -28,7 +28,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new VariableDeclarator(id, init);
+            return new VariableDeclarator(id, init).SetAdditionalInfo(this);
         }
     }
 }

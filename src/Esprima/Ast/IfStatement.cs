@@ -33,7 +33,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new IfStatement(test, consequent, alternate);
+            return new IfStatement(test, consequent, alternate).SetAdditionalInfo(this);
         }
     }
 }

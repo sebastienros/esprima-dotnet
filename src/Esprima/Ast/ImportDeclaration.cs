@@ -36,9 +36,9 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ImportDeclaration(specifiers, source, assertions);
+            return new ImportDeclaration(specifiers, source, assertions).SetAdditionalInfo(this);
         }
-        
+
         private IEnumerable<Node> CreateChildNodes()
         {
             foreach (var node in _specifiers)
@@ -47,7 +47,7 @@ namespace Esprima.Ast
             }
 
             yield return Source;
-            
+
             foreach (var node in Assertions)
             {
                 yield return node;

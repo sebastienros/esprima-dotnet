@@ -32,7 +32,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ConditionalExpression(test, consequent, alternate);
+            return new ConditionalExpression(test, consequent, alternate).SetAdditionalInfo(this);
         }
     }
 }

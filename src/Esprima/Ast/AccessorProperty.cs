@@ -36,7 +36,7 @@ public sealed class AccessorProperty : Node
             return this;
         }
 
-        return new AccessorProperty(key, value, Computed, Static, decorators);
+        return new AccessorProperty(key, value, Computed, Static, decorators).SetAdditionalInfo(this);
     }
 
     private IEnumerable<Node> CreateChildNodes()

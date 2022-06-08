@@ -9,7 +9,7 @@ public sealed class ImportAttribute : Node
     /// </summary>
     public readonly Expression Key;
     public readonly Literal Value;
-    
+
     public ImportAttribute(Expression key, Literal value) : base(Nodes.ImportAttribute)
     {
         Key = key;
@@ -22,7 +22,7 @@ public sealed class ImportAttribute : Node
     {
         return visitor.VisitImportAttribute(this);
     }
-    
+
     public ImportAttribute UpdateWith(Expression key, Literal value)
     {
         if (key == Key && value == Value)
@@ -30,6 +30,6 @@ public sealed class ImportAttribute : Node
             return this;
         }
 
-        return new ImportAttribute(key, value);
+        return new ImportAttribute(key, value).SetAdditionalInfo(this);
     }
 }

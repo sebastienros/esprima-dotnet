@@ -25,7 +25,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new BreakStatement(label);
+            return new BreakStatement(label).SetAdditionalInfo(this);
         }
     }
 }

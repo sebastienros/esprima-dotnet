@@ -42,7 +42,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ClassExpression(id, superClass, body, Decorators);
+            return new ClassExpression(id, superClass, body, Decorators).SetAdditionalInfo(this);
         }
 
         private IEnumerable<Node> CreateChildNodes()

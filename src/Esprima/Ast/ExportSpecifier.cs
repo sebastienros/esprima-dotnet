@@ -34,7 +34,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ExportSpecifier(local, exported);
+            return new ExportSpecifier(local, exported).SetAdditionalInfo(this);
         }
     }
 }

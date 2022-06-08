@@ -28,7 +28,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new LabeledStatement(label, body);
+            return new LabeledStatement(label, body).SetAdditionalInfo(this);
         }
     }
 }

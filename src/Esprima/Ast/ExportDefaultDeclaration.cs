@@ -25,7 +25,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ExportDefaultDeclaration(declaration);
+            return new ExportDefaultDeclaration(declaration).SetAdditionalInfo(this);
         }
     }
 }

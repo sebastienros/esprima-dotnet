@@ -31,7 +31,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new Import(source, attributes);
+            return new Import(source, attributes).SetAdditionalInfo(this);
         }
     }
 }
