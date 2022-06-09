@@ -31,6 +31,6 @@ public sealed class JsxElement : JsxExpression
             return this;
         }
 
-        return new JsxElement(openingElement, children, closingElement);
+        return new JsxElement(openingElement, children, closingElement).SetAdditionalInfo(this);
     }
 }

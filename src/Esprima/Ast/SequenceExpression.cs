@@ -32,7 +32,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new SequenceExpression(expressions);
+            return new SequenceExpression(expressions).SetAdditionalInfo(this);
         }
     }
 }

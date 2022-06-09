@@ -28,7 +28,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ChainExpression(expression);
+            return new ChainExpression(expression).SetAdditionalInfo(this);
         }
     }
 }

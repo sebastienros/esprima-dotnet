@@ -10,7 +10,7 @@ namespace Esprima.Ast
         /// <see cref="Identifier" /> | StringLiteral <see cref="Literal" />
         /// </summary>
         public readonly Expression? Exported;
-        
+
         public readonly NodeList<ImportAttribute> Assertions;
 
         public ExportAllDeclaration(Literal source) : this(source, null, new NodeList<ImportAttribute>())
@@ -38,18 +38,18 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ExportAllDeclaration(source, exported, assertions);
+            return new ExportAllDeclaration(source, exported, assertions).SetAdditionalInfo(this);
         }
-        
+
         private IEnumerable<Node> CreateChildNodes()
         {
             yield return Source;
-            
+
             if (Exported is not null)
             {
                 yield return Exported;
             }
-            
+
             foreach (var assertion in Assertions)
             {
                 yield return assertion;

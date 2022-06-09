@@ -38,7 +38,7 @@ namespace Esprima.Ast
             this(ParseAssignmentOperator(op), left, right)
         {
         }
-        
+
         internal AssignmentExpression(
             AssignmentOperator op,
             Expression left,
@@ -89,7 +89,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new AssignmentExpression(Operator, left, right);
+            return new AssignmentExpression(Operator, left, right).SetAdditionalInfo(this);
         }
     }
 }

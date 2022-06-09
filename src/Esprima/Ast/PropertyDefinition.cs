@@ -35,7 +35,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new PropertyDefinition(key, Computed, value, Static, decorators);
+            return new PropertyDefinition(key, Computed, value, Static, decorators).SetAdditionalInfo(this);
         }
     }
 }

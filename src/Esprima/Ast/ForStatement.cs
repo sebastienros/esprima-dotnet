@@ -37,7 +37,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ForStatement(init, test, update, body);
+            return new ForStatement(init, test, update, body).SetAdditionalInfo(this);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new RestElement(argument);
+            return new RestElement(argument).SetAdditionalInfo(this);
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new FunctionDeclaration(id, parameters, body, Generator, Strict, Async);
+            return new FunctionDeclaration(id, parameters, body, Generator, Strict, Async).SetAdditionalInfo(this);
         }
     }
 }

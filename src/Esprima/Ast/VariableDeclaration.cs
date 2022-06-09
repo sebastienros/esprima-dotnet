@@ -32,7 +32,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new VariableDeclaration(declarations, Kind);
+            return new VariableDeclaration(declarations, Kind).SetAdditionalInfo(this);
         }
     }
 }

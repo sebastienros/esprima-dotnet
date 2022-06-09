@@ -30,7 +30,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ClassBody(body);
+            return new ClassBody(body).SetAdditionalInfo(this);
         }
     }
 }

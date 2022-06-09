@@ -33,7 +33,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new TemplateLiteral(quasis, expressions);
+            return new TemplateLiteral(quasis, expressions).SetAdditionalInfo(this);
         }
 
         private IEnumerable<Node> CreateChildNodes()

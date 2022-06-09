@@ -98,5 +98,19 @@ namespace Esprima.Ast
                 return false;
             }
         }
+
+        internal static T SetAdditionalInfo<T>(this T node, Node sourceNode) where T : Node
+        {
+            node.Location = sourceNode.Location;
+            node.Range = sourceNode.Range;
+            return node;
+        }
+
+        internal static T SetAdditionalInfo<T>(this T node, Statement sourceNode) where T : Statement
+        {
+            node.LabelSet = sourceNode.LabelSet;
+            node.SetAdditionalInfo((Node) sourceNode);
+            return node;
+        }
     }
 }

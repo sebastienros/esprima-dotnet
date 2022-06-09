@@ -36,7 +36,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new Property(Kind, key, Computed, value, Method, Shorthand);
+            return new Property(Kind, key, Computed, value, Method, Shorthand).SetAdditionalInfo(this);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new MethodDefinition(key, Computed, value, Kind, Static, decorators);
+            return new MethodDefinition(key, Computed, value, Kind, Static, decorators).SetAdditionalInfo(this);
         }
     }
 }
