@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
@@ -18,27 +19,23 @@ namespace Esprima.Ast
 
     public class UnaryExpression : Expression
     {
-        public readonly UnaryOperator Operator;
-        public readonly Expression Argument;
-        public bool Prefix { get; protected set; }
-
-        public UnaryExpression(string? op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
+        public UnaryExpression(string? op, Expression arg) : this(ParseUnaryOperator(op), arg)
         {
         }
 
-        internal UnaryExpression(UnaryOperator op, Expression arg) : this(Nodes.UnaryExpression, op, arg)
+        public UnaryExpression(UnaryOperator op, Expression arg) : this(Nodes.UnaryExpression, op, arg, prefix: true)
         {
         }
 
-        protected UnaryExpression(Nodes type, string? op, Expression arg) : this(type, ParseUnaryOperator(op), arg)
+        protected UnaryExpression(Nodes type, string? op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
         {
         }
 
-        protected UnaryExpression(Nodes type, UnaryOperator op, Expression arg) : base(type)
+        protected UnaryExpression(Nodes type, UnaryOperator op, Expression arg, bool prefix) : base(type)
         {
             Operator = op;
             Argument = arg;
-            Prefix = true;
+            Prefix = prefix;
         }
 
         private static UnaryOperator ParseUnaryOperator(string? op)
@@ -57,6 +54,10 @@ namespace Esprima.Ast
                 _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
             };
         }
+
+        public UnaryOperator Operator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public bool Prefix { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public sealed override NodeCollection ChildNodes => new(Argument);
 

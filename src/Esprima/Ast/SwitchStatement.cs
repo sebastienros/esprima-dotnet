@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -6,17 +7,16 @@ namespace Esprima.Ast
     {
         private readonly NodeList<SwitchCase> _cases;
 
-        public readonly Expression Discriminant;
-
         public SwitchStatement(Expression discriminant, in NodeList<SwitchCase> cases) : base(Nodes.SwitchStatement)
         {
             Discriminant = discriminant;
             _cases = cases;
         }
 
-        public ref readonly NodeList<SwitchCase> Cases => ref _cases;
+        public Expression Discriminant { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<SwitchCase> Cases { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _cases; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Discriminant, _cases);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Discriminant, Cases);
 
         protected internal override object? Accept(AstVisitor visitor)
         {
@@ -32,6 +32,5 @@ namespace Esprima.Ast
 
             return new SwitchStatement(discriminant, cases).SetAdditionalInfo(this);
         }
-
     }
 }

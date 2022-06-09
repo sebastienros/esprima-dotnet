@@ -1,15 +1,10 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ForStatement : Statement
     {
-        // can be a Statement (var i) or an Expression (i=0)
-        public readonly StatementListItem? Init;
-        public readonly Expression? Test;
-        public readonly Expression? Update;
-        public readonly Statement Body;
-
         public ForStatement(
             StatementListItem? init,
             Expression? test,
@@ -22,6 +17,14 @@ namespace Esprima.Ast
             Update = update;
             Body = body;
         }
+
+        /// <remarks>
+        /// <see cref="Statement"/> (var i) | <see cref="Expression"/> (i=0)
+        /// </remarks>
+        public StatementListItem? Init { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression? Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression? Update { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Init, Test, Update, Body);
 

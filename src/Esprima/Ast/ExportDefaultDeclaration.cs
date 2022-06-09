@@ -1,15 +1,19 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ExportDefaultDeclaration : ExportDeclaration
     {
-        public readonly StatementListItem Declaration; //: BindingIdentifier | BindingPattern | ClassDeclaration | Expression | FunctionDeclaration;
-
         public ExportDefaultDeclaration(StatementListItem declaration) : base(Nodes.ExportDefaultDeclaration)
         {
             Declaration = declaration;
         }
+
+        /// <remarks>
+        /// BindingIdentifier | <see cref="BindingPattern" /> | <see cref="ClassDeclaration" /> | <see cref="Expression" /> | <see cref="FunctionDeclaration" />
+        /// </remarks>
+        public StatementListItem Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Declaration);
 

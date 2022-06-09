@@ -1,17 +1,18 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class MetaProperty : Expression
     {
-        public readonly Identifier Meta;
-        public readonly Identifier Property;
-
         public MetaProperty(Identifier meta, Identifier property) : base(Nodes.MetaProperty)
         {
             Meta = meta;
             Property = property;
         }
+
+        public Identifier Meta { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Identifier Property { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Meta, Property);
 

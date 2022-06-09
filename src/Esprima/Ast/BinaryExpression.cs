@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
@@ -34,16 +35,12 @@ namespace Esprima.Ast
 
     public sealed class BinaryExpression : Expression
     {
-        public readonly BinaryOperator Operator;
-        public readonly Expression Left;
-        public readonly Expression Right;
-
         public BinaryExpression(string op, Expression left, Expression right) :
             this(ParseBinaryOperator(op), left, right)
         {
         }
 
-        internal BinaryExpression(BinaryOperator op, Expression left, Expression right) :
+        public BinaryExpression(BinaryOperator op, Expression left, Expression right) :
             base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr || op == BinaryOperator.NullishCoalescing ? Nodes.LogicalExpression : Nodes.BinaryExpression)
         {
             Operator = op;
@@ -83,6 +80,10 @@ namespace Esprima.Ast
                 _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
             };
         }
+
+        public BinaryOperator Operator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Left, Right);
 

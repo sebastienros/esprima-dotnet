@@ -1100,7 +1100,7 @@ namespace Esprima
                 ThrowTemplateLiteralEarlyErrors(token);
             }
 
-            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value! };
+            var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!, Cooked: (string) token.Value!);
 
             return Finalize(node, new TemplateElement(value, token.Tail));
         }
@@ -1119,7 +1119,7 @@ namespace Esprima
                 ThrowTemplateLiteralEarlyErrors(token);
             }
 
-            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value! };
+            var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!, Cooked: (string) token.Value!);
 
             return Finalize(node, new TemplateElement(value, token.Tail));
         }
@@ -1196,7 +1196,7 @@ namespace Esprima
                     {
                         if (property is Property p)
                         {
-                            p.Value = ReinterpretExpressionAsPattern(p.Value);
+                            p._value = ReinterpretExpressionAsPattern(p.Value);
                             properties.Add(p);
                         }
                         else
@@ -1355,7 +1355,7 @@ namespace Esprima
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression!));
                                     }
 
-                                    sequenceExpression.UpdateExpressions(NodeList.From(ref reinterpretedExpressions));
+                                    sequenceExpression._expressions = NodeList.From(ref reinterpretedExpressions);
                                 }
                                 else
                                 {
@@ -2244,7 +2244,7 @@ namespace Esprima
                             ThrowUnexpectedToken(_lookahead);
                         }
 
-                        assignment.Right = new Identifier("yield") { Location = assignment.Right.Location, Range = assignment.Right.Range };
+                        assignment._right = new Identifier("yield") { Location = assignment.Right.Location, Range = assignment.Right.Range };
                     }
                 }
                 else if (asyncArrow && param.Type == Nodes.Identifier && param.As<Identifier>().Name == "await")

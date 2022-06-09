@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Esprima.Utils;
 
@@ -8,17 +9,6 @@ namespace Esprima.Ast
     [DebuggerDisplay("{Raw,nq}")]
     public class Literal : Expression
     {
-        public string? StringValue => TokenType == TokenType.StringLiteral ? Value as string : null;
-        public readonly double NumericValue;
-        public bool BooleanValue => TokenType == TokenType.BooleanLiteral && NumericValue != 0;
-        public Regex? RegexValue => TokenType == TokenType.RegularExpression ? (Regex?) Value : null;
-        public BigInteger? BigIntValue => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null;
-
-        public readonly RegexValue? Regex;
-        public readonly object? Value;
-        public readonly string Raw;
-        public readonly TokenType TokenType;
-
         internal Literal(TokenType tokenType, object? value, string raw) : base(Nodes.Literal)
         {
             TokenType = tokenType;
@@ -49,6 +39,17 @@ namespace Esprima.Ast
             // value is null if a Regex object couldn't be created out of the pattern or options
             Regex = new RegexValue(pattern, flags);
         }
+
+        public TokenType TokenType { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public object? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public string Raw { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public RegexValue? Regex { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+        public string? StringValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.StringLiteral ? Value as string : null; }
+        public bool BooleanValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BooleanLiteral && NumericValue != 0; }
+        public double NumericValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Regex? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.RegularExpression ? (Regex?) Value : null; }
+        public BigInteger? BigIntValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null; }
 
         public sealed override NodeCollection ChildNodes => NodeCollection.Empty;
 

@@ -1,17 +1,18 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class DoWhileStatement : Statement
     {
-        public readonly Statement Body;
-        public readonly Expression Test;
-
         public DoWhileStatement(Statement body, Expression test) : base(Nodes.DoWhileStatement)
         {
             Body = body;
             Test = test;
         }
+
+        public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Body, Test);
 

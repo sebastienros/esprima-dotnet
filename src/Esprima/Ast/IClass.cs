@@ -8,7 +8,7 @@
         Identifier? Id { get; }
         Expression? SuperClass { get; }
         ClassBody Body { get; }
+        ref readonly NodeList<Decorator> Decorators { get; }
         NodeCollection ChildNodes { get; }
-        NodeList<Decorator> Decorators { get; }
     }
 }

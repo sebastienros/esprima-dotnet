@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -16,9 +17,9 @@ namespace Esprima.Ast
             _body = body;
         }
 
-        public ref readonly NodeList<Statement> Body => ref _body;
+        public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
-        public sealed override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
+        public sealed override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
 
         protected internal sealed override object? Accept(AstVisitor visitor)
         {

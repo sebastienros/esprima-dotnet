@@ -1,14 +1,13 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ImportDeclaration : Declaration
     {
         private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
+        private readonly NodeList<ImportAttribute> _assertions;
 
-        public readonly Literal Source;
-
-        public readonly NodeList<ImportAttribute> Assertions;
         public ImportDeclaration(
             in NodeList<ImportDeclarationSpecifier> specifiers,
             Literal source,
@@ -17,10 +16,12 @@ namespace Esprima.Ast
         {
             _specifiers = specifiers;
             Source = source;
-            Assertions = assertions;
+            _assertions = assertions;
         }
 
-        public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers => ref _specifiers;
+        public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _specifiers; }
+        public Literal Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
@@ -41,7 +42,7 @@ namespace Esprima.Ast
 
         private IEnumerable<Node> CreateChildNodes()
         {
-            foreach (var node in _specifiers)
+            foreach (var node in Specifiers)
             {
                 yield return node;
             }

@@ -1,13 +1,10 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ForInStatement : Statement
     {
-        public readonly Node Left;
-        public readonly Expression Right;
-        public readonly Statement Body;
-
         public ForInStatement(
             Node left,
             Expression right,
@@ -17,6 +14,10 @@ namespace Esprima.Ast
             Right = right;
             Body = body;
         }
+
+        public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Left, Right, Body);
 

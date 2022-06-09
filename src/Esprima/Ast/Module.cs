@@ -2,17 +2,11 @@
 {
     public sealed class Module : Program
     {
-        private readonly NodeList<Statement> _body;
-        public override SourceType SourceType => SourceType.Module;
-
-        public Module(in NodeList<Statement> body) : base(Nodes.Program)
+        public Module(in NodeList<Statement> body) : base(Nodes.Program, body)
         {
-            _body = body;
         }
 
-        public override ref readonly NodeList<Statement> Body => ref _body;
-
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+        public override SourceType SourceType => SourceType.Module;
 
         protected override Program Rewrite(in NodeList<Statement> body)
         {

@@ -83,7 +83,7 @@ public class AstRewriter : AstVisitor
     {
         var id = VisitAndConvert(functionDeclaration.Id, allowNull: true);
         VisitAndConvert(functionDeclaration.Params, out var parameters);
-        var body = VisitAndConvert((BlockStatement) functionDeclaration.Body);
+        var body = VisitAndConvert(functionDeclaration.Body);
 
         return functionDeclaration.UpdateWith(id, parameters, body);
     }
@@ -250,7 +250,7 @@ public class AstRewriter : AstVisitor
     {
         var id = VisitAndConvert(functionExpression.Id, allowNull: true);
         VisitAndConvert(functionExpression.Params, out var parameters);
-        var body = VisitAndConvert((BlockStatement) functionExpression.Body);
+        var body = VisitAndConvert(functionExpression.Body);
 
         return functionExpression.UpdateWith(id, parameters, body);
     }

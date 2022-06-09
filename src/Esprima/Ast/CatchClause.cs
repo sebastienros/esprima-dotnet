@@ -1,18 +1,22 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class CatchClause : Statement
     {
-        public readonly Expression? Param; // BindingIdentifier | BindingPattern | null;
-        public readonly BlockStatement Body;
-
         public CatchClause(Expression? param, BlockStatement body) :
             base(Nodes.CatchClause)
         {
             Param = param;
             Body = body;
         }
+
+        /// <remarks>
+        /// BindingIdentifier | <see cref="BindingPattern"/> | <see langword="null"/>
+        /// </remarks>
+        public Expression? Param { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Param, Body);
 

@@ -1,14 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class MethodDefinition : ClassProperty
     {
-        public new readonly FunctionExpression Value;
-        protected override Expression? GetValue() => Value;
-
-        public readonly bool Static;
-        public readonly NodeList<Decorator> Decorators;
+        private readonly NodeList<Decorator> _decorators;
 
         public MethodDefinition(
             Expression key,
@@ -19,10 +16,16 @@ namespace Esprima.Ast
             in NodeList<Decorator> decorators)
             : base(Nodes.MethodDefinition, kind, key, computed)
         {
-            Static = isStatic;
             Value = value;
-            Decorators = decorators;
+            Static = isStatic;
+            _decorators = decorators;
         }
+
+        public new FunctionExpression Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        protected override Expression? GetValue() => Value;
+
+        public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
         protected internal override object? Accept(AstVisitor visitor)
         {

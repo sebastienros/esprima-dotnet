@@ -1,14 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class Property : ClassProperty
     {
-        public new Expression Value;
-        protected override Expression? GetValue() => Value;
-
-        public readonly bool Method;
-        public readonly bool Shorthand;
+        internal Expression _value;
 
         public Property(
             PropertyKind kind,
@@ -19,10 +16,16 @@ namespace Esprima.Ast
             bool shorthand)
             : base(Nodes.Property, kind, key, computed)
         {
-            Value = value;
+            _value = value;
             Method = method;
             Shorthand = shorthand;
         }
+
+        public new Expression Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _value; }
+        protected override Expression? GetValue() => _value;
+
+        public bool Method { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public bool Shorthand { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         protected internal override object? Accept(AstVisitor visitor)
         {

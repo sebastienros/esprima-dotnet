@@ -1,10 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class FunctionExpression : Expression, IFunction
     {
-        private readonly NodeList<Expression> _parameters;
+        private readonly NodeList<Expression> _params;
 
         public FunctionExpression(
             Identifier? id,
@@ -16,23 +17,25 @@ namespace Esprima.Ast
             base(Nodes.FunctionExpression)
         {
             Id = id;
-            _parameters = parameters;
+            _params = parameters;
             Body = body;
             Generator = generator;
-            Expression = false;
             Strict = strict;
             Async = async;
         }
 
-        public Identifier? Id { get; }
-        public ref readonly NodeList<Expression> Params => ref _parameters;
-        public Node Body { get; }
-        public bool Generator { get; }
-        public bool Expression { get; }
-        public bool Async { get; }
-        public bool Strict { get; }
+        public Identifier? Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, _parameters, Body);
+        public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        Node IFunction.Body => Body;
+
+        public bool Generator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        bool IFunction.Expression => false;
+        public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, Params, Body);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

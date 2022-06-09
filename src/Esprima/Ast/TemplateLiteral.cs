@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -16,8 +17,8 @@ namespace Esprima.Ast
             _expressions = expressions;
         }
 
-        public ref readonly NodeList<TemplateElement> Quasis => ref _quasis;
-        public ref readonly NodeList<Expression> Expressions => ref _expressions;
+        public ref readonly NodeList<TemplateElement> Quasis { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _quasis; }
+        public ref readonly NodeList<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _expressions; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
@@ -39,12 +40,12 @@ namespace Esprima.Ast
         private IEnumerable<Node> CreateChildNodes()
         {
             var i = 0;
-            while (!_quasis[i].Tail)
+            while (!Quasis[i].Tail)
             {
-                yield return _quasis[i];
-                yield return _expressions[i++];
+                yield return Quasis[i];
+                yield return Expressions[i++];
             }
-            yield return _quasis[i];
+            yield return Quasis[i];
         }
     }
 }

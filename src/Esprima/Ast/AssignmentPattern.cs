@@ -1,17 +1,20 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class AssignmentPattern : Expression
     {
-        public readonly Expression Left;
-        public Expression Right;
+        internal Expression _right;
 
         public AssignmentPattern(Expression left, Expression right) : base(Nodes.AssignmentPattern)
         {
             Left = left;
-            Right = right;
+            _right = right;
         }
+
+        public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _right; }
 
         public override NodeCollection ChildNodes => new(Left, Right);
 

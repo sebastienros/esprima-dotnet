@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -11,9 +12,9 @@ namespace Esprima.Ast
             _elements = elements;
         }
 
-        public ref readonly NodeList<Expression?> Elements => ref _elements;
+        public ref readonly NodeList<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield<Expression>(_elements!);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield<Expression>(Elements!);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

@@ -1,15 +1,16 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public class ExpressionStatement : Statement
     {
-        public readonly Expression Expression;
-
         public ExpressionStatement(Expression expression) : base(Nodes.ExpressionStatement)
         {
             Expression = expression;
         }
+
+        public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public sealed override NodeCollection ChildNodes => new(Expression);
 

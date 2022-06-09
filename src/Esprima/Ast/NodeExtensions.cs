@@ -108,7 +108,7 @@ namespace Esprima.Ast
 
         internal static T SetAdditionalInfo<T>(this T node, Statement sourceNode) where T : Statement
         {
-            node.LabelSet = sourceNode.LabelSet;
+            node._labelSet = sourceNode.LabelSet;
             node.SetAdditionalInfo((Node) sourceNode);
             return node;
         }

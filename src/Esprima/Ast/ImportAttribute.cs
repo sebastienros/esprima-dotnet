@@ -1,20 +1,21 @@
+using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 public sealed class ImportAttribute : Node
 {
-    /// <summary>
-    /// <see cref="Identifier" /> | <see cref="Literal" />
-    /// </summary>
-    public readonly Expression Key;
-    public readonly Literal Value;
-
     public ImportAttribute(Expression key, Literal value) : base(Nodes.ImportAttribute)
     {
         Key = key;
         Value = value;
     }
+
+    /// <remarks>
+    /// <see cref="Identifier" /> | <see cref="Literal" />
+    /// </remarks>
+    public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public Literal Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public override NodeCollection ChildNodes => new(Key, Value);
 

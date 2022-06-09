@@ -1,11 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class VariableDeclaration : Declaration
     {
         private readonly NodeList<VariableDeclarator> _declarations;
-        public readonly VariableDeclarationKind Kind;
 
         public VariableDeclaration(
             in NodeList<VariableDeclarator> declarations,
@@ -16,9 +16,10 @@ namespace Esprima.Ast
             Kind = kind;
         }
 
-        public ref readonly NodeList<VariableDeclarator> Declarations => ref _declarations;
+        public ref readonly NodeList<VariableDeclarator> Declarations { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _declarations; }
+        public VariableDeclarationKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_declarations);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declarations);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

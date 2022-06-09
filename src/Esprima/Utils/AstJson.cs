@@ -392,7 +392,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("params", functionDeclaration.Params);
                 Member("body", functionDeclaration.Body);
                 Member("generator", functionDeclaration.Generator);
-                Member("expression", functionDeclaration.Expression);
+                Member("expression", ((IFunction) functionDeclaration).Expression);
                 // original Esprima doesn't include this information yet
                 if (!_testCompatibilityMode)
                 {
@@ -592,10 +592,10 @@ public class AstToJsonConverter : AstJson.IConverter
         {
             using (StartNodeObject(arrowFunctionExpression))
             {
-                Member("id", arrowFunctionExpression.Id);
+                Member("id", ((IFunction) arrowFunctionExpression).Id);
                 Member("params", arrowFunctionExpression.Params);
                 Member("body", arrowFunctionExpression.Body);
-                Member("generator", arrowFunctionExpression.Generator);
+                Member("generator", ((IFunction) arrowFunctionExpression).Generator);
                 Member("expression", arrowFunctionExpression.Expression);
                 // original Esprima doesn't include this information yet
                 if (!_testCompatibilityMode)
@@ -749,7 +749,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("params", functionExpression.Params);
                 Member("body", functionExpression.Body);
                 Member("generator", functionExpression.Generator);
-                Member("expression", functionExpression.Expression);
+                Member("expression", ((IFunction) functionExpression).Expression);
                 // original Esprima doesn't include this information yet
                 if (!_testCompatibilityMode)
                 {

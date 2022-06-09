@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -9,7 +10,8 @@ namespace Esprima.Ast
             Type = type;
         }
 
-        public readonly Nodes Type;
+        public Nodes Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
         public Range Range;
         public Location Location;
 

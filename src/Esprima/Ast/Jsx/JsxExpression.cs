@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
@@ -8,12 +9,12 @@ namespace Esprima.Ast.Jsx;
 /// </summary>
 public abstract class JsxExpression : Expression
 {
-    public new readonly JsxNodeType Type;
-
     protected JsxExpression(JsxNodeType type) : base(Nodes.Extension)
     {
         Type = type;
     }
+
+    public new JsxNodeType Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     protected abstract object? Accept(IJsxAstVisitor visitor);
 
