@@ -70,6 +70,7 @@
               },
               "generator": false,
               "expression": false,
+              "strict": true,
               "async": false,
               "range": [
                 31,
@@ -173,6 +174,7 @@
     }
   ],
   "sourceType": "script",
+  "strict": false,
   "range": [
     0,
     38

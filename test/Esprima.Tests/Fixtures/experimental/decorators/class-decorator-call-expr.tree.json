@@ -150,6 +150,7 @@
     }
   ],
   "sourceType": "script",
+  "strict": false,
   "range": [
     0,
     24
