@@ -101,8 +101,8 @@ namespace Esprima.Ast
 
         internal static T SetAdditionalInfo<T>(this T node, Node sourceNode) where T : Node
         {
-            node._location = sourceNode._location;
-            node._range = sourceNode._range;
+            node.Location = sourceNode.Location;
+            node.Range = sourceNode.Range;
             return node;
         }
 
