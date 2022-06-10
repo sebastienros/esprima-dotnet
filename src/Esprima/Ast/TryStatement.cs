@@ -1,13 +1,10 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class TryStatement : Statement
     {
-        public readonly BlockStatement Block;
-        public readonly CatchClause? Handler;
-        public readonly BlockStatement? Finalizer;
-
         public TryStatement(
             BlockStatement block,
             CatchClause? handler,
@@ -18,6 +15,10 @@ namespace Esprima.Ast
             Handler = handler;
             Finalizer = finalizer;
         }
+
+        public BlockStatement Block { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public CatchClause? Handler { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public BlockStatement? Finalizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Block, Handler, Finalizer);
 

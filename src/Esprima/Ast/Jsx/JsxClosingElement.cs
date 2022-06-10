@@ -1,15 +1,16 @@
-﻿using Esprima.Utils.Jsx;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
 public sealed class JsxClosingElement : JsxExpression
 {
-    public readonly JsxExpression Name;
-
     public JsxClosingElement(JsxExpression name) : base(JsxNodeType.ClosingElement)
     {
         Name = name;
     }
+
+    public JsxExpression Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public override NodeCollection ChildNodes => new(Name);
 

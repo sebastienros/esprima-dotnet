@@ -1,17 +1,18 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class TaggedTemplateExpression : Expression
     {
-        public readonly Expression Tag;
-        public readonly TemplateLiteral Quasi;
-
         public TaggedTemplateExpression(Expression tag, TemplateLiteral quasi) : base(Nodes.TaggedTemplateExpression)
         {
             Tag = tag;
             Quasi = quasi;
         }
+
+        public Expression Tag { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public TemplateLiteral Quasi { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Tag, Quasi);
 

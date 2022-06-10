@@ -1,15 +1,16 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ContinueStatement : Statement
     {
-        public readonly Identifier? Label;
-
         public ContinueStatement(Identifier? label) : base(Nodes.ContinueStatement)
         {
             Label = label;
         }
+
+        public Identifier? Label { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Label);
 

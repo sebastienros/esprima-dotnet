@@ -1,17 +1,11 @@
+using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 public sealed class AccessorProperty : Node
 {
-    /// <summary>
-    /// <see cref="Expression" /> | <see cref="PrivateIdentifier" />
-    /// </summary>
-    public readonly Expression Key;
-    public readonly Expression? Value;
-    public readonly bool Computed;
-    public readonly bool Static;
-    public readonly NodeList<Decorator> Decorators;
+    private readonly NodeList<Decorator> _decorators;
 
     public AccessorProperty(Expression key, Expression? value, bool computed, bool isStatic, in NodeList<Decorator> decorators) : base(Nodes.AccessorProperty)
     {
@@ -19,8 +13,17 @@ public sealed class AccessorProperty : Node
         Value = value;
         Computed = computed;
         Static = isStatic;
-        Decorators = decorators;
+        _decorators = decorators;
     }
+
+    /// <remarks>
+    /// <see cref="Expression" /> | <see cref="PrivateIdentifier" />
+    /// </remarks>
+    public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public Expression? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
     public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 

@@ -350,12 +350,12 @@ namespace Esprima
 
         private protected T Finalize<T>(Marker marker, T node) where T : Node
         {
-            node.Range = new Esprima.Ast.Range(marker.Index, _lastMarker.Index);
+            node._range = new Esprima.Ast.Range(marker.Index, _lastMarker.Index);
 
             var start = new Position(marker.Line, marker.Column);
             var end = new Position(_lastMarker.Line, _lastMarker.Column);
 
-            node.Location = new Location(start, end, _errorHandler.Source);
+            node._location = new Location(start, end, _errorHandler.Source);
 
             _action?.Invoke(node);
 
@@ -1100,7 +1100,7 @@ namespace Esprima
                 ThrowTemplateLiteralEarlyErrors(token);
             }
 
-            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value! };
+            var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!, Cooked: (string) token.Value!);
 
             return Finalize(node, new TemplateElement(value, token.Tail));
         }
@@ -1119,7 +1119,7 @@ namespace Esprima
                 ThrowTemplateLiteralEarlyErrors(token);
             }
 
-            var value = new TemplateElement.TemplateElementValue { Raw = token.RawTemplate!, Cooked = (string) token.Value! };
+            var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!, Cooked: (string) token.Value!);
 
             return Finalize(node, new TemplateElement(value, token.Tail));
         }
@@ -1164,8 +1164,8 @@ namespace Esprima
                 case Nodes.SpreadElement:
                     var newArgument = ReinterpretExpressionAsPattern(expr.As<SpreadElement>().Argument);
                     node = new RestElement(newArgument);
-                    node.Range = expr.Range;
-                    node.Location = expr.Location;
+                    node._range = expr._range;
+                    node._location = expr._location;
                     break;
                 case Nodes.ArrayExpression:
                     var elements = new ArrayList<Expression?>();
@@ -1186,8 +1186,8 @@ namespace Esprima
 #nullable disable
                     node = new ArrayPattern(NodeList.From(ref elements));
 #nullable enable
-                    node.Range = expr.Range;
-                    node.Location = expr.Location;
+                    node._range = expr._range;
+                    node._location = expr._location;
 
                     break;
                 case Nodes.ObjectExpression:
@@ -1196,7 +1196,7 @@ namespace Esprima
                     {
                         if (property is Property p)
                         {
-                            p.Value = ReinterpretExpressionAsPattern(p.Value);
+                            p._value = ReinterpretExpressionAsPattern(p.Value);
                             properties.Add(p);
                         }
                         else
@@ -1206,15 +1206,15 @@ namespace Esprima
                     }
 
                     node = new ObjectPattern(NodeList.From(ref properties));
-                    node.Range = expr.Range;
-                    node.Location = expr.Location;
+                    node._range = expr._range;
+                    node._location = expr._location;
 
                     break;
                 case Nodes.AssignmentExpression:
                     var assignmentExpression = expr.As<AssignmentExpression>();
                     node = new AssignmentPattern(assignmentExpression.Left, assignmentExpression.Right);
-                    node.Range = expr.Range;
-                    node.Location = expr.Location;
+                    node._range = expr._range;
+                    node._location = expr._location;
 
                     break;
                 default:
@@ -1355,7 +1355,7 @@ namespace Esprima
                                         reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression!));
                                     }
 
-                                    sequenceExpression.UpdateExpressions(NodeList.From(ref reinterpretedExpressions));
+                                    sequenceExpression._expressions = NodeList.From(ref reinterpretedExpressions);
                                 }
                                 else
                                 {
@@ -2244,7 +2244,7 @@ namespace Esprima
                             ThrowUnexpectedToken(_lookahead);
                         }
 
-                        assignment.Right = new Identifier("yield") { Location = assignment.Right.Location, Range = assignment.Right.Range };
+                        assignment._right = new Identifier("yield") { _location = assignment.Right._location, _range = assignment.Right._range };
                     }
                 }
                 else if (asyncArrow && param.Type == Nodes.Identifier && param.As<Identifier>().Name == "await")

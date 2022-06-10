@@ -1,15 +1,16 @@
-﻿using Esprima.Utils.Jsx;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
 public sealed class JsxSpreadAttribute : JsxExpression
 {
-    public readonly Expression Argument;
-
     public JsxSpreadAttribute(Expression argument) : base(JsxNodeType.SpreadAttribute)
     {
         Argument = argument;
     }
+
+    public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public override NodeCollection ChildNodes => new(Argument);
 

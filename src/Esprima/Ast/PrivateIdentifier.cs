@@ -1,15 +1,16 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class PrivateIdentifier : Expression
     {
-        public readonly string? Name;
-
         public PrivateIdentifier(string? name) : base(Nodes.PrivateIdentifier)
         {
             Name = name;
         }
+
+        public string? Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
 

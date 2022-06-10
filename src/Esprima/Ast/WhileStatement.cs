@@ -1,17 +1,18 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class WhileStatement : Statement
     {
-        public readonly Expression Test;
-        public readonly Statement Body;
-
         public WhileStatement(Expression test, Statement body) : base(Nodes.WhileStatement)
         {
             Test = test;
             Body = body;
         }
+
+        public Expression Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Test, Body);
 

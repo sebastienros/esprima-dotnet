@@ -1,17 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ExportAllDeclaration : ExportDeclaration
     {
-        public readonly Literal Source;
-
-        /// <summary>
-        /// <see cref="Identifier" /> | StringLiteral <see cref="Literal" />
-        /// </summary>
-        public readonly Expression? Exported;
-
-        public readonly NodeList<ImportAttribute> Assertions;
+        private readonly NodeList<ImportAttribute> _assertions;
 
         public ExportAllDeclaration(Literal source) : this(source, null, new NodeList<ImportAttribute>())
         {
@@ -21,8 +15,15 @@ namespace Esprima.Ast
         {
             Source = source;
             Exported = exported;
-            Assertions = assertions;
+            _assertions = assertions;
         }
+
+        public Literal Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        /// <remarks>
+        /// <see cref="Identifier" /> | StringLiteral (<see cref="Literal" />)
+        /// </remarks>
+        public Expression? Exported { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 

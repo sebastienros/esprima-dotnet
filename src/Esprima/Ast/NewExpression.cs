@@ -1,11 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class NewExpression : Expression
     {
         private readonly NodeList<Expression> _arguments;
-        public readonly Expression Callee;
 
         public NewExpression(
             Expression callee,
@@ -16,7 +16,8 @@ namespace Esprima.Ast
             _arguments = args;
         }
 
-        public ref readonly NodeList<Expression> Arguments => ref _arguments;
+        public Expression Callee { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<Expression> Arguments { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _arguments; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Callee, Arguments);
 

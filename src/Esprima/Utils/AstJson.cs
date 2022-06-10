@@ -200,8 +200,8 @@ public class AstToJsonConverter : AstJson.IConverter
             {
                 _writer.Member("range");
                 _writer.StartArray();
-                _writer.Number(node.Range.Start);
-                _writer.Number(node.Range.End);
+                _writer.Number(node._range.Start);
+                _writer.Number(node._range.End);
                 _writer.EndArray();
             }
 
@@ -210,9 +210,9 @@ public class AstToJsonConverter : AstJson.IConverter
                 _writer.Member("loc");
                 _writer.StartObject();
                 _writer.Member("start");
-                Write(node.Location.Start);
+                Write(node._location.Start);
                 _writer.Member("end");
-                Write(node.Location.End);
+                Write(node._location.End);
                 _writer.EndObject();
             }
 
@@ -392,7 +392,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("params", functionDeclaration.Params);
                 Member("body", functionDeclaration.Body);
                 Member("generator", functionDeclaration.Generator);
-                Member("expression", functionDeclaration.Expression);
+                Member("expression", ((IFunction) functionDeclaration).Expression);
                 // original Esprima doesn't include this information yet
                 if (!_testCompatibilityMode)
                 {
@@ -592,10 +592,10 @@ public class AstToJsonConverter : AstJson.IConverter
         {
             using (StartNodeObject(arrowFunctionExpression))
             {
-                Member("id", arrowFunctionExpression.Id);
+                Member("id", ((IFunction) arrowFunctionExpression).Id);
                 Member("params", arrowFunctionExpression.Params);
                 Member("body", arrowFunctionExpression.Body);
-                Member("generator", arrowFunctionExpression.Generator);
+                Member("generator", ((IFunction) arrowFunctionExpression).Generator);
                 Member("expression", arrowFunctionExpression.Expression);
                 // original Esprima doesn't include this information yet
                 if (!_testCompatibilityMode)
@@ -749,7 +749,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("params", functionExpression.Params);
                 Member("body", functionExpression.Body);
                 Member("generator", functionExpression.Generator);
-                Member("expression", functionExpression.Expression);
+                Member("expression", ((IFunction) functionExpression).Expression);
                 // original Esprima doesn't include this information yet
                 if (!_testCompatibilityMode)
                 {
@@ -912,14 +912,14 @@ public class AstToJsonConverter : AstJson.IConverter
 
                 var callee = new ImportCompat
                 {
-                    Location = new Location(import.Location.Start, new Position(import.Location.Start.Line, import.Location.Start.Column + importToken.Length)),
-                    Range = new Ast.Range(import.Range.Start, import.Range.Start + importToken.Length)
+                    _location = new Location(import._location.Start, new Position(import._location.Start.Line, import._location.Start.Column + importToken.Length)),
+                    _range = new Ast.Range(import._range.Start, import._range.Start + importToken.Length)
                 };
                 var args = new NodeList<Expression>(new Expression[] { import.Source });
                 var callExpression = new CallExpression(callee, args, optional: false)
                 {
-                    Location = import.Location,
-                    Range = import.Range,
+                    _location = import._location,
+                    _range = import._range,
                 };
 
                 return Visit(callExpression);

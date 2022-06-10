@@ -1,15 +1,16 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ReturnStatement : Statement
     {
-        public readonly Expression? Argument;
-
         public ReturnStatement(Expression? argument) : base(Nodes.ReturnStatement)
         {
             Argument = argument;
         }
+
+        public Expression? Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Argument);
 

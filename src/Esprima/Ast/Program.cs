@@ -1,16 +1,22 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public abstract class Program : Statement
     {
-        protected Program(Nodes type) : base(type)
+        private readonly NodeList<Statement> _body;
+
+        protected Program(Nodes type, in NodeList<Statement> body) : base(type)
         {
+            _body = body;
         }
+
+        public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
         public abstract SourceType SourceType { get; }
 
-        public abstract ref readonly NodeList<Statement> Body { get; }
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

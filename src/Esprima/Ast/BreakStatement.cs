@@ -1,15 +1,16 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class BreakStatement : Statement
     {
-        public readonly Identifier? Label;
-
         public BreakStatement(Identifier? label) : base(Nodes.BreakStatement)
         {
             Label = label;
         }
+
+        public Identifier? Label { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Label);
 

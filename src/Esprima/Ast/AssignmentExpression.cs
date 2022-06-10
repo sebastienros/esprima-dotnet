@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
@@ -25,12 +26,6 @@ namespace Esprima.Ast
 
     public sealed class AssignmentExpression : Expression
     {
-        public readonly AssignmentOperator Operator;
-
-        // Can be something else than Expression (ObjectPattern, ArrayPattern) in case of destructuring assignment
-        public readonly Expression Left;
-        public readonly Expression Right;
-
         public AssignmentExpression(
             string op,
             Expression left,
@@ -39,7 +34,7 @@ namespace Esprima.Ast
         {
         }
 
-        internal AssignmentExpression(
+        public AssignmentExpression(
             AssignmentOperator op,
             Expression left,
             Expression right) :
@@ -49,7 +44,6 @@ namespace Esprima.Ast
             Left = left;
             Right = right;
         }
-
 
         public static AssignmentOperator ParseAssignmentOperator(string op)
         {
@@ -74,6 +68,13 @@ namespace Esprima.Ast
                 _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op)
             };
         }
+
+        public AssignmentOperator Operator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        /// <remarks>
+        /// Can be something else than Expression (<see cref="ObjectPattern"/>, <see cref="ArrayPattern"/>) in case of destructuring assignment
+        /// </remarks>
+        public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Left, Right);
 

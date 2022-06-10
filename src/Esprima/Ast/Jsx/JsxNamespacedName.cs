@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
@@ -6,14 +7,14 @@ namespace Esprima.Ast.Jsx;
 [DebuggerDisplay("{Namespace,nq}.{Name,nq}")]
 public sealed class JsxNamespacedName : JsxExpression
 {
-    public readonly JsxIdentifier Name;
-    public readonly JsxIdentifier Namespace;
-
-    public JsxNamespacedName(JsxIdentifier @namespace,JsxIdentifier name) : base(JsxNodeType.NamespacedName)
+    public JsxNamespacedName(JsxIdentifier @namespace, JsxIdentifier name) : base(JsxNodeType.NamespacedName)
     {
-        Name = name;
         Namespace = @namespace;
+        Name = name;
     }
+
+    public JsxIdentifier Namespace { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public JsxIdentifier Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public override NodeCollection ChildNodes => new(Name, Namespace);
 

@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -11,12 +12,12 @@ namespace Esprima.Ast
             _body = body;
         }
 
-        /// <summary>
+        /// <remarks>
         /// <see cref="MethodDefinition" /> | <see cref="PropertyDefinition" /> | <see cref="StaticBlock" /> | <see cref="AccessorProperty" />
-        /// </summary>
-        public ref readonly NodeList<Node> Body => ref _body;
+        /// </remarks>
+        public ref readonly NodeList<Node> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(_body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

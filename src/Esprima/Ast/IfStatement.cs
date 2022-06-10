@@ -1,13 +1,10 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class IfStatement : Statement
     {
-        public readonly Expression Test;
-        public readonly Statement Consequent;
-        public readonly Statement? Alternate;
-
         public IfStatement(
             Expression test,
             Statement consequent,
@@ -18,6 +15,10 @@ namespace Esprima.Ast
             Consequent = consequent;
             Alternate = alternate;
         }
+
+        public Expression Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Statement Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Statement? Alternate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Test, Consequent, Alternate);
 

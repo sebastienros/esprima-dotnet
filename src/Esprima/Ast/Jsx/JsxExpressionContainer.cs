@@ -1,15 +1,16 @@
-﻿using Esprima.Utils.Jsx;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
 public sealed class JsxExpressionContainer : JsxExpression
 {
-    public readonly Expression Expression;
-
     public JsxExpressionContainer(Expression expression) : base(JsxNodeType.ExpressionContainer)
     {
         Expression = expression;
     }
+
+    public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public override NodeCollection ChildNodes => new(Expression);
 

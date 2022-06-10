@@ -1,15 +1,16 @@
+using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 public sealed class Decorator : Node
 {
-    public readonly Expression Expression;
-
     public Decorator(Expression expression) : base(Nodes.Decorator)
     {
         Expression = expression;
     }
+
+    public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public override NodeCollection ChildNodes => new(Expression);
 

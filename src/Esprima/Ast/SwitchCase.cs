@@ -1,11 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class SwitchCase : Node
     {
         private readonly NodeList<Statement> _consequent;
-        public readonly Expression? Test;
 
         public SwitchCase(Expression? test, in NodeList<Statement> consequent) : base(Nodes.SwitchCase)
         {
@@ -13,9 +13,10 @@ namespace Esprima.Ast
             _consequent = consequent;
         }
 
-        public ref readonly NodeList<Statement> Consequent => ref _consequent;
+        public Expression? Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<Statement> Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _consequent; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Test, _consequent);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Test, Consequent);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

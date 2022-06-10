@@ -1,17 +1,13 @@
-﻿using Esprima.Utils;
-
-namespace Esprima.Ast
+﻿namespace Esprima.Ast
 {
     public sealed class UpdateExpression : UnaryExpression
     {
-        public UpdateExpression(string? op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg)
+        public UpdateExpression(string? op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg, prefix)
         {
-            Prefix = prefix;
         }
 
-        internal UpdateExpression(UnaryOperator op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg)
+        public UpdateExpression(UnaryOperator op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg, prefix)
         {
-            Prefix = prefix;
         }
 
         protected override UnaryExpression Rewrite(Expression argument)

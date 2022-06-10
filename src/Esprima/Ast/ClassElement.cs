@@ -1,15 +1,9 @@
-﻿namespace Esprima.Ast
+﻿using System.Runtime.CompilerServices;
+
+namespace Esprima.Ast
 {
     public abstract class ClassProperty : Expression
     {
-        public readonly PropertyKind Kind;
-
-        public readonly Expression Key; // Identifier, Literal, '[' Expression ']'
-        public readonly bool Computed;
-
-        public Expression? Value => GetValue();
-        protected abstract Expression? GetValue();
-
         protected ClassProperty(Nodes type, PropertyKind kind, Expression key, bool computed) : base(type)
         {
             Kind = kind;
@@ -17,6 +11,13 @@
             Computed = computed;
         }
 
-        public override NodeCollection ChildNodes => new(Key, Value);
+        public PropertyKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }  // Identifier, Literal, '[' Expression ']'
+        public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+        public Expression? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => GetValue(); }
+        protected abstract Expression? GetValue();
+
+        public override NodeCollection ChildNodes => new(Key, GetValue());
     }
 }

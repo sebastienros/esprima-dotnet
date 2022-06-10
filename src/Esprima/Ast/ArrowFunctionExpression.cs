@@ -1,4 +1,5 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
@@ -14,23 +15,23 @@ namespace Esprima.Ast
             bool async)
             : base(Nodes.ArrowFunctionExpression)
         {
-            Id = null;
             _params = parameters;
             Body = body;
-            Generator = false;
             Expression = expression;
             Strict = strict;
             Async = async;
         }
 
-        public Identifier? Id { get; }
-        public Node Body { get; } // : BlockStatement | Expression;
-        public bool Generator { get; }
-        public bool Expression { get; }
-        public bool Strict { get; }
-        public bool Async { get; }
-
-        public ref readonly NodeList<Expression> Params => ref _params;
+        Identifier? IFunction.Id => null;
+        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+        /// <remarks>
+        /// <see cref="BlockStatement" /> | <see cref="Ast.Expression" />
+        /// </remarks>
+        public Node Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        bool IFunction.Generator => false;
+        public bool Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Params, Body);
 

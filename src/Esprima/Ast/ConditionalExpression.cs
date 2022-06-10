@@ -1,13 +1,10 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ConditionalExpression : Expression
     {
-        public readonly Expression Test;
-        public readonly Expression Consequent;
-        public readonly Expression Alternate;
-
         public ConditionalExpression(
             Expression test,
             Expression consequent,
@@ -17,6 +14,10 @@ namespace Esprima.Ast
             Consequent = consequent;
             Alternate = alternate;
         }
+
+        public Expression Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Expression Alternate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Test, Consequent, Alternate);
 

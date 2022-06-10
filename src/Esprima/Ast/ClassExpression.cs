@@ -1,20 +1,11 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ClassExpression : Expression, IClass
     {
-        public readonly Identifier? Id;
-        Identifier? IClass.Id => Id;
-
-        public readonly Expression? SuperClass;
-        Expression? IClass.SuperClass => SuperClass;
-
-        public readonly ClassBody Body;
-        ClassBody IClass.Body => Body;
-
-        public readonly NodeList<Decorator> Decorators;
-        NodeList<Decorator> IClass.Decorators => Decorators;
+        private readonly NodeList<Decorator> _decorators;
 
         public ClassExpression(
             Identifier? id,
@@ -25,8 +16,16 @@ namespace Esprima.Ast
             Id = id;
             SuperClass = superClass;
             Body = body;
-            Decorators = decorators;
+            _decorators = decorators;
         }
+
+        public Identifier? Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        /// <remarks>
+        /// <see cref="Identifier" /> | <see cref="CallExpression" />
+        /// </remarks>
+        public Expression? SuperClass { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ClassBody Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
@@ -42,7 +41,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ClassExpression(id, superClass, body, Decorators).SetAdditionalInfo(this);
+            return new ClassExpression(id, superClass, body, decorators).SetAdditionalInfo(this);
         }
 
         private IEnumerable<Node> CreateChildNodes()

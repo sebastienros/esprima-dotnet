@@ -1,17 +1,18 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class WithStatement : Statement
     {
-        public readonly Expression Object;
-        public readonly Statement Body;
-
         public WithStatement(Expression obj, Statement body) : base(Nodes.WithStatement)
         {
             Object = obj;
             Body = body;
         }
+
+        public Expression Object { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Object, Body);
 

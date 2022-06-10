@@ -219,7 +219,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
     {
         return ForceNewObjectByControlType((FunctionDeclaration) base.VisitFunctionDeclaration(functionDeclaration)!,
-            node => new FunctionDeclaration(node.Id, node.Params, (BlockStatement) node.Body, node.Generator, node.Strict, node.Async));
+            node => new FunctionDeclaration(node.Id, node.Params, node.Body, node.Generator, node.Strict, node.Async));
     }
 
     protected internal override object? VisitWithStatement(WithStatement withStatement)
@@ -398,7 +398,7 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
         return ForceNewObjectByControlType((FunctionExpression) base.VisitFunctionExpression(functionExpression)!,
-            node => new FunctionExpression(node.Id, node.Params, (BlockStatement) node.Body, node.Generator, node.Strict, node.Async));
+            node => new FunctionExpression(node.Id, node.Params, node.Body, node.Generator, node.Strict, node.Async));
     }
 
     protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)

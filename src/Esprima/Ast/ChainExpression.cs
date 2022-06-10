@@ -1,18 +1,19 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ChainExpression : Expression
     {
-        /// <summary>
-        /// <see cref="CallExpression" /> | <see cref="ComputedMemberExpression" />| <see cref="StaticMemberExpression" />
-        /// </summary>
-        public readonly Expression Expression;
-
         public ChainExpression(Expression expression) : base(Nodes.ChainExpression)
         {
             Expression = expression;
         }
+
+        /// <remarks>
+        /// <see cref="CallExpression" /> | <see cref="ComputedMemberExpression" />| <see cref="StaticMemberExpression" />
+        /// </remarks>
+        public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
 

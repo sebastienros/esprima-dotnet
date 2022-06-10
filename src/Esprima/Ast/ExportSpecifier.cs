@@ -1,24 +1,24 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils;
 
 namespace Esprima.Ast
 {
     public sealed class ExportSpecifier : Statement
     {
-        /// <summary>
-        /// <see cref="Identifier" /> | <see cref="Literal" />
-        /// </summary>
-        public readonly Expression Exported;
-
-        /// <summary>
-        /// <see cref="Identifier" /> | StringLiteral <see cref="Literal" />
-        /// </summary>
-        public readonly Expression Local;
-
         public ExportSpecifier(Expression local, Expression exported) : base(Nodes.ExportSpecifier)
         {
-            Exported = exported;
             Local = local;
+            Exported = exported;
         }
+
+        /// <remarks>
+        /// <see cref="Identifier" /> | StringLiteral (<see cref="Literal" />)
+        /// </remarks>
+        public Expression Local { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        /// <remarks>
+        /// <see cref="Identifier" /> | <see cref="Literal" />
+        /// </remarks>
+        public Expression Exported { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public override NodeCollection ChildNodes => new(Exported, Local);
 

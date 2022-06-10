@@ -1,17 +1,18 @@
-﻿using Esprima.Utils.Jsx;
+﻿using System.Runtime.CompilerServices;
+using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
 public sealed class JsxMemberExpression : JsxExpression
 {
-    public readonly JsxExpression Object;
-    public readonly JsxIdentifier Property;
-
     public JsxMemberExpression(JsxExpression obj, JsxIdentifier property) : base(JsxNodeType.MemberExpression)
     {
         Object = obj;
         Property = property;
     }
+
+    public JsxExpression Object { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public JsxIdentifier Property { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public override NodeCollection ChildNodes => new(Object, Property);
 
