@@ -625,11 +625,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
     {
         return ForceNewObjectByControlType((BlockStatement) base.VisitBlockStatement(blockStatement)!,
-            node => node switch
-            {
-                StaticBlock => new StaticBlock(node.Body),
-                _ => new BlockStatement(node.Body)
-            });
+            node => new BlockStatement(node.Body));
+    }
+
+    protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+    {
+        return ForceNewObjectByControlType((StaticBlock) base.VisitStaticBlock(staticBlock)!,
+            node => new StaticBlock(node.Body));
     }
 
     public override object? VisitJsxAttribute(JsxAttribute jsxAttribute)

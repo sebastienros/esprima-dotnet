@@ -1294,6 +1294,16 @@ public class AstToJsonConverter : AstJson.IConverter
 
             return blockStatement;
         }
+
+        protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+        {
+            using (StartNodeObject(staticBlock))
+            {
+                Member("body", staticBlock.Body, e => (Statement) e);
+            }
+
+            return staticBlock;
+        }
     }
 
     private sealed class Visitor : VisitorBase

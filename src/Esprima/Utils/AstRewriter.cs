@@ -565,4 +565,11 @@ public class AstRewriter : AstVisitor
 
         return blockStatement.UpdateWith(body);
     }
+
+    protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+    {
+        VisitAndConvert(staticBlock.Body, out var body);
+
+        return staticBlock.UpdateWith(body);
+    }
 }

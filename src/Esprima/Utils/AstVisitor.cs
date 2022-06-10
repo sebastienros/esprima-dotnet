@@ -787,6 +787,17 @@ public class AstVisitor
         return blockStatement;
     }
 
+    protected internal virtual object? VisitStaticBlock(StaticBlock staticBlock)
+    {
+        ref readonly var body = ref staticBlock.Body;
+        for (var i = 0; i < body.Count; i++)
+        {
+            Visit(body[i]);
+        }
+
+        return staticBlock;
+    }
+
     protected internal virtual object? VisitExtension(Node node)
     {
         // Node type Extension is used to represent extensions to the standard AST (for example, see JSX parsing).
