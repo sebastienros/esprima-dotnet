@@ -17,7 +17,5 @@ namespace Esprima.Ast
 
         public Expression? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => GetValue(); }
         protected abstract Expression? GetValue();
-
-        public override NodeCollection ChildNodes => new(Key, GetValue());
     }
 }

@@ -27,21 +27,6 @@ public sealed class AccessorProperty : Node
 
     public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
-    protected internal override object? Accept(AstVisitor visitor)
-    {
-        return visitor.VisitAccessorProperty(this);
-    }
-
-    public AccessorProperty UpdateWith(Expression key, Expression? value, in NodeList<Decorator> decorators)
-    {
-        if (key == Key && value == Value && NodeList.AreSame(decorators, Decorators))
-        {
-            return this;
-        }
-
-        return new AccessorProperty(key, value, Computed, Static, decorators).SetAdditionalInfo(this);
-    }
-
     private IEnumerable<Node> CreateChildNodes()
     {
         yield return Key;
@@ -55,5 +40,20 @@ public sealed class AccessorProperty : Node
         {
             yield return node;
         }
+    }
+
+    protected internal override object? Accept(AstVisitor visitor)
+    {
+        return visitor.VisitAccessorProperty(this);
+    }
+
+    public AccessorProperty UpdateWith(Expression key, Expression? value, in NodeList<Decorator> decorators)
+    {
+        if (key == Key && value == Value && NodeList.AreSame(decorators, Decorators))
+        {
+            return this;
+        }
+
+        return new AccessorProperty(key, value, Computed, Static, decorators).SetAdditionalInfo(this);
     }
 }

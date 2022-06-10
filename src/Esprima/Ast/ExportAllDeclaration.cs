@@ -27,6 +27,21 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
+        private IEnumerable<Node> CreateChildNodes()
+        {
+            if (Exported is not null)
+            {
+                yield return Exported;
+            }
+
+            yield return Source;
+
+            foreach (var assertion in Assertions)
+            {
+                yield return assertion;
+            }
+        }
+
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitExportAllDeclaration(this);
@@ -40,21 +55,6 @@ namespace Esprima.Ast
             }
 
             return new ExportAllDeclaration(source, exported, assertions).SetAdditionalInfo(this);
-        }
-
-        private IEnumerable<Node> CreateChildNodes()
-        {
-            yield return Source;
-
-            if (Exported is not null)
-            {
-                yield return Exported;
-            }
-
-            foreach (var assertion in Assertions)
-            {
-                yield return assertion;
-            }
         }
     }
 }

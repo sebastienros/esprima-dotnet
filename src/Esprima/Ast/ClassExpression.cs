@@ -29,21 +29,6 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitClassExpression(this);
-        }
-
-        public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)
-        {
-            if (id == Id && superClass == SuperClass && body == Body && NodeList.AreSame(decorators, Decorators))
-            {
-                return this;
-            }
-
-            return new ClassExpression(id, superClass, body, decorators).SetAdditionalInfo(this);
-        }
-
         private IEnumerable<Node> CreateChildNodes()
         {
             if (Id is not null)
@@ -62,6 +47,21 @@ namespace Esprima.Ast
             {
                 yield return node;
             }
+        }
+
+        protected internal override object? Accept(AstVisitor visitor)
+        {
+            return visitor.VisitClassExpression(this);
+        }
+
+        public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)
+        {
+            if (id == Id && superClass == SuperClass && body == Body && NodeList.AreSame(decorators, Decorators))
+            {
+                return this;
+            }
+
+            return new ClassExpression(id, superClass, body, decorators).SetAdditionalInfo(this);
         }
     }
 }

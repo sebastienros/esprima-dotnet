@@ -22,6 +22,17 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
+        private IEnumerable<Node> CreateChildNodes()
+        {
+            TemplateElement quasi;
+            for (var i = 0; !(quasi = Quasis[i]).Tail; i++)
+            {
+                yield return quasi;
+                yield return Expressions[i];
+            }
+            yield return quasi;
+        }
+
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitTemplateLiteral(this);
@@ -35,17 +46,6 @@ namespace Esprima.Ast
             }
 
             return new TemplateLiteral(quasis, expressions).SetAdditionalInfo(this);
-        }
-
-        private IEnumerable<Node> CreateChildNodes()
-        {
-            var i = 0;
-            while (!Quasis[i].Tail)
-            {
-                yield return Quasis[i];
-                yield return Expressions[i++];
-            }
-            yield return Quasis[i];
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Esprima.Ast
         /// </remarks>
         public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        public override NodeCollection ChildNodes => new(Expression);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

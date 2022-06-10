@@ -28,21 +28,6 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitExportNamedDeclaration(this);
-        }
-
-        public ExportNamedDeclaration UpdateWith(StatementListItem? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
-        {
-            if (declaration == Declaration && NodeList.AreSame(specifiers, Specifiers) && source == Source && NodeList.AreSame(assertions, Assertions))
-            {
-                return this;
-            }
-
-            return new ExportNamedDeclaration(declaration, specifiers, source, assertions).SetAdditionalInfo(this);
-        }
-
         private IEnumerable<Node> CreateChildNodes()
         {
             if (Declaration is not null)
@@ -64,6 +49,21 @@ namespace Esprima.Ast
             {
                 yield return node;
             }
+        }
+
+        protected internal override object? Accept(AstVisitor visitor)
+        {
+            return visitor.VisitExportNamedDeclaration(this);
+        }
+
+        public ExportNamedDeclaration UpdateWith(StatementListItem? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
+        {
+            if (declaration == Declaration && NodeList.AreSame(specifiers, Specifiers) && source == Source && NodeList.AreSame(assertions, Assertions))
+            {
+                return this;
+            }
+
+            return new ExportNamedDeclaration(declaration, specifiers, source, assertions).SetAdditionalInfo(this);
         }
     }
 }
