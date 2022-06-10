@@ -32,7 +32,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new Import(source, attributes).SetAdditionalInfo(this);
+            return new Import(source, attributes);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ClassBody(body).SetAdditionalInfo(this);
+            return new ClassBody(body);
         }
     }
 }

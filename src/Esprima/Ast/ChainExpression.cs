@@ -29,7 +29,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ChainExpression(expression).SetAdditionalInfo(this);
+            return new ChainExpression(expression);
         }
     }
 }

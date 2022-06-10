@@ -45,7 +45,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new TemplateLiteral(quasis, expressions).SetAdditionalInfo(this);
+            return new TemplateLiteral(quasis, expressions);
         }
     }
 }

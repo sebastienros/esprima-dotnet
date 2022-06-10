@@ -78,7 +78,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return Rewrite(argument).SetAdditionalInfo(this);
+            return Rewrite(argument);
         }
     }
 }

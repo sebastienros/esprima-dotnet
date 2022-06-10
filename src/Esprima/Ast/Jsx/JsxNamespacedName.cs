@@ -30,6 +30,6 @@ public sealed class JsxNamespacedName : JsxExpression
             return this;
         }
 
-        return new JsxNamespacedName(@namespace, name).SetAdditionalInfo(this);
+        return new JsxNamespacedName(@namespace, name);
     }
 }

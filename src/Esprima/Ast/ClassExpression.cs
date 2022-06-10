@@ -53,7 +53,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ClassExpression(id, superClass, body, decorators).SetAdditionalInfo(this);
+            return new ClassExpression(id, superClass, body, decorators);
         }
     }
 }

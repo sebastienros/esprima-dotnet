@@ -90,7 +90,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new AssignmentExpression(Operator, left, right).SetAdditionalInfo(this);
+            return new AssignmentExpression(Operator, left, right);
         }
     }
 }

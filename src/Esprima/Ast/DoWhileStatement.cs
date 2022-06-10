@@ -28,7 +28,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new DoWhileStatement(body, test).SetAdditionalInfo(this);
+            return new DoWhileStatement(body, test);
         }
     }
 }

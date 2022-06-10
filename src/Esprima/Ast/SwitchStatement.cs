@@ -30,7 +30,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new SwitchStatement(discriminant, cases).SetAdditionalInfo(this);
+            return new SwitchStatement(discriminant, cases);
         }
     }
 }

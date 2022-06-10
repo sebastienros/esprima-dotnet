@@ -28,7 +28,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new TaggedTemplateExpression(tag, quasi).SetAdditionalInfo(this);
+            return new TaggedTemplateExpression(tag, quasi);
         }
     }
 }

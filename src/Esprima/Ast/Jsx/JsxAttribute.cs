@@ -28,6 +28,6 @@ public sealed class JsxAttribute : JsxExpression
             return this;
         }
 
-        return new JsxAttribute(name, value).SetAdditionalInfo(this);
+        return new JsxAttribute(name, value);
     }
 }

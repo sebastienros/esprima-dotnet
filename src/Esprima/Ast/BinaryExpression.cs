@@ -99,7 +99,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new BinaryExpression(Operator, left, right).SetAdditionalInfo(this);
+            return new BinaryExpression(Operator, left, right);
         }
     }
 }

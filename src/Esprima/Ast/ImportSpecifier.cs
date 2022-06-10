@@ -29,7 +29,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ImportSpecifier(local, imported).SetAdditionalInfo(this);
+            return new ImportSpecifier(local, imported);
         }
     }
 }

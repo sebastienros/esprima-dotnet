@@ -47,7 +47,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ArrowFunctionExpression(parameters, body, Expression, Strict, Async).SetAdditionalInfo(this);
+            return new ArrowFunctionExpression(parameters, body, Expression, Strict, Async);
         }
     }
 }

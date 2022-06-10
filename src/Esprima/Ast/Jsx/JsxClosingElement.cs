@@ -26,6 +26,6 @@ public sealed class JsxClosingElement : JsxExpression
             return this;
         }
 
-        return new JsxClosingElement(name).SetAdditionalInfo(this);
+        return new JsxClosingElement(name);
     }
 }

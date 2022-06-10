@@ -31,6 +31,6 @@ public sealed class ImportAttribute : Node
             return this;
         }
 
-        return new ImportAttribute(key, value).SetAdditionalInfo(this);
+        return new ImportAttribute(key, value);
     }
 }

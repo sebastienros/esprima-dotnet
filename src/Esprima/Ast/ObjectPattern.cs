@@ -28,7 +28,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ObjectPattern(properties).SetAdditionalInfo(this);
+            return new ObjectPattern(properties);
         }
     }
 }

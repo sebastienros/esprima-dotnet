@@ -26,7 +26,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ThrowStatement(argument).SetAdditionalInfo(this);
+            return new ThrowStatement(argument);
         }
 
     }

@@ -34,7 +34,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new TryStatement(block, handler, finalizer).SetAdditionalInfo(this);
+            return new TryStatement(block, handler, finalizer);
         }
     }
 }

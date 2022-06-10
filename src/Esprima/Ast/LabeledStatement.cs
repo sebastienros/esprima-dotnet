@@ -29,7 +29,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new LabeledStatement(label, body).SetAdditionalInfo(this);
+            return new LabeledStatement(label, body);
         }
     }
 }

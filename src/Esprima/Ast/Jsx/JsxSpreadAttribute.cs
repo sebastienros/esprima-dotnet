@@ -26,6 +26,6 @@ public sealed class JsxSpreadAttribute : JsxExpression
             return this;
         }
 
-        return new JsxSpreadAttribute(argument).SetAdditionalInfo(this);
+        return new JsxSpreadAttribute(argument);
     }
 }

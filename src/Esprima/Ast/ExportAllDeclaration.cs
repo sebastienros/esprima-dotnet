@@ -50,7 +50,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ExportAllDeclaration(source, exported, assertions).SetAdditionalInfo(this);
+            return new ExportAllDeclaration(source, exported, assertions);
         }
     }
 }
