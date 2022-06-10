@@ -27,13 +27,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
-        private IEnumerable<Node> CreateChildNodes()
+        private IEnumerable<Node?> CreateChildNodes()
         {
-            if (Exported is not null)
-            {
-                yield return Exported;
-            }
-
+            yield return Exported;
             yield return Source;
 
             foreach (var assertion in Assertions)

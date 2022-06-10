@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System.Collections;
+﻿using System.Collections;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
@@ -8,19 +6,19 @@ namespace Esprima.Ast
     /// <summary>
     /// Collection that enumerates nodes and node lists.
     /// </summary>
-    public readonly struct NodeCollection : IReadOnlyList<Node>
+    public readonly struct NodeCollection : IReadOnlyList<Node?>
     {
         internal static readonly NodeCollection Empty = new(0);
 
-        private readonly Node _first;
-        private readonly Node _second;
-        private readonly Node _third;
-        private readonly Node _fourth;
-        private readonly Node[] _list1;
+        private readonly Node? _first;
+        private readonly Node? _second;
+        private readonly Node? _third;
+        private readonly Node? _fourth;
+        private readonly Node?[]? _list1;
         private readonly int _list1Count;
-        private readonly Node[] _list2;
+        private readonly Node?[]? _list2;
         private readonly int _list2Count;
-        private readonly Node _fifth;
+        private readonly Node? _fifth;
         private readonly int _count;
 
         private readonly int _startNodeCount;
@@ -31,31 +29,31 @@ namespace Esprima.Ast
             _count = count;
         }
 
-        internal NodeCollection(Node first)
+        internal NodeCollection(Node? first)
             : this(first, null, null, null, null)
         {
             _count = _startNodeCount = 1;
         }
 
-        internal NodeCollection(Node first, Node second)
+        internal NodeCollection(Node? first, Node? second)
             : this(first, second, null, null, null)
         {
             _count = _startNodeCount = 2;
         }
 
-        internal NodeCollection(Node first, Node second, Node third)
+        internal NodeCollection(Node? first, Node? second, Node? third)
             : this(first, second, third, null, null)
         {
             _count = _startNodeCount = 3;
         }
 
-        internal NodeCollection(Node first, Node second, Node third, Node fourth)
+        internal NodeCollection(Node? first, Node? second, Node? third, Node? fourth)
             : this(first, second, third, fourth, null)
         {
             _count = _startNodeCount = 4;
         }
 
-        internal NodeCollection(Node[] first, int firstCount, Node second)
+        internal NodeCollection(Node?[]? first, int firstCount, Node? second)
             : this(null, null, null, null, second)
         {
             _list1 = first;
@@ -63,7 +61,7 @@ namespace Esprima.Ast
             _count = firstCount + 1;
         }
 
-        internal NodeCollection(Node first, Node[] second, int secondCount)
+        internal NodeCollection(Node? first, Node?[]? second, int secondCount)
             : this(first, null, null, null, null)
         {
             _startNodeCount = 1;
@@ -72,7 +70,7 @@ namespace Esprima.Ast
             _count = 1 + secondCount;
         }
 
-        internal NodeCollection(Node[] first, int firstCount, Node[] second, int secondCount)
+        internal NodeCollection(Node?[]? first, int firstCount, Node?[]? second, int secondCount)
             : this(null, null, null, null, null)
         {
             _list1 = first;
@@ -82,7 +80,7 @@ namespace Esprima.Ast
             _count = firstCount + secondCount;
         }
 
-        internal NodeCollection(Node first, Node[] second, int secondCount, Node third)
+        internal NodeCollection(Node? first, Node?[]? second, int secondCount, Node? third)
             : this(first, null, null, null, third)
         {
             _startNodeCount = 1;
@@ -91,7 +89,7 @@ namespace Esprima.Ast
             _count = 1 + secondCount + 1;
         }
 
-        internal NodeCollection(Node[] first, int firstCount)
+        internal NodeCollection(Node?[]? first, int firstCount)
             : this(null, null, null, null, null)
         {
             _list1 = first;
@@ -100,11 +98,11 @@ namespace Esprima.Ast
         }
 
         private NodeCollection(
-            Node first,
-            Node second,
-            Node third,
-            Node fourth,
-            Node fifth)
+            Node? first,
+            Node? second,
+            Node? third,
+            Node? fourth,
+            Node? fifth)
         {
             _startNodeCount = 0;
             _first = first;
@@ -125,7 +123,7 @@ namespace Esprima.Ast
 
         public int Count => _count;
 
-        public Node this[int index]
+        public Node? this[int index]
         {
             get
             {
@@ -152,13 +150,13 @@ namespace Esprima.Ast
                 index -= _startNodeCount;
                 if (index < _list1Count)
                 {
-                    return _list1[index];
+                    return _list1![index];
                 }
 
                 index -= _list1Count;
                 if (index < _list2Count)
                 {
-                    return _list2[index];
+                    return _list2![index];
                 }
 
                 return _fifth;
@@ -170,7 +168,7 @@ namespace Esprima.Ast
             return new Enumerator(this);
         }
 
-        IEnumerator<Node> IEnumerable<Node>.GetEnumerator()
+        IEnumerator<Node?> IEnumerable<Node?>.GetEnumerator()
         {
             return new Enumerator(this);
         }
@@ -180,11 +178,11 @@ namespace Esprima.Ast
             return GetEnumerator();
         }
 
-        public struct Enumerator : IEnumerator<Node>
+        public struct Enumerator : IEnumerator<Node?>
         {
             private readonly NodeCollection _collection;
             private int _index;
-            private Node _current;
+            private Node? _current;
 
             public Enumerator(in NodeCollection collection)
             {
@@ -210,9 +208,9 @@ namespace Esprima.Ast
                 return false;
             }
 
-            public Node Current => _current;
+            public Node? Current => _current;
 
-            object IEnumerator.Current => Current;
+            object? IEnumerator.Current => Current;
 
             void IEnumerator.Reset()
             {

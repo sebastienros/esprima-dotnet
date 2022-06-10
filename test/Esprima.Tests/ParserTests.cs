@@ -315,7 +315,8 @@ class aa {
             var script = parser.ParseScript();
 
             var variableDeclarations = script.ChildNodes
-                .SelectMany(z => z.DescendantNodesAndSelf().OfType<VariableDeclaration>())
+                .Where(node => node != null)
+                .SelectMany(z => z!.DescendantNodesAndSelf().OfType<VariableDeclaration>())
                 .ToList();
 
             Assert.Equal(8, variableDeclarations.Count);
@@ -329,6 +330,7 @@ class aa {
             var script = parser.ParseScript();
 
             var variableDeclarations = script.DescendantNodesAndSelf()
+                .Where(node => node != null)
                 .SelectMany(z => z.AncestorNodesAndSelf(script))
                 .ToList();
 
@@ -349,10 +351,10 @@ class aa {
             {
                 var raw = correctOrder[index];
                 var rawFromNode = GetRawItem(templateLiteral.ChildNodes[index]);
-                Assert.Equal(raw,rawFromNode);
+                Assert.Equal(raw, rawFromNode);
             }
 
-            static string? GetRawItem(Node item)
+            static string? GetRawItem(Node? item)
             {
                 if (item is TemplateElement element)
                 {

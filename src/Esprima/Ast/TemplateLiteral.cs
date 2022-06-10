@@ -22,7 +22,7 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
-        private IEnumerable<Node> CreateChildNodes()
+        private IEnumerable<Node?> CreateChildNodes()
         {
             TemplateElement quasi;
             for (var i = 0; !(quasi = Quasis[i]).Tail; i++)

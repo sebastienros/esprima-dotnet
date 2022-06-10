@@ -18,7 +18,7 @@ public sealed class JsxElement : JsxExpression
     public Node? ClosingElement { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<JsxExpression> Children { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _children; }
 
-    public override NodeCollection ChildNodes => ClosingElement is null ? GenericChildNodeYield.Yield(OpeningElement, Children) : GenericChildNodeYield.Yield(OpeningElement, Children, ClosingElement);
+    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(OpeningElement, Children, ClosingElement);
 
     protected override object? Accept(IJsxAstVisitor visitor)
     {

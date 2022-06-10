@@ -26,18 +26,10 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
-        private IEnumerable<Node> CreateChildNodes()
+        private IEnumerable<Node?> CreateChildNodes()
         {
-            if (Id is not null)
-            {
-                yield return Id;
-            }
-
-            if (SuperClass is not null)
-            {
-                yield return SuperClass;
-            }
-
+            yield return Id;
+            yield return SuperClass;
             yield return Body;
 
             foreach (var node in Decorators)
