@@ -4419,7 +4419,7 @@ namespace Esprima
             return decorators;
         }
 
-        private Node ParseClassElement(ref bool hasConstructor)
+        private ClassElement ParseClassElement(ref bool hasConstructor)
         {
             var token = _lookahead;
             var node = CreateNode();
@@ -4643,9 +4643,9 @@ namespace Esprima
             return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic, NodeList.From(ref decorators)));
         }
 
-        private ArrayList<Node> ParseClassElementList()
+        private ArrayList<ClassElement> ParseClassElementList()
         {
-            var body = new ArrayList<Node>();
+            var body = new ArrayList<ClassElement>();
             var hasConstructor = false;
 
             Expect("{");

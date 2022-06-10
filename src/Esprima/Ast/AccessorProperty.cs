@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class AccessorProperty : Node
+public sealed class AccessorProperty : ClassElement
 {
     private readonly NodeList<Decorator> _decorators;
 

@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class StaticBlock : Node
+    public sealed class StaticBlock : ClassElement
     {
         private readonly NodeList<Statement> _body;
 

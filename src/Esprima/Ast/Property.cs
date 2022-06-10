@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class Property : ClassProperty
+    public sealed class Property : Expression, IProperty
     {
         internal Expression _value;
 
@@ -14,15 +14,25 @@ namespace Esprima.Ast
             Expression value,
             bool method,
             bool shorthand)
-            : base(Nodes.Property, kind, key, computed)
+            : base(Nodes.Property)
         {
+            Kind = kind;
+            Key = key;
+            Computed = computed;
             _value = value;
             Method = method;
             Shorthand = shorthand;
         }
 
-        public new Expression Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _value; }
-        protected override Expression? GetValue() => _value;
+        public PropertyKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        /// <remarks>
+        /// <see cref="Identifier"/> | <see cref="Literal"/> | '[' <see cref="Expression"/> ']'
+        /// </remarks>
+        public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+        public Expression Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _value; }
+        Expression? IProperty.Value => Value;
 
         public bool Method { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Shorthand { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
