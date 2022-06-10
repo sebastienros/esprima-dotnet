@@ -7,7 +7,7 @@ namespace Esprima.Ast
     {
         private readonly NodeList<Statement> _body;
 
-        protected Program(Nodes type, in NodeList<Statement> body) : base(type)
+        protected Program(in NodeList<Statement> body) : base(Nodes.Program)
         {
             _body = body;
         }

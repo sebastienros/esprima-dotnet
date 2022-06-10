@@ -12,7 +12,7 @@ namespace Esprima.Ast
             _body = body;
         }
 
-        internal BlockStatement(in NodeList<Statement> body, Nodes type) : base(type)
+        private protected BlockStatement(in NodeList<Statement> body, Nodes type) : base(type)
         {
             _body = body;
         }

@@ -2,7 +2,7 @@
 {
     public sealed class Module : Program
     {
-        public Module(in NodeList<Statement> body) : base(Nodes.Program, body)
+        public Module(in NodeList<Statement> body) : base(body)
         {
         }
 
