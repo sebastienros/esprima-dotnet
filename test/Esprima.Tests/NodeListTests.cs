@@ -14,7 +14,7 @@ namespace Esprima.Tests
             var array =
                 Enumerable
                     .Range(start, count)
-                    .Select(x => new Literal(x, x.ToString(CultureInfo.InvariantCulture)))
+                    .Select(x => new Literal((double) x, x.ToString(CultureInfo.InvariantCulture)))
                     .ToArray();
 
             return new TheoryData<int, int, Lazy<NodeList<Literal>>> { { start, count, Lazy.Create("Sequence", () => NodeList.Create(array.Select(x => x))) }, { start, count, Lazy.Create("Collection", () => NodeList.Create(new BreakingCollection<Literal>(array))) }, { start, count, Lazy.Create("ReadOnlyList", () => NodeList.Create(new BreakingReadOnlyList<Literal>(array))) } };

@@ -594,7 +594,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new BigIntLiteral(token.BigIntValue!.Value, raw));
+                    expr = Finalize(node, new Literal(token.BigIntValue!.Value, raw));
                     break;
 
                 case TokenType.BooleanLiteral:
@@ -610,7 +610,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(TokenType.NullLiteral, null, raw));
+                    expr = Finalize(node, new Literal(raw));
                     break;
 
                 case TokenType.Template:
@@ -874,7 +874,7 @@ namespace Esprima
 
                 case TokenType.BigIntLiteral:
                     raw = GetTokenRaw(token);
-                    key = Finalize(node, new BigIntLiteral(token.BigIntValue!.Value, raw));
+                    key = Finalize(node, new Literal(token.BigIntValue!.Value, raw));
                     break;
 
                 case TokenType.Identifier:

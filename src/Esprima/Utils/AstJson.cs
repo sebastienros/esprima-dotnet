@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -715,6 +716,10 @@ public class AstToJsonConverter : AstJson.IConverter
                     Member("pattern", literal.Regex.Pattern);
                     Member("flags", literal.Regex.Flags);
                     _writer.EndObject();
+                }
+                else if (literal.Value is BigInteger bigInt)
+                {
+                    Member("bigint", bigInt.ToString(CultureInfo.InvariantCulture));
                 }
             }
 
