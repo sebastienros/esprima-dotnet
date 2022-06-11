@@ -1561,7 +1561,7 @@ namespace Esprima
                 NextToken();
                 attributes = ParseObjectInitializer();
             }
-            
+
             _context.IsAssignmentTarget = previousIsAssignmentTarget;
 
             if (!this.Match(")") && this._config.Tolerant)
@@ -1571,10 +1571,6 @@ namespace Esprima
             else
             {
                 this.Expect(")");
-                if (this.Match(";"))
-                {
-                    this.NextToken();
-                }
             }
 
             return Finalize(node, new Import(source, attributes));
