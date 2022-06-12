@@ -146,8 +146,6 @@ public class AstVisitorEventSource : AstVisitor
     public event EventHandler<BreakStatement>? VisitedBreakStatement;
     public event EventHandler<BlockStatement>? VisitingBlockStatement;
     public event EventHandler<BlockStatement>? VisitedBlockStatement;
-    public event EventHandler<AccessorProperty>? VisitingAccessorProperty;
-    public event EventHandler<AccessorProperty>? VisitedAccessorProperty;
     public event EventHandler<Decorator>? VisitingDecorator;
     public event EventHandler<Decorator>? VisitedDecorator;
     public event EventHandler<StaticBlock>? VisitingStaticBlock;
@@ -422,14 +420,6 @@ public class AstVisitorEventSource : AstVisitor
         VisitingDecorator?.Invoke(this, decorator);
         var result = base.VisitDecorator(decorator);
         VisitedDecorator?.Invoke(this, decorator);
-        return result;
-    }
-
-    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
-    {
-        VisitingAccessorProperty?.Invoke(this, accessorProperty);
-        var result = base.VisitAccessorProperty(accessorProperty);
-        VisitedAccessorProperty?.Invoke(this, accessorProperty);
         return result;
     }
 

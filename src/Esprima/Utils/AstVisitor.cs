@@ -350,24 +350,6 @@ public class AstVisitor
         return decorator;
     }
 
-    protected internal virtual object? VisitAccessorProperty(AccessorProperty accessorProperty)
-    {
-        Visit(accessorProperty.Key);
-
-        if (accessorProperty.Value is not null)
-        {
-            Visit(accessorProperty.Value);
-        }
-
-        ref readonly var decorators = ref accessorProperty.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
-        {
-            Visit(decorators[i]);
-        }
-
-        return accessorProperty;
-    }
-
     protected internal virtual object? VisitClassExpression(ClassExpression classExpression)
     {
         if (classExpression.Id is not null)

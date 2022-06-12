@@ -794,21 +794,6 @@ public class AstToJsonConverter : AstJson.IConverter
             return decorator;
         }
 
-        protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
-        {
-            using (StartNodeObject(accessorProperty))
-            {
-                Member("key", accessorProperty.Key);
-                Member("value", accessorProperty.Value);
-                if (accessorProperty.Decorators.Count > 0)
-                {
-                    Member("decorators", accessorProperty.Decorators);
-                }
-            }
-
-            return accessorProperty;
-        }
-
         protected internal override object? VisitClassExpression(ClassExpression classExpression)
         {
             using (StartNodeObject(classExpression))
