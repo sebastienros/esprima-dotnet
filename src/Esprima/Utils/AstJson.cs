@@ -770,6 +770,10 @@ public class AstToJsonConverter : AstJson.IConverter
                 Member("value", propertyDefinition.Value);
                 Member("kind", propertyDefinition.Kind);
                 Member("static", propertyDefinition.Static);
+                if (propertyDefinition.Decorators.Count > 0)
+                {
+                    Member("decorators", propertyDefinition.Decorators);
+                }
             }
 
             return propertyDefinition;

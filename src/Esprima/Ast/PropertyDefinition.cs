@@ -26,6 +26,19 @@ namespace Esprima.Ast
         public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
+
+        private IEnumerable<Node?> CreateChildNodes()
+        {
+            yield return Key;
+            yield return Value;
+
+            foreach (var node in Decorators)
+            {
+                yield return node;
+            }
+        }
+
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitPropertyDefinition(this);

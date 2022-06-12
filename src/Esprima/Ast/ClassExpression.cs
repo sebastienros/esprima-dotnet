@@ -29,6 +29,18 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
 
+        private IEnumerable<Node?> CreateChildNodes()
+        {
+            yield return Id;
+            yield return SuperClass;
+            yield return Body;
+
+            foreach (var node in Decorators)
+            {
+                yield return node;
+            }
+        }
+
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitClassExpression(this);
@@ -42,26 +54,6 @@ namespace Esprima.Ast
             }
 
             return new ClassExpression(id, superClass, body, decorators).SetAdditionalInfo(this);
-        }
-
-        private IEnumerable<Node> CreateChildNodes()
-        {
-            if (Id is not null)
-            {
-                yield return Id;
-            }
-
-            if (SuperClass is not null)
-            {
-                yield return SuperClass;
-            }
-
-            yield return Body;
-
-            foreach (var node in Decorators)
-            {
-                yield return node;
-            }
         }
     }
 }

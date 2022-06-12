@@ -327,6 +327,12 @@ public class AstVisitor
             Visit(propertyDefinition.Value);
         }
 
+        ref readonly var decorators = ref propertyDefinition.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
+
         return propertyDefinition;
     }
 
@@ -375,6 +381,12 @@ public class AstVisitor
         }
 
         Visit(classExpression.Body);
+
+        ref readonly var decorators = ref classExpression.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
 
         return classExpression;
     }
@@ -506,6 +518,12 @@ public class AstVisitor
         Visit(methodDefinition.Key);
         Visit(methodDefinition.Value);
 
+        ref readonly var decorators = ref methodDefinition.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
+
         return methodDefinition;
     }
 
@@ -531,6 +549,12 @@ public class AstVisitor
         }
 
         Visit(classDeclaration.Body);
+
+        ref readonly var decorators = ref classDeclaration.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
 
         return classDeclaration;
     }

@@ -793,9 +793,7 @@ namespace Esprima
 
             Expect("]");
 
-#nullable disable
             return Finalize(node, new ArrayExpression(NodeList.From(ref elements)));
-#nullable enable
         }
 
         // https://tc39.github.io/ecma262/#sec-object-initializer
@@ -1183,9 +1181,7 @@ namespace Esprima
                         }
                     }
 
-#nullable disable
                     node = new ArrayPattern(NodeList.From(ref elements));
-#nullable enable
                     node._range = expr._range;
                     node._location = expr._location;
 
@@ -2686,9 +2682,7 @@ namespace Esprima
 
             Expect("]");
 
-#nullable disable
             return Finalize(node, new ArrayPattern(NodeList.From(ref elements)));
-#nullable enable
         }
 
         private Property ParsePropertyPattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind)

@@ -14,7 +14,7 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield<Expression>(Elements!);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Elements);
 
         protected internal override object? Accept(AstVisitor visitor)
         {

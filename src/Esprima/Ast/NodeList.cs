@@ -1,14 +1,12 @@
-﻿#nullable disable
-
-using System.Collections;
+﻿using System.Collections;
 using System.Runtime.CompilerServices;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
-    public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node
+    public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
     {
-        internal readonly T[] _items;
+        internal readonly T[]? _items;
         internal readonly int _count;
 
         internal NodeList(ICollection<T> collection)
@@ -22,7 +20,7 @@ namespace Esprima.Ast
             }
         }
 
-        internal NodeList(T[] items, int count)
+        internal NodeList(T[]? items, int count)
         {
             _items = items;
             _count = count;
@@ -34,9 +32,9 @@ namespace Esprima.Ast
             get => _count;
         }
 
-        public NodeList<Node> AsNodes()
+        public NodeList<Node?> AsNodes()
         {
-            return new NodeList<Node>(_items /* conversion by co-variance! */, _count);
+            return new NodeList<Node?>(_items /* conversion by co-variance! */, _count);
         }
 
         public T this[int index]
@@ -50,7 +48,7 @@ namespace Esprima.Ast
                     ThrowIndexOutOfRangeException();
                 }
 
-                return _items[index];
+                return _items![index];
             }
         }
 
@@ -76,13 +74,13 @@ namespace Esprima.Ast
         /// </remarks>
         public struct Enumerator : IEnumerator<T>
         {
-            private readonly T[] _items; // Usually null when count is zero
+            private readonly T[]? _items; // Usually null when count is zero
             private readonly int _count;
 
             private int _index;
-            private T _current;
+            private T? _current;
 
-            internal Enumerator(T[] items, int count) : this()
+            internal Enumerator(T[]? items, int count) : this()
             {
                 _index = 0;
                 _items = items;
@@ -97,7 +95,7 @@ namespace Esprima.Ast
             {
                 if (_index < _count)
                 {
-                    _current = _items[_index];
+                    _current = _items![_index];
                     _index++;
                     return true;
                 }
@@ -118,9 +116,9 @@ namespace Esprima.Ast
                 _current = default;
             }
 
-            public T Current => _current;
+            public T Current => _current!;
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -137,14 +135,14 @@ namespace Esprima.Ast
 
     public static class NodeList
     {
-        internal static NodeList<T> From<T>(ref ArrayList<T> arrayList) where T : Node
+        internal static NodeList<T> From<T>(ref ArrayList<T> arrayList) where T : Node?
         {
             arrayList.Yield(out var items, out var count);
             arrayList = default;
             return new NodeList<T>(items, count);
         }
 
-        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : Node
+        public static NodeList<T> Create<T>(IEnumerable<T> source) where T : Node?
         {
             switch (source)
             {
@@ -205,7 +203,7 @@ namespace Esprima.Ast
             }
         }
 
-        internal static bool AreSame<T>(in NodeList<T> nodeList1, in NodeList<T> nodeList2) where T : Node
+        internal static bool AreSame<T>(in NodeList<T> nodeList1, in NodeList<T> nodeList2) where T : Node?
         {
             return nodeList1._items == nodeList2._items;
         }
