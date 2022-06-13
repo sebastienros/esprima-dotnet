@@ -26,32 +26,27 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         _visitor = visitor;
     }
 
-    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
-        _visitor.Visit(jsxMemberExpression.Object);
-        _visitor.Visit(jsxMemberExpression.Property);
+        _visitor.Visit(jsxAttribute.Name);
+        if (jsxAttribute.Value is not null)
+        {
+            _visitor.Visit(jsxAttribute.Value);
+        }
 
-        return jsxMemberExpression;
+        return jsxAttribute;
     }
 
-    public virtual object? VisitJsxText(JsxText jsxText)
+    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
-        return jsxText;
-    }
+        _visitor.Visit(jsxClosingElement.Name);
 
-    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
-    {
-        return jsxOpeningFragment;
+        return jsxClosingElement;
     }
 
     public virtual object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         return jsxClosingFragment;
-    }
-
-    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
-    {
-        return jsxIdentifier;
     }
 
     public virtual object? VisitJsxElement(JsxElement jsxElement)
@@ -71,6 +66,39 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxElement;
     }
 
+    public virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    {
+        return jsxEmptyExpression;
+    }
+
+    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    {
+        _visitor.Visit(jsxExpressionContainer.Expression);
+
+        return jsxExpressionContainer;
+    }
+
+    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    {
+        return jsxIdentifier;
+    }
+
+    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    {
+        _visitor.Visit(jsxMemberExpression.Object);
+        _visitor.Visit(jsxMemberExpression.Property);
+
+        return jsxMemberExpression;
+    }
+
+    public virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    {
+        _visitor.Visit(jsxNamespacedName.Name);
+        _visitor.Visit(jsxNamespacedName.Namespace);
+
+        return jsxNamespacedName;
+    }
+
     public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         _visitor.Visit(jsxOpeningElement.Name);
@@ -83,24 +111,9 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxOpeningElement;
     }
 
-    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
-        _visitor.Visit(jsxClosingElement.Name);
-
-        return jsxClosingElement;
-    }
-
-    public virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
-    {
-        return jsxEmptyExpression;
-    }
-
-    public virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
-    {
-        _visitor.Visit(jsxNamespacedName.Name);
-        _visitor.Visit(jsxNamespacedName.Namespace);
-
-        return jsxNamespacedName;
+        return jsxOpeningFragment;
     }
 
     public virtual object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
@@ -110,21 +123,8 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxSpreadAttribute;
     }
 
-    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+    public virtual object? VisitJsxText(JsxText jsxText)
     {
-        _visitor.Visit(jsxAttribute.Name);
-        if (jsxAttribute.Value is not null)
-        {
-            _visitor.Visit(jsxAttribute.Value);
-        }
-
-        return jsxAttribute;
-    }
-
-    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
-    {
-        _visitor.Visit(jsxExpressionContainer.Expression);
-
-        return jsxExpressionContainer;
+        return jsxText;
     }
 }

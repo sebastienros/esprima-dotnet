@@ -352,241 +352,24 @@ public class AstToJsonConverter : AstJson.IConverter
             }
         }
 
-        protected internal override object? VisitProgram(Program program)
+        protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
         {
-            using (StartNodeObject(program))
+            using (StartNodeObject(arrayExpression))
             {
-                Member("body", program.Body, e => (Node) e);
-                Member("sourceType", program.SourceType);
-
-                // original Esprima doesn't include this information yet
-                if (!_testCompatibilityMode && program is Script s)
-                {
-                    Member("strict", s.Strict);
-                }
+                Member("elements", arrayExpression.Elements);
             }
 
-            return program;
+            return arrayExpression;
         }
 
-        protected internal override object? VisitExtension(Node node)
+        protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
         {
-            throw new NotSupportedException("Unknown node type: " + node.Type);
-        }
-
-        protected internal override object? VisitCatchClause(CatchClause catchClause)
-        {
-            using (StartNodeObject(catchClause))
+            using (StartNodeObject(arrayPattern))
             {
-                Member("param", catchClause.Param);
-                Member("body", catchClause.Body);
+                Member("elements", arrayPattern.Elements);
             }
 
-            return catchClause;
-        }
-
-        protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
-        {
-            using (StartNodeObject(functionDeclaration))
-            {
-                Member("id", functionDeclaration.Id);
-                Member("params", functionDeclaration.Params);
-                Member("body", functionDeclaration.Body);
-                Member("generator", functionDeclaration.Generator);
-                Member("expression", ((IFunction) functionDeclaration).Expression);
-                // original Esprima doesn't include this information yet
-                if (!_testCompatibilityMode)
-                {
-                    Member("strict", functionDeclaration.Strict);
-                }
-                Member("async", functionDeclaration.Async);
-            }
-
-            return functionDeclaration;
-        }
-
-        protected internal override object? VisitWithStatement(WithStatement withStatement)
-        {
-            using (StartNodeObject(withStatement))
-            {
-                Member("object", withStatement.Object);
-                Member("body", withStatement.Body);
-            }
-
-            return withStatement;
-        }
-
-        protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
-        {
-            using (StartNodeObject(whileStatement))
-            {
-                Member("test", whileStatement.Test);
-                Member("body", whileStatement.Body);
-            }
-
-            return whileStatement;
-        }
-
-        protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
-        {
-            using (StartNodeObject(variableDeclaration))
-            {
-                Member("declarations", variableDeclaration.Declarations);
-                Member("kind", variableDeclaration.Kind);
-            }
-
-            return variableDeclaration;
-        }
-
-        protected internal override object? VisitTryStatement(TryStatement tryStatement)
-        {
-            using (StartNodeObject(tryStatement))
-            {
-                Member("block", tryStatement.Block);
-                Member("handler", tryStatement.Handler);
-                Member("finalizer", tryStatement.Finalizer);
-            }
-
-            return tryStatement;
-        }
-
-        protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
-        {
-            using (StartNodeObject(throwStatement))
-            {
-                Member("argument", throwStatement.Argument);
-            }
-
-            return throwStatement;
-        }
-
-        protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
-        {
-            using (StartNodeObject(awaitExpression))
-            {
-                Member("argument", awaitExpression.Argument);
-            }
-
-            return awaitExpression;
-        }
-
-        protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
-        {
-            using (StartNodeObject(switchStatement))
-            {
-                Member("discriminant", switchStatement.Discriminant);
-                Member("cases", switchStatement.Cases);
-            }
-
-            return switchStatement;
-        }
-
-        protected internal override object? VisitSwitchCase(SwitchCase switchCase)
-        {
-            using (StartNodeObject(switchCase))
-            {
-                Member("test", switchCase.Test);
-                Member("consequent", switchCase.Consequent, e => (Node) e);
-            }
-
-            return switchCase;
-        }
-
-        protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
-        {
-            using (StartNodeObject(returnStatement))
-            {
-                Member("argument", returnStatement.Argument);
-            }
-
-            return returnStatement;
-        }
-
-        protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
-        {
-            using (StartNodeObject(labeledStatement))
-            {
-                Member("label", labeledStatement.Label);
-                Member("body", labeledStatement.Body);
-            }
-
-            return labeledStatement;
-        }
-
-        protected internal override object? VisitIfStatement(IfStatement ifStatement)
-        {
-            using (StartNodeObject(ifStatement))
-            {
-                Member("test", ifStatement.Test);
-                Member("consequent", ifStatement.Consequent);
-                Member("alternate", ifStatement.Alternate);
-            }
-
-            return ifStatement;
-        }
-
-        protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
-        {
-            EmptyNodeObject(emptyStatement);
-            return emptyStatement;
-        }
-
-        protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
-        {
-            EmptyNodeObject(debuggerStatement);
-            return debuggerStatement;
-        }
-
-        protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
-        {
-            using (StartNodeObject(expressionStatement))
-            {
-                if (expressionStatement is Directive d)
-                {
-                    Member("directive", d.Directiv);
-                }
-
-                Member("expression", expressionStatement.Expression);
-            }
-
-            return expressionStatement;
-        }
-
-        protected internal override object? VisitForStatement(ForStatement forStatement)
-        {
-            using (StartNodeObject(forStatement))
-            {
-                Member("init", forStatement.Init);
-                Member("test", forStatement.Test);
-                Member("update", forStatement.Update);
-                Member("body", forStatement.Body);
-            }
-
-            return forStatement;
-        }
-
-        protected internal override object? VisitForInStatement(ForInStatement forInStatement)
-        {
-            using (StartNodeObject(forInStatement))
-            {
-                Member("left", forInStatement.Left);
-                Member("right", forInStatement.Right);
-                Member("body", forInStatement.Body);
-                Member("each", false);
-            }
-
-            return forInStatement;
-        }
-
-        protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
-        {
-            using (StartNodeObject(doWhileStatement))
-            {
-                Member("body", doWhileStatement.Body);
-                Member("test", doWhileStatement.Test);
-            }
-
-            return doWhileStatement;
+            return arrayPattern;
         }
 
         protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
@@ -609,189 +392,128 @@ public class AstToJsonConverter : AstJson.IConverter
             return arrowFunctionExpression;
         }
 
-        protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
+        protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
         {
-            using (StartNodeObject(unaryExpression))
+            using (StartNodeObject(assignmentExpression))
             {
-                Member("operator", unaryExpression.Operator);
-                Member("argument", unaryExpression.Argument);
-                Member("prefix", unaryExpression.Prefix);
+                Member("operator", assignmentExpression.Operator);
+                Member("left", assignmentExpression.Left);
+                Member("right", assignmentExpression.Right);
             }
 
-            return unaryExpression;
+            return assignmentExpression;
         }
 
-        protected internal override object? VisitThisExpression(ThisExpression thisExpression)
+        protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
         {
-            EmptyNodeObject(thisExpression);
-            return thisExpression;
-        }
-
-        protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
-        {
-            using (StartNodeObject(sequenceExpression))
+            using (StartNodeObject(assignmentPattern))
             {
-                Member("expressions", sequenceExpression.Expressions);
+                Member("left", assignmentPattern.Left);
+                Member("right", assignmentPattern.Right);
             }
 
-            return sequenceExpression;
+            return assignmentPattern;
         }
 
-        protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
+        protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
         {
-            using (StartNodeObject(objectExpression))
+            using (StartNodeObject(awaitExpression))
             {
-                Member("properties", objectExpression.Properties);
+                Member("argument", awaitExpression.Argument);
             }
 
-            return objectExpression;
+            return awaitExpression;
         }
 
-        protected internal override object? VisitNewExpression(NewExpression newExpression)
+        protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
         {
-            using (StartNodeObject(newExpression))
+            using (StartNodeObject(binaryExpression))
             {
-                Member("callee", newExpression.Callee);
-                Member("arguments", newExpression.Arguments, e => (Node) e);
+                Member("operator", binaryExpression.Operator);
+                Member("left", binaryExpression.Left);
+                Member("right", binaryExpression.Right);
             }
 
-            return newExpression;
+            return binaryExpression;
         }
 
-        protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
+        protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
         {
-            using (StartNodeObject(memberExpression))
+            using (StartNodeObject(blockStatement))
             {
-                Member("computed", memberExpression.Computed);
-                Member("object", memberExpression.Object);
-                Member("property", memberExpression.Property);
-                Member("optional", memberExpression.Optional);
+                Member("body", blockStatement.Body, e => (Statement) e);
             }
 
-            return memberExpression;
+            return blockStatement;
         }
 
-        protected internal override object? VisitLiteral(Literal literal)
+        protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
         {
-            using (StartNodeObject(literal))
+            using (StartNodeObject(breakStatement))
             {
-                _writer.Member("value");
-                var value = literal.Value;
+                Member("label", breakStatement.Label);
+            }
 
-                switch (value)
+            return breakStatement;
+        }
+
+        protected internal override object? VisitCallExpression(CallExpression callExpression)
+        {
+            using (StartNodeObject(callExpression))
+            {
+                Member("callee", callExpression.Callee);
+                Member("arguments", callExpression.Arguments, e => e);
+                Member("optional", callExpression.Optional);
+            }
+
+            return callExpression;
+        }
+
+        protected internal override object? VisitCatchClause(CatchClause catchClause)
+        {
+            using (StartNodeObject(catchClause))
+            {
+                Member("param", catchClause.Param);
+                Member("body", catchClause.Body);
+            }
+
+            return catchClause;
+        }
+
+        protected internal override object? VisitChainExpression(ChainExpression chainExpression)
+        {
+            using (StartNodeObject(chainExpression))
+            {
+                Member("expression", chainExpression.Expression);
+            }
+
+            return chainExpression;
+        }
+
+        protected internal override object? VisitClassBody(ClassBody classBody)
+        {
+            using (StartNodeObject(classBody))
+            {
+                Member("body", classBody.Body);
+            }
+
+            return classBody;
+        }
+
+        protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
+        {
+            using (StartNodeObject(classDeclaration))
+            {
+                Member("id", classDeclaration.Id);
+                Member("superClass", classDeclaration.SuperClass);
+                Member("body", classDeclaration.Body);
+                if (classDeclaration.Decorators.Count > 0)
                 {
-                    case null:
-                        if (!_testCompatibilityMode && literal.TokenType == TokenType.RegularExpression)
-                        {
-                            // This is how esprima.org actually renders regexes since it relies on Regex.toString
-                            _writer.String(literal.Raw);
-                        }
-                        else
-                        {
-                            _writer.Null();
-                        }
-
-                        break;
-                    case bool b:
-                        _writer.Boolean(b);
-                        break;
-                    case Regex _:
-                        _writer.StartObject();
-                        _writer.EndObject();
-                        break;
-                    case double d:
-                        _writer.Number(d);
-                        break;
-                    default:
-                        _writer.String(Convert.ToString(value, CultureInfo.InvariantCulture));
-                        break;
-                }
-
-                Member("raw", literal.Raw);
-
-                if (literal.Regex != null)
-                {
-                    _writer.Member("regex");
-                    _writer.StartObject();
-                    Member("pattern", literal.Regex.Pattern);
-                    Member("flags", literal.Regex.Flags);
-                    _writer.EndObject();
-                }
-                else if (literal.Value is BigInteger bigInt)
-                {
-                    Member("bigint", bigInt.ToString(CultureInfo.InvariantCulture));
-                }
-            }
-
-            return literal;
-        }
-
-        protected internal override object? VisitIdentifier(Identifier identifier)
-        {
-            using (StartNodeObject(identifier))
-            {
-                Member("name", identifier.Name);
-            }
-
-            return identifier;
-        }
-
-        protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
-        {
-            using (StartNodeObject(privateIdentifier))
-            {
-                Member("name", privateIdentifier.Name);
-            }
-
-            return privateIdentifier;
-        }
-
-        protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
-        {
-            using (StartNodeObject(functionExpression))
-            {
-                Member("id", functionExpression.Id);
-                Member("params", functionExpression.Params);
-                Member("body", functionExpression.Body);
-                Member("generator", functionExpression.Generator);
-                Member("expression", ((IFunction) functionExpression).Expression);
-                // original Esprima doesn't include this information yet
-                if (!_testCompatibilityMode)
-                {
-                    Member("strict", functionExpression.Strict);
-                }
-                Member("async", functionExpression.Async);
-            }
-
-            return functionExpression;
-        }
-
-        protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
-        {
-            using (StartNodeObject(propertyDefinition))
-            {
-                Member("key", propertyDefinition.Key);
-                Member("computed", propertyDefinition.Computed);
-                Member("value", propertyDefinition.Value);
-                Member("kind", propertyDefinition.Kind);
-                Member("static", propertyDefinition.Static);
-                if (propertyDefinition.Decorators.Count > 0)
-                {
-                    Member("decorators", propertyDefinition.Decorators);
+                    Member("decorators", classDeclaration.Decorators);
                 }
             }
 
-            return propertyDefinition;
-        }
-
-        protected internal override object? VisitDecorator(Decorator decorator)
-        {
-            using (StartNodeObject(decorator))
-            {
-                Member("expression", decorator.Expression);
-            }
-
-            return decorator;
+            return classDeclaration;
         }
 
         protected internal override object? VisitClassExpression(ClassExpression classExpression)
@@ -810,24 +532,59 @@ public class AstToJsonConverter : AstJson.IConverter
             return classExpression;
         }
 
-        protected internal override object? VisitChainExpression(ChainExpression chainExpression)
+        protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
         {
-            using (StartNodeObject(chainExpression))
+            using (StartNodeObject(conditionalExpression))
             {
-                Member("expression", chainExpression.Expression);
+                Member("test", conditionalExpression.Test);
+                Member("consequent", conditionalExpression.Consequent);
+                Member("alternate", conditionalExpression.Alternate);
             }
 
-            return chainExpression;
+            return conditionalExpression;
         }
 
-        protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+        protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
         {
-            using (StartNodeObject(exportDefaultDeclaration))
+            using (StartNodeObject(continueStatement))
             {
-                Member("declaration", exportDefaultDeclaration.Declaration);
+                Member("label", continueStatement.Label);
             }
 
-            return exportDefaultDeclaration;
+            return continueStatement;
+        }
+
+        protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+        {
+            EmptyNodeObject(debuggerStatement);
+            return debuggerStatement;
+        }
+
+        protected internal override object? VisitDecorator(Decorator decorator)
+        {
+            using (StartNodeObject(decorator))
+            {
+                Member("expression", decorator.Expression);
+            }
+
+            return decorator;
+        }
+
+        protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+        {
+            using (StartNodeObject(doWhileStatement))
+            {
+                Member("body", doWhileStatement.Body);
+                Member("test", doWhileStatement.Test);
+            }
+
+            return doWhileStatement;
+        }
+
+        protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
+        {
+            EmptyNodeObject(emptyStatement);
+            return emptyStatement;
         }
 
         protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
@@ -848,6 +605,16 @@ public class AstToJsonConverter : AstJson.IConverter
             }
 
             return exportAllDeclaration;
+        }
+
+        protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+        {
+            using (StartNodeObject(exportDefaultDeclaration))
+            {
+                Member("declaration", exportDefaultDeclaration.Declaration);
+            }
+
+            return exportDefaultDeclaration;
         }
 
         protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
@@ -878,22 +645,143 @@ public class AstToJsonConverter : AstJson.IConverter
             return exportSpecifier;
         }
 
-        private sealed class ImportCompat : Expression
+        protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
         {
-            public ImportCompat() : base(Nodes.Import) { }
-
-            public override NodeCollection ChildNodes => NodeCollection.Empty;
-
-            protected internal override object? Accept(AstVisitor visitor)
+            using (StartNodeObject(expressionStatement))
             {
-                return ((VisitorBase) visitor).VisitImportCompat(this);
+                if (expressionStatement is Directive d)
+                {
+                    Member("directive", d.Directiv);
+                }
+
+                Member("expression", expressionStatement.Expression);
             }
+
+            return expressionStatement;
+        }
+
+        protected internal override object? VisitExtension(Node node)
+        {
+            throw new NotSupportedException("Unknown node type: " + node.Type);
+        }
+
+        protected internal override object? VisitForInStatement(ForInStatement forInStatement)
+        {
+            using (StartNodeObject(forInStatement))
+            {
+                Member("left", forInStatement.Left);
+                Member("right", forInStatement.Right);
+                Member("body", forInStatement.Body);
+                Member("each", false);
+            }
+
+            return forInStatement;
+        }
+
+        protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
+        {
+            using (StartNodeObject(forOfStatement))
+            {
+                Member("await", forOfStatement.Await);
+                Member("left", forOfStatement.Left);
+                Member("right", forOfStatement.Right);
+                Member("body", forOfStatement.Body);
+            }
+
+            return forOfStatement;
+        }
+
+        protected internal override object? VisitForStatement(ForStatement forStatement)
+        {
+            using (StartNodeObject(forStatement))
+            {
+                Member("init", forStatement.Init);
+                Member("test", forStatement.Test);
+                Member("update", forStatement.Update);
+                Member("body", forStatement.Body);
+            }
+
+            return forStatement;
+        }
+
+        protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+        {
+            using (StartNodeObject(functionDeclaration))
+            {
+                Member("id", functionDeclaration.Id);
+                Member("params", functionDeclaration.Params);
+                Member("body", functionDeclaration.Body);
+                Member("generator", functionDeclaration.Generator);
+                Member("expression", ((IFunction) functionDeclaration).Expression);
+                // original Esprima doesn't include this information yet
+                if (!_testCompatibilityMode)
+                {
+                    Member("strict", functionDeclaration.Strict);
+                }
+                Member("async", functionDeclaration.Async);
+            }
+
+            return functionDeclaration;
+        }
+
+        protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
+        {
+            using (StartNodeObject(functionExpression))
+            {
+                Member("id", functionExpression.Id);
+                Member("params", functionExpression.Params);
+                Member("body", functionExpression.Body);
+                Member("generator", functionExpression.Generator);
+                Member("expression", ((IFunction) functionExpression).Expression);
+                // original Esprima doesn't include this information yet
+                if (!_testCompatibilityMode)
+                {
+                    Member("strict", functionExpression.Strict);
+                }
+                Member("async", functionExpression.Async);
+            }
+
+            return functionExpression;
+        }
+
+        protected internal override object? VisitIdentifier(Identifier identifier)
+        {
+            using (StartNodeObject(identifier))
+            {
+                Member("name", identifier.Name);
+            }
+
+            return identifier;
+        }
+
+        protected internal override object? VisitIfStatement(IfStatement ifStatement)
+        {
+            using (StartNodeObject(ifStatement))
+            {
+                Member("test", ifStatement.Test);
+                Member("consequent", ifStatement.Consequent);
+                Member("alternate", ifStatement.Alternate);
+            }
+
+            return ifStatement;
         }
 
         private object? VisitImportCompat(ImportCompat import)
         {
             EmptyNodeObject(import);
             return import;
+        }
+
+        private sealed class ImportCompat : Expression
+        {
+            protected internal override object? Accept(AstVisitor visitor)
+            {
+                return ((VisitorBase) visitor).VisitImportCompat(this);
+            }
+
+            public ImportCompat() : base(Nodes.Import) { }
+
+            public override NodeCollection ChildNodes => NodeCollection.Empty;
         }
 
         protected internal override object? VisitImport(Import import)
@@ -962,16 +850,6 @@ public class AstToJsonConverter : AstJson.IConverter
             return importDeclaration;
         }
 
-        protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
-        {
-            using (StartNodeObject(importNamespaceSpecifier))
-            {
-                Member("local", importNamespaceSpecifier.Local);
-            }
-
-            return importNamespaceSpecifier;
-        }
-
         protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
         {
             using (StartNodeObject(importDefaultSpecifier))
@@ -980,6 +858,16 @@ public class AstToJsonConverter : AstJson.IConverter
             }
 
             return importDefaultSpecifier;
+        }
+
+        protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+        {
+            using (StartNodeObject(importNamespaceSpecifier))
+            {
+                Member("local", importNamespaceSpecifier.Local);
+            }
+
+            return importNamespaceSpecifier;
         }
 
         protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
@@ -991,6 +879,96 @@ public class AstToJsonConverter : AstJson.IConverter
             }
 
             return importSpecifier;
+        }
+
+        protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
+        {
+            using (StartNodeObject(labeledStatement))
+            {
+                Member("label", labeledStatement.Label);
+                Member("body", labeledStatement.Body);
+            }
+
+            return labeledStatement;
+        }
+
+        protected internal override object? VisitLiteral(Literal literal)
+        {
+            using (StartNodeObject(literal))
+            {
+                _writer.Member("value");
+                var value = literal.Value;
+
+                switch (value)
+                {
+                    case null:
+                        if (!_testCompatibilityMode && literal.TokenType == TokenType.RegularExpression)
+                        {
+                            // This is how esprima.org actually renders regexes since it relies on Regex.toString
+                            _writer.String(literal.Raw);
+                        }
+                        else
+                        {
+                            _writer.Null();
+                        }
+
+                        break;
+                    case bool b:
+                        _writer.Boolean(b);
+                        break;
+                    case Regex _:
+                        _writer.StartObject();
+                        _writer.EndObject();
+                        break;
+                    case double d:
+                        _writer.Number(d);
+                        break;
+                    default:
+                        _writer.String(Convert.ToString(value, CultureInfo.InvariantCulture));
+                        break;
+                }
+
+                Member("raw", literal.Raw);
+
+                if (literal.Regex != null)
+                {
+                    _writer.Member("regex");
+                    _writer.StartObject();
+                    Member("pattern", literal.Regex.Pattern);
+                    Member("flags", literal.Regex.Flags);
+                    _writer.EndObject();
+                }
+                else if (literal.Value is BigInteger bigInt)
+                {
+                    Member("bigint", bigInt.ToString(CultureInfo.InvariantCulture));
+                }
+            }
+
+            return literal;
+        }
+
+        protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
+        {
+            using (StartNodeObject(memberExpression))
+            {
+                Member("computed", memberExpression.Computed);
+                Member("object", memberExpression.Object);
+                Member("property", memberExpression.Property);
+                Member("optional", memberExpression.Optional);
+            }
+
+            return memberExpression;
+        }
+
+        protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
+        {
+            using (StartNodeObject(metaProperty))
+            {
+                Member("meta", metaProperty.Meta);
+                Member("property", metaProperty.Property);
+            }
+
+            return metaProperty;
         }
 
         protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
@@ -1011,82 +989,25 @@ public class AstToJsonConverter : AstJson.IConverter
             return methodDefinition;
         }
 
-        protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
+        protected internal override object? VisitNewExpression(NewExpression newExpression)
         {
-            using (StartNodeObject(forOfStatement))
+            using (StartNodeObject(newExpression))
             {
-                Member("await", forOfStatement.Await);
-                Member("left", forOfStatement.Left);
-                Member("right", forOfStatement.Right);
-                Member("body", forOfStatement.Body);
+                Member("callee", newExpression.Callee);
+                Member("arguments", newExpression.Arguments, e => (Node) e);
             }
 
-            return forOfStatement;
+            return newExpression;
         }
 
-        protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
+        protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
         {
-            using (StartNodeObject(classDeclaration))
+            using (StartNodeObject(objectExpression))
             {
-                Member("id", classDeclaration.Id);
-                Member("superClass", classDeclaration.SuperClass);
-                Member("body", classDeclaration.Body);
-                if (classDeclaration.Decorators.Count > 0)
-                {
-                    Member("decorators", classDeclaration.Decorators);
-                }
+                Member("properties", objectExpression.Properties);
             }
 
-            return classDeclaration;
-        }
-
-        protected internal override object? VisitClassBody(ClassBody classBody)
-        {
-            using (StartNodeObject(classBody))
-            {
-                Member("body", classBody.Body);
-            }
-
-            return classBody;
-        }
-
-        protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
-        {
-            using (StartNodeObject(yieldExpression))
-            {
-                Member("argument", yieldExpression.Argument);
-                Member("delegate", yieldExpression.Delegate);
-            }
-
-            return yieldExpression;
-        }
-
-        protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
-        {
-            using (StartNodeObject(taggedTemplateExpression))
-            {
-                Member("tag", taggedTemplateExpression.Tag);
-                Member("quasi", taggedTemplateExpression.Quasi);
-            }
-
-            return taggedTemplateExpression;
-        }
-
-        protected internal override object? VisitSuper(Super super)
-        {
-            EmptyNodeObject(super);
-            return super;
-        }
-
-        protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
-        {
-            using (StartNodeObject(metaProperty))
-            {
-                Member("meta", metaProperty.Meta);
-                Member("property", metaProperty.Property);
-            }
-
-            return metaProperty;
+            return objectExpression;
         }
 
         protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
@@ -1099,82 +1020,31 @@ public class AstToJsonConverter : AstJson.IConverter
             return objectPattern;
         }
 
-        protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
+        protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
         {
-            using (StartNodeObject(spreadElement))
+            using (StartNodeObject(privateIdentifier))
             {
-                Member("argument", spreadElement.Argument);
+                Member("name", privateIdentifier.Name);
             }
 
-            return spreadElement;
+            return privateIdentifier;
         }
 
-        protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+        protected internal override object? VisitProgram(Program program)
         {
-            using (StartNodeObject(assignmentPattern))
+            using (StartNodeObject(program))
             {
-                Member("left", assignmentPattern.Left);
-                Member("right", assignmentPattern.Right);
+                Member("body", program.Body, e => (Node) e);
+                Member("sourceType", program.SourceType);
+
+                // original Esprima doesn't include this information yet
+                if (!_testCompatibilityMode && program is Script s)
+                {
+                    Member("strict", s.Strict);
+                }
             }
 
-            return assignmentPattern;
-        }
-
-        protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
-        {
-            using (StartNodeObject(arrayPattern))
-            {
-                Member("elements", arrayPattern.Elements);
-            }
-
-            return arrayPattern;
-        }
-
-        protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
-        {
-            using (StartNodeObject(variableDeclarator))
-            {
-                Member("id", variableDeclarator.Id);
-                Member("init", variableDeclarator.Init);
-            }
-
-            return variableDeclarator;
-        }
-
-        protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
-        {
-            using (StartNodeObject(templateLiteral))
-            {
-                Member("quasis", templateLiteral.Quasis);
-                Member("expressions", templateLiteral.Expressions);
-            }
-
-            return templateLiteral;
-        }
-
-        protected internal override object? VisitTemplateElement(TemplateElement templateElement)
-        {
-            using (StartNodeObject(templateElement))
-            {
-                _writer.Member("value");
-                _writer.StartObject();
-                Member("raw", templateElement.Value.Raw);
-                Member("cooked", templateElement.Value.Cooked);
-                _writer.EndObject();
-                Member("tail", templateElement.Tail);
-            }
-
-            return templateElement;
-        }
-
-        protected internal override object? VisitRestElement(RestElement restElement)
-        {
-            using (StartNodeObject(restElement))
-            {
-                Member("argument", restElement.Argument);
-            }
-
-            return restElement;
+            return program;
         }
 
         protected internal override object? VisitProperty(Property property)
@@ -1192,92 +1062,62 @@ public class AstToJsonConverter : AstJson.IConverter
             return property;
         }
 
-        protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
+        protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
         {
-            using (StartNodeObject(conditionalExpression))
+            using (StartNodeObject(propertyDefinition))
             {
-                Member("test", conditionalExpression.Test);
-                Member("consequent", conditionalExpression.Consequent);
-                Member("alternate", conditionalExpression.Alternate);
+                Member("key", propertyDefinition.Key);
+                Member("computed", propertyDefinition.Computed);
+                Member("value", propertyDefinition.Value);
+                Member("kind", propertyDefinition.Kind);
+                Member("static", propertyDefinition.Static);
+                if (propertyDefinition.Decorators.Count > 0)
+                {
+                    Member("decorators", propertyDefinition.Decorators);
+                }
             }
 
-            return conditionalExpression;
+            return propertyDefinition;
         }
 
-        protected internal override object? VisitCallExpression(CallExpression callExpression)
+        protected internal override object? VisitRestElement(RestElement restElement)
         {
-            using (StartNodeObject(callExpression))
+            using (StartNodeObject(restElement))
             {
-                Member("callee", callExpression.Callee);
-                Member("arguments", callExpression.Arguments, e => e);
-                Member("optional", callExpression.Optional);
+                Member("argument", restElement.Argument);
             }
 
-            return callExpression;
+            return restElement;
         }
 
-        protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
+        protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
         {
-            using (StartNodeObject(binaryExpression))
+            using (StartNodeObject(returnStatement))
             {
-                Member("operator", binaryExpression.Operator);
-                Member("left", binaryExpression.Left);
-                Member("right", binaryExpression.Right);
+                Member("argument", returnStatement.Argument);
             }
 
-            return binaryExpression;
+            return returnStatement;
         }
 
-        protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
+        protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
         {
-            using (StartNodeObject(arrayExpression))
+            using (StartNodeObject(sequenceExpression))
             {
-                Member("elements", arrayExpression.Elements);
+                Member("expressions", sequenceExpression.Expressions);
             }
 
-            return arrayExpression;
+            return sequenceExpression;
         }
 
-        protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+        protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
         {
-            using (StartNodeObject(assignmentExpression))
+            using (StartNodeObject(spreadElement))
             {
-                Member("operator", assignmentExpression.Operator);
-                Member("left", assignmentExpression.Left);
-                Member("right", assignmentExpression.Right);
+                Member("argument", spreadElement.Argument);
             }
 
-            return assignmentExpression;
-        }
-
-        protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
-        {
-            using (StartNodeObject(continueStatement))
-            {
-                Member("label", continueStatement.Label);
-            }
-
-            return continueStatement;
-        }
-
-        protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
-        {
-            using (StartNodeObject(breakStatement))
-            {
-                Member("label", breakStatement.Label);
-            }
-
-            return breakStatement;
-        }
-
-        protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
-        {
-            using (StartNodeObject(blockStatement))
-            {
-                Member("body", blockStatement.Body, e => (Statement) e);
-            }
-
-            return blockStatement;
+            return spreadElement;
         }
 
         protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
@@ -1288,6 +1128,166 @@ public class AstToJsonConverter : AstJson.IConverter
             }
 
             return staticBlock;
+        }
+
+        protected internal override object? VisitSuper(Super super)
+        {
+            EmptyNodeObject(super);
+            return super;
+        }
+
+        protected internal override object? VisitSwitchCase(SwitchCase switchCase)
+        {
+            using (StartNodeObject(switchCase))
+            {
+                Member("test", switchCase.Test);
+                Member("consequent", switchCase.Consequent, e => (Node) e);
+            }
+
+            return switchCase;
+        }
+
+        protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
+        {
+            using (StartNodeObject(switchStatement))
+            {
+                Member("discriminant", switchStatement.Discriminant);
+                Member("cases", switchStatement.Cases);
+            }
+
+            return switchStatement;
+        }
+
+        protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+        {
+            using (StartNodeObject(taggedTemplateExpression))
+            {
+                Member("tag", taggedTemplateExpression.Tag);
+                Member("quasi", taggedTemplateExpression.Quasi);
+            }
+
+            return taggedTemplateExpression;
+        }
+
+        protected internal override object? VisitTemplateElement(TemplateElement templateElement)
+        {
+            using (StartNodeObject(templateElement))
+            {
+                _writer.Member("value");
+                _writer.StartObject();
+                Member("raw", templateElement.Value.Raw);
+                Member("cooked", templateElement.Value.Cooked);
+                _writer.EndObject();
+                Member("tail", templateElement.Tail);
+            }
+
+            return templateElement;
+        }
+
+        protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
+        {
+            using (StartNodeObject(templateLiteral))
+            {
+                Member("quasis", templateLiteral.Quasis);
+                Member("expressions", templateLiteral.Expressions);
+            }
+
+            return templateLiteral;
+        }
+
+        protected internal override object? VisitThisExpression(ThisExpression thisExpression)
+        {
+            EmptyNodeObject(thisExpression);
+            return thisExpression;
+        }
+
+        protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
+        {
+            using (StartNodeObject(throwStatement))
+            {
+                Member("argument", throwStatement.Argument);
+            }
+
+            return throwStatement;
+        }
+
+        protected internal override object? VisitTryStatement(TryStatement tryStatement)
+        {
+            using (StartNodeObject(tryStatement))
+            {
+                Member("block", tryStatement.Block);
+                Member("handler", tryStatement.Handler);
+                Member("finalizer", tryStatement.Finalizer);
+            }
+
+            return tryStatement;
+        }
+
+        protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
+        {
+            using (StartNodeObject(unaryExpression))
+            {
+                Member("operator", unaryExpression.Operator);
+                Member("argument", unaryExpression.Argument);
+                Member("prefix", unaryExpression.Prefix);
+            }
+
+            return unaryExpression;
+        }
+
+        protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+        {
+            using (StartNodeObject(variableDeclaration))
+            {
+                Member("declarations", variableDeclaration.Declarations);
+                Member("kind", variableDeclaration.Kind);
+            }
+
+            return variableDeclaration;
+        }
+
+        protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+        {
+            using (StartNodeObject(variableDeclarator))
+            {
+                Member("id", variableDeclarator.Id);
+                Member("init", variableDeclarator.Init);
+            }
+
+            return variableDeclarator;
+        }
+
+        protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
+        {
+            using (StartNodeObject(whileStatement))
+            {
+                Member("test", whileStatement.Test);
+                Member("body", whileStatement.Body);
+            }
+
+            return whileStatement;
+        }
+
+        protected internal override object? VisitWithStatement(WithStatement withStatement)
+        {
+            using (StartNodeObject(withStatement))
+            {
+                Member("object", withStatement.Object);
+                Member("body", withStatement.Body);
+            }
+
+            return withStatement;
+        }
+
+        protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
+        {
+            using (StartNodeObject(yieldExpression))
+            {
+                Member("argument", yieldExpression.Argument);
+                Member("delegate", yieldExpression.Delegate);
+            }
+
+            return yieldExpression;
         }
     }
 
