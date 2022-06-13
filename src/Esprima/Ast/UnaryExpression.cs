@@ -27,11 +27,11 @@ namespace Esprima.Ast
         {
         }
 
-        protected UnaryExpression(Nodes type, string? op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
+        private protected UnaryExpression(Nodes type, string? op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
         {
         }
 
-        protected UnaryExpression(Nodes type, UnaryOperator op, Expression arg, bool prefix) : base(type)
+        private protected UnaryExpression(Nodes type, UnaryOperator op, Expression arg, bool prefix) : base(type)
         {
             Operator = op;
             Argument = arg;
@@ -78,7 +78,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return Rewrite(argument).SetAdditionalInfo(this);
+            return Rewrite(argument);
         }
     }
 }

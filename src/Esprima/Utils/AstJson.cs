@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -200,8 +201,8 @@ public class AstToJsonConverter : AstJson.IConverter
             {
                 _writer.Member("range");
                 _writer.StartArray();
-                _writer.Number(node._range.Start);
-                _writer.Number(node._range.End);
+                _writer.Number(node.Range.Start);
+                _writer.Number(node.Range.End);
                 _writer.EndArray();
             }
 
@@ -210,9 +211,9 @@ public class AstToJsonConverter : AstJson.IConverter
                 _writer.Member("loc");
                 _writer.StartObject();
                 _writer.Member("start");
-                Write(node._location.Start);
+                Write(node.Location.Start);
                 _writer.Member("end");
-                Write(node._location.End);
+                Write(node.Location.End);
                 _writer.EndObject();
             }
 
@@ -716,6 +717,10 @@ public class AstToJsonConverter : AstJson.IConverter
                     Member("flags", literal.Regex.Flags);
                     _writer.EndObject();
                 }
+                else if (literal.Value is BigInteger bigInt)
+                {
+                    Member("bigint", bigInt.ToString(CultureInfo.InvariantCulture));
+                }
             }
 
             return literal;
@@ -787,21 +792,6 @@ public class AstToJsonConverter : AstJson.IConverter
             }
 
             return decorator;
-        }
-
-        protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
-        {
-            using (StartNodeObject(accessorProperty))
-            {
-                Member("key", accessorProperty.Key);
-                Member("value", accessorProperty.Value);
-                if (accessorProperty.Decorators.Count > 0)
-                {
-                    Member("decorators", accessorProperty.Decorators);
-                }
-            }
-
-            return accessorProperty;
         }
 
         protected internal override object? VisitClassExpression(ClassExpression classExpression)
@@ -916,14 +906,14 @@ public class AstToJsonConverter : AstJson.IConverter
 
                 var callee = new ImportCompat
                 {
-                    _location = new Location(import._location.Start, new Position(import._location.Start.Line, import._location.Start.Column + importToken.Length)),
-                    _range = new Ast.Range(import._range.Start, import._range.Start + importToken.Length)
+                    Location = new Location(import.Location.Start, new Position(import.Location.Start.Line, import.Location.Start.Column + importToken.Length)),
+                    Range = new Ast.Range(import.Range.Start, import.Range.Start + importToken.Length)
                 };
                 var args = new NodeList<Expression>(new Expression[] { import.Source });
                 var callExpression = new CallExpression(callee, args, optional: false)
                 {
-                    _location = import._location,
-                    _range = import._range,
+                    Location = import.Location,
+                    Range = import.Range,
                 };
 
                 return Visit(callExpression);
@@ -1288,6 +1278,16 @@ public class AstToJsonConverter : AstJson.IConverter
             }
 
             return blockStatement;
+        }
+
+        protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+        {
+            using (StartNodeObject(staticBlock))
+            {
+                Member("body", staticBlock.Body, e => (Statement) e);
+            }
+
+            return staticBlock;
         }
     }
 

@@ -35,7 +35,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new CallExpression(callee, arguments, Optional).SetAdditionalInfo(this);
+            return new CallExpression(callee, arguments, Optional);
         }
     }
 }

@@ -26,6 +26,6 @@ public sealed class JsxExpressionContainer : JsxExpression
             return this;
         }
 
-        return new JsxExpressionContainer(expression).SetAdditionalInfo(this);
+        return new JsxExpressionContainer(expression);
     }
 }

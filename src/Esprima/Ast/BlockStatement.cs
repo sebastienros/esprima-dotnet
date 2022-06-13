@@ -3,16 +3,11 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public class BlockStatement : Statement
+    public sealed class BlockStatement : Statement
     {
         private readonly NodeList<Statement> _body;
 
         public BlockStatement(in NodeList<Statement> body) : base(Nodes.BlockStatement)
-        {
-            _body = body;
-        }
-
-        internal BlockStatement(in NodeList<Statement> body, Nodes type) : base(type)
         {
             _body = body;
         }
@@ -26,11 +21,6 @@ namespace Esprima.Ast
             return visitor.VisitBlockStatement(this);
         }
 
-        protected virtual BlockStatement Rewrite(in NodeList<Statement> body)
-        {
-            return new BlockStatement(body);
-        }
-
         public BlockStatement UpdateWith(in NodeList<Statement> body)
         {
             if (NodeList.AreSame(body, Body))
@@ -38,7 +28,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return Rewrite(body).SetAdditionalInfo(this);
+            return new BlockStatement(body);
         }
     }
 }

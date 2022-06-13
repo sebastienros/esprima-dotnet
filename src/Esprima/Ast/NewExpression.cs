@@ -33,7 +33,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new NewExpression(callee, arguments).SetAdditionalInfo(this);
+            return new NewExpression(callee, arguments);
         }
     }
 }

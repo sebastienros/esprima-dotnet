@@ -32,7 +32,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new CatchClause(param, body).SetAdditionalInfo(this);
+            return new CatchClause(param, body);
         }
     }
 }

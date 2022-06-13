@@ -29,7 +29,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ExportDefaultDeclaration(declaration).SetAdditionalInfo(this);
+            return new ExportDefaultDeclaration(declaration);
         }
     }
 }

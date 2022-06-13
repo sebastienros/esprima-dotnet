@@ -28,6 +28,6 @@ public sealed class JsxMemberExpression : JsxExpression
             return this;
         }
 
-        return new JsxMemberExpression(obj, property).SetAdditionalInfo(this);
+        return new JsxMemberExpression(obj, property);
     }
 }

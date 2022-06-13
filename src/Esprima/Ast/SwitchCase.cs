@@ -30,7 +30,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new SwitchCase(test, consequent).SetAdditionalInfo(this);
+            return new SwitchCase(test, consequent);
         }
     }
 }

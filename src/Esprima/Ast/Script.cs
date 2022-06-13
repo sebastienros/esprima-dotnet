@@ -7,7 +7,7 @@ namespace Esprima.Ast
         public Script(
             in NodeList<Statement> body,
             bool strict)
-            : base(Nodes.Program, body)
+            : base(body)
         {
             Strict = strict;
         }

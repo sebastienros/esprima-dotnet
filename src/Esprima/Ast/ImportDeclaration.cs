@@ -52,7 +52,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ImportDeclaration(specifiers, source, assertions).SetAdditionalInfo(this);
+            return new ImportDeclaration(specifiers, source, assertions);
         }
     }
 }

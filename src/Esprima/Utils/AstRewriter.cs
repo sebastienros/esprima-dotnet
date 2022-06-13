@@ -278,15 +278,6 @@ public class AstRewriter : AstVisitor
         return decorator.UpdateWith(expression);
     }
 
-    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
-    {
-        var key = VisitAndConvert(accessorProperty.Key);
-        var value = VisitAndConvert(accessorProperty.Value);
-        VisitAndConvert(accessorProperty.Decorators, out var decorators);
-
-        return accessorProperty.UpdateWith(key, value, decorators);
-    }
-
     protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
         var id = VisitAndConvert(classExpression.Id, allowNull: true);
@@ -564,5 +555,12 @@ public class AstRewriter : AstVisitor
         VisitAndConvert(blockStatement.Body, out var body);
 
         return blockStatement.UpdateWith(body);
+    }
+
+    protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+    {
+        VisitAndConvert(staticBlock.Body, out var body);
+
+        return staticBlock.UpdateWith(body);
     }
 }

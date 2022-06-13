@@ -26,7 +26,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new AwaitExpression(argument).SetAdditionalInfo(this);
+            return new AwaitExpression(argument);
         }
     }
 }

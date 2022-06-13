@@ -2,7 +2,6 @@
 {
     public enum Nodes
     {
-        AccessorProperty,
         AssignmentExpression,
         ArrayExpression,
         BlockStatement,

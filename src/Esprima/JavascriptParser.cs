@@ -350,12 +350,12 @@ namespace Esprima
 
         private protected T Finalize<T>(Marker marker, T node) where T : Node
         {
-            node._range = new Esprima.Ast.Range(marker.Index, _lastMarker.Index);
+            node.Range = new Esprima.Ast.Range(marker.Index, _lastMarker.Index);
 
             var start = new Position(marker.Line, marker.Column);
             var end = new Position(_lastMarker.Line, _lastMarker.Column);
 
-            node._location = new Location(start, end, _errorHandler.Source);
+            node.Location = new Location(start, end, _errorHandler.Source);
 
             _action?.Invoke(node);
 
@@ -594,7 +594,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new BigIntLiteral(token.BigIntValue!.Value, raw));
+                    expr = Finalize(node, new Literal(token.BigIntValue!.Value, raw));
                     break;
 
                 case TokenType.BooleanLiteral:
@@ -610,7 +610,7 @@ namespace Esprima
                     _context.IsBindingElement = false;
                     token = NextToken();
                     raw = GetTokenRaw(token);
-                    expr = Finalize(node, new Literal(TokenType.NullLiteral, null, raw));
+                    expr = Finalize(node, new Literal(raw));
                     break;
 
                 case TokenType.Template:
@@ -874,7 +874,7 @@ namespace Esprima
 
                 case TokenType.BigIntLiteral:
                     raw = GetTokenRaw(token);
-                    key = Finalize(node, new BigIntLiteral(token.BigIntValue!.Value, raw));
+                    key = Finalize(node, new Literal(token.BigIntValue!.Value, raw));
                     break;
 
                 case TokenType.Identifier:
@@ -1162,8 +1162,8 @@ namespace Esprima
                 case Nodes.SpreadElement:
                     var newArgument = ReinterpretExpressionAsPattern(expr.As<SpreadElement>().Argument);
                     node = new RestElement(newArgument);
-                    node._range = expr._range;
-                    node._location = expr._location;
+                    node.Range = expr.Range;
+                    node.Location = expr.Location;
                     break;
                 case Nodes.ArrayExpression:
                     var elements = new ArrayList<Expression?>();
@@ -1182,8 +1182,8 @@ namespace Esprima
                     }
 
                     node = new ArrayPattern(NodeList.From(ref elements));
-                    node._range = expr._range;
-                    node._location = expr._location;
+                    node.Range = expr.Range;
+                    node.Location = expr.Location;
 
                     break;
                 case Nodes.ObjectExpression:
@@ -1202,15 +1202,15 @@ namespace Esprima
                     }
 
                     node = new ObjectPattern(NodeList.From(ref properties));
-                    node._range = expr._range;
-                    node._location = expr._location;
+                    node.Range = expr.Range;
+                    node.Location = expr.Location;
 
                     break;
                 case Nodes.AssignmentExpression:
                     var assignmentExpression = expr.As<AssignmentExpression>();
                     node = new AssignmentPattern(assignmentExpression.Left, assignmentExpression.Right);
-                    node._range = expr._range;
-                    node._location = expr._location;
+                    node.Range = expr.Range;
+                    node.Location = expr.Location;
 
                     break;
                 default:
@@ -2236,7 +2236,7 @@ namespace Esprima
                             ThrowUnexpectedToken(_lookahead);
                         }
 
-                        assignment._right = new Identifier("yield") { _location = assignment.Right._location, _range = assignment.Right._range };
+                        assignment._right = new Identifier("yield") { Location = assignment.Right.Location, Range = assignment.Right.Range };
                     }
                 }
                 else if (asyncArrow && param.Type == Nodes.Identifier && param.As<Identifier>().Name == "await")
@@ -4419,7 +4419,7 @@ namespace Esprima
             return decorators;
         }
 
-        private Node ParseClassElement(ref bool hasConstructor)
+        private ClassElement ParseClassElement(ref bool hasConstructor)
         {
             var token = _lookahead;
             var node = CreateNode();
@@ -4643,9 +4643,9 @@ namespace Esprima
             return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic, NodeList.From(ref decorators)));
         }
 
-        private ArrayList<Node> ParseClassElementList()
+        private ArrayList<ClassElement> ParseClassElementList()
         {
-            var body = new ArrayList<Node>();
+            var body = new ArrayList<ClassElement>();
             var hasConstructor = false;
 
             Expect("{");

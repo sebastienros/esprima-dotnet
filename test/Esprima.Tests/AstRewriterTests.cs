@@ -377,7 +377,6 @@ sealed class TestRewriter : JsxAstRewriter
         return ForceNewObjectByControlType((Literal) base.VisitLiteral(literal)!,
             node => node.TokenType switch
             {
-                TokenType.BigIntLiteral => new BigIntLiteral((BigInteger) node.Value!, node.Raw),
                 TokenType.RegularExpression => new Literal(node.Regex!.Pattern, node.Regex.Flags, node.Value, node.Raw),
                 _ => new Literal(node.TokenType, node.Value, node.Raw),
             });
@@ -626,11 +625,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
     {
         return ForceNewObjectByControlType((BlockStatement) base.VisitBlockStatement(blockStatement)!,
-            node => node switch
-            {
-                StaticBlock => new StaticBlock(node.Body),
-                _ => new BlockStatement(node.Body)
-            });
+            node => new BlockStatement(node.Body));
+    }
+
+    protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+    {
+        return ForceNewObjectByControlType((StaticBlock) base.VisitStaticBlock(staticBlock)!,
+            node => new StaticBlock(node.Body));
     }
 
     public override object? VisitJsxAttribute(JsxAttribute jsxAttribute)

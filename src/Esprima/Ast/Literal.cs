@@ -7,7 +7,7 @@ using Esprima.Utils;
 namespace Esprima.Ast
 {
     [DebuggerDisplay("{Raw,nq}")]
-    public class Literal : Expression
+    public sealed class Literal : Expression
     {
         internal Literal(TokenType tokenType, object? value, string raw) : base(Nodes.Literal)
         {
@@ -28,6 +28,10 @@ namespace Esprima.Ast
         public Literal(double value, string raw) : this(TokenType.NumericLiteral, value, raw)
         {
             NumericValue = value;
+        }
+
+        public Literal(BigInteger value, string raw) : this(TokenType.BigIntLiteral, value, raw)
+        {
         }
 
         public Literal(string raw) : this(TokenType.NullLiteral, null, raw)

@@ -50,7 +50,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new ClassDeclaration(id, superClass, body, decorators).SetAdditionalInfo(this);
+            return new ClassDeclaration(id, superClass, body, decorators);
         }
     }
 }

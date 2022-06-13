@@ -32,6 +32,6 @@ public sealed class JsxOpeningElement : JsxExpression
             return this;
         }
 
-        return new JsxOpeningElement(name, SelfClosing, attributes).SetAdditionalInfo(this);
+        return new JsxOpeningElement(name, SelfClosing, attributes);
     }
 }

@@ -26,6 +26,6 @@ public sealed class Decorator : Node
             return this;
         }
 
-        return new Decorator(expression).SetAdditionalInfo(this);
+        return new Decorator(expression);
     }
 }
