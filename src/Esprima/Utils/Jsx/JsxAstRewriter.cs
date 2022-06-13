@@ -29,32 +29,24 @@ public class JsxAstRewriter : AstRewriter, IJsxAstVisitor
         _jsxVisitor = JsxAstVisitor.CreateJsxVisitorFor(this);
     }
 
-    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
-        var obj = _rewriter.VisitAndConvert(jsxMemberExpression.Object);
-        var property = _rewriter.VisitAndConvert(jsxMemberExpression.Property);
+        var name = _rewriter.VisitAndConvert(jsxAttribute.Name);
+        var value = _rewriter.VisitAndConvert(jsxAttribute.Value, allowNull: true);
 
-        return jsxMemberExpression.UpdateWith(obj, property);
+        return jsxAttribute.UpdateWith(name, value);
     }
 
-    public virtual object? VisitJsxText(JsxText jsxText)
+    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
-        return _jsxVisitor.VisitJsxText(jsxText);
-    }
+        var name = _rewriter.VisitAndConvert(jsxClosingElement.Name);
 
-    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
-    {
-        return _jsxVisitor.VisitJsxOpeningFragment(jsxOpeningFragment);
+        return jsxClosingElement.UpdateWith(name);
     }
 
     public virtual object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         return _jsxVisitor.VisitJsxClosingFragment(jsxClosingFragment);
-    }
-
-    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
-    {
-        return _jsxVisitor.VisitJsxIdentifier(jsxIdentifier);
     }
 
     public virtual object? VisitJsxElement(JsxElement jsxElement)
@@ -66,24 +58,29 @@ public class JsxAstRewriter : AstRewriter, IJsxAstVisitor
         return jsxElement.UpdateWith(openingElement, children, closingElement);
     }
 
-    public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
-    {
-        var name = _rewriter.VisitAndConvert(jsxOpeningElement.Name);
-        _rewriter.VisitAndConvert(jsxOpeningElement.Attributes, out var attributes);
-
-        return jsxOpeningElement.UpdateWith(name, attributes);
-    }
-
-    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
-    {
-        var name = _rewriter.VisitAndConvert(jsxClosingElement.Name);
-
-        return jsxClosingElement.UpdateWith(name);
-    }
-
     public virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
         return _jsxVisitor.VisitJsxEmptyExpression(jsxEmptyExpression);
+    }
+
+    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    {
+        var expression = _rewriter.VisitAndConvert(jsxExpressionContainer.Expression);
+
+        return jsxExpressionContainer.UpdateWith(expression);
+    }
+
+    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    {
+        return _jsxVisitor.VisitJsxIdentifier(jsxIdentifier);
+    }
+
+    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    {
+        var obj = _rewriter.VisitAndConvert(jsxMemberExpression.Object);
+        var property = _rewriter.VisitAndConvert(jsxMemberExpression.Property);
+
+        return jsxMemberExpression.UpdateWith(obj, property);
     }
 
     public virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
@@ -94,6 +91,19 @@ public class JsxAstRewriter : AstRewriter, IJsxAstVisitor
         return jsxNamespacedName.UpdateWith(name, @namespace);
     }
 
+    public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    {
+        var name = _rewriter.VisitAndConvert(jsxOpeningElement.Name);
+        _rewriter.VisitAndConvert(jsxOpeningElement.Attributes, out var attributes);
+
+        return jsxOpeningElement.UpdateWith(name, attributes);
+    }
+
+    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    {
+        return _jsxVisitor.VisitJsxOpeningFragment(jsxOpeningFragment);
+    }
+
     public virtual object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         var argument = _rewriter.VisitAndConvert(jsxSpreadAttribute.Argument);
@@ -101,18 +111,8 @@ public class JsxAstRewriter : AstRewriter, IJsxAstVisitor
         return jsxSpreadAttribute.UpdateWith(argument);
     }
 
-    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+    public virtual object? VisitJsxText(JsxText jsxText)
     {
-        var name = _rewriter.VisitAndConvert(jsxAttribute.Name);
-        var value = _rewriter.VisitAndConvert(jsxAttribute.Value, allowNull: true);
-
-        return jsxAttribute.UpdateWith(name, value);
-    }
-
-    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
-    {
-        var expression = _rewriter.VisitAndConvert(jsxExpressionContainer.Expression);
-
-        return jsxExpressionContainer.UpdateWith(expression);
+        return _jsxVisitor.VisitJsxText(jsxText);
     }
 }

@@ -33,28 +33,6 @@ public sealed class JsxAstToJsonConverter : AstToJsonConverter
             return base.GetNodeType(node);
         }
 
-        object? IJsxAstVisitor.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
-        {
-            using (StartNodeObject(jsxSpreadAttribute))
-            {
-                Member("argument", jsxSpreadAttribute.Argument);
-            }
-
-            return jsxSpreadAttribute;
-        }
-
-        object? IJsxAstVisitor.VisitJsxElement(JsxElement jsxElement)
-        {
-            using (StartNodeObject(jsxElement))
-            {
-                Member("openingElement", jsxElement.OpeningElement);
-                Member("children", jsxElement.Children);
-                Member("closingElement", jsxElement.ClosingElement);
-            }
-
-            return jsxElement;
-        }
-
         object? IJsxAstVisitor.VisitJsxAttribute(JsxAttribute jsxAttribute)
         {
             using (StartNodeObject(jsxAttribute))
@@ -64,16 +42,6 @@ public sealed class JsxAstToJsonConverter : AstToJsonConverter
             }
 
             return jsxAttribute;
-        }
-
-        object? IJsxAstVisitor.VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
-        {
-            using (StartNodeObject(jsxIdentifier))
-            {
-                Member("name", jsxIdentifier.Name);
-            }
-
-            return jsxIdentifier;
         }
 
         object? IJsxAstVisitor.VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
@@ -86,17 +54,6 @@ public sealed class JsxAstToJsonConverter : AstToJsonConverter
             return jsxClosingElement;
         }
 
-        object? IJsxAstVisitor.VisitJsxText(JsxText jsxText)
-        {
-            using (StartNodeObject(jsxText))
-            {
-                Member("value", jsxText.Value);
-                Member("raw", jsxText.Raw);
-            }
-
-            return jsxText;
-        }
-
         object? IJsxAstVisitor.VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
         {
             using (StartNodeObject(jsxClosingFragment))
@@ -106,48 +63,16 @@ public sealed class JsxAstToJsonConverter : AstToJsonConverter
             return jsxClosingFragment;
         }
 
-        object? IJsxAstVisitor.VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+        object? IJsxAstVisitor.VisitJsxElement(JsxElement jsxElement)
         {
-            using (StartNodeObject(jsxOpeningFragment))
+            using (StartNodeObject(jsxElement))
             {
-                Member("selfClosing", jsxOpeningFragment.SelfClosing);
+                Member("openingElement", jsxElement.OpeningElement);
+                Member("children", jsxElement.Children);
+                Member("closingElement", jsxElement.ClosingElement);
             }
 
-            return jsxOpeningFragment;
-        }
-
-        object? IJsxAstVisitor.VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
-        {
-            using (StartNodeObject(jsxOpeningElement))
-            {
-                Member("name", jsxOpeningElement.Name);
-                Member("selfClosing", jsxOpeningElement.SelfClosing);
-                Member("attributes", jsxOpeningElement.Attributes);
-            }
-
-            return jsxOpeningElement;
-        }
-
-        object? IJsxAstVisitor.VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
-        {
-            using (StartNodeObject(jsxNamespacedName))
-            {
-                Member("namespace", jsxNamespacedName.Namespace);
-                Member("name", jsxNamespacedName.Name);
-            }
-
-            return jsxNamespacedName;
-        }
-
-        object? IJsxAstVisitor.VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
-        {
-            using (StartNodeObject(jsxMemberExpression))
-            {
-                Member("object", jsxMemberExpression.Object);
-                Member("property", jsxMemberExpression.Property);
-            }
-
-            return jsxMemberExpression;
+            return jsxElement;
         }
 
         object? IJsxAstVisitor.VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
@@ -167,6 +92,81 @@ public sealed class JsxAstToJsonConverter : AstToJsonConverter
             }
 
             return jsxExpressionContainer;
+        }
+
+        object? IJsxAstVisitor.VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+        {
+            using (StartNodeObject(jsxIdentifier))
+            {
+                Member("name", jsxIdentifier.Name);
+            }
+
+            return jsxIdentifier;
+        }
+
+        object? IJsxAstVisitor.VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+        {
+            using (StartNodeObject(jsxMemberExpression))
+            {
+                Member("object", jsxMemberExpression.Object);
+                Member("property", jsxMemberExpression.Property);
+            }
+
+            return jsxMemberExpression;
+        }
+
+        object? IJsxAstVisitor.VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+        {
+            using (StartNodeObject(jsxNamespacedName))
+            {
+                Member("namespace", jsxNamespacedName.Namespace);
+                Member("name", jsxNamespacedName.Name);
+            }
+
+            return jsxNamespacedName;
+        }
+
+        object? IJsxAstVisitor.VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+        {
+            using (StartNodeObject(jsxOpeningElement))
+            {
+                Member("name", jsxOpeningElement.Name);
+                Member("selfClosing", jsxOpeningElement.SelfClosing);
+                Member("attributes", jsxOpeningElement.Attributes);
+            }
+
+            return jsxOpeningElement;
+        }
+
+        object? IJsxAstVisitor.VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+        {
+            using (StartNodeObject(jsxOpeningFragment))
+            {
+                Member("selfClosing", jsxOpeningFragment.SelfClosing);
+            }
+
+            return jsxOpeningFragment;
+        }
+
+        object? IJsxAstVisitor.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+        {
+            using (StartNodeObject(jsxSpreadAttribute))
+            {
+                Member("argument", jsxSpreadAttribute.Argument);
+            }
+
+            return jsxSpreadAttribute;
+        }
+
+        object? IJsxAstVisitor.VisitJsxText(JsxText jsxText)
+        {
+            using (StartNodeObject(jsxText))
+            {
+                Member("value", jsxText.Value);
+                Member("raw", jsxText.Raw);
+            }
+
+            return jsxText;
         }
     }
 }
