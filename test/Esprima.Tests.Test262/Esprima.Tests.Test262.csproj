@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="GitHubActionsTestLogger" Version="2.0.0-alpha" PrivateAssets="all" />
+      <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" PrivateAssets="all" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
       <PackageReference Include="NUnit" Version="3.13.3" />
       <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
@@ -30,8 +30,7 @@
     </ItemGroup>
 
     <!-- Based on the idea presented at https://mhut.ch/journal/2015/06/30/build-time-code-generation-in-msbuild -->
-    <Target Name="GenerateTestSuite" DependsOnTargets="_GenerateTestSuite" BeforeTargets="BeforeBuild"
-            Condition="!Exists($([System.IO.Path]::Combine($(MSBuildThisFileDirectory), $(GeneratedTestSuiteDir))))">
+    <Target Name="GenerateTestSuite" DependsOnTargets="_GenerateTestSuite" BeforeTargets="BeforeBuild" Condition="!Exists($([System.IO.Path]::Combine($(MSBuildThisFileDirectory), $(GeneratedTestSuiteDir))))">
       <ItemGroup>
         <Compile Include="$(GeneratedTestSuiteDir)\**\*.cs" />
       </ItemGroup>
@@ -42,8 +41,7 @@
       <Exec Command="dotnet test262 generate" />
     </Target>
 
-    <Target Name="DeleteTestSuite" DependsOnTargets="_DeleteTestSuite" AfterTargets="AfterClean"
-            Condition="Exists($([System.IO.Path]::Combine($(MSBuildThisFileDirectory), $(GeneratedTestSuiteDir))))">
+    <Target Name="DeleteTestSuite" DependsOnTargets="_DeleteTestSuite" AfterTargets="AfterClean" Condition="Exists($([System.IO.Path]::Combine($(MSBuildThisFileDirectory), $(GeneratedTestSuiteDir))))">
       <RemoveDir Directories="$(GeneratedTestSuiteDir)" />
     </Target>
 
