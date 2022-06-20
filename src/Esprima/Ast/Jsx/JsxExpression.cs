@@ -20,6 +20,6 @@ public abstract class JsxExpression : Expression
 
     protected internal sealed override object? Accept(AstVisitor visitor)
     {
-        return visitor is IJsxAstVisitor jsxVisitor ? Accept(jsxVisitor) : visitor.VisitExtension(this);
+        return visitor is IJsxAstVisitor jsxVisitor ? Accept(jsxVisitor) : AcceptAsExtension(visitor);
     }
 }
