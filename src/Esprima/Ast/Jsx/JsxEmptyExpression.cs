@@ -10,8 +10,8 @@ public sealed class JsxEmptyExpression : JsxExpression
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxEmptyExpression(this);
+        return visitor.VisitJsxEmptyExpression(this, context);
     }
 }

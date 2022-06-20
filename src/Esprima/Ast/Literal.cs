@@ -55,11 +55,11 @@ namespace Esprima.Ast
         public Regex? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.RegularExpression ? (Regex?) Value : null; }
         public BigInteger? BigIntValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null; }
 
-        public sealed override NodeCollection ChildNodes => NodeCollection.Empty;
+        public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-        protected internal sealed override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitLiteral(this);
+            return visitor.VisitLiteral(this, context);
         }
     }
 }

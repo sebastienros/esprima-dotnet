@@ -18,8 +18,8 @@ public sealed class JsxText : JsxExpression
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxText(this);
+        return visitor.VisitJsxText(this, context);
     }
 }

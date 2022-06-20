@@ -21,9 +21,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Left, Right, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitForInStatement(this);
+            return visitor.VisitForInStatement(this, context);
         }
 
         public ForInStatement UpdateWith(Node left, Expression right, Statement body)

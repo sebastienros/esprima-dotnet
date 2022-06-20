@@ -14,9 +14,9 @@ public sealed class Decorator : Node
 
     public override NodeCollection ChildNodes => new(Expression);
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected internal override object? Accept(AstVisitor visitor, object? context)
     {
-        return visitor.VisitDecorator(this);
+        return visitor.VisitDecorator(this, context);
     }
 
     public Decorator UpdateWith(Expression expression)

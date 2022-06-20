@@ -37,9 +37,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, Params, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitFunctionDeclaration(this);
+            return visitor.VisitFunctionDeclaration(this, context);
         }
 
         public FunctionDeclaration UpdateWith(Identifier? id, in NodeList<Expression> parameters, BlockStatement body)

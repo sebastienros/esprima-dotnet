@@ -19,9 +19,9 @@ public sealed class ImportAttribute : Node
 
     public override NodeCollection ChildNodes => new(Key, Value);
 
-    protected internal override object? Accept(AstVisitor visitor)
+    protected internal override object? Accept(AstVisitor visitor, object? context)
     {
-        return visitor.VisitImportAttribute(this);
+        return visitor.VisitImportAttribute(this, context);
     }
 
     public ImportAttribute UpdateWith(Expression key, Literal value)

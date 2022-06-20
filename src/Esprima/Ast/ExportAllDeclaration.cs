@@ -38,9 +38,9 @@ namespace Esprima.Ast
             }
         }
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitExportAllDeclaration(this);
+            return visitor.VisitExportAllDeclaration(this, context);
         }
 
         public ExportAllDeclaration UpdateWith(Expression? exported, Literal source, in NodeList<ImportAttribute> assertions)

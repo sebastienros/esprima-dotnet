@@ -87,9 +87,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Left, Right);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitBinaryExpression(this);
+            return visitor.VisitBinaryExpression(this, context);
         }
 
         public BinaryExpression UpdateWith(Expression left, Expression right)

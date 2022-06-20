@@ -40,9 +40,9 @@ namespace Esprima.Ast
             }
         }
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitImportDeclaration(this);
+            return visitor.VisitImportDeclaration(this, context);
         }
 
         public ImportDeclaration UpdateWith(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> assertions)

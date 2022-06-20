@@ -14,9 +14,9 @@ public sealed class JsxSpreadAttribute : JsxExpression
 
     public override NodeCollection ChildNodes => new(Argument);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxSpreadAttribute(this);
+        return visitor.VisitJsxSpreadAttribute(this, context);
     }
 
     public JsxSpreadAttribute UpdateWith(Expression argument)

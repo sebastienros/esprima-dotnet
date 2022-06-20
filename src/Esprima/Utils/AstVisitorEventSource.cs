@@ -151,570 +151,570 @@ public class AstVisitorEventSource : AstVisitor
     public event EventHandler<YieldExpression>? VisitingYieldExpression;
     public event EventHandler<YieldExpression>? VisitedYieldExpression;
 
-    public override object? Visit(Node node)
+    public override object? Visit(Node node, object? context = null)
     {
         VisitingNode?.Invoke(this, node);
-        var result = base.Visit(node);
+        var result = base.Visit(node, context);
         VisitedNode?.Invoke(this, node);
         return result;
     }
 
-    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
+    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression, object? context)
     {
         VisitingArrayExpression?.Invoke(this, arrayExpression);
-        var result = base.VisitArrayExpression(arrayExpression);
+        var result = base.VisitArrayExpression(arrayExpression, context);
         VisitedArrayExpression?.Invoke(this, arrayExpression);
         return result;
     }
 
-    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
+    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern, object? context)
     {
         VisitingArrayPattern?.Invoke(this, arrayPattern);
-        var result = base.VisitArrayPattern(arrayPattern);
+        var result = base.VisitArrayPattern(arrayPattern, context);
         VisitedArrayPattern?.Invoke(this, arrayPattern);
         return result;
     }
 
-    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression, object? context)
     {
         VisitingArrowFunctionExpression?.Invoke(this, arrowFunctionExpression);
-        var result = base.VisitArrowFunctionExpression(arrowFunctionExpression);
+        var result = base.VisitArrowFunctionExpression(arrowFunctionExpression, context);
         VisitedArrowFunctionExpression?.Invoke(this, arrowFunctionExpression);
         return result;
     }
 
-    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression, object? context)
     {
         VisitingAssignmentExpression?.Invoke(this, assignmentExpression);
-        var result = base.VisitAssignmentExpression(assignmentExpression);
+        var result = base.VisitAssignmentExpression(assignmentExpression, context);
         VisitedAssignmentExpression?.Invoke(this, assignmentExpression);
         return result;
     }
 
-    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern, object? context)
     {
         VisitingAssignmentPattern?.Invoke(this, assignmentPattern);
-        var result = base.VisitAssignmentPattern(assignmentPattern);
+        var result = base.VisitAssignmentPattern(assignmentPattern, context);
         VisitedAssignmentPattern?.Invoke(this, assignmentPattern);
         return result;
     }
 
-    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
+    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression, object? context)
     {
         VisitingAwaitExpression?.Invoke(this, awaitExpression);
-        var result = base.VisitAwaitExpression(awaitExpression);
+        var result = base.VisitAwaitExpression(awaitExpression, context);
         VisitedAwaitExpression?.Invoke(this, awaitExpression);
         return result;
     }
 
-    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
+    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression, object? context)
     {
         VisitingBinaryExpression?.Invoke(this, binaryExpression);
-        var result = base.VisitBinaryExpression(binaryExpression);
+        var result = base.VisitBinaryExpression(binaryExpression, context);
         VisitedBinaryExpression?.Invoke(this, binaryExpression);
         return result;
     }
 
-    protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
+    protected internal override object? VisitBlockStatement(BlockStatement blockStatement, object? context)
     {
         VisitingBlockStatement?.Invoke(this, blockStatement);
-        var result = base.VisitBlockStatement(blockStatement);
+        var result = base.VisitBlockStatement(blockStatement, context);
         VisitedBlockStatement?.Invoke(this, blockStatement);
         return result;
     }
 
-    protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
+    protected internal override object? VisitBreakStatement(BreakStatement breakStatement, object? context)
     {
         VisitingBreakStatement?.Invoke(this, breakStatement);
-        var result = base.VisitBreakStatement(breakStatement);
+        var result = base.VisitBreakStatement(breakStatement, context);
         VisitedBreakStatement?.Invoke(this, breakStatement);
         return result;
     }
 
-    protected internal override object? VisitCallExpression(CallExpression callExpression)
+    protected internal override object? VisitCallExpression(CallExpression callExpression, object? context)
     {
         VisitingCallExpression?.Invoke(this, callExpression);
-        var result = base.VisitCallExpression(callExpression);
+        var result = base.VisitCallExpression(callExpression, context);
         VisitedCallExpression?.Invoke(this, callExpression);
         return result;
     }
 
-    protected internal override object? VisitCatchClause(CatchClause catchClause)
+    protected internal override object? VisitCatchClause(CatchClause catchClause, object? context)
     {
         VisitingCatchClause?.Invoke(this, catchClause);
-        var result = base.VisitCatchClause(catchClause);
+        var result = base.VisitCatchClause(catchClause, context);
         VisitedCatchClause?.Invoke(this, catchClause);
         return result;
     }
 
-    protected internal override object? VisitChainExpression(ChainExpression chainExpression)
+    protected internal override object? VisitChainExpression(ChainExpression chainExpression, object? context)
     {
         VisitingChainExpression?.Invoke(this, chainExpression);
-        var result = base.VisitChainExpression(chainExpression);
+        var result = base.VisitChainExpression(chainExpression, context);
         VisitedChainExpression?.Invoke(this, chainExpression);
         return result;
     }
 
-    protected internal override object? VisitClassBody(ClassBody classBody)
+    protected internal override object? VisitClassBody(ClassBody classBody, object? context)
     {
         VisitingClassBody?.Invoke(this, classBody);
-        var result = base.VisitClassBody(classBody);
+        var result = base.VisitClassBody(classBody, context);
         VisitedClassBody?.Invoke(this, classBody);
         return result;
     }
 
-    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
+    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration, object? context)
     {
         VisitingClassDeclaration?.Invoke(this, classDeclaration);
-        var result = base.VisitClassDeclaration(classDeclaration);
+        var result = base.VisitClassDeclaration(classDeclaration, context);
         VisitedClassDeclaration?.Invoke(this, classDeclaration);
         return result;
     }
 
-    protected internal override object? VisitClassExpression(ClassExpression classExpression)
+    protected internal override object? VisitClassExpression(ClassExpression classExpression, object? context)
     {
         VisitingClassExpression?.Invoke(this, classExpression);
-        var result = base.VisitClassExpression(classExpression);
+        var result = base.VisitClassExpression(classExpression, context);
         VisitedClassExpression?.Invoke(this, classExpression);
         return result;
     }
 
-    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
+    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression, object? context)
     {
         VisitingConditionalExpression?.Invoke(this, conditionalExpression);
-        var result = base.VisitConditionalExpression(conditionalExpression);
+        var result = base.VisitConditionalExpression(conditionalExpression, context);
         VisitedConditionalExpression?.Invoke(this, conditionalExpression);
         return result;
     }
 
-    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
+    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement, object? context)
     {
         VisitingContinueStatement?.Invoke(this, continueStatement);
-        var result = base.VisitContinueStatement(continueStatement);
+        var result = base.VisitContinueStatement(continueStatement, context);
         VisitedContinueStatement?.Invoke(this, continueStatement);
         return result;
     }
 
-    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement, object? context)
     {
         VisitingDebuggerStatement?.Invoke(this, debuggerStatement);
-        var result = base.VisitDebuggerStatement(debuggerStatement);
+        var result = base.VisitDebuggerStatement(debuggerStatement, context);
         VisitedDebuggerStatement?.Invoke(this, debuggerStatement);
         return result;
     }
 
-    protected internal override object? VisitDecorator(Decorator decorator)
+    protected internal override object? VisitDecorator(Decorator decorator, object? context)
     {
         VisitingDecorator?.Invoke(this, decorator);
-        var result = base.VisitDecorator(decorator);
+        var result = base.VisitDecorator(decorator, context);
         VisitedDecorator?.Invoke(this, decorator);
         return result;
     }
 
-    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement, object? context)
     {
         VisitingDoWhileStatement?.Invoke(this, doWhileStatement);
-        var result = base.VisitDoWhileStatement(doWhileStatement);
+        var result = base.VisitDoWhileStatement(doWhileStatement, context);
         VisitedDoWhileStatement?.Invoke(this, doWhileStatement);
         return result;
     }
 
-    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
+    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement, object? context)
     {
         VisitingEmptyStatement?.Invoke(this, emptyStatement);
-        var result = base.VisitEmptyStatement(emptyStatement);
+        var result = base.VisitEmptyStatement(emptyStatement, context);
         VisitedEmptyStatement?.Invoke(this, emptyStatement);
         return result;
     }
 
-    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration, object? context)
     {
         VisitingExportAllDeclaration?.Invoke(this, exportAllDeclaration);
-        var result = base.VisitExportAllDeclaration(exportAllDeclaration);
+        var result = base.VisitExportAllDeclaration(exportAllDeclaration, context);
         VisitedExportAllDeclaration?.Invoke(this, exportAllDeclaration);
         return result;
     }
 
-    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration, object? context)
     {
         VisitingExportDefaultDeclaration?.Invoke(this, exportDefaultDeclaration);
-        var result = base.VisitExportDefaultDeclaration(exportDefaultDeclaration);
+        var result = base.VisitExportDefaultDeclaration(exportDefaultDeclaration, context);
         VisitedExportDefaultDeclaration?.Invoke(this, exportDefaultDeclaration);
         return result;
     }
 
-    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration, object? context)
     {
         VisitingExportNamedDeclaration?.Invoke(this, exportNamedDeclaration);
-        var result = base.VisitExportNamedDeclaration(exportNamedDeclaration);
+        var result = base.VisitExportNamedDeclaration(exportNamedDeclaration, context);
         VisitedExportNamedDeclaration?.Invoke(this, exportNamedDeclaration);
         return result;
     }
 
-    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
+    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier, object? context)
     {
         VisitingExportSpecifier?.Invoke(this, exportSpecifier);
-        var result = base.VisitExportSpecifier(exportSpecifier);
+        var result = base.VisitExportSpecifier(exportSpecifier, context);
         VisitedExportSpecifier?.Invoke(this, exportSpecifier);
         return result;
     }
 
-    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
+    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement, object? context)
     {
         VisitingExpressionStatement?.Invoke(this, expressionStatement);
-        var result = base.VisitExpressionStatement(expressionStatement);
+        var result = base.VisitExpressionStatement(expressionStatement, context);
         VisitedExpressionStatement?.Invoke(this, expressionStatement);
         return result;
     }
 
-    protected internal override object? VisitForInStatement(ForInStatement forInStatement)
+    protected internal override object? VisitForInStatement(ForInStatement forInStatement, object? context)
     {
         VisitingForInStatement?.Invoke(this, forInStatement);
-        var result = base.VisitForInStatement(forInStatement);
+        var result = base.VisitForInStatement(forInStatement, context);
         VisitedForInStatement?.Invoke(this, forInStatement);
         return result;
     }
 
-    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
+    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement, object? context)
     {
         VisitingForOfStatement?.Invoke(this, forOfStatement);
-        var result = base.VisitForOfStatement(forOfStatement);
+        var result = base.VisitForOfStatement(forOfStatement, context);
         VisitedForOfStatement?.Invoke(this, forOfStatement);
         return result;
     }
 
-    protected internal override object? VisitForStatement(ForStatement forStatement)
+    protected internal override object? VisitForStatement(ForStatement forStatement, object? context)
     {
         VisitingForStatement?.Invoke(this, forStatement);
-        var result = base.VisitForStatement(forStatement);
+        var result = base.VisitForStatement(forStatement, context);
         VisitedForStatement?.Invoke(this, forStatement);
         return result;
     }
 
-    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object? context)
     {
         VisitingFunctionDeclaration?.Invoke(this, functionDeclaration);
-        var result = base.VisitFunctionDeclaration(functionDeclaration);
+        var result = base.VisitFunctionDeclaration(functionDeclaration, context);
         VisitedFunctionDeclaration?.Invoke(this, functionDeclaration);
         return result;
     }
 
-    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression, object? context)
     {
         VisitingFunctionExpression?.Invoke(this, functionExpression);
-        var result = base.VisitFunctionExpression(functionExpression);
+        var result = base.VisitFunctionExpression(functionExpression, context);
         VisitedFunctionExpression?.Invoke(this, functionExpression);
         return result;
     }
 
-    protected internal override object? VisitIdentifier(Identifier identifier)
+    protected internal override object? VisitIdentifier(Identifier identifier, object? context)
     {
         VisitingIdentifier?.Invoke(this, identifier);
-        var result = base.VisitIdentifier(identifier);
+        var result = base.VisitIdentifier(identifier, context);
         VisitedIdentifier?.Invoke(this, identifier);
         return result;
     }
 
-    protected internal override object? VisitIfStatement(IfStatement ifStatement)
+    protected internal override object? VisitIfStatement(IfStatement ifStatement, object? context)
     {
         VisitingIfStatement?.Invoke(this, ifStatement);
-        var result = base.VisitIfStatement(ifStatement);
+        var result = base.VisitIfStatement(ifStatement, context);
         VisitedIfStatement?.Invoke(this, ifStatement);
         return result;
     }
 
-    protected internal override object? VisitImport(Import import)
+    protected internal override object? VisitImport(Import import, object? context)
     {
         VisitingImport?.Invoke(this, import);
-        var result = base.VisitImport(import);
+        var result = base.VisitImport(import, context);
         VisitedImport?.Invoke(this, import);
         return result;
     }
 
-    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
+    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration, object? context)
     {
         VisitingImportDeclaration?.Invoke(this, importDeclaration);
-        var result = base.VisitImportDeclaration(importDeclaration);
+        var result = base.VisitImportDeclaration(importDeclaration, context);
         VisitedImportDeclaration?.Invoke(this, importDeclaration);
         return result;
     }
 
-    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier, object? context)
     {
         VisitingImportDefaultSpecifier?.Invoke(this, importDefaultSpecifier);
-        var result = base.VisitImportDefaultSpecifier(importDefaultSpecifier);
+        var result = base.VisitImportDefaultSpecifier(importDefaultSpecifier, context);
         VisitedImportDefaultSpecifier?.Invoke(this, importDefaultSpecifier);
         return result;
     }
 
-    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier, object? context)
     {
         VisitingImportNamespaceSpecifier?.Invoke(this, importNamespaceSpecifier);
-        var result = base.VisitImportNamespaceSpecifier(importNamespaceSpecifier);
+        var result = base.VisitImportNamespaceSpecifier(importNamespaceSpecifier, context);
         VisitedImportNamespaceSpecifier?.Invoke(this, importNamespaceSpecifier);
         return result;
     }
 
-    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
+    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier, object? context)
     {
         VisitingImportSpecifier?.Invoke(this, importSpecifier);
-        var result = base.VisitImportSpecifier(importSpecifier);
+        var result = base.VisitImportSpecifier(importSpecifier, context);
         VisitedImportSpecifier?.Invoke(this, importSpecifier);
         return result;
     }
 
-    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
+    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement, object? context)
     {
         VisitingLabeledStatement?.Invoke(this, labeledStatement);
-        var result = base.VisitLabeledStatement(labeledStatement);
+        var result = base.VisitLabeledStatement(labeledStatement, context);
         VisitedLabeledStatement?.Invoke(this, labeledStatement);
         return result;
     }
 
-    protected internal override object? VisitLiteral(Literal literal)
+    protected internal override object? VisitLiteral(Literal literal, object? context)
     {
         VisitingLiteral?.Invoke(this, literal);
-        var result = base.VisitLiteral(literal);
+        var result = base.VisitLiteral(literal, context);
         VisitedLiteral?.Invoke(this, literal);
         return result;
     }
 
-    protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
+    protected internal override object? VisitMemberExpression(MemberExpression memberExpression, object? context)
     {
         VisitingMemberExpression?.Invoke(this, memberExpression);
-        var result = base.VisitMemberExpression(memberExpression);
+        var result = base.VisitMemberExpression(memberExpression, context);
         VisitedMemberExpression?.Invoke(this, memberExpression);
         return result;
     }
 
-    protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
+    protected internal override object? VisitMetaProperty(MetaProperty metaProperty, object? context)
     {
         VisitingMetaProperty?.Invoke(this, metaProperty);
-        var result = base.VisitMetaProperty(metaProperty);
+        var result = base.VisitMetaProperty(metaProperty, context);
         VisitedMetaProperty?.Invoke(this, metaProperty);
         return result;
     }
 
-    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
+    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition, object? context)
     {
         VisitingMethodDefinition?.Invoke(this, methodDefinition);
-        var result = base.VisitMethodDefinition(methodDefinition);
+        var result = base.VisitMethodDefinition(methodDefinition, context);
         VisitedMethodDefinition?.Invoke(this, methodDefinition);
         return result;
     }
 
-    protected internal override object? VisitNewExpression(NewExpression newExpression)
+    protected internal override object? VisitNewExpression(NewExpression newExpression, object? context)
     {
         VisitingNewExpression?.Invoke(this, newExpression);
-        var result = base.VisitNewExpression(newExpression);
+        var result = base.VisitNewExpression(newExpression, context);
         VisitedNewExpression?.Invoke(this, newExpression);
         return result;
     }
 
-    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
+    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression, object? context)
     {
         VisitingObjectExpression?.Invoke(this, objectExpression);
-        var result = base.VisitObjectExpression(objectExpression);
+        var result = base.VisitObjectExpression(objectExpression, context);
         VisitedObjectExpression?.Invoke(this, objectExpression);
         return result;
     }
 
-    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
+    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern, object? context)
     {
         VisitingObjectPattern?.Invoke(this, objectPattern);
-        var result = base.VisitObjectPattern(objectPattern);
+        var result = base.VisitObjectPattern(objectPattern, context);
         VisitedObjectPattern?.Invoke(this, objectPattern);
         return result;
     }
 
-    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier, object? context)
     {
         VisitingPrivateIdentifier?.Invoke(this, privateIdentifier);
-        var result = base.VisitPrivateIdentifier(privateIdentifier);
+        var result = base.VisitPrivateIdentifier(privateIdentifier, context);
         VisitedPrivateIdentifier?.Invoke(this, privateIdentifier);
         return result;
     }
 
-    protected internal override object? VisitProgram(Program program)
+    protected internal override object? VisitProgram(Program program, object? context)
     {
         VisitingProgram?.Invoke(this, program);
-        var result = base.VisitProgram(program);
+        var result = base.VisitProgram(program, context);
         VisitedProgram?.Invoke(this, program);
         return result;
     }
 
-    protected internal override object? VisitProperty(Property property)
+    protected internal override object? VisitProperty(Property property, object? context)
     {
         VisitingProperty?.Invoke(this, property);
-        var result = base.VisitProperty(property);
+        var result = base.VisitProperty(property, context);
         VisitedProperty?.Invoke(this, property);
         return result;
     }
 
-    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition, object? context)
     {
         VisitingPropertyDefinition?.Invoke(this, propertyDefinition);
-        var result = base.VisitPropertyDefinition(propertyDefinition);
+        var result = base.VisitPropertyDefinition(propertyDefinition, context);
         VisitedPropertyDefinition?.Invoke(this, propertyDefinition);
         return result;
     }
 
-    protected internal override object? VisitRestElement(RestElement restElement)
+    protected internal override object? VisitRestElement(RestElement restElement, object? context)
     {
         VisitingRestElement?.Invoke(this, restElement);
-        var result = base.VisitRestElement(restElement);
+        var result = base.VisitRestElement(restElement, context);
         VisitedRestElement?.Invoke(this, restElement);
         return result;
     }
 
-    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
+    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement, object? context)
     {
         VisitingReturnStatement?.Invoke(this, returnStatement);
-        var result = base.VisitReturnStatement(returnStatement);
+        var result = base.VisitReturnStatement(returnStatement, context);
         VisitedReturnStatement?.Invoke(this, returnStatement);
         return result;
     }
 
-    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
+    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression, object? context)
     {
         VisitingSequenceExpression?.Invoke(this, sequenceExpression);
-        var result = base.VisitSequenceExpression(sequenceExpression);
+        var result = base.VisitSequenceExpression(sequenceExpression, context);
         VisitedSequenceExpression?.Invoke(this, sequenceExpression);
         return result;
     }
 
-    protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
+    protected internal override object? VisitSpreadElement(SpreadElement spreadElement, object? context)
     {
         VisitingSpreadElement?.Invoke(this, spreadElement);
-        var result = base.VisitSpreadElement(spreadElement);
+        var result = base.VisitSpreadElement(spreadElement, context);
         VisitedSpreadElement?.Invoke(this, spreadElement);
         return result;
     }
 
-    protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+    protected internal override object? VisitStaticBlock(StaticBlock staticBlock, object? context)
     {
         VisitingStaticBlock?.Invoke(this, staticBlock);
-        var result = base.VisitStaticBlock(staticBlock);
+        var result = base.VisitStaticBlock(staticBlock, context);
         VisitedStaticBlock?.Invoke(this, staticBlock);
         return result;
     }
 
-    protected internal override object? VisitSuper(Super super)
+    protected internal override object? VisitSuper(Super super, object? context)
     {
         VisitingSuper?.Invoke(this, super);
-        var result = base.VisitSuper(super);
+        var result = base.VisitSuper(super, context);
         VisitedSuper?.Invoke(this, super);
         return result;
     }
 
-    protected internal override object? VisitSwitchCase(SwitchCase switchCase)
+    protected internal override object? VisitSwitchCase(SwitchCase switchCase, object? context)
     {
         VisitingSwitchCase?.Invoke(this, switchCase);
-        var result = base.VisitSwitchCase(switchCase);
+        var result = base.VisitSwitchCase(switchCase, context);
         VisitedSwitchCase?.Invoke(this, switchCase);
         return result;
     }
 
-    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
+    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement, object? context)
     {
         VisitingSwitchStatement?.Invoke(this, switchStatement);
-        var result = base.VisitSwitchStatement(switchStatement);
+        var result = base.VisitSwitchStatement(switchStatement, context);
         VisitedSwitchStatement?.Invoke(this, switchStatement);
         return result;
     }
 
-    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression, object? context)
     {
         VisitingTaggedTemplateExpression?.Invoke(this, taggedTemplateExpression);
-        var result = base.VisitTaggedTemplateExpression(taggedTemplateExpression);
+        var result = base.VisitTaggedTemplateExpression(taggedTemplateExpression, context);
         VisitedTaggedTemplateExpression?.Invoke(this, taggedTemplateExpression);
         return result;
     }
 
-    protected internal override object? VisitTemplateElement(TemplateElement templateElement)
+    protected internal override object? VisitTemplateElement(TemplateElement templateElement, object? context)
     {
         VisitingTemplateElement?.Invoke(this, templateElement);
-        var result = base.VisitTemplateElement(templateElement);
+        var result = base.VisitTemplateElement(templateElement, context);
         VisitedTemplateElement?.Invoke(this, templateElement);
         return result;
     }
 
-    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
+    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral, object? context)
     {
         VisitingTemplateLiteral?.Invoke(this, templateLiteral);
-        var result = base.VisitTemplateLiteral(templateLiteral);
+        var result = base.VisitTemplateLiteral(templateLiteral, context);
         VisitedTemplateLiteral?.Invoke(this, templateLiteral);
         return result;
     }
 
-    protected internal override object? VisitThisExpression(ThisExpression thisExpression)
+    protected internal override object? VisitThisExpression(ThisExpression thisExpression, object? context)
     {
         VisitingThisExpression?.Invoke(this, thisExpression);
-        var result = base.VisitThisExpression(thisExpression);
+        var result = base.VisitThisExpression(thisExpression, context);
         VisitedThisExpression?.Invoke(this, thisExpression);
         return result;
     }
 
-    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
+    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement, object? context)
     {
         VisitingThrowStatement?.Invoke(this, throwStatement);
-        var result = base.VisitThrowStatement(throwStatement);
+        var result = base.VisitThrowStatement(throwStatement, context);
         VisitedThrowStatement?.Invoke(this, throwStatement);
         return result;
     }
 
-    protected internal override object? VisitTryStatement(TryStatement tryStatement)
+    protected internal override object? VisitTryStatement(TryStatement tryStatement, object? context)
     {
         VisitingTryStatement?.Invoke(this, tryStatement);
-        var result = base.VisitTryStatement(tryStatement);
+        var result = base.VisitTryStatement(tryStatement, context);
         VisitedTryStatement?.Invoke(this, tryStatement);
         return result;
     }
 
-    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
+    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression, object? context)
     {
         VisitingUnaryExpression?.Invoke(this, unaryExpression);
-        var result = base.VisitUnaryExpression(unaryExpression);
+        var result = base.VisitUnaryExpression(unaryExpression, context);
         VisitedUnaryExpression?.Invoke(this, unaryExpression);
         return result;
     }
 
-    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration, object? context)
     {
         VisitingVariableDeclaration?.Invoke(this, variableDeclaration);
-        var result = base.VisitVariableDeclaration(variableDeclaration);
+        var result = base.VisitVariableDeclaration(variableDeclaration, context);
         VisitedVariableDeclaration?.Invoke(this, variableDeclaration);
         return result;
     }
 
-    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator, object? context)
     {
         VisitingVariableDeclarator?.Invoke(this, variableDeclarator);
-        var result = base.VisitVariableDeclarator(variableDeclarator);
+        var result = base.VisitVariableDeclarator(variableDeclarator, context);
         VisitedVariableDeclarator?.Invoke(this, variableDeclarator);
         return result;
     }
 
-    protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
+    protected internal override object? VisitWhileStatement(WhileStatement whileStatement, object? context)
     {
         VisitingWhileStatement?.Invoke(this, whileStatement);
-        var result = base.VisitWhileStatement(whileStatement);
+        var result = base.VisitWhileStatement(whileStatement, context);
         VisitedWhileStatement?.Invoke(this, whileStatement);
         return result;
     }
 
-    protected internal override object? VisitWithStatement(WithStatement withStatement)
+    protected internal override object? VisitWithStatement(WithStatement withStatement, object? context)
     {
         VisitingWithStatement?.Invoke(this, withStatement);
-        var result = base.VisitWithStatement(withStatement);
+        var result = base.VisitWithStatement(withStatement, context);
         VisitedWithStatement?.Invoke(this, withStatement);
         return result;
     }
 
-    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
+    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression, object? context)
     {
         VisitingYieldExpression?.Invoke(this, yieldExpression);
-        var result = base.VisitYieldExpression(yieldExpression);
+        var result = base.VisitYieldExpression(yieldExpression, context);
         VisitedYieldExpression?.Invoke(this, yieldExpression);
         return result;
     }

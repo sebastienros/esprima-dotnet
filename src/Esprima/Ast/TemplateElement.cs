@@ -18,9 +18,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitTemplateElement(this);
+            return visitor.VisitTemplateElement(this, context);
         }
     }
 }

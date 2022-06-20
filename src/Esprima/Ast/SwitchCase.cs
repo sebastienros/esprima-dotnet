@@ -18,9 +18,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Test, Consequent);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitSwitchCase(this);
+            return visitor.VisitSwitchCase(this, context);
         }
 
         public SwitchCase UpdateWith(Expression? test, in NodeList<Statement> consequent)

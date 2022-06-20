@@ -14,9 +14,9 @@ public sealed class JsxClosingElement : JsxExpression
 
     public override NodeCollection ChildNodes => new(Name);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxClosingElement(this);
+        return visitor.VisitJsxClosingElement(this, context);
     }
 
     public JsxClosingElement UpdateWith(JsxExpression name)

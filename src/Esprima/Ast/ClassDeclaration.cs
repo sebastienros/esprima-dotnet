@@ -38,9 +38,9 @@ namespace Esprima.Ast
             }
         }
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitClassDeclaration(this);
+            return visitor.VisitClassDeclaration(this, context);
         }
 
         public ClassDeclaration UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)

@@ -20,9 +20,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Source, Attributes);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitImport(this);
+            return visitor.VisitImport(this, context);
         }
 
         public Import UpdateWith(Expression source, Expression? attributes)

@@ -39,9 +39,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Key, Value);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitProperty(this);
+            return visitor.VisitProperty(this, context);
         }
 
         public Property UpdateWith(Expression key, Expression value)

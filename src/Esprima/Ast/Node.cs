@@ -17,18 +17,18 @@ namespace Esprima.Ast
 
         public abstract NodeCollection ChildNodes { get; }
 
-        protected internal abstract object? Accept(AstVisitor visitor);
+        protected internal abstract object? Accept(AstVisitor visitor, object? context);
 
         /// <summary>
-        /// Dispatches the visitation of the current node to <see cref="AstVisitor.VisitExtension(Node)"/>.
+        /// Dispatches the visitation of the current node to <see cref="AstVisitor.VisitExtension(Node, object?)"/>.
         /// </summary>
         /// <remarks>
-        /// When defining custom node types, inheritors can use this method to implement the abstract <see cref="Accept(AstVisitor)"/> method.
+        /// When defining custom node types, inheritors can use this method to implement the abstract <see cref="Accept(AstVisitor, object?)"/> method.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected object? AcceptAsExtension(AstVisitor visitor)
+        protected object? AcceptAsExtension(AstVisitor visitor, object? context)
         {
-            return visitor.VisitExtension(this);
+            return visitor.VisitExtension(this, context);
         }
     }
 }

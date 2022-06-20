@@ -14,9 +14,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Argument);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitSpreadElement(this);
+            return visitor.VisitSpreadElement(this, context);
         }
 
         public SpreadElement UpdateWith(Expression argument)

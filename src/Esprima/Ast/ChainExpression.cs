@@ -17,9 +17,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Expression);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitChainExpression(this);
+            return visitor.VisitChainExpression(this, context);
         }
 
         public ChainExpression UpdateWith(Expression expression)

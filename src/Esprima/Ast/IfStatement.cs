@@ -22,9 +22,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Test, Consequent, Alternate);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitIfStatement(this);
+            return visitor.VisitIfStatement(this, context);
         }
 
         public IfStatement UpdateWith(Expression test, Statement consequent, Statement? alternate)

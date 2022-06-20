@@ -14,11 +14,11 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
-        public sealed override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
 
-        protected internal sealed override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitBlockStatement(this);
+            return visitor.VisitBlockStatement(this, context);
         }
 
         public BlockStatement UpdateWith(in NodeList<Statement> body)

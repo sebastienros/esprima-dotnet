@@ -16,9 +16,9 @@ public sealed class JsxAttribute : JsxExpression
 
     public override NodeCollection ChildNodes => new(Name, Value);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxAttribute(this);
+        return visitor.VisitJsxAttribute(this, context);
     }
 
     public JsxAttribute UpdateWith(JsxExpression name, Expression? value)

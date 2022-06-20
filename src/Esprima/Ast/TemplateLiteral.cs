@@ -33,9 +33,9 @@ namespace Esprima.Ast
             yield return quasi;
         }
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitTemplateLiteral(this);
+            return visitor.VisitTemplateLiteral(this, context);
         }
 
         public TemplateLiteral UpdateWith(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)

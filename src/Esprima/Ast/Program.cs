@@ -16,11 +16,11 @@ namespace Esprima.Ast
 
         public abstract SourceType SourceType { get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+        public sealed override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal sealed override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitProgram(this);
+            return visitor.VisitProgram(this, context);
         }
 
         protected abstract Program Rewrite(in NodeList<Statement> body);

@@ -14,8 +14,8 @@ public sealed class JsxOpeningFragment : JsxExpression
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxOpeningFragment(this);
+        return visitor.VisitJsxOpeningFragment(this, context);
     }
 }

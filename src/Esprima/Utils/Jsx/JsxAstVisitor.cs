@@ -26,104 +26,104 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         _visitor = visitor;
     }
 
-    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute, object? context)
     {
-        _visitor.Visit(jsxAttribute.Name);
+        _visitor.Visit(jsxAttribute.Name, context);
         if (jsxAttribute.Value is not null)
         {
-            _visitor.Visit(jsxAttribute.Value);
+            _visitor.Visit(jsxAttribute.Value, context);
         }
 
         return jsxAttribute;
     }
 
-    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement, object? context)
     {
-        _visitor.Visit(jsxClosingElement.Name);
+        _visitor.Visit(jsxClosingElement.Name, context);
 
         return jsxClosingElement;
     }
 
-    public virtual object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    public virtual object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment, object? context)
     {
         return jsxClosingFragment;
     }
 
-    public virtual object? VisitJsxElement(JsxElement jsxElement)
+    public virtual object? VisitJsxElement(JsxElement jsxElement, object? context)
     {
-        _visitor.Visit(jsxElement.OpeningElement);
+        _visitor.Visit(jsxElement.OpeningElement, context);
         ref readonly var children = ref jsxElement.Children;
         for (var i = 0; i < children.Count; i++)
         {
-            _visitor.Visit(children[i]);
+            _visitor.Visit(children[i], context);
         }
 
         if (jsxElement.ClosingElement is not null)
         {
-            _visitor.Visit(jsxElement.ClosingElement);
+            _visitor.Visit(jsxElement.ClosingElement, context);
         }
 
         return jsxElement;
     }
 
-    public virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    public virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression, object? context)
     {
         return jsxEmptyExpression;
     }
 
-    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer, object? context)
     {
-        _visitor.Visit(jsxExpressionContainer.Expression);
+        _visitor.Visit(jsxExpressionContainer.Expression, context);
 
         return jsxExpressionContainer;
     }
 
-    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier, object? context)
     {
         return jsxIdentifier;
     }
 
-    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression, object? context)
     {
-        _visitor.Visit(jsxMemberExpression.Object);
-        _visitor.Visit(jsxMemberExpression.Property);
+        _visitor.Visit(jsxMemberExpression.Object, context);
+        _visitor.Visit(jsxMemberExpression.Property, context);
 
         return jsxMemberExpression;
     }
 
-    public virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    public virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName, object? context)
     {
-        _visitor.Visit(jsxNamespacedName.Name);
-        _visitor.Visit(jsxNamespacedName.Namespace);
+        _visitor.Visit(jsxNamespacedName.Name, context);
+        _visitor.Visit(jsxNamespacedName.Namespace, context);
 
         return jsxNamespacedName;
     }
 
-    public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement, object? context)
     {
-        _visitor.Visit(jsxOpeningElement.Name);
+        _visitor.Visit(jsxOpeningElement.Name, context);
         ref readonly var attributes = ref jsxOpeningElement.Attributes;
         for (var i = 0; i < attributes.Count; i++)
         {
-            _visitor.Visit(attributes[i]);
+            _visitor.Visit(attributes[i], context);
         }
 
         return jsxOpeningElement;
     }
 
-    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment, object? context)
     {
         return jsxOpeningFragment;
     }
 
-    public virtual object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    public virtual object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute, object? context)
     {
-        _visitor.Visit(jsxSpreadAttribute.Argument);
+        _visitor.Visit(jsxSpreadAttribute.Argument, context);
 
         return jsxSpreadAttribute;
     }
 
-    public virtual object? VisitJsxText(JsxText jsxText)
+    public virtual object? VisitJsxText(JsxText jsxText, object? context)
     {
         return jsxText;
     }

@@ -20,9 +20,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Param, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitCatchClause(this);
+            return visitor.VisitCatchClause(this, context);
         }
 
         public CatchClause UpdateWith(Expression? param, BlockStatement body)

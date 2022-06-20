@@ -339,11 +339,11 @@ public class AstToJsonConverter : AstJson.IConverter
             _writer.EndArray();
         }
 
-        public override object? Visit(Node? node)
+        public override object? Visit(Node? node, object? context = null)
         {
             if (node is not null)
             {
-                return base.Visit(node);
+                return base.Visit(node, context);
             }
             else
             {
@@ -352,7 +352,7 @@ public class AstToJsonConverter : AstJson.IConverter
             }
         }
 
-        protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
+        protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression, object? context)
         {
             using (StartNodeObject(arrayExpression))
             {
@@ -362,7 +362,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return arrayExpression;
         }
 
-        protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
+        protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern, object? context)
         {
             using (StartNodeObject(arrayPattern))
             {
@@ -372,7 +372,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return arrayPattern;
         }
 
-        protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+        protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression, object? context)
         {
             using (StartNodeObject(arrowFunctionExpression))
             {
@@ -392,7 +392,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return arrowFunctionExpression;
         }
 
-        protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+        protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression, object? context)
         {
             using (StartNodeObject(assignmentExpression))
             {
@@ -404,7 +404,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return assignmentExpression;
         }
 
-        protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+        protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern, object? context)
         {
             using (StartNodeObject(assignmentPattern))
             {
@@ -415,7 +415,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return assignmentPattern;
         }
 
-        protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
+        protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression, object? context)
         {
             using (StartNodeObject(awaitExpression))
             {
@@ -425,7 +425,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return awaitExpression;
         }
 
-        protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
+        protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression, object? context)
         {
             using (StartNodeObject(binaryExpression))
             {
@@ -437,7 +437,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return binaryExpression;
         }
 
-        protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
+        protected internal override object? VisitBlockStatement(BlockStatement blockStatement, object? context)
         {
             using (StartNodeObject(blockStatement))
             {
@@ -447,7 +447,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return blockStatement;
         }
 
-        protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
+        protected internal override object? VisitBreakStatement(BreakStatement breakStatement, object? context)
         {
             using (StartNodeObject(breakStatement))
             {
@@ -457,7 +457,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return breakStatement;
         }
 
-        protected internal override object? VisitCallExpression(CallExpression callExpression)
+        protected internal override object? VisitCallExpression(CallExpression callExpression, object? context)
         {
             using (StartNodeObject(callExpression))
             {
@@ -469,7 +469,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return callExpression;
         }
 
-        protected internal override object? VisitCatchClause(CatchClause catchClause)
+        protected internal override object? VisitCatchClause(CatchClause catchClause, object? context)
         {
             using (StartNodeObject(catchClause))
             {
@@ -480,7 +480,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return catchClause;
         }
 
-        protected internal override object? VisitChainExpression(ChainExpression chainExpression)
+        protected internal override object? VisitChainExpression(ChainExpression chainExpression, object? context)
         {
             using (StartNodeObject(chainExpression))
             {
@@ -490,7 +490,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return chainExpression;
         }
 
-        protected internal override object? VisitClassBody(ClassBody classBody)
+        protected internal override object? VisitClassBody(ClassBody classBody, object? context)
         {
             using (StartNodeObject(classBody))
             {
@@ -500,7 +500,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return classBody;
         }
 
-        protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
+        protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration, object? context)
         {
             using (StartNodeObject(classDeclaration))
             {
@@ -516,7 +516,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return classDeclaration;
         }
 
-        protected internal override object? VisitClassExpression(ClassExpression classExpression)
+        protected internal override object? VisitClassExpression(ClassExpression classExpression, object? context)
         {
             using (StartNodeObject(classExpression))
             {
@@ -532,7 +532,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return classExpression;
         }
 
-        protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
+        protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression, object? context)
         {
             using (StartNodeObject(conditionalExpression))
             {
@@ -544,7 +544,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return conditionalExpression;
         }
 
-        protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
+        protected internal override object? VisitContinueStatement(ContinueStatement continueStatement, object? context)
         {
             using (StartNodeObject(continueStatement))
             {
@@ -554,13 +554,13 @@ public class AstToJsonConverter : AstJson.IConverter
             return continueStatement;
         }
 
-        protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+        protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement, object? context)
         {
             EmptyNodeObject(debuggerStatement);
             return debuggerStatement;
         }
 
-        protected internal override object? VisitDecorator(Decorator decorator)
+        protected internal override object? VisitDecorator(Decorator decorator, object? context)
         {
             using (StartNodeObject(decorator))
             {
@@ -570,7 +570,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return decorator;
         }
 
-        protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+        protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement, object? context)
         {
             using (StartNodeObject(doWhileStatement))
             {
@@ -581,13 +581,13 @@ public class AstToJsonConverter : AstJson.IConverter
             return doWhileStatement;
         }
 
-        protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
+        protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement, object? context)
         {
             EmptyNodeObject(emptyStatement);
             return emptyStatement;
         }
 
-        protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+        protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration, object? context)
         {
             using (StartNodeObject(exportAllDeclaration))
             {
@@ -607,7 +607,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return exportAllDeclaration;
         }
 
-        protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+        protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration, object? context)
         {
             using (StartNodeObject(exportDefaultDeclaration))
             {
@@ -617,7 +617,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return exportDefaultDeclaration;
         }
 
-        protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+        protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration, object? context)
         {
             using (StartNodeObject(exportNamedDeclaration))
             {
@@ -634,7 +634,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return exportNamedDeclaration;
         }
 
-        protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
+        protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier, object? context)
         {
             using (StartNodeObject(exportSpecifier))
             {
@@ -645,7 +645,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return exportSpecifier;
         }
 
-        protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
+        protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement, object? context)
         {
             using (StartNodeObject(expressionStatement))
             {
@@ -660,12 +660,12 @@ public class AstToJsonConverter : AstJson.IConverter
             return expressionStatement;
         }
 
-        protected internal override object? VisitExtension(Node node)
+        protected internal override object? VisitExtension(Node node, object? context)
         {
             throw new NotSupportedException("Unknown node type: " + node.Type);
         }
 
-        protected internal override object? VisitForInStatement(ForInStatement forInStatement)
+        protected internal override object? VisitForInStatement(ForInStatement forInStatement, object? context)
         {
             using (StartNodeObject(forInStatement))
             {
@@ -678,7 +678,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return forInStatement;
         }
 
-        protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
+        protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement, object? context)
         {
             using (StartNodeObject(forOfStatement))
             {
@@ -691,7 +691,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return forOfStatement;
         }
 
-        protected internal override object? VisitForStatement(ForStatement forStatement)
+        protected internal override object? VisitForStatement(ForStatement forStatement, object? context)
         {
             using (StartNodeObject(forStatement))
             {
@@ -704,7 +704,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return forStatement;
         }
 
-        protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+        protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object? context)
         {
             using (StartNodeObject(functionDeclaration))
             {
@@ -724,7 +724,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return functionDeclaration;
         }
 
-        protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
+        protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression, object? context)
         {
             using (StartNodeObject(functionExpression))
             {
@@ -744,7 +744,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return functionExpression;
         }
 
-        protected internal override object? VisitIdentifier(Identifier identifier)
+        protected internal override object? VisitIdentifier(Identifier identifier, object? context)
         {
             using (StartNodeObject(identifier))
             {
@@ -754,7 +754,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return identifier;
         }
 
-        protected internal override object? VisitIfStatement(IfStatement ifStatement)
+        protected internal override object? VisitIfStatement(IfStatement ifStatement, object? context)
         {
             using (StartNodeObject(ifStatement))
             {
@@ -774,7 +774,7 @@ public class AstToJsonConverter : AstJson.IConverter
 
         private sealed class ImportCompat : Expression
         {
-            protected internal override object? Accept(AstVisitor visitor)
+            protected internal override object? Accept(AstVisitor visitor, object? context)
             {
                 return ((VisitorBase) visitor).VisitImportCompat(this);
             }
@@ -784,7 +784,7 @@ public class AstToJsonConverter : AstJson.IConverter
             public override NodeCollection ChildNodes => NodeCollection.Empty;
         }
 
-        protected internal override object? VisitImport(Import import)
+        protected internal override object? VisitImport(Import import, object? context)
         {
             // original Esprima uses CallExpression to represent dynamic imports currently,
             // so we need to rewrite our representation to match this expectation
@@ -823,7 +823,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return import;
         }
 
-        protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
+        protected internal override object? VisitImportAttribute(ImportAttribute importAttribute, object? context)
         {
             using (StartNodeObject(importAttribute))
             {
@@ -834,7 +834,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return importAttribute;
         }
 
-        protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
+        protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration, object? context)
         {
             using (StartNodeObject(importDeclaration))
             {
@@ -850,7 +850,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return importDeclaration;
         }
 
-        protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+        protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier, object? context)
         {
             using (StartNodeObject(importDefaultSpecifier))
             {
@@ -860,7 +860,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return importDefaultSpecifier;
         }
 
-        protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+        protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier, object? context)
         {
             using (StartNodeObject(importNamespaceSpecifier))
             {
@@ -870,7 +870,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return importNamespaceSpecifier;
         }
 
-        protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
+        protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier, object? context)
         {
             using (StartNodeObject(importSpecifier))
             {
@@ -881,7 +881,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return importSpecifier;
         }
 
-        protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
+        protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement, object? context)
         {
             using (StartNodeObject(labeledStatement))
             {
@@ -892,7 +892,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return labeledStatement;
         }
 
-        protected internal override object? VisitLiteral(Literal literal)
+        protected internal override object? VisitLiteral(Literal literal, object? context)
         {
             using (StartNodeObject(literal))
             {
@@ -947,7 +947,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return literal;
         }
 
-        protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
+        protected internal override object? VisitMemberExpression(MemberExpression memberExpression, object? context)
         {
             using (StartNodeObject(memberExpression))
             {
@@ -960,7 +960,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return memberExpression;
         }
 
-        protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
+        protected internal override object? VisitMetaProperty(MetaProperty metaProperty, object? context)
         {
             using (StartNodeObject(metaProperty))
             {
@@ -971,7 +971,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return metaProperty;
         }
 
-        protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
+        protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition, object? context)
         {
             using (StartNodeObject(methodDefinition))
             {
@@ -989,7 +989,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return methodDefinition;
         }
 
-        protected internal override object? VisitNewExpression(NewExpression newExpression)
+        protected internal override object? VisitNewExpression(NewExpression newExpression, object? context)
         {
             using (StartNodeObject(newExpression))
             {
@@ -1000,7 +1000,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return newExpression;
         }
 
-        protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
+        protected internal override object? VisitObjectExpression(ObjectExpression objectExpression, object? context)
         {
             using (StartNodeObject(objectExpression))
             {
@@ -1010,7 +1010,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return objectExpression;
         }
 
-        protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
+        protected internal override object? VisitObjectPattern(ObjectPattern objectPattern, object? context)
         {
             using (StartNodeObject(objectPattern))
             {
@@ -1020,7 +1020,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return objectPattern;
         }
 
-        protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+        protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier, object? context)
         {
             using (StartNodeObject(privateIdentifier))
             {
@@ -1030,7 +1030,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return privateIdentifier;
         }
 
-        protected internal override object? VisitProgram(Program program)
+        protected internal override object? VisitProgram(Program program, object? context)
         {
             using (StartNodeObject(program))
             {
@@ -1047,7 +1047,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return program;
         }
 
-        protected internal override object? VisitProperty(Property property)
+        protected internal override object? VisitProperty(Property property, object? context)
         {
             using (StartNodeObject(property))
             {
@@ -1062,7 +1062,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return property;
         }
 
-        protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+        protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition, object? context)
         {
             using (StartNodeObject(propertyDefinition))
             {
@@ -1080,7 +1080,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return propertyDefinition;
         }
 
-        protected internal override object? VisitRestElement(RestElement restElement)
+        protected internal override object? VisitRestElement(RestElement restElement, object? context)
         {
             using (StartNodeObject(restElement))
             {
@@ -1090,7 +1090,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return restElement;
         }
 
-        protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
+        protected internal override object? VisitReturnStatement(ReturnStatement returnStatement, object? context)
         {
             using (StartNodeObject(returnStatement))
             {
@@ -1100,7 +1100,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return returnStatement;
         }
 
-        protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
+        protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression, object? context)
         {
             using (StartNodeObject(sequenceExpression))
             {
@@ -1110,7 +1110,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return sequenceExpression;
         }
 
-        protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
+        protected internal override object? VisitSpreadElement(SpreadElement spreadElement, object? context)
         {
             using (StartNodeObject(spreadElement))
             {
@@ -1120,7 +1120,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return spreadElement;
         }
 
-        protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+        protected internal override object? VisitStaticBlock(StaticBlock staticBlock, object? context)
         {
             using (StartNodeObject(staticBlock))
             {
@@ -1130,13 +1130,13 @@ public class AstToJsonConverter : AstJson.IConverter
             return staticBlock;
         }
 
-        protected internal override object? VisitSuper(Super super)
+        protected internal override object? VisitSuper(Super super, object? context)
         {
             EmptyNodeObject(super);
             return super;
         }
 
-        protected internal override object? VisitSwitchCase(SwitchCase switchCase)
+        protected internal override object? VisitSwitchCase(SwitchCase switchCase, object? context)
         {
             using (StartNodeObject(switchCase))
             {
@@ -1147,7 +1147,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return switchCase;
         }
 
-        protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
+        protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement, object? context)
         {
             using (StartNodeObject(switchStatement))
             {
@@ -1158,7 +1158,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return switchStatement;
         }
 
-        protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+        protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression, object? context)
         {
             using (StartNodeObject(taggedTemplateExpression))
             {
@@ -1169,7 +1169,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return taggedTemplateExpression;
         }
 
-        protected internal override object? VisitTemplateElement(TemplateElement templateElement)
+        protected internal override object? VisitTemplateElement(TemplateElement templateElement, object? context)
         {
             using (StartNodeObject(templateElement))
             {
@@ -1184,7 +1184,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return templateElement;
         }
 
-        protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
+        protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral, object? context)
         {
             using (StartNodeObject(templateLiteral))
             {
@@ -1195,13 +1195,13 @@ public class AstToJsonConverter : AstJson.IConverter
             return templateLiteral;
         }
 
-        protected internal override object? VisitThisExpression(ThisExpression thisExpression)
+        protected internal override object? VisitThisExpression(ThisExpression thisExpression, object? context)
         {
             EmptyNodeObject(thisExpression);
             return thisExpression;
         }
 
-        protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
+        protected internal override object? VisitThrowStatement(ThrowStatement throwStatement, object? context)
         {
             using (StartNodeObject(throwStatement))
             {
@@ -1211,7 +1211,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return throwStatement;
         }
 
-        protected internal override object? VisitTryStatement(TryStatement tryStatement)
+        protected internal override object? VisitTryStatement(TryStatement tryStatement, object? context)
         {
             using (StartNodeObject(tryStatement))
             {
@@ -1223,7 +1223,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return tryStatement;
         }
 
-        protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
+        protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression, object? context)
         {
             using (StartNodeObject(unaryExpression))
             {
@@ -1235,7 +1235,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return unaryExpression;
         }
 
-        protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+        protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration, object? context)
         {
             using (StartNodeObject(variableDeclaration))
             {
@@ -1246,7 +1246,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return variableDeclaration;
         }
 
-        protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+        protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator, object? context)
         {
             using (StartNodeObject(variableDeclarator))
             {
@@ -1257,7 +1257,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return variableDeclarator;
         }
 
-        protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
+        protected internal override object? VisitWhileStatement(WhileStatement whileStatement, object? context)
         {
             using (StartNodeObject(whileStatement))
             {
@@ -1268,7 +1268,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return whileStatement;
         }
 
-        protected internal override object? VisitWithStatement(WithStatement withStatement)
+        protected internal override object? VisitWithStatement(WithStatement withStatement, object? context)
         {
             using (StartNodeObject(withStatement))
             {
@@ -1279,7 +1279,7 @@ public class AstToJsonConverter : AstJson.IConverter
             return withStatement;
         }
 
-        protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
+        protected internal override object? VisitYieldExpression(YieldExpression yieldExpression, object? context)
         {
             using (StartNodeObject(yieldExpression))
             {

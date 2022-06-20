@@ -61,9 +61,9 @@ namespace Esprima.Ast
 
         public sealed override NodeCollection ChildNodes => new(Argument);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal sealed override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitUnaryExpression(this);
+            return visitor.VisitUnaryExpression(this, context);
         }
 
         protected virtual UnaryExpression Rewrite(Expression argument)

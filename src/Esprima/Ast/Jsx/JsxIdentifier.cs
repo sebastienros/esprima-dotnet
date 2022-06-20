@@ -16,8 +16,8 @@ public sealed class JsxIdentifier : JsxExpression
 
     public override NodeCollection ChildNodes => NodeCollection.Empty;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxIdentifier(this);
+        return visitor.VisitJsxIdentifier(this, context);
     }
 }

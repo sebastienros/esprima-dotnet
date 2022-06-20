@@ -16,9 +16,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Body, Test);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitDoWhileStatement(this);
+            return visitor.VisitDoWhileStatement(this, context);
         }
 
         public DoWhileStatement UpdateWith(Statement body, Expression test)

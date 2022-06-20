@@ -17,9 +17,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Label, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitLabeledStatement(this);
+            return visitor.VisitLabeledStatement(this, context);
         }
 
         public LabeledStatement UpdateWith(Identifier label, Statement body)

@@ -20,9 +20,9 @@ public sealed class JsxElement : JsxExpression
 
     public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(OpeningElement, Children, ClosingElement);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
+    protected override object? Accept(IJsxAstVisitor visitor, object? context)
     {
-        return visitor.VisitJsxElement(this);
+        return visitor.VisitJsxElement(this, context);
     }
 
     public JsxElement UpdateWith(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)

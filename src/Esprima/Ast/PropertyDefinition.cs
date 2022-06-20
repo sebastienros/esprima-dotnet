@@ -39,9 +39,9 @@ namespace Esprima.Ast
             }
         }
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitPropertyDefinition(this);
+            return visitor.VisitPropertyDefinition(this, context);
         }
 
         public PropertyDefinition UpdateWith(Expression key, Expression? value, in NodeList<Decorator> decorators)

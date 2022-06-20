@@ -29,9 +29,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Key, Value);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitMethodDefinition(this);
+            return visitor.VisitMethodDefinition(this, context);
         }
 
         public MethodDefinition UpdateWith(Expression key, FunctionExpression value, in NodeList<Decorator> decorators)

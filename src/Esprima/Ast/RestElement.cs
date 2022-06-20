@@ -17,9 +17,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Argument);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitRestElement(this);
+            return visitor.VisitRestElement(this, context);
         }
 
         public RestElement UpdateWith(Expression argument)

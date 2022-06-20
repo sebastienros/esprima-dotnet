@@ -199,9 +199,9 @@ sealed class TestRewriter : JsxAstRewriter
         return _controlType == node?.GetType() ? createNew(node) : node;
     }
 
-    protected internal override object? VisitProgram(Program program)
+    protected internal override object? VisitProgram(Program program, object? context)
     {
-        return ForceNewObjectByControlType((Program) base.VisitProgram(program)!,
+        return ForceNewObjectByControlType((Program) base.VisitProgram(program, context)!,
             node => program switch
             {
                 Module => new Module(node.Body),
@@ -210,93 +210,93 @@ sealed class TestRewriter : JsxAstRewriter
             });
     }
 
-    protected internal override object? VisitCatchClause(CatchClause catchClause)
+    protected internal override object? VisitCatchClause(CatchClause catchClause, object? context)
     {
-        return ForceNewObjectByControlType((CatchClause) base.VisitCatchClause(catchClause)!,
+        return ForceNewObjectByControlType((CatchClause) base.VisitCatchClause(catchClause, context)!,
             node => new CatchClause(node.Param, node.Body));
     }
 
-    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object? context)
     {
-        return ForceNewObjectByControlType((FunctionDeclaration) base.VisitFunctionDeclaration(functionDeclaration)!,
+        return ForceNewObjectByControlType((FunctionDeclaration) base.VisitFunctionDeclaration(functionDeclaration, context)!,
             node => new FunctionDeclaration(node.Id, node.Params, node.Body, node.Generator, node.Strict, node.Async));
     }
 
-    protected internal override object? VisitWithStatement(WithStatement withStatement)
+    protected internal override object? VisitWithStatement(WithStatement withStatement, object? context)
     {
-        return ForceNewObjectByControlType((WithStatement) base.VisitWithStatement(withStatement)!,
+        return ForceNewObjectByControlType((WithStatement) base.VisitWithStatement(withStatement, context)!,
             node => new WithStatement(node.Object, node.Body));
     }
 
-    protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
+    protected internal override object? VisitWhileStatement(WhileStatement whileStatement, object? context)
     {
-        return ForceNewObjectByControlType((WhileStatement) base.VisitWhileStatement(whileStatement)!,
+        return ForceNewObjectByControlType((WhileStatement) base.VisitWhileStatement(whileStatement, context)!,
             node => new WhileStatement(node.Test, node.Body));
     }
 
-    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration, object? context)
     {
-        return ForceNewObjectByControlType((VariableDeclaration) base.VisitVariableDeclaration(variableDeclaration)!,
+        return ForceNewObjectByControlType((VariableDeclaration) base.VisitVariableDeclaration(variableDeclaration, context)!,
             node => new VariableDeclaration(node.Declarations, node.Kind));
     }
 
-    protected internal override object? VisitTryStatement(TryStatement tryStatement)
+    protected internal override object? VisitTryStatement(TryStatement tryStatement, object? context)
     {
-        return ForceNewObjectByControlType((TryStatement) base.VisitTryStatement(tryStatement)!,
+        return ForceNewObjectByControlType((TryStatement) base.VisitTryStatement(tryStatement, context)!,
             node => new TryStatement(node.Block, node.Handler, node.Finalizer));
     }
 
-    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
+    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement, object? context)
     {
-        return ForceNewObjectByControlType((ThrowStatement) base.VisitThrowStatement(throwStatement)!,
+        return ForceNewObjectByControlType((ThrowStatement) base.VisitThrowStatement(throwStatement, context)!,
             node => new ThrowStatement(node.Argument));
     }
 
-    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
+    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement, object? context)
     {
-        return ForceNewObjectByControlType((SwitchStatement) base.VisitSwitchStatement(switchStatement)!,
+        return ForceNewObjectByControlType((SwitchStatement) base.VisitSwitchStatement(switchStatement, context)!,
             node => new SwitchStatement(node.Discriminant, node.Cases));
     }
 
-    protected internal override object? VisitSwitchCase(SwitchCase switchCase)
+    protected internal override object? VisitSwitchCase(SwitchCase switchCase, object? context)
     {
-        return ForceNewObjectByControlType((SwitchCase) base.VisitSwitchCase(switchCase)!,
+        return ForceNewObjectByControlType((SwitchCase) base.VisitSwitchCase(switchCase, context)!,
             node => new SwitchCase(node.Test, node.Consequent));
     }
 
-    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
+    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement, object? context)
     {
-        return ForceNewObjectByControlType((ReturnStatement) base.VisitReturnStatement(returnStatement)!,
+        return ForceNewObjectByControlType((ReturnStatement) base.VisitReturnStatement(returnStatement, context)!,
             node => new ReturnStatement(node.Argument));
     }
 
-    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
+    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement, object? context)
     {
-        return ForceNewObjectByControlType((LabeledStatement) base.VisitLabeledStatement(labeledStatement)!,
+        return ForceNewObjectByControlType((LabeledStatement) base.VisitLabeledStatement(labeledStatement, context)!,
             node => new LabeledStatement(node.Label, node.Body));
     }
 
-    protected internal override object? VisitIfStatement(IfStatement ifStatement)
+    protected internal override object? VisitIfStatement(IfStatement ifStatement, object? context)
     {
-        return ForceNewObjectByControlType((IfStatement) base.VisitIfStatement(ifStatement)!,
+        return ForceNewObjectByControlType((IfStatement) base.VisitIfStatement(ifStatement, context)!,
             node => new IfStatement(node.Test, node.Consequent, node.Alternate));
     }
 
-    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
+    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement, object? context)
     {
-        return ForceNewObjectByControlType((EmptyStatement) base.VisitEmptyStatement(emptyStatement)!,
+        return ForceNewObjectByControlType((EmptyStatement) base.VisitEmptyStatement(emptyStatement, context)!,
             node => new EmptyStatement());
     }
 
-    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement, object? context)
     {
-        return ForceNewObjectByControlType((DebuggerStatement) base.VisitDebuggerStatement(debuggerStatement)!,
+        return ForceNewObjectByControlType((DebuggerStatement) base.VisitDebuggerStatement(debuggerStatement, context)!,
             node => new DebuggerStatement());
     }
 
-    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
+    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement, object? context)
     {
-        return ForceNewObjectByControlType((ExpressionStatement) base.VisitExpressionStatement(expressionStatement)!,
+        return ForceNewObjectByControlType((ExpressionStatement) base.VisitExpressionStatement(expressionStatement, context)!,
             node => node switch
             {
                 Directive directive => new Directive(node.Expression, directive.Directiv),
@@ -304,33 +304,33 @@ sealed class TestRewriter : JsxAstRewriter
             });
     }
 
-    protected internal override object? VisitForStatement(ForStatement forStatement)
+    protected internal override object? VisitForStatement(ForStatement forStatement, object? context)
     {
-        return ForceNewObjectByControlType((ForStatement) base.VisitForStatement(forStatement)!,
+        return ForceNewObjectByControlType((ForStatement) base.VisitForStatement(forStatement, context)!,
             node => new ForStatement(node.Init, node.Test, node.Update, node.Body));
     }
 
-    protected internal override object? VisitForInStatement(ForInStatement forInStatement)
+    protected internal override object? VisitForInStatement(ForInStatement forInStatement, object? context)
     {
-        return ForceNewObjectByControlType((ForInStatement) base.VisitForInStatement(forInStatement)!,
+        return ForceNewObjectByControlType((ForInStatement) base.VisitForInStatement(forInStatement, context)!,
             node => new ForInStatement(node.Left, node.Right, node.Body));
     }
 
-    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement, object? context)
     {
-        return ForceNewObjectByControlType((DoWhileStatement) base.VisitDoWhileStatement(doWhileStatement)!,
+        return ForceNewObjectByControlType((DoWhileStatement) base.VisitDoWhileStatement(doWhileStatement, context)!,
             node => new DoWhileStatement(node.Body, node.Test));
     }
 
-    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression, object? context)
     {
-        return ForceNewObjectByControlType((ArrowFunctionExpression) base.VisitArrowFunctionExpression(arrowFunctionExpression)!,
+        return ForceNewObjectByControlType((ArrowFunctionExpression) base.VisitArrowFunctionExpression(arrowFunctionExpression, context)!,
             node => new ArrowFunctionExpression(node.Params, node.Body, node.Expression, node.Strict, node.Async));
     }
 
-    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
+    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression, object? context)
     {
-        return ForceNewObjectByControlType((UnaryExpression) base.VisitUnaryExpression(unaryExpression)!,
+        return ForceNewObjectByControlType((UnaryExpression) base.VisitUnaryExpression(unaryExpression, context)!,
             node => node.Type switch
             {
                 Nodes.UpdateExpression => new UpdateExpression(node.Operator, node.Argument, node.Prefix),
@@ -338,33 +338,33 @@ sealed class TestRewriter : JsxAstRewriter
             });
     }
 
-    protected internal override object? VisitThisExpression(ThisExpression thisExpression)
+    protected internal override object? VisitThisExpression(ThisExpression thisExpression, object? context)
     {
-        return ForceNewObjectByControlType((ThisExpression) base.VisitThisExpression(thisExpression)!,
+        return ForceNewObjectByControlType((ThisExpression) base.VisitThisExpression(thisExpression, context)!,
             node => new ThisExpression());
     }
 
-    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
+    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression, object? context)
     {
-        return ForceNewObjectByControlType((SequenceExpression) base.VisitSequenceExpression(sequenceExpression)!,
+        return ForceNewObjectByControlType((SequenceExpression) base.VisitSequenceExpression(sequenceExpression, context)!,
             node => new SequenceExpression(node.Expressions));
     }
 
-    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
+    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression, object? context)
     {
-        return ForceNewObjectByControlType((ObjectExpression) base.VisitObjectExpression(objectExpression)!,
+        return ForceNewObjectByControlType((ObjectExpression) base.VisitObjectExpression(objectExpression, context)!,
             node => new ObjectExpression(node.Properties));
     }
 
-    protected internal override object? VisitNewExpression(NewExpression newExpression)
+    protected internal override object? VisitNewExpression(NewExpression newExpression, object? context)
     {
-        return ForceNewObjectByControlType((NewExpression) base.VisitNewExpression(newExpression)!,
+        return ForceNewObjectByControlType((NewExpression) base.VisitNewExpression(newExpression, context)!,
             node => new NewExpression(node.Callee, node.Arguments));
     }
 
-    protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
+    protected internal override object? VisitMemberExpression(MemberExpression memberExpression, object? context)
     {
-        return ForceNewObjectByControlType((MemberExpression) base.VisitMemberExpression(memberExpression)!,
+        return ForceNewObjectByControlType((MemberExpression) base.VisitMemberExpression(memberExpression, context)!,
             node => memberExpression.Computed switch
             {
                 true => new ComputedMemberExpression(node.Object, node.Property, memberExpression.Optional),
@@ -372,9 +372,9 @@ sealed class TestRewriter : JsxAstRewriter
             });
     }
 
-    protected internal override object? VisitLiteral(Literal literal)
+    protected internal override object? VisitLiteral(Literal literal, object? context)
     {
-        return ForceNewObjectByControlType((Literal) base.VisitLiteral(literal)!,
+        return ForceNewObjectByControlType((Literal) base.VisitLiteral(literal, context)!,
             node => node.TokenType switch
             {
                 TokenType.RegularExpression => new Literal(node.Regex!.Pattern, node.Regex.Flags, node.Value, node.Raw),
@@ -382,333 +382,333 @@ sealed class TestRewriter : JsxAstRewriter
             });
     }
 
-    protected internal override object? VisitIdentifier(Identifier identifier)
+    protected internal override object? VisitIdentifier(Identifier identifier, object? context)
     {
-        return ForceNewObjectByControlType((Identifier) base.VisitIdentifier(identifier)!,
+        return ForceNewObjectByControlType((Identifier) base.VisitIdentifier(identifier, context)!,
             node => new Identifier(node.Name));
     }
 
-    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier, object? context)
     {
-        return ForceNewObjectByControlType((PrivateIdentifier) base.VisitPrivateIdentifier(privateIdentifier)!,
+        return ForceNewObjectByControlType((PrivateIdentifier) base.VisitPrivateIdentifier(privateIdentifier, context)!,
             node => new PrivateIdentifier(node.Name));
     }
 
-    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression, object? context)
     {
-        return ForceNewObjectByControlType((FunctionExpression) base.VisitFunctionExpression(functionExpression)!,
+        return ForceNewObjectByControlType((FunctionExpression) base.VisitFunctionExpression(functionExpression, context)!,
             node => new FunctionExpression(node.Id, node.Params, node.Body, node.Generator, node.Strict, node.Async));
     }
 
-    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition, object? context)
     {
-        return ForceNewObjectByControlType((PropertyDefinition) base.VisitPropertyDefinition(propertyDefinition)!,
+        return ForceNewObjectByControlType((PropertyDefinition) base.VisitPropertyDefinition(propertyDefinition, context)!,
             node => new PropertyDefinition(node.Key, node.Computed, node.Value!, node.Static, node.Decorators));
     }
 
-    protected internal override object? VisitChainExpression(ChainExpression chainExpression)
+    protected internal override object? VisitChainExpression(ChainExpression chainExpression, object? context)
     {
-        return ForceNewObjectByControlType((ChainExpression) base.VisitChainExpression(chainExpression)!,
+        return ForceNewObjectByControlType((ChainExpression) base.VisitChainExpression(chainExpression, context)!,
             node => new ChainExpression(node.Expression));
     }
 
-    protected internal override object? VisitClassExpression(ClassExpression classExpression)
+    protected internal override object? VisitClassExpression(ClassExpression classExpression, object? context)
     {
-        return ForceNewObjectByControlType((ClassExpression) base.VisitClassExpression(classExpression)!,
+        return ForceNewObjectByControlType((ClassExpression) base.VisitClassExpression(classExpression, context)!,
             node => new ClassExpression(node.Id, node.SuperClass, node.Body, node.Decorators));
     }
 
-    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration, object? context)
     {
-        return ForceNewObjectByControlType((ExportDefaultDeclaration) base.VisitExportDefaultDeclaration(exportDefaultDeclaration)!,
+        return ForceNewObjectByControlType((ExportDefaultDeclaration) base.VisitExportDefaultDeclaration(exportDefaultDeclaration, context)!,
             node => new ExportDefaultDeclaration(node.Declaration));
     }
 
-    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration, object? context)
     {
-        return ForceNewObjectByControlType((ExportAllDeclaration) base.VisitExportAllDeclaration(exportAllDeclaration)!,
+        return ForceNewObjectByControlType((ExportAllDeclaration) base.VisitExportAllDeclaration(exportAllDeclaration, context)!,
             node => new ExportAllDeclaration(node.Source, node.Exported, exportAllDeclaration.Assertions));
     }
 
-    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration, object? context)
     {
-        return ForceNewObjectByControlType((ExportNamedDeclaration) base.VisitExportNamedDeclaration(exportNamedDeclaration)!,
+        return ForceNewObjectByControlType((ExportNamedDeclaration) base.VisitExportNamedDeclaration(exportNamedDeclaration, context)!,
             node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source, exportNamedDeclaration.Assertions));
     }
 
-    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
+    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier, object? context)
     {
-        return ForceNewObjectByControlType((ExportSpecifier) base.VisitExportSpecifier(exportSpecifier)!,
+        return ForceNewObjectByControlType((ExportSpecifier) base.VisitExportSpecifier(exportSpecifier, context)!,
             node => new ExportSpecifier(node.Local, node.Exported));
     }
 
-    protected internal override object? VisitImport(Import import)
+    protected internal override object? VisitImport(Import import, object? context)
     {
-        return ForceNewObjectByControlType((Import) base.VisitImport(import)!,
+        return ForceNewObjectByControlType((Import) base.VisitImport(import, context)!,
             node => new Import(node.Source, import.Attributes));
     }
 
-    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
+    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration, object? context)
     {
-        return ForceNewObjectByControlType((ImportDeclaration) base.VisitImportDeclaration(importDeclaration)!,
+        return ForceNewObjectByControlType((ImportDeclaration) base.VisitImportDeclaration(importDeclaration, context)!,
             node => new ImportDeclaration(node.Specifiers, node.Source, importDeclaration.Assertions));
     }
 
-    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier, object? context)
     {
-        return ForceNewObjectByControlType((ImportNamespaceSpecifier) base.VisitImportNamespaceSpecifier(importNamespaceSpecifier)!,
+        return ForceNewObjectByControlType((ImportNamespaceSpecifier) base.VisitImportNamespaceSpecifier(importNamespaceSpecifier, context)!,
             node => new ImportNamespaceSpecifier(node.Local));
     }
 
-    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier, object? context)
     {
-        return ForceNewObjectByControlType((ImportDefaultSpecifier) base.VisitImportDefaultSpecifier(importDefaultSpecifier)!,
+        return ForceNewObjectByControlType((ImportDefaultSpecifier) base.VisitImportDefaultSpecifier(importDefaultSpecifier, context)!,
             node => new ImportDefaultSpecifier(node.Local));
     }
 
-    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
+    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier, object? context)
     {
-        return ForceNewObjectByControlType((ImportSpecifier) base.VisitImportSpecifier(importSpecifier)!,
+        return ForceNewObjectByControlType((ImportSpecifier) base.VisitImportSpecifier(importSpecifier, context)!,
             node => new ImportSpecifier(node.Local, node.Imported));
     }
 
-    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
+    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition, object? context)
     {
-        return ForceNewObjectByControlType((MethodDefinition) base.VisitMethodDefinition(methodDefinition)!,
+        return ForceNewObjectByControlType((MethodDefinition) base.VisitMethodDefinition(methodDefinition, context)!,
             node => new MethodDefinition(node.Key, node.Computed, node.Value, node.Kind, node.Static, node.Decorators));
     }
 
-    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
+    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement, object? context)
     {
-        return ForceNewObjectByControlType((ForOfStatement) base.VisitForOfStatement(forOfStatement)!,
+        return ForceNewObjectByControlType((ForOfStatement) base.VisitForOfStatement(forOfStatement, context)!,
             node => new ForOfStatement(node.Left, node.Right, node.Body, node.Await));
     }
 
-    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
+    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration, object? context)
     {
-        return ForceNewObjectByControlType((ClassDeclaration) base.VisitClassDeclaration(classDeclaration)!,
+        return ForceNewObjectByControlType((ClassDeclaration) base.VisitClassDeclaration(classDeclaration, context)!,
             node => new ClassDeclaration(node.Id, node.SuperClass, node.Body, node.Decorators));
     }
 
-    protected internal override object? VisitClassBody(ClassBody classBody)
+    protected internal override object? VisitClassBody(ClassBody classBody, object? context)
     {
-        return ForceNewObjectByControlType((ClassBody) base.VisitClassBody(classBody)!,
+        return ForceNewObjectByControlType((ClassBody) base.VisitClassBody(classBody, context)!,
             node => new ClassBody(node.Body));
     }
 
-    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
+    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression, object? context)
     {
-        return ForceNewObjectByControlType((YieldExpression) base.VisitYieldExpression(yieldExpression)!,
+        return ForceNewObjectByControlType((YieldExpression) base.VisitYieldExpression(yieldExpression, context)!,
             node => new YieldExpression(node.Argument, yieldExpression.Delegate));
     }
 
-    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression, object? context)
     {
-        return ForceNewObjectByControlType((TaggedTemplateExpression) base.VisitTaggedTemplateExpression(taggedTemplateExpression)!,
+        return ForceNewObjectByControlType((TaggedTemplateExpression) base.VisitTaggedTemplateExpression(taggedTemplateExpression, context)!,
             node => new TaggedTemplateExpression(node.Tag, node.Quasi));
     }
 
-    protected internal override object? VisitSuper(Super super)
+    protected internal override object? VisitSuper(Super super, object? context)
     {
-        return ForceNewObjectByControlType((Super) base.VisitSuper(super)!,
+        return ForceNewObjectByControlType((Super) base.VisitSuper(super, context)!,
             node => new Super());
     }
 
-    protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
+    protected internal override object? VisitMetaProperty(MetaProperty metaProperty, object? context)
     {
-        return ForceNewObjectByControlType((MetaProperty) base.VisitMetaProperty(metaProperty)!,
+        return ForceNewObjectByControlType((MetaProperty) base.VisitMetaProperty(metaProperty, context)!,
             node => new MetaProperty(node.Meta, node.Property));
     }
 
-    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
+    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern, object? context)
     {
-        return ForceNewObjectByControlType((ObjectPattern) base.VisitObjectPattern(objectPattern)!,
+        return ForceNewObjectByControlType((ObjectPattern) base.VisitObjectPattern(objectPattern, context)!,
             node => new ObjectPattern(node.Properties));
     }
 
-    protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
+    protected internal override object? VisitSpreadElement(SpreadElement spreadElement, object? context)
     {
-        return ForceNewObjectByControlType((SpreadElement) base.VisitSpreadElement(spreadElement)!,
+        return ForceNewObjectByControlType((SpreadElement) base.VisitSpreadElement(spreadElement, context)!,
             node => new SpreadElement(node.Argument));
     }
 
-    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern, object? context)
     {
-        return ForceNewObjectByControlType((AssignmentPattern) base.VisitAssignmentPattern(assignmentPattern)!,
+        return ForceNewObjectByControlType((AssignmentPattern) base.VisitAssignmentPattern(assignmentPattern, context)!,
             node => new AssignmentPattern(node.Left, node.Right));
     }
 
-    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
+    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern, object? context)
     {
-        return ForceNewObjectByControlType((ArrayPattern) base.VisitArrayPattern(arrayPattern)!,
+        return ForceNewObjectByControlType((ArrayPattern) base.VisitArrayPattern(arrayPattern, context)!,
             node => new ArrayPattern(node.Elements));
     }
 
-    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator, object? context)
     {
-        return ForceNewObjectByControlType((VariableDeclarator) base.VisitVariableDeclarator(variableDeclarator)!,
+        return ForceNewObjectByControlType((VariableDeclarator) base.VisitVariableDeclarator(variableDeclarator, context)!,
             node => new VariableDeclarator(node.Id, node.Init));
     }
 
-    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
+    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral, object? context)
     {
-        return ForceNewObjectByControlType((TemplateLiteral) base.VisitTemplateLiteral(templateLiteral)!,
+        return ForceNewObjectByControlType((TemplateLiteral) base.VisitTemplateLiteral(templateLiteral, context)!,
             node => new TemplateLiteral(node.Quasis, node.Expressions));
     }
 
-    protected internal override object? VisitTemplateElement(TemplateElement templateElement)
+    protected internal override object? VisitTemplateElement(TemplateElement templateElement, object? context)
     {
-        return ForceNewObjectByControlType((TemplateElement) base.VisitTemplateElement(templateElement)!,
+        return ForceNewObjectByControlType((TemplateElement) base.VisitTemplateElement(templateElement, context)!,
             node => new TemplateElement(node.Value, node.Tail));
     }
 
-    protected internal override object? VisitRestElement(RestElement restElement)
+    protected internal override object? VisitRestElement(RestElement restElement, object? context)
     {
-        return ForceNewObjectByControlType((RestElement) base.VisitRestElement(restElement)!,
+        return ForceNewObjectByControlType((RestElement) base.VisitRestElement(restElement, context)!,
             node => new RestElement(node.Argument));
     }
 
-    protected internal override object? VisitProperty(Property property)
+    protected internal override object? VisitProperty(Property property, object? context)
     {
-        return ForceNewObjectByControlType((Property) base.VisitProperty(property)!,
+        return ForceNewObjectByControlType((Property) base.VisitProperty(property, context)!,
             node => new Property(property.Kind, node.Key, property.Computed, node.Value, property.Method, property.Shorthand));
     }
 
-    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
+    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression, object? context)
     {
-        return ForceNewObjectByControlType((AwaitExpression) base.VisitAwaitExpression(awaitExpression)!,
+        return ForceNewObjectByControlType((AwaitExpression) base.VisitAwaitExpression(awaitExpression, context)!,
             node => new AwaitExpression(node.Argument));
     }
 
-    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
+    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression, object? context)
     {
-        return ForceNewObjectByControlType((ConditionalExpression) base.VisitConditionalExpression(conditionalExpression)!,
+        return ForceNewObjectByControlType((ConditionalExpression) base.VisitConditionalExpression(conditionalExpression, context)!,
             node => new ConditionalExpression(node.Test, node.Consequent, node.Alternate));
     }
 
-    protected internal override object? VisitCallExpression(CallExpression callExpression)
+    protected internal override object? VisitCallExpression(CallExpression callExpression, object? context)
     {
-        return ForceNewObjectByControlType((CallExpression) base.VisitCallExpression(callExpression)!,
+        return ForceNewObjectByControlType((CallExpression) base.VisitCallExpression(callExpression, context)!,
             node => new CallExpression(node.Callee, node.Arguments, callExpression.Optional));
     }
 
-    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
+    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression, object? context)
     {
-        return ForceNewObjectByControlType((BinaryExpression) base.VisitBinaryExpression(binaryExpression)!,
+        return ForceNewObjectByControlType((BinaryExpression) base.VisitBinaryExpression(binaryExpression, context)!,
             node => new BinaryExpression(node.Operator, node.Left, node.Right));
     }
 
-    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
+    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression, object? context)
     {
-        return ForceNewObjectByControlType((ArrayExpression) base.VisitArrayExpression(arrayExpression)!,
+        return ForceNewObjectByControlType((ArrayExpression) base.VisitArrayExpression(arrayExpression, context)!,
             node => new ArrayExpression(node.Elements));
     }
 
-    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression, object? context)
     {
-        return ForceNewObjectByControlType((AssignmentExpression) base.VisitAssignmentExpression(assignmentExpression)!,
+        return ForceNewObjectByControlType((AssignmentExpression) base.VisitAssignmentExpression(assignmentExpression, context)!,
             node => new AssignmentExpression(node.Operator, node.Left, node.Right));
     }
 
-    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
+    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement, object? context)
     {
-        return ForceNewObjectByControlType((ContinueStatement) base.VisitContinueStatement(continueStatement)!,
+        return ForceNewObjectByControlType((ContinueStatement) base.VisitContinueStatement(continueStatement, context)!,
             node => new ContinueStatement(node.Label));
     }
 
-    protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
+    protected internal override object? VisitBreakStatement(BreakStatement breakStatement, object? context)
     {
-        return ForceNewObjectByControlType((BreakStatement) base.VisitBreakStatement(breakStatement)!,
+        return ForceNewObjectByControlType((BreakStatement) base.VisitBreakStatement(breakStatement, context)!,
             node => new BreakStatement(node.Label));
     }
 
-    protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
+    protected internal override object? VisitBlockStatement(BlockStatement blockStatement, object? context)
     {
-        return ForceNewObjectByControlType((BlockStatement) base.VisitBlockStatement(blockStatement)!,
+        return ForceNewObjectByControlType((BlockStatement) base.VisitBlockStatement(blockStatement, context)!,
             node => new BlockStatement(node.Body));
     }
 
-    protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
+    protected internal override object? VisitStaticBlock(StaticBlock staticBlock, object? context)
     {
-        return ForceNewObjectByControlType((StaticBlock) base.VisitStaticBlock(staticBlock)!,
+        return ForceNewObjectByControlType((StaticBlock) base.VisitStaticBlock(staticBlock, context)!,
             node => new StaticBlock(node.Body));
     }
 
-    public override object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+    public override object? VisitJsxAttribute(JsxAttribute jsxAttribute, object? context)
     {
-        return ForceNewObjectByControlType((JsxAttribute) base.VisitJsxAttribute(jsxAttribute)!,
+        return ForceNewObjectByControlType((JsxAttribute) base.VisitJsxAttribute(jsxAttribute, context)!,
             node => new JsxAttribute(node.Name, node.Value));
     }
 
-    public override object? VisitJsxElement(JsxElement jsxElement)
+    public override object? VisitJsxElement(JsxElement jsxElement, object? context)
     {
-        return ForceNewObjectByControlType((JsxElement) base.VisitJsxElement(jsxElement)!,
+        return ForceNewObjectByControlType((JsxElement) base.VisitJsxElement(jsxElement, context)!,
             node => new JsxElement(node.OpeningElement, node.Children, node.ClosingElement));
     }
 
-    public override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    public override object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier, object? context)
     {
-        return ForceNewObjectByControlType((JsxIdentifier) base.VisitJsxIdentifier(jsxIdentifier)!,
+        return ForceNewObjectByControlType((JsxIdentifier) base.VisitJsxIdentifier(jsxIdentifier, context)!,
             node => new JsxIdentifier(node.Name));
     }
 
-    public override object? VisitJsxText(JsxText jsxText)
+    public override object? VisitJsxText(JsxText jsxText, object? context)
     {
-        return ForceNewObjectByControlType((JsxText) base.VisitJsxText(jsxText)!,
+        return ForceNewObjectByControlType((JsxText) base.VisitJsxText(jsxText, context)!,
             node => new JsxText(node.Value, node.Raw));
     }
 
-    public override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    public override object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement, object? context)
     {
-        return ForceNewObjectByControlType((JsxClosingElement) base.VisitJsxClosingElement(jsxClosingElement)!,
+        return ForceNewObjectByControlType((JsxClosingElement) base.VisitJsxClosingElement(jsxClosingElement, context)!,
             node => new JsxClosingElement(node.Name));
     }
 
-    public override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    public override object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment, object? context)
     {
-        return ForceNewObjectByControlType((JsxClosingFragment) base.VisitJsxClosingFragment(jsxClosingFragment)!,
+        return ForceNewObjectByControlType((JsxClosingFragment) base.VisitJsxClosingFragment(jsxClosingFragment, context)!,
             node => new JsxClosingFragment());
     }
 
-    public override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    public override object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression, object? context)
     {
-        return ForceNewObjectByControlType((JsxEmptyExpression) base.VisitJsxEmptyExpression(jsxEmptyExpression)!,
+        return ForceNewObjectByControlType((JsxEmptyExpression) base.VisitJsxEmptyExpression(jsxEmptyExpression, context)!,
             node => new JsxEmptyExpression());
     }
 
-    public override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    public override object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer, object? context)
     {
-        return ForceNewObjectByControlType((JsxExpressionContainer) base.VisitJsxExpressionContainer(jsxExpressionContainer)!,
+        return ForceNewObjectByControlType((JsxExpressionContainer) base.VisitJsxExpressionContainer(jsxExpressionContainer, context)!,
             node => new JsxExpressionContainer(node.Expression));
     }
 
-    public override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    public override object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression, object? context)
     {
-        return ForceNewObjectByControlType((JsxMemberExpression) base.VisitJsxMemberExpression(jsxMemberExpression)!,
+        return ForceNewObjectByControlType((JsxMemberExpression) base.VisitJsxMemberExpression(jsxMemberExpression, context)!,
             node => new JsxMemberExpression(node.Object, node.Property));
     }
 
-    public override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    public override object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName, object? context)
     {
-        return ForceNewObjectByControlType((JsxNamespacedName) base.VisitJsxNamespacedName(jsxNamespacedName)!,
+        return ForceNewObjectByControlType((JsxNamespacedName) base.VisitJsxNamespacedName(jsxNamespacedName, context)!,
             node => new JsxNamespacedName(node.Namespace, node.Name));
     }
 
-    public override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    public override object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement, object? context)
     {
-        return ForceNewObjectByControlType((JsxOpeningElement) base.VisitJsxOpeningElement(jsxOpeningElement)!,
+        return ForceNewObjectByControlType((JsxOpeningElement) base.VisitJsxOpeningElement(jsxOpeningElement, context)!,
             node => new JsxOpeningElement(node.Name, node.SelfClosing, node.Attributes));
     }
 
-    public override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    public override object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment, object? context)
     {
-        return ForceNewObjectByControlType((JsxOpeningFragment) base.VisitJsxOpeningFragment(jsxOpeningFragment)!,
+        return ForceNewObjectByControlType((JsxOpeningFragment) base.VisitJsxOpeningFragment(jsxOpeningFragment, context)!,
             node => new JsxOpeningFragment(node.SelfClosing));
     }
 
-    public override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    public override object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute, object? context)
     {
-        return ForceNewObjectByControlType((JsxSpreadAttribute) base.VisitJsxSpreadAttribute(jsxSpreadAttribute)!,
+        return ForceNewObjectByControlType((JsxSpreadAttribute) base.VisitJsxSpreadAttribute(jsxSpreadAttribute, context)!,
             node => new JsxSpreadAttribute(node.Argument));
     }
 }

@@ -16,9 +16,9 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Expressions);
 
-        protected internal override object? Accept(AstVisitor visitor)
+        protected internal override object? Accept(AstVisitor visitor, object? context)
         {
-            return visitor.VisitSequenceExpression(this);
+            return visitor.VisitSequenceExpression(this, context);
         }
 
         public SequenceExpression UpdateWith(in NodeList<Expression> expressions)
