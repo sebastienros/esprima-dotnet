@@ -77,7 +77,7 @@ namespace Esprima.Ast
                 "||" => BinaryOperator.LogicalOr,
                 "**" => BinaryOperator.Exponentiation,
                 "??" => BinaryOperator.NullishCoalescing,
-                _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
+                _ => Enum.TryParse<BinaryOperator>(op, true, out var bo) ? bo : ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
             };
         }
 
