@@ -237,7 +237,7 @@ namespace Esprima.Test
         {
             var count = 0;
             Action<Node> action = node => count++;
-            var parser = new JavaScriptParser("// this is a comment", new ParserOptions(), action);
+            var parser = new JavaScriptParser("// this is a comment", new ParserOptions { OnNodeCreated = action });
             parser.ParseScript();
 
             Assert.Equal(1, count);
