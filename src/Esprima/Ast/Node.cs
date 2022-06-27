@@ -22,6 +22,15 @@ namespace Esprima.Ast
 
         public abstract NodeCollection ChildNodes { get; }
 
+        public ChildNodes ChildNodesExperimental => new ChildNodes(this);
+
+        /// <remarks>
+        /// Custom node types should override this method and provide an actual implementation.
+        /// </remarks>
+        protected internal virtual IEnumerator<Node>? GetChildNodes() => null;
+
+        internal virtual Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
+
         protected internal abstract object? Accept(AstVisitor visitor);
 
         /// <summary>

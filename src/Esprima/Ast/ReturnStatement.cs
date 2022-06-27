@@ -14,6 +14,11 @@ namespace Esprima.Ast
 
         public override NodeCollection ChildNodes => new(Argument);
 
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator)
+        {
+            return enumerator.MoveNextOptional(Argument);
+        }
+
         protected internal override object? Accept(AstVisitor visitor)
         {
             return visitor.VisitReturnStatement(this);
