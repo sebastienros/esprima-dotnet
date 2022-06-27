@@ -232,6 +232,45 @@ namespace Esprima.Test
             return root ?? "";
         }
 
+        private sealed class ParentNodeChecker : AstVisitor
+        {
+            public void Check(Node node)
+            {
+                Assert.Null(node.Data);
+
+                base.Visit(node);
+            }
+
+            public override object? Visit(Node node)
+            {
+                var parent = (Node?) node.Data;
+                Assert.NotNull(parent);
+                Assert.Contains(node, parent!.ChildNodes);
+
+                return base.Visit(node);
+            }
+        }
+
+        [Fact]
+        public void NodeDataCanBeSetToParentNode()
+        {
+            Action<Node> action = node =>
+            {
+                foreach (var child in node.ChildNodes)
+                {
+                    if (child is not null)
+                    {
+                        child.Data = node;
+                    }
+                }
+            };
+
+            var parser = new JavaScriptParser("function add(a, b) { return a + b; }", new ParserOptions { OnNodeCreated = action });
+            var script = parser.ParseScript();
+
+            new ParentNodeChecker().Check(script);
+        }
+
         [Fact]
         public void CommentsAreParsed()
         {
