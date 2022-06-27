@@ -6,22 +6,22 @@ namespace Esprima.Ast
 {
     public enum AssignmentOperator
     {
-        [EnumMember(Value = "=")] Assign,
-        [EnumMember(Value = "+=")] PlusAssign,
-        [EnumMember(Value = "-=")] MinusAssign,
-        [EnumMember(Value = "*=")] TimesAssign,
-        [EnumMember(Value = "/=")] DivideAssign,
-        [EnumMember(Value = "%=")] ModuloAssign,
-        [EnumMember(Value = "&=")] BitwiseAndAssign,
-        [EnumMember(Value = "|=")] BitwiseOrAssign,
-        [EnumMember(Value = "^=")] BitwiseXOrAssign,
-        [EnumMember(Value = "<<=")] LeftShiftAssign,
-        [EnumMember(Value = ">>=")] RightShiftAssign,
-        [EnumMember(Value = ">>>=")] UnsignedRightShiftAssign,
-        [EnumMember(Value = "**=")] ExponentiationAssign,
-        [EnumMember(Value = "??=")] NullishAssign,
-        [EnumMember(Value = "&&=")] AndAssign,
-        [EnumMember(Value = "||=")] OrAssign
+        Assign,
+        PlusAssign,
+        MinusAssign,
+        TimesAssign,
+        DivideAssign,
+        ModuloAssign,
+        BitwiseAndAssign,
+        BitwiseOrAssign,
+        BitwiseXOrAssign,
+        LeftShiftAssign,
+        RightShiftAssign,
+        UnsignedRightShiftAssign,
+        ExponentiationAssign,
+        NullishAssign,
+        AndAssign,
+        OrAssign
     }
 
     public sealed class AssignmentExpression : Expression
@@ -58,14 +58,38 @@ namespace Esprima.Ast
                 "&=" => AssignmentOperator.BitwiseAndAssign,
                 "|=" => AssignmentOperator.BitwiseOrAssign,
                 "^=" => AssignmentOperator.BitwiseXOrAssign,
-                "**=" => AssignmentOperator.ExponentiationAssign,
                 "<<=" => AssignmentOperator.LeftShiftAssign,
                 ">>=" => AssignmentOperator.RightShiftAssign,
                 ">>>=" => AssignmentOperator.UnsignedRightShiftAssign,
+                "**=" => AssignmentOperator.ExponentiationAssign,
                 "??=" => AssignmentOperator.NullishAssign,
                 "&&=" => AssignmentOperator.AndAssign,
                 "||=" => AssignmentOperator.OrAssign,
                 _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op)
+            };
+        }
+
+        public static string GetAssignmentOperatorToken(AssignmentOperator op)
+        {
+            return op switch
+            {
+                AssignmentOperator.Assign => "=",
+                AssignmentOperator.PlusAssign => "+=",
+                AssignmentOperator.MinusAssign => "-=",
+                AssignmentOperator.TimesAssign => "*=",
+                AssignmentOperator.DivideAssign => "/=",
+                AssignmentOperator.ModuloAssign => "%=",
+                AssignmentOperator.BitwiseAndAssign => "&=",
+                AssignmentOperator.BitwiseOrAssign => "|=",
+                AssignmentOperator.BitwiseXOrAssign => "^=",
+                AssignmentOperator.LeftShiftAssign => "<<=",
+                AssignmentOperator.RightShiftAssign => ">>=",
+                AssignmentOperator.UnsignedRightShiftAssign => ">>>=",
+                AssignmentOperator.ExponentiationAssign => "**=",
+                AssignmentOperator.NullishAssign => "??=",
+                AssignmentOperator.AndAssign => "&&=",
+                AssignmentOperator.OrAssign => "||=",
+                _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid assignment operator: " + op)
             };
         }
 

@@ -315,10 +315,7 @@ public class AstToJsonConverter : AstJson.IConverter
                 EnumMap.GetValue(value.GetType(),
                     t => t.GetRuntimeFields()
                         .Where(f => f.IsStatic)
-                        .ToDictionary(f => (T) f.GetValue(null),
-                            f => f.GetCustomAttribute<EnumMemberAttribute>() is EnumMemberAttribute a
-                                ? a.Value
-                                : f.Name.ToLowerInvariant()));
+                        .ToDictionary(f => (T) f.GetValue(null), f => f.Name.ToLowerInvariant()));
             Member(name, map[value]);
         }
 
@@ -396,7 +393,7 @@ public class AstToJsonConverter : AstJson.IConverter
         {
             using (StartNodeObject(assignmentExpression))
             {
-                Member("operator", assignmentExpression.Operator);
+                Member("operator", AssignmentExpression.GetAssignmentOperatorToken(assignmentExpression.Operator));
                 Member("left", assignmentExpression.Left);
                 Member("right", assignmentExpression.Right);
             }
@@ -429,7 +426,7 @@ public class AstToJsonConverter : AstJson.IConverter
         {
             using (StartNodeObject(binaryExpression))
             {
-                Member("operator", binaryExpression.Operator);
+                Member("operator", BinaryExpression.GetBinaryOperatorToken(binaryExpression.Operator));
                 Member("left", binaryExpression.Left);
                 Member("right", binaryExpression.Right);
             }
@@ -1227,7 +1224,7 @@ public class AstToJsonConverter : AstJson.IConverter
         {
             using (StartNodeObject(unaryExpression))
             {
-                Member("operator", unaryExpression.Operator);
+                Member("operator", UnaryExpression.GetUnaryOperatorToken(unaryExpression.Operator));
                 Member("argument", unaryExpression.Argument);
                 Member("prefix", unaryExpression.Prefix);
             }
