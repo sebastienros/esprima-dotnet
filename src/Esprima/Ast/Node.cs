@@ -15,6 +15,11 @@ namespace Esprima.Ast
         public Range Range;
         public Location Location;
 
+        /// <summary>
+        /// A general purpose field for associating additional, user-defined data or context with <see cref="Node"/>.
+        /// </summary>
+        public object? Data;
+
         public abstract NodeCollection ChildNodes { get; }
 
         protected internal abstract object? Accept(AstVisitor visitor);
