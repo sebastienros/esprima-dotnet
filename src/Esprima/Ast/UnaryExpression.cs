@@ -6,15 +6,15 @@ namespace Esprima.Ast
 {
     public enum UnaryOperator
     {
-        [EnumMember(Value = "+")] Plus,
-        [EnumMember(Value = "-")] Minus,
-        [EnumMember(Value = "~")] BitwiseNot,
-        [EnumMember(Value = "!")] LogicalNot,
-        [EnumMember(Value = "delete")] Delete,
-        [EnumMember(Value = "void")] Void,
-        [EnumMember(Value = "typeof")] TypeOf,
-        [EnumMember(Value = "++")] Increment,
-        [EnumMember(Value = "--")] Decrement
+        Plus,
+        Minus,
+        BitwiseNot,
+        LogicalNot,
+        Delete,
+        Void,
+        TypeOf,
+        Increment,
+        Decrement
     }
 
     public class UnaryExpression : Expression
@@ -38,20 +38,37 @@ namespace Esprima.Ast
             Prefix = prefix;
         }
 
-        private static UnaryOperator ParseUnaryOperator(string? op)
+        public static UnaryOperator ParseUnaryOperator(string? op)
         {
             return op switch
             {
                 "+" => UnaryOperator.Plus,
                 "-" => UnaryOperator.Minus,
-                "++" => UnaryOperator.Increment,
-                "--" => UnaryOperator.Decrement,
                 "~" => UnaryOperator.BitwiseNot,
                 "!" => UnaryOperator.LogicalNot,
                 "delete" => UnaryOperator.Delete,
                 "void" => UnaryOperator.Void,
                 "typeof" => UnaryOperator.TypeOf,
+                "++" => UnaryOperator.Increment,
+                "--" => UnaryOperator.Decrement,
                 _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
+            };
+        }
+
+        public static string GetUnaryOperatorToken(UnaryOperator op)
+        {
+            return op switch
+            {
+                UnaryOperator.Plus => "+",
+                UnaryOperator.Minus => "-",
+                UnaryOperator.BitwiseNot => "~",
+                UnaryOperator.LogicalNot => "!",
+                UnaryOperator.Delete => "delete",
+                UnaryOperator.Void => "void",
+                UnaryOperator.TypeOf => "typeof",
+                UnaryOperator.Increment => "++",
+                UnaryOperator.Decrement => "--",
+                _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid unary operator: " + op)
             };
         }
 
