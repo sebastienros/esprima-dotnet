@@ -58,5 +58,10 @@
         /// Default timeout for created regexes, defaults to 10 seconds.
         /// </summary>
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromSeconds(10);
+
+        /// <summary>
+        /// The maximum depth of assignments allowed, defaults to 200.
+        /// </summary>
+        public int MaxAssignmentDepth { get; set; } = 200;
     }
 }
