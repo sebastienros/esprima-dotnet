@@ -55,11 +55,8 @@ namespace Esprima.Ast
         public Regex? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.RegularExpression ? (Regex?) Value : null; }
         public BigInteger? BigIntValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null; }
 
-        public sealed override NodeCollection ChildNodes => NodeCollection.Empty;
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-        protected internal sealed override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitLiteral(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitLiteral(this);
     }
 }

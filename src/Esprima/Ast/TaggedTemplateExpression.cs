@@ -14,12 +14,9 @@ namespace Esprima.Ast
         public Expression Tag { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public TemplateLiteral Quasi { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Tag, Quasi);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Tag, Quasi);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitTaggedTemplateExpression(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTaggedTemplateExpression(this);
 
         public TaggedTemplateExpression UpdateWith(Expression tag, TemplateLiteral quasi)
         {

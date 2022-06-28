@@ -18,12 +18,9 @@ namespace Esprima.Ast
         public Expression Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression? Init { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Id, Init);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Id, Init);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitVariableDeclarator(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitVariableDeclarator(this);
 
         public VariableDeclarator UpdateWith(Expression id, Expression? init)
         {

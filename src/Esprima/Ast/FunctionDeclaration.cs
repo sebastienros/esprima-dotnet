@@ -35,12 +35,9 @@ namespace Esprima.Ast
         public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Id, Params, Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Id, Params, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitFunctionDeclaration(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitFunctionDeclaration(this);
 
         public FunctionDeclaration UpdateWith(Identifier? id, in NodeList<Expression> parameters, BlockStatement body)
         {

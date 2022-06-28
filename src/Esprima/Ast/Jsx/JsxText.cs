@@ -16,10 +16,7 @@ public sealed class JsxText : JsxExpression
     public string? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public string Raw { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => NodeCollection.Empty;
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxText(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxText(this);
 }

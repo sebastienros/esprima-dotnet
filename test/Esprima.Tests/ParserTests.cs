@@ -347,10 +347,11 @@ class aa {
             var script = parser.ParseScript();
             var templateLiteral = script.DescendantNodes().OfType<TemplateLiteral>().First();
 
+            var childNodes = templateLiteral.ChildNodes.ToArray();
             for (var index = 0; index < correctOrder.Length; index++)
             {
                 var raw = correctOrder[index];
-                var rawFromNode = GetRawItem(templateLiteral.ChildNodes[index]);
+                var rawFromNode = GetRawItem(childNodes[index]);
                 Assert.Equal(raw, rawFromNode);
             }
 

@@ -12,12 +12,9 @@ public sealed class JsxExpressionContainer : JsxExpression
 
     public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Expression);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expression);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxExpressionContainer(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxExpressionContainer(this);
 
     public JsxExpressionContainer UpdateWith(Expression expression)
     {

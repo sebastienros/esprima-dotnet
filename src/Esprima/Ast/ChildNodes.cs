@@ -11,6 +11,12 @@ namespace Esprima.Ast
             _parentNode = parentNode;
         }
 
+        public bool IsEmpty()
+        {
+            using var enumerator = GetEnumerator();
+            return !enumerator.MoveNext();
+        }
+
         public Enumerator GetEnumerator()
         {
             return new Enumerator(this);
@@ -29,8 +35,8 @@ namespace Esprima.Ast
         public partial struct Enumerator : IEnumerator<Node>
         {
             private readonly object? _source; // Node | IEnumerator<Node> | null
-            internal int _propertyIndex;
-            internal int _listIndex;
+            private int _propertyIndex;
+            private int _listIndex;
             private Node? _current;
 
             public Enumerator(in ChildNodes childNodes)

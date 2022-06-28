@@ -20,12 +20,9 @@ namespace Esprima.Ast
         public Statement Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Statement? Alternate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Test, Consequent, Alternate);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(Test, Consequent, Alternate);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitIfStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitIfStatement(this);
 
         public IfStatement UpdateWith(Expression test, Statement consequent, Statement? alternate)
         {

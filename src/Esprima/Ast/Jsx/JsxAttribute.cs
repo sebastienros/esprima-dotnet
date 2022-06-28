@@ -14,12 +14,9 @@ public sealed class JsxAttribute : JsxExpression
     public JsxExpression Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Expression? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Name, Value);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Name, Value);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxAttribute(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxAttribute(this);
 
     public JsxAttribute UpdateWith(JsxExpression name, Expression? value)
     {

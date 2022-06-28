@@ -12,12 +12,9 @@ public sealed class Decorator : Node
 
     public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Expression);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expression);
 
-    protected internal override object? Accept(AstVisitor visitor)
-    {
-        return visitor.VisitDecorator(this);
-    }
+    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitDecorator(this);
 
     public Decorator UpdateWith(Expression expression)
     {

@@ -27,12 +27,9 @@ namespace Esprima.Ast
         public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
-        public override NodeCollection ChildNodes => new(Key, Value);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Key, Value, Decorators);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitMethodDefinition(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitMethodDefinition(this);
 
         public MethodDefinition UpdateWith(Expression key, FunctionExpression value, in NodeList<Decorator> decorators)
         {

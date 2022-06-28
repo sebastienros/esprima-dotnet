@@ -8,10 +8,7 @@ public sealed class JsxClosingFragment : JsxExpression
     {
     }
 
-    public override NodeCollection ChildNodes => NodeCollection.Empty;
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxClosingFragment(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxClosingFragment(this);
 }

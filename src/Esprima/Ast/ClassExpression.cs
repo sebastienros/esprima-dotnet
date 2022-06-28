@@ -27,24 +27,9 @@ namespace Esprima.Ast
         public ClassBody Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_1(Id, SuperClass, Body, Decorators);
 
-        private IEnumerable<Node?> CreateChildNodes()
-        {
-            yield return Id;
-            yield return SuperClass;
-            yield return Body;
-
-            foreach (var node in Decorators)
-            {
-                yield return node;
-            }
-        }
-
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitClassExpression(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitClassExpression(this);
 
         public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)
         {

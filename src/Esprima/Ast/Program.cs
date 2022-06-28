@@ -16,12 +16,9 @@ namespace Esprima.Ast
 
         public abstract SourceType SourceType { get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+        internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitProgram(this);
-        }
+        protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitProgram(this);
 
         protected abstract Program Rewrite(in NodeList<Statement> body);
 

@@ -16,11 +16,8 @@ namespace Esprima.Ast
         public TemplateElementValue Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Tail { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitTemplateElement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTemplateElement(this);
     }
 }

@@ -12,12 +12,9 @@ public sealed class JsxSpreadAttribute : JsxExpression
 
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Argument);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxSpreadAttribute(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxSpreadAttribute(this);
 
     public JsxSpreadAttribute UpdateWith(Expression argument)
     {

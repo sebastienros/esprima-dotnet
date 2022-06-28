@@ -6,5 +6,6 @@
         Expression Key { get; }
         bool Computed { get; }
         Expression? Value { get; }
+        ChildNodes ChildNodes { get; }
     }
 }

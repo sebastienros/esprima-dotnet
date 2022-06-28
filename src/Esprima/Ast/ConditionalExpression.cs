@@ -19,12 +19,9 @@ namespace Esprima.Ast
         public Expression Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Alternate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Test, Consequent, Alternate);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Test, Consequent, Alternate);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitConditionalExpression(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitConditionalExpression(this);
 
         public ConditionalExpression UpdateWith(Expression test, Expression consequent, Expression alternate)
         {

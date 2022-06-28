@@ -21,11 +21,8 @@ namespace Esprima.Ast
         public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Params);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitArrowParameterPlaceHolder(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowParameterPlaceHolder(this);
     }
 }

@@ -14,12 +14,9 @@ namespace Esprima.Ast
         public Expression Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Test, Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Test, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitWhileStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitWhileStatement(this);
 
         public WhileStatement UpdateWith(Expression test, Statement body)
         {

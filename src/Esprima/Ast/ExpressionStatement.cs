@@ -12,12 +12,9 @@ namespace Esprima.Ast
 
         public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public sealed override NodeCollection ChildNodes => new(Expression);
+        internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expression);
 
-        protected internal sealed override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitExpressionStatement(this);
-        }
+        protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitExpressionStatement(this);
 
         protected virtual ExpressionStatement Rewrite(Expression expression)
         {

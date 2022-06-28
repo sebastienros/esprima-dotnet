@@ -14,12 +14,9 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _expressions; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Expressions);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expressions);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitSequenceExpression(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSequenceExpression(this);
 
         public SequenceExpression UpdateWith(in NodeList<Expression> expressions)
         {

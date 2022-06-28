@@ -18,12 +18,9 @@ public sealed class JsxElement : JsxExpression
     public Node? ClosingElement { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<JsxExpression> Children { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _children; }
 
-    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(OpeningElement, Children, ClosingElement);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(OpeningElement, Children, ClosingElement);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxElement(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxElement(this);
 
     public JsxElement UpdateWith(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
     {

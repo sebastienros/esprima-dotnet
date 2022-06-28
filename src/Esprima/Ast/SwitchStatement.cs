@@ -16,12 +16,9 @@ namespace Esprima.Ast
         public Expression Discriminant { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<SwitchCase> Cases { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _cases; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Discriminant, Cases);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Discriminant, Cases);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitSwitchStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSwitchStatement(this);
 
         public SwitchStatement UpdateWith(Expression discriminant, in NodeList<SwitchCase> cases)
         {

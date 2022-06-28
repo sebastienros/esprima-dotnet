@@ -14,12 +14,9 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
-        public sealed override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
 
-        protected internal sealed override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitStaticBlock(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitStaticBlock(this);
 
         public StaticBlock UpdateWith(in NodeList<Statement> body)
         {

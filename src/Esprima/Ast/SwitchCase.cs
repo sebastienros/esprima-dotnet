@@ -16,12 +16,9 @@ namespace Esprima.Ast
         public Expression? Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<Statement> Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _consequent; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Test, Consequent);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Test, Consequent);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitSwitchCase(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSwitchCase(this);
 
         public SwitchCase UpdateWith(Expression? test, in NodeList<Statement> consequent)
         {

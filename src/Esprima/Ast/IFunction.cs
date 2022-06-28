@@ -12,6 +12,6 @@
         bool Expression { get; }
         bool Strict { get; }
         bool Async { get; }
-        NodeCollection ChildNodes { get; }
+        ChildNodes ChildNodes { get; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{71570FFF-0BEA-4AF7-8288-9E46627EA676}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Tests", "test\Espri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Benchmark", "samples\Esprima.Benchmark\Esprima.Benchmark.csproj", "{0E05EB4C-CEE3-4D68-90B8-1F0FCE0D2DCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Esprima.Tests.Test262", "test\Esprima.Tests.Test262\Esprima.Tests.Test262.csproj", "{D006FF90-259B-4BFA-BB7E-C1985A520634}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.Tests.Test262", "test\Esprima.Tests.Test262\Esprima.Tests.Test262.csproj", "{D006FF90-259B-4BFA-BB7E-C1985A520634}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{0B8DD64D-C014-4284-A608-05ED477EBCFA}"
 EndProject
@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\release.yml = .github\workflows\release.yml
 		.github\workflows\staging.yml = .github\workflows\staging.yml
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Esprima.SourceGenerators", "src\Esprima.SourceGenerators\Esprima.SourceGenerators.csproj", "{51AE7AAC-9585-4B71-873A-E3EC95F51E59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,15 +58,19 @@ Global
 		{D006FF90-259B-4BFA-BB7E-C1985A520634}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D006FF90-259B-4BFA-BB7E-C1985A520634}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D006FF90-259B-4BFA-BB7E-C1985A520634}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51AE7AAC-9585-4B71-873A-E3EC95F51E59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51AE7AAC-9585-4B71-873A-E3EC95F51E59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51AE7AAC-9585-4B71-873A-E3EC95F51E59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51AE7AAC-9585-4B71-873A-E3EC95F51E59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {077EFD6B-7F31-451D-A880-C255FC083C39}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0B8DD64D-C014-4284-A608-05ED477EBCFA} = {71570FFF-0BEA-4AF7-8288-9E46627EA676}
 		{59CAEBBB-3BDA-4894-A563-7D8E668B8A66} = {0B8DD64D-C014-4284-A608-05ED477EBCFA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {077EFD6B-7F31-451D-A880-C255FC083C39}
 	EndGlobalSection
 EndGlobal

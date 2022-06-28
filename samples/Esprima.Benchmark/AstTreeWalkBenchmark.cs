@@ -89,7 +89,7 @@ namespace Esprima.Benchmark
                         }
                     }
 
-                    if (childNode.ChildNodes.Count > 0)
+                    if (!childNode.ChildNodes.IsEmpty())
                     {
                         Visit(childNode);
                     }

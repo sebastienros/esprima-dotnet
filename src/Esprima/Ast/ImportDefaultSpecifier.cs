@@ -8,12 +8,9 @@ namespace Esprima.Ast
         {
         }
 
-        public override NodeCollection ChildNodes => new(Local);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Local);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitImportDefaultSpecifier(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportDefaultSpecifier(this);
 
         public ImportDefaultSpecifier UpdateWith(Identifier local)
         {

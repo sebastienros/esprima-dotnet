@@ -12,12 +12,9 @@ namespace Esprima.Ast
 
         public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Argument);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitThrowStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitThrowStatement(this);
 
         public ThrowStatement UpdateWith(Expression argument)
         {

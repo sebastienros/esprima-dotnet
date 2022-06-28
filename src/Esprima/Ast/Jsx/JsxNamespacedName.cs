@@ -16,12 +16,9 @@ public sealed class JsxNamespacedName : JsxExpression
     public JsxIdentifier Namespace { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public JsxIdentifier Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Name, Namespace);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Name, Namespace);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxNamespacedName(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxNamespacedName(this);
 
     public JsxNamespacedName UpdateWith(JsxIdentifier name, JsxIdentifier @namespace)
     {

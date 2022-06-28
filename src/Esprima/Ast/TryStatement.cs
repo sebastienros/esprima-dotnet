@@ -20,12 +20,9 @@ namespace Esprima.Ast
         public CatchClause? Handler { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public BlockStatement? Finalizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Block, Handler, Finalizer);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Block, Handler, Finalizer);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitTryStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTryStatement(this);
 
         public TryStatement UpdateWith(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
         {

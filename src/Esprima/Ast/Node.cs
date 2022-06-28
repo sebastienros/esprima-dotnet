@@ -20,16 +20,15 @@ namespace Esprima.Ast
         /// </summary>
         public object? Data;
 
-        public abstract NodeCollection ChildNodes { get; }
-
-        public ChildNodes ChildNodesExperimental => new ChildNodes(this);
+        public ChildNodes ChildNodes => new ChildNodes(this);
 
         /// <remarks>
-        /// Custom node types should override this method and provide an actual implementation.
+        /// Inheritors who extend the AST with custom node types should override this method and provide an actual implementation.
         /// </remarks>
         protected internal virtual IEnumerator<Node>? GetChildNodes() => null;
 
-        internal virtual Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
+        internal virtual Node? NextChildNode(ref ChildNodes.Enumerator enumerator) =>
+            throw new NotImplementedException($"User-defined node types should override the {nameof(GetChildNodes)} method and provide an actual implementation.");
 
         protected internal abstract object? Accept(AstVisitor visitor);
 

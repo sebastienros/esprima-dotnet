@@ -14,11 +14,8 @@ namespace Esprima.Ast
 
         public string? Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitIdentifier(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitIdentifier(this);
     }
 }
