@@ -6,31 +6,31 @@ namespace Esprima.Ast
 {
     public enum BinaryOperator
     {
-        [EnumMember(Value = "+")] Plus,
-        [EnumMember(Value = "-")] Minus,
-        [EnumMember(Value = "*")] Times,
-        [EnumMember(Value = "/")] Divide,
-        [EnumMember(Value = "%")] Modulo,
-        [EnumMember(Value = "==")] Equal,
-        [EnumMember(Value = "!=")] NotEqual,
-        [EnumMember(Value = ">")] Greater,
-        [EnumMember(Value = ">=")] GreaterOrEqual,
-        [EnumMember(Value = "<")] Less,
-        [EnumMember(Value = "<=")] LessOrEqual,
-        [EnumMember(Value = "===")] StrictlyEqual,
-        [EnumMember(Value = "!==")] StricltyNotEqual,
-        [EnumMember(Value = "&")] BitwiseAnd,
-        [EnumMember(Value = "|")] BitwiseOr,
-        [EnumMember(Value = "^")] BitwiseXOr,
-        [EnumMember(Value = "<<")] LeftShift,
-        [EnumMember(Value = ">>")] RightShift,
-        [EnumMember(Value = ">>>")] UnsignedRightShift,
-        [EnumMember(Value = "instanceof")] InstanceOf,
-        [EnumMember(Value = "in")] In,
-        [EnumMember(Value = "&&")] LogicalAnd,
-        [EnumMember(Value = "||")] LogicalOr,
-        [EnumMember(Value = "**")] Exponentiation,
-        [EnumMember(Value = "??")] NullishCoalescing
+        Plus,
+        Minus,
+        Times,
+        Divide,
+        Modulo,
+        Equal,
+        NotEqual,
+        Greater,
+        GreaterOrEqual,
+        Less,
+        LessOrEqual,
+        StrictlyEqual,
+        StricltyNotEqual,
+        BitwiseAnd,
+        BitwiseOr,
+        BitwiseXor,
+        LeftShift,
+        RightShift,
+        UnsignedRightShift,
+        InstanceOf,
+        In,
+        LogicalAnd,
+        LogicalOr,
+        Exponentiation,
+        NullishCoalescing
     }
 
     public sealed class BinaryExpression : Expression
@@ -67,7 +67,7 @@ namespace Esprima.Ast
                 "!==" => BinaryOperator.StricltyNotEqual,
                 "&" => BinaryOperator.BitwiseAnd,
                 "|" => BinaryOperator.BitwiseOr,
-                "^" => BinaryOperator.BitwiseXOr,
+                "^" => BinaryOperator.BitwiseXor,
                 "<<" => BinaryOperator.LeftShift,
                 ">>" => BinaryOperator.RightShift,
                 ">>>" => BinaryOperator.UnsignedRightShift,
@@ -78,6 +78,39 @@ namespace Esprima.Ast
                 "**" => BinaryOperator.Exponentiation,
                 "??" => BinaryOperator.NullishCoalescing,
                 _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
+            };
+        }
+
+        public static string GetBinaryOperatorToken(BinaryOperator op)
+        {
+            return op switch
+            {
+                BinaryOperator.Plus => "+",
+                BinaryOperator.Minus => "-",
+                BinaryOperator.Times => "*",
+                BinaryOperator.Divide => "/",
+                BinaryOperator.Modulo => "%",
+                BinaryOperator.Equal => "==",
+                BinaryOperator.NotEqual => "!=",
+                BinaryOperator.Greater => ">",
+                BinaryOperator.GreaterOrEqual => ">=",
+                BinaryOperator.Less => "<",
+                BinaryOperator.LessOrEqual => "<=",
+                BinaryOperator.StrictlyEqual => "===",
+                BinaryOperator.StricltyNotEqual => "!==",
+                BinaryOperator.BitwiseAnd => "&",
+                BinaryOperator.BitwiseOr => "|",
+                BinaryOperator.BitwiseXor => "^",
+                BinaryOperator.LeftShift => "<<",
+                BinaryOperator.RightShift => ">>",
+                BinaryOperator.UnsignedRightShift => ">>>",
+                BinaryOperator.InstanceOf => "instanceof",
+                BinaryOperator.In => "in",
+                BinaryOperator.LogicalAnd => "&&",
+                BinaryOperator.LogicalOr => "||",
+                BinaryOperator.Exponentiation => "**",
+                BinaryOperator.NullishCoalescing => "??",
+                _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid binary operator: " + op)
             };
         }
 

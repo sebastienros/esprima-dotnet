@@ -70,7 +70,6 @@ namespace Esprima
         private protected readonly IErrorHandler _errorHandler;
         private protected readonly ParserOptions _config;
         private protected bool _hasLineTerminator;
-        private protected readonly Action<Node>? _action;
 
         private protected readonly List<Token> _tokens = new();
 
@@ -114,17 +113,7 @@ namespace Esprima
         /// <param name="code">The JavaScript code to parse.</param>
         /// <param name="options">The parser options.</param>
         /// <returns></returns>
-        public JavaScriptParser(string code, ParserOptions options) : this(code, options, null)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="JavaScriptParser" /> instance.
-        /// </summary>
-        /// <param name="code">The JavaScript code to parse.</param>
-        /// <param name="options">The parser options.</param>
-        /// <param name="action">Action to execute on each parsed node.</param>
-        public JavaScriptParser(string code, ParserOptions options, Action<Node>? action)
+        public JavaScriptParser(string code, ParserOptions options)
         {
             if (code == null)
             {
@@ -153,7 +142,6 @@ namespace Esprima
             parseAsyncArgument = ParseAsyncArgument;
 
             _config = options;
-            _action = action;
             _errorHandler = _config.ErrorHandler;
             _errorHandler.Tolerant = _config.Tolerant;
             _scanner = new Scanner(code, _config);
@@ -357,7 +345,7 @@ namespace Esprima
 
             node.Location = new Location(start, end, _errorHandler.Source);
 
-            _action?.Invoke(node);
+            _config.OnNodeCreated?.Invoke(node);
 
             return node;
         }

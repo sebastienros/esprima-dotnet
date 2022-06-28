@@ -1,4 +1,6 @@
-﻿namespace Esprima
+﻿using Esprima.Ast;
+
+namespace Esprima
 {
     /// <summary>
     /// Parser options.
@@ -63,5 +65,26 @@
         /// The maximum depth of assignments allowed, defaults to 200.
         /// </summary>
         public int MaxAssignmentDepth { get; set; } = 200;
+
+        /// Action to execute on each parsed node.
+        /// </summary>
+        /// <remarks>
+        /// This callback allows you to make changes to the nodes created by the parser.
+        /// E.g. you can use it to initialize <see cref="Node.Data"/> with a reference to the parent node:
+        /// <code>
+        /// options.OnNodeCreated = node => 
+        /// { 
+        ///    foreach (var child in node.ChildNodes)
+        ///    {
+        ///        if (child is not null)
+        ///        {
+        ///            child.Data = node;
+        ///        }
+        ///    }
+        /// };
+        /// </code>
+        /// </remarks>
+        public Action<Node>? OnNodeCreated { get; set; }
+
     }
 }
