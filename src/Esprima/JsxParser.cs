@@ -296,10 +296,6 @@ public class JsxParser : JavaScriptParser
     {
     }
 
-    public JsxParser(string code, JsxParserOptions options, Action<Node>? action) : base(code, options, action)
-    {
-    }
-
     private protected override Expression ParsePrimaryExpression()
     {
         return Match("<") ? ParseJsxRoot() : base.ParsePrimaryExpression();

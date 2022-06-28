@@ -1,4 +1,6 @@
-﻿namespace Esprima
+﻿using Esprima.Ast;
+
+namespace Esprima
 {
     /// <summary>
     /// Parser options.
@@ -58,5 +60,26 @@
         /// Default timeout for created regexes, defaults to 10 seconds.
         /// </summary>
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromSeconds(10);
+
+        /// <summary>
+        /// Action to execute on each parsed node.
+        /// </summary>
+        /// <remarks>
+        /// This callback allows you to make changes to the nodes created by the parser.
+        /// E.g. you can use it to initialize <see cref="Node.Data"/> with a reference to the parent node:
+        /// <code>
+        /// options.OnNodeCreated = node => 
+        /// { 
+        ///    foreach (var child in node.ChildNodes)
+        ///    {
+        ///        if (child is not null)
+        ///        {
+        ///            child.Data = node;
+        ///        }
+        ///    }
+        /// };
+        /// </code>
+        /// </remarks>
+        public Action<Node>? OnNodeCreated { get; set; }
     }
 }
