@@ -85,6 +85,5 @@ namespace Esprima
         /// </code>
         /// </remarks>
         public Action<Node>? OnNodeCreated { get; set; }
-
     }
 }
