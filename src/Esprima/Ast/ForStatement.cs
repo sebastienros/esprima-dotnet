@@ -26,12 +26,9 @@ namespace Esprima.Ast
         public Expression? Update { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Init, Test, Update, Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_1_2(Init, Test, Update, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitForStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitForStatement(this);
 
         public ForStatement UpdateWith(StatementListItem? init, Expression? test, Expression? update, Statement body)
         {

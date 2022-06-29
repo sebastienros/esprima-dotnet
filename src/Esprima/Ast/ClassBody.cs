@@ -17,12 +17,9 @@ namespace Esprima.Ast
         /// </remarks>
         public ref readonly NodeList<ClassElement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitClassBody(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitClassBody(this);
 
         public ClassBody UpdateWith(in NodeList<ClassElement> body)
         {

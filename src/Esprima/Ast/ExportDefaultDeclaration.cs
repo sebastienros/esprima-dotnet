@@ -15,12 +15,9 @@ namespace Esprima.Ast
         /// </remarks>
         public StatementListItem Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Declaration);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Declaration);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitExportDefaultDeclaration(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportDefaultDeclaration(this);
 
         public ExportDefaultDeclaration UpdateWith(StatementListItem declaration)
         {

@@ -14,12 +14,9 @@ namespace Esprima.Ast
         public Expression Object { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Object, Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Object, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitWithStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitWithStatement(this);
 
         public WithStatement UpdateWith(Expression obj, Statement body)
         {

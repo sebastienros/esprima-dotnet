@@ -23,27 +23,9 @@ namespace Esprima.Ast
         public Literal Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Specifiers, Source, Assertions);
 
-        private IEnumerable<Node?> CreateChildNodes()
-        {
-            foreach (var node in Specifiers)
-            {
-                yield return node;
-            }
-
-            yield return Source;
-
-            foreach (var node in Assertions)
-            {
-                yield return node;
-            }
-        }
-
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitImportDeclaration(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportDeclaration(this);
 
         public ImportDeclaration UpdateWith(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> assertions)
         {

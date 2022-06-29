@@ -14,12 +14,9 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Elements);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Elements);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitArrayPattern(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrayPattern(this);
 
         public ArrayPattern UpdateWith(in NodeList<Expression?> elements)
         {

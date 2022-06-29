@@ -17,12 +17,9 @@ public sealed class ImportAttribute : Node
     public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Literal Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Key, Value);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Key, Value);
 
-    protected internal override object? Accept(AstVisitor visitor)
-    {
-        return visitor.VisitImportAttribute(this);
-    }
+    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportAttribute(this);
 
     public ImportAttribute UpdateWith(Expression key, Literal value)
     {

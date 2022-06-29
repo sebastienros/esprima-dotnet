@@ -16,12 +16,9 @@ namespace Esprima.Ast
         public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _right; }
 
-        public override NodeCollection ChildNodes => new(Left, Right);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitAssignmentPattern(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAssignmentPattern(this);
 
         public AssignmentPattern UpdateWith(Expression left, Expression right)
         {

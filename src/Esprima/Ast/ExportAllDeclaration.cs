@@ -25,23 +25,9 @@ namespace Esprima.Ast
         public Expression? Exported { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Exported, Source, Assertions);
 
-        private IEnumerable<Node?> CreateChildNodes()
-        {
-            yield return Exported;
-            yield return Source;
-
-            foreach (var assertion in Assertions)
-            {
-                yield return assertion;
-            }
-        }
-
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitExportAllDeclaration(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportAllDeclaration(this);
 
         public ExportAllDeclaration UpdateWith(Expression? exported, Literal source, in NodeList<ImportAttribute> assertions)
         {

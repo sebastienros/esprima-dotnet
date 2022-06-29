@@ -22,12 +22,9 @@ namespace Esprima.Ast
         public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Await { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Left, Right, Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitForOfStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitForOfStatement(this);
 
         public ForOfStatement UpdateWith(Node left, Expression right, Statement body)
         {

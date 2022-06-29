@@ -14,12 +14,9 @@ namespace Esprima.Ast
 
         public ref readonly NodeList<Node> Properties { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _properties; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Properties);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Properties);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitObjectPattern(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitObjectPattern(this);
 
         public ObjectPattern UpdateWith(in NodeList<Node> properties)
         {

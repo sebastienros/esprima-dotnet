@@ -18,12 +18,9 @@ namespace Esprima.Ast
         public Expression? Param { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Param, Body);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Param, Body);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitCatchClause(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitCatchClause(this);
 
         public CatchClause UpdateWith(Expression? param, BlockStatement body)
         {

@@ -6,11 +6,8 @@ namespace Esprima.Ast
     {
         public DebuggerStatement() : base(Nodes.DebuggerStatement) { }
 
-        public override NodeCollection ChildNodes => NodeCollection.Empty;
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitDebuggerStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitDebuggerStatement(this);
     }
 }

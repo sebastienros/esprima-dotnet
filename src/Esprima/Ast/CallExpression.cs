@@ -21,12 +21,9 @@ namespace Esprima.Ast
         public ref readonly NodeList<Expression> Arguments { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _arguments; }
         public bool Optional { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Callee, Arguments);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Callee, Arguments);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitCallExpression(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitCallExpression(this);
 
         public CallExpression UpdateWith(Expression callee, in NodeList<Expression> arguments)
         {

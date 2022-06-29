@@ -22,12 +22,9 @@ namespace Esprima.Ast
         public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Optional { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Object, Property);
+        internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Object, Property);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitMemberExpression(this);
-        }
+        protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitMemberExpression(this);
 
         protected abstract MemberExpression Rewrite(Expression obj, Expression property);
 

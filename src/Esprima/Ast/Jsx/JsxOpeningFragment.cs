@@ -12,10 +12,7 @@ public sealed class JsxOpeningFragment : JsxExpression
 
     public bool SelfClosing { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => NodeCollection.Empty;
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxOpeningFragment(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxOpeningFragment(this);
 }

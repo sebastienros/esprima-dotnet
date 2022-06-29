@@ -771,14 +771,11 @@ public class AstToJsonConverter : AstJson.IConverter
 
         private sealed class ImportCompat : Expression
         {
-            protected internal override object? Accept(AstVisitor visitor)
-            {
-                return ((VisitorBase) visitor).VisitImportCompat(this);
-            }
-
             public ImportCompat() : base(Nodes.Import) { }
 
-            public override NodeCollection ChildNodes => NodeCollection.Empty;
+            internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
+
+            protected internal override object? Accept(AstVisitor visitor) => ((VisitorBase) visitor).VisitImportCompat(this);
         }
 
         protected internal override object? VisitImport(Import import)

@@ -12,12 +12,9 @@ namespace Esprima.Ast
 
         public Identifier? Label { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Label);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Label);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitContinueStatement(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitContinueStatement(this);
 
         public ContinueStatement UpdateWith(Identifier? label)
         {

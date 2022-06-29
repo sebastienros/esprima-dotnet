@@ -14,12 +14,9 @@ namespace Esprima.Ast
         public Identifier Meta { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Identifier Property { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Meta, Property);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Meta, Property);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitMetaProperty(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitMetaProperty(this);
 
         public MetaProperty UpdateWith(Identifier meta, Identifier property)
         {

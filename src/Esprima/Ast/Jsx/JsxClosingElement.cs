@@ -12,12 +12,9 @@ public sealed class JsxClosingElement : JsxExpression
 
     public JsxExpression Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Name);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Name);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxClosingElement(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxClosingElement(this);
 
     public JsxClosingElement UpdateWith(JsxExpression name)
     {

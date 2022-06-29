@@ -20,23 +20,9 @@ namespace Esprima.Ast
         public ref readonly NodeList<TemplateElement> Quasis { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _quasis; }
         public ref readonly NodeList<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _expressions; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(NodeList.Create(CreateChildNodes()));
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextTemplateLiteral(Quasis, Expressions);
 
-        private IEnumerable<Node?> CreateChildNodes()
-        {
-            TemplateElement quasi;
-            for (var i = 0; !(quasi = Quasis[i]).Tail; i++)
-            {
-                yield return quasi;
-                yield return Expressions[i];
-            }
-            yield return quasi;
-        }
-
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitTemplateLiteral(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTemplateLiteral(this);
 
         public TemplateLiteral UpdateWith(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
         {

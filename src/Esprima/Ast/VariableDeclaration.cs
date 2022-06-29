@@ -19,12 +19,9 @@ namespace Esprima.Ast
         public ref readonly NodeList<VariableDeclarator> Declarations { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _declarations; }
         public VariableDeclarationKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Declarations);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Declarations);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitVariableDeclaration(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitVariableDeclaration(this);
 
         public VariableDeclaration UpdateWith(in NodeList<VariableDeclarator> declarations)
         {

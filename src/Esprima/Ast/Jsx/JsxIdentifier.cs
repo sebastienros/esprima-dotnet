@@ -14,10 +14,7 @@ public sealed class JsxIdentifier : JsxExpression
 
     public string Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => NodeCollection.Empty;
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxIdentifier(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxIdentifier(this);
 }

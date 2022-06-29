@@ -76,12 +76,9 @@ namespace Esprima.Ast
         public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Prefix { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public sealed override NodeCollection ChildNodes => new(Argument);
+        internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitUnaryExpression(this);
-        }
+        protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitUnaryExpression(this);
 
         protected virtual UnaryExpression Rewrite(Expression argument)
         {

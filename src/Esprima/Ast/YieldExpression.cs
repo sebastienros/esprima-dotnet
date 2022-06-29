@@ -14,12 +14,9 @@ namespace Esprima.Ast
         public Expression? Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Delegate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Argument);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Argument);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitYieldExpression(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitYieldExpression(this);
 
         public YieldExpression UpdateWith(Expression? argument)
         {

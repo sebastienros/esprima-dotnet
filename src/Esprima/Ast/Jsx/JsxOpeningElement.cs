@@ -18,12 +18,9 @@ public sealed class JsxOpeningElement : JsxExpression
     public bool SelfClosing { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<JsxExpression> Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _attributes; }
 
-    public override NodeCollection ChildNodes => GenericChildNodeYield.Yield(Name, Attributes);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Name, Attributes);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxOpeningElement(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxOpeningElement(this);
 
     public JsxOpeningElement UpdateWith(JsxExpression name, in NodeList<JsxExpression> attributes)
     {

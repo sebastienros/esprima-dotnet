@@ -20,12 +20,9 @@ namespace Esprima.Ast
         /// </remarks>
         public Expression Exported { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        public override NodeCollection ChildNodes => new(Exported, Local);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Local, Exported);
 
-        protected internal override object? Accept(AstVisitor visitor)
-        {
-            return visitor.VisitExportSpecifier(this);
-        }
+        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportSpecifier(this);
 
         public ExportSpecifier UpdateWith(Expression local, Expression exported)
         {

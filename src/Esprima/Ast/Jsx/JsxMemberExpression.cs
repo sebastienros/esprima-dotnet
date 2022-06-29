@@ -14,12 +14,9 @@ public sealed class JsxMemberExpression : JsxExpression
     public JsxExpression Object { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public JsxIdentifier Property { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public override NodeCollection ChildNodes => new(Object, Property);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Object, Property);
 
-    protected override object? Accept(IJsxAstVisitor visitor)
-    {
-        return visitor.VisitJsxMemberExpression(this);
-    }
+    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxMemberExpression(this);
 
     public JsxMemberExpression UpdateWith(JsxExpression obj, JsxIdentifier property)
     {
