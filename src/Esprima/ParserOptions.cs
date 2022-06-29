@@ -66,6 +66,7 @@ namespace Esprima
         /// </summary>
         public int MaxAssignmentDepth { get; set; } = 200;
 
+        /// <summary>
         /// Action to execute on each parsed node.
         /// </summary>
         /// <remarks>
