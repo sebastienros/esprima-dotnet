@@ -2264,14 +2264,13 @@ namespace Esprima
             };
         }
 
-        private const int MaxAssignmentDepth = 100;
         private int _assignmentDepth = 0;
 
         private protected Expression ParseAssignmentExpression()
         {
             Expression expr;
 
-            if (_assignmentDepth++ > MaxAssignmentDepth)
+            if (_assignmentDepth++ > _config.MaxAssignmentDepth)
             {
                 ThrowUnexpectedToken(_lookahead, "Maximum statements depth reached");
             }

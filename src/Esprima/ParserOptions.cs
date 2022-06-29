@@ -62,6 +62,11 @@ namespace Esprima
         public TimeSpan RegexTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
         /// <summary>
+        /// The maximum depth of assignments allowed, defaults to 200.
+        /// </summary>
+        public int MaxAssignmentDepth { get; set; } = 200;
+
+        /// <summary>
         /// Action to execute on each parsed node.
         /// </summary>
         /// <remarks>
