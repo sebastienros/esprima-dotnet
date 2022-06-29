@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using Esprima.Ast;
+using Esprima.Tests.Helpers;
 using Xunit;
 
 namespace Esprima.Tests

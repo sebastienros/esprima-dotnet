@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Esprima.Tests
+namespace Esprima.Tests.Helpers
 {
     internal static class Lazy
     {

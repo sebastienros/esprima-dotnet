@@ -28,7 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Esprima.Tests
+namespace Esprima.Tests.Helpers
 {
     internal class BreakingSequence<T> : IEnumerable<T>
     {

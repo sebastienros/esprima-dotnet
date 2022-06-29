@@ -77,10 +77,7 @@ namespace Esprima
         /// { 
         ///    foreach (var child in node.ChildNodes)
         ///    {
-        ///        if (child is not null)
-        ///        {
-        ///            child.Data = node;
-        ///        }
+        ///        child.Data = node;
         ///    }
         /// };
         /// </code>
