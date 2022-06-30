@@ -303,7 +303,11 @@ public class AstVisitor
     protected internal virtual object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
     {
         Visit(exportSpecifier.Local);
-        Visit(exportSpecifier.Exported);
+
+        if (exportSpecifier.Exported != exportSpecifier.Local)
+        {
+            Visit(exportSpecifier.Exported);
+        }
 
         return exportSpecifier;
     }
@@ -473,7 +477,11 @@ public class AstVisitor
 
     protected internal virtual object? VisitImportSpecifier(ImportSpecifier importSpecifier)
     {
-        Visit(importSpecifier.Imported);
+        if (importSpecifier.Imported != importSpecifier.Local)
+        {
+            Visit(importSpecifier.Imported);
+        }
+
         Visit(importSpecifier.Local);
 
         return importSpecifier;
@@ -574,7 +582,11 @@ public class AstVisitor
 
     protected internal virtual object? VisitProperty(Property property)
     {
-        Visit(property.Key);
+        if (!property.Shorthand)
+        {
+            Visit(property.Key);
+        }
+
         Visit(property.Value);
 
         return property;

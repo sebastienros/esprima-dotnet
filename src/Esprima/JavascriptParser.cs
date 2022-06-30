@@ -2683,7 +2683,6 @@ namespace Esprima
             {
                 var keyToken = _lookahead;
                 key = ParseVariableIdentifier();
-                var init = Finalize(node, new Identifier((string?) keyToken.Value));
                 if (Match("="))
                 {
                     parameters.Push(keyToken);
@@ -2693,13 +2692,13 @@ namespace Esprima
                     _context.IsAssignmentTarget = true;
                     var expr = ParseAssignmentExpression();
                     _context.IsAssignmentTarget = previousIsAssignmentTarget;
-                    value = Finalize(StartNode(keyToken), new AssignmentPattern(init, expr));
+                    value = Finalize(StartNode(keyToken), new AssignmentPattern(key, expr));
                 }
                 else if (!Match(":"))
                 {
                     parameters.Push(keyToken);
                     shorthand = true;
-                    value = init;
+                    value = key;
                 }
                 else
                 {

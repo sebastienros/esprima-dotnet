@@ -112,5 +112,106 @@ namespace Esprima.Tests
 
             Assert.Equal(new[] { id1, id2 }, customNode.ChildNodes);
         }
+
+        public static IEnumerable<object[]> ReusedNodeInstancesData => new[]
+        {
+            new object[]
+            {
+                "export { a }",
+                (IEnumerable<Node> nodes) => nodes.OfType<Identifier>().Where(id => id.Name == "a")
+            },
+            new object[]
+            {
+                "import { b } from 'x'",
+                (IEnumerable<Node> nodes) => nodes.OfType<Identifier>().Where(id => id.Name == "b")
+            },
+            new object[]
+            {
+                "({ c })",
+                (IEnumerable<Node> nodes) => nodes.OfType<Identifier>().Where(id => id.Name == "c")
+            },
+            new object[]
+            {
+                "var { v } = { }",
+                (IEnumerable<Node> nodes) => nodes.OfType<Identifier>().Where(id => id.Name == "v")
+            },
+            new object[]
+            {
+                "var { v = 0 } = { }",
+                (IEnumerable<Node> nodes) => nodes.OfType<Identifier>().Where(id => id.Name == "v")
+            },
+        };
+
+        [Theory]
+        [MemberData(nameof(ReusedNodeInstancesData))]
+        public void ReusedNodeInstancesEnumeratedOnlyOnce(string source, Func<IEnumerable<Node>, IEnumerable<Node>> reusedNodeSelector)
+        {
+            var parser = new JavaScriptParser(source);
+            var module = parser.ParseModule();
+
+            var nodes = module.DescendantNodes();
+
+            Assert.Single(reusedNodeSelector(nodes));
+        }
+
+        public sealed class VisitedNodesCollector : AstVisitor
+        {
+            private readonly List<Node> _nodes = new List<Node>();
+
+            public IReadOnlyList<Node> Collect(Node node)
+            {
+                _nodes.Clear();
+                base.Visit(node);
+                return _nodes;
+            }
+
+            public override object? Visit(Node node)
+            {
+                _nodes.Add(node);
+                return base.Visit(node);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ReusedNodeInstancesData))]
+        public void ReusedNodeInstancesVisitedOnlyOnce(string source, Func<IEnumerable<Node>, IEnumerable<Node>> reusedNodeSelector)
+        {
+            var parser = new JavaScriptParser(source);
+            var module = parser.ParseModule();
+
+            var nodes = new VisitedNodesCollector().Collect(module);
+
+            Assert.Single(reusedNodeSelector(nodes));
+        }
+
+        public sealed class RewrittenNodesCollector : AstRewriter
+        {
+            private readonly List<Node> _nodes = new List<Node>();
+
+            public IReadOnlyList<Node> Collect(Node node)
+            {
+                _nodes.Clear();
+                base.Visit(node);
+                return _nodes;
+            }
+
+            public override object? Visit(Node node)
+            {
+                _nodes.Add(node);
+                return base.Visit(node);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ReusedNodeInstancesData))]
+        public void ReusedNodeInstancesRewrittenOnlyOnce(string source, Func<IEnumerable<Node>, IEnumerable<Node>> reusedNodeSelector)
+        {
+            var parser = new JavaScriptParser(source);
+            var module = parser.ParseModule();
+
+            var nodes = new RewrittenNodesCollector().Collect(module);
+
+            Assert.Single(reusedNodeSelector(nodes));
+        }
     }
 }

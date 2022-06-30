@@ -240,8 +240,18 @@ public class AstRewriter : AstVisitor
 
     protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
     {
-        var local = VisitAndConvert(exportSpecifier.Local);
-        var exported = VisitAndConvert(exportSpecifier.Exported);
+        Expression local;
+        Expression exported;
+
+        if (exportSpecifier.Exported == exportSpecifier.Local)
+        {
+            exported = local = VisitAndConvert(exportSpecifier.Local);
+        }
+        else
+        {
+            local = VisitAndConvert(exportSpecifier.Local);
+            exported = VisitAndConvert(exportSpecifier.Exported);
+        }
 
         return exportSpecifier.UpdateWith(local, exported);
     }
@@ -351,8 +361,18 @@ public class AstRewriter : AstVisitor
 
     protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
     {
-        var imported = VisitAndConvert(importSpecifier.Imported);
-        var local = VisitAndConvert(importSpecifier.Local);
+        Expression imported;
+        Identifier local;
+
+        if (importSpecifier.Imported == importSpecifier.Local)
+        {
+            imported = local = VisitAndConvert(importSpecifier.Local);
+        }
+        else
+        {
+            imported = VisitAndConvert(importSpecifier.Imported);
+            local = VisitAndConvert(importSpecifier.Local);
+        }
 
         return importSpecifier.UpdateWith(imported, local);
     }
@@ -421,8 +441,21 @@ public class AstRewriter : AstVisitor
 
     protected internal override object? VisitProperty(Property property)
     {
-        var key = VisitAndConvert(property.Key);
-        var value = VisitAndConvert(property.Value);
+        Expression? key;
+        Expression value;
+
+        if (property.Shorthand)
+        {
+            value = VisitAndConvert(property.Value);
+            key = value is AssignmentPattern assignmentPattern
+                ? assignmentPattern.Left
+                : value;
+        }
+        else
+        {
+            key = VisitAndConvert(property.Key);
+            value = VisitAndConvert(property.Value);
+        }
 
         return property.UpdateWith(key, value);
     }
