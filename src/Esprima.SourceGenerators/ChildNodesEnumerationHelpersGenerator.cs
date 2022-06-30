@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 using Esprima.SourceGenerators.Helpers;
 using Microsoft.CodeAnalysis;
@@ -7,9 +8,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Esprima.SourceGenerators;
 
+// Spec for incremental generators: https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.md
+// How to implement:
+// * https://andrewlock.net/exploring-dotnet-6-part-9-source-generator-updates-incremental-generators/
+// * https://www.thinktecture.com/en/net/roslyn-source-generators-performance/
 // How to debug: https://stackoverflow.com/a/71314452/8656352
 [Generator]
-public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
+public class ChildNodesEnumerationHelpersGenerator : IIncrementalGenerator
 {
     private const string NodeTypeName = "Esprima.Ast.Node";
     private const string NodeListTypeName = "Esprima.Ast.NodeList`1";
@@ -22,99 +27,74 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
         category: "Design",
         DiagnosticSeverity.Error, isEnabledByDefault: true);
 
-    public void Initialize(GeneratorInitializationContext context) { }
-
-    public void Execute(GeneratorExecutionContext context)
+    // IIncrementalGenerator has an Initialize method that is called by the host exactly once,
+    // regardless of the number of further compilations that may occur.
+    // For instance a host with multiple loaded projects may share the same generator instance across multiple projects,
+    // and will only call Initialize a single time for the lifetime of the host.
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var nodeType = GetRequiredType(NodeTypeName, context);
-        var nodeListType = GetRequiredType(NodeListTypeName, context);
-        var childNodesEnumeratorType = GetRequiredType(ChildNodesEnumeratorTypeName, context);
+        var compilationDiagnostics = context.CompilationProvider
+            .Select(GetCompilationDiagnostics);
 
-        if (nodeType is null || nodeListType is null || childNodesEnumeratorType is null)
-        {
-            return;
-        }
+        IncrementalValuesProvider<HelperMethodInfo> helperMethodInfos = context.SyntaxProvider
+            .CreateSyntaxProvider(IsSyntaxTargetForGeneration, GetSemanticTargetForGeneration)
+            .Where(item => item is not null)!;
 
-        nodeListType = nodeListType.ConstructUnboundGenericType();
-
-        var helperMethods = GetHelperMethodsToGenerate(childNodesEnumeratorType, nodeType, nodeListType, context.Compilation);
-
-        var sourceBuilder = new StringBuilder();
-
-        sourceBuilder
-            .AppendLine("#nullable enable")
-            .AppendLine()
-            .AppendLine("namespace Esprima.Ast;")
-            .AppendLine()
-            .AppendLine("public readonly partial struct ChildNodes : IEnumerable<Node>")
-            .AppendLine("{")
-            .AppendLine("    public partial struct Enumerator : IEnumerator<Node>")
-            .AppendLine("    {");
-
-        string? separator = null;
-        foreach (var method in helperMethods)
-        {
-            sourceBuilder.Append(separator);
-            separator = Environment.NewLine;
-
-            GenerateHelperMethodImpl(method, sourceBuilder);
-        }
-
-        sourceBuilder
-            .AppendLine("    }")
-            .AppendLine("}");
-
-
-        context.AddSource($"{childNodesEnumeratorType.ContainingType.Name}.Helpers.g.cs", sourceBuilder.ToString());
+        context.RegisterSourceOutput(compilationDiagnostics.Combine(helperMethodInfos.Collect()), (context, source) => Execute(context, source.Left, source.Right));
     }
 
-    private static INamedTypeSymbol? GetRequiredType(string typeName, GeneratorExecutionContext context)
+    private static StructuralEqualityWrapper<Diagnostic[]> GetCompilationDiagnostics(Compilation compilation, CancellationToken cancellationToken)
     {
-        var type = context.Compilation.Assembly.GetTypeByMetadataName(typeName);
-        if (type is null)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(s_typeNotFound, Location.None, typeName));
-        }
+        return new[] { NodeTypeName, NodeListTypeName, ChildNodesEnumeratorTypeName }
+            .Select(typeName => (typeName, type: compilation.GetTypeByMetadataName(typeName)))
+            .Where(item => item.type is null)
+            .Select(item => Diagnostic.Create(s_typeNotFound, Location.None, item.typeName))
+            .ToArray();
+    }
 
-        return type;
+    private static bool IsSyntaxTargetForGeneration(SyntaxNode node, CancellationToken cancellationToken)
+    {
+        return
+            node is MethodDeclarationSyntax methodDeclarationSyntax &&
+            methodDeclarationSyntax.Body is null &&
+            methodDeclarationSyntax.Identifier.ValueText.StartsWith("MoveNext", StringComparison.Ordinal);
     }
 
     private sealed record class HelperMethodParamInfo(string ParamName, bool IsList, bool IsOptional);
 
     private sealed record class HelperMethodInfo(string MethodDeclaration, StructuralEqualityWrapper<HelperMethodParamInfo[]> ParamInfos);
 
-    private static HelperMethodInfo[] GetHelperMethodsToGenerate(INamedTypeSymbol childNodesEnumeratorType, INamedTypeSymbol nodeType, INamedTypeSymbol nodeListType,
-        Compilation compilation)
+    private static HelperMethodInfo? GetSemanticTargetForGeneration(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
-        return childNodesEnumeratorType.GetMembers()
-            .OfType<IMethodSymbol>()
-            .Select(method => GetMethodInfo(method, nodeType, nodeListType, compilation))
-            .Where(methodInfo => methodInfo is not null)
-            .ToArray()!;
+        INamedTypeSymbol? nodeType, nodeListType, childNodesEnumeratorType;
 
-        static HelperMethodInfo? GetMethodInfo(IMethodSymbol method, INamedTypeSymbol nodeType, INamedTypeSymbol nodeListType, Compilation compilation)
+        var methodDeclarationSyntax = (MethodDeclarationSyntax) context.Node;
+        var method = context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax, cancellationToken);
+
+        if (method is null ||
+            !method.IsPartialDefinition ||
+            method.DeclaringSyntaxReferences.Length != 1 ||
+            (childNodesEnumeratorType = context.SemanticModel.Compilation.GetTypeByMetadataName(ChildNodesEnumeratorTypeName)) is null ||
+            !SymbolEqualityComparer.Default.Equals(method.ContainingType, childNodesEnumeratorType) ||
+            (nodeType = context.SemanticModel.Compilation.GetTypeByMetadataName(NodeTypeName)) is null ||
+            (nodeListType = context.SemanticModel.Compilation.GetTypeByMetadataName(NodeListTypeName)?.ConstructUnboundGenericType()) is null ||
+            !IsValidReturnType(method, nodeType) ||
+            method.IsGenericMethod && !method.TypeParameters.All(param => IsValidGenericTypeParam(param, nodeType)))
         {
-            if (!method.IsPartialDefinition ||
-                method.DeclaringSyntaxReferences.Length != 1 ||
-                !method.Name.StartsWith("MoveNext") ||
-                !IsValidReturnType(method, nodeType) ||
-                method.IsGenericMethod && !method.TypeParameters.All(param => IsValidGenericTypeParam(param, nodeType)))
-            {
-                return null;
-            }
-
-            var paramInfos = method.Parameters
-                .Select(param => GetMethodParamInfo(param, nodeType, nodeListType, compilation))
-                .TakeWhile(paramInfo => paramInfo is not null)
-                .ToArray();
-
-            if (paramInfos.Length < method.Parameters.Length)
-            {
-                return null;
-            }
-
-            return new HelperMethodInfo(GetMethodDeclaration(method), paramInfos!);
+            return null;
         }
+
+        var paramInfos = method.Parameters
+            .Select(param => GetMethodParamInfo(param, nodeType, nodeListType))
+            .TakeWhile(paramInfo => paramInfo is not null)
+            .ToArray();
+
+        if (paramInfos.Length < method.Parameters.Length)
+        {
+            return null;
+        }
+
+        return new HelperMethodInfo(GetMethodDeclaration(method), paramInfos!);
 
         static bool IsValidReturnType(IMethodSymbol method, INamedTypeSymbol nodeType)
         {
@@ -131,7 +111,7 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
                 SymbolEqualityComparer.Default.Equals(constraintType, nodeType));
         }
 
-        static HelperMethodParamInfo? GetMethodParamInfo(IParameterSymbol param, INamedTypeSymbol nodeType, INamedTypeSymbol nodeListType, Compilation compilation)
+        static HelperMethodParamInfo? GetMethodParamInfo(IParameterSymbol param, INamedTypeSymbol nodeType, INamedTypeSymbol nodeListType)
         {
             // param type must be one of the following: Node, Node?, in NodeList<T>, in NodeList<T?> (where T : Node)
 
@@ -150,7 +130,6 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
 
             return null;
         }
-
 
         static string GetParamName(IParameterSymbol param)
         {
@@ -178,6 +157,49 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
 
             return methodDeclarationSyntax.ToString();
         }
+    }
+
+    private static void Execute(SourceProductionContext context, StructuralEqualityWrapper<Diagnostic[]> compilationDiagnostics, ImmutableArray<HelperMethodInfo> helperMethodInfos)
+    {
+        if (compilationDiagnostics.Target.Length > 0)
+        {
+            foreach (var diagnostic in compilationDiagnostics.Target)
+            {
+                context.ReportDiagnostic(diagnostic);
+            }
+
+            return;
+        }
+
+        var sourceBuilder = new StringBuilder();
+
+        sourceBuilder
+            .AppendLine("#nullable enable")
+            .AppendLine()
+            .AppendLine("namespace Esprima.Ast;")
+            .AppendLine()
+            .AppendLine("public readonly partial struct ChildNodes : IEnumerable<Node>")
+            .AppendLine("{")
+            .AppendLine("    public partial struct Enumerator : IEnumerator<Node>")
+            .AppendLine("    {");
+
+        string? separator = null;
+        foreach (var helperMethodInfo in helperMethodInfos)
+        {
+            context.CancellationToken.ThrowIfCancellationRequested();
+
+            sourceBuilder.Append(separator);
+            separator = Environment.NewLine;
+
+            GenerateHelperMethodImpl(helperMethodInfo, sourceBuilder);
+        }
+
+        sourceBuilder
+            .AppendLine("    }")
+            .AppendLine("}");
+
+
+        context.AddSource($"ChildNodes.Helpers.g.cs", sourceBuilder.ToString());
     }
 
     private static void GenerateHelperMethodImpl(HelperMethodInfo methodInfo, StringBuilder sourceBuilder)
