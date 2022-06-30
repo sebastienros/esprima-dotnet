@@ -37,7 +37,7 @@ namespace Esprima.Ast
         public bool Method { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Shorthand { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Key, Value);
+        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextProperty(Key, Value, Shorthand);
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitProperty(this);
 
