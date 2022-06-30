@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
+using Esprima.SourceGenerators.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -78,9 +79,9 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
         return type;
     }
 
-    private sealed record class HelperMethodParamInfo(IParameterSymbol Param, bool IsList, bool IsOptional);
+    private sealed record class HelperMethodParamInfo(string ParamName, bool IsList, bool IsOptional);
 
-    private sealed record class HelperMethodInfo(IMethodSymbol Method, HelperMethodParamInfo[] ParamInfos);
+    private sealed record class HelperMethodInfo(string MethodDeclaration, StructuralEqualityWrapper<HelperMethodParamInfo[]> ParamInfos);
 
     private static HelperMethodInfo[] GetHelperMethodsToGenerate(INamedTypeSymbol childNodesEnumeratorType, INamedTypeSymbol nodeType, INamedTypeSymbol nodeListType,
         Compilation compilation)
@@ -112,7 +113,7 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
                 return null;
             }
 
-            return new HelperMethodInfo(method, paramInfos!);
+            return new HelperMethodInfo(GetMethodDeclaration(method), paramInfos!);
         }
 
         static bool IsValidReturnType(IMethodSymbol method, INamedTypeSymbol nodeType)
@@ -139,40 +140,50 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
                 paramType.IsGenericType &&
                 SymbolEqualityComparer.Default.Equals(paramType.ConstructUnboundGenericType(), nodeListType))
             {
-                return new HelperMethodParamInfo(param, IsList: true, IsOptional: paramType.TypeArguments[0].NullableAnnotation == NullableAnnotation.Annotated);
+                return new HelperMethodParamInfo(GetParamName(param), IsList: true, IsOptional: paramType.TypeArguments[0].NullableAnnotation == NullableAnnotation.Annotated);
             }
             else if (param.RefKind == RefKind.None &&
                 SymbolEqualityComparer.Default.Equals(param.Type, nodeType))
             {
-                return new HelperMethodParamInfo(param, IsList: false, IsOptional: param.Type.NullableAnnotation == NullableAnnotation.Annotated);
+                return new HelperMethodParamInfo(GetParamName(param), IsList: false, IsOptional: param.Type.NullableAnnotation == NullableAnnotation.Annotated);
             }
 
             return null;
+        }
+
+
+        static string GetParamName(IParameterSymbol param)
+        {
+            var paramSyntax = (ParameterSyntax) param.DeclaringSyntaxReferences[0].GetSyntax();
+            return paramSyntax.Identifier.ToString();
+        }
+
+        static string GetMethodDeclaration(IMethodSymbol method)
+        {
+            var methodDeclarationSyntax = (MethodDeclarationSyntax) method.DeclaringSyntaxReferences[0].GetSyntax();
+
+            // remove trailing semicolon
+
+            methodDeclarationSyntax = SyntaxFactory.MethodDeclaration(
+                methodDeclarationSyntax.AttributeLists,
+                methodDeclarationSyntax.Modifiers,
+                methodDeclarationSyntax.ReturnType,
+                methodDeclarationSyntax.ExplicitInterfaceSpecifier,
+                methodDeclarationSyntax.Identifier,
+                methodDeclarationSyntax.TypeParameterList,
+                methodDeclarationSyntax.ParameterList,
+                methodDeclarationSyntax.ConstraintClauses,
+                body: null,
+                expressionBody: null);
+
+            return methodDeclarationSyntax.ToString();
         }
     }
 
     private static void GenerateHelperMethodImpl(HelperMethodInfo methodInfo, StringBuilder sourceBuilder)
     {
-        var methodDeclarationSyntax = (MethodDeclarationSyntax) methodInfo.Method.DeclaringSyntaxReferences[0].GetSyntax();
-
-        // remove trailing semicolon
-
-        methodDeclarationSyntax = SyntaxFactory.MethodDeclaration(
-            methodDeclarationSyntax.AttributeLists,
-            methodDeclarationSyntax.Modifiers,
-            methodDeclarationSyntax.ReturnType,
-            methodDeclarationSyntax.ExplicitInterfaceSpecifier,
-            methodDeclarationSyntax.Identifier,
-            methodDeclarationSyntax.TypeParameterList,
-            methodDeclarationSyntax.ParameterList,
-            methodDeclarationSyntax.ConstraintClauses,
-            body: null,
-            expressionBody: null);
-
-        var methodDeclaration = methodDeclarationSyntax.ToString();
-
         sourceBuilder
-            .AppendLine($"        {methodDeclaration}")
+            .AppendLine($"        {methodInfo.MethodDeclaration}")
             .AppendLine("        {");
 
         sourceBuilder
@@ -180,13 +191,11 @@ public class ChildNodesEnumerationHelpersGenerator : ISourceGenerator
             .AppendLine("            {");
 
         var itemVariable = "Node? item";
-        var paramInfos = methodInfo.ParamInfos;
+        var paramInfos = methodInfo.ParamInfos.Target;
         for (int i = 0, n = paramInfos.Length; i < n; i++)
         {
             var paramInfo = paramInfos[i];
-
-            var paramSyntax = (ParameterSyntax) paramInfo.Param.DeclaringSyntaxReferences[0].GetSyntax();
-            var paramName = paramSyntax.Identifier.ToString();
+            var paramName = paramInfo.ParamName;
 
             sourceBuilder
                 .AppendLine($"                case {i.ToString(CultureInfo.InvariantCulture)}:");
