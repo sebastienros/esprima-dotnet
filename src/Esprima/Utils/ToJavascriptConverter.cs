@@ -650,11 +650,6 @@ namespace Esprima.Utils
                 Append("async ");
             }
 
-            if (arrowFunctionExpression.Id != null)
-            {
-                Visit(arrowFunctionExpression.Id);
-            }
-
             if (arrowFunctionExpression.Params.Count == 1)
             {
                 if (arrowFunctionExpression.Params[0] is RestElement || ExpressionNeedsBrackets(arrowFunctionExpression.Params[0]))
@@ -687,7 +682,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitUnaryExpression(UnaryExpression unaryExpression)
         {
-            var op = UnaryExpression.ConvertUnaryOperator(unaryExpression.Operator);
+            var op = UnaryExpression.GetUnaryOperatorToken(unaryExpression.Operator);
             if (unaryExpression.Prefix)
             {
                 Append(op);
@@ -713,12 +708,12 @@ namespace Esprima.Utils
         {
             if (updateExpression.Prefix)
             {
-                Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
+                Append(UnaryExpression.GetUnaryOperatorToken(updateExpression.Operator));
             }
             Visit(updateExpression.Argument);
             if (!updateExpression.Prefix)
             {
-                Append(UnaryExpression.ConvertUnaryOperator(updateExpression.Operator));
+                Append(UnaryExpression.GetUnaryOperatorToken(updateExpression.Operator));
             }
         }
 
@@ -810,7 +805,7 @@ namespace Esprima.Utils
 
         protected virtual void VisitIdentifier(Identifier identifier)
         {
-            Append(identifier.Name);
+            Append(identifier.Name!);
         }
 
         protected virtual void VisitFunctionExpression(IFunction function)
@@ -1346,7 +1341,7 @@ namespace Esprima.Utils
             {
                 Append(")");
             }
-            var op = BinaryExpression.ConvertBinaryOperator(binaryExpression.Operator);
+            var op = BinaryExpression.GetBinaryOperatorToken(binaryExpression.Operator);
             if (char.IsLetter(op[0]))
             {
                 Append(" ");
@@ -1388,7 +1383,7 @@ namespace Esprima.Utils
             {
                 Append("(");
             }
-            var op = AssignmentExpression.ConvertAssignmentOperator(assignmentExpression.Operator);
+            var op = AssignmentExpression.GetAssignmentOperatorToken(assignmentExpression.Operator);
             Visit(assignmentExpression.Left);
             AppendBeautificationSpace();
             Append(op);
@@ -1444,7 +1439,7 @@ namespace Esprima.Utils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void VisitNodeList<TNode>(IEnumerable<TNode> nodeList, string appendAtEnd = null, string appendSeperatorString = null, bool appendBracketsIfNeeded = false, bool addLineBreaks = false)
+        private void VisitNodeList<TNode>(IEnumerable<TNode?> nodeList, string? appendAtEnd = null, string? appendSeperatorString = null, bool appendBracketsIfNeeded = false, bool addLineBreaks = false)
             where TNode : Node
         {
             var notfirst = false;
