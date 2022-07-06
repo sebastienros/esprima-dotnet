@@ -4,7 +4,7 @@ using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Utils;
 
-public class AstToJavascriptConverter
+public class AstToJavascriptConverter : AstVisitor
 {
     public delegate AstToJavascriptConverter Factory(TextWriter writer, AstToJavascript.Options options);
 
@@ -13,10 +13,8 @@ public class AstToJavascriptConverter
     public readonly bool _beautify;
     public readonly string _indent;
 
+    private Node? _parentNode, _currentNode;
     private int _indentionLevel = 0;
-
-    private readonly List<Node> _parentStack = new List<Node>();
-    protected IReadOnlyList<Node> ParentStack => _parentStack;
 
     public AstToJavascriptConverter(TextWriter writer, AstToJavascript.Options options)
     {
@@ -31,6 +29,8 @@ public class AstToJavascriptConverter
         _beautify = options.Beautify;
         _indent = options.Indent ?? "    ";
     }
+
+    protected Node? ParentNode => _parentNode;
 
     protected void Append(string text)
     {
@@ -74,265 +74,40 @@ public class AstToJavascriptConverter
         _indentionLevel--;
     }
 
-    /// <summary>
-    /// Returns parent node at specified position.
-    /// </summary>
-    /// <param name="offset">Zero index value returns current node; one corresponds to direct
-    /// parent of current node.</param>
-    protected Node? TryGetParentAt(int offset)
-    {
-        if (_parentStack.Count < offset + 1)
-        {
-            return null;
-        }
-
-        return _parentStack[_parentStack.Count - 1 - offset];
-    }
-
     public void Convert(Node node)
     {
         Visit(node ?? ThrowArgumentNullException<Node>(nameof(node)));
     }
 
-    public virtual void Visit(Node node)
+    public override object? Visit(Node node)
     {
-        _parentStack.Add(node);
+        var originalParentNode = _parentNode;
+        _parentNode = _currentNode;
+        _currentNode = node;
 
-        switch (node.Type)
-        {
-            case Nodes.AssignmentExpression:
-                VisitAssignmentExpression(node.As<AssignmentExpression>());
-                break;
-            case Nodes.ArrayExpression:
-                VisitArrayExpression(node.As<ArrayExpression>());
-                break;
-            case Nodes.BlockStatement:
-                VisitBlockStatement(node.As<BlockStatement>());
-                break;
-            case Nodes.BinaryExpression:
-                VisitBinaryExpression(node.As<BinaryExpression>());
-                break;
-            case Nodes.BreakStatement:
-                VisitBreakStatement(node.As<BreakStatement>());
-                break;
-            case Nodes.CallExpression:
-                VisitCallExpression(node.As<CallExpression>());
-                break;
-            case Nodes.CatchClause:
-                VisitCatchClause(node.As<CatchClause>());
-                break;
-            case Nodes.ConditionalExpression:
-                VisitConditionalExpression(node.As<ConditionalExpression>());
-                break;
-            case Nodes.ContinueStatement:
-                VisitContinueStatement(node.As<ContinueStatement>());
-                break;
-            case Nodes.DoWhileStatement:
-                VisitDoWhileStatement(node.As<DoWhileStatement>());
-                break;
-            case Nodes.DebuggerStatement:
-                VisitDebuggerStatement(node.As<DebuggerStatement>());
-                break;
-            case Nodes.EmptyStatement:
-                VisitEmptyStatement(node.As<EmptyStatement>());
-                break;
-            case Nodes.ExpressionStatement:
-                VisitExpressionStatement(node.As<ExpressionStatement>());
-                break;
-            case Nodes.ForStatement:
-                VisitForStatement(node.As<ForStatement>());
-                break;
-            case Nodes.ForInStatement:
-                VisitForInStatement(node.As<ForInStatement>());
-                break;
-            case Nodes.FunctionDeclaration:
-                VisitFunctionDeclaration(node.As<FunctionDeclaration>());
-                break;
-            case Nodes.FunctionExpression:
-                VisitFunctionExpression(node.As<FunctionExpression>());
-                break;
-            case Nodes.Identifier:
-                VisitIdentifier(node.As<Identifier>());
-                break;
-            case Nodes.IfStatement:
-                VisitIfStatement(node.As<IfStatement>());
-                break;
-            case Nodes.Import:
-                VisitImport(node.As<Import>());
-                break;
-            case Nodes.Literal:
-                VisitLiteral(node.As<Literal>());
-                break;
-            case Nodes.LabeledStatement:
-                VisitLabeledStatement(node.As<LabeledStatement>());
-                break;
-            case Nodes.LogicalExpression:
-                VisitBinaryExpression(node.As<BinaryExpression>());
-                break;
-            case Nodes.MemberExpression:
-                VisitMemberExpression(node.As<MemberExpression>());
-                break;
-            case Nodes.NewExpression:
-                VisitNewExpression(node.As<NewExpression>());
-                break;
-            case Nodes.ObjectExpression:
-                VisitObjectExpression(node.As<ObjectExpression>());
-                break;
-            case Nodes.Program:
-                VisitProgram(node.As<Program>());
-                break;
-            case Nodes.Property:
-                VisitProperty(node.As<Property>());
-                break;
-            case Nodes.PropertyDefinition:
-                VisitPropertyDefinition(node.As<PropertyDefinition>());
-                break;
-            case Nodes.RestElement:
-                VisitRestElement(node.As<RestElement>());
-                break;
-            case Nodes.ReturnStatement:
-                VisitReturnStatement(node.As<ReturnStatement>());
-                break;
-            case Nodes.SequenceExpression:
-                VisitSequenceExpression(node.As<SequenceExpression>());
-                break;
-            case Nodes.SwitchStatement:
-                VisitSwitchStatement(node.As<SwitchStatement>());
-                break;
-            case Nodes.SwitchCase:
-                VisitSwitchCase(node.As<SwitchCase>());
-                break;
-            case Nodes.TemplateElement:
-                VisitTemplateElement(node.As<TemplateElement>());
-                break;
-            case Nodes.TemplateLiteral:
-                VisitTemplateLiteral(node.As<TemplateLiteral>());
-                break;
-            case Nodes.ThisExpression:
-                VisitThisExpression(node.As<ThisExpression>());
-                break;
-            case Nodes.ThrowStatement:
-                VisitThrowStatement(node.As<ThrowStatement>());
-                break;
-            case Nodes.TryStatement:
-                VisitTryStatement(node.As<TryStatement>());
-                break;
-            case Nodes.UnaryExpression:
-                VisitUnaryExpression(node.As<UnaryExpression>());
-                break;
-            case Nodes.UpdateExpression:
-                VisitUpdateExpression(node.As<UpdateExpression>());
-                break;
-            case Nodes.VariableDeclaration:
-                VisitVariableDeclaration(node.As<VariableDeclaration>());
-                break;
-            case Nodes.VariableDeclarator:
-                VisitVariableDeclarator(node.As<VariableDeclarator>());
-                break;
-            case Nodes.WhileStatement:
-                VisitWhileStatement(node.As<WhileStatement>());
-                break;
-            case Nodes.WithStatement:
-                VisitWithStatement(node.As<WithStatement>());
-                break;
-            case Nodes.ArrayPattern:
-                VisitArrayPattern(node.As<ArrayPattern>());
-                break;
-            case Nodes.AssignmentPattern:
-                VisitAssignmentPattern(node.As<AssignmentPattern>());
-                break;
-            case Nodes.SpreadElement:
-                VisitSpreadElement(node.As<SpreadElement>());
-                break;
-            case Nodes.ObjectPattern:
-                VisitObjectPattern(node.As<ObjectPattern>());
-                break;
-            case Nodes.ArrowParameterPlaceHolder:
-                VisitArrowParameterPlaceHolder(node.As<ArrowParameterPlaceHolder>());
-                break;
-            case Nodes.MetaProperty:
-                VisitMetaProperty(node.As<MetaProperty>());
-                break;
-            case Nodes.Super:
-                VisitSuper(node.As<Super>());
-                break;
-            case Nodes.TaggedTemplateExpression:
-                VisitTaggedTemplateExpression(node.As<TaggedTemplateExpression>());
-                break;
-            case Nodes.YieldExpression:
-                VisitYieldExpression(node.As<YieldExpression>());
-                break;
-            case Nodes.ArrowFunctionExpression:
-                VisitArrowFunctionExpression(node.As<ArrowFunctionExpression>());
-                break;
-            case Nodes.AwaitExpression:
-                VisitAwaitExpression(node.As<AwaitExpression>());
-                break;
-            case Nodes.ClassBody:
-                VisitClassBody(node.As<ClassBody>());
-                break;
-            case Nodes.ClassDeclaration:
-                VisitClassDeclaration(node.As<ClassDeclaration>());
-                break;
-            case Nodes.ForOfStatement:
-                VisitForOfStatement(node.As<ForOfStatement>());
-                break;
-            case Nodes.MethodDefinition:
-                VisitMethodDefinition(node.As<MethodDefinition>());
-                break;
-            case Nodes.ImportSpecifier:
-                VisitImportSpecifier(node.As<ImportSpecifier>());
-                break;
-            case Nodes.ImportDefaultSpecifier:
-                VisitImportDefaultSpecifier(node.As<ImportDefaultSpecifier>());
-                break;
-            case Nodes.ImportNamespaceSpecifier:
-                VisitImportNamespaceSpecifier(node.As<ImportNamespaceSpecifier>());
-                break;
-            case Nodes.ImportDeclaration:
-                VisitImportDeclaration(node.As<ImportDeclaration>());
-                break;
-            case Nodes.ExportSpecifier:
-                VisitExportSpecifier(node.As<ExportSpecifier>());
-                break;
-            case Nodes.ExportNamedDeclaration:
-                VisitExportNamedDeclaration(node.As<ExportNamedDeclaration>());
-                break;
-            case Nodes.ExportAllDeclaration:
-                VisitExportAllDeclaration(node.As<ExportAllDeclaration>());
-                break;
-            case Nodes.ExportDefaultDeclaration:
-                VisitExportDefaultDeclaration(node.As<ExportDefaultDeclaration>());
-                break;
-            case Nodes.ClassExpression:
-                VisitClassExpression(node.As<ClassExpression>());
-                break;
-            case Nodes.ChainExpression:
-                VisitChainExpression(node.As<ChainExpression>());
-                break;
-            default:
-                VisitUnknownNode(node);
-                break;
+        var result = base.Visit(node);
+
+        _currentNode = _parentNode;
+        _parentNode = originalParentNode;
+
+        return result;
         }
-        _parentStack.RemoveAt(_parentStack.Count - 1);
-    }
 
-    protected virtual void VisitProgram(Program program)
+    protected internal override object? VisitProgram(Program program)
     {
         VisitNodeList(program.Body, appendAtEnd: ";", addLineBreaks: true);
+
+        return program;
     }
 
-    protected virtual void VisitUnknownNode(Node node)
-    {
-        throw new NotImplementedException($"AST visitor doesn't support nodes of type {node.Type}, you can override VisitUnknownNode to handle this case.");
-    }
-
-    protected virtual void VisitChainExpression(ChainExpression chainExpression)
+    protected internal override object? VisitChainExpression(ChainExpression chainExpression)
     {
         Visit(chainExpression.Expression);
+
+        return chainExpression;
     }
 
-    protected virtual void VisitCatchClause(CatchClause catchClause)
+    protected internal override object? VisitCatchClause(CatchClause catchClause)
     {
         Append("(");
         if (catchClause.Param is not null)
@@ -341,9 +116,11 @@ public class AstToJavascriptConverter
         }
         Append(")");
         Visit(catchClause.Body);
+
+        return catchClause;
     }
 
-    protected virtual void VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
     {
         if (functionDeclaration.Async)
         {
@@ -364,31 +141,39 @@ public class AstToJavascriptConverter
         Append(")");
         AppendBeautificationSpace();
         Visit(functionDeclaration.Body);
+
+        return functionDeclaration;
     }
 
-    protected virtual void VisitWithStatement(WithStatement withStatement)
+    protected internal override object? VisitWithStatement(WithStatement withStatement)
     {
         Append("with(");
         Visit(withStatement.Object);
         Append(")");
         Visit(withStatement.Body);
+
+        return withStatement;
     }
 
-    protected virtual void VisitWhileStatement(WhileStatement whileStatement)
+    protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
     {
         Append("while(");
         Visit(whileStatement.Test);
         Append(")");
         Visit(whileStatement.Body);
+
+        return whileStatement;
     }
 
-    protected virtual void VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
     {
         Append(variableDeclaration.Kind.ToString().ToLower() + " ");
         VisitNodeList(variableDeclaration.Declarations, appendSeperatorString: ",");
+
+        return variableDeclaration;
     }
 
-    protected virtual void VisitTryStatement(TryStatement tryStatement)
+    protected internal override object? VisitTryStatement(TryStatement tryStatement)
     {
         Append("try ");
         Visit(tryStatement.Block);
@@ -402,16 +187,20 @@ public class AstToJavascriptConverter
             Append(" finally");
             Visit(tryStatement.Finalizer);
         }
+
+        return tryStatement;
     }
 
-    protected virtual void VisitThrowStatement(ThrowStatement throwStatement)
+    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
     {
         Append("throw ");
         Visit(throwStatement.Argument);
         Append(";");
+
+        return throwStatement;
     }
 
-    protected virtual void VisitSwitchStatement(SwitchStatement switchStatement)
+    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
     {
         Append("switch(");
         Visit(switchStatement.Discriminant);
@@ -430,9 +219,11 @@ public class AstToJavascriptConverter
         AppendBeautificationIndent();
 
         Append("}");
+
+        return switchStatement;
     }
 
-    protected virtual void VisitSwitchCase(SwitchCase switchCase)
+    protected internal override object? VisitSwitchCase(SwitchCase switchCase)
     {
         if (switchCase.Test is not null)
         {
@@ -452,9 +243,11 @@ public class AstToJavascriptConverter
         VisitNodeList(switchCase.Consequent, appendAtEnd: ";", addLineBreaks: true);
 
         DecreaseIndent();
+
+        return switchCase;
     }
 
-    protected virtual void VisitReturnStatement(ReturnStatement returnStatement)
+    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
     {
         Append("return");
         if (returnStatement.Argument is not null)
@@ -463,16 +256,20 @@ public class AstToJavascriptConverter
             Visit(returnStatement.Argument);
         }
         Append(";");
+
+        return returnStatement;
     }
 
-    protected virtual void VisitLabeledStatement(LabeledStatement labeledStatement)
+    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
     {
         Visit(labeledStatement.Label);
         Append(":");
         Visit(labeledStatement.Body);
+
+        return labeledStatement;
     }
 
-    protected virtual void VisitIfStatement(IfStatement ifStatement)
+    protected internal override object? VisitIfStatement(IfStatement ifStatement)
     {
         Append("if");
         AppendBeautificationSpace();
@@ -520,19 +317,25 @@ public class AstToJavascriptConverter
                 DecreaseIndent();
             }
         }
+
+        return ifStatement;
     }
 
-    protected virtual void VisitEmptyStatement(EmptyStatement emptyStatement)
+    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
     {
         Append(";");
+
+        return emptyStatement;
     }
 
-    protected virtual void VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
     {
         Append("debugger");
+
+        return debuggerStatement;
     }
 
-    protected virtual void VisitExpressionStatement(ExpressionStatement expressionStatement)
+    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
     {
         if (expressionStatement.Expression is CallExpression callExpression && !(callExpression.Callee is Identifier))
         {
@@ -567,9 +370,11 @@ public class AstToJavascriptConverter
                 Append(")");
             }
         }
+
+        return expressionStatement;
     }
 
-    protected virtual void VisitForStatement(ForStatement forStatement)
+    protected internal override object? VisitForStatement(ForStatement forStatement)
     {
         Append("for(");
         if (forStatement.Init is not null)
@@ -606,9 +411,11 @@ public class AstToJavascriptConverter
         {
             DecreaseIndent();
         }
+
+        return forStatement;
     }
 
-    protected virtual void VisitForInStatement(ForInStatement forInStatement)
+    protected internal override object? VisitForInStatement(ForInStatement forInStatement)
     {
         Append("for(");
         Visit(forInStatement.Left);
@@ -632,9 +439,11 @@ public class AstToJavascriptConverter
         {
             DecreaseIndent();
         }
+
+        return forInStatement;
     }
 
-    protected virtual void VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
     {
         Append("do ");
         Visit(doWhileStatement.Body);
@@ -645,9 +454,11 @@ public class AstToJavascriptConverter
         Append("while(");
         Visit(doWhileStatement.Test);
         Append(")");
+
+        return doWhileStatement;
     }
 
-    protected virtual void VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
     {
         if (arrowFunctionExpression.Async)
         {
@@ -682,10 +493,26 @@ public class AstToJavascriptConverter
         {
             Append(")");
         }
+
+        return arrowFunctionExpression;
     }
 
-    protected virtual void VisitUnaryExpression(UnaryExpression unaryExpression)
+    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
     {
+        if (unaryExpression is UpdateExpression updateExpression)
+        {
+            if (updateExpression.Prefix)
+            {
+                Append(UnaryExpression.GetUnaryOperatorToken(updateExpression.Operator));
+            }
+            Visit(updateExpression.Argument);
+            if (!updateExpression.Prefix)
+            {
+                Append(UnaryExpression.GetUnaryOperatorToken(updateExpression.Operator));
+            }
+        }
+        else
+        {
         var op = UnaryExpression.GetUnaryOperatorToken(unaryExpression.Operator);
         if (unaryExpression.Prefix)
         {
@@ -708,30 +535,24 @@ public class AstToJavascriptConverter
         }
     }
 
-    protected virtual void VisitUpdateExpression(UpdateExpression updateExpression)
-    {
-        if (updateExpression.Prefix)
-        {
-            Append(UnaryExpression.GetUnaryOperatorToken(updateExpression.Operator));
+        return unaryExpression;
         }
-        Visit(updateExpression.Argument);
-        if (!updateExpression.Prefix)
-        {
-            Append(UnaryExpression.GetUnaryOperatorToken(updateExpression.Operator));
-        }
-    }
 
-    protected virtual void VisitThisExpression(ThisExpression thisExpression)
+    protected internal override object? VisitThisExpression(ThisExpression thisExpression)
     {
         Append("this");
+
+        return thisExpression;
     }
 
-    protected virtual void VisitSequenceExpression(SequenceExpression sequenceExpression)
+    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
     {
         VisitNodeList(sequenceExpression.Expressions, appendSeperatorString: _beautify ? ", " : ",");
+
+        return sequenceExpression;
     }
 
-    protected virtual void VisitObjectExpression(ObjectExpression objectExpression)
+    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
     {
         Append("{");
         if (objectExpression.Properties.Count > 0)
@@ -748,9 +569,11 @@ public class AstToJavascriptConverter
             AppendBeautificationIndent();
         }
         Append("}");
+
+        return objectExpression;
     }
 
-    protected virtual void VisitNewExpression(NewExpression newExpression)
+    protected internal override object? VisitNewExpression(NewExpression newExpression)
     {
         Append("new");
         if (ExpressionNeedsBrackets(newExpression.Callee))
@@ -772,9 +595,11 @@ public class AstToJavascriptConverter
             VisitNodeList(newExpression.Arguments, appendSeperatorString: ",");
             Append(")");
         }
+
+        return newExpression;
     }
 
-    protected virtual void VisitMemberExpression(MemberExpression memberExpression)
+    protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
     {
         if (ExpressionNeedsBrackets(memberExpression.Object) || (memberExpression.Object is Literal l && l.TokenType != TokenType.StringLiteral))
         {
@@ -791,7 +616,7 @@ public class AstToJavascriptConverter
         }
         else
         {
-            if (TryGetParentAt(0) is ChainExpression)
+            if (_parentNode is ChainExpression)
                 Append("?");
             Append(".");
         }
@@ -800,49 +625,57 @@ public class AstToJavascriptConverter
         {
             Append("]");
         }
+
+        return memberExpression;
     }
 
-    protected virtual void VisitLiteral(Literal literal)
+    protected internal override object? VisitLiteral(Literal literal)
     {
         Append(literal.Raw);
+
+        return literal;
     }
 
-    protected virtual void VisitIdentifier(Identifier identifier)
+    protected internal override object? VisitIdentifier(Identifier identifier)
     {
         Append(identifier.Name!);
+
+        return identifier;
     }
 
-    protected virtual void VisitFunctionExpression(IFunction function)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
-        var isParentMethod = TryGetParentAt(1) is MethodDefinition;
+        var isParentMethod = _parentNode is MethodDefinition;
         if (!isParentMethod)
         {
-            if (function.Async)
+            if (functionExpression.Async)
             {
                 Append("async ");
             }
-            if (!(TryGetParentAt(1) is MethodDefinition))
+            if (_parentNode is not MethodDefinition)
             {
                 Append("function");
             }
-            if (function.Generator)
+            if (functionExpression.Generator)
             {
                 Append("*");
             }
         }
-        if (function.Id is not null)
+        if (functionExpression.Id is not null)
         {
             Append(" ");
-            Visit(function.Id);
+            Visit(functionExpression.Id);
         }
         Append("(");
-        VisitNodeList(function.Params, appendSeperatorString: ",");
+        VisitNodeList(functionExpression.Params, appendSeperatorString: ",");
         Append(")");
         AppendBeautificationSpace();
-        Visit(function.Body);
+        Visit(functionExpression.Body);
+
+        return functionExpression;
     }
 
-    protected virtual void VisitClassExpression(ClassExpression classExpression)
+    protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
         Append("class ");
         if (classExpression.Id is not null)
@@ -869,24 +702,30 @@ public class AstToJavascriptConverter
         AppendBeautificationIndent();
 
         Append("}");
+
+        return classExpression;
     }
 
-    protected virtual void VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
     {
         Append("export default ");
         if (exportDefaultDeclaration.Declaration is not null)
         {
             Visit(exportDefaultDeclaration.Declaration);
         }
+
+        return exportDefaultDeclaration;
     }
 
-    protected virtual void VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
         Append("export*from");
         Visit(exportAllDeclaration.Source);
+
+        return exportAllDeclaration;
     }
 
-    protected virtual void VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
         Append("export");
         if (exportNamedDeclaration.Declaration is not null)
@@ -910,9 +749,10 @@ public class AstToJavascriptConverter
             Append("{}");
         }
 
+        return exportNamedDeclaration;
     }
 
-    protected virtual void VisitExportSpecifier(ExportSpecifier exportSpecifier)
+    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
     {
         Visit(exportSpecifier.Local);
         if (exportSpecifier.Local != exportSpecifier.Exported)
@@ -920,16 +760,20 @@ public class AstToJavascriptConverter
             Append(" as ");
             Visit(exportSpecifier.Exported);
         }
+
+        return exportSpecifier;
     }
 
-    protected virtual void VisitImport(Import import)
+    protected internal override object? VisitImport(Import import)
     {
         Append("import(");
         Visit(import.Source);
         Append(")");
+
+        return import;
     }
 
-    protected virtual void VisitImportDeclaration(ImportDeclaration importDeclaration)
+    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         Append("import ");
         var firstSpecifier = importDeclaration.Specifiers.FirstOrDefault();
@@ -974,20 +818,26 @@ public class AstToJavascriptConverter
             Append(" from ");
         }
         Visit(importDeclaration.Source);
+
+        return importDeclaration;
     }
 
-    protected virtual void VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
     {
         Append("* as ");
         Visit(importNamespaceSpecifier.Local);
+
+        return importNamespaceSpecifier;
     }
 
-    protected virtual void VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
     {
         Visit(importDefaultSpecifier.Local);
+
+        return importDefaultSpecifier;
     }
 
-    protected virtual void VisitImportSpecifier(ImportSpecifier importSpecifier)
+    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
     {
         Visit(importSpecifier.Imported);
         if (importSpecifier.Local != importSpecifier.Imported)
@@ -995,9 +845,11 @@ public class AstToJavascriptConverter
             Append(" as ");
             Visit(importSpecifier.Local);
         }
+
+        return importSpecifier;
     }
 
-    protected virtual void VisitMethodDefinition(MethodDefinition methodDefinition)
+    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
         if (methodDefinition.Static)
         {
@@ -1037,9 +889,11 @@ public class AstToJavascriptConverter
             Append("]");
         }
         Visit(methodDefinition.Value);
+
+        return methodDefinition;
     }
 
-    protected virtual void VisitForOfStatement(ForOfStatement forOfStatement)
+    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
     {
         Append("for(");
         Visit(forOfStatement.Left);
@@ -1063,9 +917,11 @@ public class AstToJavascriptConverter
         {
             DecreaseIndent();
         }
+
+        return forOfStatement;
     }
 
-    protected virtual void VisitClassDeclaration(ClassDeclaration classDeclaration)
+    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
         Append("class ");
         if (classDeclaration.Id is not null)
@@ -1093,73 +949,88 @@ public class AstToJavascriptConverter
         AppendBeautificationIndent();
 
         Append("}");
+
+        return classDeclaration;
     }
 
-    protected virtual void VisitClassBody(ClassBody classBody)
+    protected internal override object? VisitClassBody(ClassBody classBody)
     {
         VisitNodeList(classBody.Body, addLineBreaks: true);
+
+        return classBody;
     }
 
-    protected virtual void VisitYieldExpression(YieldExpression yieldExpression)
+    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
     {
         Append("yield ");
         if (yieldExpression.Argument is not null)
         {
             Visit(yieldExpression.Argument);
         }
+
+        return yieldExpression;
     }
 
-    protected virtual void VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
     {
         Visit(taggedTemplateExpression.Tag);
         Visit(taggedTemplateExpression.Quasi);
+
+        return taggedTemplateExpression;
     }
 
-    protected virtual void VisitSuper(Super super)
+    protected internal override object? VisitSuper(Super super)
     {
         Append("super");
+
+        return super;
     }
 
-    protected virtual void VisitMetaProperty(MetaProperty metaProperty)
+    protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
     {
         Visit(metaProperty.Meta);
         Append(".");
         Visit(metaProperty.Property);
+
+        return metaProperty;
     }
 
-    protected virtual void VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-    {
-        VisitNodeList(arrowParameterPlaceHolder.Params);
-    }
-
-    protected virtual void VisitObjectPattern(ObjectPattern objectPattern)
+    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
     {
         Append("{");
         VisitNodeList(objectPattern.Properties, appendSeperatorString: ",");
         Append("}");
+
+        return objectPattern;
     }
 
-    protected virtual void VisitSpreadElement(SpreadElement spreadElement)
+    protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
     {
         Append("...");
         Visit(spreadElement.Argument);
+
+        return spreadElement;
     }
 
-    protected virtual void VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
     {
         Visit(assignmentPattern.Left);
         Append("=");
         Visit(assignmentPattern.Right);
+
+        return assignmentPattern;
     }
 
-    protected virtual void VisitArrayPattern(ArrayPattern arrayPattern)
+    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
     {
         Append("[");
         VisitNodeList(arrayPattern.Elements, appendSeperatorString: ",");
         Append("]");
+
+        return arrayPattern;
     }
 
-    protected virtual void VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
     {
         Visit(variableDeclarator.Id);
         if (variableDeclarator.Init is not null)
@@ -1177,9 +1048,11 @@ public class AstToJavascriptConverter
                 Append(")");
             }
         }
+
+        return variableDeclarator;
     }
 
-    protected virtual void VisitTemplateLiteral(TemplateLiteral templateLiteral)
+    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
     {
         Append("`");
         for (int n = 0; n < templateLiteral.Quasis.Count; n++)
@@ -1193,20 +1066,26 @@ public class AstToJavascriptConverter
             }
         }
         Append("`");
+
+        return templateLiteral;
     }
 
-    protected virtual void VisitTemplateElement(TemplateElement templateElement)
+    protected internal override object? VisitTemplateElement(TemplateElement templateElement)
     {
         Append(templateElement.Value.Raw);
+
+        return templateElement;
     }
 
-    protected virtual void VisitRestElement(RestElement restElement)
+    protected internal override object? VisitRestElement(RestElement restElement)
     {
         Append("...");
         Visit(restElement.Argument);
+
+        return restElement;
     }
 
-    protected virtual void VisitProperty(Property property)
+    protected internal override object? VisitProperty(Property property)
     {
         if (property.Key is MemberExpression || ExpressionNeedsBrackets(property.Key))
         {
@@ -1242,9 +1121,11 @@ public class AstToJavascriptConverter
                 Append(")");
             }
         }
+
+        return property;
     }
 
-    protected virtual void VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
         if (propertyDefinition.Static)
         {
@@ -1273,15 +1154,19 @@ public class AstToJavascriptConverter
             Visit(propertyDefinition.Value);
         }
         Append(";");
+
+        return propertyDefinition;
     }
 
-    protected virtual void VisitAwaitExpression(AwaitExpression awaitExpression)
+    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
     {
         Append("await ");
         Visit(awaitExpression.Argument);
+
+        return awaitExpression;
     }
 
-    protected virtual void VisitConditionalExpression(ConditionalExpression conditionalExpression)
+    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
     {
         if (conditionalExpression.Test is AssignmentExpression)
         {
@@ -1316,9 +1201,11 @@ public class AstToJavascriptConverter
         {
             Append(")");
         }
+
+        return conditionalExpression;
     }
 
-    protected virtual void VisitCallExpression(CallExpression callExpression)
+    protected internal override object? VisitCallExpression(CallExpression callExpression)
     {
         if (ExpressionNeedsBrackets(callExpression.Callee))
         {
@@ -1332,9 +1219,11 @@ public class AstToJavascriptConverter
         Append("(");
         VisitNodeList(callExpression.Arguments, appendSeperatorString: ",", appendBracketsIfNeeded: true);
         Append(")");
+
+        return callExpression;
     }
 
-    protected virtual void VisitBinaryExpression(BinaryExpression binaryExpression)
+    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
     {
         if (ExpressionNeedsBrackets(binaryExpression.Left))
         {
@@ -1372,16 +1261,20 @@ public class AstToJavascriptConverter
         {
             Append(")");
         }
+
+        return binaryExpression;
     }
 
-    protected virtual void VisitArrayExpression(ArrayExpression arrayExpression)
+    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
         Append("[");
         VisitNodeList(arrayExpression.Elements, appendSeperatorString: ",");
         Append("]");
+
+        return arrayExpression;
     }
 
-    protected virtual void VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
     {
         if (assignmentExpression.Left is ObjectPattern)
         {
@@ -1405,27 +1298,33 @@ public class AstToJavascriptConverter
         {
             Append(")");
         }
+
+        return assignmentExpression;
     }
 
-    protected virtual void VisitContinueStatement(ContinueStatement continueStatement)
+    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
     {
         Append("continue ");
         if (continueStatement.Label is not null)
         {
             Visit(continueStatement.Label);
         }
+
+        return continueStatement;
     }
 
-    protected virtual void VisitBreakStatement(BreakStatement breakStatement)
+    protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
     {
         if (breakStatement.Label is not null)
         {
             Visit(breakStatement.Label);
         }
         Append("break");
+
+        return breakStatement;
     }
 
-    protected virtual void VisitBlockStatement(BlockStatement blockStatement)
+    protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
     {
         Append("{");
 
@@ -1440,6 +1339,8 @@ public class AstToJavascriptConverter
         AppendBeautificationIndent();
 
         Append("}");
+
+        return blockStatement;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

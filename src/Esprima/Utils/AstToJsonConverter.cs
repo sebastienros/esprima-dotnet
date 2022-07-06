@@ -512,11 +512,6 @@ public class AstToJsonConverter : AstVisitor
         return expressionStatement;
     }
 
-    protected internal override object? VisitExtension(Node node)
-    {
-        throw new NotSupportedException("Unknown node type: " + node.Type);
-    }
-
     protected internal override object? VisitForInStatement(ForInStatement forInStatement)
     {
         using (StartNodeObject(forInStatement))
