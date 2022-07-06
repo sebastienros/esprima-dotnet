@@ -7,19 +7,19 @@ using Esprima.Ast;
 
 namespace Esprima.Utils
 {
-    public static class ToJavascriptConverterExtension
+    public static class AstToJavascriptConverterExtension
     {
         public static string ToJavascript(this Node node, bool beautify = false)
         {
-            return ToJavascriptConverter.ToJavascript(node, beautify);
+            return AstToJavascriptConverter.ToJavascript(node, beautify);
         }
     }
 
-    public class ToJavascriptConverter
+    public class AstToJavascriptConverter
     {
         public static string ToJavascript(Node node, bool beautify = false)
         {
-            var visitor = new ToJavascriptConverter() { Beautify = beautify };
+            var visitor = new AstToJavascriptConverter() { Beautify = beautify };
             visitor.Visit(node);
             return visitor.ToString();
         }
