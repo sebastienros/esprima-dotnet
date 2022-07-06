@@ -28,12 +28,12 @@ namespace Esprima.Test
 
         private static string ParseAndFormat(SourceType sourceType, string source,
             ParserOptions parserOptions, Func<string, ParserOptions, JavaScriptParser> parserFactory,
-            AstJson.IConverter converter, AstJson.Options conversionOptions)
+            AstToJsonConverter.Factory converterFactory, AstJson.Options conversionOptions)
         {
             var parser = parserFactory(source, parserOptions);
             var program = sourceType == SourceType.Script ? (Program) parser.ParseScript() : parser.ParseModule();
 
-            return program.ToJsonString(conversionOptions, indent: "  ", converter);
+            return program.ToJsonString(conversionOptions, indent: "  ", converterFactory);
         }
 
         private static bool CompareTreesInternal(JObject actualJObject, JObject expectedJObject, FixtureMetadata metadata)
@@ -87,13 +87,13 @@ namespace Esprima.Test
         [MemberData(nameof(SourceFiles), "Fixtures")]
         public void ExecuteTestCase(string fixture)
         {
-            var (parserOptions, parserFactory, converter) = fixture.StartsWith("JSX")
+            var (parserOptions, parserFactory, converterFactory) = fixture.StartsWith("JSX")
                 ? (new JsxParserOptions(),
                     (src, opts) => new JsxParser(src, (JsxParserOptions) opts),
-                    JsxAstToJsonConverter.Default)
+                    (writer, options) => new JsxAstToJsonConverter(writer, options))
                 : (new ParserOptions(),
                     new Func<string, ParserOptions, JavaScriptParser>((src, opts) => new JavaScriptParser(src, opts)),
-                    AstToJsonConverter.Default);
+                    new AstToJsonConverter.Factory((writer, options) => new AstToJsonConverter(writer, options)));
 
             parserOptions.Tokens = true;
 
@@ -155,7 +155,7 @@ namespace Esprima.Test
                 expected = File.ReadAllText(moduleFilePath);
                 if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
                 {
-                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
                         File.WriteAllText(moduleFilePath, actual);
                 }
@@ -165,7 +165,7 @@ namespace Esprima.Test
                 expected = File.ReadAllText(treeFilePath);
                 if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
                 {
-                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
                         File.WriteAllText(treeFilePath, actual);
                 }
@@ -176,7 +176,7 @@ namespace Esprima.Test
                 expected = File.ReadAllText(failureFilePath);
                 if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
                 {
-                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
                         File.WriteAllText(failureFilePath, actual);
                 }
@@ -196,7 +196,7 @@ namespace Esprima.Test
             {
                 parserOptions.Tolerant = true;
 
-                var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions);
                 CompareTreesAndAssert(actual, expected, metadata);
             }
             else
@@ -204,7 +204,7 @@ namespace Esprima.Test
                 parserOptions.Tolerant = false;
 
                 // TODO: check the accuracy of the message and of the location
-                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions));
+                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions));
             }
         }
 
@@ -282,9 +282,11 @@ namespace Esprima.Test
         private sealed class FixtureMetadata
         {
             public static readonly FixtureMetadata Default = new FixtureMetadata(
-                AstJson.Options.Default
-                    .WithIncludingLineColumn(true)
-                    .WithIncludingRange(true),
+                AstJson.Options.Default with
+                {
+                    IncludingLineColumn = true,
+                    IncludingRange = true
+                },
                 includesLocationSource: false,
                 ignoresRegex: false);
 
@@ -321,16 +323,12 @@ namespace Esprima.Test
 
             private static FixtureMetadata CreateFrom(HashSet<string> flags)
             {
-                var conversionOptions = AstJson.Options.Default;
-
-                if (flags.Contains("IncludesLocation"))
-                    conversionOptions = conversionOptions.WithIncludingLineColumn(true);
-
-                if (flags.Contains("IncludesRange"))
-                    conversionOptions = conversionOptions.WithIncludingRange(true);
-
-                if (flags.Contains("BorrowedFixture"))
-                    conversionOptions = conversionOptions.WithTestCompatibilityMode(true);
+                var conversionOptions = AstJson.Options.Default with
+                {
+                    IncludingLineColumn = flags.Contains("IncludesLocation"),
+                    IncludingRange = flags.Contains("IncludesRange"),
+                    TestCompatibilityMode = flags.Contains("BorrowedFixture")
+                };
 
                 var includesLocationSource = flags.Contains("IncludesLocationSource");
                 var ignoresRegex = flags.Contains("IgnoresRegex");

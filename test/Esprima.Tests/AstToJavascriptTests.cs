@@ -25,7 +25,7 @@ for (var a = []; ; ) { }
 for (var elem of list) { }
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
 
             Assert.Equal("if(true){p();}switch(foo){case 'A':p();break;}switch(foo){default:p();break;}for(var a=[];;){}for(var elem of list){}", code);
         }
@@ -47,7 +47,7 @@ for (var elem of list) { }
                 tips.forEach((tip, i) => console.log(`Tip ${ i}:` +tip));
         }");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("let tips=[\"Click on any AST node with a '+' to expand it\",\"Hovering over a node highlights the \\\r\n   corresponding location in the source code\",\"Shift click on an AST node to expand the whole subtree\"];function printTips(){tips.forEach((tip,i)=>console.log((`Tip ${i}:`+tip)));}", code);
         }
 
@@ -65,7 +65,7 @@ for (var elem of list) { }
     }
 }");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("export class aa extends HTMLElement{constructor(a,b){super(a);this._div=(document.createElement('div'));}static get is(){return 'aa';}}", code);
         }
 
@@ -129,7 +129,7 @@ export function checkSecurityAnswerCodeDirect(result) {
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program, true);
+            var code = AstToJavascript.ToJavascriptString(program, true);
 
             var expected = @"import { MccDialog } from '../mccDialogHandler';
 import { commonClient, bb as f } from '../commonClient/commonClient';
@@ -210,7 +210,7 @@ aa({});
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program, true);
+            var code = AstToJavascript.ToJavascriptString(program, true);
 
             var expected = @"(function() {
     'use strict';
@@ -241,7 +241,7 @@ aa({});
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("function _createClass(Constructor,protoProps,staticProps){if(protoProps)_defineProperties(Constructor.prototype,protoProps);if(staticProps)_defineProperties(Constructor,staticProps);return Constructor;}", code);
         }
 
@@ -252,7 +252,7 @@ aa({});
 {
 }");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("if(((x?((a.nodeName.toLowerCase())===f):(1===a.nodeType))&&(++d))&&(p&&((i=((o=(a[S]||(a[S]={})))[a.uniqueID]||(o[a.uniqueID]={})))[h]=[k,d]),a===e)){}", code);
         }
 
@@ -271,7 +271,7 @@ class a extends b {
 }
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("class a extends b{constructor(){super();this.g=1;}q=1;r='cc';}", code);
         }
 
@@ -282,7 +282,7 @@ class a extends b {
 d = (s = (r = (i = (o = (a = c)[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID] = {}))[h] || [])[0] === k && r[1]) && r[2], a = s && c.childNodes[s];
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("d=((s=(((r=((i=((o=((a=c)[S]||(a[S]={})))[a.uniqueID]||(o[a.uniqueID]={})))[h]||[]))[0]===k)&&r[1]))&&r[2]),a=(s&&c.childNodes[s]);", code);
         }
 
@@ -293,7 +293,7 @@ d = (s = (r = (i = (o = (a = c)[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID]
 m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEventListener && v.createElement, ~a.indexOf('MSIE') || a.indexOf('Trident/'), '___FONT_AWESOME___')
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("m=(z.document,(((!!(v.documentElement))&&(!!(v.head)))&&('function'==(typeof (v.addEventListener))))&&v.createElement,(~(a.indexOf('MSIE')))||(a.indexOf('Trident/')),'___FONT_AWESOME___');", code);
         }
 
@@ -315,7 +315,7 @@ m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEv
         }();
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("var h=(c.navigator||{}).userAgent,a=((void 0)===h?'':h),z=c,v=l,m=(z.document,(((!!(v.documentElement))&&(!!(v.head)))&&('function'==(typeof (v.addEventListener))))&&v.createElement,(~(a.indexOf('MSIE')))||(a.indexOf('Trident/')),'___FONT_AWESOME___'),e=((function(){try {return !0;} catch(c){return !1;}})());", code);
         }
 
@@ -328,7 +328,7 @@ children: (b = O, 'g' === b.tag ? b.children : [b])
 }
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("var a={children:(b=O,'g'===b.tag?b.children:[b])};", code);
         }
 
@@ -345,7 +345,7 @@ if (e.IsWebService)
 	} else h = e.HttpRequest.responseText;
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("if(e.IsWebService)if(h=e.HttpRequest.responseXML,'undefined'==(typeof (h)))Trace.Write((('Error: '+e.UniqueId)+' data has no properties!')),m=(!0); else try {h.setProperty('SelectionLanguage','XPath');} catch(l){Trace.Write('Error: data.setProperty(',SelectionLanguage,', ',XPath,') because '+l.message);} else h=e.HttpRequest.responseText;", code);
         }
 
@@ -365,7 +365,7 @@ if (e.IsWebService)
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program, true);
+            var code = AstToJavascript.ToJavascriptString(program, true);
 
             var expected = @"function tt(t,r) {
     var n,e,i = (b(t)),s = (b(r));
@@ -390,7 +390,7 @@ if (e.IsWebService)
 h='M'+(+new Date).toString(36)
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("h=('M'+((+(new Date)).toString(36)));", code);
         }
 
@@ -405,7 +405,7 @@ input.onchange = async (e) => {
         };
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("input.onchange=(async e=>{const files=await readFiles(input.files,readMode);document.body.removeChild(input);resolve(files);});", code);
         }
 
@@ -416,7 +416,7 @@ input.onchange = async (e) => {
 export const Base = LegacyElementMixin(HTMLElement).prototype;
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("export const Base=(LegacyElementMixin(HTMLElement)).prototype;", code);
         }
 
@@ -427,7 +427,7 @@ export const Base = LegacyElementMixin(HTMLElement).prototype;
 let {is} = getIsExtends(element);
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("let {is}=(getIsExtends(element));", code);
         }
 
@@ -439,7 +439,7 @@ export const wrap =
   (window['ShadyDOM'] && window['ShadyDOM']['wrap']) || (node => node);
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("export const wrap=((window['ShadyDOM']&&window['ShadyDOM']['wrap'])||(node=>node));", code);
         }
 
@@ -449,7 +449,7 @@ export const wrap =
             var parser = new JavaScriptParser(@"
 export {}");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("export{};", code);
         }
 
@@ -462,7 +462,7 @@ export {}");
 })();
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("(()=>{mutablePropertyChange=MutableData._mutablePropertyChange;})();", code);
         }
 
@@ -476,7 +476,7 @@ var Ol, jl = new (function() {
     }())
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("var Ol,jl=(new((function(){var l,h,z;return l=c;})()));", code);
         }
 
@@ -493,7 +493,7 @@ var Ol, jl = new (function() {
         
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program);
+            var code = AstToJavascript.ToJavascriptString(program);
             Assert.Equal("[y,{[Symbol.iterator]:(function(){return b;}),a:5}];", code);
         }
 
@@ -515,7 +515,7 @@ class A {
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program, true);
+            var code = AstToJavascript.ToJavascriptString(program, true);
 
             var expected = @"class A {
     *[Symbol.iterator]() {
@@ -545,7 +545,7 @@ class A {
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program, true);
+            var code = AstToJavascript.ToJavascriptString(program, true);
 
             var expected = @"var i = ((function e(i) {
     var r = n[i];
@@ -578,7 +578,7 @@ if (b == 2) {
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascriptConverter.ToJavascript(program, true);
+            var code = AstToJavascript.ToJavascriptString(program, true);
             Assert.Equal(source, code);
         }
     }
