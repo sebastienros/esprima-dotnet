@@ -15,6 +15,9 @@ namespace Esprima.Ast
             Body = body;
         }
 
+        /// <remarks>
+        /// <see cref="VariableDeclaration"/> (may have an initializer in non-strict mode) | <see cref="Identifier"/> | <see cref="BindingPattern"/>
+        /// </remarks>
         public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using static Esprima.EsprimaExceptionHelper;
 using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
 
@@ -7,6 +8,7 @@ namespace Esprima.Ast
     public static class NodeExtensions
     {
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T As<T>(this Node node) where T : Node
         {
             return (T) node;

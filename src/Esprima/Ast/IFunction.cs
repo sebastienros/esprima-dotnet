@@ -5,6 +5,7 @@
     /// </summary>
     public interface IFunction
     {
+        Nodes Type { get; }
         Identifier? Id { get; }
         ref readonly NodeList<Expression> Params { get; }
         Node Body { get; }

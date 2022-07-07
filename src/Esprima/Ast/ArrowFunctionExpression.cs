@@ -23,9 +23,12 @@ namespace Esprima.Ast
         }
 
         Identifier? IFunction.Id => null;
+        /// <summary>
+        /// { <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> }
+        /// </summary>
         public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
         /// <remarks>
-        /// <see cref="BlockStatement" /> | <see cref="Ast.Expression" />
+        /// <see cref="BlockStatement"/> | <see cref="Ast.Expression"/>
         /// </remarks>
         public Node Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         bool IFunction.Generator => false;

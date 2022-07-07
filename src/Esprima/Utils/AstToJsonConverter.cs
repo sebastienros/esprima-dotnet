@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
-using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Utils;
 
@@ -21,12 +20,11 @@ public class AstToJsonConverter : AstVisitor
 
     public AstToJsonConverter(JsonWriter writer, AstJson.Options options)
     {
-        _writer = writer ?? ThrowArgumentNullException<JsonWriter>(nameof(writer));
+        _writer = writer ?? throw new ArgumentNullException(nameof(writer));
 
         if (options is null)
         {
-            ThrowArgumentNullException(nameof(options));
-            return;
+            throw new ArgumentNullException(nameof(options));
         }
 
         _includeLineColumn = options.IncludingLineColumn;
@@ -188,7 +186,7 @@ public class AstToJsonConverter : AstVisitor
 
     public void Convert(Node node)
     {
-        Visit(node ?? ThrowArgumentNullException<Node>(nameof(node)));
+        Visit(node ?? throw new ArgumentNullException(nameof(node)));
     }
 
     public override object? Visit(Node? node)

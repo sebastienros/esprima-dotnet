@@ -12,6 +12,9 @@ namespace Esprima.Ast
             _elements = elements;
         }
 
+        /// <summary>
+        /// { <see cref="Expression"/> (incl. <see cref="SpreadElement"/>) | <see langword="null"/> }
+        /// </summary>
         public ref readonly NodeList<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Elements);

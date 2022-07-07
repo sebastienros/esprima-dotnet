@@ -13,7 +13,7 @@ namespace Esprima.Ast
 
         public PropertyKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         /// <remarks>
-        /// <see cref="Identifier"/> | <see cref="Literal"/> | '[' <see cref="Expression"/> ']'
+        /// <see cref="Identifier"/> | <see cref="Literal"/> (string or numeric) | '[' <see cref="Expression"/> ']' | <see cref="PrivateIdentifier"/>
         /// </remarks>
         public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

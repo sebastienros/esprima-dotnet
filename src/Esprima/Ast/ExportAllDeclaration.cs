@@ -20,7 +20,7 @@ namespace Esprima.Ast
 
         public Literal Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         /// <remarks>
-        /// <see cref="Identifier" /> | StringLiteral (<see cref="Literal" />)
+        /// <see cref="Identifier"/> | <see cref="Literal"/> (string)
         /// </remarks>
         public Expression? Exported { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }

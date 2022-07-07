@@ -13,7 +13,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// BindingIdentifier | <see cref="BindingPattern"/>
+        /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
         /// </remarks>
         public Expression Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression? Init { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

@@ -5,6 +5,7 @@
     /// </summary>
     public interface IClass
     {
+        Nodes Type { get; }
         Identifier? Id { get; }
         Expression? SuperClass { get; }
         ClassBody Body { get; }

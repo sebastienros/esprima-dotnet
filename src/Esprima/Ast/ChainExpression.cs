@@ -11,7 +11,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// <see cref="CallExpression" /> | <see cref="ComputedMemberExpression" />| <see cref="StaticMemberExpression" />
+        /// <see cref="CallExpression"/> | <see cref="ComputedMemberExpression"/>| <see cref="StaticMemberExpression"/>
         /// </remarks>
         public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 

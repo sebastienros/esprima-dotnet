@@ -12,7 +12,7 @@ public sealed class ImportAttribute : Node
     }
 
     /// <remarks>
-    /// <see cref="Identifier" /> | <see cref="Literal" />
+    /// <see cref="Identifier"/> | <see cref="Literal"/>
     /// </remarks>
     public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Literal Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

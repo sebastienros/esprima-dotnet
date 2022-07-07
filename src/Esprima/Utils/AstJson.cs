@@ -70,7 +70,7 @@ public static class AstJson
 
     public static void WriteJson(this Node node, JsonWriter writer, Options options, AstToJsonConverter.Factory? converterFactory = null)
     {
-        converterFactory ??= (writer, options) => new AstToJsonConverter(writer, options);
+        converterFactory ??= static (writer, options) => new AstToJsonConverter(writer, options);
 
         converterFactory(writer, options).Convert(node);
     }
