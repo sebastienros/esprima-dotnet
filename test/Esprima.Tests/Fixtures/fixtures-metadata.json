@@ -10,7 +10,7 @@
 
 [
   {
-    "flags": [ "BorrowedFixture", "IncludesLocation", "IncludesRange" ],
+    "flags": [ "EsprimaOrgFixture", "IncludesLocation", "IncludesRange" ],
     "files": [
       "3rdparty/angular-1.2.5.js",
       "3rdparty/angular-1.7.9.js",
@@ -1683,13 +1683,13 @@
     ]
   },
   {
-    "flags": [ "BorrowedFixture", "IncludesLocation", "IncludesRange", "IncludesLocationSource" ],
+    "flags": [ "EsprimaOrgFixture", "IncludesLocation", "IncludesRange", "IncludesLocationSource" ],
     "files": [
       "expression/complex/migrated_0001.js"
     ]
   },
   {
-    "flags": [ "BorrowedFixture", "IncludesLocation", "IncludesRange", "IgnoresRegex" ],
+    "flags": [ "EsprimaOrgFixture", "IncludesLocation", "IncludesRange", "IgnoresRegex" ],
     "files": [
       "expression/primary/literal/regular-expression/migrated_0003.js",
       "expression/primary/literal/regular-expression/migrated_0004.js",
@@ -1698,14 +1698,14 @@
     ]
   },
   {
-    "flags": [ "BorrowedFixture", "IncludesRange" ],
+    "flags": [ "EsprimaOrgFixture", "IncludesRange" ],
     "files": [
       "expression/primary/literal/numeric/migrated_0002.js",
       "expression/primary/literal/regular-expression/migrated_0007.js"
     ]
   },
   {
-    "flags": [ "BorrowedFixture", "IncludesLocation" ],
+    "flags": [ "EsprimaOrgFixture", "IncludesLocation" ],
     "files": [
       "expression/primary/literal/numeric/migrated_0003.js",
       "expression/primary/literal/regular-expression/migrated_0008.js"

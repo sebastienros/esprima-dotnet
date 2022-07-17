@@ -1,5 +1,6 @@
 ﻿using Esprima.Ast;
 using Esprima.Test;
+using Esprima.Utils;
 
 namespace Esprima.Tests
 {
@@ -367,6 +368,62 @@ class aa {
 
                 return string.Empty;
             }
+        }
+
+        [Fact]
+        public void HoistingScopeShouldWork()
+        {
+            var parser = new JavaScriptParser(@"
+                function p() {}
+                var x;");
+            var program = parser.ParseScript();
+        }
+
+        private sealed class ParentNodeChecker : AstVisitor
+        {
+            public void Check(Node node)
+            {
+                Assert.Null(node.Data);
+
+                base.Visit(node);
+            }
+
+            public override object? Visit(Node node)
+            {
+                var parent = (Node?) node.Data;
+                Assert.NotNull(parent);
+                Assert.Contains(node, parent!.ChildNodes);
+
+                return base.Visit(node);
+            }
+        }
+
+        [Fact]
+        public void NodeDataCanBeSetToParentNode()
+        {
+            Action<Node> action = node =>
+            {
+                foreach (var child in node.ChildNodes)
+                {
+                    child.Data = node;
+                }
+            };
+
+            var parser = new JavaScriptParser("function add(a, b) { return a + b; }", new ParserOptions { OnNodeCreated = action });
+            var script = parser.ParseScript();
+
+            new ParentNodeChecker().Check(script);
+        }
+
+        [Fact]
+        public void CommentsAreParsed()
+        {
+            var count = 0;
+            Action<Node> action = node => count++;
+            var parser = new JavaScriptParser("// this is a comment", new ParserOptions { OnNodeCreated = action });
+            parser.ParseScript();
+
+            Assert.Equal(1, count);
         }
     }
 }

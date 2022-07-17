@@ -21,7 +21,13 @@ public static class AstJson
         /// This switch is intended for enabling a compatibility mode for <see cref="AstToJsonConverter"/> to build a JSON output
         /// which matches the format of the test fixtures of the original Esprima project.
         /// </summary>
-        internal bool TestCompatibilityMode { get; init; }
+        internal TestCompatibilityMode TestCompatibilityMode { get; init; }
+    }
+
+    internal enum TestCompatibilityMode
+    {
+        None,
+        EsprimaOrg,
     }
 
     public static string ToJsonString(this Node node, AstToJsonConverter.Factory? converterFactory = null)

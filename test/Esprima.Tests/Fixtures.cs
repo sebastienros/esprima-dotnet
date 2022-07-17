@@ -13,18 +13,9 @@ namespace Esprima.Test
         // Only use this when the test is deemed wrong.
         private const bool WriteBackExpectedTree = false;
 
-        private const string FixturesDirName = "Fixtures";
+        internal const string FixturesDirName = "Fixtures";
 
         private static Lazy<Dictionary<string, FixtureMetadata>> Metadata { get; } = new(() => FixtureMetadata.ReadMetadata());
-
-        [Fact]
-        public void HoistingScopeShouldWork()
-        {
-            var parser = new JavaScriptParser(@"
-                function p() {}
-                var x;");
-            var program = parser.ParseScript();
-        }
 
         private static string ParseAndFormat(SourceType sourceType, string source,
             ParserOptions parserOptions, Func<string, ParserOptions, JavaScriptParser> parserFactory,
@@ -153,7 +144,7 @@ namespace Esprima.Test
             {
                 sourceType = SourceType.Module;
                 expected = File.ReadAllText(moduleFilePath);
-                if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
+                if (WriteBackExpectedTree && metadata.ConversionOptions.TestCompatibilityMode == AstJson.TestCompatibilityMode.None)
                 {
                     var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
@@ -163,7 +154,7 @@ namespace Esprima.Test
             else if (File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
-                if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
+                if (WriteBackExpectedTree && metadata.ConversionOptions.TestCompatibilityMode == AstJson.TestCompatibilityMode.None)
                 {
                     var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
@@ -174,7 +165,7 @@ namespace Esprima.Test
             {
                 invalid = true;
                 expected = File.ReadAllText(failureFilePath);
-                if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
+                if (WriteBackExpectedTree && metadata.ConversionOptions.TestCompatibilityMode == AstJson.TestCompatibilityMode.None)
                 {
                     var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converterFactory, metadata.ConversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
@@ -232,53 +223,6 @@ namespace Esprima.Test
             return root ?? "";
         }
 
-        private sealed class ParentNodeChecker : AstVisitor
-        {
-            public void Check(Node node)
-            {
-                Assert.Null(node.Data);
-
-                base.Visit(node);
-            }
-
-            public override object? Visit(Node node)
-            {
-                var parent = (Node?) node.Data;
-                Assert.NotNull(parent);
-                Assert.Contains(node, parent!.ChildNodes);
-
-                return base.Visit(node);
-            }
-        }
-
-        [Fact]
-        public void NodeDataCanBeSetToParentNode()
-        {
-            Action<Node> action = node =>
-            {
-                foreach (var child in node.ChildNodes)
-                {
-                    child.Data = node;
-                }
-            };
-
-            var parser = new JavaScriptParser("function add(a, b) { return a + b; }", new ParserOptions { OnNodeCreated = action });
-            var script = parser.ParseScript();
-
-            new ParentNodeChecker().Check(script);
-        }
-
-        [Fact]
-        public void CommentsAreParsed()
-        {
-            var count = 0;
-            Action<Node> action = node => count++;
-            var parser = new JavaScriptParser("// this is a comment", new ParserOptions { OnNodeCreated = action });
-            parser.ParseScript();
-
-            Assert.Equal(1, count);
-        }
-
         private sealed class FixtureMetadata
         {
             public static readonly FixtureMetadata Default = new FixtureMetadata(
@@ -327,7 +271,7 @@ namespace Esprima.Test
                 {
                     IncludingLineColumn = flags.Contains("IncludesLocation"),
                     IncludingRange = flags.Contains("IncludesRange"),
-                    TestCompatibilityMode = flags.Contains("BorrowedFixture")
+                    TestCompatibilityMode = flags.Contains("EsprimaOrgFixture") ? AstJson.TestCompatibilityMode.EsprimaOrg : AstJson.TestCompatibilityMode.None
                 };
 
                 var includesLocationSource = flags.Contains("IncludesLocationSource");
