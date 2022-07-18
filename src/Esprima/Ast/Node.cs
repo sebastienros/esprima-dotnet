@@ -1,8 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
 namespace Esprima.Ast
 {
+    [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(), nq}}")]
     public abstract class Node
     {
         protected Node(Nodes type)
@@ -42,6 +44,13 @@ namespace Esprima.Ast
         protected object? AcceptAsExtension(AstVisitor visitor)
         {
             return visitor.VisitExtension(this);
+        }
+
+        public override string ToString() => this.ToJavascriptString(beautify: true);
+
+        private string GetDebuggerDisplay()
+        {
+            return $"/*{Type}*/  {this}";
         }
     }
 }

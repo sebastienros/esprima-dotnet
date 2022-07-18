@@ -1,12 +1,10 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    [DebuggerDisplay("{Raw,nq}")]
     public sealed class Literal : Expression
     {
         internal Literal(TokenType tokenType, object? value, string raw) : base(Nodes.Literal)
