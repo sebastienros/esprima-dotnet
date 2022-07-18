@@ -5,10 +5,10 @@ namespace Esprima.Ast
 {
     public sealed class YieldExpression : Expression
     {
-        public YieldExpression(Expression? argument, bool delgate) : base(Nodes.YieldExpression)
+        public YieldExpression(Expression? argument, bool @delegate) : base(Nodes.YieldExpression)
         {
             Argument = argument;
-            Delegate = delgate;
+            Delegate = @delegate;
         }
 
         public Expression? Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
