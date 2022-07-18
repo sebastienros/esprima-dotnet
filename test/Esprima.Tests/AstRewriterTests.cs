@@ -299,7 +299,7 @@ sealed class TestRewriter : JsxAstRewriter
         return ForceNewObjectByControlType((ExpressionStatement) base.VisitExpressionStatement(expressionStatement)!,
             node => node switch
             {
-                Directive directive => new Directive(node.Expression, directive.Directiv),
+                Directive directive => new Directive(node.Expression, directive.Value),
                 _ => new ExpressionStatement(node.Expression)
             });
     }

@@ -499,7 +499,7 @@ public class AstToJsonConverter : AstVisitor
         {
             if (expressionStatement is Directive d)
             {
-                Member("directive", d.Directiv);
+                Member("directive", d.Value);
             }
 
             Member("expression", expressionStatement.Expression);

@@ -4140,7 +4140,7 @@ namespace Esprima
                 var statement = ParseDirective();
                 body.Push(statement);
 
-                var directive = (statement as Directive)?.Directiv;
+                var directive = (statement as Directive)?.Value;
 
                 if (directive == null)
                 {
