@@ -36,7 +36,7 @@ namespace Esprima
         }
     }
 
-    public sealed class Scanner
+    public sealed partial class Scanner
     {
         private readonly IErrorHandler _errorHandler;
         private readonly bool _trackComment;
@@ -53,64 +53,6 @@ namespace Esprima
 
         private List<string> _curlyStack;
         private readonly StringBuilder strb = new();
-
-        private static readonly HashSet<string> Keywords = new()
-        {
-            "if",
-            "in",
-            "do",
-            "var",
-            "for",
-            "new",
-            "try",
-            "let",
-            "this",
-            "else",
-            "case",
-            "void",
-            "with",
-            "enum",
-            "while",
-            "break",
-            "catch",
-            "throw",
-            "const",
-            "yield",
-            "class",
-            "super",
-            "return",
-            "typeof",
-            "delete",
-            "switch",
-            "export",
-            "import",
-            "default",
-            "finally",
-            "extends",
-            "function",
-            "continue",
-            "debugger",
-            "instanceof"
-        };
-
-        private static readonly HashSet<string> StrictModeReservedWords = new()
-        {
-            "implements",
-            "interface",
-            "package",
-            "private",
-            "protected",
-            "public",
-            "static",
-            "yield",
-            "let"
-        };
-
-        private static readonly HashSet<string> FutureReservedWords = new() { "enum", "export", "import", "super" };
-
-        private static readonly string[] threeCharacterPunctutors = { "===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=" };
-
-        private static readonly string[] twoCharacterPunctuators = { "&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**" };
 
         private static int HexValue(char ch)
         {
@@ -203,31 +145,31 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-future-reserved-words
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsFutureReservedWord(string? id)
-        {
-            return id != null && FutureReservedWords.Contains(id);
-        }
+        [StringMatcher("enum", "export", "import", "super")]
+        public static partial bool IsFutureReservedWord(string? id);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsStrictModeReservedWord(string? id)
-        {
-            return id != null && StrictModeReservedWords.Contains(id);
-        }
+        [StringMatcher("implements", "interface", "package", "private", "protected", "public", "static", "yield", "let")]
+        public static partial bool IsStrictModeReservedWord(string? id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsRestrictedWord(string? id)
         {
-            return "eval".Equals(id) || "arguments".Equals(id);
+            return id is "eval" or "arguments";
         }
+
+        [StringMatcher("&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**")]
+        private static partial bool IsTwoCharacterPunctuator(string id);
+
+        [StringMatcher("===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=")]
+        private static partial bool IsThreeCharacterPunctuator(string id);
 
         // https://tc39.github.io/ecma262/#sec-keywords
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsKeyword(string id)
-        {
-            return Keywords.Contains(id);
-        }
+        [StringMatcher(
+            "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
+            "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
+            "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof")]
+        public static partial bool IsKeyword(string? id);
 
         // https://tc39.github.io/ecma262/#sec-comments
 
@@ -711,7 +653,7 @@ namespace Esprima
             return id;
         }
 
-        public OctalValue OctalToDecimal(char ch)
+        private OctalValue OctalToDecimal(char ch)
         {
             // \0 is not octal escape sequence
             var octal = ch != '0';
@@ -886,7 +828,7 @@ namespace Esprima
                     {
                         // 3-character punctuators.
                         str = SafeSubstring(Source, Index, 3);
-                        if (str.Length == 3 && FindThreeCharEqual(str, threeCharacterPunctutors) != null)
+                        if (IsThreeCharacterPunctuator(str))
                         {
                             Index += 3;
                         }
@@ -894,15 +836,16 @@ namespace Esprima
                         {
                             // 2-character punctuators.
                             str = SafeSubstring(Source, Index, 2);
-                            if (str.Length == 2 && FindTwoCharEqual(str, twoCharacterPunctuators) != null)
+                            if (IsTwoCharacterPunctuator(str))
                             {
                                 Index += 2;
                             }
                             else
                             {
                                 // 1-character punctuators.
-                                str = Source[Index].ToString();
-                                if ("<>=!+-*%&|^/".IndexOf(str, StringComparison.Ordinal) >= 0)
+                                var temp = Source[Index];
+                                str = temp.ToString();
+                                if ("<>=!+-*%&|^/".IndexOf(temp) >= 0)
                                 {
                                     ++Index;
                                 }
@@ -2722,7 +2665,7 @@ namespace Esprima
 
             if (dotAll)
             {
-                // cannot use ECMA mode with singline
+                // cannot use ECMA mode with singe line
                 options |= RegexOptions.Singleline;
                 options &= ~RegexOptions.ECMAScript;
             }
@@ -2734,56 +2677,7 @@ namespace Esprima
 
             return options;
         }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string? FindTwoCharEqual(string input, string[] alternatives)
-        {
-            var c2 = input[1];
-            var c1 = input[0];
-            for (var i = 0; i < alternatives.Length; ++i)
-            {
-                var s = alternatives[i];
-                if (c1 == s[0]
-                    && c2 == s[1])
-                {
-                    return s;
-                }
-            }
-
-            return null;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string? FindThreeCharEqual(string input, string[] alternatives)
-        {
-            var c3 = input[2];
-            var c2 = input[1];
-            var c1 = input[0];
-            for (var i = 0; i < alternatives.Length; ++i)
-            {
-                var s = alternatives[i];
-                if (c1 == s[0]
-                    && c2 == s[1]
-                    && c3 == s[2])
-                {
-                    return alternatives[i];
-                }
-            }
-
-            return null;
-        }
     }
 
-    public readonly struct OctalValue
-    {
-        public readonly int Code;
-        public readonly bool Octal;
-
-        public OctalValue(int code, bool octal)
-        {
-            Code = code;
-            Octal = octal;
-        }
-    }
+    internal readonly record struct OctalValue(int Code, bool Octal);
 }

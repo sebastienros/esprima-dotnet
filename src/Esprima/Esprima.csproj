@@ -30,7 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Esprima.SourceGenerators\Esprima.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Using Remove="System.Net.Http" />
   </ItemGroup>
@@ -38,5 +38,19 @@
   <ItemGroup>
     <Compile Include="..\Shared\Compatibility\IsExternalInit.cs" Link="Compatibility\IsExternalInit.cs" />
   </ItemGroup>
+
+  <!-- For checking generated output-->
+
+  <!--
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <Content Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>
+  -->
 
 </Project>
