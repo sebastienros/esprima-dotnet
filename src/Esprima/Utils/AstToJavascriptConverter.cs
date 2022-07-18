@@ -846,7 +846,7 @@ public partial class AstToJavascriptConverter : AstVisitor
     protected internal override object? VisitIdentifier(Identifier identifier)
     {
         _writeContext.SetNodeProperty(nameof(identifier.Name), static node => node.As<Identifier>().Name);
-        Writer.WriteIdentifier(identifier.Name!, ref _writeContext);
+        Writer.WriteIdentifier(identifier.Name, ref _writeContext);
 
         return identifier;
     }
@@ -1093,7 +1093,7 @@ WriteSource:
     protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
     {
         _writeContext.SetNodeProperty(nameof(metaProperty.Meta), static node => node.As<MetaProperty>().Meta);
-        Writer.WriteKeyword(metaProperty.Meta.Name!, ref _writeContext);
+        Writer.WriteKeyword(metaProperty.Meta.Name, ref _writeContext);
 
         _writeContext.ClearNodeProperty();
         Writer.WritePunctuator(".", TokenFlags.InBetween, ref _writeContext);
@@ -1213,7 +1213,7 @@ WriteSource:
     {
         _writeContext.SetNodeProperty(nameof(privateIdentifier.Name), static node => node.As<PrivateIdentifier>().Name);
         Writer.WritePunctuator("#", TokenFlags.Leading, ref _writeContext);
-        Writer.WriteIdentifier(privateIdentifier.Name!, ref _writeContext);
+        Writer.WriteIdentifier(privateIdentifier.Name, ref _writeContext);
 
         return privateIdentifier;
     }

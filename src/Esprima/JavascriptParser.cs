@@ -539,7 +539,7 @@ namespace Esprima
                         TolerateUnexpectedToken(_lookahead);
                     }
 
-                    expr = MatchAsyncFunction() ? ParseFunctionExpression() : Finalize(node, new Identifier((string?) NextToken().Value));
+                    expr = MatchAsyncFunction() ? ParseFunctionExpression() : Finalize(node, new Identifier((string) NextToken().Value!));
                     break;
 
                 case TokenType.StringLiteral:
@@ -610,7 +610,7 @@ namespace Esprima
                             break;
                         case "#":
                             NextToken();
-                            expr = Finalize(node, new PrivateIdentifier((string?) NextToken().Value));
+                            expr = Finalize(node, new PrivateIdentifier((string) NextToken().Value!));
                             break;
                         case "@":
                             var decorators = ParseDecorators();
@@ -634,7 +634,7 @@ namespace Esprima
                     }
                     else if (!_context.Strict && MatchKeyword("let"))
                     {
-                        expr = Finalize(node, new Identifier((string?) NextToken().Value));
+                        expr = Finalize(node, new Identifier((string) NextToken().Value!));
                     }
                     else
                     {
@@ -850,7 +850,7 @@ namespace Esprima
                 case TokenType.BooleanLiteral:
                 case TokenType.NullLiteral:
                 case TokenType.Keyword:
-                    key = isPrivate ? Finalize(node, new PrivateIdentifier((string?) token.Value)) : Finalize(node, new Identifier((string?) token.Value));
+                    key = isPrivate ? Finalize(node, new PrivateIdentifier((string) token.Value!)) : Finalize(node, new Identifier((string?) token.Value!));
                     break;
 
                 case TokenType.Punctuator:
@@ -1400,7 +1400,7 @@ namespace Esprima
                 return ThrowUnexpectedToken<Identifier>(token);
             }
 
-            return Finalize(node, new Identifier((string?) token.Value));
+            return Finalize(node, new Identifier((string) token.Value!));
         }
 
         private Expression ParseIdentifierOrPrivateIdentifierName()
@@ -1423,7 +1423,7 @@ namespace Esprima
                 return ThrowUnexpectedToken<Identifier>(token);
             }
 
-            return isPrivateField ? Finalize(node, new PrivateIdentifier((string?) token.Value)) : Finalize(node, new Identifier((string?) token.Value));
+            return isPrivateField ? Finalize(node, new PrivateIdentifier((string) token.Value!)) : Finalize(node, new Identifier((string?) token.Value!));
         }
 
         private Expression ParseNewExpression()
@@ -2819,7 +2819,7 @@ namespace Esprima
                 TolerateUnexpectedToken(token);
             }
 
-            return Finalize(node, new Identifier((string?) token.Value));
+            return Finalize(node, new Identifier((string) token.Value!));
         }
 
         private VariableDeclarator ParseVariableDeclaration(ref bool inFor)
@@ -3103,7 +3103,7 @@ namespace Esprima
                             TolerateUnexpectedToken(_lookahead);
                         }
 
-                        left = Finalize(initNode, new Identifier(kindString));
+                        left = Finalize(initNode, new Identifier(kindString!));
                         NextToken();
                         right = ParseExpression();
                         init = null;

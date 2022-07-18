@@ -5,12 +5,12 @@ namespace Esprima.Ast
 {
     public sealed class Identifier : Expression
     {
-        public Identifier(string? name) : base(Nodes.Identifier)
+        public Identifier(string name) : base(Nodes.Identifier)
         {
             Name = name;
         }
 
-        public string? Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public string Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 

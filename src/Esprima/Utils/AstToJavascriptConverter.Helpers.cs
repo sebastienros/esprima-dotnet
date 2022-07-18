@@ -236,7 +236,7 @@ partial class AstToJavascriptConverter
 
     private void VisitExportOrImportSpecifierIdentifier(Expression identifierExpression)
     {
-        if (identifierExpression is Identifier identifier && identifier.Name == "default")
+        if (identifierExpression is Identifier { Name: "default" } identifier)
         {
             Writer.WriteKeyword("default", ref _writeContext);
         }
@@ -272,7 +272,7 @@ partial class AstToJavascriptConverter
             case Nodes.FunctionExpression:
             case Nodes.ObjectExpression:
             case Nodes.AssignmentExpression when expression.As<AssignmentExpression>() is { Left.Type: Nodes.ObjectPattern }:
-            case Nodes.Identifier when Scanner.IsStrictModeReservedWord(expression.As<Identifier>().Name!):
+            case Nodes.Identifier when Scanner.IsStrictModeReservedWord(expression.As<Identifier>().Name):
                 return true;
         }
 
