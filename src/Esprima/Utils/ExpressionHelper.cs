@@ -98,7 +98,7 @@ Reenter:
                     case BinaryOperator.Equal:
                     case BinaryOperator.NotEqual:
                     case BinaryOperator.StrictlyEqual:
-                    case BinaryOperator.StricltyNotEqual:
+                    case BinaryOperator.StrictlyNotEqual:
                         associativity = leftToRightAssociativity;
                         return 800;
 
