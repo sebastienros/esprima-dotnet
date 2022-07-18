@@ -5029,7 +5029,7 @@ namespace Esprima
                         break;
                 }
 
-                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
+                exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration.As<Declaration>(), new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
             }
             else if (MatchAsyncFunction())
             {
