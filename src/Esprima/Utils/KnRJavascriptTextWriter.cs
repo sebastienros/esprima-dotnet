@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Esprima.Ast;
 
 namespace Esprima.Utils;
@@ -26,13 +27,9 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
     private const int KeepSingleStatementBodyInLineFlag = 1 << 1;
     private const int KeepEmptyBlockBodyInLineFlag = 1 << 2;
 
-    private const int StatementBlockBodyFlag = 1 << 0;
-    private const int StatementEmptyBlockBodyFlag = 1 << 1;
-
     private readonly int _optionFlags;
     private readonly string _indent;
     private int _indentionLevel;
-    private int _currentStatementBodyFlags;
 
     public KnRJavascriptTextWriter(TextWriter writer, JavascriptTextWriter.Options options) : base(writer, options)
     {
@@ -70,8 +67,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
     protected int MultiLineArrayLiteralThreshold { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     protected int MultiLineObjectLiteralThreshold { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    protected int PreviousStatementBody { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
     protected void IncreaseIndent()
     {
         _indentionLevel++;
@@ -90,7 +85,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void WriteEpsilon(TokenFlags flags, in WriteContext context)
+    public override void WriteEpsilon(TokenFlags flags, ref WriteContext context)
     {
         if (WhiteSpaceWrittenSinceLastToken)
         {
@@ -103,7 +98,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    protected override void StartKeyword(string value, TokenFlags flags, in WriteContext context)
+    protected override void StartKeyword(string value, TokenFlags flags, ref WriteContext context)
     {
         if (WhiteSpaceWrittenSinceLastToken)
         {
@@ -112,7 +107,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
 
         if (flags.HasFlagFast(TokenFlags.FollowsStatementBody))
         {
-            if (UseEgyptianBraces && CanUseEgyptianBraces())
+            if (UseEgyptianBraces && CanUseEgyptianBraces(ref context))
             {
                 WriteSpace();
             }
@@ -128,11 +123,11 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
         else
         {
-            base.StartKeyword(value, flags, context);
+            base.StartKeyword(value, flags, ref context);
         }
     }
 
-    protected override void StartIdentifier(string value, TokenFlags flags, in WriteContext context)
+    protected override void StartIdentifier(string value, TokenFlags flags, ref WriteContext context)
     {
         if (WhiteSpaceWrittenSinceLastToken)
         {
@@ -145,11 +140,11 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
         else
         {
-            base.StartIdentifier(value, flags, context);
+            base.StartIdentifier(value, flags, ref context);
         }
     }
 
-    protected override void StartLiteral(string value, TokenType type, TokenFlags flags, in WriteContext context)
+    protected override void StartLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
         if (WhiteSpaceWrittenSinceLastToken)
         {
@@ -162,11 +157,11 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
         else
         {
-            base.StartLiteral(value, type, flags, context);
+            base.StartLiteral(value, type, flags, ref context);
         }
     }
 
-    protected override void StartPunctuator(string value, TokenFlags flags, in WriteContext context)
+    protected override void StartPunctuator(string value, TokenFlags flags, ref WriteContext context)
     {
         if (WhiteSpaceWrittenSinceLastToken)
         {
@@ -179,13 +174,13 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
         else
         {
-            base.StartPunctuator(value, flags, context);
+            base.StartPunctuator(value, flags, ref context);
         }
     }
 
-    public override void StartArray(int elementCount, in WriteContext context)
+    public override void StartArray(int elementCount, ref WriteContext context)
     {
-        base.StartArray(elementCount, context);
+        base.StartArray(elementCount, ref context);
 
         if (context.Node.Type == Nodes.ArrayExpression && elementCount >= MultiLineArrayLiteralThreshold)
         {
@@ -194,7 +189,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void EndArray(int elementCount, in WriteContext context)
+    public override void EndArray(int elementCount, ref WriteContext context)
     {
         if (context.Node.Type == Nodes.ArrayExpression && elementCount >= MultiLineArrayLiteralThreshold)
         {
@@ -202,12 +197,12 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
             WriteIndent();
         }
 
-        base.EndArray(elementCount, context);
+        base.EndArray(elementCount, ref context);
     }
 
-    public override void StartObject(int propertyCount, in WriteContext context)
+    public override void StartObject(int propertyCount, ref WriteContext context)
     {
-        base.StartObject(propertyCount, context);
+        base.StartObject(propertyCount, ref context);
 
         if (context.Node.Type == Nodes.ObjectExpression && propertyCount >= MultiLineObjectLiteralThreshold)
         {
@@ -216,7 +211,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void EndObject(int propertyCount, in WriteContext context)
+    public override void EndObject(int propertyCount, ref WriteContext context)
     {
         if (context.Node.Type == Nodes.ObjectExpression && propertyCount >= MultiLineObjectLiteralThreshold)
         {
@@ -224,12 +219,12 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
             WriteIndent();
         }
 
-        base.EndObject(propertyCount, context);
+        base.EndObject(propertyCount, ref context);
     }
 
-    public override void StartBlock(int statementCount, in WriteContext context)
+    public override void StartBlock(int statementCount, ref WriteContext context)
     {
-        base.StartBlock(statementCount, context);
+        base.StartBlock(statementCount, ref context);
 
         if (statementCount > 0 || !KeepEmptyBlockBodyInLine)
         {
@@ -238,7 +233,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void EndBlock(int statementCount, in WriteContext context)
+    public override void EndBlock(int statementCount, ref WriteContext context)
     {
         if (statementCount > 0 || !KeepEmptyBlockBodyInLine)
         {
@@ -246,31 +241,30 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
             WriteIndent();
         }
 
-        base.EndBlock(statementCount, context);
+        base.EndBlock(statementCount, ref context);
     }
 
-    public override void StartStatement(StatementFlags flags, in WriteContext context)
+    protected virtual void StoreStatementBodyIntoContext(Statement statement, ref WriteContext context)
+    {
+        context.Data = statement;
+    }
+
+    protected virtual Statement RetrieveStatementBodyFromContext(ref WriteContext context)
+    {
+        return (Statement) (context.Data ?? throw new InvalidOperationException());
+    }
+
+    public override void StartStatement(StatementFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(StatementFlags.IsStatementBody))
         {
             var statement = context.GetNodePropertyValue<Statement>();
+            StoreStatementBodyIntoContext(statement, ref context);
 
-            // Is block body?
-            if (statement is BlockStatement blockStatement)
-            {
-                _currentStatementBodyFlags = StatementBlockBodyFlag;
-
-                if (blockStatement.Body.Count == 0)
-                {
-                    _currentStatementBodyFlags |= StatementEmptyBlockBodyFlag;
-                }
-            }
             // Is single statement body?
-            else
+            if (statement.Type != Nodes.BlockStatement)
             {
-                _currentStatementBodyFlags = 0;
-
-                if (CanInlineSingleStatementBody(statement, flags, in context))
+                if (CanInlineSingleStatementBody(statement, flags, ref context))
                 {
                     WriteSpace();
                 }
@@ -284,24 +278,29 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void EndStatement(StatementFlags flags, in WriteContext context)
+    public override void EndStatement(StatementFlags flags, ref WriteContext context)
     {
-        // Is single statement body?
-        if (flags.HasFlagFast(StatementFlags.IsStatementBody) && (_currentStatementBodyFlags & StatementBlockBodyFlag) == 0)
+        if (flags.HasFlagFast(StatementFlags.IsStatementBody))
         {
-            if (!CanInlineSingleStatementBody(context.GetNodePropertyValue<Statement>(), flags, in context))
+            var statement = RetrieveStatementBodyFromContext(ref context);
+
+            // Is single statement body?
+            if (statement.Type != Nodes.BlockStatement)
             {
-                DecreaseIndent();
+                if (!CanInlineSingleStatementBody(statement, flags, ref context))
+                {
+                    DecreaseIndent();
+                }
             }
         }
 
-        if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyValue<Statement>(), flags, in context))
+        if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyValue<Statement>(), flags, ref context))
         {
-            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, in context);
+            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref context);
         }
     }
 
-    public override void StartStatementList(int count, in WriteContext context)
+    public override void StartStatementList(int count, ref WriteContext context)
     {
         if (context.Node.Type == Nodes.SwitchCase)
         {
@@ -317,7 +316,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void StartStatementListItem(int index, int count, StatementFlags flags, in WriteContext context)
+    public override void StartStatementListItem(int index, int count, StatementFlags flags, ref WriteContext context)
     {
         if (context.Node.Type == Nodes.SwitchCase)
         {
@@ -330,17 +329,17 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         WriteIndent();
     }
 
-    public override void EndStatementListItem(int index, int count, StatementFlags flags, in WriteContext context)
+    public override void EndStatementListItem(int index, int count, StatementFlags flags, ref WriteContext context)
     {
-        if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyListValue<Statement>()[index], flags, in context))
+        if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyListValue<Statement>()[index], flags, ref context))
         {
-            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, in context);
+            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref context);
         }
 
         WriteLine();
     }
 
-    public override void EndStatementList(int count, in WriteContext context)
+    public override void EndStatementList(int count, ref WriteContext context)
     {
         if (context.Node.Type == Nodes.SwitchCase)
         {
@@ -351,14 +350,14 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    protected virtual bool CanUseEgyptianBraces()
+    protected virtual bool CanUseEgyptianBraces(ref WriteContext context)
     {
         return KeepEmptyBlockBodyInLine
-            ? (_currentStatementBodyFlags & (StatementBlockBodyFlag | StatementEmptyBlockBodyFlag)) == StatementBlockBodyFlag
-            : (_currentStatementBodyFlags & (StatementBlockBodyFlag)) != 0;
+            ? RetrieveStatementBodyFromContext(ref context) is BlockStatement blockStatement && blockStatement.Body.Count > 0
+            : RetrieveStatementBodyFromContext(ref context).Type == Nodes.BlockStatement;
     }
 
-    protected virtual bool CanInlineSingleStatementBody(Statement statement, StatementFlags flags, in WriteContext context)
+    protected virtual bool CanInlineSingleStatementBody(Statement statement, StatementFlags flags, ref WriteContext context)
     {
         return statement.Type switch
         {
@@ -404,7 +403,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         };
     }
 
-    protected virtual bool ShouldTerminateStatementAnyway(Statement statement, StatementFlags flags, in WriteContext context)
+    protected virtual bool ShouldTerminateStatementAnyway(Statement statement, StatementFlags flags, ref WriteContext context)
     {
         return statement.Type switch
         {
@@ -413,19 +412,19 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         };
     }
 
-    public override void StartExpressionListItem(int index, int count, ExpressionFlags flags, in WriteContext context)
+    public override void StartExpressionListItem(int index, int count, ExpressionFlags flags, ref WriteContext context)
     {
         if (context.Node.Type == Nodes.ArrayExpression && count >= MultiLineArrayLiteralThreshold)
         {
             WriteIndent();
         }
 
-        base.StartExpressionListItem(index, count, flags, context);
+        base.StartExpressionListItem(index, count, flags, ref context);
     }
 
-    public override void EndExpressionListItem(int index, int count, ExpressionFlags flags, in WriteContext context)
+    public override void EndExpressionListItem(int index, int count, ExpressionFlags flags, ref WriteContext context)
     {
-        base.EndExpressionListItem(index, count, flags, context);
+        base.EndExpressionListItem(index, count, flags, ref context);
 
         if (context.Node.Type == Nodes.ArrayExpression && count >= MultiLineArrayLiteralThreshold)
         {
@@ -433,7 +432,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void StartAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, in WriteContext context)
+    public override void StartAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, ref WriteContext context)
     {
         if (typeof(T) == typeof(SwitchCase) ||
             context.Node.Type == Nodes.ClassBody ||
@@ -443,9 +442,9 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    public override void EndAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, in WriteContext context)
+    public override void EndAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, ref WriteContext context)
     {
-        base.EndAuxiliaryNodeListItem<T>(index, count, separator, nodeContext, context);
+        base.EndAuxiliaryNodeListItem<T>(index, count, separator, nodeContext, ref context);
 
         if (context.Node.Type is Nodes.ClassBody ||
             context.Node.Type == Nodes.ObjectExpression && count >= MultiLineObjectLiteralThreshold)

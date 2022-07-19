@@ -19,6 +19,7 @@ partial class JavascriptTextWriter
             Node = node;
             _nodePropertyName = null;
             _nodePropertyValueAccessor = null;
+            Data = null;
         }
 
         public Node? ParentNode { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
@@ -85,5 +86,7 @@ partial class JavascriptTextWriter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ChangeNodeProperty<T>(string name, NodePropertyListValueAccessor<T> listValueAccessor) where T : Node? =>
             SetNodeProperty(name ?? ThrowArgumentNullException<string>(nameof(name)), listValueAccessor ?? ThrowArgumentNullException<NodePropertyListValueAccessor<T>>(nameof(listValueAccessor)));
+
+        public object? Data;
     }
 }

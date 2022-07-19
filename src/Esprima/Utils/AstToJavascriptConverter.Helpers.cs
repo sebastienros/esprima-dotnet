@@ -50,9 +50,9 @@ partial class AstToJavascriptConverter
         var originalStatementFlags = _currentStatementFlags;
         _currentStatementFlags = getCombinedFlags(this, statement, flags);
 
-        Writer.StartStatement((JavascriptTextWriter.StatementFlags) _currentStatementFlags, in _writeContext);
+        Writer.StartStatement((JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
         Visit(statement);
-        Writer.EndStatement((JavascriptTextWriter.StatementFlags) _currentStatementFlags, in _writeContext);
+        Writer.EndStatement((JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
 
         _currentStatementFlags = originalStatementFlags;
     }
@@ -66,14 +66,14 @@ partial class AstToJavascriptConverter
 
     protected void VisitStatementList(in NodeList<Statement> statementList, Func<AstToJavascriptConverter, Statement, int, int, StatementFlags> getCombinedItemFlags)
     {
-        Writer.StartStatementList(statementList.Count, in _writeContext);
+        Writer.StartStatementList(statementList.Count, ref _writeContext);
 
         for (var i = 0; i < statementList.Count; i++)
         {
             VisitStatementListItem(statementList[i], i, statementList.Count, getCombinedItemFlags);
         }
 
-        Writer.EndStatementList(statementList.Count, in _writeContext);
+        Writer.EndStatementList(statementList.Count, ref _writeContext);
     }
 
     protected void VisitStatementListItem(Statement statement, int index, int count, Func<AstToJavascriptConverter, Statement, int, int, StatementFlags> getCombinedFlags)
@@ -81,9 +81,9 @@ partial class AstToJavascriptConverter
         var originalStatementFlags = _currentStatementFlags;
         _currentStatementFlags = getCombinedFlags(this, statement, index, count);
 
-        Writer.StartStatementListItem(index, count, (JavascriptTextWriter.StatementFlags) _currentStatementFlags, in _writeContext);
+        Writer.StartStatementListItem(index, count, (JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
         Visit(statement);
-        Writer.EndStatementListItem(index, count, (JavascriptTextWriter.StatementFlags) _currentStatementFlags, in _writeContext);
+        Writer.EndStatementListItem(index, count, (JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
 
         _currentStatementFlags = originalStatementFlags;
     }
@@ -183,9 +183,9 @@ partial class AstToJavascriptConverter
         var originalExpressionFlags = _currentExpressionFlags;
         _currentExpressionFlags = getCombinedFlags(this, expression, flags);
 
-        Writer.StartExpression((JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, in _writeContext);
+        Writer.StartExpression((JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
         Visit(expression);
-        Writer.EndExpression((JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, in _writeContext);
+        Writer.EndExpression((JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
 
         _currentExpressionFlags = originalExpressionFlags;
     }
@@ -199,14 +199,14 @@ partial class AstToJavascriptConverter
 
     protected void VisitExpressionList(in NodeList<Expression> expressionList, Func<AstToJavascriptConverter, Expression, int, int, ExpressionFlags> getCombinedItemFlags)
     {
-        Writer.StartExpressionList(expressionList.Count, in _writeContext);
+        Writer.StartExpressionList(expressionList.Count, ref _writeContext);
 
         for (var i = 0; i < expressionList.Count; i++)
         {
             VisitExpressionListItem(expressionList[i], i, expressionList.Count, getCombinedItemFlags);
         }
 
-        Writer.EndExpressionList(expressionList.Count, in _writeContext);
+        Writer.EndExpressionList(expressionList.Count, ref _writeContext);
     }
 
     protected void VisitExpressionListItem(Expression expression, int index, int count, Func<AstToJavascriptConverter, Expression, int, int, ExpressionFlags> getCombinedFlags)
@@ -214,9 +214,9 @@ partial class AstToJavascriptConverter
         var originalExpressionFlags = _currentExpressionFlags;
         _currentExpressionFlags = getCombinedFlags(this, expression, index, count);
 
-        Writer.StartExpressionListItem(index, count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, in _writeContext);
+        Writer.StartExpressionListItem(index, count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
         Visit(expression);
-        Writer.EndExpressionListItem(index, count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, in _writeContext);
+        Writer.EndExpressionListItem(index, count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
 
         _currentExpressionFlags = originalExpressionFlags;
     }
@@ -225,20 +225,20 @@ partial class AstToJavascriptConverter
     {
         // https://github.com/tc39/proposal-import-assertions
 
-        Writer.WriteKeyword("assert", TokenFlags.SurroundingSpaceRecommended, in _writeContext);
+        Writer.WriteKeyword("assert", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
 
-        Writer.StartObject(assertions.Count, in _writeContext);
+        Writer.StartObject(assertions.Count, ref _writeContext);
 
         VisitAuxiliaryNodeList(in assertions, separator: ",");
 
-        Writer.EndObject(assertions.Count, in _writeContext);
+        Writer.EndObject(assertions.Count, ref _writeContext);
     }
 
     private void VisitExportOrImportSpecifierIdentifier(Expression identifierExpression)
     {
         if (identifierExpression is Identifier identifier && identifier.Name == "default")
         {
-            Writer.WriteKeyword("default", in _writeContext);
+            Writer.WriteKeyword("default", ref _writeContext);
         }
         else
         {
@@ -250,9 +250,9 @@ partial class AstToJavascriptConverter
     {
         if (computed)
         {
-            Writer.WritePunctuator("[", TokenFlags.Leading | leadingBracketFlags, in _writeContext);
+            Writer.WritePunctuator("[", TokenFlags.Leading | leadingBracketFlags, ref _writeContext);
             VisitRootExpression(key, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(key)));
-            Writer.WritePunctuator("]", TokenFlags.Trailing | trailingBracketFlags, in _writeContext);
+            Writer.WritePunctuator("]", TokenFlags.Trailing | trailingBracketFlags, ref _writeContext);
         }
         else if (key.Type == Nodes.Identifier)
         {
@@ -370,9 +370,9 @@ partial class AstToJavascriptConverter
         var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
         _currentAuxiliaryNodeContext = getNodeContext(this, node);
 
-        Writer.StartAuxiliaryNode(_currentAuxiliaryNodeContext, in _writeContext);
+        Writer.StartAuxiliaryNode(_currentAuxiliaryNodeContext, ref _writeContext);
         Visit(node);
-        Writer.EndAuxiliaryNode(_currentAuxiliaryNodeContext, in _writeContext);
+        Writer.EndAuxiliaryNode(_currentAuxiliaryNodeContext, ref _writeContext);
 
         _currentAuxiliaryNodeContext = originalAuxiliaryNodeContext;
     }
@@ -387,14 +387,14 @@ partial class AstToJavascriptConverter
     protected void VisitAuxiliaryNodeList<TNode>(in NodeList<TNode> nodeList, string separator, Func<AstToJavascriptConverter, Node?, int, int, object?> getNodeContext)
         where TNode : Node
     {
-        Writer.StartAuxiliaryNodeList<TNode>(nodeList.Count, in _writeContext);
+        Writer.StartAuxiliaryNodeList<TNode>(nodeList.Count, ref _writeContext);
 
         for (var i = 0; i < nodeList.Count; i++)
         {
             VisitAuxiliaryNodeListItem(nodeList[i], i, nodeList.Count, separator, getNodeContext);
         }
 
-        Writer.EndAuxiliaryNodeList<TNode>(nodeList.Count, in _writeContext);
+        Writer.EndAuxiliaryNodeList<TNode>(nodeList.Count, ref _writeContext);
     }
 
     protected void VisitAuxiliaryNodeListItem<TNode>(TNode node, int index, int count, string separator, Func<AstToJavascriptConverter, Node?, int, int, object?> getNodeContext)
@@ -403,9 +403,9 @@ partial class AstToJavascriptConverter
         var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
         _currentAuxiliaryNodeContext = getNodeContext(this, node, index, count);
 
-        Writer.StartAuxiliaryNodeListItem<TNode>(index, count, separator, _currentAuxiliaryNodeContext, in _writeContext);
+        Writer.StartAuxiliaryNodeListItem<TNode>(index, count, separator, _currentAuxiliaryNodeContext, ref _writeContext);
         Visit(node);
-        Writer.EndAuxiliaryNodeListItem<TNode>(index, count, separator, _currentAuxiliaryNodeContext, in _writeContext);
+        Writer.EndAuxiliaryNodeListItem<TNode>(index, count, separator, _currentAuxiliaryNodeContext, ref _writeContext);
 
         _currentAuxiliaryNodeContext = originalAuxiliaryNodeContext;
     }

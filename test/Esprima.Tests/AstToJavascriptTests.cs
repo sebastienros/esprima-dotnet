@@ -14,23 +14,23 @@ namespace Esprima.Tests
         {
             public CustomCompactJavascriptTextWriter(TextWriter writer, Options options) : base(writer, options) { }
 
-            public override void EndStatement(StatementFlags flags, in WriteContext context)
+            public override void EndStatement(StatementFlags flags, ref WriteContext context)
             {
-                if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyValue<Statement>(), flags, in context))
+                if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyValue<Statement>(), flags, ref context))
                 {
-                    WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, in context);
+                    WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref context);
                 }
             }
 
-            public override void EndStatementListItem(int index, int count, StatementFlags flags, in WriteContext context)
+            public override void EndStatementListItem(int index, int count, StatementFlags flags, ref WriteContext context)
             {
-                if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyListValue<Statement>()[index], flags, in context))
+                if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) || ShouldTerminateStatementAnyway(context.GetNodePropertyListValue<Statement>()[index], flags, ref context))
                 {
-                    WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, in context);
+                    WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref context);
                 }
             }
 
-            private bool ShouldTerminateStatementAnyway(Statement statement, StatementFlags flags, in WriteContext context)
+            private bool ShouldTerminateStatementAnyway(Statement statement, StatementFlags flags, ref WriteContext context)
             {
                 return statement.Type switch
                 {

@@ -62,9 +62,9 @@ public partial class JavascriptTextWriter
         LastTokenFlags |= TokenFlags.TrailingSpaceRecommended;
     }
 
-    public virtual void WriteEpsilon(TokenFlags flags, in WriteContext context) { }
+    public virtual void WriteEpsilon(TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartIdentifier(string value, TokenFlags flags, in WriteContext context)
+    protected virtual void StartIdentifier(string value, TokenFlags flags, ref WriteContext context)
     {
         switch (LastTokenType)
         {
@@ -87,26 +87,26 @@ public partial class JavascriptTextWriter
         }
     }
 
-    public void WriteIdentifier(string value, TokenFlags flags, in WriteContext context)
+    public void WriteIdentifier(string value, TokenFlags flags, ref WriteContext context)
     {
-        StartIdentifier(value, flags, in context);
+        StartIdentifier(value, flags, ref context);
         _writer.Write(value);
         WhiteSpaceWrittenSinceLastToken = false;
-        EndIdentifier(value, flags, in context);
+        EndIdentifier(value, flags, ref context);
 
         LastTokenType = TokenType.Identifier;
         LastTokenFlags = flags;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WriteIdentifier(string value, in WriteContext context)
+    public void WriteIdentifier(string value, ref WriteContext context)
     {
-        WriteIdentifier(value, TokenFlags.None, in context);
+        WriteIdentifier(value, TokenFlags.None, ref context);
     }
 
-    protected virtual void EndIdentifier(string value, TokenFlags flags, in WriteContext context) { }
+    protected virtual void EndIdentifier(string value, TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartKeyword(string value, TokenFlags flags, in WriteContext context)
+    protected virtual void StartKeyword(string value, TokenFlags flags, ref WriteContext context)
     {
         switch (LastTokenType)
         {
@@ -129,26 +129,26 @@ public partial class JavascriptTextWriter
         }
     }
 
-    public void WriteKeyword(string value, TokenFlags flags, in WriteContext context)
+    public void WriteKeyword(string value, TokenFlags flags, ref WriteContext context)
     {
-        StartKeyword(value, flags, in context);
+        StartKeyword(value, flags, ref context);
         _writer.Write(value);
         WhiteSpaceWrittenSinceLastToken = false;
-        EndKeyword(value, flags, in context);
+        EndKeyword(value, flags, ref context);
 
         LastTokenType = TokenType.Keyword;
         LastTokenFlags = flags;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WriteKeyword(string value, in WriteContext context)
+    public void WriteKeyword(string value, ref WriteContext context)
     {
-        WriteKeyword(value, TokenFlags.None, in context);
+        WriteKeyword(value, TokenFlags.None, ref context);
     }
 
-    protected virtual void EndKeyword(string value, TokenFlags flags, in WriteContext context) { }
+    protected virtual void EndKeyword(string value, TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartLiteral(string value, TokenType type, TokenFlags flags, in WriteContext context)
+    protected virtual void StartLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
         switch (LastTokenType)
         {
@@ -174,158 +174,158 @@ public partial class JavascriptTextWriter
         }
     }
 
-    public void WriteLiteral(string value, TokenType type, TokenFlags flags, in WriteContext context)
+    public void WriteLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
-        StartLiteral(value, type, flags, in context);
+        StartLiteral(value, type, flags, ref context);
         _writer.Write(value);
         WhiteSpaceWrittenSinceLastToken = false;
-        EndLiteral(value, type, flags, in context);
+        EndLiteral(value, type, flags, ref context);
 
         LastTokenType = type;
         LastTokenFlags = flags;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WriteLiteral(string value, TokenType tokenType, in WriteContext context)
+    public void WriteLiteral(string value, TokenType tokenType, ref WriteContext context)
     {
-        WriteLiteral(value, tokenType, TokenFlags.None, in context);
+        WriteLiteral(value, tokenType, TokenFlags.None, ref context);
     }
 
-    protected virtual void EndLiteral(string value, TokenType type, TokenFlags flags, in WriteContext context) { }
+    protected virtual void EndLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartPunctuator(string value, TokenFlags flags, in WriteContext context) { }
+    protected virtual void StartPunctuator(string value, TokenFlags flags, ref WriteContext context) { }
 
-    public void WritePunctuator(string value, TokenFlags flags, in WriteContext context)
+    public void WritePunctuator(string value, TokenFlags flags, ref WriteContext context)
     {
-        StartPunctuator(value, flags, in context);
+        StartPunctuator(value, flags, ref context);
         _writer.Write(value);
         WhiteSpaceWrittenSinceLastToken = false;
-        EndPunctuator(value, flags, in context);
+        EndPunctuator(value, flags, ref context);
 
         LastTokenType = TokenType.Punctuator;
         LastTokenFlags = flags;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WritePunctuator(string value, in WriteContext context)
+    public void WritePunctuator(string value, ref WriteContext context)
     {
-        WritePunctuator(value, TokenFlags.None, in context);
+        WritePunctuator(value, TokenFlags.None, ref context);
     }
 
-    protected virtual void EndPunctuator(string value, TokenFlags flags, in WriteContext context) { }
+    protected virtual void EndPunctuator(string value, TokenFlags flags, ref WriteContext context) { }
 
-    public virtual void StartArray(int elementCount, in WriteContext context)
+    public virtual void StartArray(int elementCount, ref WriteContext context)
     {
-        WritePunctuator("[", TokenFlags.Leading, in context);
+        WritePunctuator("[", TokenFlags.Leading, ref context);
     }
 
-    public virtual void EndArray(int elementCount, in WriteContext context)
+    public virtual void EndArray(int elementCount, ref WriteContext context)
     {
-        WritePunctuator("]", TokenFlags.Trailing, in context);
+        WritePunctuator("]", TokenFlags.Trailing, ref context);
     }
 
-    public virtual void StartObject(int propertyCount, in WriteContext context)
+    public virtual void StartObject(int propertyCount, ref WriteContext context)
     {
-        WritePunctuator("{", TokenFlags.Leading | TokenFlags.TrailingSpaceRecommended, in context);
+        WritePunctuator("{", TokenFlags.Leading | TokenFlags.TrailingSpaceRecommended, ref context);
     }
 
-    public virtual void EndObject(int propertyCount, in WriteContext context)
+    public virtual void EndObject(int propertyCount, ref WriteContext context)
     {
-        WritePunctuator("}", TokenFlags.Trailing | TokenFlags.LeadingSpaceRecommended, in context);
+        WritePunctuator("}", TokenFlags.Trailing | TokenFlags.LeadingSpaceRecommended, ref context);
     }
 
-    public virtual void StartBlock(int statementCount, in WriteContext context)
+    public virtual void StartBlock(int statementCount, ref WriteContext context)
     {
-        WritePunctuator("{", TokenFlags.Leading | TokenFlags.SurroundingSpaceRecommended, in context);
+        WritePunctuator("{", TokenFlags.Leading | TokenFlags.SurroundingSpaceRecommended, ref context);
     }
 
-    public virtual void EndBlock(int statementCount, in WriteContext context)
+    public virtual void EndBlock(int statementCount, ref WriteContext context)
     {
-        WritePunctuator("}", TokenFlags.Trailing | TokenFlags.LeadingSpaceRecommended, in context);
+        WritePunctuator("}", TokenFlags.Trailing | TokenFlags.LeadingSpaceRecommended, ref context);
     }
 
-    public virtual void StartStatement(StatementFlags flags, in WriteContext context) { }
+    public virtual void StartStatement(StatementFlags flags, ref WriteContext context) { }
 
-    public virtual void EndStatement(StatementFlags flags, in WriteContext context)
+    public virtual void EndStatement(StatementFlags flags, ref WriteContext context)
     {
         // Writes statement terminator unless it can be omitted.
         if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) && !flags.HasFlagFast(StatementFlags.MayOmitRightMostSemicolon | StatementFlags.IsRightMost))
         {
-            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, in context);
+            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref context);
         }
     }
 
-    public virtual void StartStatementList(int count, in WriteContext context) { }
+    public virtual void StartStatementList(int count, ref WriteContext context) { }
 
-    public virtual void StartStatementListItem(int index, int count, StatementFlags flags, in WriteContext context) { }
+    public virtual void StartStatementListItem(int index, int count, StatementFlags flags, ref WriteContext context) { }
 
-    public virtual void EndStatementListItem(int index, int count, StatementFlags flags, in WriteContext context)
+    public virtual void EndStatementListItem(int index, int count, StatementFlags flags, ref WriteContext context)
     {
         // Writes statement terminator unless it can be omitted.
         if (flags.HasFlagFast(StatementFlags.NeedsSemicolon) && !flags.HasFlagFast(StatementFlags.MayOmitRightMostSemicolon | StatementFlags.IsRightMost))
         {
-            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, in context);
+            WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref context);
         }
     }
 
-    public virtual void EndStatementList(int count, in WriteContext context) { }
+    public virtual void EndStatementList(int count, ref WriteContext context) { }
 
-    public virtual void StartExpression(ExpressionFlags flags, in WriteContext context)
+    public virtual void StartExpression(ExpressionFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(ExpressionFlags.NeedsBrackets))
         {
-            WritePunctuator("(", TokenFlags.Leading | flags.HasFlagFast(ExpressionFlags.SpaceAroundBracketsRecommended).ToFlag(TokenFlags.LeadingSpaceRecommended), in context);
+            WritePunctuator("(", TokenFlags.Leading | flags.HasFlagFast(ExpressionFlags.SpaceAroundBracketsRecommended).ToFlag(TokenFlags.LeadingSpaceRecommended), ref context);
         }
     }
 
-    public virtual void EndExpression(ExpressionFlags flags, in WriteContext context)
+    public virtual void EndExpression(ExpressionFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(ExpressionFlags.NeedsBrackets))
         {
-            WritePunctuator(")", TokenFlags.Trailing | flags.HasFlagFast(ExpressionFlags.SpaceAroundBracketsRecommended).ToFlag(TokenFlags.TrailingSpaceRecommended), in context);
+            WritePunctuator(")", TokenFlags.Trailing | flags.HasFlagFast(ExpressionFlags.SpaceAroundBracketsRecommended).ToFlag(TokenFlags.TrailingSpaceRecommended), ref context);
         }
     }
 
-    public virtual void StartExpressionList(int count, in WriteContext context) { }
+    public virtual void StartExpressionList(int count, ref WriteContext context) { }
 
-    public virtual void StartExpressionListItem(int index, int count, ExpressionFlags flags, in WriteContext context)
+    public virtual void StartExpressionListItem(int index, int count, ExpressionFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(ExpressionFlags.NeedsBrackets))
         {
-            WritePunctuator("(", TokenFlags.Leading, in context);
+            WritePunctuator("(", TokenFlags.Leading, ref context);
         }
     }
 
-    public virtual void EndExpressionListItem(int index, int count, ExpressionFlags flags, in WriteContext context)
+    public virtual void EndExpressionListItem(int index, int count, ExpressionFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(ExpressionFlags.NeedsBrackets))
         {
-            WritePunctuator(")", TokenFlags.Trailing, in context);
+            WritePunctuator(")", TokenFlags.Trailing, ref context);
         }
 
         if (index < count - 1)
         {
-            WritePunctuator(",", TokenFlags.InBetween | TokenFlags.TrailingSpaceRecommended, in context);
+            WritePunctuator(",", TokenFlags.InBetween | TokenFlags.TrailingSpaceRecommended, ref context);
         }
     }
 
-    public virtual void EndExpressionList(int count, in WriteContext context) { }
+    public virtual void EndExpressionList(int count, ref WriteContext context) { }
 
-    public virtual void StartAuxiliaryNode(object? nodeContext, in WriteContext context) { }
+    public virtual void StartAuxiliaryNode(object? nodeContext, ref WriteContext context) { }
 
-    public virtual void EndAuxiliaryNode(object? nodeContext, in WriteContext context) { }
+    public virtual void EndAuxiliaryNode(object? nodeContext, ref WriteContext context) { }
 
-    public virtual void StartAuxiliaryNodeList<T>(int count, in WriteContext context) where T : Node? { }
+    public virtual void StartAuxiliaryNodeList<T>(int count, ref WriteContext context) where T : Node? { }
 
-    public virtual void StartAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, in WriteContext context) where T : Node? { }
+    public virtual void StartAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, ref WriteContext context) where T : Node? { }
 
-    public virtual void EndAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, in WriteContext context) where T : Node?
+    public virtual void EndAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, ref WriteContext context) where T : Node?
     {
         if (separator.Length > 0 && index < count - 1)
         {
-            WritePunctuator(separator, TokenFlags.InBetween | TokenFlags.TrailingSpaceRecommended, in context);
+            WritePunctuator(separator, TokenFlags.InBetween | TokenFlags.TrailingSpaceRecommended, ref context);
         }
     }
 
-    public virtual void EndAuxiliaryNodeList<T>(int count, in WriteContext context) where T : Node? { }
+    public virtual void EndAuxiliaryNodeList<T>(int count, ref WriteContext context) where T : Node? { }
 }
