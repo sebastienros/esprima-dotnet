@@ -7,8 +7,6 @@ namespace Esprima.Utils;
 
 partial class AstToJavascriptConverter
 {
-    #region Statements
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected static StatementFlags StatementBodyFlags(bool isRightMost)
     {
@@ -92,10 +90,6 @@ partial class AstToJavascriptConverter
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void StatementNeedsSemicolon() => _currentStatementFlags |= StatementFlags.NeedsSemicolon;
-
-    #endregion
-
-    #region Expressions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected static ExpressionFlags RootExpressionFlags(bool needsBrackets)
@@ -366,10 +360,6 @@ partial class AstToJavascriptConverter
         return result;
     }
 
-    #endregion
-
-    #region Auxiliary nodes
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void VisitAuxiliaryNode(Node node)
     {
@@ -420,6 +410,4 @@ partial class AstToJavascriptConverter
 
         _currentAuxiliaryNodeContext = originalAuxiliaryNodeContext;
     }
-
-    #endregion
 }

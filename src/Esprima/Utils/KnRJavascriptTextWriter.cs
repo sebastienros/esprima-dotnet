@@ -183,8 +183,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
-    #region Arrays
-
     public override void StartArray(int elementCount, in WriteContext context)
     {
         base.StartArray(elementCount, context);
@@ -207,10 +205,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         base.EndArray(elementCount, context);
     }
 
-    #endregion
-
-    #region Objects
-
     public override void StartObject(int propertyCount, in WriteContext context)
     {
         base.StartObject(propertyCount, context);
@@ -232,9 +226,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
 
         base.EndObject(propertyCount, context);
     }
-    #endregion
-
-    #region Blocks
 
     public override void StartBlock(int statementCount, in WriteContext context)
     {
@@ -257,10 +248,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
 
         base.EndBlock(statementCount, context);
     }
-
-    #endregion
-
-    #region Statements
 
     public override void StartStatement(StatementFlags flags, in WriteContext context)
     {
@@ -426,10 +413,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         };
     }
 
-    #endregion
-
-    #region Expressions
-
     public override void StartExpressionListItem(int index, int count, ExpressionFlags flags, in WriteContext context)
     {
         if (context.Node.Type == Nodes.ArrayExpression && count >= MultiLineArrayLiteralThreshold)
@@ -449,8 +432,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
             WriteLine();
         }
     }
-
-    #endregion
 
     public override void StartAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, in WriteContext context)
     {

@@ -38,8 +38,6 @@ public partial class JavascriptTextWriter
     protected TokenFlags LastTokenFlags { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
     protected bool WhiteSpaceWrittenSinceLastToken { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
 
-    #region White-space
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void WriteSpace()
     {
@@ -58,8 +56,6 @@ public partial class JavascriptTextWriter
         WhiteSpaceWrittenSinceLastToken = true;
     }
 
-    #endregion
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void ForceRecommendedSpace()
     {
@@ -67,8 +63,6 @@ public partial class JavascriptTextWriter
     }
 
     public virtual void WriteEpsilon(TokenFlags flags, in WriteContext context) { }
-
-    #region Identifiers
 
     protected virtual void StartIdentifier(string value, TokenFlags flags, in WriteContext context)
     {
@@ -112,10 +106,6 @@ public partial class JavascriptTextWriter
 
     protected virtual void EndIdentifier(string value, TokenFlags flags, in WriteContext context) { }
 
-    #endregion
-
-    #region Keywords
-
     protected virtual void StartKeyword(string value, TokenFlags flags, in WriteContext context)
     {
         switch (LastTokenType)
@@ -157,10 +147,6 @@ public partial class JavascriptTextWriter
     }
 
     protected virtual void EndKeyword(string value, TokenFlags flags, in WriteContext context) { }
-
-    #endregion
-
-    #region Literals
 
     protected virtual void StartLiteral(string value, TokenType type, TokenFlags flags, in WriteContext context)
     {
@@ -207,10 +193,6 @@ public partial class JavascriptTextWriter
 
     protected virtual void EndLiteral(string value, TokenType type, TokenFlags flags, in WriteContext context) { }
 
-    #endregion
-
-    #region Punctuators
-
     protected virtual void StartPunctuator(string value, TokenFlags flags, in WriteContext context) { }
 
     public void WritePunctuator(string value, TokenFlags flags, in WriteContext context)
@@ -232,10 +214,6 @@ public partial class JavascriptTextWriter
 
     protected virtual void EndPunctuator(string value, TokenFlags flags, in WriteContext context) { }
 
-    #endregion
-
-    #region Arrays
-
     public virtual void StartArray(int elementCount, in WriteContext context)
     {
         WritePunctuator("[", TokenFlags.Leading, in context);
@@ -245,10 +223,6 @@ public partial class JavascriptTextWriter
     {
         WritePunctuator("]", TokenFlags.Trailing, in context);
     }
-
-    #endregion
-
-    #region Objects
 
     public virtual void StartObject(int propertyCount, in WriteContext context)
     {
@@ -260,10 +234,6 @@ public partial class JavascriptTextWriter
         WritePunctuator("}", TokenFlags.Trailing | TokenFlags.LeadingSpaceRecommended, in context);
     }
 
-    #endregion
-
-    #region Blocks
-
     public virtual void StartBlock(int statementCount, in WriteContext context)
     {
         WritePunctuator("{", TokenFlags.Leading | TokenFlags.SurroundingSpaceRecommended, in context);
@@ -273,10 +243,6 @@ public partial class JavascriptTextWriter
     {
         WritePunctuator("}", TokenFlags.Trailing | TokenFlags.LeadingSpaceRecommended, in context);
     }
-
-    #endregion
-
-    #region Statements
 
     public virtual void StartStatement(StatementFlags flags, in WriteContext context) { }
 
@@ -303,10 +269,6 @@ public partial class JavascriptTextWriter
     }
 
     public virtual void EndStatementList(int count, in WriteContext context) { }
-
-    #endregion
-
-    #region Expressions
 
     public virtual void StartExpression(ExpressionFlags flags, in WriteContext context)
     {
@@ -349,10 +311,6 @@ public partial class JavascriptTextWriter
 
     public virtual void EndExpressionList(int count, in WriteContext context) { }
 
-    #endregion
-
-    #region Auxiliary nodes
-
     public virtual void StartAuxiliaryNode(object? nodeContext, in WriteContext context) { }
 
     public virtual void EndAuxiliaryNode(object? nodeContext, in WriteContext context) { }
@@ -370,6 +328,4 @@ public partial class JavascriptTextWriter
     }
 
     public virtual void EndAuxiliaryNodeList<T>(int count, in WriteContext context) where T : Node? { }
-
-    #endregion
 }
