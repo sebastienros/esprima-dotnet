@@ -330,7 +330,6 @@ partial class AstToJavascriptConverter
             Nodes.SequenceExpression;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual int GetOperatorPrecedence(Expression expression, out int associativity) =>
         expression.GetOperatorPrecedence(out associativity) is >= 0 and var result
         ? result

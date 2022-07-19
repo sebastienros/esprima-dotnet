@@ -2,6 +2,9 @@
 
 namespace Esprima
 {
+    /// <remarks>
+    /// JIT cannot inline methods that have <see langword="throw"/> in them. These helper methods allow us to work around this.
+    /// </remarks>
     internal static class EsprimaExceptionHelper
     {
         [DoesNotReturn]

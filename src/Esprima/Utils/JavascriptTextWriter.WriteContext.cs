@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Ast;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Utils;
 
@@ -9,7 +10,7 @@ partial class JavascriptTextWriter
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public WriteContext From(Node? parentNode, Node node) =>
-            new WriteContext(parentNode, node ?? throw new ArgumentNullException(nameof(node)));
+            new WriteContext(parentNode, node ?? ThrowArgumentNullException<Node>(nameof(node)));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal WriteContext(Node? parentNode, Node node)
@@ -30,7 +31,7 @@ partial class JavascriptTextWriter
         private Delegate NodePropertyAccessor
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _nodePropertyValueAccessor ?? throw new InvalidOperationException("The context has no associated node property.");
+            get => _nodePropertyValueAccessor ?? ThrowInvalidOperationException<Delegate>("The context has no associated node property.");
         }
 
         public bool NodePropertyHasListValue
@@ -45,7 +46,7 @@ partial class JavascriptTextWriter
             var type = NodePropertyAccessor.GetType();
             return type.IsGenericType
                 ? type.GetGenericArguments()[0]
-                : throw new InvalidOperationException("The context has an associated node property but its value is not a node list.");
+                : ThrowInvalidOperationException<Type>("The context has an associated node property but its value is not a node list.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -72,7 +73,7 @@ partial class JavascriptTextWriter
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ChangeNodeProperty(string name, NodePropertyValueAccessor valueAccessor) =>
-            SetNodeProperty(name ?? throw new ArgumentNullException(nameof(name)), valueAccessor ?? throw new ArgumentNullException(nameof(valueAccessor)));
+            SetNodeProperty(name ?? ThrowArgumentNullException<string>(nameof(name)), valueAccessor ?? ThrowArgumentNullException<NodePropertyValueAccessor>(nameof(valueAccessor)));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetNodeProperty<T>(string name, NodePropertyListValueAccessor<T> listValueAccessor) where T : Node?
@@ -83,6 +84,6 @@ partial class JavascriptTextWriter
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ChangeNodeProperty<T>(string name, NodePropertyListValueAccessor<T> listValueAccessor) where T : Node? =>
-            SetNodeProperty(name ?? throw new ArgumentNullException(nameof(name)), listValueAccessor ?? throw new ArgumentNullException(nameof(listValueAccessor)));
+            SetNodeProperty(name ?? ThrowArgumentNullException<string>(nameof(name)), listValueAccessor ?? ThrowArgumentNullException<NodePropertyListValueAccessor<T>>(nameof(listValueAccessor)));
     }
 }
