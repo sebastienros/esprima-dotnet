@@ -32,7 +32,7 @@ public partial class Scanner
                 return false;
 
             default:
-                return false;
+               return false;
         }
     }
 
@@ -90,136 +90,53 @@ public partial class Scanner
                 return input == "implements";
 
             default:
+               return false;
+        }
+    }
+
+    private static partial bool IsTwoCharacterPunctuator(string? input)
+    {
+        switch (input)
+        {
+            case "&&":
+            case "||":
+            case "==":
+            case "!=":
+            case "+=":
+            case "-=":
+            case "*=":
+            case "/=":
+            case "++":
+            case "--":
+            case "<<":
+            case ">>":
+            case "&=":
+            case "|=":
+            case "^=":
+            case "%=":
+            case "<=":
+            case ">=":
+            case "=>":
+            case "**":
+                return true;
+            default:
                 return false;
         }
     }
 
-    private static partial bool IsPunctuator(string? input)
+    private static partial bool IsThreeCharacterPunctuator(string? input)
     {
-        if (input is null)
+        switch (input)
         {
-            return false;
-        }
-        switch (input.Length)
-        {
-            case 2:
-                if (input == "&&")
-                {
-                    return true;
-                }
-                else if (input == "||")
-                {
-                    return true;
-                }
-                else if (input == "==")
-                {
-                    return true;
-                }
-                else if (input == "!=")
-                {
-                    return true;
-                }
-                else if (input == "+=")
-                {
-                    return true;
-                }
-                else if (input == "-=")
-                {
-                    return true;
-                }
-                else if (input == "*=")
-                {
-                    return true;
-                }
-                else if (input == "/=")
-                {
-                    return true;
-                }
-                else if (input == "++")
-                {
-                    return true;
-                }
-                else if (input == "--")
-                {
-                    return true;
-                }
-                else if (input == "<<")
-                {
-                    return true;
-                }
-                else if (input == ">>")
-                {
-                    return true;
-                }
-                else if (input == "&=")
-                {
-                    return true;
-                }
-                else if (input == "|=")
-                {
-                    return true;
-                }
-                else if (input == "^=")
-                {
-                    return true;
-                }
-                else if (input == "%=")
-                {
-                    return true;
-                }
-                else if (input == "<=")
-                {
-                    return true;
-                }
-                else if (input == ">=")
-                {
-                    return true;
-                }
-                else if (input == "=>")
-                {
-                    return true;
-                }
-                else if (input == "**")
-                {
-                    return true;
-                }
-                return false;
-
-            case 3:
-                if (input == "===")
-                {
-                    return true;
-                }
-                else if (input == "!==")
-                {
-                    return true;
-                }
-                else if (input == ">>>")
-                {
-                    return true;
-                }
-                else if (input == "<<=")
-                {
-                    return true;
-                }
-                else if (input == ">>=")
-                {
-                    return true;
-                }
-                else if (input == "**=")
-                {
-                    return true;
-                }
-                else if (input == "&&=")
-                {
-                    return true;
-                }
-                else if (input == "||=")
-                {
-                    return true;
-                }
-                return false;
-
+            case "===":
+            case "!==":
+            case ">>>":
+            case "<<=":
+            case ">>=":
+            case "**=":
+            case "&&=":
+            case "||=":
+                return true;
             default:
                 return false;
         }
@@ -401,7 +318,7 @@ public partial class Scanner
                 return input == "instanceof";
 
             default:
-                return false;
+               return false;
         }
     }
 

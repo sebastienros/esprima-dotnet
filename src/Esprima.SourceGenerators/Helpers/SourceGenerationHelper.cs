@@ -31,80 +31,100 @@ internal class StringMatcherAttribute : System.Attribute
     {
         var sb = new StringBuilder();
 
+        var byLength = alternatives.ToLookup(x => x.Length).OrderBy(x => x.Key).ToArray();
+
         var indentStr = new string(' ', indent);
+        var baseIndent = byLength.Length > 1 ? "        " : "    ";
 
-        sb.AppendLine("switch (input.Length)");
-        sb.Append(indentStr);
-        sb.AppendLine("{");
-
-        foreach (var group in alternatives.ToLookup(x => x.Length).OrderBy(x => x.Key))
+        if (byLength.Length > 1)
         {
-            sb.Append(indentStr);
-            sb.Append("    case ");
-            sb.Append(group.Key);
-            sb.AppendLine(":");
+            sb.Append(indentStr).AppendLine("    if (input is null)");
+            sb.Append(indentStr).AppendLine("    {");
+            sb.Append(indentStr).AppendLine("        return false;");
+            sb.Append(indentStr).AppendLine("    }");
+
+            sb.Append(indentStr).AppendLine("    switch (input.Length)");
+            sb.Append(indentStr).AppendLine("    {");
+        }
+
+        foreach (var group in byLength)
+        {
+            if (byLength.Length > 1)
+            {
+                sb.Append(indentStr).Append("        case ").Append(group.Key).AppendLine(":");
+            }
 
             var discriminatorIndex = group.Count() > 1 ? FindDiscriminatorIndex(group) : -1;
 
             if (discriminatorIndex != -1)
             {
-                sb.Append(indentStr);
-                sb.Append("        var disc").Append(group.Key).Append(" = input[").Append(discriminatorIndex).AppendLine("];");
+                sb.Append(indentStr).Append(baseIndent).Append("    var disc").Append(group.Key).Append(" = input[").Append(discriminatorIndex).AppendLine("];");
             }
             else if (group.Count() > 1)
             {
-                // going to be slow
+                // hash-based or equality-based then, let compiler generate decision tree
+                var switchIndent = indentStr + baseIndent;
+                sb.Append(switchIndent).AppendLine("switch (input)");
+                sb.Append(switchIndent).AppendLine("{");
+                foreach (var item in group)
+                {
+                    sb.Append(switchIndent).Append("    case \"").Append(item).AppendLine("\":");
+                }
+                sb.Append(switchIndent).AppendLine("        return true;");
+                sb.Append(switchIndent).AppendLine("    default:");
+                sb.Append(switchIndent).AppendLine("        return false;");
+                sb.Append(switchIndent).AppendLine("}");
+                continue;
             }
 
             var first = true;
             foreach (var item in group)
             {
-                sb.Append(indentStr);
-                sb.Append("        ");
-
                 if (group.Count() == 1)
                 {
-                    sb.Append("return input == \"").Append(item).AppendLine("\";");
+                    sb.Append(indentStr).Append(baseIndent).Append("    return input == \"").Append(item).AppendLine("\";");
                     continue;
                 }
 
+                sb.Append(indentStr).Append(baseIndent).Append("    ");
                 if (!first)
                 {
                     sb.Append("else ");
                 }
+
                 sb.Append("if (");
                 if (discriminatorIndex != -1)
                 {
                     sb.Append("disc").Append(group.Key).Append(" == '").Append(item[discriminatorIndex]).Append("' && ");
                 }
+
                 sb.Append("input == \"");
                 sb.Append(item);
                 sb.AppendLine("\")");
 
-                sb.Append(indentStr);
-                sb.AppendLine("        {");
+                sb.Append(indentStr).Append(baseIndent).AppendLine("    {");
 
-                sb.Append(indentStr).Append(indentStr).AppendLine("    return true;");
+                sb.Append(indentStr).Append(baseIndent).AppendLine("        return true;");
 
-                sb.Append(indentStr);
-                sb.AppendLine("        }");
+                sb.Append(indentStr).Append(baseIndent).AppendLine("    }");
 
                 first = false;
             }
 
             if (group.Count() > 1)
             {
-                sb.Append(indentStr).AppendLine("        return false;");
+                sb.Append(indentStr).Append(baseIndent).AppendLine("    return false;");
             }
             sb.AppendLine();
         }
 
-        sb.Append(indentStr);
-        sb.AppendLine("    default:");
+        if (byLength.Length > 1)
+        {
+            sb.Append(indentStr).Append(baseIndent).AppendLine("default:");
+            sb.Append(indentStr).Append(baseIndent).AppendLine("   return false;");
 
-        sb.Append(indentStr).Append(indentStr).AppendLine("return false;");
-
-        sb.AppendLine("        }");
+            sb.AppendLine("        }");
+        }
 
         return sb.ToString();
     }

@@ -105,11 +105,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 sourceBuilder.Append(indent);
                 sourceBuilder.Append(method.Modifiers).Append(" bool ").Append(method.Name).AppendLine("(string? input)");
                 sourceBuilder.Append(indent).AppendLine("{");
-                sourceBuilder.Append(indent).Append(indent).AppendLine("if (input is null)");
-                sourceBuilder.Append(indent).Append(indent).AppendLine("{");
-                sourceBuilder.Append(indent).Append(indent).Append(indent).AppendLine("return false;");
-                sourceBuilder.Append(indent).Append(indent).AppendLine("}");
-                sourceBuilder.Append(indent).Append(indent).Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 8));
+                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4));
                 sourceBuilder.Append(indent).AppendLine("}");
                 sourceBuilder.AppendLine();
             }
