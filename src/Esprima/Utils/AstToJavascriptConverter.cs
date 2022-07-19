@@ -17,7 +17,7 @@ public partial class AstToJavascriptConverter : AstVisitor
     public delegate AstToJavascriptConverter Factory(JavascriptTextWriter writer, AstToJavascript.Options options);
 
     private static readonly object s_lastSwitchCaseFlag = new();
-    private static readonly object s_forInLoopDeclarationFlag = new();
+    private static readonly object s_forLoopInitDeclarationFlag = new();
 
     private WriteContext _writeContext;
     private StatementFlags _currentStatementFlags;
@@ -1579,13 +1579,13 @@ WriteSource:
 
             StatementNeedsSemicolon();
         }
-        else if (ParentNode is not { Type: Nodes.ForInStatement })
+        else if (ParentNode is not { Type: Nodes.ForStatement or Nodes.ForInStatement })
         {
             VisitAuxiliaryNodeList(in variableDeclaration.Declarations, separator: ",");
         }
         else
         {
-            VisitAuxiliaryNodeList(in variableDeclaration.Declarations, separator: ",", static delegate { return s_forInLoopDeclarationFlag; });
+            VisitAuxiliaryNodeList(in variableDeclaration.Declarations, separator: ",", static delegate { return s_forLoopInitDeclarationFlag; });
         }
 
         return variableDeclaration;
@@ -1603,7 +1603,7 @@ WriteSource:
 
             _writeContext.SetNodeProperty(nameof(variableDeclarator.Init), static node => node.As<VariableDeclarator>().Init);
 
-            if (_currentAuxiliaryNodeContext != s_forInLoopDeclarationFlag)
+            if (_currentAuxiliaryNodeContext != s_forLoopInitDeclarationFlag)
             {
                 VisitRootExpression(variableDeclarator.Init, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(variableDeclarator.Init)));
             }
