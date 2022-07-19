@@ -94,7 +94,7 @@ public partial class Scanner
         }
     }
 
-    private static partial bool IsTwoCharacterPunctuator(string? input)
+    private static partial bool IsTwoCharacterPunctuator(string input)
     {
         switch (input)
         {
@@ -124,7 +124,7 @@ public partial class Scanner
         }
     }
 
-    private static partial bool IsThreeCharacterPunctuator(string? input)
+    private static partial bool IsThreeCharacterPunctuator(string input)
     {
         switch (input)
         {

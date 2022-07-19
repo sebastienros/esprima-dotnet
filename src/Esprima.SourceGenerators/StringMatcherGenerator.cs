@@ -39,7 +39,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
             methodDeclarationSyntax.Body is null;
     }
 
-    sealed record StringMatcherMethod(string ContainingType, string Modifiers, string Name, string[] Alternatives);
+    sealed record StringMatcherMethod(string ContainingType, string Modifiers, string Name, string InputType, string[] Alternatives);
 
     private static StringMatcherMethod? GetSemanticTargetForGeneration(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
@@ -56,7 +56,6 @@ public class StringMatcherGenerator : IIncrementalGenerator
 
         var attribute = method.GetAttributes()[0];
         var attributeSyntax = (AttributeSyntax) attribute.ApplicationSyntaxReference!.GetSyntax();
-
 
         var targets = new List<string>();
         var namedAttributes = new Dictionary<string, string>();
@@ -78,7 +77,11 @@ public class StringMatcherGenerator : IIncrementalGenerator
             }
         }
 
-        return new StringMatcherMethod(method.ContainingType.Name, methodDeclarationSyntax.Modifiers.ToString(), method.Name, targets.ToArray());
+        var containingType = method.ContainingType.Name;
+        var modifiers = methodDeclarationSyntax.Modifiers.ToString();
+        var inputType = method.Parameters.Single().Type.ToString();
+
+        return new StringMatcherMethod(containingType, modifiers, method.Name, inputType, targets.ToArray());
     }
 
     private static void Execute(SourceProductionContext context, ImmutableArray<StringMatcherMethod> methods)
@@ -103,7 +106,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 context.CancellationToken.ThrowIfCancellationRequested();
 
                 sourceBuilder.Append(indent);
-                sourceBuilder.Append(method.Modifiers).Append(" bool ").Append(method.Name).AppendLine("(string? input)");
+                sourceBuilder.Append(method.Modifiers).Append(" bool ").Append(method.Name).Append("(").Append(method.InputType).AppendLine(" input)");
                 sourceBuilder.Append(indent).AppendLine("{");
                 sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4));
                 sourceBuilder.Append(indent).AppendLine("}");
