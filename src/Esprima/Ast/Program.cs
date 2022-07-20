@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public abstract class Program : Statement
+    public abstract class Program : Node
     {
         private readonly NodeList<Statement> _body;
 
