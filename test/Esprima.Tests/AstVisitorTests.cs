@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Esprima.Tests
 {
-    public class VisitorTests
+    public class AstVisitorTests
     {
         [Fact]
         public void CanVisitIfWithNoElse()

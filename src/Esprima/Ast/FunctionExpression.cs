@@ -25,6 +25,9 @@ namespace Esprima.Ast
         }
 
         public Identifier? Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        /// <summary>
+        /// { <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> }
+        /// </summary>
         public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
 
         public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

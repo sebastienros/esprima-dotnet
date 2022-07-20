@@ -11,7 +11,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// BindingIdentifier | <see cref="BindingPattern" /> | <see cref="ClassDeclaration" /> | <see cref="Expression" /> | <see cref="FunctionDeclaration" />
+        /// <see cref="Expression"/> | <see cref="ClassDeclaration"/> | <see cref="FunctionDeclaration"/>
         /// </remarks>
         public StatementListItem Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 

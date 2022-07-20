@@ -12,6 +12,9 @@ namespace Esprima.Ast
             _properties = properties;
         }
 
+        /// <summary>
+        /// { <see cref="Property"/> | <see cref="SpreadElement"/> }
+        /// </summary>
         public ref readonly NodeList<Expression> Properties { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _properties; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Properties);

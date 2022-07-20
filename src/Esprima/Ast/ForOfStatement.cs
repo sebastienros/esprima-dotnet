@@ -17,6 +17,9 @@ namespace Esprima.Ast
             Await = await;
         }
 
+        /// <remarks>
+        /// <see cref="VariableDeclaration"/> (cannot have an initializer) | <see cref="Identifier"/> | <see cref="BindingPattern"/>
+        /// </remarks>
         public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

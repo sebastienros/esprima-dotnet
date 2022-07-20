@@ -13,27 +13,18 @@ namespace Esprima.Test
         // Only use this when the test is deemed wrong.
         private const bool WriteBackExpectedTree = false;
 
-        private const string FixturesDirName = "Fixtures";
+        internal const string FixturesDirName = "Fixtures";
 
         private static Lazy<Dictionary<string, FixtureMetadata>> Metadata { get; } = new(() => FixtureMetadata.ReadMetadata());
 
-        [Fact]
-        public void HoistingScopeShouldWork()
-        {
-            var parser = new JavaScriptParser(@"
-                function p() {}
-                var x;");
-            var program = parser.ParseScript();
-        }
-
         private static string ParseAndFormat(SourceType sourceType, string source,
             ParserOptions parserOptions, Func<string, ParserOptions, JavaScriptParser> parserFactory,
-            AstJson.IConverter converter, AstJson.Options conversionOptions)
+            AstToJsonOptions conversionOptions)
         {
             var parser = parserFactory(source, parserOptions);
             var program = sourceType == SourceType.Script ? (Program) parser.ParseScript() : parser.ParseModule();
 
-            return program.ToJsonString(conversionOptions, indent: "  ", converter);
+            return program.ToJsonString(conversionOptions, indent: "  ");
         }
 
         private static bool CompareTreesInternal(JObject actualJObject, JObject expectedJObject, FixtureMetadata metadata)
@@ -87,13 +78,13 @@ namespace Esprima.Test
         [MemberData(nameof(SourceFiles), "Fixtures")]
         public void ExecuteTestCase(string fixture)
         {
-            var (parserOptions, parserFactory, converter) = fixture.StartsWith("JSX")
+            var (parserOptions, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX")
                 ? (new JsxParserOptions(),
                     (src, opts) => new JsxParser(src, (JsxParserOptions) opts),
-                    JsxAstToJsonConverter.Default)
+                    JsxAstToJsonOptions.Default)
                 : (new ParserOptions(),
                     new Func<string, ParserOptions, JavaScriptParser>((src, opts) => new JavaScriptParser(src, opts)),
-                    AstToJsonConverter.Default);
+                    AstToJsonOptions.Default);
 
             parserOptions.Tokens = true;
 
@@ -148,14 +139,16 @@ namespace Esprima.Test
 
             parserOptions.AdaptRegexp = !metadata.IgnoresRegex;
 
+            var conversionOptions = metadata.CreateConversionOptions(conversionDefaultOptions);
+
 #pragma warning disable 162
             if (File.Exists(moduleFilePath))
             {
                 sourceType = SourceType.Module;
                 expected = File.ReadAllText(moduleFilePath);
-                if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
+                if (WriteBackExpectedTree && conversionOptions.TestCompatibilityMode == AstToJsonTestCompatibilityMode.None)
                 {
-                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
                         File.WriteAllText(moduleFilePath, actual);
                 }
@@ -163,9 +156,9 @@ namespace Esprima.Test
             else if (File.Exists(treeFilePath))
             {
                 expected = File.ReadAllText(treeFilePath);
-                if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
+                if (WriteBackExpectedTree && conversionOptions.TestCompatibilityMode == AstToJsonTestCompatibilityMode.None)
                 {
-                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
                         File.WriteAllText(treeFilePath, actual);
                 }
@@ -174,9 +167,9 @@ namespace Esprima.Test
             {
                 invalid = true;
                 expected = File.ReadAllText(failureFilePath);
-                if (WriteBackExpectedTree && !metadata.ConversionOptions.TestCompatibilityMode)
+                if (WriteBackExpectedTree && conversionOptions.TestCompatibilityMode == AstToJsonTestCompatibilityMode.None)
                 {
-                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                    var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
                     if (!CompareTrees(actual, expected, metadata))
                         File.WriteAllText(failureFilePath, actual);
                 }
@@ -196,7 +189,7 @@ namespace Esprima.Test
             {
                 parserOptions.Tolerant = true;
 
-                var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions);
+                var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
                 CompareTreesAndAssert(actual, expected, metadata);
             }
             else
@@ -204,7 +197,7 @@ namespace Esprima.Test
                 parserOptions.Tolerant = false;
 
                 // TODO: check the accuracy of the message and of the location
-                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, parserOptions, parserFactory, converter, metadata.ConversionOptions));
+                Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions));
             }
         }
 
@@ -232,59 +225,12 @@ namespace Esprima.Test
             return root ?? "";
         }
 
-        private sealed class ParentNodeChecker : AstVisitor
-        {
-            public void Check(Node node)
-            {
-                Assert.Null(node.Data);
-
-                base.Visit(node);
-            }
-
-            public override object? Visit(Node node)
-            {
-                var parent = (Node?) node.Data;
-                Assert.NotNull(parent);
-                Assert.Contains(node, parent!.ChildNodes);
-
-                return base.Visit(node);
-            }
-        }
-
-        [Fact]
-        public void NodeDataCanBeSetToParentNode()
-        {
-            Action<Node> action = node =>
-            {
-                foreach (var child in node.ChildNodes)
-                {
-                    child.Data = node;
-                }
-            };
-
-            var parser = new JavaScriptParser("function add(a, b) { return a + b; }", new ParserOptions { OnNodeCreated = action });
-            var script = parser.ParseScript();
-
-            new ParentNodeChecker().Check(script);
-        }
-
-        [Fact]
-        public void CommentsAreParsed()
-        {
-            var count = 0;
-            Action<Node> action = node => count++;
-            var parser = new JavaScriptParser("// this is a comment", new ParserOptions { OnNodeCreated = action });
-            parser.ParseScript();
-
-            Assert.Equal(1, count);
-        }
-
         private sealed class FixtureMetadata
         {
             public static readonly FixtureMetadata Default = new FixtureMetadata(
-                AstJson.Options.Default
-                    .WithIncludingLineColumn(true)
-                    .WithIncludingRange(true),
+                testCompatibilityMode: AstToJsonTestCompatibilityMode.None,
+                includesLocation: true,
+                includesRange: true,
                 includesLocationSource: false,
                 ignoresRegex: false);
 
@@ -321,33 +267,35 @@ namespace Esprima.Test
 
             private static FixtureMetadata CreateFrom(HashSet<string> flags)
             {
-                var conversionOptions = AstJson.Options.Default;
-
-                if (flags.Contains("IncludesLocation"))
-                    conversionOptions = conversionOptions.WithIncludingLineColumn(true);
-
-                if (flags.Contains("IncludesRange"))
-                    conversionOptions = conversionOptions.WithIncludingRange(true);
-
-                if (flags.Contains("BorrowedFixture"))
-                    conversionOptions = conversionOptions.WithTestCompatibilityMode(true);
-
-                var includesLocationSource = flags.Contains("IncludesLocationSource");
-                var ignoresRegex = flags.Contains("IgnoresRegex");
-
-                return new FixtureMetadata(conversionOptions, includesLocationSource, ignoresRegex);
+                return new FixtureMetadata(
+                    testCompatibilityMode: flags.Contains("EsprimaOrgFixture") ? AstToJsonTestCompatibilityMode.EsprimaOrg : AstToJsonTestCompatibilityMode.None,
+                    includesLocation: flags.Contains("IncludesLocation"),
+                    includesRange: flags.Contains("IncludesRange"),
+                    includesLocationSource: flags.Contains("IncludesLocationSource"),
+                    ignoresRegex: flags.Contains("IgnoresRegex"));
             }
 
-            private FixtureMetadata(AstJson.Options conversionOptions, bool includesLocationSource, bool ignoresRegex)
+            private FixtureMetadata(AstToJsonTestCompatibilityMode testCompatibilityMode, bool includesLocation, bool includesRange, bool includesLocationSource, bool ignoresRegex)
             {
-                ConversionOptions = conversionOptions;
+                TestCompatibilityMode = testCompatibilityMode;
+                IncludesLocation = includesLocation;
+                IncludesRange = includesRange;
                 IncludesLocationSource = includesLocationSource;
                 IgnoresRegex = ignoresRegex;
             }
 
-            public AstJson.Options ConversionOptions { get; }
+            public AstToJsonTestCompatibilityMode TestCompatibilityMode { get; }
+            public bool IncludesLocation { get; }
+            public bool IncludesRange { get; }
             public bool IncludesLocationSource { get; }
             public bool IgnoresRegex { get; }
+
+            public AstToJsonOptions CreateConversionOptions(AstToJsonOptions defaultOptions) => defaultOptions with
+            {
+                TestCompatibilityMode = TestCompatibilityMode,
+                IncludingLineColumn = IncludesLocation,
+                IncludingRange = IncludesRange,
+            };
         }
     }
 }

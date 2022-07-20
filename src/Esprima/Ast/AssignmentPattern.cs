@@ -13,6 +13,9 @@ namespace Esprima.Ast
             _right = right;
         }
 
+        /// <summary>
+        /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
+        /// </summary>
         public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _right; }
 

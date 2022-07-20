@@ -1800,7 +1800,7 @@ namespace Esprima
             var index = 0;
             var newPattern = tmp;
 
-            if (options.HasFlag(RegexOptions.Multiline))
+            if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
             {
                 while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
                 {

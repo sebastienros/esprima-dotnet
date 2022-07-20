@@ -1,10 +1,22 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast
 {
     public sealed class VariableDeclaration : Declaration
     {
+        public static string GetVariableDeclarationKindToken(VariableDeclarationKind kind)
+        {
+            return kind switch
+            {
+                VariableDeclarationKind.Var => "var",
+                VariableDeclarationKind.Let => "let",
+                VariableDeclarationKind.Const => "const",
+                _ => ThrowArgumentOutOfRangeException<string>(nameof(kind), "Invalid variable declaration kind: " + kind)
+            };
+        }
+
         private readonly NodeList<VariableDeclarator> _declarations;
 
         public VariableDeclaration(

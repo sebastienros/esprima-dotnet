@@ -12,11 +12,11 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// <see cref="Identifier" /> | StringLiteral (<see cref="Literal" />)
+        /// <see cref="Identifier"/> | <see cref="Literal"/> (string)
         /// </remarks>
         public Expression Local { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         /// <remarks>
-        /// <see cref="Identifier" /> | <see cref="Literal" />
+        /// <see cref="Identifier"/> | <see cref="Literal"/> (string)
         /// </remarks>
         public Expression Exported { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 

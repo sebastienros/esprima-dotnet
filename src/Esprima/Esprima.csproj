@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\Compatibility\IsExternalInit.cs" Link="Compatibility\IsExternalInit.cs" />
+    <Compile Include="..\Shared\Compatibility\NullableAttributes.cs" Link="Compatibility\NullableAttributes.cs" />
   </ItemGroup>
 
   <!-- For checking generated output-->

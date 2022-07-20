@@ -19,7 +19,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// <see cref="Statement"/> (var i) | <see cref="Expression"/> (i=0)
+        /// <see cref="VariableDeclaration"/> (var i) | <see cref="Expression"/> (i=0)
         /// </remarks>
         public StatementListItem? Init { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression? Test { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

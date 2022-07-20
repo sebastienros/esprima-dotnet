@@ -13,7 +13,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// <see cref="MethodDefinition" /> | <see cref="PropertyDefinition" /> | <see cref="StaticBlock" />
+        /// <see cref="MethodDefinition"/> | <see cref="PropertyDefinition"/> | <see cref="StaticBlock"/>
         /// </remarks>
         public ref readonly NodeList<ClassElement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 

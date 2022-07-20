@@ -21,6 +21,9 @@ namespace Esprima.Ast
             _assertions = assertions;
         }
 
+        /// <remarks>
+        /// <see cref="VariableDeclaration"/> | <see cref="ClassDeclaration"/> | <see cref="FunctionDeclaration"/>
+        /// </remarks>
         public StatementListItem? Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<ExportSpecifier> Specifiers { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _specifiers; }
         public Literal? Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

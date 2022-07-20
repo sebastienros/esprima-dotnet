@@ -94,8 +94,9 @@ namespace Esprima.Ast
         }
 
         public AssignmentOperator Operator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
         /// <remarks>
-        /// Can be something else than Expression (<see cref="ObjectPattern"/>, <see cref="ArrayPattern"/>) in case of destructuring assignment
+        /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
         /// </remarks>
         public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

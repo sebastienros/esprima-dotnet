@@ -53,8 +53,13 @@ namespace Esprima.Utils
         public JsonTextWriter(TextWriter writer, string? indent)
         {
             _writer = writer ?? ThrowArgumentNullException<TextWriter>(nameof(writer));
-            _writer = writer ?? ThrowArgumentNullException<TextWriter>(nameof(writer));
+
+            if (!string.IsNullOrWhiteSpace(indent))
+            {
+                throw new ArgumentException("Indent must be null or white-space.", nameof(indent));
+            }
             _indent = indent ?? "";
+
             _counters = new Stack<int>(8);
             _structures = new Stack<StructureKind>(8);
         }

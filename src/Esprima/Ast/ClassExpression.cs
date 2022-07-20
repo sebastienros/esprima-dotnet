@@ -21,7 +21,7 @@ namespace Esprima.Ast
 
         public Identifier? Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         /// <remarks>
-        /// <see cref="Identifier" /> | <see cref="CallExpression" />
+        /// <see cref="Identifier"/> | <see cref="CallExpression"/>
         /// </remarks>
         public Expression? SuperClass { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ClassBody Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

@@ -26,11 +26,15 @@ namespace Esprima.Ast
 
         public PropertyKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         /// <remarks>
-        /// <see cref="Identifier"/> | <see cref="Literal"/> | '[' <see cref="Expression"/> ']'
+        /// <see cref="Identifier"/> | <see cref="Literal"/> (string or numeric) | '[' <see cref="Expression"/> ']'
         /// </remarks>
         public Expression Key { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
+        /// <remarks>
+        /// When property of an object literal: <see cref="Expression"/> (incl. <see cref="SpreadElement"/> and <see cref="FunctionExpression"/> for getters/setters/methods) <br />
+        /// When property of an object binding pattern: <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/>
+        /// </remarks>
         public Expression Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _value; }
         Expression? IProperty.Value => Value;
 

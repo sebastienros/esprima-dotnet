@@ -32,9 +32,16 @@ namespace Esprima.Ast
             get => _count;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NodeList<Node?> AsNodes()
         {
             return new NodeList<Node?>(_items /* conversion by co-variance! */, _count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NodeList<TTo> As<TTo>() where TTo : Node?
+        {
+            return new NodeList<TTo>((TTo[]?) (object?) _items, _count);
         }
 
         public T this[int index]
@@ -203,6 +210,7 @@ namespace Esprima.Ast
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AreSame<T>(in NodeList<T> nodeList1, in NodeList<T> nodeList2) where T : Node?
         {
             return nodeList1._items == nodeList2._items;

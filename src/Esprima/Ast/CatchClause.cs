@@ -13,7 +13,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// BindingIdentifier | <see cref="BindingPattern"/> | <see langword="null"/>
+        /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
         /// </remarks>
         public Expression? Param { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

@@ -11,7 +11,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// <see cref="Identifier" /> | StringLiteral (<see cref="Literal" />)
+        /// <see cref="Identifier"/> | <see cref="Literal"/> (string)
         /// </remarks>
         public Expression Imported { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
