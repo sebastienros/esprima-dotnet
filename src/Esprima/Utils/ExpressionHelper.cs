@@ -117,7 +117,7 @@ Reenter:
                 break;
 
             case Nodes.LogicalExpression:
-                switch (expression.As<BinaryExpression>().Operator)
+                switch (expression.As<LogicalExpression>().Operator)
                 {
                     case BinaryOperator.LogicalAnd:
                         associativity = leftToRightAssociativity;

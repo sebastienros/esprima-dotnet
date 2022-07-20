@@ -1815,7 +1815,7 @@ namespace Esprima
                 }
 
                 var prefix = true;
-                expr = Finalize(node, new UpdateExpression((string?) token.Value, expr, prefix));
+                expr = Finalize(node, new UpdateExpression((string) token.Value!, expr, prefix));
                 _context.IsAssignmentTarget = false;
                 _context.IsBindingElement = false;
             }
@@ -1840,7 +1840,7 @@ namespace Esprima
                         _context.IsBindingElement = false;
                         var op = NextToken().Value;
                         var prefix = false;
-                        expr = Finalize(StartNode(startToken), new UpdateExpression((string?) op, expr, prefix));
+                        expr = Finalize(StartNode(startToken), new UpdateExpression((string) op!, expr, prefix));
                     }
                 }
             }
@@ -1867,7 +1867,7 @@ namespace Esprima
                 var node = StartNode(_lookahead);
                 var token = NextToken();
                 expr = InheritCoverGrammar(parseUnaryExpression);
-                expr = Finalize(node, new UnaryExpression((string?) token.Value, expr));
+                expr = Finalize(node, new UnaryExpression((string) token.Value!, expr));
                 var unaryExpr = expr.As<UnaryExpression>();
                 if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
                 {
@@ -1889,6 +1889,19 @@ namespace Esprima
             return expr;
         }
 
+        private static BinaryExpression CreateBinaryExpression(string op, Expression left, Expression right)
+        {
+            switch (op)
+            {
+                case "&&":
+                case "||":
+                case "??":
+                    return new LogicalExpression(op, left, right);
+                default:
+                    return new BinaryExpression(op, left, right);
+            }
+        }
+
         private Expression ParseExponentiationExpression()
         {
             var startToken = _lookahead;
@@ -1905,7 +1918,7 @@ namespace Esprima
                 _context.IsBindingElement = false;
                 var left = expr;
                 var right = IsolateCoverGrammar(parseExponentiationExpression);
-                expr = Finalize(StartNode(startToken), new BinaryExpression("**", left, right));
+                expr = Finalize(StartNode(startToken), CreateBinaryExpression("**", left, right));
             }
 
             return expr;
@@ -2071,7 +2084,7 @@ namespace Esprima
                         markers.Pop();
                         var marker = markers.Peek();
                         var node = StartNode(marker, marker.LineStart);
-                        stack.Push(Finalize(node, new BinaryExpression(op, left, right)));
+                        stack.Push(Finalize(node, CreateBinaryExpression(op, left, right)));
                     }
 
                     // Shift.
@@ -2092,7 +2105,7 @@ namespace Esprima
                     var lastLineStart = lastMarker?.LineStart ?? 0;
                     var node = StartNode(marker, lastLineStart);
                     var op = (string) stack[i - 1];
-                    expr = Finalize(node, new BinaryExpression(op, (Expression) stack[i - 2], expr));
+                    expr = Finalize(node, CreateBinaryExpression(op, (Expression) stack[i - 2], expr));
                     i -= 2;
                     lastMarker = marker;
                 }

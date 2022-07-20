@@ -2,7 +2,7 @@
 {
     public sealed class UpdateExpression : UnaryExpression
     {
-        public UpdateExpression(string? op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg, prefix)
+        public UpdateExpression(string op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg, prefix)
         {
         }
 
