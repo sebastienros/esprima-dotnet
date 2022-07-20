@@ -5,7 +5,7 @@ namespace Esprima.Utils.Jsx;
 
 public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
 {
-    public JsxAstToJsonConverter(JsonWriter writer, AstJson.Options options)
+    public JsxAstToJsonConverter(JsonWriter writer, AstToJson.Options options)
         : base(writer, options)
     {
     }

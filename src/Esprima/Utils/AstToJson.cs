@@ -8,7 +8,7 @@ public enum LocationMembersPlacement
     Start
 }
 
-public static class AstJson
+public static class AstToJson
 {
     public record class Options
     {
