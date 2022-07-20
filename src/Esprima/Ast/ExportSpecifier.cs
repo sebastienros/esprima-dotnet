@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class ExportSpecifier : Statement
+    public sealed class ExportSpecifier : Node
     {
         public ExportSpecifier(Expression local, Expression exported) : base(Nodes.ExportSpecifier)
         {

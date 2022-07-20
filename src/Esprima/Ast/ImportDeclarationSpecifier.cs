@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast
 {
-    public abstract class ImportDeclarationSpecifier : Declaration
+    public abstract class ImportDeclarationSpecifier : Node
     {
         protected ImportDeclarationSpecifier(Identifier local, Nodes type) : base(type)
         {
