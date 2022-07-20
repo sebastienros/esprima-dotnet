@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class Property : Expression, IProperty
+    public sealed class Property : Node, IProperty
     {
         internal Expression _value;
 

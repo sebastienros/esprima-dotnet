@@ -1033,14 +1033,14 @@ namespace Esprima
         {
             var node = CreateNode();
 
-            var properties = new ArrayList<Expression>();
+            var properties = new ArrayList<Node>();
             var hasProto = false;
 
             Expect("{");
 
             while (!Match("}"))
             {
-                var property = Match("...") ? (Expression) ParseSpreadElement() : ParseObjectProperty(ref hasProto);
+                var property = Match("...") ? (Node) ParseSpreadElement() : ParseObjectProperty(ref hasProto);
                 properties.Add(property);
 
                 if (!Match("}") && (property is not Property {Method: true} || Match(",")))
@@ -1166,7 +1166,7 @@ namespace Esprima
                         }
                         else
                         {
-                            properties.Add(ReinterpretExpressionAsPattern(property!));
+                            properties.Add(ReinterpretExpressionAsPattern(property!.As<Expression>()));
                         }
                     }
 

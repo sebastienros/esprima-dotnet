@@ -1185,7 +1185,7 @@ WriteSource:
             }
             else
             {
-                VisitAuxiliaryNodeListItem<Node>(property, i, objectExpression.Properties.Count, separator: ",", static delegate { return null; });
+                VisitAuxiliaryNodeListItem(property, i, objectExpression.Properties.Count, separator: ",", static delegate { return null; });
             }
         }
 
