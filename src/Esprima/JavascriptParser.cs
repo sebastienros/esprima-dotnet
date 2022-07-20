@@ -2320,7 +2320,7 @@ namespace Esprima
                         var node = StartNode(startToken);
                         Expect("=>");
 
-                        Node body;
+                        StatementListItem body;
                         if (Match("{"))
                         {
                             var previousAllowIn = _context.AllowIn;

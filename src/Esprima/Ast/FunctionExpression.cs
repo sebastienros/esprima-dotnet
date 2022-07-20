@@ -31,7 +31,7 @@ namespace Esprima.Ast
         public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
 
         public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        Node IFunction.Body => Body;
+        StatementListItem IFunction.Body => Body;
 
         public bool Generator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         bool IFunction.Expression => false;

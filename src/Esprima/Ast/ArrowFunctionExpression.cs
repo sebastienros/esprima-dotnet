@@ -9,7 +9,7 @@ namespace Esprima.Ast
 
         public ArrowFunctionExpression(
             in NodeList<Expression> parameters,
-            Node body,
+            StatementListItem body,
             bool expression,
             bool strict,
             bool async)
@@ -30,7 +30,7 @@ namespace Esprima.Ast
         /// <remarks>
         /// <see cref="BlockStatement"/> | <see cref="Ast.Expression"/>
         /// </remarks>
-        public Node Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public StatementListItem Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         bool IFunction.Generator => false;
         public bool Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
@@ -40,7 +40,7 @@ namespace Esprima.Ast
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
 
-        public ArrowFunctionExpression UpdateWith(in NodeList<Expression> parameters, Node body)
+        public ArrowFunctionExpression UpdateWith(in NodeList<Expression> parameters, StatementListItem body)
         {
             if (NodeList.AreSame(parameters, Params) && body == Body)
             {
