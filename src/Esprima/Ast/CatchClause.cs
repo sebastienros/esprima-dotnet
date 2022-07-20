@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class CatchClause : Statement
+    public sealed class CatchClause : Node
     {
         public CatchClause(Expression? param, BlockStatement body) :
             base(Nodes.CatchClause)
