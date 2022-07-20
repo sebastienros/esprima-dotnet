@@ -3,11 +3,11 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class AssignmentPattern : Expression
+    public sealed class AssignmentPattern : Node
     {
         internal Expression _right;
 
-        public AssignmentPattern(Expression left, Expression right) : base(Nodes.AssignmentPattern)
+        public AssignmentPattern(Node left, Expression right) : base(Nodes.AssignmentPattern)
         {
             Left = left;
             _right = right;
@@ -16,14 +16,14 @@ namespace Esprima.Ast
         /// <summary>
         /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
         /// </summary>
-        public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _right; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAssignmentPattern(this);
 
-        public AssignmentPattern UpdateWith(Expression left, Expression right)
+        public AssignmentPattern UpdateWith(Node left, Expression right)
         {
             if (left == Left && right == Right)
             {

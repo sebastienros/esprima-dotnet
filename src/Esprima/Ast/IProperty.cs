@@ -6,7 +6,7 @@
         PropertyKind Kind { get; }
         Expression Key { get; }
         bool Computed { get; }
-        Expression? Value { get; }
+        Node? Value { get; }
         ChildNodes ChildNodes { get; }
     }
 }

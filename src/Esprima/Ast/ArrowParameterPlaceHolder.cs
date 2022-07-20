@@ -5,12 +5,12 @@ namespace Esprima.Ast
 {
     public sealed class ArrowParameterPlaceHolder : Expression
     {
-        public static readonly ArrowParameterPlaceHolder Empty = new(new NodeList<Expression>(), false);
+        public static readonly ArrowParameterPlaceHolder Empty = new(new NodeList<Node>(), false);
 
-        private readonly NodeList<Expression> _params;
+        private readonly NodeList<Node> _params;
 
         public ArrowParameterPlaceHolder(
-            in NodeList<Expression> parameters,
+            in NodeList<Node> parameters,
             bool async) :
             base(Nodes.ArrowParameterPlaceHolder)
         {
@@ -19,7 +19,7 @@ namespace Esprima.Ast
         }
 
         public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+        public ref readonly NodeList<Node> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params);
 

@@ -893,7 +893,7 @@ namespace Esprima
             var token = _lookahead;
 
             Expression? key = null;
-            Expression value;
+            Node value;
 
             PropertyKind kind;
             var computed = false;
@@ -1112,14 +1112,14 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-grouping-operator
 
-        private Expression ReinterpretExpressionAsPattern(Expression expr)
+        private Node ReinterpretExpressionAsPattern(Node expr)
         {
             // In esprima this method mutates the expression that is passed as a parameter.
             // Because the type property is mutated we need to change the behavior to cloning
             // it instead. As a matter of fact the callers need to replace the actual value that
             // was sent by the returned one.
 
-            var node = expr;
+            Node node = expr;
 
             switch (expr.Type)
             {
@@ -1135,7 +1135,7 @@ namespace Esprima
                     node.Location = expr.Location;
                     break;
                 case Nodes.ArrayExpression:
-                    var elements = new ArrayList<Expression?>();
+                    var elements = new ArrayList<Node?>();
 
                     foreach (var element in expr.As<ArrayExpression>().Elements)
                     {
@@ -1166,7 +1166,7 @@ namespace Esprima
                         }
                         else
                         {
-                            properties.Add(ReinterpretExpressionAsPattern(property!.As<Expression>()));
+                            properties.Add(ReinterpretExpressionAsPattern(property!));
                         }
                     }
 
@@ -1218,7 +1218,7 @@ namespace Esprima
                         Expect("=>");
                     }
 
-                    expr = new ArrowParameterPlaceHolder(new NodeList<Expression>(new Expression[] { rest }, 1), false);
+                    expr = new ArrowParameterPlaceHolder(new NodeList<Node>(new Node[] { rest }, 1), false);
                 }
                 else
                 {
@@ -1243,13 +1243,15 @@ namespace Esprima
                             if (Match(")"))
                             {
                                 NextToken();
+                                var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count);
                                 for (var i = 0; i < expressions.Count; i++)
                                 {
-                                    ReinterpretExpressionAsPattern(expressions[i]);
+                                    reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expressions[i]));
                                 }
 
                                 arrow = true;
-                                expr = new ArrowParameterPlaceHolder(NodeList.From(ref expressions), false);
+                                expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
+                                break;
                             }
                             else if (Match("..."))
                             {
@@ -1258,7 +1260,7 @@ namespace Esprima
                                     ThrowUnexpectedToken(_lookahead);
                                 }
 
-                                expressions.Add(ParseRestElement(ref parameters));
+                                var restElement = ParseRestElement(ref parameters);
                                 Expect(")");
                                 if (!Match("=>"))
                                 {
@@ -1266,24 +1268,20 @@ namespace Esprima
                                 }
 
                                 _context.IsBindingElement = false;
-                                var reinterpretedExpressions = new ArrayList<Expression>();
+                                var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count + 1);
                                 foreach (var expression in expressions)
                                 {
                                     reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression));
                                 }
+                                reinterpretedExpressions.Add(restElement);
 
-                                expressions = reinterpretedExpressions;
                                 arrow = true;
-                                expr = new ArrowParameterPlaceHolder(NodeList.From(ref expressions), false);
+                                expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
+                                break;
                             }
                             else
                             {
                                 expressions.Add(InheritCoverGrammar(parseAssignmentExpression));
-                            }
-
-                            if (arrow)
-                            {
-                                break;
                             }
                         }
 
@@ -1300,11 +1298,9 @@ namespace Esprima
                         {
                             if (expr.Type == Nodes.Identifier && ((Identifier) expr).Name == "yield")
                             {
-                                arrow = true;
-                                expr = new ArrowParameterPlaceHolder(new NodeList<Expression>(new[] { expr }, 1), false);
+                                expr = new ArrowParameterPlaceHolder(new NodeList<Node>(new[] { expr }, 1), false);
                             }
-
-                            if (!arrow)
+                            else
                             {
                                 if (!_context.IsBindingElement)
                                 {
@@ -1314,26 +1310,17 @@ namespace Esprima
                                 if (expr.Type == Nodes.SequenceExpression)
                                 {
                                     var sequenceExpression = expr.As<SequenceExpression>();
-                                    var reinterpretedExpressions = new ArrayList<Expression>();
+                                    var reinterpretedExpressions = new ArrayList<Node>();
                                     foreach (var expression in sequenceExpression.Expressions)
                                     {
-                                        reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression!));
+                                        reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression));
                                     }
 
-                                    sequenceExpression._expressions = NodeList.From(ref reinterpretedExpressions);
+                                    expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
                                 }
                                 else
                                 {
-                                    expr = ReinterpretExpressionAsPattern(expr);
-                                }
-
-                                if (expr.Type == Nodes.SequenceExpression)
-                                {
-                                    expr = new ArrowParameterPlaceHolder(expr.As<SequenceExpression>().Expressions, false);
-                                }
-                                else
-                                {
-                                    expr = new ArrowParameterPlaceHolder(new NodeList<Expression>(new[] { expr }, 1), false);
+                                    expr = new ArrowParameterPlaceHolder(new NodeList<Node>(new[] { ReinterpretExpressionAsPattern(expr) }, 1), false);
                                 }
                             }
                         }
@@ -1638,7 +1625,7 @@ namespace Esprima
                     expr = Finalize(StartNode(startToken), new CallExpression(expr, args, optional));
                     if (asyncArrow && Match("=>"))
                     {
-                        var nodeArguments = new ArrayList<Expression>();
+                        var nodeArguments = new ArrayList<Node>();
                         for (var i = 0; i < args.Count; ++i)
                         {
                             nodeArguments.Add(ReinterpretExpressionAsPattern(args[i]));
@@ -2183,18 +2170,18 @@ namespace Esprima
 
         private ParsedParameters? ReinterpretAsCoverFormalsList(Expression expr)
         {
-            ArrayList<Expression> parameters;
+            ArrayList<Node> parameters;
             var asyncArrow = false;
 
             switch (expr.Type)
             {
                 case Nodes.Identifier:
-                    parameters = new ArrayList<Expression>(1) { expr };
+                    parameters = new ArrayList<Node>(1) { expr };
                     break;
                 case Nodes.ArrowParameterPlaceHolder:
                     // TODO clean-up
                     var arrowParameterPlaceHolder = expr.As<ArrowParameterPlaceHolder>();
-                    parameters = new ArrayList<Expression>(arrowParameterPlaceHolder.Params.Count);
+                    parameters = new ArrayList<Node>(arrowParameterPlaceHolder.Params.Count);
                     parameters.AddRange(arrowParameterPlaceHolder.Params);
                     asyncArrow = arrowParameterPlaceHolder.Async;
                     break;
@@ -2286,7 +2273,7 @@ namespace Esprima
                         var arg = ParsePrimaryExpression();
                         ReinterpretExpressionAsPattern(arg);
                         var args = new[] { arg };
-                        expr = new ArrowParameterPlaceHolder(new NodeList<Expression>(args, 1), true);
+                        expr = new ArrowParameterPlaceHolder(new NodeList<Node>(args, 1), true);
                     }
                 }
 
@@ -2376,19 +2363,22 @@ namespace Esprima
                             }
                         }
 
+                        Node left;
+
                         if (!Match("="))
                         {
                             _context.IsAssignmentTarget = false;
                             _context.IsBindingElement = false;
+                            left = expr;
                         }
                         else
                         {
-                            expr = ReinterpretExpressionAsPattern(expr);
+                            left = ReinterpretExpressionAsPattern(expr);
                         }
 
                         token = NextToken();
                         var right = IsolateCoverGrammar(parseAssignmentExpression);
-                        expr = Finalize(StartNode(startToken), new AssignmentExpression((string) token.Value!, expr, right));
+                        expr = Finalize(StartNode(startToken), new AssignmentExpression((string) token.Value!, left, right));
                         _context.FirstCoverInitializedNameError = null;
                     }
                 }
@@ -2630,7 +2620,7 @@ namespace Esprima
             var node = CreateNode();
 
             Expect("[");
-            var elements = new ArrayList<Expression?>();
+            var elements = new ArrayList<Node?>();
             while (!Match("]"))
             {
                 if (Match(","))
@@ -2671,7 +2661,7 @@ namespace Esprima
             var method = false;
 
             Expression key;
-            Expression value;
+            Node value;
 
             if (_lookahead.Type == TokenType.Identifier)
             {
@@ -2749,9 +2739,9 @@ namespace Esprima
             return Finalize(node, new ObjectPattern(NodeList.From(ref properties)));
         }
 
-        private Expression ParsePattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
+        private Node ParsePattern(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
         {
-            Expression pattern;
+            Node pattern;
 
             if (Match("["))
             {
@@ -2775,7 +2765,7 @@ namespace Esprima
             return pattern;
         }
 
-        private Expression ParsePatternWithDefault(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
+        private Node ParsePatternWithDefault(ref ArrayList<Token> parameters, VariableDeclarationKind? kind = null)
         {
             var startToken = _lookahead;
 
@@ -3186,8 +3176,7 @@ namespace Esprima
                         }
 
                         NextToken();
-                        init = ReinterpretExpressionAsPattern((Expression) init);
-                        left = init;
+                        left = ReinterpretExpressionAsPattern(init);
                         right = ParseExpression();
                         init = null;
                     }
@@ -3199,8 +3188,7 @@ namespace Esprima
                         }
 
                         NextToken();
-                        init = ReinterpretExpressionAsPattern((Expression) init);
-                        left = init;
+                        left = ReinterpretExpressionAsPattern(init);
                         right = ParseAssignmentExpression();
                         init = null;
                         forIn = false;
@@ -3544,7 +3532,7 @@ namespace Esprima
 
             ExpectKeyword("catch");
 
-            Expression? param = null;
+            Node? param = null;
             if (Match("("))
             {
                 Expect("(");
@@ -3884,7 +3872,7 @@ namespace Esprima
             Expect("(");
             if (!Match(")"))
             {
-                options.Parameters = new ArrayList<Expression>();
+                options.Parameters = new ArrayList<Node>();
                 while (_lookahead.Type != TokenType.EOF)
                 {
                     ParseFormalParameter(options);
@@ -5211,7 +5199,7 @@ namespace Esprima
             private HashSet<string?>? paramSet;
             public Token? FirstRestricted;
             public string? Message;
-            public ArrayList<Expression> Parameters = new();
+            public ArrayList<Node> Parameters = new();
             public Token? Stricted;
             public bool Simple;
             public bool HasDuplicateParameterNames;

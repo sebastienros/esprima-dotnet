@@ -5,10 +5,10 @@ namespace Esprima.Ast
 {
     public sealed class ArrowFunctionExpression : Expression, IFunction
     {
-        private readonly NodeList<Expression> _params;
+        private readonly NodeList<Node> _params;
 
         public ArrowFunctionExpression(
-            in NodeList<Expression> parameters,
+            in NodeList<Node> parameters,
             StatementListItem body,
             bool expression,
             bool strict,
@@ -26,7 +26,7 @@ namespace Esprima.Ast
         /// <summary>
         /// { <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> }
         /// </summary>
-        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+        public ref readonly NodeList<Node> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
         /// <remarks>
         /// <see cref="BlockStatement"/> | <see cref="Ast.Expression"/>
         /// </remarks>
@@ -40,7 +40,7 @@ namespace Esprima.Ast
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
 
-        public ArrowFunctionExpression UpdateWith(in NodeList<Expression> parameters, StatementListItem body)
+        public ArrowFunctionExpression UpdateWith(in NodeList<Node> parameters, StatementListItem body)
         {
             if (NodeList.AreSame(parameters, Params) && body == Body)
             {

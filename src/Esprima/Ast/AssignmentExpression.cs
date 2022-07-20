@@ -28,7 +28,7 @@ namespace Esprima.Ast
     {
         public AssignmentExpression(
             string op,
-            Expression left,
+            Node left,
             Expression right) :
             this(ParseAssignmentOperator(op), left, right)
         {
@@ -36,7 +36,7 @@ namespace Esprima.Ast
 
         public AssignmentExpression(
             AssignmentOperator op,
-            Expression left,
+            Node left,
             Expression right) :
             base(Nodes.AssignmentExpression)
         {
@@ -98,14 +98,14 @@ namespace Esprima.Ast
         /// <remarks>
         /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
         /// </remarks>
-        public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAssignmentExpression(this);
 
-        public AssignmentExpression UpdateWith(Expression left, Expression right)
+        public AssignmentExpression UpdateWith(Node left, Expression right)
         {
             if (left == Left && right == Right)
             {

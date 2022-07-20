@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class SequenceExpression : Expression
     {
-        internal NodeList<Expression> _expressions;
+        private readonly NodeList<Expression> _expressions;
 
         public SequenceExpression(in NodeList<Expression> expressions) : base(Nodes.SequenceExpression)
         {

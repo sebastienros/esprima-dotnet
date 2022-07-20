@@ -7,7 +7,7 @@
     {
         Nodes Type { get; }
         Identifier? Id { get; }
-        ref readonly NodeList<Expression> Params { get; }
+        ref readonly NodeList<Node> Params { get; }
         StatementListItem Body { get; }
         bool Generator { get; }
         bool Expression { get; }

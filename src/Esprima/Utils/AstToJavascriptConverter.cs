@@ -200,7 +200,7 @@ public partial class AstToJavascriptConverter : AstVisitor
         Writer.WritePunctuator("=", TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
 
         _writeContext.SetNodeProperty(nameof(assignmentPattern.Right), static node => node.As<AssignmentPattern>().Right);
-        VisitAuxiliaryNode(assignmentPattern.Right);
+        VisitRootExpression(assignmentPattern.Right, RootExpressionFlags(needsBrackets: false));
 
         return assignmentPattern;
     }
