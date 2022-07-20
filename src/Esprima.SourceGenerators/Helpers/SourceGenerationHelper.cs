@@ -27,7 +27,7 @@ internal class StringMatcherAttribute : System.Attribute
     /// <summary>
     /// Builds optimized value lookup using known facts about keys.
     /// </summary>
-    internal static string GenerateLookups(string[] alternatives, int indent)
+    internal static string GenerateLookups(string[] alternatives, int indent, bool checkNull)
     {
         var sb = new StringBuilder();
 
@@ -38,10 +38,13 @@ internal class StringMatcherAttribute : System.Attribute
 
         if (byLength.Length > 1)
         {
-            sb.Append(indentStr).AppendLine("    if (input is null)");
-            sb.Append(indentStr).AppendLine("    {");
-            sb.Append(indentStr).AppendLine("        return false;");
-            sb.Append(indentStr).AppendLine("    }");
+            if (checkNull)
+            {
+                sb.Append(indentStr).AppendLine("    if (input is null)");
+                sb.Append(indentStr).AppendLine("    {");
+                sb.Append(indentStr).AppendLine("        return false;");
+                sb.Append(indentStr).AppendLine("    }");
+            }
 
             sb.Append(indentStr).AppendLine("    switch (input.Length)");
             sb.Append(indentStr).AppendLine("    {");

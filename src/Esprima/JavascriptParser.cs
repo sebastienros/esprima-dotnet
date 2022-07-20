@@ -9,27 +9,10 @@ namespace Esprima
     /// <remarks>
     /// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression" /> methods to parse the JavaScript code.
     /// </remarks>
-    public class JavaScriptParser
+    public partial class JavaScriptParser
     {
-        private static readonly HashSet<string> AssignmentOperators = new()
-        {
-            "=",
-            "*=",
-            "**=",
-            "/=",
-            "%=",
-            "+=",
-            "-=",
-            "<<=",
-            ">>=",
-            ">>>=",
-            "&=",
-            "^=",
-            "|=",
-            "&&=",
-            "||=",
-            "??="
-        };
+        [StringMatcher("=", "*=", "**=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "&&=", "||=", "??=")]
+        private static partial bool IsAssignmentOperator(string id);
 
         internal sealed class Context
         {
@@ -222,8 +205,6 @@ namespace Esprima
                         node.End = e.End;
                         node.Loc = e.Loc;
                     }
-
-                    ;
                 }
             }
         }
@@ -444,7 +425,7 @@ namespace Esprima
             }
 
             var op = (string?) _lookahead.Value;
-            return AssignmentOperators.Contains(op!);
+            return IsAssignmentOperator(op!);
         }
 
         // Cover grammar support.
@@ -1064,7 +1045,7 @@ namespace Esprima
 
                 if (!Match("}") && (property is not Property {Method: true} || Match(",")))
                 {
-                    ExpectCommaSeparator();    
+                    ExpectCommaSeparator();
                 }
             }
 
@@ -4261,56 +4242,28 @@ namespace Esprima
 
         // https://tc39.github.io/ecma262/#sec-generator-function-definitions
 
-        private static readonly HashSet<string> PunctuatorExpressionStart = new()
-        {
-            "[",
-            "(",
-            "{",
-            "+",
-            "-",
-            "!",
-            "~",
-            "++",
-            "--",
-            "/",
-            "/="
-        };
+        [StringMatcher("[", "(", "{", "+", "-", "!", "~", "++", "--", "/", "/=")]
+        private static partial bool IsPunctuatorExpressionStart(string input);
 
-        private static readonly HashSet<string> KeywordExpressionStart = new()
-        {
-            "class",
-            "delete",
-            "function",
-            "let",
-            "new",
-            "super",
-            "this",
-            "typeof",
-            "void",
-            "yield"
-        };
+        [StringMatcher("class", "delete", "function", "let", "new", "super", "this", "typeof", "void", "yield")]
+        private static partial bool IsKeywordExpressionStart(string input);
 
         private protected virtual bool IsStartOfExpression()
         {
             var start = true;
 
-            if (!(_lookahead.Value is string value))
+            if (_lookahead.Value is not string value)
             {
                 return start;
             }
 
-            switch (_lookahead.Type)
+            if (_lookahead.Type == TokenType.Punctuator)
             {
-                case TokenType.Punctuator:
-                    start = PunctuatorExpressionStart.Contains(value);
-                    break;
-
-                case TokenType.Keyword:
-                    start = KeywordExpressionStart.Contains(value);
-                    break;
-
-                default:
-                    break;
+                start = IsPunctuatorExpressionStart(value);
+            }
+            else if (_lookahead.Type == TokenType.Keyword)
+            {
+                start = IsKeywordExpressionStart(value);
             }
 
             return start;
@@ -4384,19 +4337,19 @@ namespace Esprima
             _context.Strict = previousStrict;
             _context.AllowYield = previousAllowYield;
             _context.IsAsync = previousIsAsync;
-            
+
             if (Match(";"))
             {
                 ThrowError(Messages.NoSemicolonAfterDecorator);
             }
-            
+
             return Finalize(node, new Decorator(expression));
         }
 
         private ArrayList<Decorator> ParseDecorators()
         {
             var decorators = new ArrayList<Decorator>();
-            
+
             while (Match("@"))
             {
                 decorators.Add(ParseDecorator());
@@ -4419,7 +4372,7 @@ namespace Esprima
             var isAsync = false;
             var isGenerator = false;
             var isPrivate = false;
-            
+
             var decorators = ParseDecorators();
 
             if (decorators.Count > 0)
@@ -4748,8 +4701,8 @@ namespace Esprima
             while (!Match("}"))
             {
                 var importAttribute = ParseImportAttribute();
-                
-                string? key = string.Empty; 
+
+                string? key = string.Empty;
                 switch (importAttribute.Key)
                 {
                     case Identifier identifier:
@@ -4764,7 +4717,7 @@ namespace Esprima
                 {
                     ThrowError(Messages.DuplicateAssertClauseProperty, key);
                 }
-                
+
                 attributes.Add(importAttribute);
                 if (!Match("}"))
                 {
@@ -4774,7 +4727,7 @@ namespace Esprima
             Expect("}");
             return attributes;
         }
-        
+
         private ImportAttribute ParseImportAttribute()
         {
             var node = CreateNode();
@@ -5089,7 +5042,7 @@ namespace Esprima
                 Literal? source = null;
                 var isExportFromIdentifier = false;
                 ArrayList<ImportAttribute> attributes = new();
-                
+
                 Expect("{");
                 while (!Match("}"))
                 {
