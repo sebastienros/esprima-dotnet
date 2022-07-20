@@ -14,8 +14,6 @@ public partial class AstToJavascriptConverter : AstVisitor
     // * Visit identifiers using VisitAuxiliaryNode when they are binding identifiers (declarations) and visit them using VisitRootExpression when they are identifier references (actual expressions).
     // * Visit any other nodes using VisitAuxiliaryNode / VisitAuxiliaryNodeList.
 
-    public delegate AstToJavascriptConverter Factory(JavascriptTextWriter writer, AstToJavascript.Options options);
-
     private static readonly object s_lastSwitchCaseFlag = new();
     private static readonly object s_forLoopInitDeclarationFlag = new();
 
@@ -24,7 +22,7 @@ public partial class AstToJavascriptConverter : AstVisitor
     private ExpressionFlags _currentExpressionFlags;
     private object? _currentAuxiliaryNodeContext;
 
-    public AstToJavascriptConverter(JavascriptTextWriter writer, AstToJavascript.Options options)
+    public AstToJavascriptConverter(JavascriptTextWriter writer, AstToJavascriptOptions options)
     {
         Writer = writer ?? throw new ArgumentNullException(nameof(writer));
 

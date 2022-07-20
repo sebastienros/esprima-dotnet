@@ -1,18 +1,20 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Esprima.Ast;
 using Esprima.Test;
 using Esprima.Utils;
-using Esprima.Utils.Jsx;
-using Xunit;
 
 namespace Esprima.Tests
 {
     public class AstToJavascriptTests
     {
+        private record class CustomCompactJavascriptTextWriterOptions : JavascriptTextWriterOptions
+        {
+            protected internal override JavascriptTextWriter CreateWriter(TextWriter writer) => new CustomCompactJavascriptTextWriter(writer, this);
+        }
+
         private sealed class CustomCompactJavascriptTextWriter : JavascriptTextWriter
         {
-            public CustomCompactJavascriptTextWriter(TextWriter writer, Options options) : base(writer, options) { }
+            public CustomCompactJavascriptTextWriter(TextWriter writer, CustomCompactJavascriptTextWriterOptions options) : base(writer, options) { }
 
             public override void EndStatement(StatementFlags flags, ref WriteContext context)
             {
@@ -40,8 +42,8 @@ namespace Esprima.Tests
             }
         }
 
-        private static readonly JavascriptTextWriter.Factory s_customCompactWriterFactory = (writer, options) => new CustomCompactJavascriptTextWriter(writer, options);
-        private static readonly KnRJavascriptTextWriter.Options s_indentedWriterOptions = new KnRJavascriptTextWriter.Options
+        private static readonly CustomCompactJavascriptTextWriterOptions s_customCompactWriterOptions = new();
+        private static readonly KnRJavascriptTextWriterOptions s_indentedWriterOptions = new()
         {
             Indent = "    ",
             KeepEmptyBlockBodyInLine = false,
@@ -67,7 +69,7 @@ for (var elem of list) { }
 ");
             var program = parser.ParseScript();
 
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
 
             Assert.Equal("if(true){p();}switch(foo){case'A':p();break;}switch(foo){default:p();break;}for(var a=[];;){}for(var elem of list){}", code);
         }
@@ -89,7 +91,7 @@ for (var elem of list) { }
                 tips.forEach((tip, i) => console.log(`Tip ${ i}:` +tip));
         }");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("let tips=[\"Click on any AST node with a '+' to expand it\",\"Hovering over a node highlights the \\\r\n   corresponding location in the source code\",\"Shift click on an AST node to expand the whole subtree\"];function printTips(){tips.forEach((tip,i)=>console.log(`Tip ${i}:`+tip));}", code);
         }
 
@@ -107,7 +109,7 @@ for (var elem of list) { }
     }
 }");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("export class aa extends HTMLElement{constructor(a,b){super(a);this._div=document.createElement('div');}static get is(){return'aa';}}", code);
         }
 
@@ -283,7 +285,7 @@ aa({ });
             source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
             var parser = new JavaScriptParser(source);
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("function _createClass(Constructor,protoProps,staticProps){if(protoProps)_defineProperties(Constructor.prototype,protoProps);if(staticProps)_defineProperties(Constructor,staticProps);return Constructor;}", code);
         }
 
@@ -294,7 +296,7 @@ aa({ });
 {
 }");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("if((x?a.nodeName.toLowerCase()===f:1===a.nodeType)&&++d&&(p&&((i=(o=a[S]||(a[S]={}))[a.uniqueID]||(o[a.uniqueID]={}))[h]=[k,d]),a===e)){}", code);
         }
 
@@ -313,7 +315,7 @@ class a extends b {
 }
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("class a extends b{constructor(){super();this.g=1;}q=1;r='cc';}", code);
         }
 
@@ -324,7 +326,7 @@ class a extends b {
 d = (s = (r = (i = (o = (a = c)[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID] = {}))[h] || [])[0] === k && r[1]) && r[2], a = s && c.childNodes[s];
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("d=(s=(r=(i=(o=(a=c)[S]||(a[S]={}))[a.uniqueID]||(o[a.uniqueID]={}))[h]||[])[0]===k&&r[1])&&r[2],a=s&&c.childNodes[s];", code);
         }
 
@@ -335,7 +337,7 @@ d = (s = (r = (i = (o = (a = c)[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID]
 m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEventListener && v.createElement, ~a.indexOf('MSIE') || a.indexOf('Trident/'), '___FONT_AWESOME___')
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("m=(z.document,!!v.documentElement&&!!v.head&&'function'==typeof v.addEventListener&&v.createElement,~a.indexOf('MSIE')||a.indexOf('Trident/'),'___FONT_AWESOME___');", code);
         }
 
@@ -357,7 +359,7 @@ m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEv
         }();
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("var h=(c.navigator||{}).userAgent,a=void 0===h?'':h,z=c,v=l,m=(z.document,!!v.documentElement&&!!v.head&&'function'==typeof v.addEventListener&&v.createElement,~a.indexOf('MSIE')||a.indexOf('Trident/'),'___FONT_AWESOME___'),e=function(){try{return!0;}catch(c){return!1;}}();", code);
         }
 
@@ -370,7 +372,7 @@ children: (b = O, 'g' === b.tag ? b.children : [b])
 }
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("var a={children:(b=O,'g'===b.tag?b.children:[b])};", code);
         }
 
@@ -387,7 +389,7 @@ if (e.IsWebService)
 	} else h = e.HttpRequest.responseText;
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("if(e.IsWebService)if(h=e.HttpRequest.responseXML,'undefined'==typeof h)Trace.Write('Error: '+e.UniqueId+' data has no properties!'),m=!0;else try{h.setProperty('SelectionLanguage','XPath');}catch(l){Trace.Write('Error: data.setProperty(',SelectionLanguage,', ',XPath,') because '+l.message);}else h=e.HttpRequest.responseText;", code);
         }
 
@@ -433,7 +435,7 @@ if (e.IsWebService)
 h='M'+(+new Date).toString(36)
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("h='M'+(+new Date).toString(36);", code);
         }
 
@@ -448,7 +450,7 @@ input.onchange = async (e) => {
         };
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("input.onchange=async e=>{const files=await readFiles(input.files,readMode);document.body.removeChild(input);resolve(files);};", code);
         }
 
@@ -459,7 +461,7 @@ input.onchange = async (e) => {
 export const Base = LegacyElementMixin(HTMLElement).prototype;
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("export const Base=LegacyElementMixin(HTMLElement).prototype;", code);
         }
 
@@ -470,7 +472,7 @@ export const Base = LegacyElementMixin(HTMLElement).prototype;
 let {is} = getIsExtends(element);
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("let{is}=getIsExtends(element);", code);
         }
 
@@ -482,7 +484,7 @@ export const wrap =
   (window['ShadyDOM'] && window['ShadyDOM']['wrap']) || (node => node);
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("export const wrap=window['ShadyDOM']&&window['ShadyDOM']['wrap']||(node=>node);", code);
         }
 
@@ -492,7 +494,7 @@ export const wrap =
             var parser = new JavaScriptParser(@"
 export {}");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("export{};", code);
         }
 
@@ -505,7 +507,7 @@ export {}");
 })();
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("(()=>{mutablePropertyChange=MutableData._mutablePropertyChange;})();", code);
         }
 
@@ -519,7 +521,7 @@ var Ol, jl = new (function() {
     }())
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("var Ol,jl=new(function(){var l,h,z;return l=c;}());", code);
         }
 
@@ -536,7 +538,7 @@ var Ol, jl = new (function() {
         
 ");
             var program = parser.ParseScript();
-            var code = AstToJavascript.ToJavascriptString(program, s_customCompactWriterFactory, JavascriptTextWriter.Options.Default, AstToJavascript.Options.Default);
+            var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
             Assert.Equal("[y,{[Symbol.iterator](){return b;},a:5}];", code);
         }
 

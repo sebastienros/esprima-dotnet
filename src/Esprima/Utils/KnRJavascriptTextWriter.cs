@@ -1,28 +1,27 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Esprima.Ast;
 
 namespace Esprima.Utils;
+
+public record class KnRJavascriptTextWriterOptions : JavascriptTextWriterOptions
+{
+    public static new readonly KnRJavascriptTextWriterOptions Default = new();
+
+    public string? Indent { get; init; }
+    public bool UseEgyptianBraces { get; init; } = true;
+    public bool KeepSingleStatementBodyInLine { get; init; }
+    public bool KeepEmptyBlockBodyInLine { get; init; } = true;
+    public int MultiLineArrayLiteralThreshold { get; init; } = 7;
+    public int MultiLineObjectLiteralThreshold { get; init; } = 3;
+
+    protected internal override JavascriptTextWriter CreateWriter(TextWriter writer) => new KnRJavascriptTextWriter(writer, this);
+}
 
 /// <summary>
 /// Javascript text writer (code formatter) which implements the most common <see href="https://en.wikipedia.org/wiki/Indentation_style#K&amp;R_style">K&amp;R style</see>.
 /// </summary>
 public class KnRJavascriptTextWriter : JavascriptTextWriter
 {
-    public new record class Options : JavascriptTextWriter.Options
-    {
-        public static new readonly Options Default = new();
-
-        internal static Options GetDefaultFrom(JavascriptTextWriter.Options baseOptions) => Default;
-
-        public string? Indent { get; init; }
-        public bool UseEgyptianBraces { get; init; } = true;
-        public bool KeepSingleStatementBodyInLine { get; init; }
-        public bool KeepEmptyBlockBodyInLine { get; init; } = true;
-        public int MultiLineArrayLiteralThreshold { get; init; } = 7;
-        public int MultiLineObjectLiteralThreshold { get; init; } = 3;
-    }
-
     private const int UseEgyptianBracesFlag = 1 << 0;
     private const int KeepSingleStatementBodyInLineFlag = 1 << 1;
     private const int KeepEmptyBlockBodyInLineFlag = 1 << 2;
@@ -31,34 +30,32 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
     private readonly string _indent;
     private int _indentionLevel;
 
-    public KnRJavascriptTextWriter(TextWriter writer, JavascriptTextWriter.Options options) : base(writer, options)
+    public KnRJavascriptTextWriter(TextWriter writer, KnRJavascriptTextWriterOptions options) : base(writer, options)
     {
-        var extendedOptions = options as Options ?? Options.GetDefaultFrom(options);
-
-        if (!string.IsNullOrWhiteSpace(extendedOptions.Indent))
+        if (!string.IsNullOrWhiteSpace(options.Indent))
         {
-            throw new ArgumentException("Indent must be null or white-space.", nameof(extendedOptions));
+            throw new ArgumentException("Indent must be null or white-space.", nameof(options));
         }
 
-        _indent = extendedOptions.Indent ?? "  ";
+        _indent = options.Indent ?? "  ";
 
-        if (extendedOptions.UseEgyptianBraces)
+        if (options.UseEgyptianBraces)
         {
             _optionFlags |= UseEgyptianBracesFlag;
         }
 
-        if (extendedOptions.KeepSingleStatementBodyInLine)
+        if (options.KeepSingleStatementBodyInLine)
         {
             _optionFlags |= KeepSingleStatementBodyInLineFlag;
         }
 
-        if (extendedOptions.KeepEmptyBlockBodyInLine)
+        if (options.KeepEmptyBlockBodyInLine)
         {
             _optionFlags |= KeepEmptyBlockBodyInLineFlag;
         }
 
-        MultiLineArrayLiteralThreshold = extendedOptions.MultiLineArrayLiteralThreshold >= 0 ? extendedOptions.MultiLineArrayLiteralThreshold : int.MaxValue;
-        MultiLineObjectLiteralThreshold = extendedOptions.MultiLineObjectLiteralThreshold >= 0 ? extendedOptions.MultiLineObjectLiteralThreshold : int.MaxValue;
+        MultiLineArrayLiteralThreshold = options.MultiLineArrayLiteralThreshold >= 0 ? options.MultiLineArrayLiteralThreshold : int.MaxValue;
+        MultiLineObjectLiteralThreshold = options.MultiLineObjectLiteralThreshold >= 0 ? options.MultiLineObjectLiteralThreshold : int.MaxValue;
     }
 
     protected bool UseEgyptianBraces { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => (_optionFlags & UseEgyptianBracesFlag) != 0; }

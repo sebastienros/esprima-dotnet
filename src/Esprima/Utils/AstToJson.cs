@@ -8,76 +8,81 @@ public enum LocationMembersPlacement
     Start
 }
 
+internal enum AstToJsonTestCompatibilityMode
+{
+    None,
+    EsprimaOrg,
+}
+
+public record class AstToJsonOptions
+{
+    public static readonly AstToJsonOptions Default = new();
+
+    public bool IncludingLineColumn { get; init; }
+    public bool IncludingRange { get; init; }
+    public LocationMembersPlacement LocationMembersPlacement { get; init; }
+    /// <summary>
+    /// This switch is intended for enabling a compatibility mode for <see cref="AstToJsonConverter"/> to build a JSON output
+    /// which matches the format of the test fixtures of the original Esprima project.
+    /// </summary>
+    internal AstToJsonTestCompatibilityMode TestCompatibilityMode { get; init; }
+
+    protected internal virtual AstToJsonConverter CreateConverter(JsonWriter writer) => new AstToJsonConverter(writer, this);
+}
+
 public static class AstToJson
 {
-    public record class Options
+    public static string ToJsonString(this Node node)
     {
-        public static readonly Options Default = new();
-
-        public bool IncludingLineColumn { get; init; }
-        public bool IncludingRange { get; init; }
-        public LocationMembersPlacement LocationMembersPlacement { get; init; }
-        /// <summary>
-        /// This switch is intended for enabling a compatibility mode for <see cref="AstToJsonConverter"/> to build a JSON output
-        /// which matches the format of the test fixtures of the original Esprima project.
-        /// </summary>
-        internal TestCompatibilityMode TestCompatibilityMode { get; init; }
+        return ToJsonString(node, indent: null);
     }
 
-    internal enum TestCompatibilityMode
+    public static string ToJsonString(this Node node, string? indent)
     {
-        None,
-        EsprimaOrg,
+        return ToJsonString(node, AstToJsonOptions.Default, indent);
     }
 
-    public static string ToJsonString(this Node node, AstToJsonConverter.Factory? converterFactory = null)
+    public static string ToJsonString(this Node node, AstToJsonOptions options)
     {
-        return ToJsonString(node, indent: null, converterFactory);
+        return ToJsonString(node, options, indent: null);
     }
 
-    public static string ToJsonString(this Node node, string? indent, AstToJsonConverter.Factory? converterFactory = null)
-    {
-        return ToJsonString(node, Options.Default, indent, converterFactory);
-    }
-
-    public static string ToJsonString(this Node node, Options options, AstToJsonConverter.Factory? converterFactory = null)
-    {
-        return ToJsonString(node, options, indent: null, converterFactory);
-    }
-
-    public static string ToJsonString(this Node node, Options options, string? indent, AstToJsonConverter.Factory? converterFactory = null)
+    public static string ToJsonString(this Node node, AstToJsonOptions options, string? indent)
     {
         using (var writer = new StringWriter())
         {
-            WriteJson(node, writer, options, indent, converterFactory);
+            WriteJson(node, writer, options, indent);
             return writer.ToString();
         }
     }
 
-    public static void WriteJson(this Node node, TextWriter writer, AstToJsonConverter.Factory? converterFactory = null)
+    public static void WriteJson(this Node node, TextWriter writer)
     {
-        WriteJson(node, writer, indent: null, converterFactory);
+        WriteJson(node, writer, indent: null);
     }
 
-    public static void WriteJson(this Node node, TextWriter writer, string? indent, AstToJsonConverter.Factory? converterFactory = null)
+    public static void WriteJson(this Node node, TextWriter writer, string? indent)
     {
-        WriteJson(node, writer, Options.Default, indent, converterFactory);
+        WriteJson(node, writer, AstToJsonOptions.Default, indent);
     }
 
-    public static void WriteJson(this Node node, TextWriter writer, Options options, AstToJsonConverter.Factory? converterFactory = null)
+    public static void WriteJson(this Node node, TextWriter writer, AstToJsonOptions options)
     {
-        WriteJson(node, writer, options, indent: null, converterFactory);
+        WriteJson(node, writer, options, indent: null);
     }
 
-    public static void WriteJson(this Node node, TextWriter writer, Options options, string? indent, AstToJsonConverter.Factory? converterFactory = null)
+    public static void WriteJson(this Node node, TextWriter writer, AstToJsonOptions options, string? indent)
     {
-        WriteJson(node, new JsonTextWriter(writer, indent), options, converterFactory);
+        WriteJson(node, new JsonTextWriter(writer, indent), options);
     }
 
-    public static void WriteJson(this Node node, JsonWriter writer, Options options, AstToJsonConverter.Factory? converterFactory = null)
+    public static void WriteJson(this Node node, JsonWriter writer, AstToJsonOptions options)
     {
-        converterFactory ??= static (writer, options) => new AstToJsonConverter(writer, options);
+        if (options is null)
+        {
+            throw new ArgumentNullException(nameof(options));
+        }
 
-        converterFactory(writer, options).Convert(node);
+        options.CreateConverter(writer).Convert(node);
     }
 }

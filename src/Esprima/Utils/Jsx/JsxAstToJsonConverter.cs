@@ -3,9 +3,16 @@ using Esprima.Ast.Jsx;
 
 namespace Esprima.Utils.Jsx;
 
+public record class JsxAstToJsonOptions : AstToJsonOptions
+{
+    public static new readonly JsxAstToJsonOptions Default = new();
+
+    protected internal override AstToJsonConverter CreateConverter(JsonWriter writer) => new JsxAstToJsonConverter(writer, this);
+}
+
 public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
 {
-    public JsxAstToJsonConverter(JsonWriter writer, AstToJson.Options options)
+    public JsxAstToJsonConverter(JsonWriter writer, JsxAstToJsonOptions options)
         : base(writer, options)
     {
     }

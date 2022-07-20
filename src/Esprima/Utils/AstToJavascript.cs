@@ -2,77 +2,71 @@
 
 namespace Esprima.Utils;
 
+public record class AstToJavascriptOptions
+{
+    public static readonly AstToJavascriptOptions Default = new();
+
+    protected internal virtual AstToJavascriptConverter CreateConverter(JavascriptTextWriter writer) => new AstToJavascriptConverter(writer, this);
+}
+
 public static class AstToJavascript
 {
-    public record class Options
+    public static string ToJavascriptString(this Node node)
     {
-        public static readonly Options Default = new();
+        return ToJavascriptString(node, JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, AstToJavascriptConverter.Factory? converterFactory = null)
+    public static string ToJavascriptString(this Node node, KnRJavascriptTextWriterOptions formattingOptions)
     {
-        JavascriptTextWriter.Factory writerFactory = static (writer, formattingOptions) => new JavascriptTextWriter(writer, formattingOptions);
-        return ToJavascriptString(node, writerFactory, JavascriptTextWriter.Options.Default, Options.Default, converterFactory);
+        return ToJavascriptString(node, formattingOptions, AstToJavascriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, KnRJavascriptTextWriter.Options formattingOptions, AstToJavascriptConverter.Factory? converterFactory = null)
+    public static string ToJavascriptString(this Node node, bool beautify)
     {
-        JavascriptTextWriter.Factory writerFactory = static (writer, formattingOptions) => new KnRJavascriptTextWriter(writer, formattingOptions);
-        return ToJavascriptString(node, writerFactory, formattingOptions, Options.Default, converterFactory);
+        return ToJavascriptString(node, beautify ? KnRJavascriptTextWriterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, bool beautify, AstToJavascriptConverter.Factory? converterFactory = null)
+    public static string ToJavascriptString(this Node node, JavascriptTextWriterOptions writerOptions, AstToJavascriptOptions options)
     {
-        if (beautify)
-        {
-            return ToJavascriptString(node, KnRJavascriptTextWriter.Options.Default, converterFactory);
-        }
-        else
-        {
-            return ToJavascriptString(node, converterFactory);
-        }
-    }
-
-    public static string ToJavascriptString(this Node node, JavascriptTextWriter.Factory writerFactory, JavascriptTextWriter.Options formattingOptions, Options options, AstToJavascriptConverter.Factory? converterFactory = null)
-    {
-        if (writerFactory is null)
-        {
-            throw new ArgumentNullException(nameof(writerFactory));
-        }
-
         using (var writer = new StringWriter())
         {
-            WriteJavascript(node, writerFactory(writer, formattingOptions), options, converterFactory);
+            WriteJavascript(node, writer, writerOptions, options);
             return writer.ToString();
         }
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, AstToJavascriptConverter.Factory? converterFactory = null)
+    public static void WriteJavascript(this Node node, TextWriter writer)
     {
-        WriteJavascript(node, new JavascriptTextWriter(writer, JavascriptTextWriter.Options.Default), Options.Default, converterFactory);
+        WriteJavascript(node, writer, JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, KnRJavascriptTextWriter.Options formattingOptions, AstToJavascriptConverter.Factory? converterFactory = null)
+    public static void WriteJavascript(this Node node, TextWriter writer, KnRJavascriptTextWriterOptions formattingOptions)
     {
-        WriteJavascript(node, new KnRJavascriptTextWriter(writer, formattingOptions), Options.Default, converterFactory);
+        WriteJavascript(node, writer, formattingOptions, AstToJavascriptOptions.Default);
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, bool beautify, AstToJavascriptConverter.Factory? converterFactory = null)
+    public static void WriteJavascript(this Node node, TextWriter writer, bool beautify)
     {
-        if (beautify)
+        WriteJavascript(node, writer, beautify ? KnRJavascriptTextWriterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
+    }
+
+    public static void WriteJavascript(this Node node, TextWriter writer, JavascriptTextWriterOptions writerOptions, AstToJavascriptOptions options)
+    {
+        if (writerOptions is null)
         {
-            WriteJavascript(node, writer, KnRJavascriptTextWriter.Options.Default, converterFactory);
+            throw new ArgumentNullException(nameof(writerOptions));
         }
-        else
-        {
-            WriteJavascript(node, writer, converterFactory);
-        }
+
+        WriteJavascript(node, writerOptions.CreateWriter(writer), options);
     }
 
-    public static void WriteJavascript(this Node node, JavascriptTextWriter writer, Options options, AstToJavascriptConverter.Factory? converterFactory = null)
+    public static void WriteJavascript(this Node node, JavascriptTextWriter writer, AstToJavascriptOptions options)
     {
-        converterFactory ??= static (writer, options) => new AstToJavascriptConverter(writer, options);
+        if (options is null)
+        {
+            throw new ArgumentNullException(nameof(options));
+        }
 
-        converterFactory(writer, options).Convert(node);
+        options.CreateConverter(writer).Convert(node);
     }
 }

@@ -10,15 +10,13 @@ namespace Esprima.Utils;
 
 public class AstToJsonConverter : AstVisitor
 {
-    public delegate AstToJsonConverter Factory(JsonWriter writer, AstToJson.Options options);
-
     private readonly JsonWriter _writer;
     private protected readonly bool _includeLineColumn;
     private protected readonly bool _includeRange;
     private protected readonly LocationMembersPlacement _locationMembersPlacement;
-    private protected readonly AstToJson.TestCompatibilityMode _testCompatibilityMode;
+    private protected readonly AstToJsonTestCompatibilityMode _testCompatibilityMode;
 
-    public AstToJsonConverter(JsonWriter writer, AstToJson.Options options)
+    public AstToJsonConverter(JsonWriter writer, AstToJsonOptions options)
     {
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
 
@@ -232,7 +230,7 @@ public class AstToJsonConverter : AstVisitor
             Member("generator", ((IFunction) arrowFunctionExpression).Generator);
             Member("expression", arrowFunctionExpression.Expression);
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("strict", arrowFunctionExpression.Strict);
             }
@@ -444,7 +442,7 @@ public class AstToJsonConverter : AstVisitor
             Member("source", exportAllDeclaration.Source);
 
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("exported", exportAllDeclaration.Exported);
                 if (exportAllDeclaration.Assertions.Count > 0)
@@ -475,7 +473,7 @@ public class AstToJsonConverter : AstVisitor
             Member("specifiers", exportNamedDeclaration.Specifiers);
             Member("source", exportNamedDeclaration.Source);
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg && exportNamedDeclaration.Assertions.Count > 0)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && exportNamedDeclaration.Assertions.Count > 0)
             {
                 Member("assertions", exportNamedDeclaration.Assertions);
             }
@@ -559,7 +557,7 @@ public class AstToJsonConverter : AstVisitor
             Member("generator", functionDeclaration.Generator);
             Member("expression", ((IFunction) functionDeclaration).Expression);
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("strict", functionDeclaration.Strict);
             }
@@ -579,7 +577,7 @@ public class AstToJsonConverter : AstVisitor
             Member("generator", functionExpression.Generator);
             Member("expression", ((IFunction) functionExpression).Expression);
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("strict", functionExpression.Strict);
             }
@@ -630,7 +628,7 @@ public class AstToJsonConverter : AstVisitor
     {
         // original Esprima uses CallExpression to represent dynamic imports currently,
         // so we need to rewrite our representation to match this expectation
-        if (_testCompatibilityMode == AstToJson.TestCompatibilityMode.EsprimaOrg)
+        if (_testCompatibilityMode == AstToJsonTestCompatibilityMode.EsprimaOrg)
         {
             const string importToken = "import";
 
@@ -651,7 +649,7 @@ public class AstToJsonConverter : AstVisitor
 
         using (StartNodeObject(import))
         {
-            if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("source", import.Source);
 
@@ -744,7 +742,7 @@ public class AstToJsonConverter : AstVisitor
             switch (value)
             {
                 case null:
-                    if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg && literal.TokenType == TokenType.RegularExpression)
+                    if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && literal.TokenType == TokenType.RegularExpression)
                     {
                         // This is how esprima.org actually renders regexes since it relies on Regex.toString
                         _writer.String(literal.Raw);
@@ -880,7 +878,7 @@ public class AstToJsonConverter : AstVisitor
             Member("sourceType", program.SourceType);
 
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJson.TestCompatibilityMode.EsprimaOrg && program is Script s)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && program is Script s)
             {
                 Member("strict", s.Strict);
             }

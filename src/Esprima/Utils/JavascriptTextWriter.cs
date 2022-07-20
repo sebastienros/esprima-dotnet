@@ -7,21 +7,21 @@ public delegate object? NodePropertyValueAccessor(Node node);
 
 public delegate ref readonly NodeList<T> NodePropertyListValueAccessor<T>(Node node) where T : Node?;
 
+public record class JavascriptTextWriterOptions
+{
+    public static readonly JavascriptTextWriterOptions Default = new();
+
+    protected internal virtual JavascriptTextWriter CreateWriter(TextWriter writer) => new JavascriptTextWriter(writer, this);
+}
+
 /// <summary>
 /// Base Javascript text writer (code formatter) which uses the most compact possible (i.e. minimal) format.
 /// </summary>
 public partial class JavascriptTextWriter
 {
-    public record class Options
-    {
-        public static readonly Options Default = new();
-    }
-
-    public delegate JavascriptTextWriter Factory(TextWriter writer, Options options);
-
     private readonly TextWriter _writer;
 
-    public JavascriptTextWriter(TextWriter writer, Options options)
+    public JavascriptTextWriter(TextWriter writer, JavascriptTextWriterOptions options)
     {
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
 
