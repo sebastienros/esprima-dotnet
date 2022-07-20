@@ -3,7 +3,10 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class ArrowParameterPlaceHolder : Expression
+    /// <remarks>
+    /// <see cref="ArrowParameterPlaceHolder"/> nodes never appear in the final AST, only used during its construction.
+    /// </remarks>
+    internal sealed class ArrowParameterPlaceHolder : Expression
     {
         public static readonly ArrowParameterPlaceHolder Empty = new(new NodeList<Node>(), false);
 
@@ -23,6 +26,6 @@ namespace Esprima.Ast
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params);
 
-        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowParameterPlaceHolder(this);
+        protected internal override object? Accept(AstVisitor visitor) => throw new NotSupportedException();
     }
 }
