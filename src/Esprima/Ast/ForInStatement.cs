@@ -16,7 +16,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// <see cref="VariableDeclaration"/> (may have an initializer in non-strict mode) | <see cref="Identifier"/> | <see cref="BindingPattern"/>
+        /// <see cref="VariableDeclaration"/> (may have an initializer in non-strict mode) | <see cref="Identifier"/> | <see cref="MemberExpression"/> | <see cref="BindingPattern"/>
         /// </remarks>
         public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

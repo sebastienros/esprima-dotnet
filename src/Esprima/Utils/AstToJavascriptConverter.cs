@@ -16,6 +16,7 @@ public partial class AstToJavascriptConverter : AstVisitor
 
     private static readonly object s_lastSwitchCaseFlag = new();
     private static readonly object s_forLoopInitDeclarationFlag = new();
+    private static readonly object s_bindingPatternAllowsExpressionsFlag = new(); // automatically propagated to sub-patterns
 
     private WriteContext _writeContext;
     private StatementFlags _currentStatementFlags;
@@ -112,17 +113,38 @@ public partial class AstToJavascriptConverter : AstVisitor
         {
             var element = arrayPattern.Elements[i];
 
-            var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
-            _currentAuxiliaryNodeContext = null;
-
-            Writer.StartAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
             if (element is not null)
             {
-                Visit(element);
-            }
-            Writer.EndAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
+                if (_currentAuxiliaryNodeContext != s_bindingPatternAllowsExpressionsFlag)
+                {
+                    VisitAuxiliaryNodeListItem(element, i, arrayPattern.Elements.Count, separator: ",", static delegate { return null; });
+                }
+                else if (element is not Expression expression)
+                {
+                    VisitAuxiliaryNodeListItem(element, i, arrayPattern.Elements.Count, separator: ",", static delegate { return s_bindingPatternAllowsExpressionsFlag; }); // propagate flag to sub-patterns
+                }
+                else
+                {
+                    var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
+                    _currentAuxiliaryNodeContext = null;
 
-            _currentAuxiliaryNodeContext = originalAuxiliaryNodeContext;
+                    Writer.StartAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
+                    VisitRootExpression(expression, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(expression)));
+                    Writer.EndAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
+
+                    _currentAuxiliaryNodeContext = originalAuxiliaryNodeContext;
+                }
+            }
+            else
+            {
+                var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
+                _currentAuxiliaryNodeContext = null;
+
+                Writer.StartAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
+                Writer.EndAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
+
+                _currentAuxiliaryNodeContext = originalAuxiliaryNodeContext;
+            }
         }
 
         Writer.EndAuxiliaryNodeList<Node?>(arrayPattern.Elements.Count, ref _writeContext);
@@ -175,7 +197,14 @@ public partial class AstToJavascriptConverter : AstVisitor
     protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
     {
         _writeContext.SetNodeProperty(nameof(assignmentExpression.Left), static node => node.As<AssignmentExpression>().Left);
-        VisitAuxiliaryNode(assignmentExpression.Left);
+        if (assignmentExpression.Left is Expression leftExpression)
+        {
+            VisitSubExpression(leftExpression, SubExpressionFlags(needsBrackets: false, isLeftMost: true));
+        }
+        else
+        {
+            VisitAuxiliaryNode(assignmentExpression.Left, static delegate { return s_bindingPatternAllowsExpressionsFlag; });
+        }
 
         var op = AssignmentExpression.GetAssignmentOperatorToken(assignmentExpression.Operator);
 
@@ -194,7 +223,18 @@ public partial class AstToJavascriptConverter : AstVisitor
     protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
     {
         _writeContext.SetNodeProperty(nameof(assignmentPattern.Left), static node => node.As<AssignmentPattern>().Left);
-        VisitAuxiliaryNode(assignmentPattern.Left);
+        if (_currentAuxiliaryNodeContext != s_bindingPatternAllowsExpressionsFlag)
+        {
+            VisitAuxiliaryNode(assignmentPattern.Left);
+        }
+        else if (assignmentPattern.Left is not Expression leftExpression)
+        {
+            VisitAuxiliaryNode(assignmentPattern.Left, static delegate { return s_bindingPatternAllowsExpressionsFlag; }); // propagate flag to sub-patterns
+        }
+        else
+        {
+            VisitRootExpression(leftExpression, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(leftExpression)));
+        }
 
         _writeContext.ClearNodeProperty();
         Writer.WritePunctuator("=", TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
@@ -629,9 +669,13 @@ public partial class AstToJavascriptConverter : AstVisitor
         {
             VisitStatement(variableDeclaration, StatementFlags.NestedVariableDeclaration);
         }
+        else if (forInStatement.Left is Expression leftExpression)
+        {
+            VisitRootExpression(leftExpression, RootExpressionFlags(needsBrackets: false));
+        }
         else
         {
-            VisitAuxiliaryNode(forInStatement.Left);
+            VisitAuxiliaryNode(forInStatement.Left, static delegate { return s_bindingPatternAllowsExpressionsFlag; });
         }
 
         _writeContext.ClearNodeProperty();
@@ -667,9 +711,13 @@ public partial class AstToJavascriptConverter : AstVisitor
         {
             VisitStatement(variableDeclaration, StatementFlags.NestedVariableDeclaration);
         }
+        else if (forOfStatement.Left is Expression leftExpression)
+        {
+            VisitRootExpression(leftExpression, RootExpressionFlags(needsBrackets: false));
+        }
         else
         {
-            VisitAuxiliaryNode(forOfStatement.Left);
+            VisitAuxiliaryNode(forOfStatement.Left, static delegate { return s_bindingPatternAllowsExpressionsFlag; });
         }
 
         _writeContext.ClearNodeProperty();
@@ -1202,7 +1250,10 @@ WriteSource:
 
         Writer.StartObject(objectPattern.Properties.Count, ref _writeContext);
 
-        VisitAuxiliaryNodeList(in objectPattern.Properties, separator: ",");
+        VisitAuxiliaryNodeList(in objectPattern.Properties, separator: ",", static (@this, _, _, _) =>
+            @this._currentAuxiliaryNodeContext == s_bindingPatternAllowsExpressionsFlag
+                ? s_bindingPatternAllowsExpressionsFlag // propagate flag to sub-patterns
+                : null);
 
         Writer.EndObject(objectPattern.Properties.Count, ref _writeContext);
 
@@ -1261,14 +1312,26 @@ WriteSource:
 
         _writeContext.SetNodeProperty(nameof(property.Value), static node => node.As<Property>().Value);
 
+        Expression? valueExpression;
         if (ParentNode is { Type: Nodes.ObjectPattern })
         {
-            VisitAuxiliaryNode(property.Value);
+            if (_currentAuxiliaryNodeContext != s_bindingPatternAllowsExpressionsFlag)
+            {
+                VisitAuxiliaryNode(property.Value);
+            }
+            else if ((valueExpression = property.Value as Expression) is null)
+            {
+                VisitAuxiliaryNode(property.Value, static delegate { return s_bindingPatternAllowsExpressionsFlag; }); // propagate flag to sub-patterns
+            }
+            else
+            {
+                VisitRootExpression(valueExpression, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(valueExpression)));
+            }
         }
         else
         {
-            var expression = property.Value.As<Expression>();
-            VisitRootExpression(expression, isMethod.ToFlag(ExpressionFlags.IsMethod) | RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(expression)));
+            valueExpression = property.Value.As<Expression>();
+            VisitRootExpression(valueExpression, isMethod.ToFlag(ExpressionFlags.IsMethod) | RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(valueExpression)));
         }
 
         return property;
@@ -1312,7 +1375,18 @@ WriteSource:
         _writeContext.SetNodeProperty(nameof(restElement.Argument), static node => node.As<RestElement>().Argument);
         Writer.WritePunctuator("...", TokenFlags.Leading, ref _writeContext);
 
-        VisitAuxiliaryNode(restElement.Argument);
+        if (_currentAuxiliaryNodeContext != s_bindingPatternAllowsExpressionsFlag)
+        {
+            VisitAuxiliaryNode(restElement.Argument);
+        }
+        else if (restElement.Argument is not Expression argumentExpression)
+        {
+            VisitAuxiliaryNode(restElement.Argument, static delegate { return s_bindingPatternAllowsExpressionsFlag; }); // propagate flag to sub-patterns
+        }
+        else
+        {
+            VisitRootExpression(argumentExpression, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(argumentExpression)));
+        }
 
         return restElement;
     }

@@ -96,7 +96,7 @@ namespace Esprima.Ast
         public AssignmentOperator Operator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         /// <remarks>
-        /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
+        /// <see cref="Identifier"/> | <see cref="MemberExpression"/> | <see cref="BindingPattern"/> 
         /// </remarks>
         public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

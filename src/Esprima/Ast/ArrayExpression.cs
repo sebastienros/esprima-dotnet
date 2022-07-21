@@ -13,7 +13,7 @@ namespace Esprima.Ast
         }
 
         /// <summary>
-        /// { <see cref="Expression"/> (incl. <see cref="SpreadElement"/>) | <see langword="null"/> }
+        /// { <see cref="Expression"/> (incl. <see cref="SpreadElement"/>) | <see langword="null"/> (omitted element) }
         /// </summary>
         public ref readonly NodeList<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
 

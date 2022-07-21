@@ -33,7 +33,7 @@ namespace Esprima.Ast
 
         /// <remarks>
         /// When property of an object literal: <see cref="Expression"/> (incl. <see cref="SpreadElement"/> and <see cref="FunctionExpression"/> for getters/setters/methods) <br />
-        /// When property of an object binding pattern: <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/>
+        /// When property of an object binding pattern: <see cref="Identifier"/> | <see cref="MemberExpression"/> (in assignment contexts only) | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/>
         /// </remarks>
         public Node Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _value; }
         Node? IProperty.Value => Value;

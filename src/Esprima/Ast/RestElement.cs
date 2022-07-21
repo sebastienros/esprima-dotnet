@@ -11,7 +11,7 @@ namespace Esprima.Ast
         }
 
         /// <remarks>
-        /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
+        /// <see cref="Identifier"/> | <see cref="MemberExpression"/> (in assignment contexts only) | <see cref="BindingPattern"/>
         /// </remarks>
         public Node Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
