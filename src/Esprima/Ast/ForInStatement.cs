@@ -1,39 +1,38 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class ForInStatement : Statement
 {
-    public sealed class ForInStatement : Statement
+    public ForInStatement(
+        Node left,
+        Expression right,
+        Statement body) : base(Nodes.ForInStatement)
     {
-        public ForInStatement(
-            Node left,
-            Expression right,
-            Statement body) : base(Nodes.ForInStatement)
+        Left = left;
+        Right = right;
+        Body = body;
+    }
+
+    /// <remarks>
+    /// <see cref="VariableDeclaration"/> (may have an initializer in non-strict mode) | <see cref="Identifier"/> | <see cref="MemberExpression"/> | <see cref="BindingPattern"/>
+    /// </remarks>
+    public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right, Body);
+
+    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitForInStatement(this);
+
+    public ForInStatement UpdateWith(Node left, Expression right, Statement body)
+    {
+        if (left == Left && right == Right && body == Body)
         {
-            Left = left;
-            Right = right;
-            Body = body;
+            return this;
         }
 
-        /// <remarks>
-        /// <see cref="VariableDeclaration"/> (may have an initializer in non-strict mode) | <see cref="Identifier"/> | <see cref="MemberExpression"/> | <see cref="BindingPattern"/>
-        /// </remarks>
-        public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right, Body);
-
-        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitForInStatement(this);
-
-        public ForInStatement UpdateWith(Node left, Expression right, Statement body)
-        {
-            if (left == Left && right == Right && body == Body)
-            {
-                return this;
-            }
-
-            return new ForInStatement(left, right, body);
-        }
+        return new ForInStatement(left, right, body);
     }
 }

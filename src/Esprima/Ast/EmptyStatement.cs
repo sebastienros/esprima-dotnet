@@ -1,15 +1,14 @@
 ﻿using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class EmptyStatement : Statement
 {
-    public sealed class EmptyStatement : Statement
+    public EmptyStatement() : base(Nodes.EmptyStatement)
     {
-        public EmptyStatement() : base(Nodes.EmptyStatement)
-        {
-        }
-
-        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
-
-        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitEmptyStatement(this);
     }
+
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
+
+    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitEmptyStatement(this);
 }

@@ -28,92 +28,91 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Esprima.Tests.Helpers
+namespace Esprima.Tests.Helpers;
+
+internal class BreakingSequence<T> : IEnumerable<T>
 {
-    internal class BreakingSequence<T> : IEnumerable<T>
+    public IEnumerator<T> GetEnumerator()
     {
-        public IEnumerator<T> GetEnumerator()
-        {
-            throw new InvalidOperationException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        throw new InvalidOperationException();
     }
 
-    internal class BreakingCollection<T> : BreakingSequence<T>, ICollection<T>
+    IEnumerator IEnumerable.GetEnumerator()
     {
-        protected readonly IList<T> List;
+        return GetEnumerator();
+    }
+}
 
-        public BreakingCollection(params T[] values) : this((IList<T>) values) { }
+internal class BreakingCollection<T> : BreakingSequence<T>, ICollection<T>
+{
+    protected readonly IList<T> List;
 
-        public BreakingCollection(IList<T> list)
-        {
-            List = list;
-        }
+    public BreakingCollection(params T[] values) : this((IList<T>) values) { }
 
-        public BreakingCollection(int count) :
-            this(Enumerable.Repeat(default(T)!, count).ToList())
-        {
-        }
-
-        public int Count => List.Count;
-
-        public void Add(T item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Clear()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Contains(T item)
-        {
-            return List.Contains(item);
-        }
-
-        public void CopyTo(T[] array, int arrayIndex)
-        {
-            List.CopyTo(array, arrayIndex);
-        }
-
-        public bool Remove(T item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsReadOnly => true;
+    public BreakingCollection(IList<T> list)
+    {
+        List = list;
     }
 
-    internal class BreakingReadOnlyCollection<T> : BreakingSequence<T>, IReadOnlyCollection<T>
+    public BreakingCollection(int count) :
+        this(Enumerable.Repeat(default(T)!, count).ToList())
     {
-        private readonly IReadOnlyCollection<T> _collection;
-
-        public BreakingReadOnlyCollection(params T[] values) : this((IReadOnlyCollection<T>) values) { }
-
-        public BreakingReadOnlyCollection(IReadOnlyCollection<T> collection)
-        {
-            _collection = collection;
-        }
-
-        public int Count => _collection.Count;
     }
 
-    internal sealed class BreakingReadOnlyList<T> : BreakingReadOnlyCollection<T>, IReadOnlyList<T>
+    public int Count => List.Count;
+
+    public void Add(T item)
     {
-        private readonly IReadOnlyList<T> _list;
-
-        public BreakingReadOnlyList(params T[] values) : this((IReadOnlyList<T>) values) { }
-
-        public BreakingReadOnlyList(IReadOnlyList<T> list) : base(list)
-        {
-            _list = list;
-        }
-
-        public T this[int index] => _list[index];
+        throw new NotImplementedException();
     }
+
+    public void Clear()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool Contains(T item)
+    {
+        return List.Contains(item);
+    }
+
+    public void CopyTo(T[] array, int arrayIndex)
+    {
+        List.CopyTo(array, arrayIndex);
+    }
+
+    public bool Remove(T item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool IsReadOnly => true;
+}
+
+internal class BreakingReadOnlyCollection<T> : BreakingSequence<T>, IReadOnlyCollection<T>
+{
+    private readonly IReadOnlyCollection<T> _collection;
+
+    public BreakingReadOnlyCollection(params T[] values) : this((IReadOnlyCollection<T>) values) { }
+
+    public BreakingReadOnlyCollection(IReadOnlyCollection<T> collection)
+    {
+        _collection = collection;
+    }
+
+    public int Count => _collection.Count;
+}
+
+internal sealed class BreakingReadOnlyList<T> : BreakingReadOnlyCollection<T>, IReadOnlyList<T>
+{
+    private readonly IReadOnlyList<T> _list;
+
+    public BreakingReadOnlyList(params T[] values) : this((IReadOnlyList<T>) values) { }
+
+    public BreakingReadOnlyList(IReadOnlyList<T> list) : base(list)
+    {
+        _list = list;
+    }
+
+    public T this[int index] => _list[index];
 }

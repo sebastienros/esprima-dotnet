@@ -1,9 +1,8 @@
-﻿namespace Esprima.Ast
+﻿namespace Esprima.Ast;
+
+public abstract class ExportDeclaration : Declaration
 {
-    public abstract class ExportDeclaration : Declaration
+    protected ExportDeclaration(Nodes type) : base(type)
     {
-        protected ExportDeclaration(Nodes type) : base(type)
-        {
-        }
     }
 }

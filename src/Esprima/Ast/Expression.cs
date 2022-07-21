@@ -1,12 +1,11 @@
-﻿namespace Esprima.Ast
+﻿namespace Esprima.Ast;
+
+/// <summary>
+/// A JavaScript expression. 
+/// </summary>
+public abstract class Expression : StatementListItem
 {
-    /// <summary>
-    /// A JavaScript expression. 
-    /// </summary>
-    public abstract class Expression : StatementListItem
+    protected Expression(Nodes type) : base(type)
     {
-        protected Expression(Nodes type) : base(type)
-        {
-        }
     }
 }

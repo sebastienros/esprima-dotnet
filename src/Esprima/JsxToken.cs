@@ -4,21 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Esprima
+namespace Esprima;
+
+public enum JsxTokenType
 {
-    public enum JsxTokenType
-    {
-        JsxIdentifier,
-        JsxText
-    };
+    JsxIdentifier,
+    JsxText
+};
 
-    public sealed class JsxToken : Token
+public sealed class JsxToken : Token
+{
+    public JsxToken()
     {
-        public JsxToken()
-        {
-            base.Type = TokenType.Extension;
-        }
-
-        public new JsxTokenType Type;
+        base.Type = TokenType.Extension;
     }
+
+    public new JsxTokenType Type;
 }

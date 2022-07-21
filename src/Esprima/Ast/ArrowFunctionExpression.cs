@@ -1,53 +1,52 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class ArrowFunctionExpression : Expression, IFunction
 {
-    public sealed class ArrowFunctionExpression : Expression, IFunction
+    private readonly NodeList<Node> _params;
+
+    public ArrowFunctionExpression(
+        in NodeList<Node> parameters,
+        StatementListItem body,
+        bool expression,
+        bool strict,
+        bool async)
+        : base(Nodes.ArrowFunctionExpression)
     {
-        private readonly NodeList<Node> _params;
+        _params = parameters;
+        Body = body;
+        Expression = expression;
+        Strict = strict;
+        Async = async;
+    }
 
-        public ArrowFunctionExpression(
-            in NodeList<Node> parameters,
-            StatementListItem body,
-            bool expression,
-            bool strict,
-            bool async)
-            : base(Nodes.ArrowFunctionExpression)
+    Identifier? IFunction.Id => null;
+    /// <summary>
+    /// { <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> }
+    /// </summary>
+    public ref readonly NodeList<Node> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+    /// <remarks>
+    /// <see cref="BlockStatement"/> | <see cref="Ast.Expression"/>
+    /// </remarks>
+    public StatementListItem Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    bool IFunction.Generator => false;
+    public bool Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params, Body);
+
+    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
+
+    public ArrowFunctionExpression UpdateWith(in NodeList<Node> parameters, StatementListItem body)
+    {
+        if (NodeList.AreSame(parameters, Params) && body == Body)
         {
-            _params = parameters;
-            Body = body;
-            Expression = expression;
-            Strict = strict;
-            Async = async;
+            return this;
         }
 
-        Identifier? IFunction.Id => null;
-        /// <summary>
-        /// { <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> }
-        /// </summary>
-        public ref readonly NodeList<Node> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
-        /// <remarks>
-        /// <see cref="BlockStatement"/> | <see cref="Ast.Expression"/>
-        /// </remarks>
-        public StatementListItem Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        bool IFunction.Generator => false;
-        public bool Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params, Body);
-
-        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
-
-        public ArrowFunctionExpression UpdateWith(in NodeList<Node> parameters, StatementListItem body)
-        {
-            if (NodeList.AreSame(parameters, Params) && body == Body)
-            {
-                return this;
-            }
-
-            return new ArrowFunctionExpression(parameters, body, Expression, Strict, Async);
-        }
+        return new ArrowFunctionExpression(parameters, body, Expression, Strict, Async);
     }
 }

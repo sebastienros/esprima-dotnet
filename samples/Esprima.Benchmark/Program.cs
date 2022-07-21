@@ -1,13 +1,12 @@
 ﻿using System.Reflection;
 using BenchmarkDotNet.Running;
 
-namespace Esprima.Benchmark
+namespace Esprima.Benchmark;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            BenchmarkSwitcher.FromAssembly(typeof(Program).GetTypeInfo().Assembly).Run(args);
-        }
+        BenchmarkSwitcher.FromAssembly(typeof(Program).GetTypeInfo().Assembly).Run(args);
     }
 }

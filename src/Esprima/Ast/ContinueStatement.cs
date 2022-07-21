@@ -1,29 +1,28 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class ContinueStatement : Statement
 {
-    public sealed class ContinueStatement : Statement
+    public ContinueStatement(Identifier? label) : base(Nodes.ContinueStatement)
     {
-        public ContinueStatement(Identifier? label) : base(Nodes.ContinueStatement)
+        Label = label;
+    }
+
+    public Identifier? Label { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Label);
+
+    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitContinueStatement(this);
+
+    public ContinueStatement UpdateWith(Identifier? label)
+    {
+        if (label == Label)
         {
-            Label = label;
+            return this;
         }
 
-        public Identifier? Label { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Label);
-
-        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitContinueStatement(this);
-
-        public ContinueStatement UpdateWith(Identifier? label)
-        {
-            if (label == Label)
-            {
-                return this;
-            }
-
-            return new ContinueStatement(label);
-        }
+        return new ContinueStatement(label);
     }
 }
