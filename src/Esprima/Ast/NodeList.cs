@@ -44,6 +44,10 @@ namespace Esprima.Ast
             return new NodeList<TTo>((TTo[]?) (object?) _items, _count);
         }
 
+        public ReadOnlySpan<T> AsSpan() => new ReadOnlySpan<T>(_items, 0, _count);
+
+        public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(_items, 0, _count);
+
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
