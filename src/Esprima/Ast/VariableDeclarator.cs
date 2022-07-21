@@ -5,7 +5,7 @@ namespace Esprima.Ast
 {
     public sealed class VariableDeclarator : Node
     {
-        public VariableDeclarator(Expression id, Expression? init) :
+        public VariableDeclarator(Node id, Expression? init) :
             base(Nodes.VariableDeclarator)
         {
             Id = id;
@@ -15,14 +15,14 @@ namespace Esprima.Ast
         /// <remarks>
         /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
         /// </remarks>
-        public Expression Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Node Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public Expression? Init { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Id, Init);
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitVariableDeclarator(this);
 
-        public VariableDeclarator UpdateWith(Expression id, Expression? init)
+        public VariableDeclarator UpdateWith(Node id, Expression? init)
         {
             if (id == Id && init == Init)
             {

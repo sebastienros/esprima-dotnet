@@ -17,9 +17,6 @@ namespace Esprima.Ast
         }
 
         public Identifier? Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        /// <remarks>
-        /// <see cref="Identifier"/> | <see cref="CallExpression"/>
-        /// </remarks>
         public Expression? SuperClass { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ClassBody Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }

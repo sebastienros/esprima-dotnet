@@ -442,14 +442,14 @@ public class AstRewriter : AstVisitor
     protected internal override object? VisitProperty(Property property)
     {
         Expression? key;
-        Expression value;
+        Node value;
 
         if (property.Shorthand)
         {
             value = VisitAndConvert(property.Value);
-            key = value is AssignmentPattern assignmentPattern
+            key = (value is AssignmentPattern assignmentPattern
                 ? assignmentPattern.Left
-                : value;
+                : value).As<Identifier>();
         }
         else
         {

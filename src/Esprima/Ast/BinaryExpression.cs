@@ -18,7 +18,7 @@ namespace Esprima.Ast
         Less,
         LessOrEqual,
         StrictlyEqual,
-        StricltyNotEqual,
+        StrictlyNotEqual,
         BitwiseAnd,
         BitwiseOr,
         BitwiseXor,
@@ -33,15 +33,21 @@ namespace Esprima.Ast
         NullishCoalescing
     }
 
-    public sealed class BinaryExpression : Expression
+    public class BinaryExpression : Expression
     {
-        public BinaryExpression(string op, Expression left, Expression right) :
-            this(ParseBinaryOperator(op), left, right)
+        public BinaryExpression(string op, Expression left, Expression right) : this(ParseBinaryOperator(op), left, right)
         {
         }
 
-        public BinaryExpression(BinaryOperator op, Expression left, Expression right) :
-            base(op == BinaryOperator.LogicalAnd || op == BinaryOperator.LogicalOr || op == BinaryOperator.NullishCoalescing ? Nodes.LogicalExpression : Nodes.BinaryExpression)
+        public BinaryExpression(BinaryOperator op, Expression left, Expression right) : this(Nodes.BinaryExpression, op, left, right)
+        {
+        }
+
+        private protected BinaryExpression(Nodes type, string op, Expression left, Expression right) : this(type, ParseBinaryOperator(op), left, right)
+        {
+        }
+
+        private protected BinaryExpression(Nodes type, BinaryOperator op, Expression left, Expression right) : base(type)
         {
             Operator = op;
             Left = left;
@@ -64,7 +70,7 @@ namespace Esprima.Ast
                 "<" => BinaryOperator.Less,
                 "<=" => BinaryOperator.LessOrEqual,
                 "===" => BinaryOperator.StrictlyEqual,
-                "!==" => BinaryOperator.StricltyNotEqual,
+                "!==" => BinaryOperator.StrictlyNotEqual,
                 "&" => BinaryOperator.BitwiseAnd,
                 "|" => BinaryOperator.BitwiseOr,
                 "^" => BinaryOperator.BitwiseXor,
@@ -97,7 +103,7 @@ namespace Esprima.Ast
                 BinaryOperator.Less => "<",
                 BinaryOperator.LessOrEqual => "<=",
                 BinaryOperator.StrictlyEqual => "===",
-                BinaryOperator.StricltyNotEqual => "!==",
+                BinaryOperator.StrictlyNotEqual => "!==",
                 BinaryOperator.BitwiseAnd => "&",
                 BinaryOperator.BitwiseOr => "|",
                 BinaryOperator.BitwiseXor => "^",
@@ -122,6 +128,11 @@ namespace Esprima.Ast
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitBinaryExpression(this);
 
+        protected virtual BinaryExpression Rewrite(Expression left, Expression right)
+        {
+            return new BinaryExpression(Operator, left, right);
+        }
+
         public BinaryExpression UpdateWith(Expression left, Expression right)
         {
             if (left == Left && right == Right)
@@ -129,7 +140,7 @@ namespace Esprima.Ast
                 return this;
             }
 
-            return new BinaryExpression(Operator, left, right);
+            return Rewrite(left, right);
         }
     }
 }

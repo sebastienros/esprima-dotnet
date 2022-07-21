@@ -5,11 +5,11 @@ namespace Esprima.Ast
 {
     public sealed class FunctionExpression : Expression, IFunction
     {
-        private readonly NodeList<Expression> _params;
+        private readonly NodeList<Node> _params;
 
         public FunctionExpression(
             Identifier? id,
-            in NodeList<Expression> parameters,
+            in NodeList<Node> parameters,
             BlockStatement body,
             bool generator,
             bool strict,
@@ -28,10 +28,10 @@ namespace Esprima.Ast
         /// <summary>
         /// { <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> }
         /// </summary>
-        public ref readonly NodeList<Expression> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
+        public ref readonly NodeList<Node> Params { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _params; }
 
         public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        Node IFunction.Body => Body;
+        StatementListItem IFunction.Body => Body;
 
         public bool Generator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         bool IFunction.Expression => false;
@@ -42,7 +42,7 @@ namespace Esprima.Ast
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitFunctionExpression(this);
 
-        public FunctionExpression UpdateWith(Identifier? id, in NodeList<Expression> parameters, BlockStatement body)
+        public FunctionExpression UpdateWith(Identifier? id, in NodeList<Node> parameters, BlockStatement body)
         {
             if (id == Id && NodeList.AreSame(parameters, Params) && body == Body)
             {

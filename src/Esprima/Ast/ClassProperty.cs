@@ -19,6 +19,7 @@ namespace Esprima.Ast
         public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         public Expression? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => GetValue(); }
+        Node? IProperty.Value => GetValue();
         protected abstract Expression? GetValue();
     }
 }

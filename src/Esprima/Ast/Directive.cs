@@ -4,16 +4,16 @@ namespace Esprima.Ast
 {
     public sealed class Directive : ExpressionStatement
     {
-        public Directive(Expression expression, string directive) : base(expression)
+        public Directive(Expression expression, string value) : base(expression)
         {
-            Directiv = directive;
+            Value = value;
         }
 
-        public string Directiv { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public string Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         protected override ExpressionStatement Rewrite(Expression expression)
         {
-            return new Directive(expression, Directiv);
+            return new Directive(expression, Value);
         }
     }
 }

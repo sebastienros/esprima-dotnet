@@ -19,7 +19,7 @@ namespace Esprima.Ast
 
     public class UnaryExpression : Expression
     {
-        public UnaryExpression(string? op, Expression arg) : this(ParseUnaryOperator(op), arg)
+        public UnaryExpression(string op, Expression arg) : this(ParseUnaryOperator(op), arg)
         {
         }
 
@@ -27,7 +27,7 @@ namespace Esprima.Ast
         {
         }
 
-        private protected UnaryExpression(Nodes type, string? op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
+        private protected UnaryExpression(Nodes type, string op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
         {
         }
 
@@ -38,7 +38,7 @@ namespace Esprima.Ast
             Prefix = prefix;
         }
 
-        public static UnaryOperator ParseUnaryOperator(string? op)
+        public static UnaryOperator ParseUnaryOperator(string op)
         {
             return op switch
             {

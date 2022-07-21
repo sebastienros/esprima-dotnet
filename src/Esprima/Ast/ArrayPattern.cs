@@ -5,23 +5,23 @@ namespace Esprima.Ast
 {
     public sealed class ArrayPattern : BindingPattern
     {
-        private readonly NodeList<Expression?> _elements;
+        private readonly NodeList<Node?> _elements;
 
-        public ArrayPattern(in NodeList<Expression?> elements) : base(Nodes.ArrayPattern)
+        public ArrayPattern(in NodeList<Node?> elements) : base(Nodes.ArrayPattern)
         {
             _elements = elements;
         }
 
         /// <summary>
-        /// { <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> | <see langword="null"/> }
+        /// { <see cref="Identifier"/> | <see cref="MemberExpression"/> (in assignment contexts only) | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/> | <see langword="null"/> (omitted element) }
         /// </summary>
-        public ref readonly NodeList<Expression?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
+        public ref readonly NodeList<Node?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Elements);
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrayPattern(this);
 
-        public ArrayPattern UpdateWith(in NodeList<Expression?> elements)
+        public ArrayPattern UpdateWith(in NodeList<Node?> elements)
         {
             if (NodeList.AreSame(elements, Elements))
             {

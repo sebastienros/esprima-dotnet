@@ -9,7 +9,7 @@ namespace Esprima.Ast
         private readonly NodeList<ImportAttribute> _assertions;
 
         public ExportNamedDeclaration(
-            StatementListItem? declaration,
+            Declaration? declaration,
             in NodeList<ExportSpecifier> specifiers,
             Literal? source,
             in NodeList<ImportAttribute> assertions)
@@ -24,7 +24,7 @@ namespace Esprima.Ast
         /// <remarks>
         /// <see cref="VariableDeclaration"/> | <see cref="ClassDeclaration"/> | <see cref="FunctionDeclaration"/>
         /// </remarks>
-        public StatementListItem? Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Declaration? Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<ExportSpecifier> Specifiers { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _specifiers; }
         public Literal? Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
@@ -33,7 +33,7 @@ namespace Esprima.Ast
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportNamedDeclaration(this);
 
-        public ExportNamedDeclaration UpdateWith(StatementListItem? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
+        public ExportNamedDeclaration UpdateWith(Declaration? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
         {
             if (declaration == Declaration && NodeList.AreSame(specifiers, Specifiers) && source == Source && NodeList.AreSame(assertions, Assertions))
             {

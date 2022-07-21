@@ -56,14 +56,6 @@ public class AstVisitor
         return arrowFunctionExpression;
     }
 
-    protected internal virtual object? VisitArrowParameterPlaceHolder(ArrowParameterPlaceHolder arrowParameterPlaceHolder)
-    {
-        // Seems that ArrowParameterPlaceHolder nodes never appear in the final tree and only used during the construction of a tree.
-        // Though we provide the VisitArrowParameterPlaceHolder method for inheritors in case they still needed it.
-
-        throw UnsupportedNodeType(arrowParameterPlaceHolder.GetType());
-    }
-
     protected internal virtual object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
     {
         Visit(assignmentExpression.Left);

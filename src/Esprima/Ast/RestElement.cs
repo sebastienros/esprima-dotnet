@@ -3,23 +3,23 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class RestElement : Expression
+    public sealed class RestElement : Node
     {
-        public RestElement(Expression argument) : base(Nodes.RestElement)
+        public RestElement(Node argument) : base(Nodes.RestElement)
         {
             Argument = argument;
         }
 
         /// <remarks>
-        /// <see cref="Identifier"/> | <see cref="BindingPattern"/>
+        /// <see cref="Identifier"/> | <see cref="MemberExpression"/> (in assignment contexts only) | <see cref="BindingPattern"/>
         /// </remarks>
-        public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+        public Node Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitRestElement(this);
 
-        public RestElement UpdateWith(Expression argument)
+        public RestElement UpdateWith(Node argument)
         {
             if (argument == Argument)
             {

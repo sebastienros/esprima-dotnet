@@ -3,15 +3,15 @@ using Esprima.Utils;
 
 namespace Esprima.Ast
 {
-    public sealed class Property : Expression, IProperty
+    public sealed class Property : Node, IProperty
     {
-        internal Expression _value;
+        internal Node _value;
 
         public Property(
             PropertyKind kind,
             Expression key,
             bool computed,
-            Expression value,
+            Node value,
             bool method,
             bool shorthand)
             : base(Nodes.Property)
@@ -33,10 +33,10 @@ namespace Esprima.Ast
 
         /// <remarks>
         /// When property of an object literal: <see cref="Expression"/> (incl. <see cref="SpreadElement"/> and <see cref="FunctionExpression"/> for getters/setters/methods) <br />
-        /// When property of an object binding pattern: <see cref="Identifier"/> | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/>
+        /// When property of an object binding pattern: <see cref="Identifier"/> | <see cref="MemberExpression"/> (in assignment contexts only) | <see cref="BindingPattern"/> | <see cref="AssignmentPattern"/> | <see cref="RestElement"/>
         /// </remarks>
-        public Expression Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _value; }
-        Expression? IProperty.Value => Value;
+        public Node Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _value; }
+        Node? IProperty.Value => Value;
 
         public bool Method { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
         public bool Shorthand { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
@@ -45,7 +45,7 @@ namespace Esprima.Ast
 
         protected internal override object? Accept(AstVisitor visitor) => visitor.VisitProperty(this);
 
-        public Property UpdateWith(Expression key, Expression value)
+        public Property UpdateWith(Expression key, Node value)
         {
             if (key == Key && value == Value)
             {

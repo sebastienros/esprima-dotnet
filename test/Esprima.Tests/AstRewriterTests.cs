@@ -97,7 +97,7 @@ public class AstRewriterTests
     [InlineData(typeof(AwaitExpression), "async a => { await a }")]
     [InlineData(typeof(ConditionalExpression), "a ? b : c;")]
     [InlineData(typeof(CallExpression), "a()")]
-    [InlineData(typeof(BinaryExpression), "x || y ^ z")]
+    [InlineData(typeof(BinaryExpression), "x | y ^ z")]
     [InlineData(typeof(ArrayExpression), "[1,2,3]")]
     [InlineData(typeof(AssignmentExpression), "a.let = foo")]
     [InlineData(typeof(ContinueStatement), "while(true){ continue; }")]
@@ -299,7 +299,7 @@ sealed class TestRewriter : JsxAstRewriter
         return ForceNewObjectByControlType((ExpressionStatement) base.VisitExpressionStatement(expressionStatement)!,
             node => node switch
             {
-                Directive directive => new Directive(node.Expression, directive.Directiv),
+                Directive directive => new Directive(node.Expression, directive.Value),
                 _ => new ExpressionStatement(node.Expression)
             });
     }
@@ -595,7 +595,11 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
     {
         return ForceNewObjectByControlType((BinaryExpression) base.VisitBinaryExpression(binaryExpression)!,
-            node => new BinaryExpression(node.Operator, node.Left, node.Right));
+            node => node.Type switch
+            {
+                Nodes.LogicalExpression => new LogicalExpression(node.Operator, node.Left, node.Right),
+                _ => new BinaryExpression(node.Operator, node.Left, node.Right)
+            });
     }
 
     protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)

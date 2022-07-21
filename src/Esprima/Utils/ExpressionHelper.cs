@@ -98,7 +98,7 @@ Reenter:
                     case BinaryOperator.Equal:
                     case BinaryOperator.NotEqual:
                     case BinaryOperator.StrictlyEqual:
-                    case BinaryOperator.StricltyNotEqual:
+                    case BinaryOperator.StrictlyNotEqual:
                         associativity = leftToRightAssociativity;
                         return 800;
 
@@ -117,7 +117,7 @@ Reenter:
                 break;
 
             case Nodes.LogicalExpression:
-                switch (expression.As<BinaryExpression>().Operator)
+                switch (expression.As<LogicalExpression>().Operator)
                 {
                     case BinaryOperator.LogicalAnd:
                         associativity = leftToRightAssociativity;

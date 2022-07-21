@@ -115,7 +115,7 @@
                 }
             }
 
-            internal Node? MoveNextProperty(Expression? key, Expression value, bool shorthand)
+            internal Node? MoveNextProperty(Expression? key, Node value, bool shorthand)
             {
                 switch (_propertyIndex)
                 {
