@@ -1172,7 +1172,7 @@ public sealed partial class Scanner
             charCode = newCharCode;
         }
 
-        if (Source[Index -1] == '_')
+        if (Source[Index - 1] == '_')
         {
             ThrowUnexpectedToken(Messages.NumericSeparatorNotAllowedHere);
         }
@@ -2490,7 +2490,7 @@ public sealed partial class Scanner
             }
         }
 
-        return new (flags, str);
+        return new(flags, str);
     }
 
     public Token ScanRegExp()

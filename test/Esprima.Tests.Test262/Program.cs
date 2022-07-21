@@ -29,7 +29,7 @@ public static class Program
 
         // we materialize to give better feedback on progress
         var test262Files = new ConcurrentBag<Test262File>();
-    
+
         TestExecutionSummary? summary = null;
 
         AnsiConsole.Progress()

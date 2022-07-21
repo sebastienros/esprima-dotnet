@@ -614,11 +614,11 @@ public partial class JavaScriptParser
                         break;
                     case "@":
                         var decorators = ParseDecorators();
-                        
+
                         _context.Decorators = decorators;
                         var expression = ParsePrimaryExpression();
                         _context.Decorators = new ArrayList<Decorator>();
-                        
+
                         expr = Finalize(node, expression);
                         break;
                     default:
@@ -1043,7 +1043,7 @@ public partial class JavaScriptParser
             var property = Match("...") ? (Node) ParseSpreadElement() : ParseObjectProperty(ref hasProto);
             properties.Add(property);
 
-            if (!Match("}") && (property is not Property {Method: true} || Match(",")))
+            if (!Match("}") && (property is not Property { Method: true } || Match(",")))
             {
                 ExpectCommaSeparator();
             }
@@ -1401,7 +1401,7 @@ public partial class JavaScriptParser
         if (Equals(token.Value, "#"))
         {
             token = NextToken();
-            token.Value = '#' + (string?)token.Value;
+            token.Value = '#' + (string?) token.Value;
             isPrivateField = true;
         }
 
@@ -4556,7 +4556,7 @@ public partial class JavaScriptParser
 
             if (!isStatic && IsPropertyKey(key!, "constructor"))
             {
-                if (kind != PropertyKind.Method || !method || ((FunctionExpression)value!).Generator)
+                if (kind != PropertyKind.Method || !method || ((FunctionExpression) value!).Generator)
                 {
                     ThrowUnexpectedToken(token, Messages.ConstructorSpecialMethod);
                 }
@@ -4580,7 +4580,7 @@ public partial class JavaScriptParser
             return Finalize(node, new PropertyDefinition(key!, computed, value!, isStatic, NodeList.From(ref decorators)));
         }
 
-        return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression)value!, kind, isStatic, NodeList.From(ref decorators)));
+        return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression) value!, kind, isStatic, NodeList.From(ref decorators)));
     }
 
     private ArrayList<ClassElement> ParseClassElementList()
@@ -4742,7 +4742,7 @@ public partial class JavaScriptParser
         NextToken();
         var literalToken = NextToken();
         var raw = GetTokenRaw(literalToken);
-        Literal value = Finalize(node, new Literal((string?)literalToken.Value, raw));
+        Literal value = Finalize(node, new Literal((string?) literalToken.Value, raw));
 
         return Finalize(node, new ImportAttribute(key, value));
     }
