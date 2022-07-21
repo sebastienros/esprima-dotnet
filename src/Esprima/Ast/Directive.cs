@@ -1,19 +1,18 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class Directive : ExpressionStatement
 {
-    public sealed class Directive : ExpressionStatement
+    public Directive(Expression expression, string value) : base(expression)
     {
-        public Directive(Expression expression, string value) : base(expression)
-        {
-            Value = value;
-        }
+        Value = value;
+    }
 
-        public string Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public string Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-        protected override ExpressionStatement Rewrite(Expression expression)
-        {
-            return new Directive(expression, Value);
-        }
+    protected override ExpressionStatement Rewrite(Expression expression)
+    {
+        return new Directive(expression, Value);
     }
 }

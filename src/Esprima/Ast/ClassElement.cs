@@ -1,9 +1,8 @@
-﻿namespace Esprima.Ast
+﻿namespace Esprima.Ast;
+
+public abstract class ClassElement : Node
 {
-    public abstract class ClassElement : Node
+    protected ClassElement(Nodes type) : base(type)
     {
-        protected ClassElement(Nodes type) : base(type)
-        {
-        }
     }
 }

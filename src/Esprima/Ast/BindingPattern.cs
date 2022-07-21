@@ -1,9 +1,8 @@
-﻿namespace Esprima.Ast
+﻿namespace Esprima.Ast;
+
+public abstract class BindingPattern : Node
 {
-    public abstract class BindingPattern : Node
+    protected BindingPattern(Nodes type) : base(type)
     {
-        protected BindingPattern(Nodes type) : base(type)
-        {
-        }
     }
 }

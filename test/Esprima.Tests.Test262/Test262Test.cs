@@ -24,7 +24,7 @@ public abstract partial class Test262Test
             parser.ParseModule();
         }
     }
-    
+
     private partial bool ShouldThrow(Test262File testCase, bool strict)
     {
         return testCase.NegativeTestCase?.Type == ExpectedErrorType.SyntaxError || testCase.NegativeTestCase?.Phase == TestingPhase.Parse;

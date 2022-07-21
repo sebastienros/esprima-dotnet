@@ -1,12 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Esprima;
 
-namespace Jint.Benchmark
+namespace Jint.Benchmark;
+
+[MemoryDiagnoser]
+public class EvaluationBenchmark
 {
-    [MemoryDiagnoser]
-    public class EvaluationBenchmark
-    {
-        private const string Script = @"
+    private const string Script = @"
             var o = {};
             o.Foo = 'bar';
             o.Baz = 42.0001;
@@ -27,16 +27,15 @@ namespace Jint.Benchmark
             var done = true;
         ";
 
-        [Params(200)] public int N { get; set; }
+    [Params(200)] public int N { get; set; }
 
-        [Benchmark]
-        public void ParseProgram()
+    [Benchmark]
+    public void ParseProgram()
+    {
+        for (var i = 0; i < N; ++i)
         {
-            for (var i = 0; i < N; ++i)
-            {
-                var parser = new JavaScriptParser(Script);
-                parser.ParseScript();
-            }
+            var parser = new JavaScriptParser(Script);
+            parser.ParseScript();
         }
     }
 }

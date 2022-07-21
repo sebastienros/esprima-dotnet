@@ -4,43 +4,42 @@ using System.IO;
 using Esprima.Utils;
 using Newtonsoft.Json;
 
-namespace Esprima.Sample
+namespace Esprima.Sample;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            var scanner = new Scanner(@"
+        var scanner = new Scanner(@"
 ""use strict"";
 try { } catch (evil) { }
 
 ");
-            Tokenize(scanner);
-            //Parse(scanner);
-        }
+        Tokenize(scanner);
+        //Parse(scanner);
+    }
 
-        private static void Tokenize(Scanner scanner)
+    private static void Tokenize(Scanner scanner)
+    {
+        var tokens = new List<Token>();
+        Token token;
+
+        do
         {
-            var tokens = new List<Token>();
-            Token token;
+            scanner.ScanComments();
+            token = scanner.Lex();
+            tokens.Add(token);
+        } while (token.Type != TokenType.EOF);
 
-            do
-            {
-                scanner.ScanComments();
-                token = scanner.Lex();
-                tokens.Add(token);
-            } while (token.Type != TokenType.EOF);
+        Console.WriteLine(JsonConvert.SerializeObject(tokens, Formatting.Indented));
+    }
 
-            Console.WriteLine(JsonConvert.SerializeObject(tokens, Formatting.Indented));
-        }
+    private static void Parse(string source, TextWriter output)
+    {
+        var parser = new JavaScriptParser(source);
+        var program = parser.ParseScript();
 
-        private static void Parse(string source, TextWriter output)
-        {
-            var parser = new JavaScriptParser(source);
-            var program = parser.ParseScript();
-
-            program.WriteJson(output);
-            Console.WriteLine();
-        }
+        program.WriteJson(output);
+        Console.WriteLine();
     }
 }

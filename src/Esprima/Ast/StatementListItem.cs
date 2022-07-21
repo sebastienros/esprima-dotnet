@@ -1,9 +1,8 @@
-﻿namespace Esprima.Ast
+﻿namespace Esprima.Ast;
+
+public abstract class StatementListItem : Node
 {
-    public abstract class StatementListItem : Node
+    protected StatementListItem(Nodes type) : base(type)
     {
-        protected StatementListItem(Nodes type) : base(type)
-        {
-        }
     }
 }

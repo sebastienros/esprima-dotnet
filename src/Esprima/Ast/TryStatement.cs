@@ -1,37 +1,36 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
 
-namespace Esprima.Ast
+namespace Esprima.Ast;
+
+public sealed class TryStatement : Statement
 {
-    public sealed class TryStatement : Statement
+    public TryStatement(
+        BlockStatement block,
+        CatchClause? handler,
+        BlockStatement? finalizer) :
+        base(Nodes.TryStatement)
     {
-        public TryStatement(
-            BlockStatement block,
-            CatchClause? handler,
-            BlockStatement? finalizer) :
-            base(Nodes.TryStatement)
+        Block = block;
+        Handler = handler;
+        Finalizer = finalizer;
+    }
+
+    public BlockStatement Block { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public CatchClause? Handler { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public BlockStatement? Finalizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Block, Handler, Finalizer);
+
+    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTryStatement(this);
+
+    public TryStatement UpdateWith(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
+    {
+        if (block == Block && handler == Handler && finalizer == Finalizer)
         {
-            Block = block;
-            Handler = handler;
-            Finalizer = finalizer;
+            return this;
         }
 
-        public BlockStatement Block { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public CatchClause? Handler { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-        public BlockStatement? Finalizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-        internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Block, Handler, Finalizer);
-
-        protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTryStatement(this);
-
-        public TryStatement UpdateWith(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
-        {
-            if (block == Block && handler == Handler && finalizer == Finalizer)
-            {
-                return this;
-            }
-
-            return new TryStatement(block, handler, finalizer);
-        }
+        return new TryStatement(block, handler, finalizer);
     }
 }

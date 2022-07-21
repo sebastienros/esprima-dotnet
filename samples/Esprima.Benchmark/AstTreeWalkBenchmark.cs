@@ -3,96 +3,95 @@ using System.IO;
 using BenchmarkDotNet.Attributes;
 using Esprima.Ast;
 
-namespace Esprima.Benchmark
+namespace Esprima.Benchmark;
+
+[MemoryDiagnoser]
+public class AstTreeWalkBenchmark
 {
-    [MemoryDiagnoser]
-    public class AstTreeWalkBenchmark
+    private Script _script;
+
+    [GlobalSetup]
+    public void Setup()
     {
-        private Script _script;
+        var code = File.ReadAllText("3rdparty/angular-1.7.9.js");
+        var parser = new JavaScriptParser(code);
+        _script = parser.ParseScript();
+    }
 
-        [GlobalSetup]
-        public void Setup()
+    [Benchmark]
+    public void VisitChildren()
+    {
+        var walker = new ScriptWalker();
+        walker.Visit(_script);
+        if (walker._lexicalNameCount != 0)
         {
-            var code = File.ReadAllText("3rdparty/angular-1.7.9.js");
-            var parser = new JavaScriptParser(code);
-            _script = parser.ParseScript();
+            throw new InvalidOperationException("wrong _lexicalNameCount" + walker._lexicalNameCount);
         }
 
-        [Benchmark]
-        public void VisitChildren()
+        if (walker._varNameCount != 1856)
         {
-            var walker = new ScriptWalker();
-            walker.Visit(_script);
-            if (walker._lexicalNameCount != 0)
-            {
-                throw new InvalidOperationException("wrong _lexicalNameCount" + walker._lexicalNameCount);
-            }
-
-            if (walker._varNameCount != 1856)
-            {
-                throw new InvalidOperationException("wrong _varNameCount " + walker._varNameCount);
-            }
-
-            if (walker._functionCount != 1610)
-            {
-                throw new InvalidOperationException("wrong _functionCount " + walker._functionCount);
-            }
+            throw new InvalidOperationException("wrong _varNameCount " + walker._varNameCount);
         }
 
-        private sealed class ScriptWalker
+        if (walker._functionCount != 1610)
         {
-            internal int _lexicalNameCount;
-            internal int _varNameCount;
-            internal int _functionCount;
-            internal int _visitCount;
+            throw new InvalidOperationException("wrong _functionCount " + walker._functionCount);
+        }
+    }
 
-            public void Visit(Node node)
+    private sealed class ScriptWalker
+    {
+        internal int _lexicalNameCount;
+        internal int _varNameCount;
+        internal int _functionCount;
+        internal int _visitCount;
+
+        public void Visit(Node node)
+        {
+            _visitCount++;
+            foreach (var childNode in node.ChildNodes)
             {
-                _visitCount++;
-                foreach (var childNode in node.ChildNodes)
+                if (childNode is null)
                 {
-                    if (childNode is null)
-                    {
-                        // array expression can push null nodes in Esprima
-                        continue;
-                    }
+                    // array expression can push null nodes in Esprima
+                    continue;
+                }
 
-                    if (childNode is VariableDeclaration variableDeclaration)
+                if (childNode is VariableDeclaration variableDeclaration)
+                {
+                    if (variableDeclaration.Kind == VariableDeclarationKind.Var)
                     {
-                        if (variableDeclaration.Kind == VariableDeclarationKind.Var)
+                        ref readonly var nodeList = ref variableDeclaration.Declarations;
+                        foreach (var declaration in nodeList)
                         {
-                            ref readonly var nodeList = ref variableDeclaration.Declarations;
-                            foreach (var declaration in nodeList)
-                            {
-                                _varNameCount++;
-                            }
-                        }
-
-                        if (variableDeclaration.Kind != VariableDeclarationKind.Var)
-                        {
-                            ref readonly var nodeList = ref variableDeclaration.Declarations;
-                            foreach (var declaration in nodeList)
-                            {
-                                _lexicalNameCount++;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var type = childNode.Type;
-                        if (type == Nodes.FunctionDeclaration
-                            || type == Nodes.FunctionExpression
-                            || type == Nodes.ArrowFunctionExpression
-                            || type == Nodes.ArrowParameterPlaceHolder)
-                        {
-                            _functionCount++;
+                            _varNameCount++;
                         }
                     }
 
-                    if (!childNode.ChildNodes.IsEmpty())
+                    if (variableDeclaration.Kind != VariableDeclarationKind.Var)
                     {
-                        Visit(childNode);
+                        ref readonly var nodeList = ref variableDeclaration.Declarations;
+                        foreach (var declaration in nodeList)
+                        {
+                            _lexicalNameCount++;
+                        }
                     }
+                }
+                else
+                {
+                    var type = childNode.Type;
+                    if (type == Nodes.FunctionDeclaration
+                        || type == Nodes.FunctionExpression
+                        || type == Nodes.ArrowFunctionExpression
+                        || type == Nodes.ArrowParameterPlaceHolder)
+                    {
+                        _functionCount++;
+                    }
+                }
+
+                if (!childNode.ChildNodes.IsEmpty())
+                {
+                    Visit(childNode);
                 }
             }
         }
