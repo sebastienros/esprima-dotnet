@@ -4404,8 +4404,10 @@ public partial class JavaScriptParser
                 _ => null
             };
 
-            if (id == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
+            if (id == "static")
             {
+                if (QualifiedPropertyName(_lookahead) || Match("*"))
+                {
                     token = _lookahead;
                     isStatic = true;
                     computed = Match("[");
@@ -4430,15 +4432,15 @@ public partial class JavaScriptParser
                         key = ParseObjectPropertyKey();
                     }
                 }
-
-            if (id == "static" && Match("{"))
+                else if (Match("{"))
                 {
                     return ParseStaticBlock();
                 }
+            }
 
             if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?) token.Value == "async")
             {
-                if (!(_lookahead.Value is string punctuator) || punctuator != ":" && punctuator != "(")
+                if (_lookahead.Type != TokenType.Punctuator || _lookahead.Value is not (":" or "(" or ";"))
                 {
                     isAsync = true;
                     isGenerator = Match("*");
