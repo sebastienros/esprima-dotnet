@@ -318,6 +318,7 @@ partial class AstToJavascriptConverter
             case Nodes.UnaryExpression:
             case Nodes.UpdateExpression:
             case Nodes.YieldExpression:
+            case Nodes.ClassExpression when expression.As<ClassExpression>().Decorators.Count > 0:
                 return true;
         }
 
