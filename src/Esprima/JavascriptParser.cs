@@ -4406,35 +4406,35 @@ public partial class JavaScriptParser
 
             if (id == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
             {
-                token = _lookahead;
-                isStatic = true;
-                computed = Match("[");
-                if (Match("*"))
-                {
-                    NextToken();
-                    if (Match("#"))
+                    token = _lookahead;
+                    isStatic = true;
+                    computed = Match("[");
+                    if (Match("*"))
                     {
-                        isPrivate = true;
                         NextToken();
-                        token = _lookahead;
+                        if (Match("#"))
+                        {
+                            isPrivate = true;
+                            NextToken();
+                            token = _lookahead;
+                        }
+                    }
+                    else
+                    {
+                        if (Match("#"))
+                        {
+                            isPrivate = true;
+                            NextToken();
+                            token = _lookahead;
+                        }
+                        key = ParseObjectPropertyKey();
                     }
                 }
-                else
-                {
-                    if (Match("#"))
-                    {
-                        isPrivate = true;
-                        NextToken();
-                        token = _lookahead;
-                    }
-                    key = ParseObjectPropertyKey();
-                }
-            }
 
             if (id == "static" && Match("{"))
-            {
-                return ParseStaticBlock();
-            }
+                {
+                    return ParseStaticBlock();
+                }
 
             if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?) token.Value == "async")
             {
@@ -4963,7 +4963,16 @@ public partial class JavaScriptParser
                 // export default async function f () {}
                 // export default async function () {}
                 // export default async x => x
-                var declaration = MatchAsyncFunction() ? (StatementListItem) ParseFunctionDeclaration(true) : ParseAssignmentExpression();
+                StatementListItem declaration;
+                if (MatchAsyncFunction())
+                {
+                    declaration = ParseFunctionDeclaration(true);
+                }
+                else
+                {
+                    declaration = ParseAssignmentExpression();
+                    ConsumeSemicolon();
+                }
                 exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
             }
             else
