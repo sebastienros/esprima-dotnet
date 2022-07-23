@@ -613,11 +613,10 @@ public partial class JavaScriptParser
                         expr = Finalize(node, new PrivateIdentifier((string) NextToken().Value!));
                         break;
                     case "@":
-                        var decorators = ParseDecorators();
-
-                        _context.Decorators = decorators;
+                        var previousDecorators = _context.Decorators;
+                        _context.Decorators = ParseDecorators();
                         var expression = ParsePrimaryExpression();
-                        _context.Decorators = new ArrayList<Decorator>();
+                        _context.Decorators = previousDecorators;
 
                         expr = Finalize(node, expression);
                         break;
@@ -3473,6 +3472,11 @@ public partial class JavaScriptParser
                 TolerateUnexpectedToken(_lookahead);
                 body = ParseClassDeclaration();
             }
+            else if (Match("@"))
+            {
+                TolerateUnexpectedToken(_lookahead);
+                body = ParseDecoratedClassDeclaration();
+            }
             else if (MatchKeyword("function"))
             {
                 var token = _lookahead;
@@ -3608,7 +3612,7 @@ public partial class JavaScriptParser
 
     private Statement ParseStatement()
     {
-        Statement? statement = null;
+        Statement? statement;
         switch (_lookahead.Type)
         {
             case TokenType.BooleanLiteral:
@@ -3622,22 +3626,21 @@ public partial class JavaScriptParser
                 break;
 
             case TokenType.Punctuator:
-                var value = (string?) _lookahead.Value;
-                if (value == "{")
+                switch ((string?) _lookahead.Value)
                 {
-                    statement = ParseBlock();
-                }
-                else if (value == "(")
-                {
-                    statement = ParseExpressionStatement();
-                }
-                else if (value == ";")
-                {
-                    statement = ParseEmptyStatement();
-                }
-                else
-                {
-                    statement = ParseExpressionStatement();
+                    case "{":
+                        statement = ParseBlock();
+                        break;
+                    case "@":
+                        statement = ParseDecoratedClassDeclaration();
+                        break;
+                    case ";":
+                        statement = ParseEmptyStatement();
+                        break;
+                    case "(":
+                    default:
+                        statement = ParseExpressionStatement();
+                        break;
                 }
 
                 break;
@@ -4404,41 +4407,43 @@ public partial class JavaScriptParser
                 _ => null
             };
 
-            if (id == "static" && (QualifiedPropertyName(_lookahead) || Match("*")))
+            if (id == "static")
             {
-                token = _lookahead;
-                isStatic = true;
-                computed = Match("[");
-                if (Match("*"))
+                if (QualifiedPropertyName(_lookahead) || Match("*"))
                 {
-                    NextToken();
-                    if (Match("#"))
+                    token = _lookahead;
+                    isStatic = true;
+                    computed = Match("[");
+                    if (Match("*"))
                     {
-                        isPrivate = true;
                         NextToken();
-                        token = _lookahead;
+                        if (Match("#"))
+                        {
+                            isPrivate = true;
+                            NextToken();
+                            token = _lookahead;
+                        }
+                    }
+                    else
+                    {
+                        if (Match("#"))
+                        {
+                            isPrivate = true;
+                            NextToken();
+                            token = _lookahead;
+                        }
+                        key = ParseObjectPropertyKey();
                     }
                 }
-                else
+                else if (Match("{"))
                 {
-                    if (Match("#"))
-                    {
-                        isPrivate = true;
-                        NextToken();
-                        token = _lookahead;
-                    }
-                    key = ParseObjectPropertyKey();
+                    return ParseStaticBlock();
                 }
-            }
-
-            if (id == "static" && Match("{"))
-            {
-                return ParseStaticBlock();
             }
 
             if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?) token.Value == "async")
             {
-                if (!(_lookahead.Value is string punctuator) || punctuator != ":" && punctuator != "(")
+                if (_lookahead.Type != TokenType.Punctuator || _lookahead.Value is not (":" or "(" or ";"))
                 {
                     isAsync = true;
                     isGenerator = Match("*");
@@ -4614,10 +4619,8 @@ public partial class JavaScriptParser
         return Finalize(node, new ClassBody(NodeList.From(ref elementList)));
     }
 
-    private ClassDeclaration ParseClassDeclaration(bool identifierIsOptional = false)
+    private ClassDeclaration ParseClassDeclarationCore(Marker node, bool identifierIsOptional = false)
     {
-        var node = CreateNode();
-
         var previousStrict = _context.Strict;
         var previousAllowSuper = _context.AllowSuper;
         _context.Strict = true;
@@ -4641,6 +4644,23 @@ public partial class JavaScriptParser
         _context.AllowSuper = previousAllowSuper;
 
         return Finalize(node, new ClassDeclaration(id, superClass, classBody, NodeList.From(ref _context.Decorators)));
+    }
+
+    private ClassDeclaration ParseClassDeclaration(bool identifierIsOptional = false)
+    {
+        return ParseClassDeclarationCore(CreateNode(), identifierIsOptional);
+    }
+
+    private ClassDeclaration ParseDecoratedClassDeclaration(bool identifierIsOptional = false)
+    {
+        var node = CreateNode();
+
+        var previousDecorators = _context.Decorators;
+        _context.Decorators = ParseDecorators();
+        var declaration = ParseClassDeclarationCore(node, identifierIsOptional);
+        _context.Decorators = previousDecorators;
+
+        return declaration;
     }
 
     private ClassExpression ParseClassExpression()
@@ -4958,12 +4978,27 @@ public partial class JavaScriptParser
                 //};
                 exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
             }
+            else if (Match("@"))
+            {
+                // export default @abc class foo {}
+                var declaration = ParseDecoratedClassDeclaration(true);
+                exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
+            }
             else if (MatchContextualKeyword("async"))
             {
                 // export default async function f () {}
                 // export default async function () {}
                 // export default async x => x
-                var declaration = MatchAsyncFunction() ? (StatementListItem) ParseFunctionDeclaration(true) : ParseAssignmentExpression();
+                StatementListItem declaration;
+                if (MatchAsyncFunction())
+                {
+                    declaration = ParseFunctionDeclaration(true);
+                }
+                else
+                {
+                    declaration = ParseAssignmentExpression();
+                    ConsumeSemicolon();
+                }
                 exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
             }
             else

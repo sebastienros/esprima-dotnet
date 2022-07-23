@@ -2,91 +2,37 @@
   "type": "Program",
   "body": [
     {
-      "type": "ExpressionStatement",
-      "expression": {
-        "type": "ClassExpression",
-        "id": {
-          "type": "Identifier",
-          "name": "Foo",
-          "range": [
-            11,
-            14
-          ],
-          "loc": {
-            "start": {
-              "line": 2,
-              "column": 6
-            },
-            "end": {
-              "line": 2,
-              "column": 9
-            }
-          }
-        },
-        "superClass": null,
-        "body": {
-          "type": "ClassBody",
-          "body": [],
-          "range": [
-            15,
-            19
-          ],
-          "loc": {
-            "start": {
-              "line": 2,
-              "column": 10
-            },
-            "end": {
-              "line": 4,
-              "column": 1
-            }
-          }
-        },
-        "decorators": [
-          {
-            "type": "Decorator",
-            "expression": {
-              "type": "Identifier",
-              "name": "abc",
-              "range": [
-                1,
-                4
-              ],
-              "loc": {
-                "start": {
-                  "line": 1,
-                  "column": 1
-                },
-                "end": {
-                  "line": 1,
-                  "column": 4
-                }
-              }
-            },
-            "range": [
-              0,
-              4
-            ],
-            "loc": {
-              "start": {
-                "line": 1,
-                "column": 0
-              },
-              "end": {
-                "line": 1,
-                "column": 4
-              }
-            }
-          }
-        ],
+      "type": "ClassDeclaration",
+      "id": {
+        "type": "Identifier",
+        "name": "Foo",
         "range": [
-          0,
+          11,
+          14
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 6
+          },
+          "end": {
+            "line": 2,
+            "column": 9
+          }
+        }
+      },
+      "superClass": null,
+      "body": {
+        "type": "ClassBody",
+        "body": [],
+        "range": [
+          15,
           19
         ],
         "loc": {
           "start": {
-            "line": 1,
-            "column": 0
+            "line": 2,
+            "column": 10
           },
           "end": {
             "line": 4,
@@ -94,6 +40,43 @@
           }
         }
       },
+      "decorators": [
+        {
+          "type": "Decorator",
+          "expression": {
+            "type": "Identifier",
+            "name": "abc",
+            "range": [
+              1,
+              4
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 4
+              }
+            }
+          },
+          "range": [
+            0,
+            4
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 4
+            }
+          }
+        }
+      ],
       "range": [
         0,
         19

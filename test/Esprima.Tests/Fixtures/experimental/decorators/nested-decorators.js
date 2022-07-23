@@ -1,0 +1,1 @@
+@(@abc class Bar { }) class Foo { }

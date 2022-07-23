@@ -1,0 +1,1 @@
+label: @abc class Foo { }

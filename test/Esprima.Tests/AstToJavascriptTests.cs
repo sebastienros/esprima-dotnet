@@ -642,18 +642,9 @@ if (b == 2) {
         public int GetHashCode(Node? obj) => obj?.GetHashCode() ?? 0;
     }
 
-    // TODO: this should be removed once the related parser bugs get resolved
-    private static readonly HashSet<string> s_falseNegatives = new()
-    {
-        @"es2017\async\methods\async-line-terminator-method.js",
-        @"es2017\async\methods\async-line-terminator-static-method.js",
-        @"es2017\async\arrows\export-default-async-arrow.module.js"
-    };
-
     public static IEnumerable<object[]> SourceFiles(string relativePath) => Fixtures.SourceFiles(relativePath)
         // TODO: enable JSX fixtures once JSX writer gets implemented
-        .Where(items => !((string) items[0]).StartsWith("JSX"))
-        .Where(items => !s_falseNegatives.Contains(((string) items[0]).Replace('/', '\\')));
+        .Where(items => !((string) items[0]).StartsWith("JSX"));
 
     private static Program Parse(SourceType sourceType, string source,
         ParserOptions parserOptions, Func<string, ParserOptions, JavaScriptParser> parserFactory)
