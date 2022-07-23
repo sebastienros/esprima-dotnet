@@ -35,7 +35,7 @@ public partial class AstToJavascriptConverter : AstVisitor
 
     public JavascriptTextWriter Writer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    protected ref readonly WriteContext WriteContext { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _writeContext; }
+    protected ref WriteContext WriteContext { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _writeContext; }
 
     protected Node? ParentNode { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _writeContext.ParentNode; }
 
