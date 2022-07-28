@@ -489,6 +489,7 @@ public partial class JavaScriptParser
         return result;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private T InheritCoverGrammar<T>(Func<T> parseFunction) where T : Node
     {
         var previousIsBindingElement = _context.IsBindingElement;
@@ -828,7 +829,7 @@ public partial class JavaScriptParser
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, true));
     }
 
-    private Expression ParseObjectPropertyKey(Boolean isPrivate = false)
+    private Expression ParseObjectPropertyKey(bool isPrivate = false)
     {
         var node = CreateNode();
         var token = NextToken();
@@ -1514,7 +1515,8 @@ public partial class JavaScriptParser
 
         var previousIsAssignmentTarget = _context.IsAssignmentTarget;
         _context.IsAssignmentTarget = true;
-        var source = this.parseAssignmentExpression();
+
+        var source = ParseAssignmentExpression();
 
         Expression? attributes = null;
         if (Match(","))
@@ -2150,8 +2152,10 @@ public partial class JavaScriptParser
                 CheckPatternParam(options, param.As<AssignmentPattern>().Left);
                 break;
             case Nodes.ArrayPattern:
-                foreach (var element in param.As<ArrayPattern>().Elements)
+                ref readonly var list = ref param.As<ArrayPattern>().Elements;
+                for (var i = 0; i < list.Count; i++)
                 {
+                    var element = list[i];
                     if (element != null)
                     {
                         CheckPatternParam(options, element);
@@ -2160,13 +2164,13 @@ public partial class JavaScriptParser
 
                 break;
             case Nodes.ObjectPattern:
-                foreach (var property in param.As<ObjectPattern>().Properties)
+                ref readonly var nodes = ref param.As<ObjectPattern>().Properties;
+                for (var i = 0; i < nodes.Count; i++)
                 {
+                    var property = nodes[i];
                     CheckPatternParam(options, property is Property p ? p.Value : property);
                 }
 
-                break;
-            default:
                 break;
         }
 
@@ -2468,8 +2472,7 @@ public partial class JavaScriptParser
 
                     break;
                 case "const":
-                    var inFor = false;
-                    statement = ParseLexicalDeclaration(ref inFor);
+                    statement = ParseLexicalDeclaration();
                     break;
                 case "function":
                     statement = ParseFunctionDeclaration();
@@ -2478,8 +2481,7 @@ public partial class JavaScriptParser
                     statement = ParseClassDeclaration();
                     break;
                 case "let":
-                    inFor = false;
-                    statement = IsLexicalDeclaration() ? ParseLexicalDeclaration(ref inFor) : ParseStatement();
+                    statement = IsLexicalDeclaration() ? ParseLexicalDeclaration() : ParseStatement();
                     break;
                 default:
                     statement = ParseStatement();
@@ -2583,14 +2585,14 @@ public partial class JavaScriptParser
                next.Type == TokenType.Keyword && (string?) next.Value == "yield";
     }
 
-    private VariableDeclaration ParseLexicalDeclaration(ref bool inFor)
+    private VariableDeclaration ParseLexicalDeclaration()
     {
         var node = CreateNode();
         var kindString = (string?) NextToken().Value;
         var kind = ParseVariableDeclarationKind(kindString);
         //assert(kind == "let" || kind == "const", 'Lexical declaration must be either var or const');
 
-        var declarations = ParseBindingList(kind, inFor);
+        var declarations = ParseBindingList(kind, inFor: false);
         ConsumeSemicolon();
 
         return Finalize(node, new VariableDeclaration(declarations, kind));
@@ -2758,7 +2760,7 @@ public partial class JavaScriptParser
         }
         else
         {
-            if (MatchKeyword("let") && (kind == VariableDeclarationKind.Const || kind == VariableDeclarationKind.Let))
+            if (kind is VariableDeclarationKind.Const or VariableDeclarationKind.Let && MatchKeyword("let"))
             {
                 TolerateUnexpectedToken(_lookahead, Messages.LetInLexicalBinding);
             }
@@ -2830,7 +2832,7 @@ public partial class JavaScriptParser
         return Finalize(node, new Identifier((string) token.Value!));
     }
 
-    private VariableDeclarator ParseVariableDeclaration(ref bool inFor)
+    private VariableDeclarator ParseVariableDeclaration(bool inFor)
     {
         var node = CreateNode();
 
@@ -2859,17 +2861,15 @@ public partial class JavaScriptParser
         return Finalize(node, new VariableDeclarator(id, init));
     }
 
-    private NodeList<VariableDeclarator> ParseVariableDeclarationList(ref bool inFor)
+    private NodeList<VariableDeclarator> ParseVariableDeclarationList(bool inFor)
     {
-        var inFor2 = inFor;
-
         var list = new ArrayList<VariableDeclarator>();
-        list.Push(ParseVariableDeclaration(ref inFor2));
+        list.Push(ParseVariableDeclaration(inFor));
 
         while (Match(","))
         {
             NextToken();
-            list.Push(ParseVariableDeclaration(ref inFor2));
+            list.Push(ParseVariableDeclaration(inFor));
         }
 
         return NodeList.From(ref list);
@@ -2879,8 +2879,7 @@ public partial class JavaScriptParser
     {
         var node = CreateNode();
         ExpectKeyword("var");
-        var inFor = false;
-        var declarations = ParseVariableDeclarationList(ref inFor);
+        var declarations = ParseVariableDeclarationList(inFor: false);
         ConsumeSemicolon();
 
         return Finalize(node, new VariableDeclaration(declarations, VariableDeclarationKind.Var));
@@ -3058,8 +3057,7 @@ public partial class JavaScriptParser
 
                 var previousAllowIn = _context.AllowIn;
                 _context.AllowIn = false;
-                var inFor = true;
-                var declarations = ParseVariableDeclarationList(ref inFor);
+                var declarations = ParseVariableDeclarationList(inFor: true);
                 _context.AllowIn = previousAllowIn;
 
                 if (declarations.Count == 1 && MatchKeyword("in"))
@@ -3120,8 +3118,7 @@ public partial class JavaScriptParser
                 {
                     var previousAllowIn = _context.AllowIn;
                     _context.AllowIn = false;
-                    var inFor = true;
-                    var declarations = ParseBindingList(kind, inFor);
+                    var declarations = ParseBindingList(kind, inFor: true);
                     _context.AllowIn = previousAllowIn;
 
                     if (declarations.Count == 1 && declarations[0]!.Init == null && MatchKeyword("in"))
@@ -3466,12 +3463,11 @@ public partial class JavaScriptParser
 
             var id = expr.As<Identifier>();
             var key = id.Name;
-            if (_context.LabelSet.Contains(key))
+            if (!_context.LabelSet.Add(key))
             {
                 ThrowError(Messages.Redeclaration, "Label", id.Name);
             }
 
-            _context.LabelSet.Add(key);
             Statement body;
             if (MatchKeyword("class"))
             {
@@ -3961,21 +3957,23 @@ public partial class JavaScriptParser
         {
             var token = _lookahead;
             id = ParseVariableIdentifier();
+
+            var tokenValue = (string?) token.Value;
             if (_context.Strict)
             {
-                if (Scanner.IsRestrictedWord((string?) token.Value))
+                if (Scanner.IsRestrictedWord(tokenValue))
                 {
                     TolerateUnexpectedToken(token, Messages.StrictFunctionName);
                 }
             }
             else
             {
-                if (Scanner.IsRestrictedWord((string?) token.Value))
+                if (Scanner.IsRestrictedWord(tokenValue))
                 {
                     firstRestricted = token;
                     message = Messages.StrictFunctionName;
                 }
-                else if (Scanner.IsStrictModeReservedWord((string?) token.Value))
+                else if (Scanner.IsStrictModeReservedWord(tokenValue))
                 {
                     firstRestricted = token;
                     message = Messages.StrictReservedWord;
@@ -5058,8 +5056,7 @@ public partial class JavaScriptParser
             {
                 case "let":
                 case "const":
-                    var inFor = false;
-                    declaration = ParseLexicalDeclaration(ref inFor);
+                    declaration = ParseLexicalDeclaration();
                     break;
                 case "var":
                 case "class":
@@ -5125,12 +5122,12 @@ public partial class JavaScriptParser
         return exportDeclaration;
     }
 
-    private protected void ThrowError(string messageFormat, params object?[] values)
+    internal void ThrowError(string messageFormat, params object?[] values)
     {
         throw CreateError(messageFormat, values);
     }
 
-    private protected T ThrowError<T>(string messageFormat, params object?[] values)
+    internal T ThrowError<T>(string messageFormat, params object?[] values)
     {
         throw CreateError(messageFormat, values);
     }

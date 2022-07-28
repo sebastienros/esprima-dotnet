@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 using Esprima.Test;
 using Esprima.Tests.Helpers;
 using Esprima.Utils;

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Xunit;
-
-namespace Esprima.Tests;
+﻿namespace Esprima.Tests;
 
 public class ScannerTests
 {

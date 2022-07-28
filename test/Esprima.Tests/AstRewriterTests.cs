@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 using Esprima.Ast.Jsx;
 using Esprima.Utils.Jsx;
 using Module = Esprima.Ast.Module;
