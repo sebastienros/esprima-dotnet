@@ -241,14 +241,14 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         base.EndBlock(statementCount, ref context);
     }
 
-    protected virtual void StoreStatementBodyIntoContext(Statement statement, ref WriteContext context)
+    protected void StoreStatementBodyIntoContext(Statement statement, ref WriteContext context)
     {
-        context.Data = statement;
+        context._additionalDataContainer.InternalData = statement;
     }
 
-    protected virtual Statement RetrieveStatementBodyFromContext(ref WriteContext context)
+    protected Statement RetrieveStatementBodyFromContext(ref WriteContext context)
     {
-        return (Statement) (context.Data ?? throw new InvalidOperationException());
+        return (Statement) (context._additionalDataContainer.InternalData ?? throw new InvalidOperationException());
     }
 
     public override void StartStatement(StatementFlags flags, ref WriteContext context)

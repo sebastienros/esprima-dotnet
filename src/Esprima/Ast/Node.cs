@@ -7,6 +7,8 @@ namespace Esprima.Ast;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(), nq}}")]
 public abstract class Node
 {
+    internal AdditionalDataContainer _additionalDataContainer;
+
     protected Node(Nodes type)
     {
         Type = type;
@@ -16,11 +18,6 @@ public abstract class Node
 
     public Range Range;
     public Location Location;
-
-    /// <summary>
-    /// A general purpose field for associating additional, user-defined data or context with <see cref="Node"/>.
-    /// </summary>
-    public object? Data;
 
     public ChildNodes ChildNodes => new ChildNodes(this);
 
@@ -45,6 +42,24 @@ public abstract class Node
     {
         return visitor.VisitExtension(this);
     }
+
+    /// <summary>
+    /// Gets additional, user-defined data associated with the specified key.
+    /// </summary>
+    /// <remarks>
+    /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public object? GetAdditionalData(object key) => _additionalDataContainer.GetData(key);
+
+    /// <summary>
+    /// Sets additional, user-defined data associated with the specified key.
+    /// </summary>
+    /// <remarks>
+    /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetAdditionalData(object key, object? value) => _additionalDataContainer.SetData(key, value);
 
     public override string ToString() => this.ToJavascriptString(beautify: true);
 

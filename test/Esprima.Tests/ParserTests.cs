@@ -383,14 +383,14 @@ class aa {
     {
         public void Check(Node node)
         {
-            Assert.Null(node.Data);
+            Assert.Null(node.GetAdditionalData("Parent"));
 
             base.Visit(node);
         }
 
         public override object? Visit(Node node)
         {
-            var parent = (Node?) node.Data;
+            var parent = (Node?) node.GetAdditionalData("Parent");
             Assert.NotNull(parent);
             Assert.Contains(node, parent!.ChildNodes);
 
@@ -405,7 +405,7 @@ class aa {
         {
             foreach (var child in node.ChildNodes)
             {
-                child.Data = node;
+                child.SetAdditionalData("Parent", node);
             }
         };
 
