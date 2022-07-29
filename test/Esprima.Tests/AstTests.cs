@@ -50,10 +50,14 @@ public class AstTests
 
         public override object? Visit(Node node)
         {
-            // Save visited child nodes into parent's Data.
+            // Save visited child nodes into parent's additional data.
             if (_parentNode is not null)
             {
-                var children = (List<Node>) (_parentNode.Data ??= new List<Node>());
+                var children = (List<Node>?) _parentNode.GetAdditionalData("Children");
+                if (children is null)
+                {
+                    _parentNode.SetAdditionalData("Children", children = new List<Node>());
+                }
                 children.Add(node);
             }
 
@@ -65,7 +69,7 @@ public class AstTests
             _parentNode = originalParentNode;
 
             // Verify that the list of visited children matches ChildNodes.
-            Assert.True(node.ChildNodes.SequenceEqualUnordered((IEnumerable<Node>?) node.Data ?? Enumerable.Empty<Node>()));
+            Assert.True(node.ChildNodes.SequenceEqualUnordered((IEnumerable<Node>?) node.GetAdditionalData("Children") ?? Enumerable.Empty<Node>()));
 
             return result;
         }

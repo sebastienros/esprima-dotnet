@@ -71,14 +71,14 @@ public class ParserOptions
     /// </summary>
     /// <remarks>
     /// This callback allows you to make changes to the nodes created by the parser.
-    /// E.g. you can use it to initialize <see cref="Node.Data"/> with a reference to the parent node:
+    /// E.g. you can use it to store a reference to the parent node for later use:
     /// <code>
-    /// options.OnNodeCreated = node => 
+    /// options.OnNodeCreated = node =>
     /// { 
-    ///    foreach (var child in node.ChildNodes)
-    ///    {
-    ///        child.Data = node;
-    ///    }
+    ///     foreach (var child in node.ChildNodes)
+    ///     {
+    ///         child.SetAdditionalData("Parent", node);
+    ///     }
     /// };
     /// </code>
     /// </remarks>
