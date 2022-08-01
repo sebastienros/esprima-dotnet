@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using Esprima.Ast;
 
 namespace Esprima;
@@ -30,6 +31,13 @@ public class Token
     public int LineNumber;
     public int LineStart;
 
+    public Range Range
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => new Range(Start, End);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set => value.Deconstruct(out Start, out End);
+    }
     public Location Location;
 
     // For NumericLiteral

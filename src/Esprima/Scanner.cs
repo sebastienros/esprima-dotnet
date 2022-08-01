@@ -7,12 +7,6 @@ using Esprima.Ast;
 
 namespace Esprima;
 
-public sealed class SourceLocation
-{
-    public Position? Start;
-    public Position? End;
-}
-
 internal readonly struct ScannerState
 {
     public readonly int Index;
@@ -177,13 +171,12 @@ public sealed partial class Scanner
     {
         var comments = new ArrayList<Comment>();
         var start = 0;
-        var loc = new SourceLocation();
+        Position startPosition = default, endPosition;
 
         if (_trackComment)
         {
             start = Index - offset;
-            loc.Start = new Position(LineNumber, Index - LineStart - offset);
-            loc.End = new Position();
+            startPosition = new Position(LineNumber, Index - LineStart - offset);
         }
 
         while (!Eof())
@@ -194,15 +187,15 @@ public sealed partial class Scanner
             {
                 if (_trackComment)
                 {
-                    loc.End = new Position(LineNumber, Index - LineStart - 1);
+                    endPosition = new Position(LineNumber, Index - LineStart - 1);
 
                     var entry = new Comment
                     {
-                        MultiLine = false,
-                        Slice = new[] { start + offset, Index - 1 },
+                        Type = CommentType.Line,
+                        Slice = new Esprima.Range(start + offset, Index - 1),
                         Start = start,
                         End = Index - 1,
-                        Loc = loc
+                        Location = new Location(startPosition, endPosition)
                     };
 
                     comments.Add(entry);
@@ -221,14 +214,14 @@ public sealed partial class Scanner
 
         if (_trackComment)
         {
-            loc.End = new Position(LineNumber, Index - LineStart);
+            endPosition = new Position(LineNumber, Index - LineStart);
             var entry = new Comment
             {
-                MultiLine = false,
-                Slice = new int[] { start + offset, Index },
+                Type = CommentType.Line,
+                Slice = new Esprima.Range(start + offset, Index),
                 Start = start,
                 End = Index,
-                Loc = loc
+                Location = new Location(startPosition, endPosition)
             };
 
             comments.Add(entry);
@@ -241,12 +234,12 @@ public sealed partial class Scanner
     {
         var comments = new ArrayList<Comment>();
         var start = 0;
-        var loc = new SourceLocation();
+        Position startPosition = default, endPosition;
 
         if (_trackComment)
         {
             start = Index - 2;
-            loc.Start = new Position(LineNumber, Index - LineStart - 2);
+            startPosition = new Position(LineNumber, Index - LineStart - 2);
         }
 
         while (!Eof())
@@ -271,14 +264,14 @@ public sealed partial class Scanner
                     Index += 2;
                     if (_trackComment)
                     {
-                        loc.End = new Position(LineNumber, Index - LineStart);
+                        endPosition = new Position(LineNumber, Index - LineStart);
                         var entry = new Comment
                         {
-                            MultiLine = true,
-                            Slice = new int[] { start + 2, Index - 2 },
+                            Type = CommentType.Block,
+                            Slice = new Esprima.Range(start + 2, Index - 2),
                             Start = start,
                             End = Index,
-                            Loc = loc
+                            Location = new Location(startPosition, endPosition)
                         };
                         comments.Add(entry);
                     }
@@ -297,14 +290,14 @@ public sealed partial class Scanner
         // Ran off the end of the file - the whole thing is a comment
         if (_trackComment)
         {
-            loc.End = new Position(LineNumber, Index - LineStart);
+            endPosition = new Position(LineNumber, Index - LineStart);
             var entry = new Comment
             {
-                MultiLine = true,
-                Slice = new int[] { start + 2, Index },
+                Type = CommentType.Block,
+                Slice = new Esprima.Range(start + 2, Index),
                 Start = start,
                 End = Index,
-                Loc = loc
+                Location = new Location(startPosition, endPosition)
             };
             comments.Add(entry);
         }
@@ -313,12 +306,7 @@ public sealed partial class Scanner
         return comments;
     }
 
-    public IReadOnlyList<Comment> ScanComments()
-    {
-        return ScanCommentsInternal();
-    }
-
-    internal ArrayList<Comment> ScanCommentsInternal()
+    public ReadOnlySpan<Comment> ScanComments()
     {
         var comments = new ArrayList<Comment>();
 
@@ -446,7 +434,7 @@ public sealed partial class Scanner
             }
         }
 
-        return comments;
+        return comments.AsSpan();
     }
 
     public static int CodePointAt(string text, int i)

@@ -197,26 +197,20 @@ public partial class JavaScriptParser
     {
         if (!_config.Comment)
         {
-            _scanner.ScanCommentsInternal();
+            _scanner.ScanComments();
         }
         else
         {
-            var comments = _scanner.ScanCommentsInternal();
+            var comments = _scanner.ScanComments();
 
-            if (comments.Count > 0)
+            for (var i = 0; i < comments.Length; ++i)
             {
-                for (var i = 0; i < comments.Count; ++i)
-                {
-                    var e = comments[i];
-                    var node = new Comment();
-                    node.Type = e.MultiLine ? CommentType.Block : CommentType.Line;
-                    node.Value = _scanner.Source.Slice(e.Slice[0], e.Slice[1]);
-                    node.Start = e.Start;
-                    node.End = e.End;
-                    node.Loc = e.Loc;
+                var e = comments[i];
 
-                    _comments.Add(node);
-                }
+                e.Value = _scanner.Source.Slice(e.Slice.Start, e.Slice.End);
+                e.Location = new Location(e.Location.Start, e.Location.End, _errorHandler.Source);
+
+                _comments.Add(e);
             }
         }
     }
@@ -331,7 +325,7 @@ public partial class JavaScriptParser
 
     private protected T Finalize<T>(Marker marker, T node) where T : Node
     {
-        node.Range = new Esprima.Ast.Range(marker.Index, _lastMarker.Index);
+        node.Range = new Range(marker.Index, _lastMarker.Index);
 
         var start = new Position(marker.Line, marker.Column);
         var end = new Position(_lastMarker.Line, _lastMarker.Column);

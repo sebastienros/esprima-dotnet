@@ -1,4 +1,6 @@
-﻿namespace Esprima;
+﻿using System.Runtime.CompilerServices;
+
+namespace Esprima;
 
 public enum CommentType
 {
@@ -6,14 +8,22 @@ public enum CommentType
     Line
 }
 
-public sealed class Comment
+public class Comment
 {
     public CommentType Type;
-    public string? Value;
 
-    public bool MultiLine;
-    public int[] Slice = Array.Empty<int>();
+    public string Value = string.Empty;
+    public Range Slice;
+
     public int Start;
     public int End;
-    public SourceLocation? Loc;
+
+    public Range Range
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => new Range(Start, End);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set => value.Deconstruct(out Start, out End);
+    }
+    public Location Location;
 }

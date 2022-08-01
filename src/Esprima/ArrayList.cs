@@ -264,6 +264,11 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         return list;
     }
 
+    /// <remarks>
+    /// Items should not be added or removed from the <see cref="ArrayList{T}"/> while the returned <see cref="Span{T}"/> is in use!
+    /// </remarks>
+    public Span<T> AsSpan() => new Span<T>(_items, 0, _count);
+
     public Enumerator GetEnumerator()
     {
         AssertUnchanged();
