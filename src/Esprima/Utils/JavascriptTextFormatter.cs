@@ -3,34 +3,28 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public record class KnRJavascriptTextWriterOptions : JavascriptTextWriterOptions
+public abstract record class JavascriptTextFormatterOptions : JavascriptTextWriterOptions
 {
-    public static new readonly KnRJavascriptTextWriterOptions Default = new();
-
     public string? Indent { get; init; }
-    public bool UseEgyptianBraces { get; init; } = true;
     public bool KeepSingleStatementBodyInLine { get; init; }
-    public bool KeepEmptyBlockBodyInLine { get; init; } = true;
+    public bool KeepEmptyBlockBodyInLine { get; init; }
     public int MultiLineArrayLiteralThreshold { get; init; } = 7;
     public int MultiLineObjectLiteralThreshold { get; init; } = 3;
 
-    protected internal override JavascriptTextWriter CreateWriter(TextWriter writer) => new KnRJavascriptTextWriter(writer, this);
+    protected abstract JavascriptTextFormatter CreateFormatter(TextWriter writer);
+
+    protected internal sealed override JavascriptTextWriter CreateWriter(TextWriter writer) => CreateFormatter(writer);
 }
 
 /// <summary>
-/// Javascript text writer (code formatter) which implements the most common <see href="https://en.wikipedia.org/wiki/Indentation_style#K&amp;R_style">K&amp;R style</see>.
+/// Base class for Javascript code formatters.
 /// </summary>
-public class KnRJavascriptTextWriter : JavascriptTextWriter
+public abstract class JavascriptTextFormatter : JavascriptTextWriter
 {
-    private const int UseEgyptianBracesFlag = 1 << 0;
-    private const int KeepSingleStatementBodyInLineFlag = 1 << 1;
-    private const int KeepEmptyBlockBodyInLineFlag = 1 << 2;
-
-    private readonly int _optionFlags;
     private readonly string _indent;
     private int _indentionLevel;
 
-    public KnRJavascriptTextWriter(TextWriter writer, KnRJavascriptTextWriterOptions options) : base(writer, options)
+    public JavascriptTextFormatter(TextWriter writer, JavascriptTextFormatterOptions options) : base(writer, options)
     {
         if (!string.IsNullOrWhiteSpace(options.Indent))
         {
@@ -39,28 +33,14 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
 
         _indent = options.Indent ?? "  ";
 
-        if (options.UseEgyptianBraces)
-        {
-            _optionFlags |= UseEgyptianBracesFlag;
-        }
-
-        if (options.KeepSingleStatementBodyInLine)
-        {
-            _optionFlags |= KeepSingleStatementBodyInLineFlag;
-        }
-
-        if (options.KeepEmptyBlockBodyInLine)
-        {
-            _optionFlags |= KeepEmptyBlockBodyInLineFlag;
-        }
-
+        KeepSingleStatementBodyInLine = options.KeepSingleStatementBodyInLine;
+        KeepEmptyBlockBodyInLine = options.KeepEmptyBlockBodyInLine;
         MultiLineArrayLiteralThreshold = options.MultiLineArrayLiteralThreshold >= 0 ? options.MultiLineArrayLiteralThreshold : int.MaxValue;
         MultiLineObjectLiteralThreshold = options.MultiLineObjectLiteralThreshold >= 0 ? options.MultiLineObjectLiteralThreshold : int.MaxValue;
     }
 
-    protected bool UseEgyptianBraces { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => (_optionFlags & UseEgyptianBracesFlag) != 0; }
-    protected bool KeepSingleStatementBodyInLine { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => (_optionFlags & KeepSingleStatementBodyInLineFlag) != 0; }
-    protected bool KeepEmptyBlockBodyInLine { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => (_optionFlags & KeepEmptyBlockBodyInLineFlag) != 0; }
+    protected bool KeepSingleStatementBodyInLine { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    protected bool KeepEmptyBlockBodyInLine { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     protected int MultiLineArrayLiteralThreshold { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     protected int MultiLineObjectLiteralThreshold { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
@@ -121,22 +101,43 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         base.WriteBlockCommentCore(writer, lines, flags);
     }
 
+    protected virtual void WriteWhiteSpaceBetweenTokenAndIdentifier(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
+        {
+            WriteSpace();
+        }
+        else
+        {
+            WriteRequiredSpaceBetweenTokenAndIdentifier();
+        }
+    }
+
     protected override void StartIdentifier(string value, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {
-            if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
-            {
-                WriteSpace();
-            }
-            else
-            {
-                WriteRequiredSpaceBetweenTokenAndIdentifier();
-            }
+            WriteWhiteSpaceBetweenTokenAndIdentifier(value, flags, ref context);
         }
         else if (!LastTriviaType.HasFlag(WhiteSpaceTriviaFlag))
         {
             WriteSpace();
+        }
+    }
+
+    protected virtual void WriteWhiteSpaceBetweenTokenAndKeyword(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (flags.HasFlagFast(TokenFlags.FollowsStatementBody))
+        {
+            WriteLine();
+        }
+        else if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
+        {
+            WriteSpace();
+        }
+        else
+        {
+            WriteRequiredSpaceBetweenTokenAndKeyword();
         }
     }
 
@@ -144,25 +145,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
     {
         if (LastTriviaType == TriviaType.None)
         {
-            if (flags.HasFlagFast(TokenFlags.FollowsStatementBody))
-            {
-                if (UseEgyptianBraces && CanUseEgyptianBraces(ref context))
-                {
-                    WriteSpace();
-                }
-                else
-                {
-                    WriteLine();
-                }
-            }
-            else if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
-            {
-                WriteSpace();
-            }
-            else
-            {
-                WriteRequiredSpaceBetweenTokenAndKeyword();
-            }
+            WriteWhiteSpaceBetweenTokenAndKeyword(value, flags, ref context);
         }
         else if (!LastTriviaType.HasFlag(WhiteSpaceTriviaFlag))
         {
@@ -170,20 +153,33 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
         }
     }
 
+    protected virtual void WriteWhiteSpaceBetweenTokenAndLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
+    {
+        if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
+        {
+            WriteSpace();
+        }
+        else
+        {
+            WriteRequiredSpaceBetweenTokenAndLiteral(type);
+        }
+    }
+
     protected override void StartLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {
-            if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
-            {
-                WriteSpace();
-            }
-            else
-            {
-                WriteRequiredSpaceBetweenTokenAndLiteral(type);
-            }
+            WriteWhiteSpaceBetweenTokenAndLiteral(value, type, flags, ref context);
         }
         else if (!LastTriviaType.HasFlag(WhiteSpaceTriviaFlag))
+        {
+            WriteSpace();
+        }
+    }
+
+    protected virtual void WriteWhiteSpaceBetweenTokenAndPunctuator(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
         {
             WriteSpace();
         }
@@ -193,10 +189,7 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
     {
         if (LastTriviaType == TriviaType.None)
         {
-            if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
-            {
-                WriteSpace();
-            }
+            WriteWhiteSpaceBetweenTokenAndPunctuator(value, flags, ref context);
         }
         else if (!LastTriviaType.HasFlag(WhiteSpaceTriviaFlag))
         {
@@ -389,13 +382,6 @@ public class KnRJavascriptTextWriter : JavascriptTextWriter
                 DecreaseIndent();
             }
         }
-    }
-
-    protected virtual bool CanUseEgyptianBraces(ref WriteContext context)
-    {
-        return KeepEmptyBlockBodyInLine
-            ? RetrieveStatementBodyFromContext(ref context) is BlockStatement blockStatement && blockStatement.Body.Count > 0
-            : RetrieveStatementBodyFromContext(ref context).Type == Nodes.BlockStatement;
     }
 
     protected virtual bool CanKeepSingleStatementBodyInLine(Statement statement, StatementFlags flags, ref WriteContext context)

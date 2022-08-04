@@ -429,7 +429,7 @@ function",
         var testCase = s_testCaseDictionary[testCaseName];
 
         var stringWriter = new StringWriter();
-        var writer = new KnRJavascriptTextWriter(stringWriter, KnRJavascriptTextWriterOptions.Default);
+        var writer = new KnRJavascriptTextFormatter(stringWriter, KnRJavascriptTextFormatterOptions.Default);
         testCase.Write(writer);
 
         Assert.Equal(testCase.ExpectedFormatted, stringWriter.ToString());

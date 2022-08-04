@@ -43,7 +43,7 @@ public class AstToJavascriptTests
     }
 
     private static readonly CustomCompactJavascriptTextWriterOptions s_customCompactWriterOptions = new();
-    private static readonly KnRJavascriptTextWriterOptions s_indentedWriterOptions = new()
+    private static readonly KnRJavascriptTextFormatterOptions s_formattingOptions = new()
     {
         Indent = "    ",
         KeepEmptyBlockBodyInLine = false,
@@ -173,7 +173,7 @@ export function checkSecurityAnswerCodeDirect(result) {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_indentedWriterOptions);
+        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
 
         var expected = @"import { MccDialog } from '../mccDialogHandler';
 import { commonClient, bb as f } from '../commonClient/commonClient';
@@ -254,7 +254,7 @@ aa({});
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_indentedWriterOptions);
+        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
 
         var expected = @"(function() {
     'use strict';
@@ -409,7 +409,7 @@ if (e.IsWebService)
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_indentedWriterOptions);
+        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
 
         var expected = @"function tt(t, r) {
     var n, e, i = b(t), s = b(r);
@@ -560,7 +560,7 @@ class A {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_indentedWriterOptions);
+        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
 
         var expected = @"class A {
     *[Symbol.iterator]() {
@@ -591,7 +591,7 @@ class A {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_indentedWriterOptions);
+        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
 
         var expected = @"var i = function e(i) {
     var r = n[i];
@@ -626,7 +626,7 @@ if (b == 2) {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_indentedWriterOptions);
+        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
         Assert.Equal(source, code);
     }
 
@@ -737,7 +737,7 @@ if (b == 2) {
         // TODO: more detailed comparison.
         Assert.Equal(expectedAst.DescendantNodesAndSelf(), actualAst.DescendantNodesAndSelf(), NodeTypeEqualityComparer.Default);
 
-        generatedScript = expectedAst.ToJavascriptString(beautify: true);
+        generatedScript = expectedAst.ToJavascriptString(format: true);
 
         actualAst = Parse(sourceType, generatedScript, parserOptions, parserFactory);
 

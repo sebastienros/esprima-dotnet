@@ -16,14 +16,14 @@ public static class AstToJavascript
         return ToJavascriptString(node, JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, KnRJavascriptTextWriterOptions formattingOptions)
+    public static string ToJavascriptString(this Node node, KnRJavascriptTextFormatterOptions formattingOptions)
     {
         return ToJavascriptString(node, formattingOptions, AstToJavascriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, bool beautify)
+    public static string ToJavascriptString(this Node node, bool format)
     {
-        return ToJavascriptString(node, beautify ? KnRJavascriptTextWriterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
+        return ToJavascriptString(node, format ? KnRJavascriptTextFormatterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
     }
 
     public static string ToJavascriptString(this Node node, JavascriptTextWriterOptions writerOptions, AstToJavascriptOptions options)
@@ -40,14 +40,14 @@ public static class AstToJavascript
         WriteJavascript(node, writer, JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, KnRJavascriptTextWriterOptions formattingOptions)
+    public static void WriteJavascript(this Node node, TextWriter writer, KnRJavascriptTextFormatterOptions formattingOptions)
     {
         WriteJavascript(node, writer, formattingOptions, AstToJavascriptOptions.Default);
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, bool beautify)
+    public static void WriteJavascript(this Node node, TextWriter writer, bool format)
     {
-        WriteJavascript(node, writer, beautify ? KnRJavascriptTextWriterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
+        WriteJavascript(node, writer, format ? KnRJavascriptTextFormatterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
     }
 
     public static void WriteJavascript(this Node node, TextWriter writer, JavascriptTextWriterOptions writerOptions, AstToJavascriptOptions options)
