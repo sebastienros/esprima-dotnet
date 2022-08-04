@@ -4,6 +4,41 @@ namespace Esprima.Utils;
 
 partial class JavascriptTextWriter
 {
+    private protected const TriviaType WhiteSpaceTriviaFlag = (TriviaType) (1 << 1);
+    private protected const TriviaType CommentTriviaFlag = (TriviaType) (1 << 2);
+
+    protected internal enum TriviaType
+    {
+        None = 0,
+
+        WhiteSpace = WhiteSpaceTriviaFlag | 0,
+        EndOfLine = WhiteSpaceTriviaFlag | 1,
+
+        LineComment = CommentTriviaFlag | 0,
+        BlockComment = CommentTriviaFlag | 1,
+    }
+
+    [Flags]
+    public enum TriviaFlags
+    {
+        None = 0,
+
+        // Whitespace hints for non-whitespace trivia (i.e. comments)
+
+        /// <summary>
+        /// A leading new line is required for the current trivia (i.e. it must start in a new line).
+        /// </summary>
+        LeadingNewLineRequired = 1 << 0,
+        /// <summary>
+        /// A trailing new line is required for the current trivia (i.e. it must be followed by a new line).
+        /// </summary>
+        TrailingNewLineRequired = 1 << 1,
+        /// <summary>
+        /// Surrounding new lines are required for the current trivia.
+        /// </summary>
+        SurroundingNewLineRequired = LeadingNewLineRequired | TrailingNewLineRequired,
+    }
+
     [Flags]
     public enum TokenFlags
     {

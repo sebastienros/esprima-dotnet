@@ -4,6 +4,10 @@ using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Utils;
 
+public delegate object? NodePropertyValueAccessor(Node node);
+
+public delegate ref readonly NodeList<T> NodePropertyListValueAccessor<T>(Node node) where T : Node?;
+
 partial class JavascriptTextWriter
 {
     public struct WriteContext

@@ -3,10 +3,6 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public delegate object? NodePropertyValueAccessor(Node node);
-
-public delegate ref readonly NodeList<T> NodePropertyListValueAccessor<T>(Node node) where T : Node?;
-
 public record class JavascriptTextWriterOptions
 {
     public static readonly JavascriptTextWriterOptions Default = new();
@@ -31,12 +27,22 @@ public partial class JavascriptTextWriter
         }
 
         LastTokenType = TokenType.EOF;
-        WhiteSpaceWrittenSinceLastToken = true;
+        LastTriviaType = TriviaType.EndOfLine;
+        CurrentLineIsEmptyOrWhiteSpace = true;
     }
 
     protected TokenType LastTokenType { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
     protected TokenFlags LastTokenFlags { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
-    protected bool WhiteSpaceWrittenSinceLastToken { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
+
+    protected TriviaType LastTriviaType { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
+
+    protected bool CurrentLineIsEmptyOrWhiteSpace { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
+    protected bool PendingRequiredNewLine { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
+
+    protected virtual void OnTriviaWritten(TriviaType type, TriviaFlags flags)
+    {
+        LastTriviaType = type;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void WriteSpace()
@@ -44,27 +50,96 @@ public partial class JavascriptTextWriter
         WriteWhiteSpace(" ");
     }
 
-    protected void WriteLine()
-    {
-        _writer.WriteLine();
-        WhiteSpaceWrittenSinceLastToken = true;
-    }
-
     protected void WriteWhiteSpace(string value)
     {
         _writer.Write(value);
-        WhiteSpaceWrittenSinceLastToken = true;
+        OnTriviaWritten(TriviaType.WhiteSpace, TriviaFlags.None);
+    }
+
+    protected void WriteEndOfLine()
+    {
+        _writer.WriteLine();
+        OnTriviaWritten(TriviaType.EndOfLine, TriviaFlags.None);
+        CurrentLineIsEmptyOrWhiteSpace = true;
+        PendingRequiredNewLine = false;
+    }
+
+    protected virtual void WriteLine()
+    {
+        WriteEndOfLine();
+    }
+
+    protected virtual void WriteLineCommentCore(TextWriter writer, string line, TriviaFlags flags)
+    {
+        writer.Write("//");
+        writer.Write(line);
+    }
+
+    public void WriteLineComment(string line, TriviaFlags flags)
+    {
+        if (PendingRequiredNewLine || !CurrentLineIsEmptyOrWhiteSpace && flags.HasFlagFast(TriviaFlags.LeadingNewLineRequired))
+        {
+            WriteLine();
+        }
+
+        WriteLineCommentCore(_writer, line, flags);
+        OnTriviaWritten(TriviaType.LineComment, flags);
+        CurrentLineIsEmptyOrWhiteSpace = false;
+        PendingRequiredNewLine = true; // New line after line comments is always required.
+    }
+
+    protected virtual void WriteBlockCommentLine(TextWriter writer, string line, bool isFirst)
+    {
+        writer.Write(line);
+    }
+
+    protected virtual void WriteBlockCommentCore(TextWriter writer, IEnumerable<string> lines, TriviaFlags flags)
+    {
+        writer.Write("/*");
+        using (var enumerator = lines.GetEnumerator())
+        {
+            if (enumerator.MoveNext())
+            {
+                WriteBlockCommentLine(writer, enumerator.Current, isFirst: true);
+
+                while (enumerator.MoveNext())
+                {
+                    writer.WriteLine();
+                    WriteBlockCommentLine(writer, enumerator.Current, isFirst: false);
+                }
+            }
+        }
+        writer.Write("*/");
+    }
+
+    public void WriteBlockComment(IEnumerable<string> lines, TriviaFlags flags)
+    {
+        if (PendingRequiredNewLine || !CurrentLineIsEmptyOrWhiteSpace && flags.HasFlagFast(TriviaFlags.LeadingNewLineRequired))
+        {
+            WriteLine();
+        }
+
+        WriteBlockCommentCore(_writer, lines, flags);
+        OnTriviaWritten(TriviaType.BlockComment, flags);
+        CurrentLineIsEmptyOrWhiteSpace = false;
+        PendingRequiredNewLine = flags.HasFlagFast(TriviaFlags.TrailingNewLineRequired);
+    }
+
+    protected virtual void OnTokenWritten(TokenType type, TokenFlags flags)
+    {
+        LastTokenType = type;
+        LastTokenFlags = flags;
+
+        LastTriviaType = TriviaType.None;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected void ForceRecommendedSpace()
+    public void SpaceRecommendedAfterLastToken()
     {
         LastTokenFlags |= TokenFlags.TrailingSpaceRecommended;
     }
 
-    public virtual void WriteEpsilon(TokenFlags flags, ref WriteContext context) { }
-
-    protected virtual void StartIdentifier(string value, TokenFlags flags, ref WriteContext context)
+    protected void WriteRequiredSpaceBetweenTokenAndIdentifier()
     {
         switch (LastTokenType)
         {
@@ -87,15 +162,27 @@ public partial class JavascriptTextWriter
         }
     }
 
+    protected virtual void StartIdentifier(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (LastTriviaType == TriviaType.None)
+        {
+            WriteRequiredSpaceBetweenTokenAndIdentifier();
+        }
+    }
+
     public void WriteIdentifier(string value, TokenFlags flags, ref WriteContext context)
     {
+        if (PendingRequiredNewLine)
+        {
+            WriteLine();
+        }
+
         StartIdentifier(value, flags, ref context);
         _writer.Write(value);
-        WhiteSpaceWrittenSinceLastToken = false;
         EndIdentifier(value, flags, ref context);
 
-        LastTokenType = TokenType.Identifier;
-        LastTokenFlags = flags;
+        OnTokenWritten(TokenType.Identifier, flags);
+        CurrentLineIsEmptyOrWhiteSpace = false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,7 +193,7 @@ public partial class JavascriptTextWriter
 
     protected virtual void EndIdentifier(string value, TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartKeyword(string value, TokenFlags flags, ref WriteContext context)
+    protected void WriteRequiredSpaceBetweenTokenAndKeyword()
     {
         switch (LastTokenType)
         {
@@ -129,15 +216,27 @@ public partial class JavascriptTextWriter
         }
     }
 
+    protected virtual void StartKeyword(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (LastTriviaType == TriviaType.None)
+        {
+            WriteRequiredSpaceBetweenTokenAndKeyword();
+        }
+    }
+
     public void WriteKeyword(string value, TokenFlags flags, ref WriteContext context)
     {
+        if (PendingRequiredNewLine)
+        {
+            WriteLine();
+        }
+
         StartKeyword(value, flags, ref context);
         _writer.Write(value);
-        WhiteSpaceWrittenSinceLastToken = false;
         EndKeyword(value, flags, ref context);
 
-        LastTokenType = TokenType.Keyword;
-        LastTokenFlags = flags;
+        OnTokenWritten(TokenType.Keyword, flags);
+        CurrentLineIsEmptyOrWhiteSpace = false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -148,7 +247,7 @@ public partial class JavascriptTextWriter
 
     protected virtual void EndKeyword(string value, TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
+    protected void WriteRequiredSpaceBetweenTokenAndLiteral(TokenType type)
     {
         switch (LastTokenType)
         {
@@ -174,15 +273,27 @@ public partial class JavascriptTextWriter
         }
     }
 
+    protected virtual void StartLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
+    {
+        if (LastTriviaType == TriviaType.None)
+        {
+            WriteRequiredSpaceBetweenTokenAndLiteral(type);
+        }
+    }
+
     public void WriteLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
+        if (PendingRequiredNewLine)
+        {
+            WriteLine();
+        }
+
         StartLiteral(value, type, flags, ref context);
         _writer.Write(value);
-        WhiteSpaceWrittenSinceLastToken = false;
         EndLiteral(value, type, flags, ref context);
 
-        LastTokenType = type;
-        LastTokenFlags = flags;
+        OnTokenWritten(type, flags);
+        CurrentLineIsEmptyOrWhiteSpace = false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,13 +308,17 @@ public partial class JavascriptTextWriter
 
     public void WritePunctuator(string value, TokenFlags flags, ref WriteContext context)
     {
+        if (PendingRequiredNewLine)
+        {
+            WriteLine();
+        }
+
         StartPunctuator(value, flags, ref context);
         _writer.Write(value);
-        WhiteSpaceWrittenSinceLastToken = false;
         EndPunctuator(value, flags, ref context);
 
-        LastTokenType = TokenType.Punctuator;
-        LastTokenFlags = flags;
+        OnTokenWritten(TokenType.Punctuator, flags);
+        CurrentLineIsEmptyOrWhiteSpace = false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -328,4 +443,9 @@ public partial class JavascriptTextWriter
     }
 
     public virtual void EndAuxiliaryNodeList<T>(int count, ref WriteContext context) where T : Node? { }
+
+    public virtual void Finish()
+    {
+        OnTokenWritten(TokenType.EOF, TokenFlags.None);
+    }
 }
