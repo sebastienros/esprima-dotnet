@@ -12,7 +12,7 @@ public class Comment
 {
     public CommentType Type;
 
-    public string Value = string.Empty;
+    public string? Value;
     public Range Slice;
 
     public int Start;
