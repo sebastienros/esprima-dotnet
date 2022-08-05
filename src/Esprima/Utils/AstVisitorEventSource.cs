@@ -76,6 +76,8 @@ public class AstVisitorEventSource : AstVisitor
     public event EventHandler<IfStatement>? VisitedIfStatement;
     public event EventHandler<Import>? VisitingImport;
     public event EventHandler<Import>? VisitedImport;
+    public event EventHandler<ImportAttribute>? VisitingImportAttribute;
+    public event EventHandler<ImportAttribute>? VisitedImportAttribute;
     public event EventHandler<ImportDeclaration>? VisitingImportDeclaration;
     public event EventHandler<ImportDeclaration>? VisitedImportDeclaration;
     public event EventHandler<ImportDefaultSpecifier>? VisitingImportDefaultSpecifier;
@@ -428,6 +430,14 @@ public class AstVisitorEventSource : AstVisitor
         VisitingImport?.Invoke(this, import);
         var result = base.VisitImport(import);
         VisitedImport?.Invoke(this, import);
+        return result;
+    }
+
+    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
+    {
+        VisitingImportAttribute?.Invoke(this, importAttribute);
+        var result = base.VisitImportAttribute(importAttribute);
+        VisitedImportAttribute?.Invoke(this, importAttribute);
         return result;
     }
 
