@@ -216,6 +216,12 @@ sealed class TestRewriter : JsxAstRewriter
             node => new CatchClause(node.Param, node.Body));
     }
 
+    protected internal override object? VisitDecorator(Decorator decorator)
+    {
+        return ForceNewObjectByControlType((Decorator) base.VisitDecorator(decorator)!,
+            node => new Decorator(node.Expression));
+    }
+
     protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
     {
         return ForceNewObjectByControlType((FunctionDeclaration) base.VisitFunctionDeclaration(functionDeclaration)!,
@@ -446,6 +452,12 @@ sealed class TestRewriter : JsxAstRewriter
     {
         return ForceNewObjectByControlType((Import) base.VisitImport(import)!,
             node => new Import(node.Source, import.Attributes));
+    }
+
+    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
+    {
+        return ForceNewObjectByControlType((ImportAttribute) base.VisitImportAttribute(importAttribute)!,
+            node => new ImportAttribute(node.Key, node.Value));
     }
 
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
