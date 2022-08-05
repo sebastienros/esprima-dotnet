@@ -47,6 +47,8 @@ public partial class AstToJavascriptConverter : AstVisitor
         _currentAuxiliaryNodeContext = null;
 
         Visit(node ?? throw new ArgumentNullException(nameof(node)));
+
+        Writer.Finish();
     }
 
     public override object? Visit(Node node)
@@ -513,7 +515,7 @@ public partial class AstToJavascriptConverter : AstVisitor
         _writeContext.SetNodeProperty(nameof(decorator.Expression), static node => node.As<Decorator>().Expression);
         VisitRootExpression(decorator.Expression, LeftHandSideRootExpressionFlags(needsBrackets: false));
 
-        Writer.WriteEpsilon(TokenFlags.TrailingSpaceRecommended, ref _writeContext);
+        Writer.SpaceRecommendedAfterLastToken();
 
         return decorator;
     }
@@ -648,8 +650,9 @@ public partial class AstToJavascriptConverter : AstVisitor
 
     protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
     {
+        Writer.SpaceRecommendedAfterLastToken();
+
         _writeContext.SetNodeProperty(nameof(expressionStatement.Expression), static node => node.As<ExpressionStatement>().Expression);
-        Writer.WriteEpsilon(TokenFlags.LeadingSpaceRecommended, ref _writeContext);
         VisitRootExpression(expressionStatement.Expression, ExpressionFlags.IsInsideStatementExpression | RootExpressionFlags(needsBrackets: false));
 
         StatementNeedsSemicolon();
@@ -869,7 +872,7 @@ public partial class AstToJavascriptConverter : AstVisitor
             {
                 if (keyIsFirstToken && !property.Computed)
                 {
-                    Writer.WriteEpsilon(TokenFlags.LeadingSpaceRecommended, ref _writeContext);
+                    Writer.SpaceRecommendedAfterLastToken();
                 }
 
                 VisitPropertyKey(property.Key, property.Computed, leadingBracketFlags: keyIsFirstToken.ToFlag(TokenFlags.LeadingSpaceRecommended));
@@ -1077,8 +1080,9 @@ WriteSource:
 
     protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
     {
+        Writer.SpaceRecommendedAfterLastToken();
+
         _writeContext.SetNodeProperty(nameof(labeledStatement.Label), static node => node.As<LabeledStatement>().Label);
-        Writer.WriteEpsilon(TokenFlags.LeadingSpaceRecommended, ref _writeContext);
         VisitAuxiliaryNode(labeledStatement.Label);
 
         Writer.WritePunctuator(":", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref _writeContext);
@@ -1351,6 +1355,10 @@ WriteSource:
         {
             _writeContext.SetNodeProperty(nameof(propertyDefinition.Static), static node => node.As<PropertyDefinition>().Static);
             Writer.WriteKeyword("static", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+        }
+        else
+        {
+            Writer.SpaceRecommendedAfterLastToken();
         }
 
         _writeContext.SetNodeProperty(nameof(propertyDefinition.Key), static node => node.As<PropertyDefinition>().Key);

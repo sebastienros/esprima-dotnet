@@ -635,7 +635,7 @@ public class AstToJsonConverter : AstVisitor
             var callee = new ImportCompat
             {
                 Location = new Location(import.Location.Start, new Position(import.Location.Start.Line, import.Location.Start.Column + importToken.Length)),
-                Range = new Ast.Range(import.Range.Start, import.Range.Start + importToken.Length)
+                Range = new Range(import.Range.Start, import.Range.Start + importToken.Length)
             };
             var args = new NodeList<Expression>(new Expression[] { import.Source });
             var callExpression = new CallExpression(callee, args, optional: false)

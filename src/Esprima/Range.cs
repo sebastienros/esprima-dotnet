@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Esprima.Ast;
+namespace Esprima;
 
 public readonly struct Range : IEquatable<Range>
 {
@@ -41,5 +41,11 @@ public readonly struct Range : IEquatable<Range>
     public static bool operator !=(Range left, Range right)
     {
         return !left.Equals(right);
+    }
+
+    public void Deconstruct(out int start, out int end)
+    {
+        start = Start;
+        end = End;
     }
 }

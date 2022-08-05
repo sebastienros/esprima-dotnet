@@ -26,6 +26,12 @@ internal static class EnumHelper
     public static bool HasFlagFast(this AstToJavascriptConverter.ExpressionFlags flags, AstToJavascriptConverter.ExpressionFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool HasFlagFast(this JavascriptTextWriter.TriviaType flags, JavascriptTextWriter.TriviaType flag) => (flags & flag) == flag;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool HasFlagFast(this JavascriptTextWriter.TriviaFlags flags, JavascriptTextWriter.TriviaFlags flag) => (flags & flag) == flag;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool HasFlagFast(this JavascriptTextWriter.TokenFlags flags, JavascriptTextWriter.TokenFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

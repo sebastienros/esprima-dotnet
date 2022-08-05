@@ -61,7 +61,7 @@ public abstract class Node
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetAdditionalData(object key, object? value) => _additionalDataContainer.SetData(key, value);
 
-    public override string ToString() => this.ToJavascriptString(beautify: true);
+    public override string ToString() => this.ToJavascriptString(format: true);
 
     private string GetDebuggerDisplay()
     {
