@@ -9,7 +9,8 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
     /// the returned instance re-routes visitations of JSX nodes to the specified <paramref name="visitor"/>,
     /// thus it can be used for emulating base class method calls.
     /// </summary>
-    public static IJsxAstVisitor CreateJsxVisitorFor(AstVisitor visitor)
+    public static IJsxAstVisitor CreateJsxVisitorFor<TVisitor>(TVisitor visitor)
+        where TVisitor : AstVisitor, IJsxAstVisitor
     {
         return new JsxAstVisitor(visitor);
     }

@@ -9,7 +9,8 @@ public class JsxAstRewriter : AstRewriter, IJsxAstVisitor
     /// the returned instance re-routes visitations of JSX nodes to the specified <paramref name="rewriter"/>,
     /// thus it can be used for emulating base class method calls.
     /// </summary>
-    public static IJsxAstVisitor CreateJsxRewriterFor(AstRewriter rewriter)
+    public static IJsxAstVisitor CreateJsxRewriterFor<TRewriter>(TRewriter rewriter)
+        where TRewriter : AstRewriter, IJsxAstVisitor
     {
         return new JsxAstRewriter(rewriter);
     }
