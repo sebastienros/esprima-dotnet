@@ -20,6 +20,8 @@ public class JsxAstToJavascriptConverter : AstToJavascriptConverter, IJsxAstVisi
 
     object? IJsxAstVisitor.VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
+        Writer.SpaceRecommendedAfterLastToken();
+
         WriteContext.SetNodeProperty(nameof(jsxAttribute.Name), static node => node.As<JsxAttribute>().Name);
         VisitAuxiliaryNode(jsxAttribute.Name);
 
@@ -168,7 +170,7 @@ public class JsxAstToJavascriptConverter : AstToJavascriptConverter, IJsxAstVisi
 
     object? IJsxAstVisitor.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
-        Writer.WritePunctuator("{", TokenFlags.Leading, ref WriteContext);
+        Writer.WritePunctuator("{", TokenFlags.Leading | TokenFlags.LeadingSpaceRecommended, ref WriteContext);
 
         var argumentNeedsBrackets = UnaryOperandNeedsBrackets(jsxSpreadAttribute, jsxSpreadAttribute.Argument);
 

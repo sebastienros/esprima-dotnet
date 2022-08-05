@@ -2,6 +2,7 @@
 using Esprima.Ast;
 using Esprima.Test;
 using Esprima.Utils;
+using Esprima.Utils.Jsx;
 
 namespace Esprima.Tests;
 
@@ -628,6 +629,41 @@ if (b == 2) {
         var program = parser.ParseScript();
         var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
         Assert.Equal(source, code);
+    }
+
+    [Theory]
+    [InlineData(true,
+@"<>AAA <el attr1=""a"" attr2='b' attr3={x ? 'c' : 'd'} {...(x + 2, [y])}> &lt; {} &gt; </el> BBB <c.el {...[z]}>member</c.el> <ns:el>member</ns:el> DDD </>",
+@"<>AAA <el attr1=""a""attr2='b'attr3={x?'c':'d'}{...(x+2,[y])}> &lt; {} &gt; </el> BBB <c.el{...[z]}>member</c.el> <ns:el>member</ns:el> DDD </>")]
+    [InlineData(false,
+@"var obj = ({ x: (jsx || <el />) + '' })",
+@"var obj={x:(jsx||<el/>)+''}")]
+    public void ToJsxTest_Unformatted(bool isExpression, string source, string expected)
+    {
+        var parser = new JsxParser(source);
+        Node ast = isExpression ? parser.ParseExpression() : parser.ParseScript();
+        var actual = AstToJavascript.ToJavascriptString(ast, JavascriptTextWriterOptions.Default, JsxAstToJavascriptOptions.Default);
+
+        expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+        Assert.Equal(expected, actual);
+    }
+
+    [Theory]
+    [InlineData(true,
+@"<>AAA <el attr1=""a"" attr2='b' attr3={x ? 'c' : 'd'} {...(x + 2, [y])}> &lt; {} &gt; </el> BBB <c.el {...[z]}>member</c.el> <ns:el>member</ns:el> DDD </>",
+@"<>AAA <el attr1=""a"" attr2='b' attr3={x ? 'c' : 'd'} {...(x + 2, [y])}> &lt; {} &gt; </el> BBB <c.el {...[z]}>member</c.el> <ns:el>member</ns:el> DDD </>")]
+    [InlineData(false,
+@"var obj = ({ x: (jsx || <el />) + '' })",
+@"var obj = { x: (jsx || <el />) + '' };
+")]
+    public void ToJsxTest_Formatted(bool isExpression, string source, string expected)
+    {
+        var parser = new JsxParser(source);
+        Node ast = isExpression ? parser.ParseExpression() : parser.ParseScript();
+        var actual = AstToJavascript.ToJavascriptString(ast, KnRJavascriptTextFormatterOptions.Default, JsxAstToJavascriptOptions.Default);
+
+        expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+        Assert.Equal(expected, actual);
     }
 
     private sealed class NodeTypeEqualityComparer : IEqualityComparer<Node?>
