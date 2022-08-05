@@ -18,6 +18,8 @@ public partial class AstToJavascriptConverter : AstVisitor
     private static readonly object s_forLoopInitDeclarationFlag = new();
     private static readonly object s_bindingPatternAllowsExpressionsFlag = new(); // automatically propagated to sub-patterns
 
+    private readonly bool _ignoreExtensions;
+
     private WriteContext _writeContext;
     private StatementFlags _currentStatementFlags;
     private ExpressionFlags _currentExpressionFlags;
@@ -31,6 +33,8 @@ public partial class AstToJavascriptConverter : AstVisitor
         {
             throw new ArgumentNullException(nameof(options));
         }
+
+        _ignoreExtensions = options.IgnoreExtensions;
     }
 
     public JavascriptTextWriter Writer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
@@ -658,6 +662,19 @@ public partial class AstToJavascriptConverter : AstVisitor
         StatementNeedsSemicolon();
 
         return expressionStatement;
+    }
+
+    protected internal override object? VisitExtension(Node node)
+    {
+        if (_ignoreExtensions)
+        {
+            Writer.WriteBlockComment(new[] { $" Unsupported node type ({node.GetType()}). " }, TriviaFlags.None);
+            return node;
+        }
+        else
+        {
+            return base.VisitExtension(node);
+        }
     }
 
     protected internal override object? VisitForInStatement(ForInStatement forInStatement)

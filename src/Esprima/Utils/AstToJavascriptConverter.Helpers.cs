@@ -331,10 +331,22 @@ partial class AstToJavascriptConverter
             Nodes.SequenceExpression;
     }
 
-    protected virtual int GetOperatorPrecedence(Expression expression, out int associativity) =>
-        expression.GetOperatorPrecedence(out associativity) is >= 0 and var result
-        ? result
-        : throw new NotImplementedException($"Operator precedence for expression of type {expression.GetType()} is not defined.");
+    protected virtual int GetOperatorPrecedence(Expression expression, out int associativity)
+    {
+        var result = expression.GetOperatorPrecedence(out associativity);
+        if (result >= 0)
+        {
+            return result;
+        }
+        else if (_ignoreExtensions)
+        {
+            return int.MinValue;
+        }
+        else
+        {
+            throw new NotImplementedException($"Operator precedence for expression of type {expression.GetType()} is not defined.");
+        }
+    }
 
     protected bool UnaryOperandNeedsBrackets(Expression operation, Expression operand) =>
          GetOperatorPrecedence(operation, out _) > GetOperatorPrecedence(operand, out _);

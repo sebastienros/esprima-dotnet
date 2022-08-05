@@ -6,6 +6,8 @@ public record class AstToJavascriptOptions
 {
     public static readonly AstToJavascriptOptions Default = new();
 
+    internal bool IgnoreExtensions { get; init; }
+
     protected internal virtual AstToJavascriptConverter CreateConverter(JavascriptTextWriter writer) => new AstToJavascriptConverter(writer, this);
 }
 
