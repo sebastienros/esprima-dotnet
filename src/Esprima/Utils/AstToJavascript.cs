@@ -2,67 +2,67 @@
 
 namespace Esprima.Utils;
 
-public record class AstToJavascriptOptions
+public record class AstToJavaScriptOptions
 {
-    public static readonly AstToJavascriptOptions Default = new();
+    public static readonly AstToJavaScriptOptions Default = new();
 
     internal bool IgnoreExtensions { get; init; }
 
-    protected internal virtual AstToJavascriptConverter CreateConverter(JavascriptTextWriter writer) => new AstToJavascriptConverter(writer, this);
+    protected internal virtual AstToJavaScriptConverter CreateConverter(JavaScriptTextWriter writer) => new AstToJavaScriptConverter(writer, this);
 }
 
-public static class AstToJavascript
+public static class AstToJavaScript
 {
-    public static string ToJavascriptString(this Node node)
+    public static string ToJavaScriptString(this Node node)
     {
-        return ToJavascriptString(node, JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
+        return ToJavaScriptString(node, JavaScriptTextWriterOptions.Default, AstToJavaScriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, KnRJavascriptTextFormatterOptions formattingOptions)
+    public static string ToJavaScriptString(this Node node, KnRJavaScriptTextFormatterOptions formattingOptions)
     {
-        return ToJavascriptString(node, formattingOptions, AstToJavascriptOptions.Default);
+        return ToJavaScriptString(node, formattingOptions, AstToJavaScriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, bool format)
+    public static string ToJavaScriptString(this Node node, bool format)
     {
-        return ToJavascriptString(node, format ? KnRJavascriptTextFormatterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
+        return ToJavaScriptString(node, format ? KnRJavaScriptTextFormatterOptions.Default : JavaScriptTextWriterOptions.Default, AstToJavaScriptOptions.Default);
     }
 
-    public static string ToJavascriptString(this Node node, JavascriptTextWriterOptions writerOptions, AstToJavascriptOptions options)
+    public static string ToJavaScriptString(this Node node, JavaScriptTextWriterOptions writerOptions, AstToJavaScriptOptions options)
     {
         using (var writer = new StringWriter())
         {
-            WriteJavascript(node, writer, writerOptions, options);
+            WriteJavaScript(node, writer, writerOptions, options);
             return writer.ToString();
         }
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer)
+    public static void WriteJavaScript(this Node node, TextWriter writer)
     {
-        WriteJavascript(node, writer, JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
+        WriteJavaScript(node, writer, JavaScriptTextWriterOptions.Default, AstToJavaScriptOptions.Default);
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, KnRJavascriptTextFormatterOptions formattingOptions)
+    public static void WriteJavaScript(this Node node, TextWriter writer, KnRJavaScriptTextFormatterOptions formattingOptions)
     {
-        WriteJavascript(node, writer, formattingOptions, AstToJavascriptOptions.Default);
+        WriteJavaScript(node, writer, formattingOptions, AstToJavaScriptOptions.Default);
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, bool format)
+    public static void WriteJavaScript(this Node node, TextWriter writer, bool format)
     {
-        WriteJavascript(node, writer, format ? KnRJavascriptTextFormatterOptions.Default : JavascriptTextWriterOptions.Default, AstToJavascriptOptions.Default);
+        WriteJavaScript(node, writer, format ? KnRJavaScriptTextFormatterOptions.Default : JavaScriptTextWriterOptions.Default, AstToJavaScriptOptions.Default);
     }
 
-    public static void WriteJavascript(this Node node, TextWriter writer, JavascriptTextWriterOptions writerOptions, AstToJavascriptOptions options)
+    public static void WriteJavaScript(this Node node, TextWriter writer, JavaScriptTextWriterOptions writerOptions, AstToJavaScriptOptions options)
     {
         if (writerOptions is null)
         {
             throw new ArgumentNullException(nameof(writerOptions));
         }
 
-        WriteJavascript(node, writerOptions.CreateWriter(writer), options);
+        WriteJavaScript(node, writerOptions.CreateWriter(writer), options);
     }
 
-    public static void WriteJavascript(this Node node, JavascriptTextWriter writer, AstToJavascriptOptions options)
+    public static void WriteJavaScript(this Node node, JavaScriptTextWriter writer, AstToJavaScriptOptions options)
     {
         if (options is null)
         {

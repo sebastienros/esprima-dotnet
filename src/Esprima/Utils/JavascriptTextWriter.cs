@@ -3,21 +3,21 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public record class JavascriptTextWriterOptions
+public record class JavaScriptTextWriterOptions
 {
-    public static readonly JavascriptTextWriterOptions Default = new();
+    public static readonly JavaScriptTextWriterOptions Default = new();
 
-    protected internal virtual JavascriptTextWriter CreateWriter(TextWriter writer) => new JavascriptTextWriter(writer, this);
+    protected internal virtual JavaScriptTextWriter CreateWriter(TextWriter writer) => new JavaScriptTextWriter(writer, this);
 }
 
 /// <summary>
-/// Base Javascript text writer (code formatter) which uses the most compact possible (i.e. minimal) format.
+/// Base JavaScript text writer (code formatter) which uses the most compact possible (i.e. minimal) format.
 /// </summary>
-public partial class JavascriptTextWriter
+public partial class JavaScriptTextWriter
 {
     private readonly TextWriter _writer;
 
-    public JavascriptTextWriter(TextWriter writer, JavascriptTextWriterOptions options)
+    public JavaScriptTextWriter(TextWriter writer, JavaScriptTextWriterOptions options)
     {
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
 

@@ -1,10 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Ast;
-using static Esprima.Utils.JavascriptTextWriter;
+using static Esprima.Utils.JavaScriptTextWriter;
 
 namespace Esprima.Utils;
 
-public partial class AstToJavascriptConverter : AstVisitor
+public partial class AstToJavaScriptConverter : AstVisitor
 {
     // Notes for maintainers:
     // Don't visit nodes directly (by calling Visit) unless it's necessary for some special reason (but in that case you'll need to setup the context of the visitation manually!)
@@ -25,7 +25,7 @@ public partial class AstToJavascriptConverter : AstVisitor
     private ExpressionFlags _currentExpressionFlags;
     private object? _currentAuxiliaryNodeContext;
 
-    public AstToJavascriptConverter(JavascriptTextWriter writer, AstToJavascriptOptions options)
+    public AstToJavaScriptConverter(JavaScriptTextWriter writer, AstToJavaScriptOptions options)
     {
         Writer = writer ?? throw new ArgumentNullException(nameof(writer));
 
@@ -37,7 +37,7 @@ public partial class AstToJavascriptConverter : AstVisitor
         _ignoreExtensions = options.IgnoreExtensions;
     }
 
-    public JavascriptTextWriter Writer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public JavaScriptTextWriter Writer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     protected ref WriteContext WriteContext { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _writeContext; }
 
@@ -91,8 +91,8 @@ public partial class AstToJavascriptConverter : AstVisitor
                 var originalExpressionFlags = _currentExpressionFlags;
                 _currentExpressionFlags = PropagateExpressionFlags(SubExpressionFlags(needsBrackets: false, isLeftMost: false));
 
-                Writer.StartExpressionListItem(i, arrayExpression.Elements.Count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
-                Writer.EndExpressionListItem(i, arrayExpression.Elements.Count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
+                Writer.StartExpressionListItem(i, arrayExpression.Elements.Count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
+                Writer.EndExpressionListItem(i, arrayExpression.Elements.Count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
 
                 _currentExpressionFlags = originalExpressionFlags;
             }
@@ -1006,7 +1006,7 @@ public partial class AstToJavascriptConverter : AstVisitor
         }
 
         var index = 0;
-        Func<AstToJavascriptConverter, Node?, int, int, object?> getNodeContext = static delegate { return null; };
+        Func<AstToJavaScriptConverter, Node?, int, int, object?> getNodeContext = static delegate { return null; };
 
         if (importDeclaration.Specifiers[index].Type == Nodes.ImportDefaultSpecifier)
         {

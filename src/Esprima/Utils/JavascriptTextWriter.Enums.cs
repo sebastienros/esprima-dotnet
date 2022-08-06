@@ -2,7 +2,7 @@
 
 namespace Esprima.Utils;
 
-partial class JavascriptTextWriter
+partial class JavaScriptTextWriter
 {
     private protected const TriviaType WhiteSpaceTriviaFlag = (TriviaType) (1 << 1);
     private protected const TriviaType CommentTriviaFlag = (TriviaType) (1 << 2);
@@ -72,14 +72,14 @@ partial class JavascriptTextWriter
         /// A leading space is recommended for the current token (unless other white-space precedes it).
         /// </summary>
         /// <remarks>
-        /// May or may not be respected. (It is decided by the actual <see cref="JavascriptTextWriter"/> implementation.)
+        /// May or may not be respected. (It is decided by the actual <see cref="JavaScriptTextWriter"/> implementation.)
         /// </remarks>
         LeadingSpaceRecommended = 1 << 14,
         /// <summary>
         /// A trailing space is recommended for the current token (unless other white-space follows it).
         /// </summary>
         /// <remarks>
-        /// May or may not be respected. (It is decided by the actual <see cref="JavascriptTextWriter"/> implementation.)
+        /// May or may not be respected. (It is decided by the actual <see cref="JavaScriptTextWriter"/> implementation.)
         /// </remarks>
         TrailingSpaceRecommended = 1 << 15,
 
@@ -87,7 +87,7 @@ partial class JavascriptTextWriter
         /// Surrounding spaces are recommended for the current token (unless other white-spaces surround it).
         /// </summary>
         /// <remarks>
-        /// May or may not be respected. (It is decided by the actual <see cref="JavascriptTextWriter"/> implementation.)
+        /// May or may not be respected. (It is decided by the actual <see cref="JavaScriptTextWriter"/> implementation.)
         /// </remarks>
         SurroundingSpaceRecommended = LeadingSpaceRecommended | TrailingSpaceRecommended,
     }
@@ -96,7 +96,7 @@ partial class JavascriptTextWriter
     public enum StatementFlags
     {
         // Notes for maintainers:
-        // Don't use the high-order word as it's reserved for internal use (see AstToJavascriptConverter.StatementFlags)
+        // Don't use the high-order word as it's reserved for internal use (see AstToJavaScriptConverter.StatementFlags)
 
         None = 0,
         /// <summary>
@@ -108,14 +108,14 @@ partial class JavascriptTextWriter
         /// </summary>
         /// <remarks>
         /// Automatically propagated to child statements, should be set directly only for statement list items.
-        /// Whether the semicolon is omitted or not is decided by the actual <see cref="JavascriptTextWriter"/> implementation.
+        /// Whether the semicolon is omitted or not is decided by the actual <see cref="JavaScriptTextWriter"/> implementation.
         /// </remarks>
         MayOmitRightMostSemicolon = 1 << 1,
         /// <summary>
         /// The statement comes last in the current statement list (more precisely, it is the right-most part in the textual representation of the current statement list).
         /// </summary>
         /// <remarks>
-        /// In the the visitation handlers of <see cref="AstToJavascriptConverter"/> the flag is interpreted differently: it indicates that the statement comes last in the parent statement.
+        /// In the the visitation handlers of <see cref="AstToJavaScriptConverter"/> the flag is interpreted differently: it indicates that the statement comes last in the parent statement.
         /// (Upon visiting a statement, this flag of the parent and child statement gets combined to determine its effective value for the current statement list.)
         /// </remarks>
         IsRightMost = 1 << 2,
@@ -129,7 +129,7 @@ partial class JavascriptTextWriter
     public enum ExpressionFlags
     {
         // Notes for maintainers:
-        // Don't use the high-order word as it's reserved for internal use (see AstToJavascriptConverter.ExpressionFlags)
+        // Don't use the high-order word as it's reserved for internal use (see AstToJavaScriptConverter.ExpressionFlags)
 
         None = 0,
         /// <summary>
@@ -140,7 +140,7 @@ partial class JavascriptTextWriter
         /// The expression comes first in the current expression tree, more precisely, it is the left-most part in the textual representation of the currently visited expression tree (incl. brackets).
         /// </summary>
         /// <remarks>
-        /// In the the visitation handlers of <see cref="AstToJavascriptConverter"/> the flag is interpreted differently: it indicates that the expression comes first in the parent expression.
+        /// In the the visitation handlers of <see cref="AstToJavaScriptConverter"/> the flag is interpreted differently: it indicates that the expression comes first in the parent expression.
         /// (Upon visiting an expression, this flag of the parent and child expression gets combined to determine its effective value for the expression tree.)
         /// </remarks>
         IsLeftMost = 1 << 1,

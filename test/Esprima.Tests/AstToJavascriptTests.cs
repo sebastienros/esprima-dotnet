@@ -6,16 +6,16 @@ using Esprima.Utils.Jsx;
 
 namespace Esprima.Tests;
 
-public class AstToJavascriptTests
+public class AstToJavaScriptTests
 {
-    private record class CustomCompactJavascriptTextWriterOptions : JavascriptTextWriterOptions
+    private record class CustomCompactJavaScriptTextWriterOptions : JavaScriptTextWriterOptions
     {
-        protected internal override JavascriptTextWriter CreateWriter(TextWriter writer) => new CustomCompactJavascriptTextWriter(writer, this);
+        protected internal override JavaScriptTextWriter CreateWriter(TextWriter writer) => new CustomCompactJavaScriptTextWriter(writer, this);
     }
 
-    private sealed class CustomCompactJavascriptTextWriter : JavascriptTextWriter
+    private sealed class CustomCompactJavaScriptTextWriter : JavaScriptTextWriter
     {
-        public CustomCompactJavascriptTextWriter(TextWriter writer, CustomCompactJavascriptTextWriterOptions options) : base(writer, options) { }
+        public CustomCompactJavaScriptTextWriter(TextWriter writer, CustomCompactJavaScriptTextWriterOptions options) : base(writer, options) { }
 
         public override void EndStatement(StatementFlags flags, ref WriteContext context)
         {
@@ -43,8 +43,8 @@ public class AstToJavascriptTests
         }
     }
 
-    private static readonly CustomCompactJavascriptTextWriterOptions s_customCompactWriterOptions = new();
-    private static readonly KnRJavascriptTextFormatterOptions s_formattingOptions = new()
+    private static readonly CustomCompactJavaScriptTextWriterOptions s_customCompactWriterOptions = new();
+    private static readonly KnRJavaScriptTextFormatterOptions s_formattingOptions = new()
     {
         Indent = "    ",
         KeepEmptyBlockBodyInLine = false,
@@ -52,7 +52,7 @@ public class AstToJavascriptTests
     };
 
     [Fact]
-    public void ToJavascriptTest1()
+    public void ToJavaScriptTest1()
     {
         var parser = new JavaScriptParser(@"if (true) { p(); }
 switch(foo) {
@@ -70,13 +70,13 @@ for (var elem of list) { }
 ");
         var program = parser.ParseScript();
 
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
 
         Assert.Equal("if(true){p();}switch(foo){case'A':p();break;}switch(foo){default:p();break;}for(var a=[];;){}for(var elem of list){}", code);
     }
 
     [Fact]
-    public void ToJavascriptTest2()
+    public void ToJavaScriptTest2()
     {
         var parser = new JavaScriptParser(@"let tips = [
   ""Click on any AST node with a '+' to expand it"",
@@ -92,12 +92,12 @@ for (var elem of list) { }
                 tips.forEach((tip, i) => console.log(`Tip ${ i}:` +tip));
         }");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("let tips=[\"Click on any AST node with a '+' to expand it\",\"Hovering over a node highlights the \\\r\n   corresponding location in the source code\",\"Shift click on an AST node to expand the whole subtree\"];function printTips(){tips.forEach((tip,i)=>console.log(`Tip ${i}:`+tip));}", code);
     }
 
     [Fact]
-    public void ToJavascriptTest3()
+    public void ToJavaScriptTest3()
     {
         var parser = new JavaScriptParser(@"export class aa extends HTMLElement{
     constructor(a, b)
@@ -110,12 +110,12 @@ for (var elem of list) { }
     }
 }");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("export class aa extends HTMLElement{constructor(a,b){super(a);this._div=document.createElement('div');}static get is(){return'aa';}}", code);
     }
 
     [Fact]
-    public void ToJavascriptTest4()
+    public void ToJavaScriptTest4()
     {
         var source = @"import { MccDialog } from '../mccDialogHandler';
 import { commonClient, bb as f } from '../commonClient/commonClient';
@@ -174,7 +174,7 @@ export function checkSecurityAnswerCodeDirect(result) {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
+        var code = AstToJavaScript.ToJavaScriptString(program, s_formattingOptions);
 
         var expected = @"import { MccDialog } from '../mccDialogHandler';
 import { commonClient, bb as f } from '../commonClient/commonClient';
@@ -231,7 +231,7 @@ export function checkSecurityAnswerCodeDirect(result) {
     }
 
     [Fact]
-    public void ToJavascriptTest5()
+    public void ToJavaScriptTest5()
     {
         var source = @"(function () {
   'use strict';
@@ -255,7 +255,7 @@ aa({});
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
+        var code = AstToJavaScript.ToJavaScriptString(program, s_formattingOptions);
 
         var expected = @"(function() {
     'use strict';
@@ -276,7 +276,7 @@ aa({ });
     }
 
     [Fact]
-    public void ToJavascriptTest6()
+    public void ToJavaScriptTest6()
     {
         var source = @"function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
@@ -286,23 +286,23 @@ aa({ });
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("function _createClass(Constructor,protoProps,staticProps){if(protoProps)_defineProperties(Constructor.prototype,protoProps);if(staticProps)_defineProperties(Constructor,staticProps);return Constructor;}", code);
     }
 
     [Fact]
-    public void ToJavascriptTest7()
+    public void ToJavaScriptTest7()
     {
         var parser = new JavaScriptParser(@"if ((x ? a.nodeName.toLowerCase() === f : 1 === a.nodeType) && ++d && (p && ((i = (o = a[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID] = {}))[h] = [k, d]), a === e))
 {
 }");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("if((x?a.nodeName.toLowerCase()===f:1===a.nodeType)&&++d&&(p&&((i=(o=a[S]||(a[S]={}))[a.uniqueID]||(o[a.uniqueID]={}))[h]=[k,d]),a===e)){}", code);
     }
 
     [Fact]
-    public void ToJavascriptTest8()
+    public void ToJavaScriptTest8()
     {
         var parser = new JavaScriptParser(@"
 class a extends b {
@@ -316,34 +316,34 @@ class a extends b {
 }
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("class a extends b{constructor(){super();this.g=1;}q=1;r='cc';}", code);
     }
 
     [Fact]
-    public void ToJavascriptTest9()
+    public void ToJavaScriptTest9()
     {
         var parser = new JavaScriptParser(@"
 d = (s = (r = (i = (o = (a = c)[S] || (a[S] = {}))[a.uniqueID] || (o[a.uniqueID] = {}))[h] || [])[0] === k && r[1]) && r[2], a = s && c.childNodes[s];
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("d=(s=(r=(i=(o=(a=c)[S]||(a[S]={}))[a.uniqueID]||(o[a.uniqueID]={}))[h]||[])[0]===k&&r[1])&&r[2],a=s&&c.childNodes[s];", code);
     }
 
     [Fact]
-    public void ToJavascriptTest10()
+    public void ToJavaScriptTest10()
     {
         var parser = new JavaScriptParser(@"
 m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEventListener && v.createElement, ~a.indexOf('MSIE') || a.indexOf('Trident/'), '___FONT_AWESOME___')
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("m=(z.document,!!v.documentElement&&!!v.head&&'function'==typeof v.addEventListener&&v.createElement,~a.indexOf('MSIE')||a.indexOf('Trident/'),'___FONT_AWESOME___');", code);
     }
 
     [Fact]
-    public void ToJavascriptTest11()
+    public void ToJavaScriptTest11()
     {
         var parser = new JavaScriptParser(@"
  var h = (c.navigator || {}).userAgent,
@@ -360,12 +360,12 @@ m = (z.document, !!v.documentElement && !!v.head && 'function' == typeof v.addEv
         }();
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("var h=(c.navigator||{}).userAgent,a=void 0===h?'':h,z=c,v=l,m=(z.document,!!v.documentElement&&!!v.head&&'function'==typeof v.addEventListener&&v.createElement,~a.indexOf('MSIE')||a.indexOf('Trident/'),'___FONT_AWESOME___'),e=function(){try{return!0;}catch(c){return!1;}}();", code);
     }
 
     [Fact]
-    public void ToJavascriptTest12()
+    public void ToJavaScriptTest12()
     {
         var parser = new JavaScriptParser(@"
 var a = {
@@ -373,12 +373,12 @@ children: (b = O, 'g' === b.tag ? b.children : [b])
 }
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("var a={children:(b=O,'g'===b.tag?b.children:[b])};", code);
     }
 
     [Fact]
-    public void ToJavascriptTest13()
+    public void ToJavaScriptTest13()
     {
         var parser = new JavaScriptParser(@"
 if (e.IsWebService)
@@ -390,12 +390,12 @@ if (e.IsWebService)
 	} else h = e.HttpRequest.responseText;
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("if(e.IsWebService)if(h=e.HttpRequest.responseXML,'undefined'==typeof h)Trace.Write('Error: '+e.UniqueId+' data has no properties!'),m=!0;else try{h.setProperty('SelectionLanguage','XPath');}catch(l){Trace.Write('Error: data.setProperty(',SelectionLanguage,', ',XPath,') because '+l.message);}else h=e.HttpRequest.responseText;", code);
     }
 
     [Fact]
-    public void ToJavascriptTest14()
+    public void ToJavaScriptTest14()
     {
         var source = @"function tt(t, r) {
   var n, e, i = b(t),
@@ -410,7 +410,7 @@ if (e.IsWebService)
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
+        var code = AstToJavaScript.ToJavaScriptString(program, s_formattingOptions);
 
         var expected = @"function tt(t, r) {
     var n, e, i = b(t), s = b(r);
@@ -430,18 +430,18 @@ if (e.IsWebService)
     }
 
     [Fact]
-    public void ToJavascriptTest15()
+    public void ToJavaScriptTest15()
     {
         var parser = new JavaScriptParser(@"
 h='M'+(+new Date).toString(36)
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("h='M'+(+new Date).toString(36);", code);
     }
 
     [Fact]
-    public void ToJavascriptTest16()
+    public void ToJavaScriptTest16()
     {
         var parser = new JavaScriptParser(@"
 input.onchange = async (e) => {
@@ -451,56 +451,56 @@ input.onchange = async (e) => {
         };
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("input.onchange=async e=>{const files=await readFiles(input.files,readMode);document.body.removeChild(input);resolve(files);};", code);
     }
 
     [Fact]
-    public void ToJavascriptTest17()
+    public void ToJavaScriptTest17()
     {
         var parser = new JavaScriptParser(@"
 export const Base = LegacyElementMixin(HTMLElement).prototype;
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("export const Base=LegacyElementMixin(HTMLElement).prototype;", code);
     }
 
     [Fact]
-    public void ToJavascriptTest18()
+    public void ToJavaScriptTest18()
     {
         var parser = new JavaScriptParser(@"
 let {is} = getIsExtends(element);
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("let{is}=getIsExtends(element);", code);
     }
 
     [Fact]
-    public void ToJavascriptTest19()
+    public void ToJavaScriptTest19()
     {
         var parser = new JavaScriptParser(@"
 export const wrap =
   (window['ShadyDOM'] && window['ShadyDOM']['wrap']) || (node => node);
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("export const wrap=window['ShadyDOM']&&window['ShadyDOM']['wrap']||(node=>node);", code);
     }
 
     [Fact]
-    public void ToJavascriptTest20()
+    public void ToJavaScriptTest20()
     {
         var parser = new JavaScriptParser(@"
 export {}");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("export{};", code);
     }
 
     [Fact]
-    public void ToJavascriptTest21()
+    public void ToJavaScriptTest21()
     {
         var parser = new JavaScriptParser(@"
 (() => {
@@ -508,12 +508,12 @@ export {}");
 })();
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("(()=>{mutablePropertyChange=MutableData._mutablePropertyChange;})();", code);
     }
 
     [Fact]
-    public void ToJavascriptTest22()
+    public void ToJavaScriptTest22()
     {
         var parser = new JavaScriptParser(@"
 var Ol, jl = new (function() {
@@ -522,12 +522,12 @@ var Ol, jl = new (function() {
     }())
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("var Ol,jl=new(function(){var l,h,z;return l=c;}());", code);
     }
 
     [Fact]
-    public void ToJavascriptTest23()
+    public void ToJavaScriptTest23()
     {
         var parser = new JavaScriptParser(@"
 
@@ -539,12 +539,12 @@ var Ol, jl = new (function() {
         
 ");
         var program = parser.ParseScript();
-        var code = program.ToJavascriptString(s_customCompactWriterOptions, AstToJavascriptOptions.Default);
+        var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("[y,{[Symbol.iterator](){return b;},a:5}];", code);
     }
 
     [Fact]
-    public void ToJavascriptTest24()
+    public void ToJavaScriptTest24()
     {
         var source = @"
 
@@ -561,7 +561,7 @@ class A {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
+        var code = AstToJavaScript.ToJavaScriptString(program, s_formattingOptions);
 
         var expected = @"class A {
     *[Symbol.iterator]() {
@@ -576,7 +576,7 @@ class A {
     }
 
     [Fact]
-    public void ToJavascriptTest25()
+    public void ToJavaScriptTest25()
     {
         var source = @"var i = function e(i) {
             var r = n[i];
@@ -592,7 +592,7 @@ class A {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
+        var code = AstToJavaScript.ToJavaScriptString(program, s_formattingOptions);
 
         var expected = @"var i = function e(i) {
     var r = n[i];
@@ -609,7 +609,7 @@ class A {
     }
 
     [Fact]
-    public void ToJavascriptTest26()
+    public void ToJavaScriptTest26()
     {
         var source = @"class A {
     aa() {
@@ -627,7 +627,7 @@ if (b == 2) {
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser(source);
         var program = parser.ParseScript();
-        var code = AstToJavascript.ToJavascriptString(program, s_formattingOptions);
+        var code = AstToJavaScript.ToJavaScriptString(program, s_formattingOptions);
         Assert.Equal(source, code);
     }
 
@@ -642,7 +642,7 @@ if (b == 2) {
     {
         var parser = new JsxParser(source);
         Node ast = isExpression ? parser.ParseExpression() : parser.ParseScript();
-        var actual = AstToJavascript.ToJavascriptString(ast, JavascriptTextWriterOptions.Default, JsxAstToJavascriptOptions.Default);
+        var actual = AstToJavaScript.ToJavaScriptString(ast, JavaScriptTextWriterOptions.Default, JsxAstToJavaScriptOptions.Default);
 
         expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         Assert.Equal(expected, actual);
@@ -660,7 +660,7 @@ if (b == 2) {
     {
         var parser = new JsxParser(source);
         Node ast = isExpression ? parser.ParseExpression() : parser.ParseScript();
-        var actual = AstToJavascript.ToJavascriptString(ast, KnRJavascriptTextFormatterOptions.Default, JsxAstToJavascriptOptions.Default);
+        var actual = AstToJavaScript.ToJavaScriptString(ast, KnRJavaScriptTextFormatterOptions.Default, JsxAstToJavaScriptOptions.Default);
 
         expected = Regex.Replace(expected, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         Assert.Equal(expected, actual);
@@ -765,7 +765,7 @@ if (b == 2) {
         try { expectedAst = Parse(sourceType, script, parserOptions, parserFactory); }
         catch (ParserException) { return; }
 
-        var generatedScript = expectedAst.ToJavascriptString();
+        var generatedScript = expectedAst.ToJavaScriptString();
 
         var actualAst = Parse(sourceType, generatedScript, parserOptions, parserFactory);
 
@@ -773,7 +773,7 @@ if (b == 2) {
         // TODO: more detailed comparison.
         Assert.Equal(expectedAst.DescendantNodesAndSelf(), actualAst.DescendantNodesAndSelf(), NodeTypeEqualityComparer.Default);
 
-        generatedScript = expectedAst.ToJavascriptString(format: true);
+        generatedScript = expectedAst.ToJavaScriptString(format: true);
 
         actualAst = Parse(sourceType, generatedScript, parserOptions, parserFactory);
 

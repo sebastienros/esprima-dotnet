@@ -61,8 +61,8 @@ public abstract class Node
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetAdditionalData(object key, object? value) => _additionalDataContainer.SetData(key, value);
 
-    private static readonly AstToJavascriptOptions s_toStringOptions = AstToJavascriptOptions.Default with { IgnoreExtensions = true };
-    public override string ToString() => this.ToJavascriptString(KnRJavascriptTextFormatterOptions.Default, s_toStringOptions);
+    private static readonly AstToJavaScriptOptions s_toStringOptions = AstToJavaScriptOptions.Default with { IgnoreExtensions = true };
+    public override string ToString() => this.ToJavaScriptString(KnRJavaScriptTextFormatterOptions.Default, s_toStringOptions);
 
     private protected virtual string GetDebuggerDisplay()
     {

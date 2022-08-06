@@ -877,7 +877,7 @@ public sealed partial class Scanner
             if (ch == 'n')
             {
                 Index++;
-                return ScanBigIntLiteral(start, number, JavascriptNumberStyle.Hex);
+                return ScanBigIntLiteral(start, number, JavaScriptNumberStyle.Hex);
             }
             ThrowUnexpectedToken();
         }
@@ -930,7 +930,7 @@ public sealed partial class Scanner
         };
     }
 
-    private enum JavascriptNumberStyle
+    private enum JavaScriptNumberStyle
     {
         Binary,
         Hex,
@@ -938,10 +938,10 @@ public sealed partial class Scanner
         Integer
     }
 
-    private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, JavascriptNumberStyle style)
+    private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, JavaScriptNumberStyle style)
     {
         BigInteger bigInt = 0;
-        if (style == JavascriptNumberStyle.Binary)
+        if (style == JavaScriptNumberStyle.Binary)
         {
             // binary
             foreach (var c in number)
@@ -952,7 +952,7 @@ public sealed partial class Scanner
         }
         else
         {
-            if (style == JavascriptNumberStyle.Hex)
+            if (style == JavaScriptNumberStyle.Hex)
             {
                 var c = number[0];
                 if (c > '7' && Character.IsHexDigit(c))
@@ -964,8 +964,8 @@ public sealed partial class Scanner
 
             var parseStyle = style switch
             {
-                JavascriptNumberStyle.Integer => NumberStyles.Integer,
-                JavascriptNumberStyle.Hex => NumberStyles.HexNumber,
+                JavaScriptNumberStyle.Integer => NumberStyles.Integer,
+                JavaScriptNumberStyle.Hex => NumberStyles.HexNumber,
                 _ => NumberStyles.None
             };
 #if HAS_SPAN_PARSE
@@ -1003,7 +1003,7 @@ public sealed partial class Scanner
             if (ch == 'n')
             {
                 Index++;
-                return ScanBigIntLiteral(start, number, JavascriptNumberStyle.Binary);
+                return ScanBigIntLiteral(start, number, JavaScriptNumberStyle.Binary);
             }
 
             if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
@@ -1061,7 +1061,7 @@ public sealed partial class Scanner
             }
 
             Index++;
-            return ScanBigIntLiteral(start, number.AsSpan(), JavascriptNumberStyle.Octal);
+            return ScanBigIntLiteral(start, number.AsSpan(), JavaScriptNumberStyle.Octal);
         }
 
         if (Character.IsIdentifierStart(ch) || Character.IsDecimalDigit(ch))
@@ -1267,7 +1267,7 @@ public sealed partial class Scanner
             }
 
             Index++;
-            return ScanBigIntLiteral(start, sb.ToString().AsSpan(), JavascriptNumberStyle.Integer);
+            return ScanBigIntLiteral(start, sb.ToString().AsSpan(), JavaScriptNumberStyle.Integer);
         }
 
         if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
