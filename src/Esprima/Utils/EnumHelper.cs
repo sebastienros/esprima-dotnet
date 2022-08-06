@@ -17,26 +17,26 @@ internal static class EnumHelper
     // In case System.Runtime.CompilerServices.Unsafe becomes available, these methods should be replaced with a generic implementation.
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this AstToJavascriptConverter.BinaryOperationFlags flags, AstToJavascriptConverter.BinaryOperationFlags flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this AstToJavaScriptConverter.BinaryOperationFlags flags, AstToJavaScriptConverter.BinaryOperationFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this AstToJavascriptConverter.StatementFlags flags, AstToJavascriptConverter.StatementFlags flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this AstToJavaScriptConverter.StatementFlags flags, AstToJavaScriptConverter.StatementFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this AstToJavascriptConverter.ExpressionFlags flags, AstToJavascriptConverter.ExpressionFlags flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this AstToJavaScriptConverter.ExpressionFlags flags, AstToJavaScriptConverter.ExpressionFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this JavascriptTextWriter.TriviaType flags, JavascriptTextWriter.TriviaType flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this JavaScriptTextWriter.TriviaType flags, JavaScriptTextWriter.TriviaType flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this JavascriptTextWriter.TriviaFlags flags, JavascriptTextWriter.TriviaFlags flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this JavaScriptTextWriter.TriviaFlags flags, JavaScriptTextWriter.TriviaFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this JavascriptTextWriter.TokenFlags flags, JavascriptTextWriter.TokenFlags flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this JavaScriptTextWriter.TokenFlags flags, JavaScriptTextWriter.TokenFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this JavascriptTextWriter.StatementFlags flags, JavascriptTextWriter.StatementFlags flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this JavaScriptTextWriter.StatementFlags flags, JavaScriptTextWriter.StatementFlags flag) => (flags & flag) == flag;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasFlagFast(this JavascriptTextWriter.ExpressionFlags flags, JavascriptTextWriter.ExpressionFlags flag) => (flags & flag) == flag;
+    public static bool HasFlagFast(this JavaScriptTextWriter.ExpressionFlags flags, JavaScriptTextWriter.ExpressionFlags flag) => (flags & flag) == flag;
 }

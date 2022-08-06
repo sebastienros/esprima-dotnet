@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
-using static Esprima.Utils.JavascriptTextWriter;
+using static Esprima.Utils.JavaScriptTextWriter;
 
 namespace Esprima.Utils;
 
-partial class AstToJavascriptConverter
+partial class AstToJavaScriptConverter
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected static StatementFlags StatementBodyFlags(bool isRightMost)
@@ -36,7 +36,7 @@ partial class AstToJavascriptConverter
         return flags;
     }
 
-    private protected static readonly Func<AstToJavascriptConverter, Statement, StatementFlags, StatementFlags> s_getCombinedStatementFlags = static (@this, statement, flags) =>
+    private protected static readonly Func<AstToJavaScriptConverter, Statement, StatementFlags, StatementFlags> s_getCombinedStatementFlags = static (@this, statement, flags) =>
         @this.PropagateStatementFlags(flags);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,14 +45,14 @@ partial class AstToJavascriptConverter
         VisitStatement(statement, flags, s_getCombinedStatementFlags);
     }
 
-    protected void VisitStatement(Statement statement, StatementFlags flags, Func<AstToJavascriptConverter, Statement, StatementFlags, StatementFlags> getCombinedFlags)
+    protected void VisitStatement(Statement statement, StatementFlags flags, Func<AstToJavaScriptConverter, Statement, StatementFlags, StatementFlags> getCombinedFlags)
     {
         var originalStatementFlags = _currentStatementFlags;
         _currentStatementFlags = getCombinedFlags(this, statement, flags);
 
-        Writer.StartStatement((JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
+        Writer.StartStatement((JavaScriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
         Visit(statement);
-        Writer.EndStatement((JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
+        Writer.EndStatement((JavaScriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
 
         _currentStatementFlags = originalStatementFlags;
     }
@@ -64,7 +64,7 @@ partial class AstToJavascriptConverter
             (index == count - 1).ToFlag(StatementFlags.IsRightMost | StatementFlags.MayOmitRightMostSemicolon));
     }
 
-    protected void VisitStatementList(in NodeList<Statement> statementList, Func<AstToJavascriptConverter, Statement, int, int, StatementFlags> getCombinedItemFlags)
+    protected void VisitStatementList(in NodeList<Statement> statementList, Func<AstToJavaScriptConverter, Statement, int, int, StatementFlags> getCombinedItemFlags)
     {
         Writer.StartStatementList(statementList.Count, ref _writeContext);
 
@@ -76,14 +76,14 @@ partial class AstToJavascriptConverter
         Writer.EndStatementList(statementList.Count, ref _writeContext);
     }
 
-    protected void VisitStatementListItem(Statement statement, int index, int count, Func<AstToJavascriptConverter, Statement, int, int, StatementFlags> getCombinedFlags)
+    protected void VisitStatementListItem(Statement statement, int index, int count, Func<AstToJavaScriptConverter, Statement, int, int, StatementFlags> getCombinedFlags)
     {
         var originalStatementFlags = _currentStatementFlags;
         _currentStatementFlags = getCombinedFlags(this, statement, index, count);
 
-        Writer.StartStatementListItem(index, count, (JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
+        Writer.StartStatementListItem(index, count, (JavaScriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
         Visit(statement);
-        Writer.EndStatementListItem(index, count, (JavascriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
+        Writer.EndStatementListItem(index, count, (JavaScriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
 
         _currentStatementFlags = originalStatementFlags;
     }
@@ -160,7 +160,7 @@ partial class AstToJavascriptConverter
         return flags;
     }
 
-    private protected static readonly Func<AstToJavascriptConverter, Expression, ExpressionFlags, ExpressionFlags> s_getCombinedRootExpressionFlags = static (@this, expression, flags) =>
+    private protected static readonly Func<AstToJavaScriptConverter, Expression, ExpressionFlags, ExpressionFlags> s_getCombinedRootExpressionFlags = static (@this, expression, flags) =>
         @this.DisambiguateExpression(expression, flags);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -169,7 +169,7 @@ partial class AstToJavascriptConverter
         VisitExpression(expression, flags, s_getCombinedRootExpressionFlags);
     }
 
-    private protected static readonly Func<AstToJavascriptConverter, Expression, ExpressionFlags, ExpressionFlags> s_getCombinedSubExpressionFlags = static (@this, expression, flags) =>
+    private protected static readonly Func<AstToJavaScriptConverter, Expression, ExpressionFlags, ExpressionFlags> s_getCombinedSubExpressionFlags = static (@this, expression, flags) =>
         @this.DisambiguateExpression(expression, @this.PropagateExpressionFlags(flags));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -178,14 +178,14 @@ partial class AstToJavascriptConverter
         VisitExpression(expression, flags, s_getCombinedSubExpressionFlags);
     }
 
-    protected void VisitExpression(Expression expression, ExpressionFlags flags, Func<AstToJavascriptConverter, Expression, ExpressionFlags, ExpressionFlags> getCombinedFlags)
+    protected void VisitExpression(Expression expression, ExpressionFlags flags, Func<AstToJavaScriptConverter, Expression, ExpressionFlags, ExpressionFlags> getCombinedFlags)
     {
         var originalExpressionFlags = _currentExpressionFlags;
         _currentExpressionFlags = getCombinedFlags(this, expression, flags);
 
-        Writer.StartExpression((JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
+        Writer.StartExpression((JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
         Visit(expression);
-        Writer.EndExpression((JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
+        Writer.EndExpression((JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
 
         _currentExpressionFlags = originalExpressionFlags;
     }
@@ -197,7 +197,7 @@ partial class AstToJavascriptConverter
             s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
     }
 
-    protected void VisitExpressionList(in NodeList<Expression> expressionList, Func<AstToJavascriptConverter, Expression, int, int, ExpressionFlags> getCombinedItemFlags)
+    protected void VisitExpressionList(in NodeList<Expression> expressionList, Func<AstToJavaScriptConverter, Expression, int, int, ExpressionFlags> getCombinedItemFlags)
     {
         Writer.StartExpressionList(expressionList.Count, ref _writeContext);
 
@@ -209,14 +209,14 @@ partial class AstToJavascriptConverter
         Writer.EndExpressionList(expressionList.Count, ref _writeContext);
     }
 
-    protected void VisitExpressionListItem(Expression expression, int index, int count, Func<AstToJavascriptConverter, Expression, int, int, ExpressionFlags> getCombinedFlags)
+    protected void VisitExpressionListItem(Expression expression, int index, int count, Func<AstToJavaScriptConverter, Expression, int, int, ExpressionFlags> getCombinedFlags)
     {
         var originalExpressionFlags = _currentExpressionFlags;
         _currentExpressionFlags = getCombinedFlags(this, expression, index, count);
 
-        Writer.StartExpressionListItem(index, count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
+        Writer.StartExpressionListItem(index, count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
         Visit(expression);
-        Writer.EndExpressionListItem(index, count, (JavascriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
+        Writer.EndExpressionListItem(index, count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
 
         _currentExpressionFlags = originalExpressionFlags;
     }
@@ -378,7 +378,7 @@ partial class AstToJavascriptConverter
         VisitAuxiliaryNode(node, static delegate { return null; });
     }
 
-    protected void VisitAuxiliaryNode(Node node, Func<AstToJavascriptConverter, Node, object?> getNodeContext)
+    protected void VisitAuxiliaryNode(Node node, Func<AstToJavaScriptConverter, Node, object?> getNodeContext)
     {
         var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
         _currentAuxiliaryNodeContext = getNodeContext(this, node);
@@ -397,7 +397,7 @@ partial class AstToJavascriptConverter
         VisitAuxiliaryNodeList(in nodeList, separator, static delegate { return null; });
     }
 
-    protected void VisitAuxiliaryNodeList<TNode>(in NodeList<TNode> nodeList, string separator, Func<AstToJavascriptConverter, Node?, int, int, object?> getNodeContext)
+    protected void VisitAuxiliaryNodeList<TNode>(in NodeList<TNode> nodeList, string separator, Func<AstToJavaScriptConverter, Node?, int, int, object?> getNodeContext)
         where TNode : Node
     {
         Writer.StartAuxiliaryNodeList<TNode>(nodeList.Count, ref _writeContext);
@@ -410,7 +410,7 @@ partial class AstToJavascriptConverter
         Writer.EndAuxiliaryNodeList<TNode>(nodeList.Count, ref _writeContext);
     }
 
-    protected void VisitAuxiliaryNodeListItem<TNode>(TNode node, int index, int count, string separator, Func<AstToJavascriptConverter, Node?, int, int, object?> getNodeContext)
+    protected void VisitAuxiliaryNodeListItem<TNode>(TNode node, int index, int count, string separator, Func<AstToJavaScriptConverter, Node?, int, int, object?> getNodeContext)
         where TNode : Node
     {
         var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;

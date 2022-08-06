@@ -23,8 +23,8 @@ public abstract class JsxExpression : Expression
         return visitor is IJsxAstVisitor jsxVisitor ? Accept(jsxVisitor) : AcceptAsExtension(visitor);
     }
 
-    private static readonly AstToJavascriptOptions s_toStringOptions = JsxAstToJavascriptOptions.Default with { IgnoreExtensions = true };
-    public override string ToString() => this.ToJavascriptString(KnRJavascriptTextFormatterOptions.Default, s_toStringOptions);
+    private static readonly AstToJavaScriptOptions s_toStringOptions = JsxAstToJavaScriptOptions.Default with { IgnoreExtensions = true };
+    public override string ToString() => this.ToJavaScriptString(KnRJavaScriptTextFormatterOptions.Default, s_toStringOptions);
 
     private protected override string GetDebuggerDisplay()
     {

@@ -4,9 +4,9 @@ using Esprima.Utils;
 
 namespace Esprima.Tests;
 
-public class JavascriptTextWriterTests
+public class JavaScriptTextWriterTests
 {
-    public record class TestCase(Action<JavascriptTextWriter> Write, string ExpectedUnformatted, string ExpectedFormatted) { }
+    public record class TestCase(Action<JavaScriptTextWriter> Write, string ExpectedUnformatted, string ExpectedFormatted) { }
 
     private static readonly Program s_dummyAst = new Script(
         NodeList.Create<Statement>(new[]
@@ -21,10 +21,10 @@ public class JavascriptTextWriterTests
     private static readonly Dictionary<string, TestCase> s_testCaseDictionary = new()
     {
         ["TwoLineCommentsAtBeginning"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteLineComment("abc", JavascriptTextWriter.TriviaFlags.LeadingNewLineRequired);
-                writer.WriteLineComment(" def", JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteLineComment("abc", JavaScriptTextWriter.TriviaFlags.LeadingNewLineRequired);
+                writer.WriteLineComment(" def", JavaScriptTextWriter.TriviaFlags.None);
                 writer.Finish();
             },
             ExpectedUnformatted: @"//abc
@@ -35,10 +35,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["TwoBlockCommentsAtBeginning_1"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.LeadingNewLineRequired);
-                writer.WriteBlockComment(new[] { " def " }, JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.LeadingNewLineRequired);
+                writer.WriteBlockComment(new[] { " def " }, JavaScriptTextWriter.TriviaFlags.None);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*abc*//* def */",
@@ -47,10 +47,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["TwoBlockCommentsAtBeginning_2"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.TrailingNewLineRequired);
-                writer.WriteBlockComment(new[] { " def " }, JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.TrailingNewLineRequired);
+                writer.WriteBlockComment(new[] { " def " }, JavaScriptTextWriter.TriviaFlags.None);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*abc*/
@@ -61,10 +61,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["TwoBlockCommentsAtBeginning_3"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.None);
-                writer.WriteBlockComment(new[] { " def " }, JavascriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { " def " }, JavaScriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*abc*/
@@ -75,10 +75,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["MultiLineBlockAndBlockCommentsAtBeginning_1"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "!", " * abc", " " }, JavascriptTextWriter.TriviaFlags.None);
-                writer.WriteBlockComment(new[] { " def " }, JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { "!", " * abc", " " }, JavaScriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { " def " }, JavaScriptTextWriter.TriviaFlags.None);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*!
@@ -91,10 +91,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["MultiLineBlockAndBlockCommentsAtBeginning_2"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "!", " * abc", " " }, JavascriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
-                writer.WriteBlockComment(new[] { " def " }, JavascriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
+                writer.WriteBlockComment(new[] { "!", " * abc", " " }, JavaScriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
+                writer.WriteBlockComment(new[] { " def " }, JavaScriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*!
@@ -109,10 +109,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["LineAndBlockCommentsAtBeginning"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteLineComment("abc", JavascriptTextWriter.TriviaFlags.None);
-                writer.WriteBlockComment(new[] { " def " }, JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteLineComment("abc", JavaScriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { " def " }, JavaScriptTextWriter.TriviaFlags.None);
                 writer.Finish();
             },
             ExpectedUnformatted: @"//abc
@@ -123,10 +123,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["BlockAndLineCommentsAtBeginning_1"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.None);
-                writer.WriteLineComment(" def", JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.None);
+                writer.WriteLineComment(" def", JavaScriptTextWriter.TriviaFlags.None);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*abc*/// def",
@@ -135,10 +135,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["BlockAndLineCommentsAtBeginning_2"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.TrailingNewLineRequired);
-                writer.WriteLineComment(" def", JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.TrailingNewLineRequired);
+                writer.WriteLineComment(" def", JavaScriptTextWriter.TriviaFlags.None);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*abc*/
@@ -149,10 +149,10 @@ public class JavascriptTextWriterTests
         ),
 
         ["BlockAndLineCommentsAtBeginning_3"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.None);
-                writer.WriteLineComment(" def", JavascriptTextWriter.TriviaFlags.LeadingNewLineRequired);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.None);
+                writer.WriteLineComment(" def", JavaScriptTextWriter.TriviaFlags.LeadingNewLineRequired);
                 writer.Finish();
             },
             ExpectedUnformatted: @"/*abc*/
@@ -163,19 +163,19 @@ public class JavascriptTextWriterTests
         ),
 
         ["LineCommentBetweenTokens_1"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                var writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                var writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
-                writer.WriteLineComment("abc", JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteLineComment("abc", JavaScriptTextWriter.TriviaFlags.None);
 
                 var identifier = functionDeclaration.Id!;
-                writeContext = new JavascriptTextWriter.WriteContext(functionDeclaration, identifier);
+                writeContext = new JavaScriptTextWriter.WriteContext(functionDeclaration, identifier);
                 writeContext.SetNodeProperty(nameof(identifier.Name), node => node.As<Identifier>().Name);
-                writer.WriteIdentifier(identifier.Name, JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writer.WriteIdentifier(identifier.Name, JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -186,19 +186,19 @@ func"
         ),
 
         ["LineCommentBetweenTokens_2"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                var writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                var writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
-                writer.WriteLineComment("abc", JavascriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
+                writer.WriteLineComment("abc", JavaScriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
 
                 var identifier = functionDeclaration.Id!;
-                writeContext = new JavascriptTextWriter.WriteContext(functionDeclaration, identifier);
+                writeContext = new JavaScriptTextWriter.WriteContext(functionDeclaration, identifier);
                 writeContext.SetNodeProperty(nameof(identifier.Name), node => node.As<Identifier>().Name);
-                writer.WriteIdentifier(identifier.Name, JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writer.WriteIdentifier(identifier.Name, JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -211,18 +211,18 @@ func"
         ),
 
         ["LineCommentBetweenTokens_3"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
-                var writeContext = new JavascriptTextWriter.WriteContext(s_dummyAst, blockStatement);
+                var writeContext = new JavaScriptTextWriter.WriteContext(s_dummyAst, blockStatement);
                 writer.StartBlock(blockStatement.Body.Count, ref writeContext);
                 writer.StartStatementList(blockStatement.Body.Count, ref writeContext);
-                writer.StartStatementListItem(0, 1, JavascriptTextWriter.StatementFlags.MayOmitRightMostSemicolon | JavascriptTextWriter.StatementFlags.IsRightMost, ref writeContext);
+                writer.StartStatementListItem(0, 1, JavaScriptTextWriter.StatementFlags.MayOmitRightMostSemicolon | JavaScriptTextWriter.StatementFlags.IsRightMost, ref writeContext);
 
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteLineComment("abc", JavascriptTextWriter.TriviaFlags.None);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteLineComment("abc", JavaScriptTextWriter.TriviaFlags.None);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -234,18 +234,18 @@ function",
         ),
 
         ["LineCommentBetweenTokens_4"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
-                var writeContext = new JavascriptTextWriter.WriteContext(s_dummyAst, blockStatement);
+                var writeContext = new JavaScriptTextWriter.WriteContext(s_dummyAst, blockStatement);
                 writer.StartBlock(blockStatement.Body.Count, ref writeContext);
                 writer.StartStatementList(blockStatement.Body.Count, ref writeContext);
-                writer.StartStatementListItem(0, 1, JavascriptTextWriter.StatementFlags.MayOmitRightMostSemicolon | JavascriptTextWriter.StatementFlags.IsRightMost, ref writeContext);
+                writer.StartStatementListItem(0, 1, JavaScriptTextWriter.StatementFlags.MayOmitRightMostSemicolon | JavaScriptTextWriter.StatementFlags.IsRightMost, ref writeContext);
 
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteLineComment("abc", JavascriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteLineComment("abc", JavaScriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -259,19 +259,19 @@ function",
 
 
         ["BlockCommentBetweenTokens_1"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                var writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                var writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.None);
 
                 var identifier = functionDeclaration.Id!;
-                writeContext = new JavascriptTextWriter.WriteContext(functionDeclaration, identifier);
+                writeContext = new JavaScriptTextWriter.WriteContext(functionDeclaration, identifier);
                 writeContext.SetNodeProperty(nameof(identifier.Name), node => node.As<Identifier>().Name);
-                writer.WriteIdentifier(identifier.Name, JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writer.WriteIdentifier(identifier.Name, JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -280,19 +280,19 @@ function",
         ),
 
         ["BlockCommentBetweenTokens_2a"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                var writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                var writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.LeadingNewLineRequired);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.LeadingNewLineRequired);
 
                 var identifier = functionDeclaration.Id!;
-                writeContext = new JavascriptTextWriter.WriteContext(functionDeclaration, identifier);
+                writeContext = new JavaScriptTextWriter.WriteContext(functionDeclaration, identifier);
                 writeContext.SetNodeProperty(nameof(identifier.Name), node => node.As<Identifier>().Name);
-                writer.WriteIdentifier(identifier.Name, JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writer.WriteIdentifier(identifier.Name, JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -303,19 +303,19 @@ function",
         ),
 
         ["BlockCommentBetweenTokens_2b"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                var writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                var writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.TrailingNewLineRequired);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.TrailingNewLineRequired);
 
                 var identifier = functionDeclaration.Id!;
-                writeContext = new JavascriptTextWriter.WriteContext(functionDeclaration, identifier);
+                writeContext = new JavaScriptTextWriter.WriteContext(functionDeclaration, identifier);
                 writeContext.SetNodeProperty(nameof(identifier.Name), node => node.As<Identifier>().Name);
-                writer.WriteIdentifier(identifier.Name, JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writer.WriteIdentifier(identifier.Name, JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -326,19 +326,19 @@ func"
         ),
 
         ["BlockCommentBetweenTokens_2c"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                var writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                var writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
 
                 var identifier = functionDeclaration.Id!;
-                writeContext = new JavascriptTextWriter.WriteContext(functionDeclaration, identifier);
+                writeContext = new JavaScriptTextWriter.WriteContext(functionDeclaration, identifier);
                 writeContext.SetNodeProperty(nameof(identifier.Name), node => node.As<Identifier>().Name);
-                writer.WriteIdentifier(identifier.Name, JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writer.WriteIdentifier(identifier.Name, JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -351,13 +351,13 @@ func"
         ),
 
         ["BlockCommentBetweenTokens_3"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
-                var writeContext = new JavascriptTextWriter.WriteContext(s_dummyAst, blockStatement);
+                var writeContext = new JavaScriptTextWriter.WriteContext(s_dummyAst, blockStatement);
                 writer.StartBlock(0, ref writeContext);
 
-                writer.WriteBlockComment(new[] { "abc" }, JavascriptTextWriter.TriviaFlags.None);
+                writer.WriteBlockComment(new[] { "abc" }, JavaScriptTextWriter.TriviaFlags.None);
 
                 writer.StartStatementList(0, ref writeContext);
                 writer.EndStatementList(0, ref writeContext);
@@ -370,18 +370,18 @@ func"
         ),
 
         ["BlockCommentBetweenTokens_4"] = new TestCase(
-            Write: static (JavascriptTextWriter writer) =>
+            Write: static (JavaScriptTextWriter writer) =>
             {
                 var blockStatement = s_dummyAst.Body[0].As<BlockStatement>();
-                var writeContext = new JavascriptTextWriter.WriteContext(s_dummyAst, blockStatement);
+                var writeContext = new JavaScriptTextWriter.WriteContext(s_dummyAst, blockStatement);
                 writer.StartBlock(blockStatement.Body.Count, ref writeContext);
                 writer.StartStatementList(blockStatement.Body.Count, ref writeContext);
-                writer.StartStatementListItem(0, 1, JavascriptTextWriter.StatementFlags.MayOmitRightMostSemicolon | JavascriptTextWriter.StatementFlags.IsRightMost, ref writeContext);
+                writer.StartStatementListItem(0, 1, JavaScriptTextWriter.StatementFlags.MayOmitRightMostSemicolon | JavaScriptTextWriter.StatementFlags.IsRightMost, ref writeContext);
 
                 var functionDeclaration = blockStatement.Body[0].As<FunctionDeclaration>();
-                writeContext = new JavascriptTextWriter.WriteContext(blockStatement, functionDeclaration);
-                writer.WriteBlockComment(new[] { "", " * abc", " " }, JavascriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
-                writer.WriteKeyword("function", JavascriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
+                writeContext = new JavaScriptTextWriter.WriteContext(blockStatement, functionDeclaration);
+                writer.WriteBlockComment(new[] { "", " * abc", " " }, JavaScriptTextWriter.TriviaFlags.SurroundingNewLineRequired);
+                writer.WriteKeyword("function", JavaScriptTextWriter.TokenFlags.LeadingSpaceRecommended, ref writeContext);
 
                 writer.Finish();
             },
@@ -407,7 +407,7 @@ function",
         var testCase = s_testCaseDictionary[testCaseName];
 
         var stringWriter = new StringWriter();
-        var writer = new JavascriptTextWriter(stringWriter, JavascriptTextWriterOptions.Default);
+        var writer = new JavaScriptTextWriter(stringWriter, JavaScriptTextWriterOptions.Default);
         testCase.Write(writer);
 
         var expected = Regex.Replace(testCase.ExpectedUnformatted, @"\r\n|\n\r|\n|\r", Environment.NewLine);
@@ -421,7 +421,7 @@ function",
         var testCase = s_testCaseDictionary[testCaseName];
 
         var stringWriter = new StringWriter();
-        var writer = new KnRJavascriptTextFormatter(stringWriter, KnRJavascriptTextFormatterOptions.Default);
+        var writer = new KnRJavaScriptTextFormatter(stringWriter, KnRJavaScriptTextFormatterOptions.Default);
         testCase.Write(writer);
 
         var expected = Regex.Replace(testCase.ExpectedFormatted, @"\r\n|\n\r|\n|\r", Environment.NewLine);

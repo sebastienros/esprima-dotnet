@@ -3,26 +3,26 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public record class KnRJavascriptTextFormatterOptions : JavascriptTextFormatterOptions
+public record class KnRJavaScriptTextFormatterOptions : JavaScriptTextFormatterOptions
 {
-    public static new readonly KnRJavascriptTextFormatterOptions Default = new();
+    public static new readonly KnRJavaScriptTextFormatterOptions Default = new();
 
-    public KnRJavascriptTextFormatterOptions()
+    public KnRJavaScriptTextFormatterOptions()
     {
         KeepEmptyBlockBodyInLine = true;
     }
 
     public bool UseEgyptianBraces { get; init; } = true;
 
-    protected override JavascriptTextFormatter CreateFormatter(TextWriter writer) => new KnRJavascriptTextFormatter(writer, this);
+    protected override JavaScriptTextFormatter CreateFormatter(TextWriter writer) => new KnRJavaScriptTextFormatter(writer, this);
 }
 
 /// <summary>
-/// Javascript code formatter which implements the most common <see href="https://en.wikipedia.org/wiki/Indentation_style#K&amp;R_style">K&amp;R style</see>.
+/// JavaScript code formatter which implements the most common <see href="https://en.wikipedia.org/wiki/Indentation_style#K&amp;R_style">K&amp;R style</see>.
 /// </summary>
-public class KnRJavascriptTextFormatter : JavascriptTextFormatter
+public class KnRJavaScriptTextFormatter : JavaScriptTextFormatter
 {
-    public KnRJavascriptTextFormatter(TextWriter writer, KnRJavascriptTextFormatterOptions options) : base(writer, options)
+    public KnRJavaScriptTextFormatter(TextWriter writer, KnRJavaScriptTextFormatterOptions options) : base(writer, options)
     {
         UseEgyptianBraces = options.UseEgyptianBraces;
     }

@@ -1,20 +1,20 @@
 ﻿using Esprima.Ast;
 using Esprima.Ast.Jsx;
-using static Esprima.Utils.JavascriptTextWriter;
+using static Esprima.Utils.JavaScriptTextWriter;
 
 namespace Esprima.Utils.Jsx;
 
-public record class JsxAstToJavascriptOptions : AstToJavascriptOptions
+public record class JsxAstToJavaScriptOptions : AstToJavaScriptOptions
 {
-    public static new readonly JsxAstToJavascriptOptions Default = new();
+    public static new readonly JsxAstToJavaScriptOptions Default = new();
 
-    protected internal override AstToJavascriptConverter CreateConverter(JavascriptTextWriter writer) => new JsxAstToJavascriptConverter(writer, this);
+    protected internal override AstToJavaScriptConverter CreateConverter(JavaScriptTextWriter writer) => new JsxAstToJavaScriptConverter(writer, this);
 }
 
 // JSX spec: https://facebook.github.io/jsx/
-public class JsxAstToJavascriptConverter : AstToJavascriptConverter, IJsxAstVisitor
+public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisitor
 {
-    public JsxAstToJavascriptConverter(JavascriptTextWriter writer, JsxAstToJavascriptOptions options) : base(writer, options)
+    public JsxAstToJavaScriptConverter(JavaScriptTextWriter writer, JsxAstToJavaScriptOptions options) : base(writer, options)
     {
     }
 

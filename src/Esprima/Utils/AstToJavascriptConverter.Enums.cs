@@ -1,6 +1,6 @@
 ﻿namespace Esprima.Utils;
 
-partial class AstToJavascriptConverter
+partial class AstToJavaScriptConverter
 {
     [Flags]
     protected internal enum BinaryOperationFlags
@@ -16,10 +16,10 @@ partial class AstToJavascriptConverter
     {
         None = 0,
 
-        NeedsSemicolon = JavascriptTextWriter.StatementFlags.NeedsSemicolon,
-        MayOmitRightMostSemicolon = JavascriptTextWriter.StatementFlags.MayOmitRightMostSemicolon,
-        IsRightMost = JavascriptTextWriter.StatementFlags.IsRightMost,
-        IsStatementBody = JavascriptTextWriter.StatementFlags.IsStatementBody,
+        NeedsSemicolon = JavaScriptTextWriter.StatementFlags.NeedsSemicolon,
+        MayOmitRightMostSemicolon = JavaScriptTextWriter.StatementFlags.MayOmitRightMostSemicolon,
+        IsRightMost = JavaScriptTextWriter.StatementFlags.IsRightMost,
+        IsStatementBody = JavaScriptTextWriter.StatementFlags.IsStatementBody,
 
         NestedVariableDeclaration = 1 << 16,
     }
@@ -29,12 +29,12 @@ partial class AstToJavascriptConverter
     {
         None = 0,
 
-        NeedsBrackets = JavascriptTextWriter.ExpressionFlags.NeedsBrackets,
-        IsLeftMost = JavascriptTextWriter.ExpressionFlags.IsLeftMost,
+        NeedsBrackets = JavaScriptTextWriter.ExpressionFlags.NeedsBrackets,
+        IsLeftMost = JavaScriptTextWriter.ExpressionFlags.IsLeftMost,
 
-        SpaceBeforeBracketsRecommended = JavascriptTextWriter.ExpressionFlags.SpaceBeforeBracketsRecommended,
-        SpaceAfterBracketsRecommended = JavascriptTextWriter.ExpressionFlags.SpaceAfterBracketsRecommended,
-        SpaceAroundBracketsRecommended = JavascriptTextWriter.ExpressionFlags.SpaceAroundBracketsRecommended,
+        SpaceBeforeBracketsRecommended = JavaScriptTextWriter.ExpressionFlags.SpaceBeforeBracketsRecommended,
+        SpaceAfterBracketsRecommended = JavaScriptTextWriter.ExpressionFlags.SpaceAfterBracketsRecommended,
+        SpaceAroundBracketsRecommended = JavaScriptTextWriter.ExpressionFlags.SpaceAroundBracketsRecommended,
 
         IsMethod = 1 << 16,
 

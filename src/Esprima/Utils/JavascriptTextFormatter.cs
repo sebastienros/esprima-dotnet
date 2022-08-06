@@ -3,7 +3,7 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public abstract record class JavascriptTextFormatterOptions : JavascriptTextWriterOptions
+public abstract record class JavaScriptTextFormatterOptions : JavaScriptTextWriterOptions
 {
     public string? Indent { get; init; }
     public bool KeepSingleStatementBodyInLine { get; init; }
@@ -11,20 +11,20 @@ public abstract record class JavascriptTextFormatterOptions : JavascriptTextWrit
     public int MultiLineArrayLiteralThreshold { get; init; } = 7;
     public int MultiLineObjectLiteralThreshold { get; init; } = 3;
 
-    protected abstract JavascriptTextFormatter CreateFormatter(TextWriter writer);
+    protected abstract JavaScriptTextFormatter CreateFormatter(TextWriter writer);
 
-    protected internal sealed override JavascriptTextWriter CreateWriter(TextWriter writer) => CreateFormatter(writer);
+    protected internal sealed override JavaScriptTextWriter CreateWriter(TextWriter writer) => CreateFormatter(writer);
 }
 
 /// <summary>
-/// Base class for Javascript code formatters.
+/// Base class for JavaScript code formatters.
 /// </summary>
-public abstract class JavascriptTextFormatter : JavascriptTextWriter
+public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
 {
     private readonly string _indent;
     private int _indentionLevel;
 
-    public JavascriptTextFormatter(TextWriter writer, JavascriptTextFormatterOptions options) : base(writer, options)
+    public JavaScriptTextFormatter(TextWriter writer, JavaScriptTextFormatterOptions options) : base(writer, options)
     {
         if (!string.IsNullOrWhiteSpace(options.Indent))
         {
