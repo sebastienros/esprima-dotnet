@@ -486,7 +486,7 @@ public abstract class JavascriptTextFormatter : JavascriptTextWriter
 
     public override void Finish()
     {
-        if (LastTriviaType != TriviaType.EndOfLine)
+        if (LastTriviaType.HasFlagFast(CommentTriviaFlag))
         {
             WriteEndOfLine();
         }

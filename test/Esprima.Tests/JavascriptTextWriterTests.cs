@@ -1,4 +1,5 @@
-﻿using Esprima.Ast;
+﻿using System.Text.RegularExpressions;
+using Esprima.Ast;
 using Esprima.Utils;
 
 namespace Esprima.Tests;
@@ -181,8 +182,7 @@ public class JavascriptTextWriterTests
             ExpectedUnformatted: @"function//abc
 func",
             ExpectedFormatted: @"function //abc
-func
-"
+func"
         ),
 
         ["LineCommentBetweenTokens_2"] = new TestCase(
@@ -207,8 +207,7 @@ func
 func",
             ExpectedFormatted: @"function
 //abc
-func
-"
+func"
         ),
 
         ["LineCommentBetweenTokens_3"] = new TestCase(
@@ -231,8 +230,7 @@ func
 function",
             ExpectedFormatted: @"{
   //abc
-  function
-"
+  function"
         ),
 
         ["LineCommentBetweenTokens_4"] = new TestCase(
@@ -256,8 +254,7 @@ function",
 function",
             ExpectedFormatted: @"{
   //abc
-  function
-"
+  function"
         ),
 
 
@@ -279,8 +276,7 @@ function",
                 writer.Finish();
             },
             ExpectedUnformatted: @"function/*abc*/func",
-            ExpectedFormatted: @"function /*abc*/ func
-"
+            ExpectedFormatted: @"function /*abc*/ func"
         ),
 
         ["BlockCommentBetweenTokens_2a"] = new TestCase(
@@ -303,8 +299,7 @@ function",
             ExpectedUnformatted: @"function
 /*abc*/func",
             ExpectedFormatted: @"function
-/*abc*/ func
-"
+/*abc*/ func"
         ),
 
         ["BlockCommentBetweenTokens_2b"] = new TestCase(
@@ -327,8 +322,7 @@ function",
             ExpectedUnformatted: @"function/*abc*/
 func",
             ExpectedFormatted: @"function /*abc*/
-func
-"
+func"
         ),
 
         ["BlockCommentBetweenTokens_2c"] = new TestCase(
@@ -353,8 +347,7 @@ func
 func",
             ExpectedFormatted: @"function
 /*abc*/
-func
-"
+func"
         ),
 
         ["BlockCommentBetweenTokens_3"] = new TestCase(
@@ -373,8 +366,7 @@ func
                 writer.Finish();
             },
             ExpectedUnformatted: @"{/*abc*/}",
-            ExpectedFormatted: @"{ /*abc*/ }
-"
+            ExpectedFormatted: @"{ /*abc*/ }"
         ),
 
         ["BlockCommentBetweenTokens_4"] = new TestCase(
@@ -402,8 +394,7 @@ function",
   /*
    * abc
    */
-  function
-"
+  function"
         ),
     };
 
@@ -419,7 +410,8 @@ function",
         var writer = new JavascriptTextWriter(stringWriter, JavascriptTextWriterOptions.Default);
         testCase.Write(writer);
 
-        Assert.Equal(testCase.ExpectedUnformatted, stringWriter.ToString());
+        var expected = Regex.Replace(testCase.ExpectedUnformatted, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+        Assert.Equal(expected, stringWriter.ToString());
     }
 
     [Theory]
@@ -432,6 +424,7 @@ function",
         var writer = new KnRJavascriptTextFormatter(stringWriter, KnRJavascriptTextFormatterOptions.Default);
         testCase.Write(writer);
 
-        Assert.Equal(testCase.ExpectedFormatted, stringWriter.ToString());
+        var expected = Regex.Replace(testCase.ExpectedFormatted, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+        Assert.Equal(expected, stringWriter.ToString());
     }
 }
