@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 using Esprima.Test;
 using Esprima.Utils;
-using Xunit;
 
 namespace Esprima.Tests;
 
