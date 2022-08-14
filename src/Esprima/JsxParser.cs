@@ -483,7 +483,7 @@ public class JsxParser : JavaScriptParser
             }
 
             var id = _scanner.Source.Slice(start, _scanner.Index);
-            return Token.Create(TokenType.JsxIdentifier, id, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return JsxToken.CreateIdentifier(id, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         return this._scanner.Lex();
@@ -537,7 +537,7 @@ public class JsxParser : JavaScriptParser
 
         _lastMarker = _scanner.GetMarker();
 
-        var token = Token.Create(TokenType.JsxText, text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+        var token = JsxToken.CreateText(text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
 
         if (text.Length > 0 && _config.Tokens)
         {
@@ -575,7 +575,7 @@ public class JsxParser : JavaScriptParser
     {
         var node = CreateJsxNode();
         var token = NextJsxToken();
-        if (token.Type != TokenType.JsxIdentifier)
+        if (token.JsxTokenType() != JsxTokenType.Identifier)
         {
             ThrowUnexpectedToken(token);
         }
