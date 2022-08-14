@@ -457,7 +457,7 @@ public sealed partial class Scanner
         // Test: /[\\uD800-\\uFA6D]/u
     }
 
-    public bool ScanHexEscape(char prefix, out char result)
+    private bool ScanHexEscape(char prefix, out char result)
     {
         var len = prefix == 'u' ? 4 : 2;
         var code = 0;
@@ -707,20 +707,12 @@ public sealed partial class Scanner
             Index = restore;
         }
 
-        return new Token
-        {
-            Type = type,
-            Value = id,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        return Token.Create(type, id, start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-punctuators
 
-    public Token ScanPunctuator()
+    private Token ScanPunctuator()
     {
         static string SafeSubstring(string s, int startIndex, int length)
         {
@@ -849,20 +841,12 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        return new Token
-        {
-            Type = TokenType.Punctuator,
-            Value = str,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        return Token.CreatePunctuator(str, start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
 
-    public Token ScanHexLiteral(int start)
+    private Token ScanHexLiteral(int start)
     {
         var number = this.ScanLiteralPart(Character.IsHexDigitFunc, allowNumericSeparator: true, out var hasUpperCase);
 
@@ -918,16 +902,7 @@ public sealed partial class Scanner
             }
         }
 
-        return new Token
-        {
-            Type = TokenType.NumericLiteral,
-            NumericValue = value,
-            Value = value,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
     }
 
     private enum JavaScriptNumberStyle
@@ -947,7 +922,7 @@ public sealed partial class Scanner
             foreach (var c in number)
             {
                 bigInt <<= 1;
-                bigInt += c == '1' ? 1 : 0;
+                bigInt += c == '1' ? BigInteger.One : BigInteger.Zero;
             }
         }
         else
@@ -975,19 +950,10 @@ public sealed partial class Scanner
 #endif
         }
 
-        return new Token
-        {
-            Type = TokenType.BigIntLiteral,
-            Value = bigInt,
-            BigIntValue = bigInt,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        return Token.CreateBigIntLiteral(bigInt, start, end: Index, LineNumber, LineStart);
     }
 
-    public Token ScanBinaryLiteral(int start)
+    private Token ScanBinaryLiteral(int start)
     {
         var number = this.ScanLiteralPart(static c => c is '0' or '1', allowNumericSeparator: true, out _);
 
@@ -1013,21 +979,11 @@ public sealed partial class Scanner
         }
 
         var numberString = number.ToString();
-        var token = new Token
-        {
-            Type = TokenType.NumericLiteral,
-            NumericValue = Convert.ToUInt32(numberString, 2),
-            Value = numberString,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
-
-        return token;
+        var value = Convert.ToUInt32(numberString, 2);
+        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
     }
 
-    public Token ScanOctalLiteral(char prefix, int start, bool isLegacyOctalDigital = false)
+    private Token ScanOctalLiteral(char prefix, int start, bool isLegacyOctalDigital = false)
     {
         var sb = GetStringBuilder();
         var octal = false;
@@ -1079,17 +1035,7 @@ public sealed partial class Scanner
             return ThrowUnexpectedToken<Token>($"Value {number} was either too large or too small for a UInt64.");
         }
 
-        return new Token
-        {
-            Type = TokenType.NumericLiteral,
-            NumericValue = numericValue,
-            Value = number,
-            Octal = octal,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        return Token.CreateNumericLiteral(numericValue, octal, start, end: Index, LineNumber, LineStart);
     }
 
     public bool IsImplicitOctalLiteral()
@@ -1171,7 +1117,7 @@ public sealed partial class Scanner
             : span;
     }
 
-    public Token ScanNumericLiteral(bool strict)
+    private Token ScanNumericLiteral(bool strict)
     {
         var sb = GetStringBuilder();
         var start = Index;
@@ -1275,33 +1221,23 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        var token = new Token
-        {
-            Type = TokenType.NumericLiteral,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
-
         var number = sb.ToString();
 
+        double value;
         if (long.TryParse(
             number,
             NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
             CultureInfo.InvariantCulture,
             out var l))
         {
-            token.NumericValue = l;
-            token.Value = l;
+            value = l;
         }
         else if (double.TryParse(
             number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
             CultureInfo.InvariantCulture,
             out var d))
         {
-            token.NumericValue = d;
-            token.Value = d;
+            value = d;
         }
         else
         {
@@ -1309,16 +1245,15 @@ public sealed partial class Scanner
                 ? double.NegativeInfinity
                 : double.PositiveInfinity;
 
-            token.NumericValue = d;
-            token.Value = d;
+            value = d;
         }
 
-        return token;
+        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-string-literals
 
-    public Token ScanStringLiteral(bool strict)
+    private Token ScanStringLiteral(bool strict)
     {
         var start = Index;
         var quote = Source[start];
@@ -1450,21 +1385,12 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        return new Token
-        {
-            Type = TokenType.StringLiteral,
-            Value = str.ToString(),
-            Octal = octal,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        return Token.CreateStringLiteral(str.ToString(), octal, start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-template-literal-lexical-components
 
-    public Token ScanTemplate()
+    private Token ScanTemplate()
     {
         var cooked = GetStringBuilder();
         var terminated = false;
@@ -1472,7 +1398,7 @@ public sealed partial class Scanner
 
         var head = Source[start] == '`';
         var tail = false;
-        char? notEscapeSequenceHead = null;
+        char notEscapeSequenceHead = default;
         var rawOffset = 2;
 
         ++Index;
@@ -1499,7 +1425,7 @@ public sealed partial class Scanner
 
                 cooked.Append(ch);
             }
-            else if (notEscapeSequenceHead is not null)
+            else if (notEscapeSequenceHead != default)
             {
                 continue;
             }
@@ -1631,19 +1557,10 @@ public sealed partial class Scanner
             _curlyStack.RemoveAt(_curlyStack.Count - 1);
         }
 
-        return new Token
-        {
-            Type = TokenType.Template,
-            Value = notEscapeSequenceHead is null ? cooked.ToString() : null,
-            RawTemplate = Source.Slice(start + 1, Index - rawOffset),
-            Head = head,
-            Tail = tail,
-            NotEscapeSequenceHead = notEscapeSequenceHead,
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        var rawTemplate = Source.Slice(start + 1, Index - rawOffset);
+        var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
+
+        return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
     }
 
     private static string FromCharCode(uint[] codeUnits)
@@ -2366,7 +2283,7 @@ public sealed partial class Scanner
         return pattern;
     }
 
-    public Token ScanRegExpBody()
+    private string ScanRegExpBody()
     {
         var ch = Source[Index];
         //assert(ch == '/', 'Regular expression literal must start with a slash');
@@ -2422,15 +2339,12 @@ public sealed partial class Scanner
         }
 
         // Exclude leading and trailing slash.
-        var body = str.ToString();
-        return new Token { Value = body.Substring(1, body.Length - 2), Literal = body };
+        var body = str.ToString(1, str.Length - 2);
+        return body;
     }
 
-    private readonly record struct RegExpFlagsScanResult(string Flags, string Literal);
-
-    private RegExpFlagsScanResult ScanRegExpFlags()
+    private string ScanRegExpFlags()
     {
-        var str = "";
         var flags = "";
         while (!Eof())
         {
@@ -2451,54 +2365,39 @@ public sealed partial class Scanner
                     if (ScanHexEscape('u', out ch))
                     {
                         flags += ch;
-                        for (str += "\\u"; restore < Index; ++restore)
-                        {
-                            str += Source[restore];
-                        }
                     }
                     else
                     {
                         Index = restore;
                         flags += 'u';
-                        str += "\\u";
                     }
 
                     TolerateUnexpectedToken();
                 }
                 else
                 {
-                    str += '\\';
                     TolerateUnexpectedToken();
                 }
             }
             else
             {
                 flags += ch;
-                str += ch;
             }
         }
 
-        return new(flags, str);
+        return flags;
     }
 
-    public Token ScanRegExp()
+    internal Token ScanRegExp()
     {
         var start = Index;
 
         var body = ScanRegExpBody();
-        var (flags, literal) = ScanRegExpFlags();
+        var flags = ScanRegExpFlags();
 
-        return new Token
-        {
-            Type = TokenType.RegularExpression,
-            Value = _adaptRegexp ? ParseRegex((string) body.Value!, flags, _regexTimeout) : null,
-            Literal = body.Literal + literal,
-            RegexValue = new RegexValue((string) body.Value!, flags),
-            LineNumber = LineNumber,
-            LineStart = LineStart,
-            Start = start,
-            End = Index
-        };
+        var value = _adaptRegexp ? ParseRegex(body, flags, _regexTimeout) : null;
+
+        return Token.CreateRegexLiteral(value, new RegexValue(body, flags), start, end: Index, LineNumber, LineStart);
     }
 
     public Token Lex() => Lex(new LexOptions());
@@ -2507,14 +2406,7 @@ public sealed partial class Scanner
     {
         if (Eof())
         {
-            return new Token
-            {
-                Type = TokenType.EOF,
-                LineNumber = LineNumber,
-                LineStart = LineStart,
-                Start = Index,
-                End = Index
-            };
+            return Token.CreateEof(Index, LineNumber, LineStart);
         }
 
         var cp = Source.CharCodeAt(Index);
@@ -2665,6 +2557,8 @@ public sealed partial class Scanner
 
         return options;
     }
+
+    internal Marker GetMarker() => new(Index, LineNumber, Column: Index - LineStart);
 }
 
 internal readonly record struct OctalValue(int Code, bool Octal);

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using DiffEngine;
 using Esprima.Ast;
 using Esprima.Utils;
 using Esprima.Utils.Jsx;
@@ -70,6 +71,13 @@ public class Fixtures
         {
             var actualString = actualJObject.ToString();
             var expectedString = expectedJObject.ToString();
+
+            var file1 = Path.GetTempFileName() + ".json";
+            var file2 = Path.GetTempFileName() + ".json";
+            File.WriteAllText(file1, expectedString);
+            File.WriteAllText(file2, actualString);
+            DiffRunner.Launch(file1, file2);
+
             Assert.Equal(expectedString, actualString);
         }
     }

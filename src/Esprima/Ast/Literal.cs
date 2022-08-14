@@ -7,18 +7,26 @@ namespace Esprima.Ast;
 
 public sealed class Literal : Expression
 {
+    private static readonly object _boxedTrue = true;
+    private static readonly object _boxedFalse = false;
+
     internal Literal(TokenType tokenType, object? value, string raw) : base(Nodes.Literal)
     {
         TokenType = tokenType;
         Value = value;
         Raw = raw;
+
+        if (tokenType == TokenType.NumericLiteral)
+        {
+            NumericValue = (double) value!;
+        }
     }
 
     public Literal(string? value, string raw) : this(TokenType.StringLiteral, value, raw)
     {
     }
 
-    public Literal(bool value, string raw) : this(TokenType.BooleanLiteral, value, raw)
+    public Literal(bool value, string raw) : this(TokenType.BooleanLiteral, value ? _boxedTrue : _boxedFalse, raw)
     {
         NumericValue = value ? 1 : 0;
     }
@@ -48,7 +56,7 @@ public sealed class Literal : Expression
     public RegexValue? Regex { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public string? StringValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.StringLiteral ? Value as string : null; }
-    public bool BooleanValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BooleanLiteral && NumericValue != 0; }
+    public bool BooleanValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BooleanLiteral && ReferenceEquals(Value, _boxedTrue); }
     public double NumericValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Regex? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.RegularExpression ? (Regex?) Value : null; }
     public BigInteger? BigIntValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null; }

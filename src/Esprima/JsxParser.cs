@@ -15,7 +15,7 @@ public class JsxParser : JavaScriptParser
     private sealed class MetaJsxElement
     {
         public MetaJsxElement(
-            Marker node,
+            in Marker node,
             JsxExpression opening,
             JsxExpression? closing,
             List<JsxExpression> children)
@@ -413,15 +413,7 @@ public class JsxParser : JavaScriptParser
         if (cp is (60 or 62 or 47 or 58 or 61 or 123 or 125))
         {
             var value = _scanner.Source[_scanner.Index++];
-            return new()
-            {
-                Type = TokenType.Punctuator,
-                Value = value.ToString(),
-                LineNumber = _scanner.LineNumber,
-                LineStart = _scanner.LineStart,
-                Start = _scanner.Index - 1,
-                End = _scanner.Index
-            };
+            return Token.CreatePunctuator(value.ToString(), start: _scanner.Index - 1, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         // " '
@@ -448,15 +440,7 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            return new()
-            {
-                Type = TokenType.StringLiteral,
-                Value = str,
-                LineNumber = _scanner.LineNumber,
-                LineStart = _scanner.LineStart,
-                Start = start,
-                End = _scanner.Index
-            };
+            return Token.CreateStringLiteral(str, octal: false, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         if (cp == 46)
@@ -466,29 +450,13 @@ public class JsxParser : JavaScriptParser
             var value = (n1 == '.' && n2 == '.') ? "..." : ".";
             var start = _scanner.Index;
             _scanner.Index += value.Length;
-            return new()
-            {
-                Type = TokenType.Punctuator,
-                Value = value,
-                LineNumber = _scanner.LineNumber,
-                LineStart = _scanner.LineStart,
-                Start = start,
-                End = _scanner.Index
-            };
+            return Token.CreatePunctuator(value, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         // `
         if (cp == 96)
         {
-            return new()
-            {
-                Type = TokenType.Template,
-                Value = "",
-                LineNumber = _scanner.LineNumber,
-                LineStart = _scanner.LineStart,
-                Start = _scanner.Index,
-                End = _scanner.Index
-            };
+            return Token.CreateTemplate(cooked: null, rawTemplate: "", head: false, tail: false, notEscapeSequenceHead: ' ', start: _scanner.Index, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         // Identifer can not contain backslash (char code 92).
@@ -515,15 +483,7 @@ public class JsxParser : JavaScriptParser
             }
 
             var id = _scanner.Source.Slice(start, _scanner.Index);
-            return new JsxToken()
-            {
-                Type = JsxTokenType.JsxIdentifier,
-                Value = id,
-                LineNumber = _scanner.LineNumber,
-                LineStart = _scanner.LineStart,
-                Start = start,
-                End = _scanner.Index
-            };
+            return Token.Create(TokenType.JsxIdentifier, id, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         return this._scanner.Lex();
@@ -532,13 +492,10 @@ public class JsxParser : JavaScriptParser
     private Token NextJsxToken()
     {
         CollectComments();
-        _startMarker.Index = _scanner.Index;
-        _startMarker.Line = _scanner.LineNumber;
-        _startMarker.Column = _scanner.Index - _scanner.LineStart;
+        _startMarker = _scanner.GetMarker();
         var token = this.LexJsx();
-        _lastMarker.Index = _scanner.Index;
-        _lastMarker.Line = _scanner.LineNumber;
-        _lastMarker.Column = _scanner.Index - _scanner.LineStart;
+
+        _lastMarker = _scanner.GetMarker();
 
         if (_config.Tokens)
         {
@@ -550,9 +507,7 @@ public class JsxParser : JavaScriptParser
 
     private Token NextJsxText()
     {
-        _startMarker.Index = _scanner.Index;
-        _startMarker.Line = _scanner.LineNumber;
-        _startMarker.Column = _scanner.Index - _scanner.LineStart;
+        _startMarker = _scanner.GetMarker();
 
         var start = _scanner.Index;
 
@@ -580,19 +535,9 @@ public class JsxParser : JavaScriptParser
             }
         }
 
-        _lastMarker.Index = _scanner.Index;
-        _lastMarker.Line = _scanner.LineNumber;
-        _lastMarker.Column = _scanner.Index - _scanner.LineStart;
+        _lastMarker = _scanner.GetMarker();
 
-        var token = new JsxToken()
-        {
-            Type = JsxTokenType.JsxText,
-            Value = text,
-            LineNumber = _scanner.LineNumber,
-            LineStart = _scanner.LineStart,
-            Start = start,
-            End = _scanner.Index
-        };
+        var token = Token.Create(TokenType.JsxText, text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
 
         if (text.Length > 0 && _config.Tokens)
         {
@@ -630,7 +575,7 @@ public class JsxParser : JavaScriptParser
     {
         var node = CreateJsxNode();
         var token = NextJsxToken();
-        if (token is not JsxToken jsxToken || jsxToken.Type != JsxTokenType.JsxIdentifier)
+        if (token.Type != TokenType.JsxIdentifier)
         {
             ThrowUnexpectedToken(token);
         }
@@ -822,9 +767,7 @@ public class JsxParser : JavaScriptParser
     {
         var node = CreateJsxChildNode();
         CollectComments();
-        _lastMarker.Index = _scanner.Index;
-        _lastMarker.Line = _scanner.LineNumber;
-        _lastMarker.Column = _scanner.Index - _scanner.LineStart;
+        _lastMarker = _scanner.GetMarker();
 
         return Finalize(node, new JsxEmptyExpression());
     }
@@ -867,14 +810,7 @@ public class JsxParser : JavaScriptParser
 
             if (_scanner.Eof())
             {
-                ThrowUnexpectedToken(new Token
-                {
-                    Type = TokenType.EOF,
-                    LineNumber = _scanner.LineNumber,
-                    LineStart = _scanner.LineStart,
-                    Start = _scanner.Index,
-                    End = _scanner.Index
-                });
+                ThrowUnexpectedToken(Token.CreateEof(_scanner.Index, _scanner.LineNumber, _scanner.LineStart));
             }
             if (_scanner.Source[_scanner.Index] == '{')
             {
