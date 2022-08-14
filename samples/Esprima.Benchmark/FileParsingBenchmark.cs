@@ -19,8 +19,6 @@ public class FileParsingBenchmark
         { "angular-1.2.5", null }
     };
 
-    private static readonly ParserOptions parserOptions = new() { Comment = true, Tokens = true };
-
     [GlobalSetup]
     public void Setup()
     {
@@ -43,7 +41,7 @@ public class FileParsingBenchmark
     [Benchmark]
     public void ParseProgram()
     {
-        var parser = new JavaScriptParser(files[FileName], parserOptions);
+        var parser = new JavaScriptParser(files[FileName]);
         parser.ParseScript();
     }
 }
