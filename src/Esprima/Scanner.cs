@@ -457,7 +457,7 @@ public sealed partial class Scanner
         // Test: /[\\uD800-\\uFA6D]/u
     }
 
-    public bool ScanHexEscape(char prefix, out char result)
+    private bool ScanHexEscape(char prefix, out char result)
     {
         var len = prefix == 'u' ? 4 : 2;
         var code = 0;
@@ -1560,7 +1560,7 @@ public sealed partial class Scanner
         var rawTemplate = Source.Slice(start + 1, Index - rawOffset);
         var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
 
-        return Token.CreteTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
+        return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
     }
 
     private static string FromCharCode(uint[] codeUnits)
@@ -2283,7 +2283,7 @@ public sealed partial class Scanner
         return pattern;
     }
 
-    public string ScanRegExpBody()
+    private string ScanRegExpBody()
     {
         var ch = Source[Index];
         //assert(ch == '/', 'Regular expression literal must start with a slash');
@@ -2388,7 +2388,7 @@ public sealed partial class Scanner
         return flags;
     }
 
-    public Token ScanRegExp()
+    internal Token ScanRegExp()
     {
         var start = Index;
 

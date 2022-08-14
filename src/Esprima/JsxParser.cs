@@ -456,7 +456,7 @@ public class JsxParser : JavaScriptParser
         // `
         if (cp == 96)
         {
-            return Token.CreteTemplate(cooked: null, rawTemplate: "", head: false, tail: false, notEscapeSequenceHead: ' ', start: _scanner.Index, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return Token.CreateTemplate(cooked: null, rawTemplate: "", head: false, tail: false, notEscapeSequenceHead: ' ', start: _scanner.Index, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         // Identifer can not contain backslash (char code 92).

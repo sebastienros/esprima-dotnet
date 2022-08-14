@@ -96,7 +96,7 @@ public readonly record struct Token
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Token CreteTemplate(
+    internal static Token CreateTemplate(
         string? cooked,
         string rawTemplate,
         bool head,
