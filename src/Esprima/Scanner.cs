@@ -2557,6 +2557,8 @@ public sealed partial class Scanner
 
         return options;
     }
+
+    internal Marker GetMarker() => new(Index, LineNumber, Column: Index - LineStart);
 }
 
 internal readonly record struct OctalValue(int Code, bool Octal);

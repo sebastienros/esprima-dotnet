@@ -15,7 +15,7 @@ public class JsxParser : JavaScriptParser
     private sealed class MetaJsxElement
     {
         public MetaJsxElement(
-            Marker node,
+            in Marker node,
             JsxExpression opening,
             JsxExpression? closing,
             List<JsxExpression> children)
@@ -492,13 +492,10 @@ public class JsxParser : JavaScriptParser
     private Token NextJsxToken()
     {
         CollectComments();
-        _startMarker.Index = _scanner.Index;
-        _startMarker.Line = _scanner.LineNumber;
-        _startMarker.Column = _scanner.Index - _scanner.LineStart;
+        _startMarker = _scanner.GetMarker();
         var token = this.LexJsx();
-        _lastMarker.Index = _scanner.Index;
-        _lastMarker.Line = _scanner.LineNumber;
-        _lastMarker.Column = _scanner.Index - _scanner.LineStart;
+
+        _lastMarker = _scanner.GetMarker();
 
         if (_config.Tokens)
         {
@@ -510,9 +507,7 @@ public class JsxParser : JavaScriptParser
 
     private Token NextJsxText()
     {
-        _startMarker.Index = _scanner.Index;
-        _startMarker.Line = _scanner.LineNumber;
-        _startMarker.Column = _scanner.Index - _scanner.LineStart;
+        _startMarker = _scanner.GetMarker();
 
         var start = _scanner.Index;
 
@@ -540,9 +535,7 @@ public class JsxParser : JavaScriptParser
             }
         }
 
-        _lastMarker.Index = _scanner.Index;
-        _lastMarker.Line = _scanner.LineNumber;
-        _lastMarker.Column = _scanner.Index - _scanner.LineStart;
+        _lastMarker = _scanner.GetMarker();
 
         var token = Token.Create(TokenType.JsxText, text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
 
@@ -774,9 +767,7 @@ public class JsxParser : JavaScriptParser
     {
         var node = CreateJsxChildNode();
         CollectComments();
-        _lastMarker.Index = _scanner.Index;
-        _lastMarker.Line = _scanner.LineNumber;
-        _lastMarker.Column = _scanner.Index - _scanner.LineStart;
+        _lastMarker = _scanner.GetMarker();
 
         return Finalize(node, new JsxEmptyExpression());
     }

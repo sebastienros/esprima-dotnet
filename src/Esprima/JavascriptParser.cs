@@ -47,8 +47,10 @@ public partial class JavaScriptParser
 
     private protected Token _lookahead;
     private protected readonly Context _context;
-    private protected readonly Marker _startMarker;
-    private protected readonly Marker _lastMarker;
+
+    private protected Marker _startMarker;
+    private protected Marker _lastMarker;
+
     private protected readonly Scanner _scanner;
     private protected readonly IErrorHandler _errorHandler;
     private protected readonly ParserOptions _config;
@@ -141,13 +143,12 @@ public partial class JavaScriptParser
 
         _context = new Context();
 
-        _startMarker = new Marker { Index = 0, Line = _scanner.LineNumber, Column = 0 };
-
-        _lastMarker = new Marker { Index = 0, Line = _scanner.LineNumber, Column = 0 };
+        _startMarker = new Marker(Index: 0, Line: _scanner.LineNumber, Column: 0);
+        _lastMarker = new Marker(Index: 0, Line: _scanner.LineNumber, Column: 0);
 
         NextToken();
 
-        _lastMarker = new Marker { Index = _scanner.Index, Line = _scanner.LineNumber, Column = _scanner.Index - _scanner.LineStart };
+        _lastMarker = _scanner.GetMarker();
     }
 
     // https://tc39.github.io/ecma262/#sec-scripts
@@ -247,17 +248,13 @@ public partial class JavaScriptParser
     {
         var token = _lookahead;
 
-        _lastMarker.Index = _scanner.Index;
-        _lastMarker.Line = _scanner.LineNumber;
-        _lastMarker.Column = _scanner.Index - _scanner.LineStart;
+        _lastMarker = _scanner.GetMarker();
 
         CollectComments();
 
         if (_scanner.Index != _startMarker.Index)
         {
-            _startMarker.Index = _scanner.Index;
-            _startMarker.Line = _scanner.LineNumber;
-            _startMarker.Column = _scanner.Index - _scanner.LineStart;
+            _startMarker = _scanner.GetMarker();
         }
 
         var next = _scanner.Lex(new LexOptions(_context.Strict, allowIdentifierEscape));
@@ -324,7 +321,7 @@ public partial class JavaScriptParser
         return new Marker(token.Start, line, column);
     }
 
-    private protected T Finalize<T>(Marker marker, T node) where T : Node
+    private protected T Finalize<T>(in Marker marker, T node) where T : Node
     {
         node.Range = new Range(marker.Index, _lastMarker.Index);
 
@@ -523,9 +520,7 @@ public partial class JavaScriptParser
                 ThrowUnexpectedToken(_lookahead);
             }
 
-            _lastMarker.Index = _startMarker.Index;
-            _lastMarker.Line = _startMarker.Line;
-            _lastMarker.Column = _startMarker.Column;
+            _lastMarker = _startMarker;
         }
     }
 
@@ -4623,7 +4618,7 @@ public partial class JavaScriptParser
         return Finalize(node, new ClassBody(NodeList.From(ref elementList)));
     }
 
-    private ClassDeclaration ParseClassDeclarationCore(Marker node, bool identifierIsOptional = false)
+    private ClassDeclaration ParseClassDeclarationCore(in Marker node, bool identifierIsOptional = false)
     {
         var previousStrict = _context.Strict;
         var previousAllowSuper = _context.AllowSuper;
