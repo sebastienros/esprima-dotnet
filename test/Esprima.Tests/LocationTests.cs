@@ -12,7 +12,7 @@ public class LocationTests
     {
         var start = new Position(startLine, startColumn);
         var end = new Position(endLine, endColumn);
-        var (actualStart, actualEnd) = new Location(start, end);
+        var (actualStart, actualEnd) = new Location(in start, in end);
         Assert.Equal(start, actualStart);
         Assert.Equal(end, actualEnd);
     }
@@ -28,7 +28,7 @@ public class LocationTests
         var start = new Position(startLine, startColumn);
         var end = new Position(endLine, endColumn);
         var e = Assert.Throws<System.ArgumentOutOfRangeException>(() =>
-            new Location(start, end));
+            new Location(in start, in end));
         Assert.Equal("end", e.ParamName);
         Assert.Equal(end, e.ActualValue);
     }

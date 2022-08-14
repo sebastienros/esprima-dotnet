@@ -172,6 +172,7 @@ public sealed partial class Scanner
         var comments = new ArrayList<Comment>();
         var start = 0;
         Position startPosition = default, endPosition;
+        Esprima.Range slice;
 
         if (_trackComment)
         {
@@ -188,15 +189,16 @@ public sealed partial class Scanner
                 if (_trackComment)
                 {
                     endPosition = new Position(LineNumber, Index - LineStart - 1);
-
+                    slice = new Esprima.Range(start + offset, Index - 1);
                     var entry = new Comment
-                    {
-                        Type = CommentType.Line,
-                        Slice = new Esprima.Range(start + offset, Index - 1),
-                        Start = start,
-                        End = Index - 1,
-                        Location = new Location(startPosition, endPosition)
-                    };
+                    (
+                        type: CommentType.Line,
+                        slice: in slice,
+                        start: start,
+                        end: Index - 1,
+                        in startPosition,
+                        in endPosition
+                    );
 
                     comments.Add(entry);
                 }
@@ -215,14 +217,16 @@ public sealed partial class Scanner
         if (_trackComment)
         {
             endPosition = new Position(LineNumber, Index - LineStart);
+            slice = new Esprima.Range(start + offset, Index);
             var entry = new Comment
-            {
-                Type = CommentType.Line,
-                Slice = new Esprima.Range(start + offset, Index),
-                Start = start,
-                End = Index,
-                Location = new Location(startPosition, endPosition)
-            };
+            (
+                type: CommentType.Line,
+                slice: in slice,
+                start: start,
+                end: Index,
+                in startPosition,
+                in endPosition
+            );
 
             comments.Add(entry);
         }
@@ -235,6 +239,7 @@ public sealed partial class Scanner
         var comments = new ArrayList<Comment>();
         var start = 0;
         Position startPosition = default, endPosition;
+        Esprima.Range slice;
 
         if (_trackComment)
         {
@@ -265,14 +270,16 @@ public sealed partial class Scanner
                     if (_trackComment)
                     {
                         endPosition = new Position(LineNumber, Index - LineStart);
+                        slice = new Esprima.Range(start + 2, Index - 2);
                         var entry = new Comment
-                        {
-                            Type = CommentType.Block,
-                            Slice = new Esprima.Range(start + 2, Index - 2),
-                            Start = start,
-                            End = Index,
-                            Location = new Location(startPosition, endPosition)
-                        };
+                        (
+                            type: CommentType.Block,
+                            slice: in slice,
+                            start: start,
+                            end: Index,
+                            in startPosition,
+                            in endPosition
+                        );
                         comments.Add(entry);
                     }
 
@@ -291,14 +298,16 @@ public sealed partial class Scanner
         if (_trackComment)
         {
             endPosition = new Position(LineNumber, Index - LineStart);
+            slice = new Esprima.Range(start + 2, Index);
             var entry = new Comment
-            {
-                Type = CommentType.Block,
-                Slice = new Esprima.Range(start + 2, Index),
-                Start = start,
-                End = Index,
-                Location = new Location(startPosition, endPosition)
-            };
+            (
+                type: CommentType.Block,
+                slice: in slice,
+                start: start,
+                end: Index,
+                in startPosition,
+                in endPosition
+            );
             comments.Add(entry);
         }
 

@@ -66,7 +66,7 @@ public partial class JavaScriptParser
     /// </remarks>
     public IReadOnlyList<ParsedToken> Tokens => _tokens;
 
-    private protected readonly List<Comment> _comments = new();
+    private protected readonly List<ParsedComment> _comments = new();
 
     /// <summary>
     /// Returns the list of comments that were parsed.
@@ -74,7 +74,7 @@ public partial class JavaScriptParser
     /// <remarks>
     /// It requires the parser options to be configured to generate comments.
     /// </remarks>
-    public IReadOnlyList<Comment> Comments => _comments;
+    public IReadOnlyList<ParsedComment> Comments => _comments;
 
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
@@ -208,10 +208,15 @@ public partial class JavaScriptParser
             {
                 var e = comments[i];
 
-                e.Value = _scanner.Source.Slice(e.Slice.Start, e.Slice.End);
-                e.Location = new Location(e.Location.Start, e.Location.End, _errorHandler.Source);
+                var comment = new ParsedComment
+                (
+                    type: e.Type,
+                    value: _scanner.Source.Slice(e.Slice.Start, e.Slice.End),
+                    range: new Range(e.Start, e.End),
+                    location: new Location(in e.StartPosition, in e.EndPosition, _errorHandler.Source)
+                );
 
-                _comments.Add(e);
+                _comments.Add(comment);
             }
         }
     }
@@ -228,9 +233,9 @@ public partial class JavaScriptParser
     {
         var start = new Position(_startMarker.Line, _startMarker.Column);
         var end = new Position(_scanner.LineNumber, _scanner.Index - _scanner.LineStart);
-        var location = new Location(start, end);
+        var location = new Location(in start, in end);
 
-        return new ParsedToken(token.Type, GetTokenRaw(token), token.Start, token.End, location, token.RegexValue);
+        return new ParsedToken(token.Type, GetTokenRaw(token), token.RegexValue, new Range(token.Start, token.End), in location);
     }
 
     private protected Token NextToken(bool allowIdentifierEscape = false)
