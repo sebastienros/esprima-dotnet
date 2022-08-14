@@ -219,29 +219,18 @@ public partial class JavaScriptParser
     /// <summary>
     /// From internal representation to an external structure
     /// </summary>
-    private protected string GetTokenRaw(Token token)
+    private protected string GetTokenRaw(in Token token)
     {
         return _scanner.Source.Slice(token.Start, token.End);
     }
 
-    private protected ParsedToken ConvertToken(Token token)
+    private protected ParsedToken ConvertToken(in Token token)
     {
-        var t = new ParsedToken
-        {
-            Type = token.Type, Value = GetTokenRaw(token), Start = token.Start, End = token.End
-        };
-
         var start = new Position(_startMarker.Line, _startMarker.Column);
         var end = new Position(_scanner.LineNumber, _scanner.Index - _scanner.LineStart);
+        var location = new Location(start, end);
 
-        t.Location = t.Location.WithPosition(start, end);
-
-        if (token.RegexValue != null)
-        {
-            t.RegexValue = token.RegexValue;
-        }
-
-        return t;
+        return new ParsedToken(token.Type, GetTokenRaw(token), token.Start, token.End, location, token.RegexValue);
     }
 
     private protected Token NextToken(bool allowIdentifierEscape = false)
@@ -308,7 +297,7 @@ public partial class JavaScriptParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Marker StartNode(Token token, int lastLineStart = 0)
+    private static Marker StartNode(in Token token, int lastLineStart = 0)
     {
         var column = token.Start - token.LineStart;
         var line = token.LineNumber;
@@ -687,7 +676,7 @@ public partial class JavaScriptParser
     }
 
     // https://tc39.es/proposal-template-literal-revision/#sec-static-semantics-template-early-errors
-    private void ThrowTemplateLiteralEarlyErrors(Token token)
+    private void ThrowTemplateLiteralEarlyErrors(in Token token)
     {
         switch (token.NotEscapeSequenceHead)
         {
@@ -1370,7 +1359,7 @@ public partial class JavaScriptParser
         return NodeList.From(ref args);
     }
 
-    private static bool IsIdentifierName(Token token)
+    private static bool IsIdentifierName(in Token token)
     {
         return token.Type == TokenType.Identifier ||
                token.Type == TokenType.Keyword ||
@@ -1922,7 +1911,7 @@ public partial class JavaScriptParser
     // https://tc39.github.io/ecma262/#sec-binary-bitwise-operators
     // https://tc39.github.io/ecma262/#sec-binary-logical-operators
 
-    private int BinaryPrecedence(Token token)
+    private int BinaryPrecedence(in Token token)
     {
         var prec = 0;
         var op = token.Value;
@@ -2016,7 +2005,7 @@ public partial class JavaScriptParser
         var allowAndOr = true;
         var allowNullishCoalescing = true;
 
-        void UpdateNullishCoalescingRestrictions(Token t)
+        void UpdateNullishCoalescingRestrictions(in Token t)
         {
             var value = t.Value;
             if ("&&".Equals(value) || "||".Equals(value))
@@ -3789,7 +3778,7 @@ public partial class JavaScriptParser
         options.ParamSetAdd(key);
     }
 
-    private void ValidateParam2(ParsedParameters options, Token param, string? name)
+    private void ValidateParam2(ParsedParameters options, in Token param, string? name)
     {
         var key = name;
         if (_context.Strict)
@@ -4170,7 +4159,7 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-method-definitions
 
-    private static bool QualifiedPropertyName(Token token)
+    private static bool QualifiedPropertyName(in Token token)
     {
         return token.Type switch
         {
@@ -5147,7 +5136,7 @@ public partial class JavaScriptParser
         _errorHandler.TolerateError(index, line, column, msg);
     }
 
-    private ParserException UnexpectedTokenError(Token token, string? message = null)
+    private ParserException UnexpectedTokenError(in Token token, string? message = null)
     {
         var msg = message ?? Messages.UnexpectedToken;
         string value;
@@ -5204,17 +5193,17 @@ public partial class JavaScriptParser
         }
     }
 
-    private protected void ThrowUnexpectedToken(Token token = default, string? message = null)
+    private protected void ThrowUnexpectedToken(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);
     }
 
-    private protected T ThrowUnexpectedToken<T>(Token token = default, string? message = null)
+    private protected T ThrowUnexpectedToken<T>(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);
     }
 
-    private protected void TolerateUnexpectedToken(Token token, string? message = null)
+    private protected void TolerateUnexpectedToken(in Token token, string? message = null)
     {
         _errorHandler.Tolerate(UnexpectedTokenError(token, message));
     }

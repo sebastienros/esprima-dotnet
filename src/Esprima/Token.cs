@@ -134,12 +134,4 @@ public readonly record struct Token
     }
 }
 
-public class ParsedToken
-{
-    public TokenType Type { get; internal init; }
-    public string? Value { get; internal init; }
-    public int Start { get; internal init; }
-    public int End { get; internal init; }
-    public RegexValue? RegexValue { get; internal set; }
-    public Location Location { get; internal set; }
-}
+public record ParsedToken(TokenType Type, string? Value, int Start, int End, in Location Location, RegexValue? RegexValue);
