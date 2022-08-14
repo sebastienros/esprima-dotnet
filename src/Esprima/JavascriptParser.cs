@@ -1400,7 +1400,9 @@ public partial class JavaScriptParser
             return ThrowUnexpectedToken<Identifier>(token);
         }
 
-        return isPrivateField ? Finalize(node, new PrivateIdentifier('#' + (string?) token.Value)) : Finalize(node, new Identifier((string?) token.Value!));
+        return isPrivateField
+            ? Finalize(node, new PrivateIdentifier((string) token.Value!))
+            : Finalize(node, new Identifier((string) token.Value!));
     }
 
     private Expression ParseNewExpression()
