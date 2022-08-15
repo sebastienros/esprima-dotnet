@@ -131,28 +131,3 @@ public readonly record struct Token
         return new Token(newType, Value, Start, End, LineNumber, LineStart, Octal, NotEscapeSequenceHead, Head, Tail, _customValue);
     }
 }
-
-public record class ParsedToken
-{
-    public ParsedToken(TokenType type, string value, RegexValue? regexValue, in Range range, in Location location)
-    {
-        Type = type;
-
-        Value = value;
-        RegexValue = regexValue;
-
-        _range = range;
-        _location = location;
-    }
-
-    public TokenType Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    public string Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-    public RegexValue? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    private readonly Range _range;
-    public ref readonly Range Range { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _range; }
-
-    private readonly Location _location;
-    public ref readonly Location Location { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _location; }
-}

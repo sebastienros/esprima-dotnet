@@ -38,26 +38,3 @@ public readonly record struct Comment
     public readonly Position StartPosition;
     public readonly Position EndPosition;
 }
-
-public record class ParsedComment
-{
-    public ParsedComment(CommentType type, string value, in Range range, in Location location)
-    {
-        Type = type;
-
-        Value = value;
-
-        _range = range;
-        _location = location;
-    }
-
-    public CommentType Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    public string Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    private readonly Range _range;
-    public ref readonly Range Range { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _range; }
-
-    private readonly Location _location;
-    public ref readonly Location Location { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _location; }
-}

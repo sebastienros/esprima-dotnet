@@ -56,7 +56,7 @@ public partial class JavaScriptParser
     private protected readonly ParserOptions _config;
     private protected bool _hasLineTerminator;
 
-    private protected readonly List<ParsedToken> _tokens = new();
+    private protected readonly List<SyntaxToken> _tokens = new();
 
     /// <summary>
     /// Returns the list of tokens that were parsed.
@@ -64,9 +64,9 @@ public partial class JavaScriptParser
     /// <remarks>
     /// It requires the parser options to be configured to generate to tokens.
     /// </remarks>
-    public IReadOnlyList<ParsedToken> Tokens => _tokens;
+    public IReadOnlyList<SyntaxToken> Tokens => _tokens;
 
-    private protected readonly List<ParsedComment> _comments = new();
+    private protected readonly List<SyntaxComment> _comments = new();
 
     /// <summary>
     /// Returns the list of comments that were parsed.
@@ -74,7 +74,7 @@ public partial class JavaScriptParser
     /// <remarks>
     /// It requires the parser options to be configured to generate comments.
     /// </remarks>
-    public IReadOnlyList<ParsedComment> Comments => _comments;
+    public IReadOnlyList<SyntaxComment> Comments => _comments;
 
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
@@ -208,13 +208,11 @@ public partial class JavaScriptParser
             {
                 var e = comments[i];
 
-                var comment = new ParsedComment
-                (
-                    type: e.Type,
-                    value: _scanner.Source.Slice(e.Slice.Start, e.Slice.End),
-                    range: new Range(e.Start, e.End),
-                    location: new Location(in e.StartPosition, in e.EndPosition, _errorHandler.Source)
-                );
+                var comment = new SyntaxComment(e.Type, value: _scanner.Source.Slice(e.Slice.Start, e.Slice.End))
+                {
+                    Range = new Range(e.Start, e.End),
+                    Location = new Location(in e.StartPosition, in e.EndPosition, _errorHandler.Source)
+                };
 
                 _comments.Add(comment);
             }
@@ -229,13 +227,16 @@ public partial class JavaScriptParser
         return _scanner.Source.Slice(token.Start, token.End);
     }
 
-    private protected ParsedToken ConvertToken(in Token token)
+    private protected SyntaxToken ConvertToken(in Token token)
     {
         var start = new Position(_startMarker.Line, _startMarker.Column);
         var end = new Position(_scanner.LineNumber, _scanner.Index - _scanner.LineStart);
-        var location = new Location(in start, in end);
 
-        return new ParsedToken(token.Type, GetTokenRaw(token), token.RegexValue, new Range(token.Start, token.End), in location);
+        return new SyntaxToken(token.Type, GetTokenRaw(token), token.RegexValue)
+        {
+            Range = new Range(token.Start, token.End),
+            Location = new Location(in start, in end)
+        };
     }
 
     private protected Token NextToken(bool allowIdentifierEscape = false)
