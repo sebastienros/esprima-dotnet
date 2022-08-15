@@ -89,6 +89,45 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #endif
     }
 
+    /// <summary>
+    /// Note, expects ownership of the array!
+    /// </summary>
+    public ArrayList(T[] initialData)
+    {
+        if (initialData is null)
+        {
+            ThrowArgumentNullException(nameof(initialData));
+        }
+
+        _items = initialData;
+        _count = initialData.Length;
+
+#if DEBUG
+        _localVersion = 0;
+        _sharedVersion = _count > 0 ? new[] { _localVersion } : null;
+#endif
+    }
+
+    public ArrayList(NodeList<Node> initialData)
+    {
+        if (initialData._items is null)
+        {
+            _items = null;
+            _count = 0;
+            return;
+        }
+
+        _items = new T[initialData.Count];
+        _count = initialData.Count;
+
+        Array.Copy(initialData._items!, 0, _items, 0, _count);
+
+#if DEBUG
+        _localVersion = 0;
+        _sharedVersion = _count > 0 ? new[] { _localVersion } : null;
+#endif
+    }
+
     private int Capacity => _items?.Length ?? 0;
 
     public int Count
@@ -140,6 +179,19 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         Debug.Assert(_items != null);
         _items[_count] = item;
         _count++;
+
+        OnChanged();
+    }
+
+    internal void Clear()
+    {
+        AssertUnchanged();
+
+        if (this._items is not null)
+        {
+            Array.Clear(this._items, 0, this._count);
+            this._count = 0;
+        }
 
         OnChanged();
     }

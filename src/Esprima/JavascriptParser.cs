@@ -764,7 +764,7 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-object-initializer
 
-    private BlockStatement ParsePropertyMethod(ParsedParameters parameters, out bool hasStrictDirective)
+    private BlockStatement ParsePropertyMethod(ref ParsedParameters parameters, out bool hasStrictDirective)
     {
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
@@ -797,7 +797,7 @@ public partial class JavaScriptParser
         var previousAllowYield = _context.AllowYield;
         _context.AllowYield = true;
         var parameters = ParseFormalParameters();
-        var method = ParsePropertyMethod(parameters, out var hasStrictDirective);
+        var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
         _context.AllowYield = previousAllowYield;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, false));
@@ -813,7 +813,7 @@ public partial class JavaScriptParser
         _context.IsAsync = true;
 
         var parameters = ParseFormalParameters();
-        var method = ParsePropertyMethod(parameters, out var hasStrictDirective);
+        var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
         _context.AllowYield = previousAllowYield;
         _context.IsAsync = previousIsAsync;
 
@@ -2004,6 +2004,11 @@ public partial class JavaScriptParser
         return prec;
     }
 
+    // pooling for ParseBinaryExpression
+    private Stack<Token>? _markersStack;
+    private Stack<int>? _precedencesStack;
+    private ArrayList<object>? _sharedStack;
+
     private Expression ParseBinaryExpression()
     {
         var startToken = _lookahead;
@@ -2037,13 +2042,30 @@ public partial class JavaScriptParser
             _context.IsAssignmentTarget = false;
             _context.IsBindingElement = false;
 
-            var markers = new Stack<Token>(new[] { startToken, _lookahead });
+            var markers = _markersStack ?? new Stack<Token>();
+            _markersStack = null;
+            markers.Clear();
+
+            markers.Push(startToken);
+            markers.Push(_lookahead);
+
             var left = expr;
             var right = IsolateCoverGrammar(parseExponentiationExpression);
 
-            var stack = new ArrayList<object> { left, token.Value!, right };
-            var precedences = new Stack<int>();
+            var stack = _sharedStack ?? new ArrayList<object>(3);
+            _sharedStack = null;
+            stack.Clear();
+
+            stack.Add(left);
+            stack.Add(token.Value!);
+            stack.Add(right);
+
+            var precedences = _precedencesStack ?? new Stack<int>(1);
+            _precedencesStack = null;
+            precedences.Clear();
+
             precedences.Push(prec);
+
             while (true)
             {
                 prec = BinaryPrecedence(_lookahead);
@@ -2095,6 +2117,10 @@ public partial class JavaScriptParser
                 i -= 2;
                 lastMarker = marker;
             }
+
+            _markersStack = markers;
+            _sharedStack = stack;
+            _precedencesStack = precedences;
         }
 
         return expr;
@@ -2130,18 +2156,18 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-assignment-operators
 
-    private void CheckPatternParam(ParsedParameters options, Node param)
+    private void CheckPatternParam(ref ParsedParameters options, Node param)
     {
         switch (param.Type)
         {
             case Nodes.Identifier:
-                ValidateParam(options, param, param.As<Identifier>().Name);
+                ValidateParam(ref options, param, param.As<Identifier>().Name);
                 break;
             case Nodes.RestElement:
-                CheckPatternParam(options, param.As<RestElement>().Argument);
+                CheckPatternParam(ref options, param.As<RestElement>().Argument);
                 break;
             case Nodes.AssignmentPattern:
-                CheckPatternParam(options, param.As<AssignmentPattern>().Left);
+                CheckPatternParam(ref options, param.As<AssignmentPattern>().Left);
                 break;
             case Nodes.ArrayPattern:
                 ref readonly var list = ref param.As<ArrayPattern>().Elements;
@@ -2150,7 +2176,7 @@ public partial class JavaScriptParser
                     var element = list[i];
                     if (element != null)
                     {
-                        CheckPatternParam(options, element);
+                        CheckPatternParam(ref options, element);
                     }
                 }
 
@@ -2160,7 +2186,7 @@ public partial class JavaScriptParser
                 for (var i = 0; i < nodes.Count; i++)
                 {
                     var property = nodes[i];
-                    CheckPatternParam(options, property is Property p ? p.Value : property);
+                    CheckPatternParam(ref options, property is Property p ? p.Value : property);
                 }
 
                 break;
@@ -2177,13 +2203,12 @@ public partial class JavaScriptParser
         switch (expr.Type)
         {
             case Nodes.Identifier:
-                parameters = new ArrayList<Node>(1) { expr };
+                parameters = new ArrayList<Node>(new Node[] { expr });
                 break;
             case Nodes.ArrowParameterPlaceHolder:
                 // TODO clean-up
                 var arrowParameterPlaceHolder = expr.As<ArrowParameterPlaceHolder>();
-                parameters = new ArrayList<Node>(arrowParameterPlaceHolder.Params.Count);
-                parameters.AddRange(arrowParameterPlaceHolder.Params);
+                parameters = new ArrayList<Node>(arrowParameterPlaceHolder.Params);
                 asyncArrow = arrowParameterPlaceHolder.Async;
                 break;
             default:
@@ -2214,7 +2239,7 @@ public partial class JavaScriptParser
                 ThrowUnexpectedToken(_lookahead);
             }
 
-            CheckPatternParam(options, param);
+            CheckPatternParam(ref options, param);
             parameters[i] = param;
         }
 
@@ -2285,10 +2310,11 @@ public partial class JavaScriptParser
                 _context.IsBindingElement = false;
 
                 var isAsync = expr is ArrowParameterPlaceHolder arrow && arrow.Async;
-                var list = ReinterpretAsCoverFormalsList(expr);
+                var result = ReinterpretAsCoverFormalsList(expr);
 
-                if (list != null)
+                if (result != null)
                 {
+                    var list = result.Value;
                     if (_hasLineTerminator)
                     {
                         TolerateUnexpectedToken(_lookahead);
@@ -2333,7 +2359,8 @@ public partial class JavaScriptParser
                         TolerateUnexpectedToken(list.Stricted.Value, list.Message);
                     }
 
-                    expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref list.Parameters), body, expression, _context.Strict, isAsync));
+                    var listParameters = list.Parameters;
+                    expr = Finalize(node, new ArrowFunctionExpression(NodeList.From(ref listParameters), body, expression, _context.Strict, isAsync));
 
                     _context.Strict = previousStrict;
                     _context.AllowStrictDirective = previousAllowStrictDirective;
@@ -2511,11 +2538,14 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-let-and-const-declarations
 
+    // pooled for ParseLexicalBinding calls
+    private ArrayList<Token> _parseLexicalBindingParameters;
+
     private VariableDeclarator ParseLexicalBinding(VariableDeclarationKind kind, bool inFor)
     {
         var node = CreateNode();
-        var parameters = new ArrayList<Token>();
-        var id = ParsePattern(ref parameters, kind);
+        var id = ParsePattern(ref _parseLexicalBindingParameters, kind);
+        _parseLexicalBindingParameters.Clear();
 
         if (_context.Strict && id.Type == Nodes.Identifier)
         {
@@ -2552,7 +2582,7 @@ public partial class JavaScriptParser
 
     private NodeList<VariableDeclarator> ParseBindingList(VariableDeclarationKind kind, bool inFor)
     {
-        var list = new ArrayList<VariableDeclarator> { ParseLexicalBinding(kind, inFor) };
+        var list = new ArrayList<VariableDeclarator>(new [] { ParseLexicalBinding(kind, inFor) });
 
         while (Match(","))
         {
@@ -2824,12 +2854,15 @@ public partial class JavaScriptParser
         return Finalize(node, new Identifier((string) token.Value!));
     }
 
+    // pooled for ParsePattern calls
+    private ArrayList<Token> _parseVariableDeclarationParameters;
+
     private VariableDeclarator ParseVariableDeclaration(bool inFor)
     {
         var node = CreateNode();
 
-        var parameters = new ArrayList<Token>();
-        var id = ParsePattern(ref parameters, VariableDeclarationKind.Var);
+        var id = ParsePattern(ref _parseVariableDeclarationParameters, VariableDeclarationKind.Var);
+        _parseVariableDeclarationParameters.Clear();
 
         if (_context.Strict && id.Type == Nodes.Identifier)
         {
@@ -2855,8 +2888,7 @@ public partial class JavaScriptParser
 
     private NodeList<VariableDeclarator> ParseVariableDeclarationList(bool inFor)
     {
-        var list = new ArrayList<VariableDeclarator>();
-        list.Push(ParseVariableDeclaration(inFor));
+        var list = new ArrayList<VariableDeclarator>(new [] { ParseVariableDeclaration(inFor) });
 
         while (Match(","))
         {
@@ -3201,7 +3233,7 @@ public partial class JavaScriptParser
 
                     if (Match(","))
                     {
-                        var initSeq = new ArrayList<Expression>(1) { (Expression) init };
+                        var initSeq = new ArrayList<Expression>(new [] { (Expression) init });
                         while (Match(","))
                         {
                             NextToken();
@@ -3747,7 +3779,7 @@ public partial class JavaScriptParser
         return Finalize(node, new BlockStatement(NodeList.From(ref body)));
     }
 
-    private void ValidateParam(ParsedParameters options, Node param, string? name)
+    private void ValidateParam(ref ParsedParameters options, Node param, string? name)
     {
         var key = name;
         if (_context.Strict)
@@ -3786,7 +3818,7 @@ public partial class JavaScriptParser
         options.ParamSetAdd(key);
     }
 
-    private void ValidateParam2(ParsedParameters options, in Token param, string? name)
+    private void ValidateParam2(ref ParsedParameters options, in Token param, string? name)
     {
         var key = name;
         if (_context.Strict)
@@ -3845,7 +3877,7 @@ public partial class JavaScriptParser
         return Finalize(node, new RestElement(arg));
     }
 
-    private void ParseFormalParameter(ParsedParameters options)
+    private void ParseFormalParameter(ref ParsedParameters options)
     {
         var parameters = new ArrayList<Token>();
 
@@ -3855,7 +3887,7 @@ public partial class JavaScriptParser
 
         for (var i = 0; i < parameters.Count; i++)
         {
-            ValidateParam2(options, parameters[i], (string?) parameters[i].Value);
+            ValidateParam2(ref options, parameters[i], (string?) parameters[i].Value);
         }
 
         options.Simple = options.Simple && param is Identifier;
@@ -3872,7 +3904,7 @@ public partial class JavaScriptParser
             options.Parameters = new ArrayList<Node>();
             while (_lookahead.Type != TokenType.EOF)
             {
-                ParseFormalParameter(options);
+                ParseFormalParameter(ref options);
                 if (Match(")"))
                 {
                     break;
@@ -4195,7 +4227,7 @@ public partial class JavaScriptParser
             TolerateError(Messages.BadGetterArity);
         }
 
-        var method = ParsePropertyMethod(formalParameters, out var hasStrictDirective);
+        var method = ParsePropertyMethod(ref formalParameters, out var hasStrictDirective);
         _context.AllowYield = previousAllowYield;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, isGenerator, hasStrictDirective, false));
@@ -4219,7 +4251,7 @@ public partial class JavaScriptParser
             TolerateError(Messages.BadSetterRestParameter);
         }
 
-        var method = ParsePropertyMethod(formalParameters, out var hasStrictDirective);
+        var method = ParsePropertyMethod(ref formalParameters, out var hasStrictDirective);
         _context.AllowYield = previousAllowYield;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, isGenerator, hasStrictDirective, false));
@@ -4234,7 +4266,7 @@ public partial class JavaScriptParser
         _context.AllowYield = true;
         var parameters = ParseFormalParameters();
         _context.AllowYield = false;
-        var method = ParsePropertyMethod(parameters, out var hasStrictDirective);
+        var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
         _context.AllowYield = previousAllowYield;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, true, hasStrictDirective, isAsync));
@@ -5224,7 +5256,7 @@ public partial class JavaScriptParser
         }
     }
 
-    private sealed class ParsedParameters
+    private struct ParsedParameters
     {
         private HashSet<string?>? paramSet;
         public Token? FirstRestricted;
@@ -5233,6 +5265,16 @@ public partial class JavaScriptParser
         public Token? Stricted;
         public bool Simple;
         public bool HasDuplicateParameterNames;
+
+        public ParsedParameters()
+        {
+            paramSet = null;
+            FirstRestricted = null;
+            Message = null;
+            Stricted = null;
+            Simple = false;
+            HasDuplicateParameterNames = false;
+        }
 
         public bool ParamSetContains(string? key)
         {
