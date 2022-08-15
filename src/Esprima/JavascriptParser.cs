@@ -271,7 +271,7 @@ public partial class JavaScriptParser
             _tokens.Add(ConvertToken(next));
         }
 
-        return token!;
+        return token;
     }
 
     private Token NextRegexToken()
@@ -338,7 +338,7 @@ public partial class JavaScriptParser
     private void Expect(string value)
     {
         var token = NextToken(allowIdentifierEscape: true);
-        if (token.Type != TokenType.Punctuator || !value.Equals(token.Value))
+        if (token.Type != TokenType.Punctuator || !value.Equals((string) token.Value!))
         {
             ThrowUnexpectedToken(token);
         }
@@ -380,7 +380,7 @@ public partial class JavaScriptParser
     private void ExpectKeyword(string keyword)
     {
         var token = NextToken();
-        if (token.Type != TokenType.Keyword || !keyword.Equals(token.Value))
+        if (token.Type != TokenType.Keyword || !keyword.Equals((string) token.Value!))
         {
             ThrowUnexpectedToken(token);
         }
@@ -392,7 +392,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected bool Match(string value)
     {
-        return _lookahead.Type == TokenType.Punctuator && value.Equals(_lookahead.Value);
+        return _lookahead.Type == TokenType.Punctuator && value.Equals((string) _lookahead.Value!);
     }
 
     /// <summary>
@@ -401,7 +401,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Keyword && keyword.Equals(_lookahead.Value);
+        return _lookahead.Type == TokenType.Keyword && keyword.Equals((string) _lookahead.Value!);
     }
 
     // Return true if the next token matches the specified contextual keyword
@@ -410,7 +410,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchContextualKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Identifier && keyword.Equals(_lookahead.Value);
+        return _lookahead.Type == TokenType.Identifier && keyword.Equals((string) _lookahead.Value!);
     }
 
     // Return true if the next token is an assignment operator
@@ -418,13 +418,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchAssign()
     {
-        if (_lookahead.Type != TokenType.Punctuator)
-        {
-            return false;
-        }
-
-        var op = (string?) _lookahead.Value;
-        return IsAssignmentOperator(op!);
+        return _lookahead.Type == TokenType.Punctuator && IsAssignmentOperator((string) _lookahead.Value!);
     }
 
     // Cover grammar support.
