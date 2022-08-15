@@ -30,7 +30,9 @@ public readonly struct Range : IEquatable<Range>
 
     public override string ToString()
     {
-        return string.Format(CultureInfo.InvariantCulture, "[{0}..{1})", Start, End);
+        return Start != End
+            ? string.Format(CultureInfo.InvariantCulture, "[{0}..{1})", Start, End)
+            : string.Format(CultureInfo.InvariantCulture, "[{0})", Start);
     }
 
     public static bool operator ==(Range left, Range right)
