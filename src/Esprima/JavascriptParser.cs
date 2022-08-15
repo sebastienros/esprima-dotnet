@@ -56,7 +56,7 @@ public partial class JavaScriptParser
     private protected readonly ParserOptions _config;
     private protected bool _hasLineTerminator;
 
-    private protected readonly List<ParsedToken> _tokens = new();
+    private protected readonly List<SyntaxToken> _tokens = new();
 
     /// <summary>
     /// Returns the list of tokens that were parsed.
@@ -64,9 +64,9 @@ public partial class JavaScriptParser
     /// <remarks>
     /// It requires the parser options to be configured to generate to tokens.
     /// </remarks>
-    public IReadOnlyList<ParsedToken> Tokens => _tokens;
+    public IReadOnlyList<SyntaxToken> Tokens => _tokens;
 
-    private protected readonly List<Comment> _comments = new();
+    private protected readonly List<SyntaxComment> _comments = new();
 
     /// <summary>
     /// Returns the list of comments that were parsed.
@@ -74,7 +74,7 @@ public partial class JavaScriptParser
     /// <remarks>
     /// It requires the parser options to be configured to generate comments.
     /// </remarks>
-    public IReadOnlyList<Comment> Comments => _comments;
+    public IReadOnlyList<SyntaxComment> Comments => _comments;
 
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
@@ -208,10 +208,13 @@ public partial class JavaScriptParser
             {
                 var e = comments[i];
 
-                e.Value = _scanner.Source.Slice(e.Slice.Start, e.Slice.End);
-                e.Location = new Location(e.Location.Start, e.Location.End, _errorHandler.Source);
+                var comment = new SyntaxComment(e.Type, value: _scanner.Source.Slice(e.Slice.Start, e.Slice.End))
+                {
+                    Range = new Range(e.Start, e.End),
+                    Location = new Location(in e.StartPosition, in e.EndPosition, _errorHandler.Source)
+                };
 
-                _comments.Add(e);
+                _comments.Add(comment);
             }
         }
     }
@@ -224,13 +227,16 @@ public partial class JavaScriptParser
         return _scanner.Source.Slice(token.Start, token.End);
     }
 
-    private protected ParsedToken ConvertToken(in Token token)
+    private protected SyntaxToken ConvertToken(in Token token)
     {
         var start = new Position(_startMarker.Line, _startMarker.Column);
         var end = new Position(_scanner.LineNumber, _scanner.Index - _scanner.LineStart);
-        var location = new Location(start, end);
 
-        return new ParsedToken(token.Type, GetTokenRaw(token), token.Start, token.End, location, token.RegexValue);
+        return new SyntaxToken(token.Type, GetTokenRaw(token), token.RegexValue)
+        {
+            Range = new Range(token.Start, token.End),
+            Location = new Location(in start, in end)
+        };
     }
 
     private protected Token NextToken(bool allowIdentifierEscape = false)
@@ -824,7 +830,7 @@ public partial class JavaScriptParser
         {
             case TokenType.StringLiteral:
                 var raw = GetTokenRaw(token);
-                key = Finalize(node, new Literal((string?) token.Value, raw));
+                key = Finalize(node, new Literal((string) token.Value!, raw));
                 break;
 
             case TokenType.NumericLiteral:
@@ -2007,7 +2013,7 @@ public partial class JavaScriptParser
         var allowAndOr = true;
         var allowNullishCoalescing = true;
 
-        void UpdateNullishCoalescingRestrictions(in Token t)
+        static void UpdateNullishCoalescingRestrictions(in Token t, ref bool allowAndOr, ref bool allowNullishCoalescing)
         {
             var value = t.Value;
             if ("&&".Equals(value) || "||".Equals(value))
@@ -2025,7 +2031,7 @@ public partial class JavaScriptParser
         var prec = BinaryPrecedence(token);
         if (prec > 0)
         {
-            UpdateNullishCoalescingRestrictions(token);
+            UpdateNullishCoalescingRestrictions(token, ref allowAndOr, ref allowNullishCoalescing);
             NextToken();
 
             _context.IsAssignmentTarget = false;
@@ -2052,7 +2058,7 @@ public partial class JavaScriptParser
                     ThrowUnexpectedToken(_lookahead);
                 }
 
-                UpdateNullishCoalescingRestrictions(_lookahead);
+                UpdateNullishCoalescingRestrictions(_lookahead, ref allowAndOr, ref allowNullishCoalescing);
 
                 // Reduce: make a binary expression from the three topmost entries.
                 while (stack.Count > 2 && prec <= precedences.Peek())
@@ -4694,7 +4700,7 @@ public partial class JavaScriptParser
 
         var token = NextToken();
         var raw = GetTokenRaw(token);
-        return Finalize(node, new Literal((string?) token.Value, raw));
+        return Finalize(node, new Literal((string) token.Value!, raw));
     }
 
     private ArrayList<ImportAttribute> ParseImportAttributes()
@@ -4752,7 +4758,7 @@ public partial class JavaScriptParser
         NextToken();
         var literalToken = NextToken();
         var raw = GetTokenRaw(literalToken);
-        Literal value = Finalize(node, new Literal((string?) literalToken.Value, raw));
+        Literal value = Finalize(node, new Literal((string) literalToken.Value!, raw));
 
         return Finalize(node, new ImportAttribute(key, value));
     }

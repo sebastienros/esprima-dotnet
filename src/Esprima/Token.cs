@@ -21,15 +21,13 @@ public enum TokenType : byte
     Template,
     BigIntLiteral,
 
-    JsxIdentifier,
-    JsxText,
-    Extension
+    Extension = byte.MaxValue
 }
 
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct Token
 {
-    private Token(
+    internal Token(
         TokenType type,
         object? value,
         int start,
@@ -124,14 +122,12 @@ public readonly record struct Token
     public readonly bool Head;
     public readonly bool Tail;
 
-    private readonly object? _customValue;
-    public string? RawTemplate => this.Type == TokenType.Template ? (string?) _customValue : null;
-    public RegexValue? RegexValue => this.Type == TokenType.RegularExpression ? (RegexValue?) _customValue : null;
+    internal readonly object? _customValue;
+    public string? RawTemplate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Type == TokenType.Template ? (string?) _customValue : null; }
+    public RegexValue? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Type == TokenType.RegularExpression ? (RegexValue?) _customValue : null; }
 
     internal Token ChangeType(TokenType newType)
     {
         return new Token(newType, Value, Start, End, LineNumber, LineStart, Octal, NotEscapeSequenceHead, Head, Tail, _customValue);
     }
 }
-
-public record ParsedToken(TokenType Type, string? Value, int Start, int End, in Location Location, RegexValue? RegexValue);

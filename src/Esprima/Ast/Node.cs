@@ -4,20 +4,14 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-[DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(), nq}}")]
-public abstract class Node
+public abstract class Node : SyntaxElement
 {
-    internal AdditionalDataContainer _additionalDataContainer;
-
     protected Node(Nodes type)
     {
         Type = type;
     }
 
     public Nodes Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    public Range Range;
-    public Location Location;
 
     public ChildNodes ChildNodes => new ChildNodes(this);
 
@@ -43,28 +37,10 @@ public abstract class Node
         return visitor.VisitExtension(this);
     }
 
-    /// <summary>
-    /// Gets additional, user-defined data associated with the specified key.
-    /// </summary>
-    /// <remarks>
-    /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public object? GetAdditionalData(object key) => _additionalDataContainer.GetData(key);
-
-    /// <summary>
-    /// Sets additional, user-defined data associated with the specified key.
-    /// </summary>
-    /// <remarks>
-    /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetAdditionalData(object key, object? value) => _additionalDataContainer.SetData(key, value);
-
     private static readonly AstToJavaScriptOptions s_toStringOptions = AstToJavaScriptOptions.Default with { IgnoreExtensions = true };
     public override string ToString() => this.ToJavaScriptString(KnRJavaScriptTextFormatterOptions.Default, s_toStringOptions);
 
-    private protected virtual string GetDebuggerDisplay()
+    private protected override string GetDebuggerDisplay()
     {
         return $"/*{Type}*/  {this}";
     }

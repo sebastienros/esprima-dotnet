@@ -7,33 +7,26 @@ namespace Esprima.Ast;
 
 public sealed class Literal : Expression
 {
-    private static readonly object _boxedTrue = true;
-    private static readonly object _boxedFalse = false;
+    private static readonly object s_boxedTrue = true;
+    private static readonly object s_boxedFalse = false;
 
     internal Literal(TokenType tokenType, object? value, string raw) : base(Nodes.Literal)
     {
         TokenType = tokenType;
         Value = value;
         Raw = raw;
-
-        if (tokenType == TokenType.NumericLiteral)
-        {
-            NumericValue = (double) value!;
-        }
     }
 
-    public Literal(string? value, string raw) : this(TokenType.StringLiteral, value, raw)
+    public Literal(string value, string raw) : this(TokenType.StringLiteral, value, raw)
     {
     }
 
-    public Literal(bool value, string raw) : this(TokenType.BooleanLiteral, value ? _boxedTrue : _boxedFalse, raw)
+    public Literal(bool value, string raw) : this(TokenType.BooleanLiteral, value ? s_boxedTrue : s_boxedFalse, raw)
     {
-        NumericValue = value ? 1 : 0;
     }
 
     public Literal(double value, string raw) : this(TokenType.NumericLiteral, value, raw)
     {
-        NumericValue = value;
     }
 
     public Literal(BigInteger value, string raw) : this(TokenType.BigIntLiteral, value, raw)
@@ -55,11 +48,11 @@ public sealed class Literal : Expression
     public string Raw { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public RegexValue? Regex { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public string? StringValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.StringLiteral ? Value as string : null; }
-    public bool BooleanValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BooleanLiteral && ReferenceEquals(Value, _boxedTrue); }
-    public double NumericValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public string? StringValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.StringLiteral ? (string) Value! : null; }
+    public bool? BooleanValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BooleanLiteral ? ReferenceEquals(Value, s_boxedTrue) : null; }
+    public double? NumericValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.NumericLiteral ? (double) Value! : null; }
     public Regex? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.RegularExpression ? (Regex?) Value : null; }
-    public BigInteger? BigIntValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BigIntLiteral ? (BigInteger?) Value : null; }
+    public BigInteger? BigIntValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BigIntLiteral ? (BigInteger) Value! : null; }
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 

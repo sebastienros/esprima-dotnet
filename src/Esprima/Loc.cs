@@ -5,11 +5,11 @@ namespace Esprima;
 [DebuggerDisplay("{ToString()}")]
 public readonly struct Location : IEquatable<Location>
 {
-    public Position Start { get; }
-    public Position End { get; }
-    public string? Source { get; }
+    public readonly Position Start;
+    public readonly Position End;
+    public readonly string? Source;
 
-    public Location(Position start, Position end) : this(start, end, null)
+    public Location(in Position start, in Position end) : this(start, end, null)
     {
     }
 

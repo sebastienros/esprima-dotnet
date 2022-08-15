@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Esprima;
 
@@ -8,22 +9,32 @@ public enum CommentType
     Line
 }
 
-public class Comment
+[StructLayout(LayoutKind.Auto)]
+public readonly record struct Comment
 {
-    public CommentType Type;
-
-    public string? Value;
-    public Range Slice;
-
-    public int Start;
-    public int End;
-
-    public Range Range
+    internal Comment(
+        CommentType type,
+        in Range slice,
+        int start,
+        int end,
+        in Position startPosition,
+        in Position endPosition)
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new Range(Start, End);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => value.Deconstruct(out Start, out End);
+        Type = type;
+        Slice = slice;
+        Start = start;
+        End = end;
+        StartPosition = startPosition;
+        EndPosition = endPosition;
     }
-    public Location Location;
+
+    public readonly CommentType Type;
+
+    public readonly Range Slice;
+
+    public readonly int Start;
+    public readonly int End;
+
+    public readonly Position StartPosition;
+    public readonly Position EndPosition;
 }
