@@ -2013,7 +2013,7 @@ public partial class JavaScriptParser
         var allowAndOr = true;
         var allowNullishCoalescing = true;
 
-        void UpdateNullishCoalescingRestrictions(in Token t)
+        static void UpdateNullishCoalescingRestrictions(in Token t, ref bool allowAndOr, ref bool allowNullishCoalescing)
         {
             var value = t.Value;
             if ("&&".Equals(value) || "||".Equals(value))
@@ -2031,7 +2031,7 @@ public partial class JavaScriptParser
         var prec = BinaryPrecedence(token);
         if (prec > 0)
         {
-            UpdateNullishCoalescingRestrictions(token);
+            UpdateNullishCoalescingRestrictions(token, ref allowAndOr, ref allowNullishCoalescing);
             NextToken();
 
             _context.IsAssignmentTarget = false;
@@ -2058,7 +2058,7 @@ public partial class JavaScriptParser
                     ThrowUnexpectedToken(_lookahead);
                 }
 
-                UpdateNullishCoalescingRestrictions(_lookahead);
+                UpdateNullishCoalescingRestrictions(_lookahead, ref allowAndOr, ref allowNullishCoalescing);
 
                 // Reduce: make a binary expression from the three topmost entries.
                 while (stack.Count > 2 && prec <= precedences.Peek())
