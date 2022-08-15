@@ -3877,17 +3877,20 @@ public partial class JavaScriptParser
         return Finalize(node, new RestElement(arg));
     }
 
+    // pooled for ParseLexicalBinding calls
+    private ArrayList<Token> _parseFormalParameterParameters;
+
     private void ParseFormalParameter(ref ParsedParameters options)
     {
-        var parameters = new ArrayList<Token>();
+        _parseFormalParameterParameters.Clear();
 
         var param = Match("...")
-            ? ParseRestElement(ref parameters)
-            : ParsePatternWithDefault(ref parameters);
+            ? ParseRestElement(ref _parseFormalParameterParameters)
+            : ParsePatternWithDefault(ref _parseFormalParameterParameters);
 
-        for (var i = 0; i < parameters.Count; i++)
+        for (var i = 0; i < _parseFormalParameterParameters.Count; i++)
         {
-            ValidateParam2(ref options, parameters[i], (string?) parameters[i].Value);
+            ValidateParam2(ref options, _parseFormalParameterParameters[i], (string?) _parseFormalParameterParameters[i].Value);
         }
 
         options.Simple = options.Simple && param is Identifier;
