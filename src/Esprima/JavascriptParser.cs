@@ -830,7 +830,7 @@ public partial class JavaScriptParser
         {
             case TokenType.StringLiteral:
                 var raw = GetTokenRaw(token);
-                key = Finalize(node, new Literal((string?) token.Value, raw));
+                key = Finalize(node, new Literal((string) token.Value!, raw));
                 break;
 
             case TokenType.NumericLiteral:
@@ -4700,7 +4700,7 @@ public partial class JavaScriptParser
 
         var token = NextToken();
         var raw = GetTokenRaw(token);
-        return Finalize(node, new Literal((string?) token.Value, raw));
+        return Finalize(node, new Literal((string) token.Value!, raw));
     }
 
     private ArrayList<ImportAttribute> ParseImportAttributes()
@@ -4758,7 +4758,7 @@ public partial class JavaScriptParser
         NextToken();
         var literalToken = NextToken();
         var raw = GetTokenRaw(literalToken);
-        Literal value = Finalize(node, new Literal((string?) literalToken.Value, raw));
+        Literal value = Finalize(node, new Literal((string) literalToken.Value!, raw));
 
         return Finalize(node, new ImportAttribute(key, value));
     }

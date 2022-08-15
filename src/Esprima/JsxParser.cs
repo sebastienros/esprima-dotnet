@@ -640,7 +640,7 @@ public class JsxParser : JavaScriptParser
         }
 
         var raw = GetTokenRaw(token);
-        return Finalize(node, new Literal(token.Value as string, raw));
+        return Finalize(node, new Literal((string) token.Value!, raw));
     }
 
     private JsxExpressionContainer ParseJsxExpressionAttribute()
