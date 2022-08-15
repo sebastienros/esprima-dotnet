@@ -15,6 +15,7 @@ public abstract class Program : Node
     public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
     public abstract SourceType SourceType { get; }
+    public abstract bool Strict { get; }
 
     internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
 

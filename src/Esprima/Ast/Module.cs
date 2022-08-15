@@ -7,6 +7,7 @@ public sealed class Module : Program
     }
 
     public override SourceType SourceType => SourceType.Module;
+    public override bool Strict => true;
 
     protected override Program Rewrite(in NodeList<Statement> body)
     {
