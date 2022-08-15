@@ -8,7 +8,6 @@ public sealed class SyntaxComment : SyntaxElement
     public SyntaxComment(CommentType type, string value)
     {
         Type = type;
-
         Value = value;
     }
 

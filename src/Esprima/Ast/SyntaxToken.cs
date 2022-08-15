@@ -15,6 +15,7 @@ public sealed class SyntaxToken : SyntaxElement
     public TokenType Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public string Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+
     public RegexValue? RegexValue
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

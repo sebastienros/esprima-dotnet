@@ -7,7 +7,7 @@ public enum JsxTokenType
     Unknown,
     Identifier,
     Text
-};
+}
 
 public static class JsxToken
 {
