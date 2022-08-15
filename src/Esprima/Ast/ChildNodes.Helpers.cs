@@ -40,19 +40,18 @@ public readonly partial struct ChildNodes : IEnumerable<Node>
         #region 3 arguments
 
         internal partial Node? MoveNext(Node arg0, Node arg1, Node arg2);
+        internal partial Node? MoveNext<T0>(in NodeList<T0> arg0, Node arg1, Node arg2) where T0 : Node;
         internal partial Node? MoveNext<T0, T2>(in NodeList<T0> arg0, Node arg1, in NodeList<T2> arg2)
             where T0 : Node
             where T2 : Node;
-        internal partial Node? MoveNext<T2>(Node arg0, Node arg1, in NodeList<T2> arg2) where T2 : Node;
 
         internal partial Node? MoveNextNullableAt0<T1>(Node? arg0, in NodeList<T1> arg1, Node arg2) where T1 : Node;
         internal partial Node? MoveNextNullableAt0<T2>(Node? arg0, Node arg1, in NodeList<T2> arg2) where T2 : Node;
 
-        internal partial Node? MoveNextNullableAt1<T2>(Node arg0, Node? arg1, in NodeList<T2> arg2) where T2 : Node;
-
         internal partial Node? MoveNextNullableAt1_2(Node arg0, Node? arg1, Node? arg2);
 
         internal partial Node? MoveNextNullableAt2(Node arg0, Node arg1, Node? arg2);
+        internal partial Node? MoveNextNullableAt2<T0>(in NodeList<T0> arg0, Node arg1, Node? arg2) where T0 : Node;
         internal partial Node? MoveNextNullableAt2<T1>(Node arg0, in NodeList<T1> arg1, Node? arg2) where T1 : Node;
 
         #endregion
@@ -61,11 +60,11 @@ public readonly partial struct ChildNodes : IEnumerable<Node>
 
         internal partial Node? MoveNextNullableAt0_1_2(Node? arg0, Node? arg1, Node? arg2, Node arg3);
 
-        internal partial Node? MoveNextNullableAt0_1<T3>(Node? arg0, Node? arg1, Node arg2, in NodeList<T3> arg3) where T3 : Node;
-
         internal partial Node? MoveNextNullableAt0_2<T1, T3>(Node? arg0, in NodeList<T1> arg1, Node? arg2, in NodeList<T3> arg3)
             where T1 : Node
             where T3 : Node;
+
+        internal partial Node? MoveNextNullableAt1_2<T0>(in NodeList<T0> arg0, Node? arg1, Node? arg2, Node arg3) where T0 : Node;
 
         #endregion
 

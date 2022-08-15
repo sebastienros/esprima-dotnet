@@ -26,7 +26,7 @@ public sealed class PropertyDefinition : ClassProperty
     public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Key, Value, Decorators);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(Decorators, Key, Value);
 
     protected internal override object? Accept(AstVisitor visitor) => visitor.VisitPropertyDefinition(this);
 

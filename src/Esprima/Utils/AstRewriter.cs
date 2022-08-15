@@ -163,20 +163,20 @@ public class AstRewriter : AstVisitor
 
     protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
+        VisitAndConvert(classDeclaration.Decorators, out var decorators);
         var id = VisitAndConvert(classDeclaration.Id, allowNull: true);
         var superClass = VisitAndConvert(classDeclaration.SuperClass, allowNull: true);
         var body = VisitAndConvert(classDeclaration.Body);
-        VisitAndConvert(classDeclaration.Decorators, out var decorators);
 
         return classDeclaration.UpdateWith(id, superClass, body, decorators);
     }
 
     protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
+        VisitAndConvert(classExpression.Decorators, out var decorators);
         var id = VisitAndConvert(classExpression.Id, allowNull: true);
         var superClass = VisitAndConvert(classExpression.SuperClass, allowNull: true);
         var body = VisitAndConvert(classExpression.Body);
-        VisitAndConvert(classExpression.Decorators, out var decorators);
 
         return classExpression.UpdateWith(id, superClass, body, decorators);
     }
@@ -403,9 +403,9 @@ public class AstRewriter : AstVisitor
 
     protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
+        VisitAndConvert(methodDefinition.Decorators, out var decorators);
         var key = VisitAndConvert(methodDefinition.Key);
         var value = VisitAndConvert(methodDefinition.Value);
-        VisitAndConvert(methodDefinition.Decorators, out var decorators);
 
         return methodDefinition.UpdateWith(key, value, decorators);
     }
@@ -462,9 +462,9 @@ public class AstRewriter : AstVisitor
 
     protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
+        VisitAndConvert(propertyDefinition.Decorators, out var decorators);
         var key = VisitAndConvert(propertyDefinition.Key);
         var value = VisitAndConvert(propertyDefinition.Value, allowNull: true);
-        VisitAndConvert(propertyDefinition.Decorators, out var decorators);
 
         return propertyDefinition.UpdateWith(key, value, decorators);
     }
