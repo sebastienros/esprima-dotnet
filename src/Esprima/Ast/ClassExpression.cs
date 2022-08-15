@@ -24,7 +24,7 @@ public sealed class ClassExpression : Expression, IClass
     public ClassBody Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_1(Id, SuperClass, Body, Decorators);
+    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Decorators, Id, SuperClass, Body);
 
     protected internal override object? Accept(AstVisitor visitor) => visitor.VisitClassExpression(this);
 

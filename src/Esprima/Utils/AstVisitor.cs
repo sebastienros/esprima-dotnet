@@ -152,6 +152,12 @@ public class AstVisitor
 
     protected internal virtual object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
+        ref readonly var decorators = ref classDeclaration.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
+
         if (classDeclaration.Id is not null)
         {
             Visit(classDeclaration.Id);
@@ -164,17 +170,17 @@ public class AstVisitor
 
         Visit(classDeclaration.Body);
 
-        ref readonly var decorators = ref classDeclaration.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
-        {
-            Visit(decorators[i]);
-        }
-
         return classDeclaration;
     }
 
     protected internal virtual object? VisitClassExpression(ClassExpression classExpression)
     {
+        ref readonly var decorators = ref classExpression.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
+
         if (classExpression.Id is not null)
         {
             Visit(classExpression.Id);
@@ -186,12 +192,6 @@ public class AstVisitor
         }
 
         Visit(classExpression.Body);
-
-        ref readonly var decorators = ref classExpression.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
-        {
-            Visit(decorators[i]);
-        }
 
         return classExpression;
     }
@@ -510,14 +510,14 @@ public class AstVisitor
 
     protected internal virtual object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
-        Visit(methodDefinition.Key);
-        Visit(methodDefinition.Value);
-
         ref readonly var decorators = ref methodDefinition.Decorators;
         for (var i = 0; i < decorators.Count; i++)
         {
             Visit(decorators[i]);
         }
+
+        Visit(methodDefinition.Key);
+        Visit(methodDefinition.Value);
 
         return methodDefinition;
     }
@@ -586,17 +586,17 @@ public class AstVisitor
 
     protected internal virtual object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
+        ref readonly var decorators = ref propertyDefinition.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
+
         Visit(propertyDefinition.Key);
 
         if (propertyDefinition.Value is not null)
         {
             Visit(propertyDefinition.Value);
-        }
-
-        ref readonly var decorators = ref propertyDefinition.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
-        {
-            Visit(decorators[i]);
         }
 
         return propertyDefinition;

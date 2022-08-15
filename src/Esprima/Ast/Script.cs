@@ -13,8 +13,7 @@ public sealed class Script : Program
     }
 
     public override SourceType SourceType => SourceType.Script;
-
-    public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public override bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     protected override Program Rewrite(in NodeList<Statement> body)
     {
