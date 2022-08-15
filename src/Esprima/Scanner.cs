@@ -498,7 +498,7 @@ public sealed partial class Scanner
         return true;
     }
 
-    public string? TryToScanUnicodeCodePointEscape()
+    private string? TryToScanUnicodeCodePointEscape()
     {
         var ch = Source[Index];
         var code = 0;
@@ -539,7 +539,7 @@ public sealed partial class Scanner
         return result!;
     }
 
-    public string GetIdentifier()
+    private string GetIdentifier()
     {
         var start = Index++;
         while (!Eof())
@@ -571,7 +571,7 @@ public sealed partial class Scanner
         return Source.Slice(start, Index);
     }
 
-    public string GetComplexIdentifier()
+    private string GetComplexIdentifier()
     {
         var cp = CodePointAt(Source, Index);
         var id = Character.FromCodePoint(cp);
@@ -1047,7 +1047,7 @@ public sealed partial class Scanner
         return Token.CreateNumericLiteral(numericValue, octal, start, end: Index, LineNumber, LineStart);
     }
 
-    public bool IsImplicitOctalLiteral()
+    private bool IsImplicitOctalLiteral()
     {
         // Implicit octal, unless there is a non-octal digit.
         // (Annex B.1.1 on Numeric Literals)
