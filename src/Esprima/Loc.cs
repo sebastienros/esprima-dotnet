@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 
 namespace Esprima;
 
@@ -56,7 +57,21 @@ public readonly struct Location : IEquatable<Location>
 
     public override string ToString()
     {
-        return $"{Start}...{End}{(Source is string s ? ": " + s : null)}";
+        string interval;
+        if (Start.Line != End.Line)
+        {
+            interval = Start.Column != End.Column
+                ? string.Format(CultureInfo.InvariantCulture, "[{0},{1}..{2},{3})", Start.Line, Start.Column, End.Line, End.Column)
+                : string.Format(CultureInfo.InvariantCulture, "[{0}..{1},{2})", Start.Line, End.Line, Start.Column);
+        }
+        else
+        {
+            interval = Start.Column != End.Column
+                ? string.Format(CultureInfo.InvariantCulture, "[{0},{1}..{2})", Start.Line, Start.Column, End.Column)
+                : string.Format(CultureInfo.InvariantCulture, "[{0},{1})", Start.Line, Start.Column);
+        }
+
+        return Source is not null ? interval + ": " + Source : interval;
     }
 
     public static bool operator ==(in Location left, in Location right)

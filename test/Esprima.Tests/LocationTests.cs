@@ -33,4 +33,17 @@ public class LocationTests
         Assert.Equal(end, e.ActualValue);
     }
 #endif
+
+    [Theory]
+    [InlineData(1, 2, 1, 2, null, "[1,2)")]
+    [InlineData(1, 2, 1, 5, null, "[1,2..5)")]
+    [InlineData(1, 0, 5, 0, null, "[1..5,0)")]
+    [InlineData(1, 0, 5, 5, "foo.js", "[1,0..5,5): foo.js")]
+    public void ToStringTest(int startLine, int startColumn, int endLine, int endColumn, string? source, string expected)
+    {
+        var start = new Position(startLine, startColumn);
+        var end = new Position(endLine, endColumn);
+        var location = new Location(in start, in end, source);
+        Assert.Equal(expected, location.ToString());
+    }
 }
