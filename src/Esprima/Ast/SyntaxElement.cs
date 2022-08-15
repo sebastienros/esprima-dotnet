@@ -7,7 +7,7 @@ namespace Esprima.Ast;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(), nq}}")]
 public abstract class SyntaxElement
 {
-    internal AdditionalDataContainer _additionalDataContainer;
+    private protected AdditionalDataContainer _additionalDataContainer;
 
     /// <summary>
     /// Gets additional, user-defined data associated with the specified key.
