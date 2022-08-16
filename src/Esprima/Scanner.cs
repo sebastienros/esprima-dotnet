@@ -48,6 +48,8 @@ public sealed partial class Scanner
     private List<string> _curlyStack;
     private readonly StringBuilder strb = new();
 
+    internal StringPool _stringPool;
+
     private static int HexValue(char ch)
     {
         if (ch >= 'A')
@@ -594,7 +596,7 @@ public sealed partial class Scanner
             }
         }
 
-        return Source.Slice(start, Index);
+        return Source.Slice(start, Index, ref _stringPool);
     }
 
     private string GetComplexIdentifier()
@@ -1574,7 +1576,7 @@ public sealed partial class Scanner
             _curlyStack.RemoveAt(_curlyStack.Count - 1);
         }
 
-        var rawTemplate = Source.Slice(start + 1, Index - rawOffset);
+        var rawTemplate = Source.Slice(start + 1, Index - rawOffset, ref _stringPool);
         var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
 
         return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
@@ -2428,6 +2430,7 @@ public sealed partial class Scanner
             _curlyStack.Capacity = 0;
             strb.Clear();
             strb.Capacity = 0;
+            _stringPool = default;
 
             return Token.CreateEof(Index, LineNumber, LineStart);
         }

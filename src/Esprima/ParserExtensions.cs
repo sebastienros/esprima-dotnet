@@ -26,6 +26,13 @@ public static class ParserExtensions
             Scanner.TryGetInternedPunctuator(source);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string Slice(this string source, int start, int end, ref StringPool stringPool)
+    {
+        var sourceSpan = source.AsSpan(start, end - start);
+        return TryGetInternedString(sourceSpan) ?? stringPool.GetOrCreate(sourceSpan);
+    }
+
     public static string Slice(this string source, int start, int end)
     {
         var len = source.Length;
