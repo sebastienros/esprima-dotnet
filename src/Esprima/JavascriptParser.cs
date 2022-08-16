@@ -2202,7 +2202,7 @@ public partial class JavaScriptParser
             case Nodes.ArrowParameterPlaceHolder:
                 // TODO clean-up
                 var arrowParameterPlaceHolder = expr.As<ArrowParameterPlaceHolder>();
-                parameters = new ArrayList<Node>(arrowParameterPlaceHolder.Params);
+                parameters = ArrayList<Node>.FromNodeList(arrowParameterPlaceHolder.Params);
                 asyncArrow = arrowParameterPlaceHolder.Async;
                 break;
             default:
@@ -2533,13 +2533,18 @@ public partial class JavaScriptParser
     // https://tc39.github.io/ecma262/#sec-let-and-const-declarations
 
     // pooled for ParseLexicalBinding calls
-    private ArrayList<Token> _parseLexicalBindingParameters;
+    private ArrayList<Token>? _parseLexicalBindingParameters;
 
     private VariableDeclarator ParseLexicalBinding(VariableDeclarationKind kind, bool inFor)
     {
         var node = CreateNode();
-        var id = ParsePattern(ref _parseLexicalBindingParameters, kind);
-        _parseLexicalBindingParameters.Clear();
+        var parameters = _parseLexicalBindingParameters ?? new ArrayList<Token>();
+        _parseLexicalBindingParameters = null;
+        parameters.Clear();
+
+        var id = ParsePattern(ref parameters, kind);
+
+        _parseLexicalBindingParameters = parameters;
 
         if (_context.Strict && id.Type == Nodes.Identifier)
         {
@@ -2576,7 +2581,7 @@ public partial class JavaScriptParser
 
     private NodeList<VariableDeclarator> ParseBindingList(VariableDeclarationKind kind, bool inFor)
     {
-        var list = new ArrayList<VariableDeclarator>(new [] { ParseLexicalBinding(kind, inFor) });
+        var list = new ArrayList<VariableDeclarator>(new[] { ParseLexicalBinding(kind, inFor) });
 
         while (Match(","))
         {
@@ -2849,14 +2854,18 @@ public partial class JavaScriptParser
     }
 
     // pooled for ParsePattern calls
-    private ArrayList<Token> _parseVariableDeclarationParameters;
+    private ArrayList<Token>? _parseVariableDeclarationParameters;
 
     private VariableDeclarator ParseVariableDeclaration(bool inFor)
     {
         var node = CreateNode();
 
-        var id = ParsePattern(ref _parseVariableDeclarationParameters, VariableDeclarationKind.Var);
-        _parseVariableDeclarationParameters.Clear();
+        var parameters = _parseVariableDeclarationParameters ?? new ArrayList<Token>();
+        _parseVariableDeclarationParameters = null;
+        parameters.Clear();
+
+        var id = ParsePattern(ref parameters, VariableDeclarationKind.Var);
+        _parseVariableDeclarationParameters = parameters;
 
         if (_context.Strict && id.Type == Nodes.Identifier)
         {
@@ -3227,7 +3236,7 @@ public partial class JavaScriptParser
 
                     if (Match(","))
                     {
-                        var initSeq = new ArrayList<Expression>(new [] { (Expression) init });
+                        var initSeq = new ArrayList<Expression>(new[] { (Expression) init });
                         while (Match(","))
                         {
                             NextToken();
@@ -3872,23 +3881,27 @@ public partial class JavaScriptParser
     }
 
     // pooled for ParseLexicalBinding calls
-    private ArrayList<Token> _parseFormalParameterParameters;
+    private ArrayList<Token>? _parseFormalParameterParameters;
 
     private void ParseFormalParameter(ref ParsedParameters options)
     {
-        _parseFormalParameterParameters.Clear();
+        var parameters = _parseFormalParameterParameters ?? new ArrayList<Token>();
+        _parseFormalParameterParameters = null;
+        parameters.Clear();
 
         var param = Match("...")
-            ? ParseRestElement(ref _parseFormalParameterParameters)
-            : ParsePatternWithDefault(ref _parseFormalParameterParameters);
+            ? ParseRestElement(ref parameters)
+            : ParsePatternWithDefault(ref parameters);
 
-        for (var i = 0; i < _parseFormalParameterParameters.Count; i++)
+        for (var i = 0; i < parameters.Count; i++)
         {
-            ValidateParam2(ref options, _parseFormalParameterParameters[i], (string?) _parseFormalParameterParameters[i].Value);
+            ValidateParam2(ref options, parameters[i], (string?) parameters[i].Value);
         }
 
         options.Simple = options.Simple && param is Identifier;
         options.Parameters.Push(param);
+
+        _parseFormalParameterParameters = parameters;
     }
 
     private ParsedParameters ParseFormalParameters(Token? firstRestricted = null)

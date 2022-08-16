@@ -71,7 +71,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #if DEBUG
     private int[] _sharedVersion;
     private int _localVersion;
-#endif
+ #endif
 
     public ArrayList(int initialCapacity)
     {
@@ -108,24 +108,25 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #endif
     }
 
-    public ArrayList(NodeList<Node> initialData)
+    public static ArrayList<Node> FromNodeList(NodeList<Node> initialData)
     {
-        if (initialData._items is null)
+        if (initialData._count == 0)
         {
-            _items = null;
-            _count = 0;
-            return;
+            return new ArrayList<Node>();
         }
 
-        _items = new T[initialData.Count];
-        _count = initialData.Count;
-
-        Array.Copy(initialData._items!, 0, _items, 0, _count);
-
+        var items = new Node[initialData.Count];
+        Array.Copy(initialData._items!, 0, items, 0, initialData._count);
+        return new ArrayList<Node>
+        {
+            _items = items,
+            _count = initialData.Count,
 #if DEBUG
-        _localVersion = 0;
-        _sharedVersion = _count > 0 ? new[] { _localVersion } : null;
+            _localVersion = 0,
+            _sharedVersion = initialData._count > 0 ? new[] { 0 } : null
 #endif
+        };
+
     }
 
     private int Capacity => _items?.Length ?? 0;
@@ -187,13 +188,16 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         AssertUnchanged();
 
-        if (this._items is not null)
+        if (this._count > 0)
         {
             Array.Clear(this._items, 0, this._count);
             this._count = 0;
         }
 
-        OnChanged();
+#if DEBUG
+        _sharedVersion = new [] { 0 };
+        _localVersion = 0;
+#endif
     }
 
     internal void Resize(int size)
