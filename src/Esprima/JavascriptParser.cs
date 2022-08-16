@@ -255,9 +255,9 @@ public partial class JavaScriptParser
         var next = _scanner.Lex(new LexOptions(_context.Strict, allowIdentifierEscape));
         _hasLineTerminator = token.Type != TokenType.Unknown && next.Type != TokenType.Unknown && token.LineNumber != next.LineNumber;
 
-        if (next.Type != TokenType.Unknown && _context.Strict && next.Type == TokenType.Identifier)
+        if (_context.Strict && next.Type == TokenType.Identifier)
         {
-            var nextValue = (string?) next.Value;
+            var nextValue = (string) next.Value!;
             if (Scanner.IsStrictModeReservedWord(nextValue))
             {
                 next = next.ChangeType(TokenType.Keyword);
@@ -2846,7 +2846,7 @@ public partial class JavaScriptParser
         }
         else if (token.Type != TokenType.Identifier)
         {
-            if (_context.Strict && token.Type == TokenType.Keyword && Scanner.IsStrictModeReservedWord((string?) token.Value))
+            if (_context.Strict && token.Type == TokenType.Keyword && Scanner.IsStrictModeReservedWord((string) token.Value!))
             {
                 TolerateUnexpectedToken(token, Messages.StrictReservedWord);
             }
@@ -3803,7 +3803,7 @@ public partial class JavaScriptParser
         var key = name;
         if (_context.Strict)
         {
-            if (Scanner.IsRestrictedWord(name))
+            if (name is not null && Scanner.IsRestrictedWord(name))
             {
                 options.Stricted = new Token(); // Marker token
                 options.Message = Messages.StrictParamName;
@@ -3817,12 +3817,12 @@ public partial class JavaScriptParser
         }
         else if (options.FirstRestricted == null)
         {
-            if (Scanner.IsRestrictedWord(name))
+            if (name is not null && Scanner.IsRestrictedWord(name))
             {
                 options.FirstRestricted = new Token(); // Marker token
                 options.Message = Messages.StrictParamName;
             }
-            else if (Scanner.IsStrictModeReservedWord(name))
+            else if (name is not null && Scanner.IsStrictModeReservedWord(name))
             {
                 options.FirstRestricted = new Token(); // Marker token
                 options.Message = Messages.StrictReservedWord;
@@ -3842,7 +3842,7 @@ public partial class JavaScriptParser
         var key = name;
         if (_context.Strict)
         {
-            if (Scanner.IsRestrictedWord(name))
+            if (name is not null && Scanner.IsRestrictedWord(name))
             {
                 options.Stricted = param;
                 options.Message = Messages.StrictParamName;
@@ -3856,12 +3856,12 @@ public partial class JavaScriptParser
         }
         else if (options.FirstRestricted == null)
         {
-            if (Scanner.IsRestrictedWord(name))
+            if (name is not null && Scanner.IsRestrictedWord(name))
             {
                 options.FirstRestricted = param;
                 options.Message = Messages.StrictParamName;
             }
-            else if (Scanner.IsStrictModeReservedWord(name))
+            else if (name is not null && Scanner.IsStrictModeReservedWord(name))
             {
                 options.FirstRestricted = param;
                 options.Message = Messages.StrictReservedWord;
@@ -4008,19 +4008,19 @@ public partial class JavaScriptParser
             var tokenValue = (string?) token.Value;
             if (_context.Strict)
             {
-                if (Scanner.IsRestrictedWord(tokenValue))
+                if (tokenValue is not null && Scanner.IsRestrictedWord(tokenValue))
                 {
                     TolerateUnexpectedToken(token, Messages.StrictFunctionName);
                 }
             }
             else
             {
-                if (Scanner.IsRestrictedWord(tokenValue))
+                if (tokenValue is not null && Scanner.IsRestrictedWord(tokenValue))
                 {
                     firstRestricted = token;
                     message = Messages.StrictFunctionName;
                 }
-                else if (Scanner.IsStrictModeReservedWord(tokenValue))
+                else if (tokenValue is not null && Scanner.IsStrictModeReservedWord(tokenValue))
                 {
                     firstRestricted = token;
                     message = Messages.StrictReservedWord;
@@ -4102,19 +4102,19 @@ public partial class JavaScriptParser
 
             if (_context.Strict)
             {
-                if (Scanner.IsRestrictedWord((string?) token.Value))
+                if (token.Value is not null && Scanner.IsRestrictedWord((string) token.Value))
                 {
                     TolerateUnexpectedToken(token, Messages.StrictFunctionName);
                 }
             }
             else
             {
-                if (Scanner.IsRestrictedWord((string?) token.Value))
+                if (token.Value is not null && Scanner.IsRestrictedWord((string) token.Value))
                 {
                     firstRestricted = token;
                     message = Messages.StrictFunctionName;
                 }
-                else if (Scanner.IsStrictModeReservedWord((string?) token.Value))
+                else if (token.Value is not null && Scanner.IsStrictModeReservedWord((string) token.Value))
                 {
                     firstRestricted = token;
                     message = Messages.StrictReservedWord;
@@ -4165,7 +4165,7 @@ public partial class JavaScriptParser
         var expr = ParseExpression();
         if (expr.Type == Nodes.Literal)
         {
-            directive = GetTokenRaw(token).Slice(1, -1);
+            directive = _scanner.Source.Slice(token.Start + 1, token.End - 1);
         }
 
         ConsumeSemicolon();
@@ -5217,11 +5217,11 @@ public partial class JavaScriptParser
 
                 if (token.Type == TokenType.Keyword)
                 {
-                    if (Scanner.IsFutureReservedWord((string?) token.Value))
+                    if (Scanner.IsFutureReservedWord((string) token.Value!))
                     {
                         msg = Messages.UnexpectedReserved;
                     }
-                    else if (_context.Strict && Scanner.IsStrictModeReservedWord((string?) token.Value))
+                    else if (_context.Strict && Scanner.IsStrictModeReservedWord((string) token.Value!))
                     {
                         msg = Messages.StrictReservedWord;
                     }
