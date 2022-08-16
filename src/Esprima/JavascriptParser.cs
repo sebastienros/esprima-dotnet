@@ -1199,10 +1199,17 @@ public partial class JavaScriptParser
         else
         {
             var startToken = _lookahead;
-            var parameters = new ArrayList<Token>();
+            ArrayList<Token> parameters;
             if (Match("..."))
             {
+                parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+                _parseVariableBindingParameters = null;
+                parameters.Clear();
+
                 var rest = ParseRestElement(ref parameters);
+
+                _parseVariableBindingParameters = parameters;
+
                 Expect(")");
                 if (!Match("=>"))
                 {
@@ -1251,7 +1258,14 @@ public partial class JavaScriptParser
                                 ThrowUnexpectedToken(_lookahead);
                             }
 
+                            parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+                            _parseVariableBindingParameters = null;
+                            parameters.Clear();
+
                             var restElement = ParseRestElement(ref parameters);
+
+                            _parseVariableBindingParameters = parameters;
+
                             Expect(")");
                             if (!Match("=>"))
                             {
@@ -2202,7 +2216,7 @@ public partial class JavaScriptParser
             case Nodes.ArrowParameterPlaceHolder:
                 // TODO clean-up
                 var arrowParameterPlaceHolder = expr.As<ArrowParameterPlaceHolder>();
-                parameters = ArrayList<Node>.FromNodeList(arrowParameterPlaceHolder.Params);
+                parameters = ArrayList.Create(arrowParameterPlaceHolder.Params);
                 asyncArrow = arrowParameterPlaceHolder.Async;
                 break;
             default:
@@ -2532,19 +2546,19 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-let-and-const-declarations
 
-    // pooled for ParseLexicalBinding calls
-    private ArrayList<Token>? _parseLexicalBindingParameters;
+    // pooled for calls which parse a variable/parameter binding
+    private ArrayList<Token>? _parseVariableBindingParameters;
 
     private VariableDeclarator ParseLexicalBinding(VariableDeclarationKind kind, bool inFor)
     {
         var node = CreateNode();
-        var parameters = _parseLexicalBindingParameters ?? new ArrayList<Token>();
-        _parseLexicalBindingParameters = null;
+        var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+        _parseVariableBindingParameters = null;
         parameters.Clear();
 
         var id = ParsePattern(ref parameters, kind);
 
-        _parseLexicalBindingParameters = parameters;
+        _parseVariableBindingParameters = parameters;
 
         if (_context.Strict && id.Type == Nodes.Identifier)
         {
@@ -2853,19 +2867,16 @@ public partial class JavaScriptParser
         return Finalize(node, new Identifier((string) token.Value!));
     }
 
-    // pooled for ParsePattern calls
-    private ArrayList<Token>? _parseVariableDeclarationParameters;
-
     private VariableDeclarator ParseVariableDeclaration(bool inFor)
     {
         var node = CreateNode();
 
-        var parameters = _parseVariableDeclarationParameters ?? new ArrayList<Token>();
-        _parseVariableDeclarationParameters = null;
+        var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+        _parseVariableBindingParameters = null;
         parameters.Clear();
 
         var id = ParsePattern(ref parameters, VariableDeclarationKind.Var);
-        _parseVariableDeclarationParameters = parameters;
+        _parseVariableBindingParameters = parameters;
 
         if (_context.Strict && id.Type == Nodes.Identifier)
         {
@@ -2891,7 +2902,7 @@ public partial class JavaScriptParser
 
     private NodeList<VariableDeclarator> ParseVariableDeclarationList(bool inFor)
     {
-        var list = new ArrayList<VariableDeclarator>(new [] { ParseVariableDeclaration(inFor) });
+        var list = new ArrayList<VariableDeclarator>(new[] { ParseVariableDeclaration(inFor) });
 
         while (Match(","))
         {
@@ -3574,7 +3585,10 @@ public partial class JavaScriptParser
                 ThrowUnexpectedToken(_lookahead);
             }
 
-            var parameters = new ArrayList<Token>();
+            var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+            _parseVariableBindingParameters = null;
+            parameters.Clear();
+
             param = ParsePattern(ref parameters);
             var paramMap = new Dictionary<string?, bool>();
             for (var i = 0; i < parameters.Count; i++)
@@ -3587,6 +3601,8 @@ public partial class JavaScriptParser
 
                 paramMap[key] = true;
             }
+
+            _parseVariableBindingParameters = parameters;
 
             if (_context.Strict && param.Type == Nodes.Identifier)
             {
@@ -3880,13 +3896,10 @@ public partial class JavaScriptParser
         return Finalize(node, new RestElement(arg));
     }
 
-    // pooled for ParseLexicalBinding calls
-    private ArrayList<Token>? _parseFormalParameterParameters;
-
     private void ParseFormalParameter(ref ParsedParameters options)
     {
-        var parameters = _parseFormalParameterParameters ?? new ArrayList<Token>();
-        _parseFormalParameterParameters = null;
+        var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+        _parseVariableBindingParameters = null;
         parameters.Clear();
 
         var param = Match("...")
@@ -3901,7 +3914,7 @@ public partial class JavaScriptParser
         options.Simple = options.Simple && param is Identifier;
         options.Parameters.Push(param);
 
-        _parseFormalParameterParameters = parameters;
+        _parseVariableBindingParameters = parameters;
     }
 
     private ParsedParameters ParseFormalParameters(Token? firstRestricted = null)

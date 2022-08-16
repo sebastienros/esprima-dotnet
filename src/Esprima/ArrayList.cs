@@ -71,7 +71,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #if DEBUG
     private int[] _sharedVersion;
     private int _localVersion;
- #endif
+#endif
 
     public ArrayList(int initialCapacity)
     {
@@ -106,27 +106,6 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         _localVersion = 0;
         _sharedVersion = _count > 0 ? new[] { _localVersion } : null;
 #endif
-    }
-
-    public static ArrayList<Node> FromNodeList(NodeList<Node> initialData)
-    {
-        if (initialData._count == 0)
-        {
-            return new ArrayList<Node>();
-        }
-
-        var items = new Node[initialData.Count];
-        Array.Copy(initialData._items!, 0, items, 0, initialData._count);
-        return new ArrayList<Node>
-        {
-            _items = items,
-            _count = initialData.Count,
-#if DEBUG
-            _localVersion = 0,
-            _sharedVersion = initialData._count > 0 ? new[] { 0 } : null
-#endif
-        };
-
     }
 
     private int Capacity => _items?.Length ?? 0;
@@ -193,11 +172,15 @@ internal struct ArrayList<T> : IReadOnlyList<T>
             Array.Clear(this._items, 0, this._count);
             this._count = 0;
         }
-
 #if DEBUG
-        _sharedVersion = new [] { 0 };
-        _localVersion = 0;
+        else if (_sharedVersion is null)
+        {
+            _sharedVersion = new[] { 0 };
+            _localVersion = 0;
+        }
 #endif
+
+        OnChanged();
     }
 
     internal void Resize(int size)
@@ -407,8 +390,20 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     }
 }
 
-internal static class ArrayListExtensions
+internal static class ArrayList
 {
+    public static ArrayList<T> Create<T>(in NodeList<T> source) where T : Node
+    {
+        if (source._count == 0)
+        {
+            return new ArrayList<T>();
+        }
+
+        var items = new T[source.Count];
+        Array.Copy(source._items!, 0, items, 0, source._count);
+        return new ArrayList<T>(items);
+    }
+
     public static void AddRange<T>(
         ref this ArrayList<T> destination,
         in NodeList<T> source) where T : Node
