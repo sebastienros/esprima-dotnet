@@ -27,7 +27,7 @@ internal class StringMatcherAttribute : System.Attribute
     /// <summary>
     /// Builds optimized value lookup using known facts about keys.
     /// </summary>
-    internal static string GenerateLookups(string[] alternatives, int indent, bool checkNull)
+    internal static string GenerateLookups(string[] alternatives, int indent, bool checkNull, bool returnString, bool sourceIsSpan)
     {
         var sb = new StringBuilder();
 
@@ -36,13 +36,35 @@ internal class StringMatcherAttribute : System.Attribute
         var indentStr = new string(' ', indent);
         var baseIndent = byLength.Length > 1 ? "        " : "    ";
 
+        static string Escape(string s)
+        {
+            return s.Replace("\"", "\\\"");
+        }
+
+        void StringEquality(StringBuilder builder, string toCheck)
+        {
+            toCheck = toCheck.Replace("\"", "\"");
+            if (!sourceIsSpan)
+            {
+                builder.Append("input == \"");
+                builder.Append(Escape(toCheck));
+                builder.Append("\"");
+            }
+            else
+            {
+                builder.Append("input.SequenceEqual(\"");
+                builder.Append(Escape(toCheck));
+                builder.Append("\".AsSpan())");
+            }
+        }
+
         if (byLength.Length > 1)
         {
             if (checkNull)
             {
                 sb.Append(indentStr).AppendLine("    if (input is null)");
                 sb.Append(indentStr).AppendLine("    {");
-                sb.Append(indentStr).AppendLine("        return false;");
+                sb.Append(indentStr).Append("        return ").Append(returnString ? "null" : "false").AppendLine(";");
                 sb.Append(indentStr).AppendLine("    }");
             }
 
@@ -66,16 +88,29 @@ internal class StringMatcherAttribute : System.Attribute
             else if (group.Count() > 1)
             {
                 // hash-based or equality-based then, let compiler generate decision tree
-                var switchIndent = indentStr + baseIndent;
+                var switchIndent = indentStr + indentStr + baseIndent;
                 sb.Append(switchIndent).AppendLine("switch (input)");
                 sb.Append(switchIndent).AppendLine("{");
-                foreach (var item in group)
+                if (returnString)
                 {
-                    sb.Append(switchIndent).Append("    case \"").Append(item).AppendLine("\":");
+                    foreach (var item in group)
+                    {
+                        sb.Append(switchIndent).Append("    case \"").Append(Escape(item)).AppendLine("\":");
+                        sb.Append(switchIndent).Append("        return \"").Append(Escape(item)).AppendLine("\";");
+                    }
                 }
-                sb.Append(switchIndent).AppendLine("        return true;");
+                else
+                {
+                    foreach (var item in group)
+                    {
+                        sb.Append(switchIndent).Append("    case \"").Append(Escape(item)).AppendLine("\":");
+                    }
+
+                    sb.Append(switchIndent).AppendLine("        return true;");
+                }
+
                 sb.Append(switchIndent).AppendLine("    default:");
-                sb.Append(switchIndent).AppendLine("        return false;");
+                sb.Append(switchIndent).Append("        return ").Append(returnString ? "null" : "false").AppendLine(";");
                 sb.Append(switchIndent).AppendLine("}");
                 continue;
             }
@@ -85,7 +120,10 @@ internal class StringMatcherAttribute : System.Attribute
             {
                 if (group.Count() == 1)
                 {
-                    sb.Append(indentStr).Append(baseIndent).Append("    return input == \"").Append(item).AppendLine("\";");
+                    var trueFalse = returnString ? "\"" + Escape(item) + "\" : null" : "true : false";
+                    sb.Append(indentStr).Append(baseIndent).Append("    return ");
+                    StringEquality(sb, item);
+                    sb.Append(" ? ").Append(trueFalse).AppendLine(";");
                     continue;
                 }
 
@@ -98,17 +136,31 @@ internal class StringMatcherAttribute : System.Attribute
                 sb.Append("if (");
                 if (discriminatorIndex != -1)
                 {
-                    sb.Append("disc").Append(group.Key).Append(" == '").Append(item[discriminatorIndex]).Append("' && ");
+                    var value = item[discriminatorIndex];
+                    sb.Append("disc").Append(group.Key).Append(" == '");
+                    if (value == '\'')
+                    {
+                        sb.Append("\\'");
+                    }
+                    else
+                    {
+                        sb.Append(value);
+                    }
+                    sb.Append("' && ");
                 }
 
-                sb.Append("input == \"");
-                sb.Append(item);
-                sb.AppendLine("\")");
+                StringEquality(sb, item);
+                sb.AppendLine(")");
 
                 sb.Append(indentStr).Append(baseIndent).AppendLine("    {");
-
-                sb.Append(indentStr).Append(baseIndent).AppendLine("        return true;");
-
+                if (returnString)
+                {
+                    sb.Append(indentStr).Append(baseIndent).Append("        return \"").Append(item).AppendLine("\";");
+                }
+                else
+                {
+                    sb.Append(indentStr).Append(baseIndent).AppendLine("        return true;");
+                }
                 sb.Append(indentStr).Append(baseIndent).AppendLine("    }");
 
                 first = false;
@@ -116,7 +168,7 @@ internal class StringMatcherAttribute : System.Attribute
 
             if (group.Count() > 1)
             {
-                sb.Append(indentStr).Append(baseIndent).AppendLine("    return false;");
+                sb.Append(indentStr).Append(baseIndent).Append("    return ").Append(returnString ? "null" : "false").AppendLine(";");
             }
             sb.AppendLine();
         }
@@ -124,7 +176,7 @@ internal class StringMatcherAttribute : System.Attribute
         if (byLength.Length > 1)
         {
             sb.Append(indentStr).Append(baseIndent).AppendLine("default:");
-            sb.Append(indentStr).Append(baseIndent).AppendLine("   return false;");
+            sb.Append(indentStr).Append(baseIndent).Append("   return ").Append(returnString ? "null" : "false").AppendLine(";");
 
             sb.AppendLine("        }");
         }

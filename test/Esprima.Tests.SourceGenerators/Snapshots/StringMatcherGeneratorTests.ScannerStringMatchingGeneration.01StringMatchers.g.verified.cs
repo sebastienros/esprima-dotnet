@@ -10,7 +10,7 @@ public partial class JavaScriptParser
         switch (input.Length)
         {
             case 1:
-                return input == "=";
+                return input == "=" ? true : false;
 
             case 2:
                 var disc2 = input[0];
@@ -77,7 +77,7 @@ public partial class JavaScriptParser
                 return false;
 
             case 4:
-                return input == ">>>=";
+                return input == ">>>=" ? true : false;
 
             default:
                return false;
@@ -202,7 +202,7 @@ public partial class JavaScriptParser
                 return false;
 
             case 8:
-                return input == "function";
+                return input == "function" ? true : false;
 
             default:
                return false;
@@ -222,10 +222,10 @@ public partial class Scanner
         switch (input.Length)
         {
             case 4:
-                return input == "enum";
+                return input == "enum" ? true : false;
 
             case 5:
-                return input == "super";
+                return input == "super" ? true : false;
 
             case 6:
                 var disc6 = input[0];
@@ -253,10 +253,10 @@ public partial class Scanner
         switch (input.Length)
         {
             case 3:
-                return input == "let";
+                return input == "let" ? true : false;
 
             case 5:
-                return input == "yield";
+                return input == "yield" ? true : false;
 
             case 6:
                 var disc6 = input[0];
@@ -295,7 +295,7 @@ public partial class Scanner
                 return false;
 
             case 10:
-                return input == "implements";
+                return input == "implements" ? true : false;
 
             default:
                return false;
@@ -304,50 +304,50 @@ public partial class Scanner
 
     private static partial bool IsTwoCharacterPunctuator(string input)
     {
-        switch (input)
-        {
-            case "&&":
-            case "||":
-            case "==":
-            case "!=":
-            case "+=":
-            case "-=":
-            case "*=":
-            case "/=":
-            case "++":
-            case "--":
-            case "<<":
-            case ">>":
-            case "&=":
-            case "|=":
-            case "^=":
-            case "%=":
-            case "<=":
-            case ">=":
-            case "=>":
-            case "**":
-                return true;
-            default:
-                return false;
-        }
+            switch (input)
+            {
+                case "&&":
+                case "||":
+                case "==":
+                case "!=":
+                case "+=":
+                case "-=":
+                case "*=":
+                case "/=":
+                case "++":
+                case "--":
+                case "<<":
+                case ">>":
+                case "&=":
+                case "|=":
+                case "^=":
+                case "%=":
+                case "<=":
+                case ">=":
+                case "=>":
+                case "**":
+                    return true;
+                default:
+                    return false;
+            }
     }
 
     private static partial bool IsThreeCharacterPunctuator(string input)
     {
-        switch (input)
-        {
-            case "===":
-            case "!==":
-            case ">>>":
-            case "<<=":
-            case ">>=":
-            case "**=":
-            case "&&=":
-            case "||=":
-                return true;
-            default:
-                return false;
-        }
+            switch (input)
+            {
+                case "===":
+                case "!==":
+                case ">>>":
+                case "<<=":
+                case ">>=":
+                case "**=":
+                case "&&=":
+                case "||=":
+                    return true;
+                default:
+                    return false;
+            }
     }
 
     public static partial bool IsKeyword(string? input)
@@ -523,7 +523,7 @@ public partial class Scanner
                 return false;
 
             case 10:
-                return input == "instanceof";
+                return input == "instanceof" ? true : false;
 
             default:
                return false;

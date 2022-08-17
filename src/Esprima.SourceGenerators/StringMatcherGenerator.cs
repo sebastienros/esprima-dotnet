@@ -39,7 +39,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
             methodDeclarationSyntax.Body is null;
     }
 
-    sealed record StringMatcherMethod(string ContainingType, string Modifiers, string Name, string InputType, string[] Alternatives);
+    sealed record StringMatcherMethod(string ContainingType, string Modifiers, string ReturnType, string Name, string InputType, string[] Alternatives);
 
     private static StringMatcherMethod? GetSemanticTargetForGeneration(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
@@ -52,6 +52,18 @@ public class StringMatcherGenerator : IIncrementalGenerator
             method.GetAttributes().FirstOrDefault()?.AttributeClass?.Name != "StringMatcherAttribute")
         {
             return null;
+        }
+
+        static string CleanTarget(string s)
+        {
+            s = s.TrimStart('"');
+            if (s.EndsWith("\""))
+            {
+                s = s.Substring(0, s.Length - 1);
+            }
+
+            s = s.Replace("\\\"", "\"");
+            return s;
         }
 
         var attribute = method.GetAttributes()[0];
@@ -67,21 +79,43 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 {
                     if (ag.NameEquals is null)
                     {
-                        targets.Add(ag.Expression.ToString().Trim('"'));
+                        targets.Add(CleanTarget(ag.Expression.ToString()));
                     }
                     else
                     {
-                        namedAttributes.Add(ag.NameEquals.Name.NormalizeWhitespace().ToFullString(), ag.Expression.ChildTokens().FirstOrDefault().Value?.ToString() ?? "");
+                        var key = ag.NameEquals.Name.NormalizeWhitespace().ToFullString();
+                        string stringValue;
+                        if (ag.Expression is ImplicitArrayCreationExpressionSyntax arraySyntax)
+                        {
+                            stringValue = string.Join(",", arraySyntax.Initializer.Expressions.Select(x => CleanTarget(x.ToString())).ToArray());
+                        }
+                        else
+                        {
+                            stringValue = ag.Expression.ChildTokens().FirstOrDefault().Value?.ToString() ?? "";
+                        }
+                        namedAttributes.Add(key, stringValue);
                     }
                 }
             }
         }
 
+        if (targets.Count == 0 && namedAttributes.TryGetValue("Targets", out var value))
+        {
+            targets.AddRange(value.Split(','));
+        }
+
+        var returnType = methodDeclarationSyntax.ReturnType.ToString();
+        /*
+        if (namedAttributes.TryGetValue("ReturnString", out value) && bool.TryParse(value, out var b) && b)
+        {
+            returnType = "string";
+        }*/
+
         var containingType = method.ContainingType.Name;
         var modifiers = methodDeclarationSyntax.Modifiers.ToString();
         var inputType = method.Parameters.Single().Type.ToString();
 
-        return new StringMatcherMethod(containingType, modifiers, method.Name, inputType, targets.ToArray());
+        return new StringMatcherMethod(containingType, modifiers, returnType, method.Name, inputType, targets.ToArray());
     }
 
     private static void Execute(SourceProductionContext context, ImmutableArray<StringMatcherMethod> methods)
@@ -106,9 +140,14 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 context.CancellationToken.ThrowIfCancellationRequested();
 
                 sourceBuilder.Append(indent);
-                sourceBuilder.Append(method.Modifiers).Append(" bool ").Append(method.Name).Append("(").Append(method.InputType).AppendLine(" input)");
+                sourceBuilder.Append(method.Modifiers).Append(" ").Append(method.ReturnType).Append(" ").Append(method.Name).Append("(").Append(method.InputType).AppendLine(" input)");
                 sourceBuilder.Append(indent).AppendLine("{");
-                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4, checkNull: method.InputType.EndsWith("?")));
+
+                var checkNull = method.InputType.EndsWith("?");
+                var returnString = method.ReturnType.StartsWith("string");
+                var sourceIsSpan = method.InputType.Contains("Span");
+
+                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4, checkNull, returnString, sourceIsSpan));
                 sourceBuilder.Append(indent).AppendLine("}");
                 sourceBuilder.AppendLine();
             }
