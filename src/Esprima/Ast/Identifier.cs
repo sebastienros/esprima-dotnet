@@ -1,16 +1,17 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima.Ast;
 
 public sealed class Identifier : Expression
 {
-    public Identifier(string name) : base(Nodes.Identifier)
+    public Identifier(StringSegment name) : base(Nodes.Identifier)
     {
         Name = name;
     }
 
-    public string Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public StringSegment Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 

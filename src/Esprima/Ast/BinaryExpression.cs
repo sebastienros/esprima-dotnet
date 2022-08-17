@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
+using Microsoft.Extensions.Primitives;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast;
@@ -35,7 +36,7 @@ public enum BinaryOperator
 
 public class BinaryExpression : Expression
 {
-    public BinaryExpression(string op, Expression left, Expression right) : this(ParseBinaryOperator(op), left, right)
+    public BinaryExpression(StringSegment op, Expression left, Expression right) : this(ParseBinaryOperator(op), left, right)
     {
     }
 
@@ -43,7 +44,7 @@ public class BinaryExpression : Expression
     {
     }
 
-    private protected BinaryExpression(Nodes type, string op, Expression left, Expression right) : this(type, ParseBinaryOperator(op), left, right)
+    private protected BinaryExpression(Nodes type, StringSegment op, Expression left, Expression right) : this(type, ParseBinaryOperator(op), left, right)
     {
     }
 
@@ -54,7 +55,7 @@ public class BinaryExpression : Expression
         Right = right;
     }
 
-    public static BinaryOperator ParseBinaryOperator(string op)
+    public static BinaryOperator ParseBinaryOperator(ReadOnlySpan<char> op)
     {
         return op switch
         {
@@ -83,7 +84,7 @@ public class BinaryExpression : Expression
             "||" => BinaryOperator.LogicalOr,
             "**" => BinaryOperator.Exponentiation,
             "??" => BinaryOperator.NullishCoalescing,
-            _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
+            _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op.ToString())
         };
     }
 

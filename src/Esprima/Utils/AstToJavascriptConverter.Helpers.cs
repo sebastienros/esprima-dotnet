@@ -236,7 +236,7 @@ partial class AstToJavaScriptConverter
 
     private void VisitExportOrImportSpecifierIdentifier(Expression identifierExpression)
     {
-        if (identifierExpression is Identifier { Name: "default" } identifier)
+        if (identifierExpression is Identifier identifier && identifier.Name == "default")
         {
             Writer.WriteKeyword("default", ref _writeContext);
         }

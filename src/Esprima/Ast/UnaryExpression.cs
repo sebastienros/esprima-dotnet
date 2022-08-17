@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
+using Microsoft.Extensions.Primitives;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast;
@@ -19,7 +20,7 @@ public enum UnaryOperator
 
 public class UnaryExpression : Expression
 {
-    public UnaryExpression(string op, Expression arg) : this(ParseUnaryOperator(op), arg)
+    public UnaryExpression(StringSegment op, Expression arg) : this(ParseUnaryOperator(op), arg)
     {
     }
 
@@ -27,7 +28,7 @@ public class UnaryExpression : Expression
     {
     }
 
-    private protected UnaryExpression(Nodes type, string op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
+    private protected UnaryExpression(Nodes type, StringSegment op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
     {
     }
 
@@ -38,7 +39,7 @@ public class UnaryExpression : Expression
         Prefix = prefix;
     }
 
-    public static UnaryOperator ParseUnaryOperator(string op)
+    public static UnaryOperator ParseUnaryOperator(ReadOnlySpan<char> op)
     {
         return op switch
         {
@@ -51,7 +52,7 @@ public class UnaryExpression : Expression
             "typeof" => UnaryOperator.TypeOf,
             "++" => UnaryOperator.Increment,
             "--" => UnaryOperator.Decrement,
-            _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
+            _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op.ToString())
         };
     }
 

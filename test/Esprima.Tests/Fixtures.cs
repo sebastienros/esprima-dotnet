@@ -112,12 +112,12 @@ public class Fixtures
             moduleFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(jsFilePath)) + ".module.json";
         }
 
-        var script = File.ReadAllText(jsFilePath);
+        string script = File.ReadAllText(jsFilePath);
         if (jsFilePath.EndsWith(".source.js"))
         {
-            var parser = new JavaScriptParser(script);
+            var parser = new JavaScriptParser(script.ToString());
             var program = parser.ParseScript();
-            var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!;
+            var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!.Value.ToString();
             script = source;
         }
 
@@ -166,7 +166,7 @@ public class Fixtures
             expected = File.ReadAllText(treeFilePath);
             if (WriteBackExpectedTree && conversionOptions.TestCompatibilityMode == AstToJsonTestCompatibilityMode.None)
             {
-                var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
+                var actual = ParseAndFormat(sourceType, script.ToString(), parserOptions, parserFactory, conversionOptions);
                 if (!CompareTrees(actual, expected, metadata))
                     File.WriteAllText(treeFilePath, actual);
             }
@@ -177,7 +177,7 @@ public class Fixtures
             expected = File.ReadAllText(failureFilePath);
             if (WriteBackExpectedTree && conversionOptions.TestCompatibilityMode == AstToJsonTestCompatibilityMode.None)
             {
-                var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
+                var actual = ParseAndFormat(sourceType, script.ToString(), parserOptions, parserFactory, conversionOptions);
                 if (!CompareTrees(actual, expected, metadata))
                     File.WriteAllText(failureFilePath, actual);
             }

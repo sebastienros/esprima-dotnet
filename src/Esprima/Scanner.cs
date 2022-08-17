@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima;
 
@@ -140,22 +141,22 @@ public sealed partial class Scanner
     // https://tc39.github.io/ecma262/#sec-future-reserved-words
 
     [StringMatcher("enum", "export", "import", "super")]
-    public static partial bool IsFutureReservedWord(string? id);
+    public static partial bool IsFutureReservedWord(ReadOnlySpan<char> id);
 
     [StringMatcher("implements", "interface", "package", "private", "protected", "public", "static", "yield", "let")]
-    public static partial bool IsStrictModeReservedWord(string? id);
+    public static partial bool IsStrictModeReservedWord(ReadOnlySpan<char> id);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsRestrictedWord(string? id)
+    public static bool IsRestrictedWord(ReadOnlySpan<char> id)
     {
         return id is "eval" or "arguments";
     }
 
     [StringMatcher("&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**")]
-    private static partial bool IsTwoCharacterPunctuator(string id);
+    private static partial bool IsTwoCharacterPunctuator(ReadOnlySpan<char> id);
 
     [StringMatcher("===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=")]
-    private static partial bool IsThreeCharacterPunctuator(string id);
+    private static partial bool IsThreeCharacterPunctuator(ReadOnlySpan<char> id);
 
     // https://tc39.github.io/ecma262/#sec-keywords
 
@@ -163,7 +164,7 @@ public sealed partial class Scanner
         "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
         "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
         "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof")]
-    public static partial bool IsKeyword(string? id);
+    public static partial bool IsKeyword(StringSegment id);
 
     // https://tc39.github.io/ecma262/#sec-comments
 
@@ -539,7 +540,7 @@ public sealed partial class Scanner
         return result!;
     }
 
-    private string GetIdentifier()
+    private StringSegment GetIdentifier()
     {
         var start = Index++;
         while (!Eof())
@@ -692,11 +693,11 @@ public sealed partial class Scanner
         {
             type = TokenType.Keyword;
         }
-        else if ("null".Equals(id))
+        else if (id == "null")
         {
             type = TokenType.NullLiteral;
         }
-        else if ("true".Equals(id) || "false".Equals(id))
+        else if (id == "true" || id == "false")
         {
             type = TokenType.BooleanLiteral;
         }
@@ -716,24 +717,23 @@ public sealed partial class Scanner
             Index = restore;
         }
 
-        return Token.Create(type, id, start, end: Index, LineNumber, LineStart);
+        return Token.Create(type, Source, null, start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-punctuators
 
     private Token ScanPunctuator()
     {
-        static string SafeSubstring(string s, int startIndex, int length)
+        static StringSegment SafeSubstring(string s, int startIndex, int length)
         {
-            return startIndex + length > s.Length ? string.Empty : s.Substring(startIndex, length);
+            return startIndex + length > s.Length ? StringSegment.Empty : new StringSegment(s, startIndex, length);
         }
 
         var start = Index;
 
         // Check for most common single-character punctuators.
-        // TODO spanify
         var c = Source[Index];
-        var str = c.ToString();
+        StringSegment str = ParserExtensions.CharToString(c);
 
         switch (c)
         {
@@ -833,7 +833,7 @@ public sealed partial class Scanner
                         {
                             // 1-character punctuators.
                             var temp = Source[Index];
-                            str = temp.ToString();
+                            str = ParserExtensions.CharToString(temp);
                             if ("<>=!+-*%&|^/".IndexOf(temp) >= 0)
                             {
                                 ++Index;
@@ -850,7 +850,7 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        return Token.CreatePunctuator(str, start, end: Index, LineNumber, LineStart);
+        return Token.CreatePunctuator(Source, str.ToString(), start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
@@ -911,7 +911,7 @@ public sealed partial class Scanner
             }
         }
 
-        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(Source, value, octal: false, start, end: Index, LineNumber, LineStart);
     }
 
     private enum JavaScriptNumberStyle
@@ -959,7 +959,7 @@ public sealed partial class Scanner
 #endif
         }
 
-        return Token.CreateBigIntLiteral(bigInt, start, end: Index, LineNumber, LineStart);
+        return Token.CreateBigIntLiteral(Source, bigInt, start, end: Index, LineNumber, LineStart);
     }
 
     private Token ScanBinaryLiteral(int start)
@@ -989,7 +989,7 @@ public sealed partial class Scanner
 
         var numberString = number.ToString();
         var value = Convert.ToUInt32(numberString, 2);
-        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(Source, value, octal: false, start, end: Index, LineNumber, LineStart);
     }
 
     private Token ScanOctalLiteral(char prefix, int start, bool isLegacyOctalDigital = false)
@@ -1044,7 +1044,7 @@ public sealed partial class Scanner
             return ThrowUnexpectedToken<Token>($"Value {number} was either too large or too small for a UInt64.");
         }
 
-        return Token.CreateNumericLiteral(numericValue, octal, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(Source, numericValue, octal, start, end: Index, LineNumber, LineStart);
     }
 
     private bool IsImplicitOctalLiteral()
@@ -1257,7 +1257,7 @@ public sealed partial class Scanner
             value = d;
         }
 
-        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(Source, value, octal: false, start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-string-literals
@@ -1394,7 +1394,7 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        return Token.CreateStringLiteral(str.ToString(), octal, start, end: Index, LineNumber, LineStart);
+        return Token.CreateStringLiteral(Source, str.ToString(), octal, start, end: Index, LineNumber, LineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-template-literal-lexical-components
@@ -1569,7 +1569,7 @@ public sealed partial class Scanner
         var rawTemplate = Source.Slice(start + 1, Index - rawOffset);
         var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
 
-        return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
+        return Token.CreateTemplate(Source, cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
     }
 
     private static string FromCharCode(uint[] codeUnits)
@@ -2406,7 +2406,7 @@ public sealed partial class Scanner
 
         var value = _adaptRegexp ? ParseRegex(body, flags, _regexTimeout) : null;
 
-        return Token.CreateRegexLiteral(value, new RegexValue(body, flags), start, end: Index, LineNumber, LineStart);
+        return Token.CreateRegexLiteral(Source, value, new RegexValue(body, flags), start, end: Index, LineNumber, LineStart);
     }
 
     public Token Lex() => Lex(new LexOptions());

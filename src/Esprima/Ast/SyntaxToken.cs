@@ -1,10 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima.Ast;
 
 public sealed class SyntaxToken : SyntaxElement
 {
-    public SyntaxToken(TokenType type, string value, RegexValue? regexValue = null)
+    public SyntaxToken(TokenType type, StringSegment value, RegexValue? regexValue = null)
     {
         Type = type;
 
@@ -14,7 +15,7 @@ public sealed class SyntaxToken : SyntaxElement
 
     public TokenType Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    public string Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public StringSegment Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public RegexValue? RegexValue
     {
@@ -24,5 +25,5 @@ public sealed class SyntaxToken : SyntaxElement
         private set => _additionalDataContainer.InternalData = value;
     }
 
-    public override string ToString() => Value;
+    public override string ToString() => Value.ToString();
 }

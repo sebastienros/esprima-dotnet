@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima.Utils;
 
@@ -133,6 +134,31 @@ public class AstToJsonConverter : AstVisitor
     {
         Member(name);
         Visit(node);
+    }
+
+    protected void Member(string name, StringSegment? value)
+    {
+        Member(name);
+        if (value is null)
+        {
+            _writer.String((string?) null);
+        }
+        else
+        {
+            _writer.String(value.Value);
+        }
+    }
+
+    protected void Member(string name, StringSegment value)
+    {
+        Member(name);
+        _writer.String(value);
+    }
+
+    protected void Member(string name, ReadOnlySpan<char> value)
+    {
+        Member(name);
+        _writer.String(value);
     }
 
     protected void Member(string name, string? value)
@@ -768,7 +794,7 @@ public class AstToJsonConverter : AstVisitor
                     break;
             }
 
-            Member("raw", literal.Raw);
+            Member("raw", literal.Raw.AsSpan());
 
             if (literal.Regex is not null)
             {

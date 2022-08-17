@@ -1,8 +1,10 @@
-﻿namespace Esprima.Ast;
+﻿using Microsoft.Extensions.Primitives;
+
+namespace Esprima.Ast;
 
 public sealed class UpdateExpression : UnaryExpression
 {
-    public UpdateExpression(string op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg, prefix)
+    public UpdateExpression(StringSegment op, Expression arg, bool prefix) : base(Nodes.UpdateExpression, op, arg, prefix)
     {
     }
 

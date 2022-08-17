@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima.Ast;
 
@@ -11,7 +12,7 @@ public sealed class TemplateElement : Node
         Tail = tail;
     }
 
-    public sealed record TemplateElementValue(string? Cooked, string Raw);
+    public sealed record TemplateElementValue(StringSegment? Cooked, StringSegment Raw);
 
     public TemplateElementValue Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool Tail { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

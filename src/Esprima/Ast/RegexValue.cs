@@ -1,3 +1,5 @@
-﻿namespace Esprima.Ast;
+﻿using Microsoft.Extensions.Primitives;
 
-public sealed record RegexValue(string Pattern, string Flags);
+namespace Esprima.Ast;
+
+public sealed record RegexValue(StringSegment Pattern, StringSegment Flags);

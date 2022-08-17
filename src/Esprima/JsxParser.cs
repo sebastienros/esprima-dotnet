@@ -1,5 +1,6 @@
 ﻿using Esprima.Ast;
 using Esprima.Ast.Jsx;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima;
 
@@ -413,7 +414,7 @@ public class JsxParser : JavaScriptParser
         if (cp is (60 or 62 or 47 or 58 or 61 or 123 or 125))
         {
             var value = _scanner.Source[_scanner.Index++];
-            return Token.CreatePunctuator(value.ToString(), start: _scanner.Index - 1, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return Token.CreatePunctuator(_scanner.Source, ParserExtensions.CharToString(value), start: _scanner.Index - 1, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         // " '
@@ -440,7 +441,7 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            return Token.CreateStringLiteral(str, octal: false, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return Token.CreateStringLiteral(_scanner.Source, str, octal: false, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         if (cp == 46)
@@ -450,13 +451,13 @@ public class JsxParser : JavaScriptParser
             var value = (n1 == '.' && n2 == '.') ? "..." : ".";
             var start = _scanner.Index;
             _scanner.Index += value.Length;
-            return Token.CreatePunctuator(value, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return Token.CreatePunctuator(_scanner.Source, value, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         // `
         if (cp == 96)
         {
-            return Token.CreateTemplate(cooked: null, rawTemplate: "", head: false, tail: false, notEscapeSequenceHead: ' ', start: _scanner.Index, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return Token.CreateTemplate(_scanner.Source, cooked: null, rawTemplate: "", head: false, tail: false, notEscapeSequenceHead: ' ', start: _scanner.Index, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         // Identifer can not contain backslash (char code 92).
@@ -482,8 +483,7 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            var id = _scanner.Source.Slice(start, _scanner.Index);
-            return JsxToken.CreateIdentifier(id, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return JsxToken.CreateIdentifier(_scanner.Source, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
         return this._scanner.Lex();
@@ -537,7 +537,7 @@ public class JsxParser : JavaScriptParser
 
         _lastMarker = _scanner.GetMarker();
 
-        var token = JsxToken.CreateText(text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+        var token = JsxToken.CreateText(_scanner.Source, text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
 
         if (text.Length > 0 && _config.Tokens)
         {
@@ -559,7 +559,7 @@ public class JsxParser : JavaScriptParser
     private void ExpectJsx(string value)
     {
         var token = this.NextJsxToken();
-        if (token.Type != TokenType.Punctuator || token.Value is string val && val != value)
+        if (!token.IsPunctuator(value))
         {
             ThrowUnexpectedToken(token);
         }
@@ -568,7 +568,7 @@ public class JsxParser : JavaScriptParser
     private bool MatchJsx(string value)
     {
         var next = this.PeekJsxToken();
-        return next.Type == TokenType.Punctuator && next.Value is string val && val == value;
+        return next.IsPunctuator(value);
     }
 
     private JsxIdentifier ParseJsxIdentifier()
@@ -580,7 +580,7 @@ public class JsxParser : JavaScriptParser
             ThrowUnexpectedToken(token);
         }
 
-        return Finalize(node, new JsxIdentifier((string) token.Value!));
+        return Finalize(node, new JsxIdentifier(token.GetSegment()));
     }
 
     private JsxExpression ParseJsxElementName()
@@ -640,7 +640,7 @@ public class JsxParser : JavaScriptParser
         }
 
         var raw = GetTokenRaw(token);
-        return Finalize(node, new Literal((string) token.Value!, raw));
+        return Finalize(node, new Literal(token.GetSegment(), raw));
     }
 
     private JsxExpressionContainer ParseJsxExpressionAttribute()
@@ -804,7 +804,7 @@ public class JsxParser : JavaScriptParser
             if (token.Start < token.End)
             {
                 var raw = GetTokenRaw(token);
-                var child = Finalize(node, new JsxText(token.Value as string, raw));
+                var child = Finalize(node, new JsxText(token.GetSegment(), raw));
                 children.Add(child);
             }
 
@@ -924,9 +924,9 @@ public class JsxParser : JavaScriptParser
         return element;
     }
 
-    private static string? GetQualifiedElementName(JsxExpression elementName)
+    private static StringSegment? GetQualifiedElementName(JsxExpression elementName)
     {
-        string? qualifiedName;
+        StringSegment? qualifiedName;
         switch (elementName.Type)
         {
             case JsxNodeType.Identifier:

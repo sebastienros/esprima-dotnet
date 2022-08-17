@@ -1,8 +1,10 @@
-﻿namespace Esprima.Ast;
+﻿using Microsoft.Extensions.Primitives;
+
+namespace Esprima.Ast;
 
 public sealed class LogicalExpression : BinaryExpression
 {
-    public LogicalExpression(string op, Expression left, Expression right) : base(Nodes.LogicalExpression, op, left, right)
+    public LogicalExpression(StringSegment op, Expression left, Expression right) : base(Nodes.LogicalExpression, op, left, right)
     {
     }
 

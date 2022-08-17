@@ -68,7 +68,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         WriteIndent();
     }
 
-    protected override void WriteLineCommentCore(TextWriter writer, string line, TriviaFlags flags)
+    protected override void WriteLineCommentCore(TextWriter writer, ReadOnlySpan<char> line, TriviaFlags flags)
     {
         if (!LastTriviaType.HasFlag(WhiteSpaceTriviaFlag))
         {
@@ -78,7 +78,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         base.WriteLineCommentCore(writer, line, flags);
     }
 
-    protected override void WriteBlockCommentLine(TextWriter writer, string line, bool isFirst)
+    protected override void WriteBlockCommentLine(TextWriter writer, ReadOnlySpan<char> line, bool isFirst)
     {
         if (!isFirst)
         {
@@ -101,7 +101,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         base.WriteBlockCommentCore(writer, lines, flags);
     }
 
-    protected virtual void WriteWhiteSpaceBetweenTokenAndIdentifier(string value, TokenFlags flags, ref WriteContext context)
+    protected virtual void WriteWhiteSpaceBetweenTokenAndIdentifier(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
         {
@@ -113,7 +113,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         }
     }
 
-    protected override void StartIdentifier(string value, TokenFlags flags, ref WriteContext context)
+    protected override void StartIdentifier(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {
@@ -125,7 +125,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         }
     }
 
-    protected virtual void WriteWhiteSpaceBetweenTokenAndKeyword(string value, TokenFlags flags, ref WriteContext context)
+    protected virtual void WriteWhiteSpaceBetweenTokenAndKeyword(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(TokenFlags.FollowsStatementBody))
         {
@@ -141,7 +141,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         }
     }
 
-    protected override void StartKeyword(string value, TokenFlags flags, ref WriteContext context)
+    protected override void StartKeyword(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {
@@ -153,7 +153,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         }
     }
 
-    protected virtual void WriteWhiteSpaceBetweenTokenAndLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
+    protected virtual void WriteWhiteSpaceBetweenTokenAndLiteral(ReadOnlySpan<char> value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(TokenFlags.LeadingSpaceRecommended) || LastTokenFlags.HasFlagFast(TokenFlags.TrailingSpaceRecommended))
         {
@@ -165,7 +165,7 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         }
     }
 
-    protected override void StartLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
+    protected override void StartLiteral(ReadOnlySpan<char> value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {

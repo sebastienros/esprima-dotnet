@@ -5,6 +5,7 @@ public abstract class JsonWriter
     public abstract void Null();
     public abstract void Number(long n);
     public abstract void Number(double n);
+    public abstract void String(ReadOnlySpan<char> value);
     public abstract void String(string? value);
     public abstract void Boolean(bool flag);
     public abstract void StartArray();

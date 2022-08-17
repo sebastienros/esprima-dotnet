@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
+using Microsoft.Extensions.Primitives;
 using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast;
@@ -27,7 +28,7 @@ public enum AssignmentOperator
 public sealed class AssignmentExpression : Expression
 {
     public AssignmentExpression(
-        string op,
+        StringSegment op,
         Node left,
         Expression right) :
         this(ParseAssignmentOperator(op), left, right)
@@ -45,7 +46,7 @@ public sealed class AssignmentExpression : Expression
         Right = right;
     }
 
-    public static AssignmentOperator ParseAssignmentOperator(string op)
+    public static AssignmentOperator ParseAssignmentOperator(ReadOnlySpan<char> op)
     {
         return op switch
         {
@@ -65,7 +66,7 @@ public sealed class AssignmentExpression : Expression
             "??=" => AssignmentOperator.NullishAssign,
             "&&=" => AssignmentOperator.AndAssign,
             "||=" => AssignmentOperator.OrAssign,
-            _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op)
+            _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op.ToString())
         };
     }
 
@@ -96,7 +97,7 @@ public sealed class AssignmentExpression : Expression
     public AssignmentOperator Operator { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     /// <remarks>
-    /// <see cref="Identifier"/> | <see cref="MemberExpression"/> | <see cref="BindingPattern"/> 
+    /// <see cref="Identifier"/> | <see cref="MemberExpression"/> | <see cref="BindingPattern"/>
     /// </remarks>
     public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }

@@ -1,18 +1,19 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Esprima.Utils.Jsx;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima.Ast.Jsx;
 
 [DebuggerDisplay("{Name,nq}")]
 public sealed class JsxIdentifier : JsxExpression
 {
-    public JsxIdentifier(string name) : base(JsxNodeType.Identifier)
+    public JsxIdentifier(StringSegment name) : base(JsxNodeType.Identifier)
     {
         Name = name;
     }
 
-    public string Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    public StringSegment Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 

@@ -69,13 +69,18 @@ public partial class JavaScriptTextWriter
         WriteEndOfLine();
     }
 
-    protected virtual void WriteLineCommentCore(TextWriter writer, string line, TriviaFlags flags)
+    protected virtual void WriteLineCommentCore(TextWriter writer, ReadOnlySpan<char> line, TriviaFlags flags)
     {
         writer.Write("//");
         writer.Write(line);
     }
 
     public void WriteLineComment(string line, TriviaFlags flags)
+    {
+        WriteLineComment(line.AsSpan(), flags);
+    }
+
+    public void WriteLineComment(ReadOnlySpan<char> line, TriviaFlags flags)
     {
         if (PendingRequiredNewLine || !CurrentLineIsEmptyOrWhiteSpace && flags.HasFlagFast(TriviaFlags.LeadingNewLineRequired))
         {
@@ -88,7 +93,7 @@ public partial class JavaScriptTextWriter
         PendingRequiredNewLine = true; // New line after line comments is always required.
     }
 
-    protected virtual void WriteBlockCommentLine(TextWriter writer, string line, bool isFirst)
+    protected virtual void WriteBlockCommentLine(TextWriter writer, ReadOnlySpan<char> line, bool isFirst)
     {
         writer.Write(line);
     }
@@ -100,12 +105,12 @@ public partial class JavaScriptTextWriter
         {
             if (enumerator.MoveNext())
             {
-                WriteBlockCommentLine(writer, enumerator.Current, isFirst: true);
+                WriteBlockCommentLine(writer, enumerator.Current.AsSpan(), isFirst: true);
 
                 while (enumerator.MoveNext())
                 {
                     writer.WriteLine();
-                    WriteBlockCommentLine(writer, enumerator.Current, isFirst: false);
+                    WriteBlockCommentLine(writer, enumerator.Current.AsSpan(), isFirst: false);
                 }
             }
         }
@@ -162,7 +167,7 @@ public partial class JavaScriptTextWriter
         }
     }
 
-    protected virtual void StartIdentifier(string value, TokenFlags flags, ref WriteContext context)
+    protected virtual void StartIdentifier(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {
@@ -170,7 +175,7 @@ public partial class JavaScriptTextWriter
         }
     }
 
-    public void WriteIdentifier(string value, TokenFlags flags, ref WriteContext context)
+    public void WriteIdentifier(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (PendingRequiredNewLine)
         {
@@ -186,12 +191,12 @@ public partial class JavaScriptTextWriter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WriteIdentifier(string value, ref WriteContext context)
+    public void WriteIdentifier(ReadOnlySpan<char> value, ref WriteContext context)
     {
         WriteIdentifier(value, TokenFlags.None, ref context);
     }
 
-    protected virtual void EndIdentifier(string value, TokenFlags flags, ref WriteContext context) { }
+    protected virtual void EndIdentifier(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context) { }
 
     protected void WriteRequiredSpaceBetweenTokenAndKeyword()
     {
@@ -216,7 +221,7 @@ public partial class JavaScriptTextWriter
         }
     }
 
-    protected virtual void StartKeyword(string value, TokenFlags flags, ref WriteContext context)
+    protected virtual void StartKeyword(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {
@@ -225,6 +230,11 @@ public partial class JavaScriptTextWriter
     }
 
     public void WriteKeyword(string value, TokenFlags flags, ref WriteContext context)
+    {
+        WriteKeyword(value.AsSpan(), flags, ref context);
+    }
+
+    public void WriteKeyword(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (PendingRequiredNewLine)
         {
@@ -242,10 +252,16 @@ public partial class JavaScriptTextWriter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteKeyword(string value, ref WriteContext context)
     {
+        WriteKeyword(value.AsSpan(), TokenFlags.None, ref context);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void WriteKeyword(ReadOnlySpan<char> value, ref WriteContext context)
+    {
         WriteKeyword(value, TokenFlags.None, ref context);
     }
 
-    protected virtual void EndKeyword(string value, TokenFlags flags, ref WriteContext context) { }
+    protected virtual void EndKeyword(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context) { }
 
     protected void WriteRequiredSpaceBetweenTokenAndLiteral(TokenType type)
     {
@@ -273,7 +289,7 @@ public partial class JavaScriptTextWriter
         }
     }
 
-    protected virtual void StartLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
+    protected virtual void StartLiteral(ReadOnlySpan<char> value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
         if (LastTriviaType == TriviaType.None)
         {
@@ -281,7 +297,7 @@ public partial class JavaScriptTextWriter
         }
     }
 
-    public void WriteLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context)
+    public void WriteLiteral(ReadOnlySpan<char> value, TokenType type, TokenFlags flags, ref WriteContext context)
     {
         if (PendingRequiredNewLine)
         {
@@ -297,14 +313,18 @@ public partial class JavaScriptTextWriter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WriteLiteral(string value, TokenType tokenType, ref WriteContext context)
+    public void WriteLiteral(ReadOnlySpan<char> value, TokenType tokenType, ref WriteContext context)
     {
         WriteLiteral(value, tokenType, TokenFlags.None, ref context);
     }
 
-    protected virtual void EndLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context) { }
+    protected virtual void EndLiteral(ReadOnlySpan<char> value, TokenType type, TokenFlags flags, ref WriteContext context)
+    {
+    }
 
-    protected virtual void StartPunctuator(string value, TokenFlags flags, ref WriteContext context) { }
+    protected virtual void StartPunctuator(string value, TokenFlags flags, ref WriteContext context)
+    {
+    }
 
     public void WritePunctuator(string value, TokenFlags flags, ref WriteContext context)
     {

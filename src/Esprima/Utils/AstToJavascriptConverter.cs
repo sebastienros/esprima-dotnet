@@ -217,7 +217,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
         _writeContext.SetNodeProperty(nameof(assignmentExpression.Operator), static node => node.As<AssignmentExpression>().Operator);
         Writer.WritePunctuator(op, TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
 
-        // AssignmentExpression is not a real binary operation because its left side is not an expression. 
+        // AssignmentExpression is not a real binary operation because its left side is not an expression.
         var rightNeedsBrackets = GetOperatorPrecedence(assignmentExpression, out _) > GetOperatorPrecedence(assignmentExpression.Right, out _);
 
         _writeContext.SetNodeProperty(nameof(assignmentExpression.Right), static node => node.As<AssignmentExpression>().Right);
@@ -1285,7 +1285,7 @@ WriteSource:
     {
         _writeContext.SetNodeProperty(nameof(privateIdentifier.Name), static node => node.As<PrivateIdentifier>().Name);
         Writer.WritePunctuator("#", TokenFlags.Leading, ref _writeContext);
-        Writer.WriteIdentifier(privateIdentifier.Name, ref _writeContext);
+        Writer.WriteIdentifier(privateIdentifier.Name.AsSpan(), ref _writeContext);
 
         return privateIdentifier;
     }
@@ -1542,7 +1542,7 @@ WriteSource:
     protected internal override object? VisitTemplateElement(TemplateElement templateElement)
     {
         _writeContext.SetNodeProperty(nameof(templateElement.Value), static node => node.As<TemplateElement>().Value);
-        Writer.WriteLiteral(templateElement.Value.Raw, TokenType.Template, ref _writeContext);
+        Writer.WriteLiteral(templateElement.Value.Raw.AsSpan(), TokenType.Template, ref _writeContext);
 
         return templateElement;
     }

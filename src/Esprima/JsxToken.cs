@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima;
 
@@ -15,15 +16,15 @@ public static class JsxToken
     private static readonly object s_boxedTextTokenType = Esprima.JsxTokenType.Text;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Token CreateIdentifier(string value, int start, int end, int lineNumber, int lineStart)
+    internal static Token CreateIdentifier(string source, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.Extension, value, start, end, lineNumber, lineStart, customValue: s_boxedIdentifierTokenType);
+        return new Token(TokenType.Extension, source, null, start, end, lineNumber, lineStart, customValue: s_boxedIdentifierTokenType);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Token CreateText(string value, int start, int end, int lineNumber, int lineStart)
+    internal static Token CreateText(string source, string text, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.Extension, value, start, end, lineNumber, lineStart, customValue: s_boxedTextTokenType);
+        return new Token(TokenType.Extension, source, text, start, end, lineNumber, lineStart, customValue: s_boxedTextTokenType);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

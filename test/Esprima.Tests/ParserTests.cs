@@ -1,6 +1,7 @@
 ﻿using Esprima.Ast;
 using Esprima.Test;
 using Esprima.Utils;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima.Tests;
 
@@ -354,7 +355,7 @@ class aa {
             Assert.Equal(raw, rawFromNode);
         }
 
-        static string? GetRawItem(Node? item)
+        static StringSegment GetRawItem(Node? item)
         {
             if (item is TemplateElement element)
             {
@@ -366,7 +367,7 @@ class aa {
                 return identifier.Name;
             }
 
-            return string.Empty;
+            return StringSegment.Empty;
         }
     }
 

@@ -13,19 +13,19 @@ public class AstTests
         {
             typeof(AssignmentOperator),
             (Enum op) => AssignmentExpression.GetAssignmentOperatorToken((AssignmentOperator)op),
-            (string op) => (Enum)AssignmentExpression.ParseAssignmentOperator(op),
+            (string op) => (Enum)AssignmentExpression.ParseAssignmentOperator(op.AsSpan()),
         },
         new object[]
         {
             typeof(BinaryOperator),
             (Enum op) => BinaryExpression.GetBinaryOperatorToken((BinaryOperator)op),
-            (string op) => (Enum)BinaryExpression.ParseBinaryOperator(op),
+            (string op) => (Enum)BinaryExpression.ParseBinaryOperator(op.AsSpan()),
         },
         new object[]
         {
             typeof(UnaryOperator),
             (Enum op) => UnaryExpression.GetUnaryOperatorToken((UnaryOperator)op),
-            (string op) => (Enum)UnaryExpression.ParseUnaryOperator(op),
+            (string op) => (Enum)UnaryExpression.ParseUnaryOperator(op.AsSpan()),
         },
     };
 

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Ast;
+using Microsoft.Extensions.Primitives;
 
 namespace Esprima;
 
@@ -12,13 +13,13 @@ namespace Esprima;
 public partial class JavaScriptParser
 {
     [StringMatcher("=", "*=", "**=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "&&=", "||=", "??=")]
-    private static partial bool IsAssignmentOperator(string id);
+    private static partial bool IsAssignmentOperator(ReadOnlySpan<char> id);
 
     internal sealed class Context
     {
         public Context()
         {
-            LabelSet = new HashSet<string?>();
+            LabelSet = new HashSet<StringSegment>();
             AllowIn = true;
             AllowYield = true;
             AllowStrictDirective = true;
@@ -42,7 +43,7 @@ public partial class JavaScriptParser
 
         public ArrayList<Decorator> Decorators;
 
-        public HashSet<string?> LabelSet;
+        public HashSet<StringSegment> LabelSet;
     }
 
     private protected Token _lookahead;
@@ -222,7 +223,7 @@ public partial class JavaScriptParser
     /// <summary>
     /// From internal representation to an external structure
     /// </summary>
-    private protected string GetTokenRaw(in Token token)
+    private protected StringSegment GetTokenRaw(in Token token)
     {
         return _scanner.Source.Slice(token.Start, token.End);
     }
@@ -257,7 +258,7 @@ public partial class JavaScriptParser
 
         if (next.Type != TokenType.Unknown && _context.Strict && next.Type == TokenType.Identifier)
         {
-            var nextValue = (string?) next.Value;
+            var nextValue = next.Source;
             if (Scanner.IsStrictModeReservedWord(nextValue))
             {
                 next = next.ChangeType(TokenType.Keyword);
@@ -338,7 +339,7 @@ public partial class JavaScriptParser
     private void Expect(string value)
     {
         var token = NextToken(allowIdentifierEscape: true);
-        if (token.Type != TokenType.Punctuator || !value.Equals((string) token.Value!))
+        if (token.Type != TokenType.Punctuator || !token.Source.SequenceEqual(value.AsSpan()))
         {
             ThrowUnexpectedToken(token);
         }
@@ -352,11 +353,11 @@ public partial class JavaScriptParser
         if (_config.Tolerant)
         {
             var token = _lookahead;
-            if (token.Type == TokenType.Punctuator && ",".Equals(token.Value))
+            if (token.IsPunctuator(","))
             {
                 NextToken();
             }
-            else if (token.Type == TokenType.Punctuator && ";".Equals(token.Value))
+            else if (token.IsPunctuator(";"))
             {
                 NextToken();
                 TolerateUnexpectedToken(token);
@@ -380,7 +381,7 @@ public partial class JavaScriptParser
     private void ExpectKeyword(string keyword)
     {
         var token = NextToken();
-        if (token.Type != TokenType.Keyword || !keyword.Equals((string) token.Value!))
+        if (!token.IsKeyword(keyword))
         {
             ThrowUnexpectedToken(token);
         }
@@ -392,7 +393,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected bool Match(string value)
     {
-        return _lookahead.Type == TokenType.Punctuator && value.Equals((string) _lookahead.Value!);
+        return _lookahead.IsPunctuator(value);
     }
 
     /// <summary>
@@ -401,7 +402,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Keyword && keyword.Equals((string) _lookahead.Value!);
+        return _lookahead.IsKeyword(keyword);
     }
 
     // Return true if the next token matches the specified contextual keyword
@@ -410,7 +411,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchContextualKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Identifier && keyword.Equals((string) _lookahead.Value!);
+        return _lookahead.IsIdentifier(keyword);
     }
 
     // Return true if the next token is an assignment operator
@@ -418,7 +419,7 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchAssign()
     {
-        return _lookahead.Type == TokenType.Punctuator && IsAssignmentOperator((string) _lookahead.Value!);
+        return _lookahead.Type == TokenType.Punctuator && IsAssignmentOperator(_lookahead.Source);
     }
 
     // Cover grammar support.
@@ -521,17 +522,17 @@ public partial class JavaScriptParser
 
         Expression expr;
         Token token;
-        string raw;
+        StringSegment raw;
 
         switch (_lookahead.Type)
         {
             case TokenType.Identifier:
-                if ((_context.IsModule || _context.IsAsync) && "await".Equals(_lookahead.Value))
+                if ((_context.IsModule || _context.IsAsync) && _lookahead.Source.SequenceEqual("await".AsSpan()))
                 {
                     TolerateUnexpectedToken(_lookahead);
                 }
 
-                expr = MatchAsyncFunction() ? ParseFunctionExpression() : Finalize(node, new Identifier((string) NextToken().Value!));
+                expr = MatchAsyncFunction() ? ParseFunctionExpression() : Finalize(node, new Identifier(NextToken().GetSegment()));
                 break;
 
             case TokenType.StringLiteral:
@@ -539,7 +540,7 @@ public partial class JavaScriptParser
                 _context.IsBindingElement = false;
                 token = NextToken();
                 raw = GetTokenRaw(token);
-                expr = Finalize(node, new Literal(TokenType.StringLiteral, token.Value, raw));
+                expr = Finalize(node, new Literal(token.GetSegment(), raw));
                 break;
 
             case TokenType.NumericLiteral:
@@ -563,7 +564,7 @@ public partial class JavaScriptParser
                 _context.IsBindingElement = false;
                 token = NextToken();
                 raw = GetTokenRaw(token);
-                expr = Finalize(node, new Literal("true".Equals(token.Value), raw));
+                expr = Finalize(node, new Literal(token.Source.SequenceEqual("true".AsSpan()), raw));
                 break;
 
             case TokenType.NullLiteral:
@@ -579,7 +580,8 @@ public partial class JavaScriptParser
                 break;
 
             case TokenType.Punctuator:
-                switch ((string?) _lookahead.Value)
+                var punctuator = _lookahead.Source;
+                switch (punctuator)
                 {
                     case "(":
                         _context.IsBindingElement = false;
@@ -602,7 +604,7 @@ public partial class JavaScriptParser
                         break;
                     case "#":
                         NextToken();
-                        expr = Finalize(node, new PrivateIdentifier((string) NextToken().Value!));
+                        expr = Finalize(node, new PrivateIdentifier(NextToken().GetSegment()));
                         break;
                     case "@":
                         var previousDecorators = _context.Decorators;
@@ -625,7 +627,7 @@ public partial class JavaScriptParser
                 }
                 else if (!_context.Strict && MatchKeyword("let"))
                 {
-                    expr = Finalize(node, new Identifier((string) NextToken().Value!));
+                    expr = Finalize(node, new Identifier(NextToken().GetSegment()));
                 }
                 else
                 {
@@ -824,7 +826,7 @@ public partial class JavaScriptParser
         {
             case TokenType.StringLiteral:
                 var raw = GetTokenRaw(token);
-                key = Finalize(node, new Literal((string) token.Value!, raw));
+                key = Finalize(node, new Literal(token.GetSegment(), raw));
                 break;
 
             case TokenType.NumericLiteral:
@@ -841,11 +843,13 @@ public partial class JavaScriptParser
             case TokenType.BooleanLiteral:
             case TokenType.NullLiteral:
             case TokenType.Keyword:
-                key = isPrivate ? Finalize(node, new PrivateIdentifier((string) token.Value!)) : Finalize(node, new Identifier((string?) token.Value!));
+                key = isPrivate
+                    ? Finalize(node, new PrivateIdentifier(token.GetSegment()))
+                    : Finalize(node, new Identifier(token.GetSegment()));
                 break;
 
             case TokenType.Punctuator:
-                if ("[".Equals(token.Value))
+                if (token.Source.SequenceEqual("[".AsSpan()))
                 {
                     key = IsolateCoverGrammar(parseAssignmentExpression);
                     Expect("]");
@@ -868,11 +872,11 @@ public partial class JavaScriptParser
     {
         if (key.Type == Nodes.Identifier)
         {
-            return value.Equals(key.As<Identifier>().Name);
+            return key.As<Identifier>().Name == value;
         }
         else if (key.Type == Nodes.Literal)
         {
-            return value.Equals(key.As<Literal>().StringValue);
+            return key.As<Literal>().StringValue == value;
         }
 
         return false;
@@ -895,11 +899,10 @@ public partial class JavaScriptParser
 
         if (token.Type == TokenType.Identifier)
         {
-            var id = (string) token.Value!;
+            var id = token.GetSegment();
             NextToken();
             computed = Match("[");
-            isAsync = !_hasLineTerminator && id == "async" &&
-                      !Match(":") && !Match("(") && !Match(",");
+            isAsync = !_hasLineTerminator && id == "async" && !Match(":") && !Match("(") && !Match(",");
             isGenerator = Match("*");
             if (isGenerator)
             {
@@ -919,9 +922,9 @@ public partial class JavaScriptParser
         }
 
         var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
-        if (token.Type == TokenType.Identifier && !isAsync && "get".Equals(token.Value) && lookaheadPropertyKey)
+        if (!isAsync && lookaheadPropertyKey && token.IsIdentifier("get"))
         {
-            if (!"get".Equals(GetTokenRaw(token)))
+            if (GetTokenRaw(token) != "get")
             {
                 TolerateError(Messages.InvalidUnicodeKeyword, "get");
             }
@@ -937,9 +940,9 @@ public partial class JavaScriptParser
             _context.AllowYield = previousAllowYield;
             _context.AllowSuper = previousAllowSuper;
         }
-        else if (token.Type == TokenType.Identifier && !isAsync && "set".Equals(token.Value) && lookaheadPropertyKey)
+        else if (!isAsync && lookaheadPropertyKey && token.IsIdentifier("set"))
         {
-            if (!"set".Equals(GetTokenRaw(token)))
+            if (GetTokenRaw(token) != "set")
             {
                 TolerateError(Messages.InvalidUnicodeKeyword, "set");
             }
@@ -952,7 +955,7 @@ public partial class JavaScriptParser
             value = ParseSetterMethod();
             _context.AllowSuper = previousAllowSuper;
         }
-        else if (token.Type == TokenType.Punctuator && "*".Equals(token.Value) && lookaheadPropertyKey)
+        else if (lookaheadPropertyKey && token.IsPunctuator("*"))
         {
             kind = PropertyKind.Init;
             computed = Match("[");
@@ -1058,7 +1061,7 @@ public partial class JavaScriptParser
             ThrowTemplateLiteralEarlyErrors(token);
         }
 
-        var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!, Cooked: (string) token.Value!);
+        var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!.Value, Cooked: token.GetSegment());
 
         return Finalize(node, new TemplateElement(value, token.Tail));
     }
@@ -1077,7 +1080,7 @@ public partial class JavaScriptParser
             ThrowTemplateLiteralEarlyErrors(token);
         }
 
-        var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!, Cooked: (string) token.Value!);
+        var value = new TemplateElement.TemplateElementValue(Raw: token.RawTemplate!.Value, Cooked: token.GetSegment());
 
         return Finalize(node, new TemplateElement(value, token.Tail));
     }
@@ -1392,7 +1395,7 @@ public partial class JavaScriptParser
             return ThrowUnexpectedToken<Identifier>(token);
         }
 
-        return Finalize(node, new Identifier((string) token.Value!));
+        return Finalize(node, new Identifier(token.GetSegment()));
     }
 
     private Expression ParseIdentifierOrPrivateIdentifierName()
@@ -1403,7 +1406,7 @@ public partial class JavaScriptParser
 
         var token = NextToken();
 
-        if (Equals(token.Value, "#"))
+        if (token.Source.SequenceEqual("#".AsSpan()))
         {
             token = NextToken();
             isPrivateField = true;
@@ -1415,8 +1418,8 @@ public partial class JavaScriptParser
         }
 
         return isPrivateField
-            ? Finalize(node, new PrivateIdentifier((string) token.Value!))
-            : Finalize(node, new Identifier((string) token.Value!));
+            ? Finalize(node, new PrivateIdentifier(token.GetSegment()))
+            : Finalize(node, new Identifier(token.GetSegment()));
     }
 
     private Expression ParseNewExpression()
@@ -1430,7 +1433,7 @@ public partial class JavaScriptParser
         if (Match("."))
         {
             NextToken();
-            if (_lookahead.Type == TokenType.Identifier && _context.InFunctionBody && "target".Equals(_lookahead.Value))
+            if (_context.InFunctionBody && _lookahead.IsIdentifier("target"))
             {
                 var property = ParseIdentifierName();
                 expr = new MetaProperty(id, property);
@@ -1501,7 +1504,7 @@ public partial class JavaScriptParser
             _scanner.ScanComments();
             var next = _scanner.Lex(new LexOptions(_context));
             _scanner.RestoreState(state);
-            match = next.Type == TokenType.Punctuator && (string?) next.Value == "(";
+            match = next.IsPunctuator("(");
         }
 
         return match;
@@ -1548,11 +1551,11 @@ public partial class JavaScriptParser
             _scanner.ScanComments();
             var lexOptions = new LexOptions(_context);
             var dot = _scanner.Lex(lexOptions);
-            if (dot.Type == TokenType.Punctuator && Equals(dot.Value, "."))
+            if (dot.IsPunctuator("."))
             {
                 _scanner.ScanComments();
                 var meta = _scanner.Lex(lexOptions);
-                match = meta.Type == TokenType.Identifier && Equals(meta.Value, "meta");
+                match = meta.IsIdentifier("meta");
                 if (match)
                 {
                     if (meta.End - meta.Start != "meta".Length)
@@ -1809,7 +1812,7 @@ public partial class JavaScriptParser
             }
 
             var prefix = true;
-            expr = Finalize(node, new UpdateExpression((string) token.Value!, expr, prefix));
+            expr = Finalize(node, new UpdateExpression(token.GetSegment(), expr, prefix));
             _context.IsAssignmentTarget = false;
             _context.IsBindingElement = false;
         }
@@ -1832,9 +1835,7 @@ public partial class JavaScriptParser
 
                     _context.IsAssignmentTarget = false;
                     _context.IsBindingElement = false;
-                    var op = NextToken().Value;
-                    var prefix = false;
-                    expr = Finalize(StartNode(startToken), new UpdateExpression((string) op!, expr, prefix));
+                    expr = Finalize(StartNode(startToken), new UpdateExpression(NextToken().GetSegment(), expr, prefix: false));
                 }
             }
         }
@@ -1861,7 +1862,7 @@ public partial class JavaScriptParser
             var node = StartNode(_lookahead);
             var token = NextToken();
             expr = InheritCoverGrammar(parseUnaryExpression);
-            expr = Finalize(node, new UnaryExpression((string) token.Value!, expr));
+            expr = Finalize(node, new UnaryExpression(token.GetSegment(), expr));
             var unaryExpr = expr.As<UnaryExpression>();
             if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
             {
@@ -1883,9 +1884,9 @@ public partial class JavaScriptParser
         return expr;
     }
 
-    private static BinaryExpression CreateBinaryExpression(string op, Expression left, Expression right)
+    private static BinaryExpression CreateBinaryExpression(StringSegment op, Expression left, Expression right)
     {
-        switch (op)
+        switch (op.AsSpan())
         {
             case "&&":
             case "||":
@@ -1930,11 +1931,10 @@ public partial class JavaScriptParser
     private int BinaryPrecedence(in Token token)
     {
         var prec = 0;
-        var op = token.Value;
 
         if (token.Type == TokenType.Punctuator)
         {
-            switch ((string?) op)
+            switch (token.Source)
             {
                 case ")":
                 case ";":
@@ -2006,7 +2006,8 @@ public partial class JavaScriptParser
         }
         else if (token.Type == TokenType.Keyword)
         {
-            prec = "instanceof".Equals(op) || _context.AllowIn && "in".Equals(op) ? 12 : 0;
+            var op = token.Source;
+            prec = op.SequenceEqual("instanceof".AsSpan()) || _context.AllowIn && op.SequenceEqual("in".AsSpan()) ? 12 : 0;
         }
 
         return prec;
@@ -2028,13 +2029,13 @@ public partial class JavaScriptParser
 
         static void UpdateNullishCoalescingRestrictions(in Token t, ref bool allowAndOr, ref bool allowNullishCoalescing)
         {
-            var value = t.Value;
-            if ("&&".Equals(value) || "||".Equals(value))
+            var value = t.Source;
+            if (value.SequenceEqual("&&".AsSpan()) || value.SequenceEqual("||".AsSpan()))
             {
                 allowNullishCoalescing = false;
             }
 
-            if ("??".Equals(value))
+            if (value.SequenceEqual("??".AsSpan()))
             {
                 allowAndOr = false;
             }
@@ -2065,7 +2066,7 @@ public partial class JavaScriptParser
             stack.Clear();
 
             stack.Add(left);
-            stack.Add(token.Value!);
+            stack.Add(token.GetSegment());
             stack.Add(right);
 
             var precedences = _precedencesStack ?? new Stack<int>(1);
@@ -2082,8 +2083,8 @@ public partial class JavaScriptParser
                     break;
                 }
 
-                if (!allowAndOr && ("&&".Equals(_lookahead.Value) || "||".Equals(_lookahead.Value)) ||
-                    !allowNullishCoalescing && "??".Equals(_lookahead.Value))
+                if (!allowAndOr && (_lookahead.Source.SequenceEqual("&&".AsSpan()) || _lookahead.Source.SequenceEqual("||".AsSpan()))
+                    || !allowNullishCoalescing && _lookahead.Source.SequenceEqual("??".AsSpan()))
                 {
                     ThrowUnexpectedToken(_lookahead);
                 }
@@ -2094,7 +2095,7 @@ public partial class JavaScriptParser
                 while (stack.Count > 2 && prec <= precedences.Peek())
                 {
                     right = (Expression) stack.Pop();
-                    var op = (string) stack.Pop();
+                    var op = (StringSegment) stack.Pop();
                     precedences.Pop();
                     left = (Expression) stack.Pop();
                     markers.Pop();
@@ -2104,7 +2105,7 @@ public partial class JavaScriptParser
                 }
 
                 // Shift.
-                stack.Push(NextToken().Value!);
+                stack.Push(NextToken().GetSegment());
                 precedences.Push(prec);
                 markers.Push(_lookahead);
                 stack.Push(IsolateCoverGrammar(parseExponentiationExpression));
@@ -2120,7 +2121,7 @@ public partial class JavaScriptParser
                 var marker = markers.Pop();
                 var lastLineStart = lastMarker.LineStart;
                 var node = StartNode(marker, lastLineStart);
-                var op = (string) stack[i - 1];
+                var op = (StringSegment) stack[i - 1];
                 expr = Finalize(node, CreateBinaryExpression(op, (Expression) stack[i - 2], expr));
                 i -= 2;
                 lastMarker = marker;
@@ -2300,7 +2301,7 @@ public partial class JavaScriptParser
             var token = startToken;
             expr = ParseConditionalExpression();
 
-            if (token.Type == TokenType.Identifier && token.LineNumber == _lookahead.LineNumber && (string?) token.Value == "async")
+            if (token.Type == TokenType.Identifier && token.LineNumber == _lookahead.LineNumber && token.Source.SequenceEqual("async".AsSpan()))
             {
                 if (_lookahead.Type == TokenType.Identifier || MatchKeyword("yield"))
                 {
@@ -2414,7 +2415,7 @@ public partial class JavaScriptParser
 
                     token = NextToken();
                     var right = IsolateCoverGrammar(parseAssignmentExpression);
-                    expr = Finalize(StartNode(startToken), new AssignmentExpression((string) token.Value!, left, right));
+                    expr = Finalize(StartNode(startToken), new AssignmentExpression(token.GetSegment(), left, right));
                     _context.FirstCoverInitializedNameError = null;
                 }
             }
@@ -2467,7 +2468,7 @@ public partial class JavaScriptParser
 
         if (_lookahead.Type == TokenType.Keyword)
         {
-            switch ((string?) _lookahead.Value)
+            switch (_lookahead.Source)
             {
                 case "export":
                     if (!_context.IsModule)
@@ -2614,16 +2615,16 @@ public partial class JavaScriptParser
         _scanner.RestoreState(state);
 
         return next.Type == TokenType.Identifier ||
-               next.Type == TokenType.Punctuator && (string?) next.Value == "[" ||
-               next.Type == TokenType.Punctuator && (string?) next.Value == "{" ||
-               next.Type == TokenType.Keyword && (string?) next.Value == "let" ||
-               next.Type == TokenType.Keyword && (string?) next.Value == "yield";
+               next.IsPunctuator("[") ||
+               next.IsPunctuator("{") ||
+               next.IsKeyword("let") ||
+               next.IsKeyword("yield");
     }
 
     private VariableDeclaration ParseLexicalDeclaration()
     {
         var node = CreateNode();
-        var kindString = (string?) NextToken().Value;
+        var kindString = NextToken().Source;
         var kind = ParseVariableDeclarationKind(kindString);
         //assert(kind == "let" || kind == "const", 'Lexical declaration must be either var or const');
 
@@ -2634,14 +2635,14 @@ public partial class JavaScriptParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private VariableDeclarationKind ParseVariableDeclarationKind(string? kindString)
+    private VariableDeclarationKind ParseVariableDeclarationKind(ReadOnlySpan<char> kindString)
     {
         return kindString switch
         {
             "const" => VariableDeclarationKind.Const,
             "let" => VariableDeclarationKind.Let,
             "var" => VariableDeclarationKind.Var,
-            _ => ThrowError<VariableDeclarationKind>("Unknown declaration kind '{0}'", kindString)
+            _ => ThrowError<VariableDeclarationKind>("Unknown declaration kind '{0}'", kindString.ToString())
         };
     }
 
@@ -2832,7 +2833,7 @@ public partial class JavaScriptParser
         var node = CreateNode();
 
         var token = NextToken();
-        if (token.Type == TokenType.Keyword && (string?) token.Value == "yield")
+        if (token.IsKeyword("yield"))
         {
             if (_context.Strict)
             {
@@ -2846,25 +2847,25 @@ public partial class JavaScriptParser
         }
         else if (token.Type != TokenType.Identifier)
         {
-            if (_context.Strict && token.Type == TokenType.Keyword && Scanner.IsStrictModeReservedWord((string?) token.Value))
+            if (_context.Strict && token.Type == TokenType.Keyword && Scanner.IsStrictModeReservedWord(token.Source))
             {
                 TolerateUnexpectedToken(token, Messages.StrictReservedWord);
             }
             else
             {
-                var stringValue = token.Value as string;
-                if (_context.Strict || stringValue == null || stringValue != "let" || kind != VariableDeclarationKind.Var)
+                var value = token.Value;
+                if (_context.Strict || value == null || kind != VariableDeclarationKind.Var || !token.Source.SequenceEqual("let".AsSpan()))
                 {
                     ThrowUnexpectedToken(token);
                 }
             }
         }
-        else if ((_context.IsModule || _context.IsAsync) && !allowAwaitKeyword && token.Type == TokenType.Identifier && (string?) token.Value == "await")
+        else if ((_context.IsModule || _context.IsAsync) && !allowAwaitKeyword && token.Type == TokenType.Identifier && token.Source.SequenceEqual("await".AsSpan()))
         {
             TolerateUnexpectedToken(token);
         }
 
-        return Finalize(node, new Identifier((string) token.Value!));
+        return Finalize(node, new Identifier(token.GetSegment()));
     }
 
     private VariableDeclarator ParseVariableDeclaration(bool inFor)
@@ -3138,9 +3139,9 @@ public partial class JavaScriptParser
             else if (MatchKeyword("const") || MatchKeyword("let"))
             {
                 var initNode = CreateNode();
-                var kindString = (string?) NextToken().Value;
+                var kindString = NextToken().GetSegment();
                 var kind = ParseVariableDeclarationKind(kindString);
-                if (!_context.Strict && (string?) _lookahead.Value == "in")
+                if (!_context.Strict && _lookahead.Source.SequenceEqual("in".AsSpan()))
                 {
                     if (@await)
                     {
@@ -3590,13 +3591,13 @@ public partial class JavaScriptParser
             parameters.Clear();
 
             param = ParsePattern(ref parameters);
-            var paramMap = new Dictionary<string?, bool>();
+            var paramMap = new Dictionary<StringSegment, bool>();
             for (var i = 0; i < parameters.Count; i++)
             {
-                var key = (string?) parameters[i].Value;
+                var key = parameters[i].GetSegment();
                 if (paramMap.ContainsKey(key))
                 {
-                    TolerateError(Messages.DuplicateBinding, parameters[i].Value);
+                    TolerateError(Messages.DuplicateBinding, key);
                 }
 
                 paramMap[key] = true;
@@ -3671,22 +3672,15 @@ public partial class JavaScriptParser
                 break;
 
             case TokenType.Punctuator:
-                switch ((string?) _lookahead.Value)
+                var punctuator = _lookahead.Source;
+                statement = punctuator switch
                 {
-                    case "{":
-                        statement = ParseBlock();
-                        break;
-                    case "@":
-                        statement = ParseDecoratedClassDeclaration();
-                        break;
-                    case ";":
-                        statement = ParseEmptyStatement();
-                        break;
-                    case "(":
-                    default:
-                        statement = ParseExpressionStatement();
-                        break;
-                }
+                    "{" => ParseBlock(),
+                    "@" => ParseDecoratedClassDeclaration(),
+                    ";" => ParseEmptyStatement(),
+                    "(" => ParseExpressionStatement(),
+                    _ => ParseExpressionStatement()
+                };
 
                 break;
 
@@ -3695,54 +3689,25 @@ public partial class JavaScriptParser
                 break;
 
             case TokenType.Keyword:
-                switch ((string?) _lookahead.Value)
+                var keyword = _lookahead.Source;
+                statement = keyword switch
                 {
-                    case "break":
-                        statement = ParseBreakStatement();
-                        break;
-                    case "continue":
-                        statement = ParseContinueStatement();
-                        break;
-                    case "debugger":
-                        statement = ParseDebuggerStatement();
-                        break;
-                    case "do":
-                        statement = ParseDoWhileStatement();
-                        break;
-                    case "for":
-                        statement = ParseForStatement();
-                        break;
-                    case "function":
-                        statement = ParseFunctionDeclaration();
-                        break;
-                    case "if":
-                        statement = ParseIfStatement();
-                        break;
-                    case "return":
-                        statement = ParseReturnStatement();
-                        break;
-                    case "switch":
-                        statement = ParseSwitchStatement();
-                        break;
-                    case "throw":
-                        statement = ParseThrowStatement();
-                        break;
-                    case "try":
-                        statement = ParseTryStatement();
-                        break;
-                    case "var":
-                        statement = ParseVariableStatement();
-                        break;
-                    case "while":
-                        statement = ParseWhileStatement();
-                        break;
-                    case "with":
-                        statement = ParseWithStatement();
-                        break;
-                    default:
-                        statement = ParseExpressionStatement();
-                        break;
-                }
+                    "break" => ParseBreakStatement(),
+                    "continue" => ParseContinueStatement(),
+                    "debugger" => ParseDebuggerStatement(),
+                    "do" => ParseDoWhileStatement(),
+                    "for" => ParseForStatement(),
+                    "function" => ParseFunctionDeclaration(),
+                    "if" => ParseIfStatement(),
+                    "return" => ParseReturnStatement(),
+                    "switch" => ParseSwitchStatement(),
+                    "throw" => ParseThrowStatement(),
+                    "try" => ParseTryStatement(),
+                    "var" => ParseVariableStatement(),
+                    "while" => ParseWhileStatement(),
+                    "with" => ParseWithStatement(),
+                    _ => ParseExpressionStatement()
+                };
 
                 break;
 
@@ -3768,7 +3733,7 @@ public partial class JavaScriptParser
         var previousInSwitch = _context.InSwitch;
         var previousInFunctionBody = _context.InFunctionBody;
 
-        _context.LabelSet = previousLabelSetEmpty ? previousLabelSet : new HashSet<string?>();
+        _context.LabelSet = previousLabelSetEmpty ? previousLabelSet : new HashSet<StringSegment>();
         _context.InIteration = false;
         _context.InSwitch = false;
         _context.InFunctionBody = true;
@@ -3798,7 +3763,7 @@ public partial class JavaScriptParser
         return Finalize(node, new BlockStatement(NodeList.From(ref body)));
     }
 
-    private void ValidateParam(ref ParsedParameters options, Node param, string? name)
+    private void ValidateParam(ref ParsedParameters options, Node param, StringSegment name)
     {
         var key = name;
         if (_context.Strict)
@@ -3837,7 +3802,7 @@ public partial class JavaScriptParser
         options.ParamSetAdd(key);
     }
 
-    private void ValidateParam2(ref ParsedParameters options, in Token param, string? name)
+    private void ValidateParam2(ref ParsedParameters options, in Token param, StringSegment name)
     {
         var key = name;
         if (_context.Strict)
@@ -3908,7 +3873,7 @@ public partial class JavaScriptParser
 
         for (var i = 0; i < parameters.Count; i++)
         {
-            ValidateParam2(ref options, parameters[i], (string?) parameters[i].Value);
+            ValidateParam2(ref options, parameters[i], parameters[i].GetSegment());
         }
 
         options.Simple = options.Simple && param is Identifier;
@@ -3968,7 +3933,7 @@ public partial class JavaScriptParser
             var next = _scanner.Lex(new LexOptions(_context));
             _scanner.RestoreState(state);
 
-            match = state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
+            match = state.LineNumber == next.LineNumber && next.IsKeyword("function");
         }
 
         return match;
@@ -4005,7 +3970,7 @@ public partial class JavaScriptParser
             var token = _lookahead;
             id = ParseVariableIdentifier();
 
-            var tokenValue = (string?) token.Value;
+            var tokenValue = token.Source;
             if (_context.Strict)
             {
                 if (Scanner.IsRestrictedWord(tokenValue))
@@ -4102,19 +4067,19 @@ public partial class JavaScriptParser
 
             if (_context.Strict)
             {
-                if (Scanner.IsRestrictedWord((string?) token.Value))
+                if (Scanner.IsRestrictedWord(token.Source))
                 {
                     TolerateUnexpectedToken(token, Messages.StrictFunctionName);
                 }
             }
             else
             {
-                if (Scanner.IsRestrictedWord((string?) token.Value))
+                if (Scanner.IsRestrictedWord(token.Source))
                 {
                     firstRestricted = token;
                     message = Messages.StrictFunctionName;
                 }
-                else if (Scanner.IsStrictModeReservedWord((string?) token.Value))
+                else if (Scanner.IsStrictModeReservedWord(token.Source))
                 {
                     firstRestricted = token;
                     message = Messages.StrictReservedWord;
@@ -4159,7 +4124,7 @@ public partial class JavaScriptParser
     private ExpressionStatement ParseDirective()
     {
         var token = _lookahead;
-        string? directive = null;
+        StringSegment? directive = null;
 
         var node = CreateNode();
         var expr = ParseExpression();
@@ -4232,7 +4197,7 @@ public partial class JavaScriptParser
             TokenType.NullLiteral => true,
             TokenType.NumericLiteral => true,
             TokenType.Keyword => true,
-            TokenType.Punctuator => Equals(token.Value, "[") || Equals(token.Value, "#"),
+            TokenType.Punctuator => token.Source.SequenceEqual("[".AsSpan()) || token.Source.SequenceEqual("#".AsSpan()),
             _ => false
         };
     }
@@ -4298,28 +4263,19 @@ public partial class JavaScriptParser
     // https://tc39.github.io/ecma262/#sec-generator-function-definitions
 
     [StringMatcher("[", "(", "{", "+", "-", "!", "~", "++", "--", "/", "/=")]
-    private static partial bool IsPunctuatorExpressionStart(string input);
+    private static partial bool IsPunctuatorExpressionStart(ReadOnlySpan<char> input);
 
     [StringMatcher("class", "delete", "function", "let", "new", "super", "this", "typeof", "void", "yield")]
-    private static partial bool IsKeywordExpressionStart(string input);
+    private static partial bool IsKeywordExpressionStart(ReadOnlySpan<char> input);
 
     private protected virtual bool IsStartOfExpression()
     {
-        var start = true;
-
-        if (_lookahead.Value is not string value)
+        var start = _lookahead.Type switch
         {
-            return start;
-        }
-
-        if (_lookahead.Type == TokenType.Punctuator)
-        {
-            start = IsPunctuatorExpressionStart(value);
-        }
-        else if (_lookahead.Type == TokenType.Keyword)
-        {
-            start = IsKeywordExpressionStart(value);
-        }
+            TokenType.Punctuator => IsPunctuatorExpressionStart(_lookahead.Source),
+            TokenType.Keyword => IsKeywordExpressionStart(_lookahead.Source),
+            _ => true
+        };
 
         return start;
     }
@@ -4492,9 +4448,10 @@ public partial class JavaScriptParser
                 }
             }
 
-            if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?) token.Value == "async")
+            if (!_hasLineTerminator && token.IsIdentifier("async"))
             {
-                if (_lookahead.Type != TokenType.Punctuator || _lookahead.Value is not (":" or "(" or ";"))
+                if (_lookahead.Type != TokenType.Punctuator
+                    || !_lookahead.Source.SequenceEqual(":".AsSpan()) && !_lookahead.Source.SequenceEqual("(".AsSpan()) && !_lookahead.Source.SequenceEqual(";".AsSpan()))
                 {
                     isAsync = true;
                     isGenerator = Match("*");
@@ -4512,7 +4469,7 @@ public partial class JavaScriptParser
                     token = _lookahead;
                     computed = Match("[");
                     key = ParseObjectPropertyKey(isPrivate);
-                    if (token.Type == TokenType.Identifier && !isStatic && !isGenerator && (string?) token.Value == "constructor")
+                    if (token.Type == TokenType.Identifier && !isStatic && !isGenerator && token.Source.SequenceEqual("constructor".AsSpan()))
                     {
                         TolerateUnexpectedToken(token, Messages.ConstructorIsAsync);
                     }
@@ -4523,7 +4480,7 @@ public partial class JavaScriptParser
         var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
         if (token.Type == TokenType.Identifier)
         {
-            if (lookaheadPropertyKey && (string?) token.Value == "get")
+            if (lookaheadPropertyKey && token.Source.SequenceEqual("get".AsSpan()))
             {
                 kind = PropertyKind.Get;
                 if (Match("#"))
@@ -4537,7 +4494,7 @@ public partial class JavaScriptParser
                 _context.AllowYield = false;
                 value = ParseGetterMethod();
             }
-            else if (lookaheadPropertyKey && (string?) token.Value == "set")
+            else if (lookaheadPropertyKey && token.Source.SequenceEqual("set".AsSpan()))
             {
                 kind = PropertyKind.Set;
                 if (Match("#"))
@@ -4562,7 +4519,7 @@ public partial class JavaScriptParser
                 }
             }
         }
-        else if (token.Type == TokenType.Punctuator && (string?) token.Value == "*" && lookaheadPropertyKey)
+        else if (lookaheadPropertyKey && token.IsPunctuator("*"))
         {
             kind = PropertyKind.Init;
             if (Match("#"))
@@ -4583,7 +4540,7 @@ public partial class JavaScriptParser
             {
                 var previousAllowSuper = _context.AllowSuper;
                 var previousInClassConstructor = _context.InClassConstructor;
-                _context.InClassConstructor = Equals(token.Value, "constructor");
+                _context.InClassConstructor = token.Value is StringSegment s && s == "constructor";
                 _context.AllowSuper = true;
                 kind = PropertyKind.Init;
                 value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
@@ -4755,13 +4712,13 @@ public partial class JavaScriptParser
 
         var token = NextToken();
         var raw = GetTokenRaw(token);
-        return Finalize(node, new Literal((string) token.Value!, raw));
+        return Finalize(node, new Literal(token.GetSegment(), raw));
     }
 
     private ArrayList<ImportAttribute> ParseImportAttributes()
     {
         var attributes = new ArrayList<ImportAttribute>();
-        if (_lookahead.Value is not ("assert"))
+        if (!_lookahead.Source.SequenceEqual("assert".AsSpan()))
         {
             return attributes;
         }
@@ -4769,12 +4726,12 @@ public partial class JavaScriptParser
         NextToken();
         Expect("{");
 
-        var parameterSet = new HashSet<string?>();
+        var parameterSet = new HashSet<StringSegment?>();
         while (!Match("}"))
         {
             var importAttribute = ParseImportAttribute();
 
-            string? key = string.Empty;
+            StringSegment? key = StringSegment.Empty;
             switch (importAttribute.Key)
             {
                 case Identifier identifier:
@@ -4813,7 +4770,7 @@ public partial class JavaScriptParser
         NextToken();
         var literalToken = NextToken();
         var raw = GetTokenRaw(literalToken);
-        Literal value = Finalize(node, new Literal((string) literalToken.Value!, raw));
+        var value = Finalize(node, new Literal(literalToken.GetSegment(), raw));
 
         return Finalize(node, new ImportAttribute(key, value));
     }
@@ -5099,7 +5056,7 @@ public partial class JavaScriptParser
         {
             // export var f = 1;
             StatementListItem declaration;
-            switch (_lookahead.Value)
+            switch (_lookahead.Source)
             {
                 case "let":
                 case "const":
@@ -5202,7 +5159,7 @@ public partial class JavaScriptParser
     private ParserException UnexpectedTokenError(in Token token, string? message = null)
     {
         var msg = message ?? Messages.UnexpectedToken;
-        string value;
+        StringSegment value;
 
         if (token.Type != TokenType.Unknown)
         {
@@ -5217,11 +5174,11 @@ public partial class JavaScriptParser
 
                 if (token.Type == TokenType.Keyword)
                 {
-                    if (Scanner.IsFutureReservedWord((string?) token.Value))
+                    if (Scanner.IsFutureReservedWord(token.Source))
                     {
                         msg = Messages.UnexpectedReserved;
                     }
-                    else if (_context.Strict && Scanner.IsStrictModeReservedWord((string?) token.Value))
+                    else if (_context.Strict && Scanner.IsStrictModeReservedWord(token.Source))
                     {
                         msg = Messages.StrictReservedWord;
                     }
@@ -5229,7 +5186,7 @@ public partial class JavaScriptParser
             }
 
             value = token.Type == TokenType.Template
-                ? token.RawTemplate!
+                ? token.RawTemplate!.Value
                 : Convert.ToString(token.Value);
         }
         else
@@ -5281,7 +5238,7 @@ public partial class JavaScriptParser
 
     private struct ParsedParameters
     {
-        private HashSet<string?>? paramSet;
+        private HashSet<StringSegment>? paramSet;
         public Token? FirstRestricted;
         public string? Message;
         public ArrayList<Node> Parameters = new();
@@ -5299,14 +5256,14 @@ public partial class JavaScriptParser
             HasDuplicateParameterNames = false;
         }
 
-        public bool ParamSetContains(string? key)
+        public bool ParamSetContains(StringSegment key)
         {
             return paramSet != null && paramSet.Contains(key);
         }
 
-        public void ParamSetAdd(string? key)
+        public void ParamSetAdd(StringSegment key)
         {
-            (paramSet ??= new HashSet<string?>()).Add(key);
+            (paramSet ??= new HashSet<StringSegment>()).Add(key);
         }
     }
 }

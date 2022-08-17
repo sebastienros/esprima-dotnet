@@ -29,7 +29,7 @@ public class KnRJavaScriptTextFormatter : JavaScriptTextFormatter
 
     protected bool UseEgyptianBraces { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    protected override void WriteWhiteSpaceBetweenTokenAndKeyword(string value, TokenFlags flags, ref WriteContext context)
+    protected override void WriteWhiteSpaceBetweenTokenAndKeyword(ReadOnlySpan<char> value, TokenFlags flags, ref WriteContext context)
     {
         if (flags.HasFlagFast(TokenFlags.FollowsStatementBody))
         {

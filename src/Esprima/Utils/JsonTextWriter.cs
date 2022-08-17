@@ -106,6 +106,11 @@ internal sealed class JsonTextWriter : JsonWriter
         _memberName = name;
     }
 
+    public override void String(ReadOnlySpan<char> str)
+    {
+        Write(str, TokenKind.String);
+    }
+
     public override void String(string? str)
     {
         if (str == null)
@@ -207,7 +212,12 @@ internal sealed class JsonTextWriter : JsonWriter
 
     private void Write(string token, TokenKind kind)
     {
-        Debug.Assert(kind == TokenKind.String || !string.IsNullOrEmpty(token));
+        Write(token.AsSpan(), kind);
+    }
+
+    private void Write(ReadOnlySpan<char> token, TokenKind kind)
+    {
+        Debug.Assert(kind == TokenKind.String || token.Length > 0);
 
         if (Depth == 0 && kind == TokenKind.Scalar)
         {
@@ -237,7 +247,7 @@ internal sealed class JsonTextWriter : JsonWriter
         if (name != null)
         {
             Indent();
-            Enquote(name, writer);
+            Enquote(name.AsSpan(), writer);
             writer.Write(Pretty ? ": " : ":");
         }
 
@@ -261,11 +271,11 @@ internal sealed class JsonTextWriter : JsonWriter
         }
     }
 
-    private static void Enquote(string s, TextWriter writer)
+    private static void Enquote(ReadOnlySpan<char> s, TextWriter writer)
     {
         Debug.Assert(writer != null);
 
-        var length = (s ?? string.Empty).Length;
+        var length = s.Length;
 
         writer!.Write('"');
 

@@ -19,6 +19,8 @@
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    
+    <LangVersion>preview</LangVersion>
 
     <DefineConstants Condition="'$(Checked)' == true or $(Configuration) == 'Debug'">$(DefineConstants);LOCATION_ASSERTS</DefineConstants>
 
@@ -26,6 +28,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="6.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="all" />
     <PackageReference Include="System.Memory" Version="4.5.4" Condition=" '$(TargetFramework)' != 'netstandard2.1'" />
   </ItemGroup>

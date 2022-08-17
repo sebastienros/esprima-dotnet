@@ -7,5 +7,10 @@ internal static class Shims
     {
         return sb.Append(value.ToString());
     }
+
+    public static void Write(this TextWriter writer, ReadOnlySpan<char> value)
+    {
+        writer.Write(value.ToString());
+    }
 #endif
 }

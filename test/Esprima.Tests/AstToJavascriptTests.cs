@@ -721,12 +721,12 @@ if (b == 2) {
             moduleFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(jsFilePath)) + ".module.json";
         }
 
-        var script = File.ReadAllText(jsFilePath);
+        string script = File.ReadAllText(jsFilePath);
         if (jsFilePath.EndsWith(".source.js"))
         {
             var parser = new JavaScriptParser(script);
             var program = parser.ParseScript();
-            var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!;
+            var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!.Value.ToString();
             script = source;
         }
 
@@ -762,8 +762,14 @@ if (b == 2) {
             return;
         }
 
-        try { expectedAst = Parse(sourceType, script, parserOptions, parserFactory); }
-        catch (ParserException) { return; }
+        try
+        {
+            expectedAst = Parse(sourceType, script, parserOptions, parserFactory);
+        }
+        catch (ParserException)
+        {
+            return;
+        }
 
         var generatedScript = expectedAst.ToJavaScriptString();
 
