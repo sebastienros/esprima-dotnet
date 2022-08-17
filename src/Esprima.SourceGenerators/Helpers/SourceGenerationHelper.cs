@@ -58,16 +58,16 @@ internal class StringMatcherAttribute : System.Attribute
             }
         }
 
+        if (checkNull)
+        {
+            sb.Append(indentStr).AppendLine("    if (input is null)");
+            sb.Append(indentStr).AppendLine("    {");
+            sb.Append(indentStr).Append("        return ").Append(returnString ? "null" : "false").AppendLine(";");
+            sb.Append(indentStr).AppendLine("    }");
+        }
+
         if (byLength.Length > 1)
         {
-            if (checkNull)
-            {
-                sb.Append(indentStr).AppendLine("    if (input is null)");
-                sb.Append(indentStr).AppendLine("    {");
-                sb.Append(indentStr).Append("        return ").Append(returnString ? "null" : "false").AppendLine(";");
-                sb.Append(indentStr).AppendLine("    }");
-            }
-
             sb.Append(indentStr).AppendLine("    switch (input.Length)");
             sb.Append(indentStr).AppendLine("    {");
         }
@@ -79,16 +79,25 @@ internal class StringMatcherAttribute : System.Attribute
                 sb.Append(indentStr).Append("        case ").Append(group.Key).AppendLine(":");
             }
 
-            var discriminatorIndex = group.Count() > 1 ? FindDiscriminatorIndex(group) : -1;
-
-            if (discriminatorIndex != -1)
+            if (group.Count() == 1)
             {
-                sb.Append(indentStr).Append(baseIndent).Append("    var disc").Append(group.Key).Append(" = input[").Append(discriminatorIndex).AppendLine("];");
+                var item = group.First();
+                sb.Append(indentStr).Append(baseIndent).Append("    return ");
+                StringEquality(sb, item);
+                if (returnString)
+                {
+                    sb.Append(" ? ").Append("\"").Append(Escape(item)).Append("\"").Append(" : null");
+                }
+                sb.AppendLine(";");
+                continue;
             }
-            else if (group.Count() > 1)
+
+            var discriminatorIndex = FindDiscriminatorIndex(group);
+
+            if (discriminatorIndex == -1)
             {
                 // hash-based or equality-based then, let compiler generate decision tree
-                var switchIndent = indentStr + indentStr + baseIndent;
+                var switchIndent = byLength.Length > 1 ? indentStr + indentStr + baseIndent : indentStr + baseIndent;
                 sb.Append(switchIndent).AppendLine("switch (input)");
                 sb.Append(switchIndent).AppendLine("{");
                 if (returnString)
@@ -115,62 +124,42 @@ internal class StringMatcherAttribute : System.Attribute
                 continue;
             }
 
-            var first = true;
+            sb.Append(indentStr).Append(baseIndent).Append("    switch (").Append("input[").Append(discriminatorIndex).AppendLine("])");
+            sb.Append(indentStr).Append(baseIndent).AppendLine("    {");
+
             foreach (var item in group)
             {
-                if (group.Count() == 1)
+                sb.Append(indentStr).Append(baseIndent).Append("        case '");
+                var value = item[discriminatorIndex];
+                if (value == '\'')
                 {
-                    var trueFalse = returnString ? "\"" + Escape(item) + "\" : null" : "true : false";
-                    sb.Append(indentStr).Append(baseIndent).Append("    return ");
-                    StringEquality(sb, item);
-                    sb.Append(" ? ").Append(trueFalse).AppendLine(";");
-                    continue;
-                }
-
-                sb.Append(indentStr).Append(baseIndent).Append("    ");
-                if (!first)
-                {
-                    sb.Append("else ");
-                }
-
-                sb.Append("if (");
-                if (discriminatorIndex != -1)
-                {
-                    var value = item[discriminatorIndex];
-                    sb.Append("disc").Append(group.Key).Append(" == '");
-                    if (value == '\'')
-                    {
-                        sb.Append("\\'");
-                    }
-                    else
-                    {
-                        sb.Append(value);
-                    }
-                    sb.Append("' && ");
-                }
-
-                StringEquality(sb, item);
-                sb.AppendLine(")");
-
-                sb.Append(indentStr).Append(baseIndent).AppendLine("    {");
-                if (returnString)
-                {
-                    sb.Append(indentStr).Append(baseIndent).Append("        return \"").Append(item).AppendLine("\";");
+                    sb.Append("\\'");
                 }
                 else
                 {
-                    sb.Append(indentStr).Append(baseIndent).AppendLine("        return true;");
+                    sb.Append(value);
                 }
-                sb.Append(indentStr).Append(baseIndent).AppendLine("    }");
+                sb.AppendLine("':");
 
-                first = false;
+                sb.Append(indentStr).Append(baseIndent).Append("            return ");
+                if (group.Key == 1)
+                {
+                    sb.Append("true");
+                }
+                else
+                {
+                    StringEquality(sb, item);
+                    if (returnString)
+                    {
+                        sb.Append(" ? ").Append("\"").Append(Escape(item)).Append("\"").Append(" : null");
+                    }
+                }
+                sb.AppendLine(";");
             }
+            sb.Append(indentStr).Append(baseIndent).AppendLine("        default:");
+            sb.Append(indentStr).Append(baseIndent).Append("           return ").Append(returnString ? "null" : "false").AppendLine(";");
 
-            if (group.Count() > 1)
-            {
-                sb.Append(indentStr).Append(baseIndent).Append("    return ").Append(returnString ? "null" : "false").AppendLine(";");
-            }
-            sb.AppendLine();
+            sb.Append(indentStr).Append(baseIndent).AppendLine("    }");
         }
 
         if (byLength.Length > 1)
@@ -178,7 +167,7 @@ internal class StringMatcherAttribute : System.Attribute
             sb.Append(indentStr).Append(baseIndent).AppendLine("default:");
             sb.Append(indentStr).Append(baseIndent).Append("   return ").Append(returnString ? "null" : "false").AppendLine(";");
 
-            sb.AppendLine("        }");
+            sb.Append(indentStr).AppendLine("    }");
         }
 
         return sb.ToString();
