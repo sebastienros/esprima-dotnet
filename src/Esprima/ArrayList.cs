@@ -89,6 +89,25 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #endif
     }
 
+    /// <summary>
+    /// Note, expects ownership of the array!
+    /// </summary>
+    public ArrayList(T[] initialData)
+    {
+        if (initialData is null)
+        {
+            ThrowArgumentNullException(nameof(initialData));
+        }
+
+        _items = initialData;
+        _count = initialData.Length;
+
+#if DEBUG
+        _localVersion = 0;
+        _sharedVersion = _count > 0 ? new[] { _localVersion } : null;
+#endif
+    }
+
     private int Capacity => _items?.Length ?? 0;
 
     public int Count
@@ -140,6 +159,26 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         Debug.Assert(_items != null);
         _items[_count] = item;
         _count++;
+
+        OnChanged();
+    }
+
+    internal void Clear()
+    {
+        AssertUnchanged();
+
+        if (this._count > 0)
+        {
+            Array.Clear(this._items, 0, this._count);
+            this._count = 0;
+        }
+#if DEBUG
+        else if (_sharedVersion is null)
+        {
+            _sharedVersion = new[] { 0 };
+            _localVersion = 0;
+        }
+#endif
 
         OnChanged();
     }
@@ -351,8 +390,20 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     }
 }
 
-internal static class ArrayListExtensions
+internal static class ArrayList
 {
+    public static ArrayList<T> Create<T>(in NodeList<T> source) where T : Node
+    {
+        if (source._count == 0)
+        {
+            return new ArrayList<T>();
+        }
+
+        var items = new T[source.Count];
+        Array.Copy(source._items!, 0, items, 0, source._count);
+        return new ArrayList<T>(items);
+    }
+
     public static void AddRange<T>(
         ref this ArrayList<T> destination,
         in NodeList<T> source) where T : Node
