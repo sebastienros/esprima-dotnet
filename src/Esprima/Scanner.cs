@@ -188,6 +188,9 @@ public sealed partial class Scanner
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsKeyword(string id) => TryGetInternedKeyword(id.AsSpan()) is not null;
 
+    [StringMatcher("as", "of", "get", "set", "false", "from", "null", "true", "async", "await", "constructor")]
+    internal static partial string? TryGetInternedContextualKeyword(ReadOnlySpan<char> id);
+
     // https://tc39.github.io/ecma262/#sec-comments
 
     private ArrayList<Comment> SkipSingleLineComment(int offset)

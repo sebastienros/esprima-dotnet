@@ -22,7 +22,7 @@ public static class ParserExtensions
     {
         return
             Scanner.TryGetInternedKeyword(source) ??
-            Scanner.TryGetInternedFutureReservedWord(source) ??
+            Scanner.TryGetInternedContextualKeyword(source) ??
             Scanner.TryGetInternedStrictModeReservedWord(source) ??
             Scanner.TryGetInternedRestrictedWord(source) ??
             Scanner.TryGetInternedPunctuator(source);

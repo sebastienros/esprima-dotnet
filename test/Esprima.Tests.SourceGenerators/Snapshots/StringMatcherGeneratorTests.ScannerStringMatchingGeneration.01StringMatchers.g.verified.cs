@@ -508,5 +508,60 @@ public partial class Scanner
         }
     }
 
+    internal static partial string? TryGetInternedContextualKeyword(ReadOnlySpan<char> input)
+    {
+        switch (input.Length)
+        {
+            case 2:
+                switch (input[0])
+                {
+                    case 'a':
+                        return input.SequenceEqual("as".AsSpan()) ? "as" : null;
+                    case 'o':
+                        return input.SequenceEqual("of".AsSpan()) ? "of" : null;
+                    default:
+                       return null;
+                }
+            case 3:
+                switch (input[0])
+                {
+                    case 'g':
+                        return input.SequenceEqual("get".AsSpan()) ? "get" : null;
+                    case 's':
+                        return input.SequenceEqual("set".AsSpan()) ? "set" : null;
+                    default:
+                       return null;
+                }
+            case 4:
+                switch (input[0])
+                {
+                    case 'f':
+                        return input.SequenceEqual("from".AsSpan()) ? "from" : null;
+                    case 'n':
+                        return input.SequenceEqual("null".AsSpan()) ? "null" : null;
+                    case 't':
+                        return input.SequenceEqual("true".AsSpan()) ? "true" : null;
+                    default:
+                       return null;
+                }
+            case 5:
+                switch (input[1])
+                {
+                    case 'a':
+                        return input.SequenceEqual("false".AsSpan()) ? "false" : null;
+                    case 's':
+                        return input.SequenceEqual("async".AsSpan()) ? "async" : null;
+                    case 'w':
+                        return input.SequenceEqual("await".AsSpan()) ? "await" : null;
+                    default:
+                       return null;
+                }
+            case 11:
+                return input.SequenceEqual("constructor".AsSpan()) ? "constructor" : null;
+            default:
+               return null;
+        }
+    }
+
 }
 
