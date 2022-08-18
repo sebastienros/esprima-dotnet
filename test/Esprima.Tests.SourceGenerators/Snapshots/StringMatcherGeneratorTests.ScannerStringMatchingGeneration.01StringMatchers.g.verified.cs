@@ -10,75 +10,49 @@ public partial class JavaScriptParser
         switch (input.Length)
         {
             case 1:
-                return input == "=" ? true : false;
-
+                return input == "=";
             case 2:
-                var disc2 = input[0];
-                if (disc2 == '*' && input == "*=")
+                switch (input[0])
                 {
-                    return true;
+                    case '*':
+                        return input == "*=";
+                    case '/':
+                        return input == "/=";
+                    case '%':
+                        return input == "%=";
+                    case '+':
+                        return input == "+=";
+                    case '-':
+                        return input == "-=";
+                    case '&':
+                        return input == "&=";
+                    case '^':
+                        return input == "^=";
+                    case '|':
+                        return input == "|=";
+                    default:
+                       return false;
                 }
-                else if (disc2 == '/' && input == "/=")
-                {
-                    return true;
-                }
-                else if (disc2 == '%' && input == "%=")
-                {
-                    return true;
-                }
-                else if (disc2 == '+' && input == "+=")
-                {
-                    return true;
-                }
-                else if (disc2 == '-' && input == "-=")
-                {
-                    return true;
-                }
-                else if (disc2 == '&' && input == "&=")
-                {
-                    return true;
-                }
-                else if (disc2 == '^' && input == "^=")
-                {
-                    return true;
-                }
-                else if (disc2 == '|' && input == "|=")
-                {
-                    return true;
-                }
-                return false;
-
             case 3:
-                var disc3 = input[0];
-                if (disc3 == '*' && input == "**=")
+                switch (input[0])
                 {
-                    return true;
+                    case '*':
+                        return input == "**=";
+                    case '<':
+                        return input == "<<=";
+                    case '>':
+                        return input == ">>=";
+                    case '&':
+                        return input == "&&=";
+                    case '|':
+                        return input == "||=";
+                    case '?':
+                        return input == "??=";
+                    default:
+                       return false;
                 }
-                else if (disc3 == '<' && input == "<<=")
-                {
-                    return true;
-                }
-                else if (disc3 == '>' && input == ">>=")
-                {
-                    return true;
-                }
-                else if (disc3 == '&' && input == "&&=")
-                {
-                    return true;
-                }
-                else if (disc3 == '|' && input == "||=")
-                {
-                    return true;
-                }
-                else if (disc3 == '?' && input == "??=")
-                {
-                    return true;
-                }
-                return false;
-
             case 4:
-                return input == ">>>=" ? true : false;
-
+                return input == ">>>=";
             default:
                return false;
         }
@@ -89,57 +63,39 @@ public partial class JavaScriptParser
         switch (input.Length)
         {
             case 1:
-                var disc1 = input[0];
-                if (disc1 == '[' && input == "[")
+                switch (input[0])
                 {
-                    return true;
+                    case '[':
+                        return true;
+                    case '(':
+                        return true;
+                    case '{':
+                        return true;
+                    case '+':
+                        return true;
+                    case '-':
+                        return true;
+                    case '!':
+                        return true;
+                    case '~':
+                        return true;
+                    case '/':
+                        return true;
+                    default:
+                       return false;
                 }
-                else if (disc1 == '(' && input == "(")
-                {
-                    return true;
-                }
-                else if (disc1 == '{' && input == "{")
-                {
-                    return true;
-                }
-                else if (disc1 == '+' && input == "+")
-                {
-                    return true;
-                }
-                else if (disc1 == '-' && input == "-")
-                {
-                    return true;
-                }
-                else if (disc1 == '!' && input == "!")
-                {
-                    return true;
-                }
-                else if (disc1 == '~' && input == "~")
-                {
-                    return true;
-                }
-                else if (disc1 == '/' && input == "/")
-                {
-                    return true;
-                }
-                return false;
-
             case 2:
-                var disc2 = input[0];
-                if (disc2 == '+' && input == "++")
+                switch (input[0])
                 {
-                    return true;
+                    case '+':
+                        return input == "++";
+                    case '-':
+                        return input == "--";
+                    case '/':
+                        return input == "/=";
+                    default:
+                       return false;
                 }
-                else if (disc2 == '-' && input == "--")
-                {
-                    return true;
-                }
-                else if (disc2 == '/' && input == "/=")
-                {
-                    return true;
-                }
-                return false;
-
             default:
                return false;
         }
@@ -150,60 +106,49 @@ public partial class JavaScriptParser
         switch (input.Length)
         {
             case 3:
-                var disc3 = input[0];
-                if (disc3 == 'l' && input == "let")
+                switch (input[0])
                 {
-                    return true;
+                    case 'l':
+                        return input == "let";
+                    case 'n':
+                        return input == "new";
+                    default:
+                       return false;
                 }
-                else if (disc3 == 'n' && input == "new")
-                {
-                    return true;
-                }
-                return false;
-
             case 4:
-                var disc4 = input[0];
-                if (disc4 == 't' && input == "this")
+                switch (input[0])
                 {
-                    return true;
+                    case 't':
+                        return input == "this";
+                    case 'v':
+                        return input == "void";
+                    default:
+                       return false;
                 }
-                else if (disc4 == 'v' && input == "void")
-                {
-                    return true;
-                }
-                return false;
-
             case 5:
-                var disc5 = input[0];
-                if (disc5 == 'c' && input == "class")
+                switch (input[0])
                 {
-                    return true;
+                    case 'c':
+                        return input == "class";
+                    case 's':
+                        return input == "super";
+                    case 'y':
+                        return input == "yield";
+                    default:
+                       return false;
                 }
-                else if (disc5 == 's' && input == "super")
-                {
-                    return true;
-                }
-                else if (disc5 == 'y' && input == "yield")
-                {
-                    return true;
-                }
-                return false;
-
             case 6:
-                var disc6 = input[0];
-                if (disc6 == 'd' && input == "delete")
+                switch (input[0])
                 {
-                    return true;
+                    case 'd':
+                        return input == "delete";
+                    case 't':
+                        return input == "typeof";
+                    default:
+                       return false;
                 }
-                else if (disc6 == 't' && input == "typeof")
-                {
-                    return true;
-                }
-                return false;
-
             case 8:
-                return input == "function" ? true : false;
-
+                return input == "function";
             default:
                return false;
         }
@@ -222,23 +167,19 @@ public partial class Scanner
         switch (input.Length)
         {
             case 4:
-                return input == "enum" ? true : false;
-
+                return input == "enum";
             case 5:
-                return input == "super" ? true : false;
-
+                return input == "super";
             case 6:
-                var disc6 = input[0];
-                if (disc6 == 'e' && input == "export")
+                switch (input[0])
                 {
-                    return true;
+                    case 'e':
+                        return input == "export";
+                    case 'i':
+                        return input == "import";
+                    default:
+                       return false;
                 }
-                else if (disc6 == 'i' && input == "import")
-                {
-                    return true;
-                }
-                return false;
-
             default:
                return false;
         }
@@ -253,50 +194,41 @@ public partial class Scanner
         switch (input.Length)
         {
             case 3:
-                return input == "let" ? true : false;
-
+                return input == "let";
             case 5:
-                return input == "yield" ? true : false;
-
+                return input == "yield";
             case 6:
-                var disc6 = input[0];
-                if (disc6 == 'p' && input == "public")
+                switch (input[0])
                 {
-                    return true;
+                    case 'p':
+                        return input == "public";
+                    case 's':
+                        return input == "static";
+                    default:
+                       return false;
                 }
-                else if (disc6 == 's' && input == "static")
-                {
-                    return true;
-                }
-                return false;
-
             case 7:
-                var disc7 = input[1];
-                if (disc7 == 'a' && input == "package")
+                switch (input[1])
                 {
-                    return true;
+                    case 'a':
+                        return input == "package";
+                    case 'r':
+                        return input == "private";
+                    default:
+                       return false;
                 }
-                else if (disc7 == 'r' && input == "private")
-                {
-                    return true;
-                }
-                return false;
-
             case 9:
-                var disc9 = input[0];
-                if (disc9 == 'i' && input == "interface")
+                switch (input[0])
                 {
-                    return true;
+                    case 'i':
+                        return input == "interface";
+                    case 'p':
+                        return input == "protected";
+                    default:
+                       return false;
                 }
-                else if (disc9 == 'p' && input == "protected")
-                {
-                    return true;
-                }
-                return false;
-
             case 10:
-                return input == "implements" ? true : false;
-
+                return input == "implements";
             default:
                return false;
         }
@@ -304,50 +236,50 @@ public partial class Scanner
 
     private static partial bool IsTwoCharacterPunctuator(string input)
     {
-            switch (input)
-            {
-                case "&&":
-                case "||":
-                case "==":
-                case "!=":
-                case "+=":
-                case "-=":
-                case "*=":
-                case "/=":
-                case "++":
-                case "--":
-                case "<<":
-                case ">>":
-                case "&=":
-                case "|=":
-                case "^=":
-                case "%=":
-                case "<=":
-                case ">=":
-                case "=>":
-                case "**":
-                    return true;
-                default:
-                    return false;
-            }
+        switch (input)
+        {
+            case "&&":
+            case "||":
+            case "==":
+            case "!=":
+            case "+=":
+            case "-=":
+            case "*=":
+            case "/=":
+            case "++":
+            case "--":
+            case "<<":
+            case ">>":
+            case "&=":
+            case "|=":
+            case "^=":
+            case "%=":
+            case "<=":
+            case ">=":
+            case "=>":
+            case "**":
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static partial bool IsThreeCharacterPunctuator(string input)
     {
-            switch (input)
-            {
-                case "===":
-                case "!==":
-                case ">>>":
-                case "<<=":
-                case ">>=":
-                case "**=":
-                case "&&=":
-                case "||=":
-                    return true;
-                default:
-                    return false;
-            }
+        switch (input)
+        {
+            case "===":
+            case "!==":
+            case ">>>":
+            case "<<=":
+            case ">>=":
+            case "**=":
+            case "&&=":
+            case "||=":
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static partial bool IsKeyword(string? input)
@@ -359,172 +291,117 @@ public partial class Scanner
         switch (input.Length)
         {
             case 2:
-                var disc2 = input[1];
-                if (disc2 == 'f' && input == "if")
+                switch (input[1])
                 {
-                    return true;
+                    case 'f':
+                        return input == "if";
+                    case 'n':
+                        return input == "in";
+                    case 'o':
+                        return input == "do";
+                    default:
+                       return false;
                 }
-                else if (disc2 == 'n' && input == "in")
-                {
-                    return true;
-                }
-                else if (disc2 == 'o' && input == "do")
-                {
-                    return true;
-                }
-                return false;
-
             case 3:
-                var disc3 = input[0];
-                if (disc3 == 'v' && input == "var")
+                switch (input[0])
                 {
-                    return true;
+                    case 'v':
+                        return input == "var";
+                    case 'f':
+                        return input == "for";
+                    case 'n':
+                        return input == "new";
+                    case 't':
+                        return input == "try";
+                    case 'l':
+                        return input == "let";
+                    default:
+                       return false;
                 }
-                else if (disc3 == 'f' && input == "for")
-                {
-                    return true;
-                }
-                else if (disc3 == 'n' && input == "new")
-                {
-                    return true;
-                }
-                else if (disc3 == 't' && input == "try")
-                {
-                    return true;
-                }
-                else if (disc3 == 'l' && input == "let")
-                {
-                    return true;
-                }
-                return false;
-
             case 4:
-                var disc4 = input[1];
-                if (disc4 == 'h' && input == "this")
+                switch (input[1])
                 {
-                    return true;
+                    case 'h':
+                        return input == "this";
+                    case 'l':
+                        return input == "else";
+                    case 'a':
+                        return input == "case";
+                    case 'o':
+                        return input == "void";
+                    case 'i':
+                        return input == "with";
+                    case 'n':
+                        return input == "enum";
+                    default:
+                       return false;
                 }
-                else if (disc4 == 'l' && input == "else")
-                {
-                    return true;
-                }
-                else if (disc4 == 'a' && input == "case")
-                {
-                    return true;
-                }
-                else if (disc4 == 'o' && input == "void")
-                {
-                    return true;
-                }
-                else if (disc4 == 'i' && input == "with")
-                {
-                    return true;
-                }
-                else if (disc4 == 'n' && input == "enum")
-                {
-                    return true;
-                }
-                return false;
-
             case 5:
-                var disc5 = input[4];
-                if (disc5 == 'e' && input == "while")
+                switch (input[4])
                 {
-                    return true;
+                    case 'e':
+                        return input == "while";
+                    case 'k':
+                        return input == "break";
+                    case 'h':
+                        return input == "catch";
+                    case 'w':
+                        return input == "throw";
+                    case 't':
+                        return input == "const";
+                    case 'd':
+                        return input == "yield";
+                    case 's':
+                        return input == "class";
+                    case 'r':
+                        return input == "super";
+                    default:
+                       return false;
                 }
-                else if (disc5 == 'k' && input == "break")
-                {
-                    return true;
-                }
-                else if (disc5 == 'h' && input == "catch")
-                {
-                    return true;
-                }
-                else if (disc5 == 'w' && input == "throw")
-                {
-                    return true;
-                }
-                else if (disc5 == 't' && input == "const")
-                {
-                    return true;
-                }
-                else if (disc5 == 'd' && input == "yield")
-                {
-                    return true;
-                }
-                else if (disc5 == 's' && input == "class")
-                {
-                    return true;
-                }
-                else if (disc5 == 'r' && input == "super")
-                {
-                    return true;
-                }
-                return false;
-
             case 6:
-                var disc6 = input[0];
-                if (disc6 == 'r' && input == "return")
+                switch (input[0])
                 {
-                    return true;
+                    case 'r':
+                        return input == "return";
+                    case 't':
+                        return input == "typeof";
+                    case 'd':
+                        return input == "delete";
+                    case 's':
+                        return input == "switch";
+                    case 'e':
+                        return input == "export";
+                    case 'i':
+                        return input == "import";
+                    default:
+                       return false;
                 }
-                else if (disc6 == 't' && input == "typeof")
-                {
-                    return true;
-                }
-                else if (disc6 == 'd' && input == "delete")
-                {
-                    return true;
-                }
-                else if (disc6 == 's' && input == "switch")
-                {
-                    return true;
-                }
-                else if (disc6 == 'e' && input == "export")
-                {
-                    return true;
-                }
-                else if (disc6 == 'i' && input == "import")
-                {
-                    return true;
-                }
-                return false;
-
             case 7:
-                var disc7 = input[0];
-                if (disc7 == 'd' && input == "default")
+                switch (input[0])
                 {
-                    return true;
+                    case 'd':
+                        return input == "default";
+                    case 'f':
+                        return input == "finally";
+                    case 'e':
+                        return input == "extends";
+                    default:
+                       return false;
                 }
-                else if (disc7 == 'f' && input == "finally")
-                {
-                    return true;
-                }
-                else if (disc7 == 'e' && input == "extends")
-                {
-                    return true;
-                }
-                return false;
-
             case 8:
-                var disc8 = input[0];
-                if (disc8 == 'f' && input == "function")
+                switch (input[0])
                 {
-                    return true;
+                    case 'f':
+                        return input == "function";
+                    case 'c':
+                        return input == "continue";
+                    case 'd':
+                        return input == "debugger";
+                    default:
+                       return false;
                 }
-                else if (disc8 == 'c' && input == "continue")
-                {
-                    return true;
-                }
-                else if (disc8 == 'd' && input == "debugger")
-                {
-                    return true;
-                }
-                return false;
-
             case 10:
-                return input == "instanceof" ? true : false;
-
+                return input == "instanceof";
             default:
                return false;
         }
