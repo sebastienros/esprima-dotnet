@@ -698,11 +698,11 @@ public partial class Scanner
                 switch (input[1])
                 {
                     case 'f':
-                        return input[0] == 'i' && input[1] == 'f' ? "if" : null;
+                        return input[0] == 'i' ? "if" : null;
                     case 'n':
-                        return input[0] == 'i' && input[1] == 'n' ? "in" : null;
+                        return input[0] == 'i' ? "in" : null;
                     case 'o':
-                        return input[0] == 'd' && input[1] == 'o' ? "do" : null;
+                        return input[0] == 'd' ? "do" : null;
                     default:
                        return null;
                 }
@@ -710,15 +710,15 @@ public partial class Scanner
                 switch (input[0])
                 {
                     case 'v':
-                        return input[0] == 'v' && input[1] == 'a' && input[2] == 'r' ? "var" : null;
+                        return input[1] == 'a' && input[2] == 'r' ? "var" : null;
                     case 'f':
-                        return input[0] == 'f' && input[1] == 'o' && input[2] == 'r' ? "for" : null;
+                        return input[1] == 'o' && input[2] == 'r' ? "for" : null;
                     case 'n':
-                        return input[0] == 'n' && input[1] == 'e' && input[2] == 'w' ? "new" : null;
+                        return input[1] == 'e' && input[2] == 'w' ? "new" : null;
                     case 't':
-                        return input[0] == 't' && input[1] == 'r' && input[2] == 'y' ? "try" : null;
+                        return input[1] == 'r' && input[2] == 'y' ? "try" : null;
                     case 'l':
-                        return input[0] == 'l' && input[1] == 'e' && input[2] == 't' ? "let" : null;
+                        return input[1] == 'e' && input[2] == 't' ? "let" : null;
                     default:
                        return null;
                 }
@@ -824,9 +824,9 @@ public partial class Scanner
                 switch (input[0])
                 {
                     case 'a':
-                        return input[0] == 'a' && input[1] == 's' ? "as" : null;
+                        return input[1] == 's' ? "as" : null;
                     case 'o':
-                        return input[0] == 'o' && input[1] == 'f' ? "of" : null;
+                        return input[1] == 'f' ? "of" : null;
                     default:
                        return null;
                 }
@@ -834,9 +834,9 @@ public partial class Scanner
                 switch (input[0])
                 {
                     case 'g':
-                        return input[0] == 'g' && input[1] == 'e' && input[2] == 't' ? "get" : null;
+                        return input[1] == 'e' && input[2] == 't' ? "get" : null;
                     case 's':
-                        return input[0] == 's' && input[1] == 'e' && input[2] == 't' ? "set" : null;
+                        return input[1] == 'e' && input[2] == 't' ? "set" : null;
                     default:
                        return null;
                 }

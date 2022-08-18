@@ -70,7 +70,7 @@ internal class StringMatcherAttribute : System.Attribute
             {
                 var item = group.First();
                 sb.Append(indentStr).Append(baseIndent).Append("    return ");
-                StringEquality(sb, item, sourceIsSpan, startIndex: 0);
+                StringEquality(sb, item, sourceIsSpan, startIndex: 0, discriminatorIndex: -1);
                 if (returnString)
                 {
                     sb.Append(" ? ").Append("\"").Append(Escape(item)).Append("\"").Append(" : null");
@@ -165,7 +165,7 @@ internal class StringMatcherAttribute : System.Attribute
             }
             else
             {
-                StringEquality(sb, item, sourceIsSpan, startIndex: 0);
+                StringEquality(sb, item, sourceIsSpan, startIndex: 0, discriminatorIndex);
                 if (returnString)
                 {
                     sb.Append(" ? ").Append("\"").Append(Escape(item)).Append("\"").Append(" : null");
@@ -181,7 +181,7 @@ internal class StringMatcherAttribute : System.Attribute
         sb.Append(indent).AppendLine("    }");
     }
 
-    private static void StringEquality(StringBuilder builder, string toCheck, bool sourceIsSpan, int startIndex)
+    private static void StringEquality(StringBuilder builder, string toCheck, bool sourceIsSpan, int startIndex, int discriminatorIndex)
     {
         toCheck = toCheck.Replace("\"", "\"");
         if (!sourceIsSpan)
@@ -203,8 +203,14 @@ internal class StringMatcherAttribute : System.Attribute
                 // check char by char
                 for (var i = startIndex; i < toCheck.Length; ++i)
                 {
+                    if (i == discriminatorIndex)
+                    {
+                        // no need to check
+                        continue;
+                    }
+
                     builder.Append("input[").Append(i).Append("] == '").Append(toCheck[i]).Append("'");
-                    if (i != toCheck.Length - 1)
+                    if (i != toCheck.Length - 1 && i + 1 != discriminatorIndex)
                     {
                         builder.Append(" && ");
                     }
@@ -269,7 +275,7 @@ internal class StringMatcherAttribute : System.Attribute
         foreach (var item in group)
         {
             sb.Append(indent).Append("if (");
-            StringEquality(sb, item, sourceIsSpan, startIndex);
+            StringEquality(sb, item, sourceIsSpan, startIndex, discriminatorIndex: -1);
             sb.AppendLine(")");
             sb.Append(indent).AppendLine("{");
             if (returnString)
