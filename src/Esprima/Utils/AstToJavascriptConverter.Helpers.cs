@@ -312,13 +312,15 @@ partial class AstToJavaScriptConverter
             case Nodes.AssignmentExpression:
             case Nodes.AwaitExpression:
             case Nodes.BinaryExpression:
-            case Nodes.LogicalExpression:
+            case Nodes.ChainExpression:
             case Nodes.ConditionalExpression:
+            case Nodes.LogicalExpression:
             case Nodes.SequenceExpression:
             case Nodes.UnaryExpression:
             case Nodes.UpdateExpression:
             case Nodes.YieldExpression:
             case Nodes.ClassExpression when expression.As<ClassExpression>().Decorators.Count > 0:
+            case Nodes.NewExpression when expression.As<NewExpression>().Arguments.Count == 0:
                 return true;
         }
 

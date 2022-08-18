@@ -25,7 +25,6 @@ internal static class ExpressionHelper
 
         associativity = undefinedAssociativity;
 
-Reenter:
         switch (expression.Type)
         {
             case Nodes.ArrayExpression:
@@ -53,6 +52,9 @@ Reenter:
 
             case Nodes.NewExpression:
                 return 1600;
+
+            case Nodes.ChainExpression:
+                return 1550;
 
             case Nodes.UpdateExpression when !expression.As<UpdateExpression>().Prefix:
                 return 1500;
@@ -141,11 +143,6 @@ Reenter:
             case Nodes.SequenceExpression:
                 associativity = leftToRightAssociativity;
                 return 100;
-
-            case Nodes.ChainExpression:
-                // This can be improved when tail recursion becomes available (see https://github.com/dotnet/csharplang/issues/2304).
-                expression = expression.As<ChainExpression>().Expression;
-                goto Reenter;
         }
 
         return -1;
