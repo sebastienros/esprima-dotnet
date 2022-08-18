@@ -5,6 +5,8 @@
     <IsPackable>false</IsPackable>
     <TargetFrameworks>net462;netcoreapp3.1;net6.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
+    <AssemblyOriginatorKeyFile>../../src/Esprima.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\test\Esprima.Tests\Fixtures\3rdparty\**" CopyToOutputDirectory="PreserveNewest" LinkBase="3rdparty" />
