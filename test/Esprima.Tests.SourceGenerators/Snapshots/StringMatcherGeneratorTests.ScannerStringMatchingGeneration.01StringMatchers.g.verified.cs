@@ -158,252 +158,408 @@ public partial class JavaScriptParser
 
 public partial class Scanner
 {
-    public static partial bool IsFutureReservedWord(string? input)
+    internal static partial string? TryGetInternedFutureReservedWord(ReadOnlySpan<char> input)
     {
-        if (input is null)
-        {
-            return false;
-        }
         switch (input.Length)
         {
             case 4:
-                return input == "enum";
+                return input.SequenceEqual("enum".AsSpan()) ? "enum" : null;
             case 5:
-                return input == "super";
+                return input.SequenceEqual("super".AsSpan()) ? "super" : null;
             case 6:
                 switch (input[0])
                 {
                     case 'e':
-                        return input == "export";
+                        return input.SequenceEqual("export".AsSpan()) ? "export" : null;
                     case 'i':
-                        return input == "import";
+                        return input.SequenceEqual("import".AsSpan()) ? "import" : null;
                     default:
-                       return false;
+                       return null;
                 }
             default:
-               return false;
+               return null;
         }
     }
 
-    public static partial bool IsStrictModeReservedWord(string? input)
+    internal static partial string? TryGetInternedStrictModeReservedWord(ReadOnlySpan<char> input)
     {
-        if (input is null)
-        {
-            return false;
-        }
         switch (input.Length)
         {
             case 3:
-                return input == "let";
+                return input.SequenceEqual("let".AsSpan()) ? "let" : null;
             case 5:
-                return input == "yield";
+                return input.SequenceEqual("yield".AsSpan()) ? "yield" : null;
             case 6:
                 switch (input[0])
                 {
                     case 'p':
-                        return input == "public";
+                        return input.SequenceEqual("public".AsSpan()) ? "public" : null;
                     case 's':
-                        return input == "static";
+                        return input.SequenceEqual("static".AsSpan()) ? "static" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 7:
                 switch (input[1])
                 {
                     case 'a':
-                        return input == "package";
+                        return input.SequenceEqual("package".AsSpan()) ? "package" : null;
                     case 'r':
-                        return input == "private";
+                        return input.SequenceEqual("private".AsSpan()) ? "private" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 9:
                 switch (input[0])
                 {
                     case 'i':
-                        return input == "interface";
+                        return input.SequenceEqual("interface".AsSpan()) ? "interface" : null;
                     case 'p':
-                        return input == "protected";
+                        return input.SequenceEqual("protected".AsSpan()) ? "protected" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 10:
-                return input == "implements";
+                return input.SequenceEqual("implements".AsSpan()) ? "implements" : null;
             default:
-               return false;
+               return null;
         }
     }
 
-    private static partial bool IsTwoCharacterPunctuator(string input)
+    private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> input)
     {
         switch (input)
         {
             case "&&":
+                return "&&";
             case "||":
+                return "||";
             case "==":
+                return "==";
             case "!=":
+                return "!=";
             case "+=":
+                return "+=";
             case "-=":
+                return "-=";
             case "*=":
+                return "*=";
             case "/=":
+                return "/=";
             case "++":
+                return "++";
             case "--":
+                return "--";
             case "<<":
+                return "<<";
             case ">>":
+                return ">>";
             case "&=":
+                return "&=";
             case "|=":
+                return "|=";
             case "^=":
+                return "^=";
             case "%=":
+                return "%=";
             case "<=":
+                return "<=";
             case ">=":
+                return ">=";
             case "=>":
+                return "=>";
             case "**":
-                return true;
+                return "**";
             default:
-                return false;
+                return null;
         }
     }
 
-    private static partial bool IsThreeCharacterPunctuator(string input)
+    private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> input)
     {
         switch (input)
         {
             case "===":
+                return "===";
             case "!==":
+                return "!==";
             case ">>>":
+                return ">>>";
             case "<<=":
+                return "<<=";
             case ">>=":
+                return ">>=";
             case "**=":
+                return "**=";
             case "&&=":
+                return "&&=";
             case "||=":
-                return true;
+                return "||=";
             default:
-                return false;
+                return null;
         }
     }
 
-    public static partial bool IsKeyword(string? input)
+    internal static partial string? TryGetInternedPunctuator(ReadOnlySpan<char> input)
     {
-        if (input is null)
+        switch (input.Length)
         {
-            return false;
+            case 2:
+                switch (input)
+                {
+                    case "&&":
+                        return "&&";
+                    case "||":
+                        return "||";
+                    case "==":
+                        return "==";
+                    case "!=":
+                        return "!=";
+                    case "+=":
+                        return "+=";
+                    case "-=":
+                        return "-=";
+                    case "*=":
+                        return "*=";
+                    case "/=":
+                        return "/=";
+                    case "++":
+                        return "++";
+                    case "--":
+                        return "--";
+                    case "<<":
+                        return "<<";
+                    case ">>":
+                        return ">>";
+                    case "&=":
+                        return "&=";
+                    case "|=":
+                        return "|=";
+                    case "^=":
+                        return "^=";
+                    case "%=":
+                        return "%=";
+                    case "<=":
+                        return "<=";
+                    case ">=":
+                        return ">=";
+                    case "=>":
+                        return "=>";
+                    case "**":
+                        return "**";
+                    case "??":
+                        return "??";
+                    case "?.":
+                        return "?.";
+                    default:
+                        return null;
+                }
+            case 3:
+                switch (input)
+                {
+                    case "===":
+                        return "===";
+                    case "!==":
+                        return "!==";
+                    case ">>>":
+                        return ">>>";
+                    case "<<=":
+                        return "<<=";
+                    case ">>=":
+                        return ">>=";
+                    case "**=":
+                        return "**=";
+                    case "&&=":
+                        return "&&=";
+                    case "||=":
+                        return "||=";
+                    case "??=":
+                        return "??=";
+                    case "...":
+                        return "...";
+                    default:
+                        return null;
+                }
+            case 4:
+                return input.SequenceEqual(">>>=".AsSpan()) ? ">>>=" : null;
+            default:
+               return null;
         }
+    }
+
+    internal static partial string? TryGetInternedKeyword(ReadOnlySpan<char> input)
+    {
         switch (input.Length)
         {
             case 2:
                 switch (input[1])
                 {
                     case 'f':
-                        return input == "if";
+                        return input.SequenceEqual("if".AsSpan()) ? "if" : null;
                     case 'n':
-                        return input == "in";
+                        return input.SequenceEqual("in".AsSpan()) ? "in" : null;
                     case 'o':
-                        return input == "do";
+                        return input.SequenceEqual("do".AsSpan()) ? "do" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 3:
                 switch (input[0])
                 {
                     case 'v':
-                        return input == "var";
+                        return input.SequenceEqual("var".AsSpan()) ? "var" : null;
                     case 'f':
-                        return input == "for";
+                        return input.SequenceEqual("for".AsSpan()) ? "for" : null;
                     case 'n':
-                        return input == "new";
+                        return input.SequenceEqual("new".AsSpan()) ? "new" : null;
                     case 't':
-                        return input == "try";
+                        return input.SequenceEqual("try".AsSpan()) ? "try" : null;
                     case 'l':
-                        return input == "let";
+                        return input.SequenceEqual("let".AsSpan()) ? "let" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 4:
                 switch (input[1])
                 {
                     case 'h':
-                        return input == "this";
+                        return input.SequenceEqual("this".AsSpan()) ? "this" : null;
                     case 'l':
-                        return input == "else";
+                        return input.SequenceEqual("else".AsSpan()) ? "else" : null;
                     case 'a':
-                        return input == "case";
+                        return input.SequenceEqual("case".AsSpan()) ? "case" : null;
                     case 'o':
-                        return input == "void";
+                        return input.SequenceEqual("void".AsSpan()) ? "void" : null;
                     case 'i':
-                        return input == "with";
+                        return input.SequenceEqual("with".AsSpan()) ? "with" : null;
                     case 'n':
-                        return input == "enum";
+                        return input.SequenceEqual("enum".AsSpan()) ? "enum" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 5:
                 switch (input[4])
                 {
                     case 'e':
-                        return input == "while";
+                        return input.SequenceEqual("while".AsSpan()) ? "while" : null;
                     case 'k':
-                        return input == "break";
+                        return input.SequenceEqual("break".AsSpan()) ? "break" : null;
                     case 'h':
-                        return input == "catch";
+                        return input.SequenceEqual("catch".AsSpan()) ? "catch" : null;
                     case 'w':
-                        return input == "throw";
+                        return input.SequenceEqual("throw".AsSpan()) ? "throw" : null;
                     case 't':
-                        return input == "const";
+                        return input.SequenceEqual("const".AsSpan()) ? "const" : null;
                     case 'd':
-                        return input == "yield";
+                        return input.SequenceEqual("yield".AsSpan()) ? "yield" : null;
                     case 's':
-                        return input == "class";
+                        return input.SequenceEqual("class".AsSpan()) ? "class" : null;
                     case 'r':
-                        return input == "super";
+                        return input.SequenceEqual("super".AsSpan()) ? "super" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 6:
                 switch (input[0])
                 {
                     case 'r':
-                        return input == "return";
+                        return input.SequenceEqual("return".AsSpan()) ? "return" : null;
                     case 't':
-                        return input == "typeof";
+                        return input.SequenceEqual("typeof".AsSpan()) ? "typeof" : null;
                     case 'd':
-                        return input == "delete";
+                        return input.SequenceEqual("delete".AsSpan()) ? "delete" : null;
                     case 's':
-                        return input == "switch";
+                        return input.SequenceEqual("switch".AsSpan()) ? "switch" : null;
                     case 'e':
-                        return input == "export";
+                        return input.SequenceEqual("export".AsSpan()) ? "export" : null;
                     case 'i':
-                        return input == "import";
+                        return input.SequenceEqual("import".AsSpan()) ? "import" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 7:
                 switch (input[0])
                 {
                     case 'd':
-                        return input == "default";
+                        return input.SequenceEqual("default".AsSpan()) ? "default" : null;
                     case 'f':
-                        return input == "finally";
+                        return input.SequenceEqual("finally".AsSpan()) ? "finally" : null;
                     case 'e':
-                        return input == "extends";
+                        return input.SequenceEqual("extends".AsSpan()) ? "extends" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 8:
                 switch (input[0])
                 {
                     case 'f':
-                        return input == "function";
+                        return input.SequenceEqual("function".AsSpan()) ? "function" : null;
                     case 'c':
-                        return input == "continue";
+                        return input.SequenceEqual("continue".AsSpan()) ? "continue" : null;
                     case 'd':
-                        return input == "debugger";
+                        return input.SequenceEqual("debugger".AsSpan()) ? "debugger" : null;
                     default:
-                       return false;
+                       return null;
                 }
             case 10:
-                return input == "instanceof";
+                return input.SequenceEqual("instanceof".AsSpan()) ? "instanceof" : null;
             default:
-               return false;
+               return null;
+        }
+    }
+
+    internal static partial string? TryGetInternedContextualKeyword(ReadOnlySpan<char> input)
+    {
+        switch (input.Length)
+        {
+            case 2:
+                switch (input[0])
+                {
+                    case 'a':
+                        return input.SequenceEqual("as".AsSpan()) ? "as" : null;
+                    case 'o':
+                        return input.SequenceEqual("of".AsSpan()) ? "of" : null;
+                    default:
+                       return null;
+                }
+            case 3:
+                switch (input[0])
+                {
+                    case 'g':
+                        return input.SequenceEqual("get".AsSpan()) ? "get" : null;
+                    case 's':
+                        return input.SequenceEqual("set".AsSpan()) ? "set" : null;
+                    default:
+                       return null;
+                }
+            case 4:
+                switch (input[0])
+                {
+                    case 'f':
+                        return input.SequenceEqual("from".AsSpan()) ? "from" : null;
+                    case 'n':
+                        return input.SequenceEqual("null".AsSpan()) ? "null" : null;
+                    case 't':
+                        return input.SequenceEqual("true".AsSpan()) ? "true" : null;
+                    default:
+                       return null;
+                }
+            case 5:
+                switch (input[1])
+                {
+                    case 'a':
+                        return input.SequenceEqual("false".AsSpan()) ? "false" : null;
+                    case 's':
+                        return input.SequenceEqual("async".AsSpan()) ? "async" : null;
+                    case 'w':
+                        return input.SequenceEqual("await".AsSpan()) ? "await" : null;
+                    default:
+                       return null;
+                }
+            case 11:
+                return input.SequenceEqual("constructor".AsSpan()) ? "constructor" : null;
+            default:
+               return null;
         }
     }
 

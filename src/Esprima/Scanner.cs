@@ -96,7 +96,6 @@ public sealed partial class Scanner
         _curlyStack = new List<string>(20);
     }
 
-
     internal ScannerState SaveState()
     {
         return new ScannerState(Index, LineNumber, LineStart, new List<string>(_curlyStack));
@@ -140,22 +139,43 @@ public sealed partial class Scanner
     // https://tc39.github.io/ecma262/#sec-future-reserved-words
 
     [StringMatcher("enum", "export", "import", "super")]
-    public static partial bool IsFutureReservedWord(string? id);
-
-    [StringMatcher("implements", "interface", "package", "private", "protected", "public", "static", "yield", "let")]
-    public static partial bool IsStrictModeReservedWord(string? id);
+    internal static partial string? TryGetInternedFutureReservedWord(ReadOnlySpan<char> id);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsRestrictedWord(string? id)
+    public static bool IsFutureReservedWord(string id) => TryGetInternedFutureReservedWord(id.AsSpan()) is not null;
+
+    [StringMatcher("implements", "interface", "package", "private", "protected", "public", "static", "yield", "let")]
+    internal static partial string? TryGetInternedStrictModeReservedWord(ReadOnlySpan<char> id);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsStrictModeReservedWord(string id) => TryGetInternedStrictModeReservedWord(id.AsSpan()) is not null;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string? TryGetInternedRestrictedWord(ReadOnlySpan<char> id) => id switch
     {
-        return id is "eval" or "arguments";
-    }
+        "eval" => "eval",
+        "arguments" => "arguments",
+        _ => null
+    };
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsRestrictedWord(string id) => TryGetInternedRestrictedWord(id.AsSpan()) is not null;
 
     [StringMatcher("&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**")]
-    private static partial bool IsTwoCharacterPunctuator(string id);
+    private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> id);
 
     [StringMatcher("===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=")]
-    private static partial bool IsThreeCharacterPunctuator(string id);
+    private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> id);
+
+    [StringMatcher(
+        // 2-character
+        "&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**", "??", "?.",
+        // 3-character
+        "===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=", "??=", "...",
+        // 4-character
+        ">>>="
+    )]
+    internal static partial string? TryGetInternedPunctuator(ReadOnlySpan<char> id);
 
     // https://tc39.github.io/ecma262/#sec-keywords
 
@@ -163,7 +183,13 @@ public sealed partial class Scanner
         "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
         "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
         "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof")]
-    public static partial bool IsKeyword(string? id);
+    internal static partial string? TryGetInternedKeyword(ReadOnlySpan<char> id);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsKeyword(string id) => TryGetInternedKeyword(id.AsSpan()) is not null;
+
+    [StringMatcher("as", "of", "get", "set", "false", "from", "null", "true", "async", "await", "constructor")]
+    internal static partial string? TryGetInternedContextualKeyword(ReadOnlySpan<char> id);
 
     // https://tc39.github.io/ecma262/#sec-comments
 
@@ -723,27 +749,20 @@ public sealed partial class Scanner
 
     private Token ScanPunctuator()
     {
-        static string SafeSubstring(string s, int startIndex, int length)
-        {
-            return startIndex + length > s.Length ? string.Empty : s.Substring(startIndex, length);
-        }
-
         var start = Index;
 
         // Check for most common single-character punctuators.
-        // TODO spanify
         var c = Source[Index];
-        var str = c.ToString();
+        var str = ParserExtensions.CharToString(c);
 
         switch (c)
         {
             case '(':
-            case '{':
-                if (c == '{')
-                {
-                    _curlyStack.Add("{");
-                }
+                ++Index;
+                break;
 
+            case '{':
+                _curlyStack.Add("{");
                 ++Index;
                 break;
 
@@ -766,7 +785,6 @@ public sealed partial class Scanner
                 }
 
                 break;
-
 
             case '?':
                 ++Index;
@@ -806,39 +824,29 @@ public sealed partial class Scanner
                 break;
 
             default:
-
                 // 4-character punctuator.
-                str = SafeSubstring(Source, Index, 4);
-                if (str == ">>>=")
+                if (Index + 4 <= Source.Length && Source.AsSpan(Index, 4).SequenceEqual(">>>=".AsSpan()))
                 {
                     Index += 4;
+                    str = ">>>=";
                 }
+                // 3-character punctuators.
+                else if (Index + 3 <= Source.Length && (str = TryGetInternedThreeCharacterPunctuator(Source.AsSpan(Index, 3))) is not null)
+                {
+                    Index += 3;
+                }
+                // 2-character punctuators.
+                else if (Index + 2 <= Source.Length && (str = TryGetInternedTwoCharacterPunctuator(Source.AsSpan(Index, 2))) is not null)
+                {
+                    Index += 2;
+                }
+                // 1-character punctuators.
                 else
                 {
-                    // 3-character punctuators.
-                    str = SafeSubstring(Source, Index, 3);
-                    if (IsThreeCharacterPunctuator(str))
+                    str = ParserExtensions.CharToString(c);
+                    if ("<>=!+-*%&|^/".IndexOf(c) >= 0)
                     {
-                        Index += 3;
-                    }
-                    else
-                    {
-                        // 2-character punctuators.
-                        str = SafeSubstring(Source, Index, 2);
-                        if (IsTwoCharacterPunctuator(str))
-                        {
-                            Index += 2;
-                        }
-                        else
-                        {
-                            // 1-character punctuators.
-                            var temp = Source[Index];
-                            str = temp.ToString();
-                            if ("<>=!+-*%&|^/".IndexOf(temp) >= 0)
-                            {
-                                ++Index;
-                            }
-                        }
+                        ++Index;
                     }
                 }
 
@@ -2415,6 +2423,12 @@ public sealed partial class Scanner
     {
         if (Eof())
         {
+            // Release possibly large buffers
+            _curlyStack.Clear();
+            _curlyStack.Capacity = 0;
+            strb.Clear();
+            strb.Capacity = 0;
+
             return Token.CreateEof(Index, LineNumber, LineStart);
         }
 
