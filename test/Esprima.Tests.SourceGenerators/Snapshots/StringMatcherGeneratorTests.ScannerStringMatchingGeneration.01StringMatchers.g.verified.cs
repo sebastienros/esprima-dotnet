@@ -7,57 +7,44 @@ public partial class JavaScriptParser
 {
     private static partial bool IsAssignmentOperator(string input)
     {
-        if ((uint) input.Length - 1 > 3)
-        {
-            return false;
-        }
-
         switch (input.Length)
         {
             case 1:
+            {
                 return input == "=";
+            }
             case 2:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case '*':
-                        return input == "*=";
-                    case '/':
-                        return input == "/=";
-                    case '%':
-                        return input == "%=";
-                    case '+':
-                        return input == "+=";
-                    case '-':
-                        return input == "-=";
-                    case '&':
-                        return input == "&=";
-                    case '^':
-                        return input == "^=";
-                    case '|':
-                        return input == "|=";
-                    default:
-                       return false;
-                }
+                    '*' => input == "*=",
+                    '/' => input == "/=",
+                    '%' => input == "%=",
+                    '+' => input == "+=",
+                    '-' => input == "-=",
+                    '&' => input == "&=",
+                    '^' => input == "^=",
+                    '|' => input == "|=",
+                    _ => false
+                };
+            }
             case 3:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case '*':
-                        return input == "**=";
-                    case '<':
-                        return input == "<<=";
-                    case '>':
-                        return input == ">>=";
-                    case '&':
-                        return input == "&&=";
-                    case '|':
-                        return input == "||=";
-                    case '?':
-                        return input == "??=";
-                    default:
-                       return false;
-                }
+                    '*' => input == "**=",
+                    '<' => input == "<<=",
+                    '>' => input == ">>=",
+                    '&' => input == "&&=",
+                    '|' => input == "||=",
+                    '?' => input == "??=",
+                    _ => false
+                };
+            }
             case 4:
+            {
                 return input == ">>>=";
+            }
             default:
                return false;
         }
@@ -65,47 +52,33 @@ public partial class JavaScriptParser
 
     private static partial bool IsPunctuatorExpressionStart(string input)
     {
-        if ((uint) input.Length - 1 > 1)
-        {
-            return false;
-        }
-
         switch (input.Length)
         {
             case 1:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case '[':
-                        return true;
-                    case '(':
-                        return true;
-                    case '{':
-                        return true;
-                    case '+':
-                        return true;
-                    case '-':
-                        return true;
-                    case '!':
-                        return true;
-                    case '~':
-                        return true;
-                    case '/':
-                        return true;
-                    default:
-                       return false;
-                }
+                    '[' => true,
+                    '(' => true,
+                    '{' => true,
+                    '+' => true,
+                    '-' => true,
+                    '!' => true,
+                    '~' => true,
+                    '/' => true,
+                    _ => false
+                };
+            }
             case 2:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case '+':
-                        return input == "++";
-                    case '-':
-                        return input == "--";
-                    case '/':
-                        return input == "/=";
-                    default:
-                       return false;
-                }
+                    '+' => input == "++",
+                    '-' => input == "--",
+                    '/' => input == "/=",
+                    _ => false
+                };
+            }
             default:
                return false;
         }
@@ -113,57 +86,49 @@ public partial class JavaScriptParser
 
     private static partial bool IsKeywordExpressionStart(string input)
     {
-        if ((uint) input.Length - 3 > 5)
-        {
-            return false;
-        }
-
         switch (input.Length)
         {
             case 3:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'l':
-                        return input == "let";
-                    case 'n':
-                        return input == "new";
-                    default:
-                       return false;
-                }
+                    'l' => input == "let",
+                    'n' => input == "new",
+                    _ => false
+                };
+            }
             case 4:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 't':
-                        return input == "this";
-                    case 'v':
-                        return input == "void";
-                    default:
-                       return false;
-                }
+                    't' => input == "this",
+                    'v' => input == "void",
+                    _ => false
+                };
+            }
             case 5:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'c':
-                        return input == "class";
-                    case 's':
-                        return input == "super";
-                    case 'y':
-                        return input == "yield";
-                    default:
-                       return false;
-                }
+                    'c' => input == "class",
+                    's' => input == "super",
+                    'y' => input == "yield",
+                    _ => false
+                };
+            }
             case 6:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'd':
-                        return input == "delete";
-                    case 't':
-                        return input == "typeof";
-                    default:
-                       return false;
-                }
+                    'd' => input == "delete",
+                    't' => input == "typeof",
+                    _ => false
+                };
+            }
             case 8:
+            {
                 return input == "function";
+            }
             default:
                return false;
         }
@@ -175,27 +140,25 @@ public partial class Scanner
 {
     internal static partial string? TryGetInternedFutureReservedWord(ReadOnlySpan<char> input)
     {
-        if ((uint) input.Length - 4 > 2)
-        {
-            return null;
-        }
-
         switch (input.Length)
         {
             case 4:
-                return input.SequenceEqual("enum".AsSpan()) ? "enum" : null;
+            {
+                return input[0] == 'e' && input[1] == 'n' && input[2] == 'u' && input[3] == 'm' ? "enum" : null;
+            }
             case 5:
-                return input.SequenceEqual("super".AsSpan()) ? "super" : null;
+            {
+                return input[0] == 's' && input[1] == 'u' && input[2] == 'p' && input[3] == 'e' && input[4] == 'r' ? "super" : null;
+            }
             case 6:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'e':
-                        return input.SequenceEqual("export".AsSpan()) ? "export" : null;
-                    case 'i':
-                        return input.SequenceEqual("import".AsSpan()) ? "import" : null;
-                    default:
-                       return null;
-                }
+                    'e' => input.SequenceEqual("export".AsSpan()) ? "export" : null,
+                    'i' => input.SequenceEqual("import".AsSpan()) ? "import" : null,
+                    _ => null
+                };
+            }
             default:
                return null;
         }
@@ -203,49 +166,47 @@ public partial class Scanner
 
     internal static partial string? TryGetInternedStrictModeReservedWord(ReadOnlySpan<char> input)
     {
-        if ((uint) input.Length - 3 > 7)
-        {
-            return null;
-        }
-
         switch (input.Length)
         {
             case 3:
+            {
                 return input[0] == 'l' && input[1] == 'e' && input[2] == 't' ? "let" : null;
+            }
             case 5:
-                return input.SequenceEqual("yield".AsSpan()) ? "yield" : null;
+            {
+                return input[0] == 'y' && input[1] == 'i' && input[2] == 'e' && input[3] == 'l' && input[4] == 'd' ? "yield" : null;
+            }
             case 6:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'p':
-                        return input.SequenceEqual("public".AsSpan()) ? "public" : null;
-                    case 's':
-                        return input.SequenceEqual("static".AsSpan()) ? "static" : null;
-                    default:
-                       return null;
-                }
+                    'p' => input.SequenceEqual("public".AsSpan()) ? "public" : null,
+                    's' => input.SequenceEqual("static".AsSpan()) ? "static" : null,
+                    _ => null
+                };
+            }
             case 7:
-                switch (input[1])
+            {
+                return input[1] switch
                 {
-                    case 'a':
-                        return input.SequenceEqual("package".AsSpan()) ? "package" : null;
-                    case 'r':
-                        return input.SequenceEqual("private".AsSpan()) ? "private" : null;
-                    default:
-                       return null;
-                }
+                    'a' => input.SequenceEqual("package".AsSpan()) ? "package" : null,
+                    'r' => input.SequenceEqual("private".AsSpan()) ? "private" : null,
+                    _ => null
+                };
+            }
             case 9:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'i':
-                        return input.SequenceEqual("interface".AsSpan()) ? "interface" : null;
-                    case 'p':
-                        return input.SequenceEqual("protected".AsSpan()) ? "protected" : null;
-                    default:
-                       return null;
-                }
+                    'i' => input.SequenceEqual("interface".AsSpan()) ? "interface" : null,
+                    'p' => input.SequenceEqual("protected".AsSpan()) ? "protected" : null,
+                    _ => null
+                };
+            }
             case 10:
+            {
                 return input.SequenceEqual("implements".AsSpan()) ? "implements" : null;
+            }
             default:
                return null;
         }
@@ -253,433 +214,440 @@ public partial class Scanner
 
     private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> input)
     {
-            if (input[0] == '&')
+        var c1 = input[1];
+        if (input[0] == '&')
+        {
+            if (c1 == '&')
             {
-                if (input[1] == '&')
-                {
-                    return "&&";
-                }
-                if (input[1] == '=')
-                {
-                    return "&=";
-                }
-                return null;
+                return "&&";
             }
-            if (input[0] == '|')
+            if (c1 == '=')
             {
-                if (input[1] == '|')
-                {
-                    return "||";
-                }
-                if (input[1] == '=')
-                {
-                    return "|=";
-                }
-                return null;
+                return "&=";
             }
-            if (input[0] == '=')
+            return null;
+        }
+        if (input[0] == '|')
+        {
+            if (c1 == '|')
             {
-                if (input[1] == '=')
-                {
-                    return "==";
-                }
-                if (input[1] == '>')
-                {
-                    return "=>";
-                }
-                return null;
+                return "||";
             }
-            if (input[0] == '!')
+            if (c1 == '=')
             {
-                if (input[1] == '=')
-                {
-                    return "!=";
-                }
-                return null;
+                return "|=";
             }
-            if (input[0] == '+')
+            return null;
+        }
+        if (input[0] == '=')
+        {
+            if (c1 == '=')
             {
-                if (input[1] == '=')
-                {
-                    return "+=";
-                }
-                if (input[1] == '+')
-                {
-                    return "++";
-                }
-                return null;
+                return "==";
             }
-            if (input[0] == '-')
+            if (c1 == '>')
             {
-                if (input[1] == '=')
-                {
-                    return "-=";
-                }
-                if (input[1] == '-')
-                {
-                    return "--";
-                }
-                return null;
+                return "=>";
             }
-            if (input[0] == '*')
+            return null;
+        }
+        if (input[0] == '!')
+        {
+            if (c1 == '=')
             {
-                if (input[1] == '=')
-                {
-                    return "*=";
-                }
-                if (input[1] == '*')
-                {
-                    return "**";
-                }
-                return null;
+                return "!=";
             }
-            if (input[0] == '/')
+            return null;
+        }
+        if (input[0] == '+')
+        {
+            if (c1 == '=')
             {
-                if (input[1] == '=')
-                {
-                    return "/=";
-                }
-                return null;
+                return "+=";
             }
-            if (input[0] == '<')
+            if (c1 == '+')
             {
-                if (input[1] == '<')
-                {
-                    return "<<";
-                }
-                if (input[1] == '=')
-                {
-                    return "<=";
-                }
-                return null;
+                return "++";
             }
-            if (input[0] == '>')
+            return null;
+        }
+        if (input[0] == '-')
+        {
+            if (c1 == '=')
             {
-                if (input[1] == '>')
-                {
-                    return ">>";
-                }
-                if (input[1] == '=')
-                {
-                    return ">=";
-                }
-                return null;
+                return "-=";
             }
-            if (input[0] == '^')
+            if (c1 == '-')
             {
-                if (input[1] == '=')
-                {
-                    return "^=";
-                }
-                return null;
+                return "--";
             }
-            if (input[0] == '%')
+            return null;
+        }
+        if (input[0] == '*')
+        {
+            if (c1 == '=')
             {
-                if (input[1] == '=')
-                {
-                    return "%=";
-                }
-                return null;
+                return "*=";
             }
-               return null;
+            if (c1 == '*')
+            {
+                return "**";
+            }
+            return null;
+        }
+        if (input[0] == '/')
+        {
+            if (c1 == '=')
+            {
+                return "/=";
+            }
+            return null;
+        }
+        if (input[0] == '<')
+        {
+            if (c1 == '<')
+            {
+                return "<<";
+            }
+            if (c1 == '=')
+            {
+                return "<=";
+            }
+            return null;
+        }
+        if (input[0] == '>')
+        {
+            if (c1 == '>')
+            {
+                return ">>";
+            }
+            if (c1 == '=')
+            {
+                return ">=";
+            }
+            return null;
+        }
+        if (input[0] == '^')
+        {
+            if (c1 == '=')
+            {
+                return "^=";
+            }
+            return null;
+        }
+        if (input[0] == '%')
+        {
+            if (c1 == '=')
+            {
+                return "%=";
+            }
+            return null;
+        }
+        return null;
     }
 
     private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> input)
     {
-            if (input[0] == '=')
+        var c1 = input[1];
+        var c2 = input[2];
+        if (input[0] == '=')
+        {
+            if (c1 == '=' && c2 == '=')
             {
-                if (input[1] == '=' && input[2] == '=')
-                {
-                    return "===";
-                }
-                return null;
+                return "===";
             }
-            if (input[0] == '!')
+            return null;
+        }
+        if (input[0] == '!')
+        {
+            if (c1 == '=' && c2 == '=')
             {
-                if (input[1] == '=' && input[2] == '=')
-                {
-                    return "!==";
-                }
-                return null;
+                return "!==";
             }
-            if (input[0] == '>')
+            return null;
+        }
+        if (input[0] == '>')
+        {
+            if (c1 == '>' && c2 == '>')
             {
-                if (input[1] == '>' && input[2] == '>')
-                {
-                    return ">>>";
-                }
-                if (input[1] == '>' && input[2] == '=')
-                {
-                    return ">>=";
-                }
-                return null;
+                return ">>>";
             }
-            if (input[0] == '<')
+            if (c1 == '>' && c2 == '=')
             {
-                if (input[1] == '<' && input[2] == '=')
-                {
-                    return "<<=";
-                }
-                return null;
+                return ">>=";
             }
-            if (input[0] == '*')
+            return null;
+        }
+        if (input[0] == '<')
+        {
+            if (c1 == '<' && c2 == '=')
             {
-                if (input[1] == '*' && input[2] == '=')
-                {
-                    return "**=";
-                }
-                return null;
+                return "<<=";
             }
-            if (input[0] == '&')
+            return null;
+        }
+        if (input[0] == '*')
+        {
+            if (c1 == '*' && c2 == '=')
             {
-                if (input[1] == '&' && input[2] == '=')
-                {
-                    return "&&=";
-                }
-                return null;
+                return "**=";
             }
-            if (input[0] == '|')
+            return null;
+        }
+        if (input[0] == '&')
+        {
+            if (c1 == '&' && c2 == '=')
             {
-                if (input[1] == '|' && input[2] == '=')
-                {
-                    return "||=";
-                }
-                return null;
+                return "&&=";
             }
-               return null;
+            return null;
+        }
+        if (input[0] == '|')
+        {
+            if (c1 == '|' && c2 == '=')
+            {
+                return "||=";
+            }
+            return null;
+        }
+        return null;
     }
 
     internal static partial string? TryGetInternedPunctuator(ReadOnlySpan<char> input)
     {
-        if ((uint) input.Length - 2 > 2)
-        {
-            return null;
-        }
-
         switch (input.Length)
         {
             case 2:
-                    if (input[0] == '&')
+            {
+                var c1 = input[1];
+                if (input[0] == '&')
+                {
+                    if (c1 == '&')
                     {
-                        if (input[1] == '&')
-                        {
-                            return "&&";
-                        }
-                        if (input[1] == '=')
-                        {
-                            return "&=";
-                        }
-                        return null;
+                        return "&&";
                     }
-                    if (input[0] == '|')
+                    if (c1 == '=')
                     {
-                        if (input[1] == '|')
-                        {
-                            return "||";
-                        }
-                        if (input[1] == '=')
-                        {
-                            return "|=";
-                        }
-                        return null;
+                        return "&=";
                     }
-                    if (input[0] == '=')
+                    return null;
+                }
+                if (input[0] == '|')
+                {
+                    if (c1 == '|')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "==";
-                        }
-                        if (input[1] == '>')
-                        {
-                            return "=>";
-                        }
-                        return null;
+                        return "||";
                     }
-                    if (input[0] == '!')
+                    if (c1 == '=')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "!=";
-                        }
-                        return null;
+                        return "|=";
                     }
-                    if (input[0] == '+')
+                    return null;
+                }
+                if (input[0] == '=')
+                {
+                    if (c1 == '=')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "+=";
-                        }
-                        if (input[1] == '+')
-                        {
-                            return "++";
-                        }
-                        return null;
+                        return "==";
                     }
-                    if (input[0] == '-')
+                    if (c1 == '>')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "-=";
-                        }
-                        if (input[1] == '-')
-                        {
-                            return "--";
-                        }
-                        return null;
+                        return "=>";
                     }
-                    if (input[0] == '*')
+                    return null;
+                }
+                if (input[0] == '!')
+                {
+                    if (c1 == '=')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "*=";
-                        }
-                        if (input[1] == '*')
-                        {
-                            return "**";
-                        }
-                        return null;
+                        return "!=";
                     }
-                    if (input[0] == '/')
+                    return null;
+                }
+                if (input[0] == '+')
+                {
+                    if (c1 == '=')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "/=";
-                        }
-                        return null;
+                        return "+=";
                     }
-                    if (input[0] == '<')
+                    if (c1 == '+')
                     {
-                        if (input[1] == '<')
-                        {
-                            return "<<";
-                        }
-                        if (input[1] == '=')
-                        {
-                            return "<=";
-                        }
-                        return null;
+                        return "++";
                     }
-                    if (input[0] == '>')
+                    return null;
+                }
+                if (input[0] == '-')
+                {
+                    if (c1 == '=')
                     {
-                        if (input[1] == '>')
-                        {
-                            return ">>";
-                        }
-                        if (input[1] == '=')
-                        {
-                            return ">=";
-                        }
-                        return null;
+                        return "-=";
                     }
-                    if (input[0] == '^')
+                    if (c1 == '-')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "^=";
-                        }
-                        return null;
+                        return "--";
                     }
-                    if (input[0] == '%')
+                    return null;
+                }
+                if (input[0] == '*')
+                {
+                    if (c1 == '=')
                     {
-                        if (input[1] == '=')
-                        {
-                            return "%=";
-                        }
-                        return null;
+                        return "*=";
                     }
-                    if (input[0] == '?')
+                    if (c1 == '*')
                     {
-                        if (input[1] == '?')
-                        {
-                            return "??";
-                        }
-                        if (input[1] == '.')
-                        {
-                            return "?.";
-                        }
-                        return null;
+                        return "**";
                     }
-                       return null;
+                    return null;
+                }
+                if (input[0] == '/')
+                {
+                    if (c1 == '=')
+                    {
+                        return "/=";
+                    }
+                    return null;
+                }
+                if (input[0] == '<')
+                {
+                    if (c1 == '<')
+                    {
+                        return "<<";
+                    }
+                    if (c1 == '=')
+                    {
+                        return "<=";
+                    }
+                    return null;
+                }
+                if (input[0] == '>')
+                {
+                    if (c1 == '>')
+                    {
+                        return ">>";
+                    }
+                    if (c1 == '=')
+                    {
+                        return ">=";
+                    }
+                    return null;
+                }
+                if (input[0] == '^')
+                {
+                    if (c1 == '=')
+                    {
+                        return "^=";
+                    }
+                    return null;
+                }
+                if (input[0] == '%')
+                {
+                    if (c1 == '=')
+                    {
+                        return "%=";
+                    }
+                    return null;
+                }
+                if (input[0] == '?')
+                {
+                    if (c1 == '?')
+                    {
+                        return "??";
+                    }
+                    if (c1 == '.')
+                    {
+                        return "?.";
+                    }
+                    return null;
+                }
+                return null;
+            }
             case 3:
-                    if (input[0] == '=')
+            {
+                var c1 = input[1];
+                var c2 = input[2];
+                if (input[0] == '=')
+                {
+                    if (c1 == '=' && c2 == '=')
                     {
-                        if (input[1] == '=' && input[2] == '=')
-                        {
-                            return "===";
-                        }
-                        return null;
+                        return "===";
                     }
-                    if (input[0] == '!')
+                    return null;
+                }
+                if (input[0] == '!')
+                {
+                    if (c1 == '=' && c2 == '=')
                     {
-                        if (input[1] == '=' && input[2] == '=')
-                        {
-                            return "!==";
-                        }
-                        return null;
+                        return "!==";
                     }
-                    if (input[0] == '>')
+                    return null;
+                }
+                if (input[0] == '>')
+                {
+                    if (c1 == '>' && c2 == '>')
                     {
-                        if (input[1] == '>' && input[2] == '>')
-                        {
-                            return ">>>";
-                        }
-                        if (input[1] == '>' && input[2] == '=')
-                        {
-                            return ">>=";
-                        }
-                        return null;
+                        return ">>>";
                     }
-                    if (input[0] == '<')
+                    if (c1 == '>' && c2 == '=')
                     {
-                        if (input[1] == '<' && input[2] == '=')
-                        {
-                            return "<<=";
-                        }
-                        return null;
+                        return ">>=";
                     }
-                    if (input[0] == '*')
+                    return null;
+                }
+                if (input[0] == '<')
+                {
+                    if (c1 == '<' && c2 == '=')
                     {
-                        if (input[1] == '*' && input[2] == '=')
-                        {
-                            return "**=";
-                        }
-                        return null;
+                        return "<<=";
                     }
-                    if (input[0] == '&')
+                    return null;
+                }
+                if (input[0] == '*')
+                {
+                    if (c1 == '*' && c2 == '=')
                     {
-                        if (input[1] == '&' && input[2] == '=')
-                        {
-                            return "&&=";
-                        }
-                        return null;
+                        return "**=";
                     }
-                    if (input[0] == '|')
+                    return null;
+                }
+                if (input[0] == '&')
+                {
+                    if (c1 == '&' && c2 == '=')
                     {
-                        if (input[1] == '|' && input[2] == '=')
-                        {
-                            return "||=";
-                        }
-                        return null;
+                        return "&&=";
                     }
-                    if (input[0] == '?')
+                    return null;
+                }
+                if (input[0] == '|')
+                {
+                    if (c1 == '|' && c2 == '=')
                     {
-                        if (input[1] == '?' && input[2] == '=')
-                        {
-                            return "??=";
-                        }
-                        return null;
+                        return "||=";
                     }
-                    if (input[0] == '.')
+                    return null;
+                }
+                if (input[0] == '?')
+                {
+                    if (c1 == '?' && c2 == '=')
                     {
-                        if (input[1] == '.' && input[2] == '.')
-                        {
-                            return "...";
-                        }
-                        return null;
+                        return "??=";
                     }
-                       return null;
+                    return null;
+                }
+                if (input[0] == '.')
+                {
+                    if (c1 == '.' && c2 == '.')
+                    {
+                        return "...";
+                    }
+                    return null;
+                }
+                return null;
+            }
             case 4:
-                return input.SequenceEqual(">>>=".AsSpan()) ? ">>>=" : null;
+            {
+                return input[0] == '>' && input[1] == '>' && input[2] == '>' && input[3] == '=' ? ">>>=" : null;
+            }
             default:
                return null;
         }
@@ -687,125 +655,95 @@ public partial class Scanner
 
     internal static partial string? TryGetInternedKeyword(ReadOnlySpan<char> input)
     {
-        if ((uint) input.Length - 2 > 8)
-        {
-            return null;
-        }
-
         switch (input.Length)
         {
             case 2:
-                switch (input[1])
+            {
+                return input[1] switch
                 {
-                    case 'f':
-                        return input[0] == 'i' ? "if" : null;
-                    case 'n':
-                        return input[0] == 'i' ? "in" : null;
-                    case 'o':
-                        return input[0] == 'd' ? "do" : null;
-                    default:
-                       return null;
-                }
+                    'f' => input[0] == 'i' ? "if" : null,
+                    'n' => input[0] == 'i' ? "in" : null,
+                    'o' => input[0] == 'd' ? "do" : null,
+                    _ => null
+                };
+            }
             case 3:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'v':
-                        return input[1] == 'a' && input[2] == 'r' ? "var" : null;
-                    case 'f':
-                        return input[1] == 'o' && input[2] == 'r' ? "for" : null;
-                    case 'n':
-                        return input[1] == 'e' && input[2] == 'w' ? "new" : null;
-                    case 't':
-                        return input[1] == 'r' && input[2] == 'y' ? "try" : null;
-                    case 'l':
-                        return input[1] == 'e' && input[2] == 't' ? "let" : null;
-                    default:
-                       return null;
-                }
+                    'v' => input[1] == 'a' && input[2] == 'r' ? "var" : null,
+                    'f' => input[1] == 'o' && input[2] == 'r' ? "for" : null,
+                    'n' => input[1] == 'e' && input[2] == 'w' ? "new" : null,
+                    't' => input[1] == 'r' && input[2] == 'y' ? "try" : null,
+                    'l' => input[1] == 'e' && input[2] == 't' ? "let" : null,
+                    _ => null
+                };
+            }
             case 4:
-                switch (input[1])
+            {
+                return input[1] switch
                 {
-                    case 'h':
-                        return input.SequenceEqual("this".AsSpan()) ? "this" : null;
-                    case 'l':
-                        return input.SequenceEqual("else".AsSpan()) ? "else" : null;
-                    case 'a':
-                        return input.SequenceEqual("case".AsSpan()) ? "case" : null;
-                    case 'o':
-                        return input.SequenceEqual("void".AsSpan()) ? "void" : null;
-                    case 'i':
-                        return input.SequenceEqual("with".AsSpan()) ? "with" : null;
-                    case 'n':
-                        return input.SequenceEqual("enum".AsSpan()) ? "enum" : null;
-                    default:
-                       return null;
-                }
+                    'h' => input[0] == 't' && input[2] == 'i' && input[3] == 's' ? "this" : null,
+                    'l' => input[0] == 'e' && input[2] == 's' && input[3] == 'e' ? "else" : null,
+                    'a' => input[0] == 'c' && input[2] == 's' && input[3] == 'e' ? "case" : null,
+                    'o' => input[0] == 'v' && input[2] == 'i' && input[3] == 'd' ? "void" : null,
+                    'i' => input[0] == 'w' && input[2] == 't' && input[3] == 'h' ? "with" : null,
+                    'n' => input[0] == 'e' && input[2] == 'u' && input[3] == 'm' ? "enum" : null,
+                    _ => null
+                };
+            }
             case 5:
-                switch (input[4])
+            {
+                return input[4] switch
                 {
-                    case 'e':
-                        return input.SequenceEqual("while".AsSpan()) ? "while" : null;
-                    case 'k':
-                        return input.SequenceEqual("break".AsSpan()) ? "break" : null;
-                    case 'h':
-                        return input.SequenceEqual("catch".AsSpan()) ? "catch" : null;
-                    case 'w':
-                        return input.SequenceEqual("throw".AsSpan()) ? "throw" : null;
-                    case 't':
-                        return input.SequenceEqual("const".AsSpan()) ? "const" : null;
-                    case 'd':
-                        return input.SequenceEqual("yield".AsSpan()) ? "yield" : null;
-                    case 's':
-                        return input.SequenceEqual("class".AsSpan()) ? "class" : null;
-                    case 'r':
-                        return input.SequenceEqual("super".AsSpan()) ? "super" : null;
-                    default:
-                       return null;
-                }
+                    'e' => input[0] == 'w' && input[1] == 'h' && input[2] == 'i' && input[3] == 'l' ? "while" : null,
+                    'k' => input[0] == 'b' && input[1] == 'r' && input[2] == 'e' && input[3] == 'a' ? "break" : null,
+                    'h' => input[0] == 'c' && input[1] == 'a' && input[2] == 't' && input[3] == 'c' ? "catch" : null,
+                    'w' => input[0] == 't' && input[1] == 'h' && input[2] == 'r' && input[3] == 'o' ? "throw" : null,
+                    't' => input[0] == 'c' && input[1] == 'o' && input[2] == 'n' && input[3] == 's' ? "const" : null,
+                    'd' => input[0] == 'y' && input[1] == 'i' && input[2] == 'e' && input[3] == 'l' ? "yield" : null,
+                    's' => input[0] == 'c' && input[1] == 'l' && input[2] == 'a' && input[3] == 's' ? "class" : null,
+                    'r' => input[0] == 's' && input[1] == 'u' && input[2] == 'p' && input[3] == 'e' ? "super" : null,
+                    _ => null
+                };
+            }
             case 6:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'r':
-                        return input.SequenceEqual("return".AsSpan()) ? "return" : null;
-                    case 't':
-                        return input.SequenceEqual("typeof".AsSpan()) ? "typeof" : null;
-                    case 'd':
-                        return input.SequenceEqual("delete".AsSpan()) ? "delete" : null;
-                    case 's':
-                        return input.SequenceEqual("switch".AsSpan()) ? "switch" : null;
-                    case 'e':
-                        return input.SequenceEqual("export".AsSpan()) ? "export" : null;
-                    case 'i':
-                        return input.SequenceEqual("import".AsSpan()) ? "import" : null;
-                    default:
-                       return null;
-                }
+                    'r' => input.SequenceEqual("return".AsSpan()) ? "return" : null,
+                    't' => input.SequenceEqual("typeof".AsSpan()) ? "typeof" : null,
+                    'd' => input.SequenceEqual("delete".AsSpan()) ? "delete" : null,
+                    's' => input.SequenceEqual("switch".AsSpan()) ? "switch" : null,
+                    'e' => input.SequenceEqual("export".AsSpan()) ? "export" : null,
+                    'i' => input.SequenceEqual("import".AsSpan()) ? "import" : null,
+                    _ => null
+                };
+            }
             case 7:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'd':
-                        return input.SequenceEqual("default".AsSpan()) ? "default" : null;
-                    case 'f':
-                        return input.SequenceEqual("finally".AsSpan()) ? "finally" : null;
-                    case 'e':
-                        return input.SequenceEqual("extends".AsSpan()) ? "extends" : null;
-                    default:
-                       return null;
-                }
+                    'd' => input.SequenceEqual("default".AsSpan()) ? "default" : null,
+                    'f' => input.SequenceEqual("finally".AsSpan()) ? "finally" : null,
+                    'e' => input.SequenceEqual("extends".AsSpan()) ? "extends" : null,
+                    _ => null
+                };
+            }
             case 8:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'f':
-                        return input.SequenceEqual("function".AsSpan()) ? "function" : null;
-                    case 'c':
-                        return input.SequenceEqual("continue".AsSpan()) ? "continue" : null;
-                    case 'd':
-                        return input.SequenceEqual("debugger".AsSpan()) ? "debugger" : null;
-                    default:
-                       return null;
-                }
+                    'f' => input.SequenceEqual("function".AsSpan()) ? "function" : null,
+                    'c' => input.SequenceEqual("continue".AsSpan()) ? "continue" : null,
+                    'd' => input.SequenceEqual("debugger".AsSpan()) ? "debugger" : null,
+                    _ => null
+                };
+            }
             case 10:
+            {
                 return input.SequenceEqual("instanceof".AsSpan()) ? "instanceof" : null;
+            }
             default:
                return null;
         }
@@ -813,59 +751,50 @@ public partial class Scanner
 
     internal static partial string? TryGetInternedContextualKeyword(ReadOnlySpan<char> input)
     {
-        if ((uint) input.Length - 2 > 9)
-        {
-            return null;
-        }
-
         switch (input.Length)
         {
             case 2:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'a':
-                        return input[1] == 's' ? "as" : null;
-                    case 'o':
-                        return input[1] == 'f' ? "of" : null;
-                    default:
-                       return null;
-                }
+                    'a' => input[1] == 's' ? "as" : null,
+                    'o' => input[1] == 'f' ? "of" : null,
+                    _ => null
+                };
+            }
             case 3:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'g':
-                        return input[1] == 'e' && input[2] == 't' ? "get" : null;
-                    case 's':
-                        return input[1] == 'e' && input[2] == 't' ? "set" : null;
-                    default:
-                       return null;
-                }
+                    'g' => input[1] == 'e' && input[2] == 't' ? "get" : null,
+                    's' => input[1] == 'e' && input[2] == 't' ? "set" : null,
+                    _ => null
+                };
+            }
             case 4:
-                switch (input[0])
+            {
+                return input[0] switch
                 {
-                    case 'f':
-                        return input.SequenceEqual("from".AsSpan()) ? "from" : null;
-                    case 'n':
-                        return input.SequenceEqual("null".AsSpan()) ? "null" : null;
-                    case 't':
-                        return input.SequenceEqual("true".AsSpan()) ? "true" : null;
-                    default:
-                       return null;
-                }
+                    'f' => input[1] == 'r' && input[2] == 'o' && input[3] == 'm' ? "from" : null,
+                    'n' => input[1] == 'u' && input[2] == 'l' && input[3] == 'l' ? "null" : null,
+                    't' => input[1] == 'r' && input[2] == 'u' && input[3] == 'e' ? "true" : null,
+                    _ => null
+                };
+            }
             case 5:
-                switch (input[1])
+            {
+                return input[1] switch
                 {
-                    case 'a':
-                        return input.SequenceEqual("false".AsSpan()) ? "false" : null;
-                    case 's':
-                        return input.SequenceEqual("async".AsSpan()) ? "async" : null;
-                    case 'w':
-                        return input.SequenceEqual("await".AsSpan()) ? "await" : null;
-                    default:
-                       return null;
-                }
+                    'a' => input[0] == 'f' && input[2] == 'l' && input[3] == 's' && input[4] == 'e' ? "false" : null,
+                    's' => input[0] == 'a' && input[2] == 'y' && input[3] == 'n' && input[4] == 'c' ? "async" : null,
+                    'w' => input[0] == 'a' && input[2] == 'a' && input[3] == 'i' && input[4] == 't' ? "await" : null,
+                    _ => null
+                };
+            }
             case 11:
+            {
                 return input.SequenceEqual("constructor".AsSpan()) ? "constructor" : null;
+            }
             default:
                return null;
         }
