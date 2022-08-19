@@ -2,7 +2,7 @@
 
 namespace Esprima;
 
-public static class ParserExtensions
+internal static class ParserExtensions
 {
     private static readonly string[] s_charToString = new string[256];
 
@@ -33,24 +33,8 @@ public static class ParserExtensions
         return TryGetInternedString(sourceSpan) ?? stringPool.GetOrCreate(sourceSpan);
     }
 
-    public static string Slice(this string source, int start, int end)
-    {
-        var len = source.Length;
-        var from = start < 0 ? Math.Max(len + start, 0) : Math.Min(start, len);
-        var to = end < 0 ? Math.Max(len + end, 0) : Math.Min(end, len);
-        var span = Math.Max(to - from, 0);
-
-        if (span == 1)
-        {
-            return CharToString(source[from]);
-        }
-
-        var substring = TryGetInternedString(source.AsSpan(from, span)) ?? source.Substring(from, span);
-        return substring;
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string CharToString(char c)
+    internal static string CharToString(char c)
     {
         if (c >= 0 && c < s_charToString.Length)
         {
@@ -61,7 +45,7 @@ public static class ParserExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static char CharCodeAt(this string source, int index)
+    internal static char CharCodeAt(this string source, int index)
     {
         if (index < 0 || index > source.Length - 1)
         {
