@@ -201,8 +201,10 @@ internal class StringMatcherAttribute : System.Attribute
         }
         else
         {
+            // TODO with net7 should be faster to do the sequence equals always
+            // if we ever add a target for net7/8 we should revisit this equality checking
             var lengthToCheck = toCheck.Length - startIndex;
-            if (lengthToCheck < 6)
+            if (lengthToCheck < 10)
             {
                 // check char by char
                 var addAnd = false;

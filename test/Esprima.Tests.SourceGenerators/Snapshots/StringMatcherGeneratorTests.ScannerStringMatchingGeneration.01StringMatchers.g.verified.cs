@@ -154,8 +154,8 @@ public partial class Scanner
             {
                 return input[0] switch
                 {
-                    'e' => input.SequenceEqual("export".AsSpan()) ? "export" : null,
-                    'i' => input.SequenceEqual("import".AsSpan()) ? "import" : null,
+                    'e' => input[1] == 'x' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "export" : null,
+                    'i' => input[1] == 'm' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "import" : null,
                     _ => null
                 };
             }
@@ -180,8 +180,8 @@ public partial class Scanner
             {
                 return input[0] switch
                 {
-                    'p' => input.SequenceEqual("public".AsSpan()) ? "public" : null,
-                    's' => input.SequenceEqual("static".AsSpan()) ? "static" : null,
+                    'p' => input[1] == 'u' && input[2] == 'b' && input[3] == 'l' && input[4] == 'i' && input[5] == 'c' ? "public" : null,
+                    's' => input[1] == 't' && input[2] == 'a' && input[3] == 't' && input[4] == 'i' && input[5] == 'c' ? "static" : null,
                     _ => null
                 };
             }
@@ -189,8 +189,8 @@ public partial class Scanner
             {
                 return input[1] switch
                 {
-                    'a' => input.SequenceEqual("package".AsSpan()) ? "package" : null,
-                    'r' => input.SequenceEqual("private".AsSpan()) ? "private" : null,
+                    'a' => input[0] == 'p' && input[2] == 'c' && input[3] == 'k' && input[4] == 'a' && input[5] == 'g' && input[6] == 'e' ? "package" : null,
+                    'r' => input[0] == 'p' && input[2] == 'i' && input[3] == 'v' && input[4] == 'a' && input[5] == 't' && input[6] == 'e' ? "private" : null,
                     _ => null
                 };
             }
@@ -198,8 +198,8 @@ public partial class Scanner
             {
                 return input[0] switch
                 {
-                    'i' => input.SequenceEqual("interface".AsSpan()) ? "interface" : null,
-                    'p' => input.SequenceEqual("protected".AsSpan()) ? "protected" : null,
+                    'i' => input[1] == 'n' && input[2] == 't' && input[3] == 'e' && input[4] == 'r' && input[5] == 'f' && input[6] == 'a' && input[7] == 'c' && input[8] == 'e' ? "interface" : null,
+                    'p' => input[1] == 'r' && input[2] == 'o' && input[3] == 't' && input[4] == 'e' && input[5] == 'c' && input[6] == 't' && input[7] == 'e' && input[8] == 'd' ? "protected" : null,
                     _ => null
                 };
             }
@@ -711,12 +711,12 @@ public partial class Scanner
             {
                 return input[0] switch
                 {
-                    'r' => input.SequenceEqual("return".AsSpan()) ? "return" : null,
-                    't' => input.SequenceEqual("typeof".AsSpan()) ? "typeof" : null,
-                    'd' => input.SequenceEqual("delete".AsSpan()) ? "delete" : null,
-                    's' => input.SequenceEqual("switch".AsSpan()) ? "switch" : null,
-                    'e' => input.SequenceEqual("export".AsSpan()) ? "export" : null,
-                    'i' => input.SequenceEqual("import".AsSpan()) ? "import" : null,
+                    'r' => input[1] == 'e' && input[2] == 't' && input[3] == 'u' && input[4] == 'r' && input[5] == 'n' ? "return" : null,
+                    't' => input[1] == 'y' && input[2] == 'p' && input[3] == 'e' && input[4] == 'o' && input[5] == 'f' ? "typeof" : null,
+                    'd' => input[1] == 'e' && input[2] == 'l' && input[3] == 'e' && input[4] == 't' && input[5] == 'e' ? "delete" : null,
+                    's' => input[1] == 'w' && input[2] == 'i' && input[3] == 't' && input[4] == 'c' && input[5] == 'h' ? "switch" : null,
+                    'e' => input[1] == 'x' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "export" : null,
+                    'i' => input[1] == 'm' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "import" : null,
                     _ => null
                 };
             }
@@ -724,9 +724,9 @@ public partial class Scanner
             {
                 return input[0] switch
                 {
-                    'd' => input.SequenceEqual("default".AsSpan()) ? "default" : null,
-                    'f' => input.SequenceEqual("finally".AsSpan()) ? "finally" : null,
-                    'e' => input.SequenceEqual("extends".AsSpan()) ? "extends" : null,
+                    'd' => input[1] == 'e' && input[2] == 'f' && input[3] == 'a' && input[4] == 'u' && input[5] == 'l' && input[6] == 't' ? "default" : null,
+                    'f' => input[1] == 'i' && input[2] == 'n' && input[3] == 'a' && input[4] == 'l' && input[5] == 'l' && input[6] == 'y' ? "finally" : null,
+                    'e' => input[1] == 'x' && input[2] == 't' && input[3] == 'e' && input[4] == 'n' && input[5] == 'd' && input[6] == 's' ? "extends" : null,
                     _ => null
                 };
             }
@@ -734,9 +734,9 @@ public partial class Scanner
             {
                 return input[0] switch
                 {
-                    'f' => input.SequenceEqual("function".AsSpan()) ? "function" : null,
-                    'c' => input.SequenceEqual("continue".AsSpan()) ? "continue" : null,
-                    'd' => input.SequenceEqual("debugger".AsSpan()) ? "debugger" : null,
+                    'f' => input[1] == 'u' && input[2] == 'n' && input[3] == 'c' && input[4] == 't' && input[5] == 'i' && input[6] == 'o' && input[7] == 'n' ? "function" : null,
+                    'c' => input[1] == 'o' && input[2] == 'n' && input[3] == 't' && input[4] == 'i' && input[5] == 'n' && input[6] == 'u' && input[7] == 'e' ? "continue" : null,
+                    'd' => input[1] == 'e' && input[2] == 'b' && input[3] == 'u' && input[4] == 'g' && input[5] == 'g' && input[6] == 'e' && input[7] == 'r' ? "debugger" : null,
                     _ => null
                 };
             }
