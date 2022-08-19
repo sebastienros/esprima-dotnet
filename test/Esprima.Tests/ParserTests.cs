@@ -453,4 +453,122 @@ block comment", comment.Value);
 
         Assert.Equal(1, count);
     }
+
+    [Theory]
+    [InlineData("&&")]
+    [InlineData("||")]
+    [InlineData("==")]
+    [InlineData("!=")]
+    [InlineData("+=")]
+    [InlineData("-=")]
+    [InlineData("*=")]
+    [InlineData("/=")]
+    [InlineData("++")]
+    [InlineData("--")]
+    [InlineData("<<")]
+    [InlineData(">>")]
+    [InlineData("&=")]
+    [InlineData("|=")]
+    [InlineData("^=")]
+    [InlineData("%=")]
+    [InlineData("<=")]
+    [InlineData(">=")]
+    [InlineData("=>")]
+    [InlineData("**")]
+    [InlineData("??")]
+    [InlineData("?.")]
+    [InlineData("===")]
+    [InlineData("!==")]
+    [InlineData(">>>")]
+    [InlineData("<<=")]
+    [InlineData(">>=")]
+    [InlineData("**=")]
+    [InlineData("&&=")]
+    [InlineData("||=")]
+    [InlineData("??=")]
+    [InlineData("...")]
+    [InlineData(">>>=")]
+    [InlineData("as")]
+    [InlineData("do")]
+    [InlineData("if")]
+    [InlineData("in")]
+    [InlineData("of")]
+    [InlineData("for")]
+    [InlineData("get")]
+    [InlineData("let")]
+    [InlineData("new")]
+    [InlineData("set")]
+    [InlineData("try")]
+    [InlineData("var")]
+    [InlineData("case")]
+    [InlineData("else")]
+    [InlineData("enum")]
+    [InlineData("eval")]
+    [InlineData("from")]
+    [InlineData("null")]
+    [InlineData("this")]
+    [InlineData("true")]
+    [InlineData("void")]
+    [InlineData("with")]
+    [InlineData("async")]
+    [InlineData("await")]
+    [InlineData("break")]
+    [InlineData("catch")]
+    [InlineData("class")]
+    [InlineData("const")]
+    [InlineData("false")]
+    [InlineData("super")]
+    [InlineData("throw")]
+    [InlineData("while")]
+    [InlineData("yield")]
+    [InlineData("delete")]
+    [InlineData("export")]
+    [InlineData("import")]
+    [InlineData("public")]
+    [InlineData("return")]
+    [InlineData("static")]
+    [InlineData("switch")]
+    [InlineData("typeof")]
+    [InlineData("default")]
+    [InlineData("extends")]
+    [InlineData("finally")]
+    [InlineData("package")]
+    [InlineData("private")]
+    [InlineData("continue")]
+    [InlineData("debugger")]
+    [InlineData("function")]
+    [InlineData("arguments")]
+    [InlineData("interface")]
+    [InlineData("protected")]
+    [InlineData("implements")]
+    [InlineData("instanceof")]
+    [InlineData("constructor")]
+    public void UsesInternedInstancesForWellKnownTokens(string token)
+    {
+        var stringPool = new StringPool();
+
+        var nonInternedToken = new string(token.ToCharArray());
+        var slicedToken = nonInternedToken.Slice(0, nonInternedToken.Length, ref stringPool);
+        Assert.Equal(token, slicedToken);
+
+        Assert.NotNull(string.IsInterned(slicedToken));
+        Assert.Equal(0, stringPool.Count);
+    }
+
+    [Fact]
+    public void UsesPooledInstancesForNotWellKnownTokens()
+    {
+        var stringPool = new StringPool();
+
+        var token = "pow2";
+        var slicedToken1 = "pow2".Slice(0, token.Length, ref stringPool);
+        Assert.Equal(token, slicedToken1);
+
+        var source = "async function pow2(x) { return x ** 2; }";
+        var slicedToken2 = source.Slice(15, 15 + token.Length, ref stringPool);
+        Assert.Equal(token, slicedToken2);
+
+        Assert.Same(slicedToken1, slicedToken2);
+        Assert.Equal(1, stringPool.Count);
+    }
 }

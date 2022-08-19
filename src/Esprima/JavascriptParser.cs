@@ -208,7 +208,7 @@ public partial class JavaScriptParser
             {
                 var e = comments[i];
 
-                var comment = new SyntaxComment(e.Type, value: _scanner.Source.Slice(e.Slice.Start, e.Slice.End))
+                var comment = new SyntaxComment(e.Type, value: _scanner.Source.Slice(e.Slice.Start, e.Slice.End, ref _scanner._stringPool))
                 {
                     Range = new Range(e.Start, e.End),
                     Location = new Location(in e.StartPosition, in e.EndPosition, _errorHandler.Source)
@@ -224,7 +224,7 @@ public partial class JavaScriptParser
     /// </summary>
     private protected string GetTokenRaw(in Token token)
     {
-        return _scanner.Source.Slice(token.Start, token.End);
+        return _scanner.Source.Slice(token.Start, token.End, ref _scanner._stringPool);
     }
 
     private protected SyntaxToken ConvertToken(in Token token)
@@ -4165,7 +4165,7 @@ public partial class JavaScriptParser
         var expr = ParseExpression();
         if (expr.Type == Nodes.Literal)
         {
-            directive = _scanner.Source.Slice(token.Start + 1, token.End - 1);
+            directive = _scanner.Source.Slice(token.Start + 1, token.End - 1, ref _scanner._stringPool);
         }
 
         ConsumeSemicolon();
