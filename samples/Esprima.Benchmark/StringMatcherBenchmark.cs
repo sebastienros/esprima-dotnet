@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
@@ -26,9 +25,23 @@ public class StringMatcherBenchmark
     public int CountKeywords()
     {
         int count = 0;
-        for (int i = 0; i < _tokens.Length; i++)
+        foreach (var token in _tokens)
         {
-            if (Scanner.IsKeyword(_tokens[i].Value))
+            if (Scanner.IsKeyword(token.Value))
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    [Benchmark]
+    public int CountInterned()
+    {
+        int count = 0;
+        foreach (var token in _tokens)
+        {
+            if (Scanner.TryGetInternedKeyword(token.Value.AsSpan()) is not null)
             {
                 count++;
             }
