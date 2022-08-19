@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace Esprima;
 
+/// <summary>
+/// A heavily slimmed down version of <see cref="HashSet{String}"/> which can be used to reduce memory allocations when dissecting a string.
+/// </summary>
 // Based on:
 // * https://github.com/dotnet/runtime/blob/v6.0.8/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/HashSet.cs
 // * https://github.com/CommunityToolkit/WindowsCommunityToolkit/blob/v7.1.2/Microsoft.Toolkit.HighPerformance/Buffers/StringPool.cs
@@ -11,6 +14,8 @@ internal struct StringPool
     private int[]? _buckets;
     private Entry[]? _entries;
     private int _count;
+
+    public int Count { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _count; }
 
     /// <summary>
     /// Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
