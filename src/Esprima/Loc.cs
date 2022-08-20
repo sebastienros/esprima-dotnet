@@ -1,29 +1,52 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Esprima;
 
-[DebuggerDisplay("{ToString()}")]
 public readonly struct Location : IEquatable<Location>
 {
     public readonly Position Start;
     public readonly Position End;
     public readonly string? Source;
 
-    public Location(in Position start, in Position end) : this(start, end, null)
+    private static bool Validate(in Position start, in Position end, bool @throw = true)
+    {
+        if (start == default && end != default)
+        {
+            if (@throw)
+            {
+                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(start), start, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            }
+            return false;
+        }
+
+        if (end == default ? start != default : end < start)
+        {
+            if (@throw)
+            {
+                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(end), end, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Location From(in Position start, in Position end, string? source = null)
+    {
+        Validate(in start, in end);
+        return new Location(start, end, source);
+    }
+
+    internal Location(in Position start, in Position end) : this(start, end, null)
     {
     }
 
-    public Location(in Position start, in Position end, string? source)
+    internal Location(in Position start, in Position end, string? source)
     {
 #if LOCATION_ASSERTS
-        if (start == default && end != default
-            || end == default && start != default
-            || end.Line < start.Line
-            || start.Line > 0 && start.Line == end.Line && end.Column < start.Column)
-        {
-            EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(end), end, Exception<ArgumentOutOfRangeException>.DefaultMessage);
-        }
+        Validate(in start, in end);
 #endif
 
         Start = start;
@@ -46,6 +69,16 @@ public readonly struct Location : IEquatable<Location>
         return Start.Equals(other.Start)
                && End.Equals(other.End)
                && string.Equals(Source, other.Source);
+    }
+
+    public static bool operator ==(in Location left, in Location right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(in Location left, in Location right)
+    {
+        return !left.Equals(right);
     }
 
     public override int GetHashCode()
@@ -74,15 +107,124 @@ public readonly struct Location : IEquatable<Location>
         return Source is not null ? interval + ": " + Source : interval;
     }
 
-    public static bool operator ==(in Location left, in Location right)
+    private static bool TryParse(ReadOnlySpan<char> s, bool throwIfInvalid, out Location result)
     {
-        return left.Equals(right);
+        int i;
+        if (s[0] != '[' || (i = s.IndexOf(')')) < 0 || ++i < 5)
+        {
+            goto InvalidFormat;
+        }
+
+        var source = s.Slice(i);
+        if (source.Length > 0 && source[0] != ':')
+        {
+            goto InvalidFormat;
+        }
+
+        s = s.Slice(1, i - 2);
+
+        int startLine, startColumn, endLine, endColumn;
+        if (!ParserExtensions.TryConsumeInt(ref s, out startLine))
+        {
+            goto InvalidFormat;
+        }
+
+        if (s.Length >= 5 && s[0] == '.' && s[1] == '.')
+        {
+            startColumn = -1;
+            goto EndPart;
+        }
+        else if (s.Length < 2 || s[0] != ',')
+        {
+            goto InvalidFormat;
+        }
+        s = s.Slice(1);
+
+        if (!ParserExtensions.TryConsumeInt(ref s, out startColumn))
+        {
+            goto InvalidFormat;
+        }
+
+        if (s.Length == 0)
+        {
+            endLine = startLine;
+            endColumn = startColumn;
+            goto SourcePart;
+        }
+        else if (s.Length < 3 || s[0] != '.' || s[1] != '.')
+        {
+            goto InvalidFormat;
+        }
+
+EndPart:
+        s = s.Slice(2);
+
+        if (!ParserExtensions.TryConsumeInt(ref s, out var number))
+        {
+            goto InvalidFormat;
+        }
+
+        if (s.Length == 0)
+        {
+            endLine = startLine;
+            endColumn = number;
+            goto SourcePart;
+        }
+        else if (s.Length < 2 || s[0] != ',')
+        {
+            goto InvalidFormat;
+        }
+        endLine = number;
+        s = s.Slice(1);
+
+        if (!ParserExtensions.TryConsumeInt(ref s, out endColumn) || s.Length > 0)
+        {
+            goto InvalidFormat;
+        }
+
+        if (startColumn < 0)
+        {
+            startColumn = endColumn;
+        }
+
+SourcePart:
+        if (source.Length > 0)
+        {
+            source = source.Slice(1).Trim();
+            if (source.Length == 0)
+            {
+                goto InvalidFormat;
+            }
+        }
+
+        var start = new Position(startLine, startColumn);
+        var end = new Position(endLine, endColumn);
+
+        if (Validate(in start, in end, throwIfInvalid))
+        {
+            result = new Location(in start, in end, source.Length > 0 ? source.ToString() : null);
+            return true;
+        }
+
+InvalidFormat:
+        result = default;
+        return false;
     }
 
-    public static bool operator !=(in Location left, in Location right)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool TryParse(ReadOnlySpan<char> s, out Location result) => TryParse(s, throwIfInvalid: false, out result);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool TryParse(string s, out Location result) => TryParse(s.AsSpan(), out result);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Location Parse(ReadOnlySpan<char> s)
     {
-        return !left.Equals(right);
+        return TryParse(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Location Parse(string s) => Parse(s.AsSpan());
 
     public void Deconstruct(out Position start, out Position end)
     {

@@ -55,4 +55,24 @@ internal static class ParserExtensions
 
         return source[index];
     }
+
+    internal static bool TryConsumeInt(this ref ReadOnlySpan<char> s, out int result)
+    {
+        result = 0;
+        char c;
+        int i;
+        for (i = 0; i < s.Length && (c = s[i]) is >= '0' and <= '9'; i++)
+        {
+            result = checked(result * 10 + c - '0');
+        }
+
+        if (i == 0)
+        {
+            result = default;
+            return false;
+        }
+
+        s = s.Slice(i);
+        return true;
+    }
 }
