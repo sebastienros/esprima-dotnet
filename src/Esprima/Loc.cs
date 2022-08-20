@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Esprima;
@@ -9,7 +10,7 @@ public readonly struct Location : IEquatable<Location>
     public readonly Position End;
     public readonly string? Source;
 
-    private static bool Validate(in Position start, in Position end, bool throwOnError = true)
+    private static bool Validate(in Position start, in Position end, bool throwOnError)
     {
         if (start == default && end != default)
         {
@@ -35,7 +36,7 @@ public readonly struct Location : IEquatable<Location>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location From(in Position start, in Position end, string? source = null)
     {
-        Validate(in start, in end);
+        Validate(in start, in end, throwOnError: true);
         return new Location(start, end, source);
     }
 
@@ -45,9 +46,7 @@ public readonly struct Location : IEquatable<Location>
 
     internal Location(in Position start, in Position end, string? source)
     {
-#if LOCATION_ASSERTS
-        Validate(in start, in end);
-#endif
+        Debug.Assert(Validate(in start, in end, throwOnError: false));
 
         Start = start;
         End = end;

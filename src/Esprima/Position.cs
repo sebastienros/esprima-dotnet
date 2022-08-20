@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Esprima;
@@ -17,7 +18,7 @@ public readonly struct Position : IEquatable<Position>, IComparable<Position>
     public readonly int Line;
     public readonly int Column;
 
-    private static bool Validate(int line, int column, bool throwOnError = true)
+    private static bool Validate(int line, int column, bool throwOnError)
     {
         if (line < 0 || line == 0 && column != 0)
         {
@@ -43,15 +44,13 @@ public readonly struct Position : IEquatable<Position>, IComparable<Position>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Position From(int line, int column)
     {
-        Validate(line, column);
+        Validate(line, column, throwOnError: true);
         return new Position(line, column);
     }
 
     internal Position(int line, int column)
     {
-#if LOCATION_ASSERTS
-        Validate(line, column);
-#endif
+        Debug.Assert(Validate(line, column, throwOnError: false));
 
         Line = line;
         Column = column;

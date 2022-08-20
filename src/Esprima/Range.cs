@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Esprima;
@@ -8,7 +9,7 @@ public readonly struct Range : IEquatable<Range>
     public readonly int Start;
     public readonly int End;
 
-    private static bool Validate(int start, int end, bool throwOnError = true)
+    private static bool Validate(int start, int end, bool throwOnError)
     {
         if (start < 0)
         {
@@ -34,15 +35,13 @@ public readonly struct Range : IEquatable<Range>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Range From(int start, int end)
     {
-        Validate(start, end);
+        Validate(start, end, throwOnError: true);
         return new Range(start, end);
     }
 
     internal Range(int start, int end)
     {
-#if LOCATION_ASSERTS
-        Validate(start, end);
-#endif
+        Debug.Assert(Validate(start, end, throwOnError: false));
 
         Start = start;
         End = end;

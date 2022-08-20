@@ -20,8 +20,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
 
-    <DefineConstants Condition="'$(Checked)' == true or $(Configuration) == 'Debug'">$(DefineConstants);LOCATION_ASSERTS</DefineConstants>
-
     <DefineConstants Condition=" '$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants);HAS_SPAN_PARSE</DefineConstants>
   </PropertyGroup>
 
