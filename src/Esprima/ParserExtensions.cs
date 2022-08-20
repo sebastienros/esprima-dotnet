@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Esprima;
 
@@ -16,12 +17,14 @@ internal static partial class ParserExtensions
     }
 
     [StringMatcher(
-        "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum", "await",
+        // basic keywords (should include all keywords defined in Scanner.IsKeyword)
+        "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
         "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
-        "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof", "async", "static",
-        "undefined", "true", "false", "null", "get", "set", "constructor", "as",
-        // some common ones in our test data set (benchmarks + test suite)
-        "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
+        "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof",
+        // contextual keywords (should at least include "null", "false" and "true")
+        "as", /*"of",*/ "get", "set", "false", /*"from",*/ "null", "true", "async", "await", "static", "constructor",
+        // some common identifiers/literals in our test data set (benchmarks + test suite)
+        "undefined", "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
         "options", "value", "name", "self", "key", "\"use strict\"", "use strict"
     )]
     internal static partial string? TryGetInternedString(ReadOnlySpan<char> source);
@@ -30,7 +33,16 @@ internal static partial class ParserExtensions
     internal static string Slice(this string source, int start, int end, ref StringPool stringPool)
     {
         var sourceSpan = source.AsSpan(start, end - start);
-        return TryGetInternedString(sourceSpan) ?? stringPool.GetOrCreate(sourceSpan);
+
+        if (sourceSpan.Length == 1)
+        {
+            return CharToString(sourceSpan[0]);
+        }
+
+        return TryGetInternedString(sourceSpan) ??
+            (sourceSpan.Length <= 20
+            ? stringPool.GetOrCreate(sourceSpan)
+            : sourceSpan.ToString()); // too long to pool)
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

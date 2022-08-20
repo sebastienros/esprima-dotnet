@@ -74,12 +74,6 @@ internal struct StringPool
     /// <returns>The stored string instance.</returns>
     public string GetOrCreate(ReadOnlySpan<char> value)
     {
-        if (value.Length > 20)
-        {
-            // too long
-            return value.ToString();
-        }
-
         if (_buckets is null)
         {
             Initialize(4);

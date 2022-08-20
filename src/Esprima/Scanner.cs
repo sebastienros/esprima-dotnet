@@ -141,44 +141,30 @@ public sealed partial class Scanner
     // https://tc39.github.io/ecma262/#sec-future-reserved-words
 
     [StringMatcher("enum", "export", "import", "super")]
-    internal static partial string? TryGetInternedFutureReservedWord(ReadOnlySpan<char> id);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsFutureReservedWord(string id) => TryGetInternedFutureReservedWord(id.AsSpan()) is not null;
+    public static partial bool IsFutureReservedWord(string id);
 
     [StringMatcher("implements", "interface", "package", "private", "protected", "public", "static", "yield", "let")]
-    internal static partial string? TryGetInternedStrictModeReservedWord(ReadOnlySpan<char> id);
+    public static partial bool IsStrictModeReservedWord(string id);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsStrictModeReservedWord(string id) => TryGetInternedStrictModeReservedWord(id.AsSpan()) is not null;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string? TryGetInternedRestrictedWord(ReadOnlySpan<char> id) => id switch
+    public static bool IsRestrictedWord(string id)
     {
-        "eval" => "eval",
-        "arguments" => "arguments",
-        _ => null
-    };
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsRestrictedWord(string id) => TryGetInternedRestrictedWord(id.AsSpan()) is not null;
+        return id is "eval" or "arguments";
+    }
 
     [StringMatcher("&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**")]
-    internal static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> id);
+    private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> id);
 
     [StringMatcher("===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=")]
-    internal static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> id);
+    private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> id);
 
     // https://tc39.github.io/ecma262/#sec-keywords
 
+    // Note for maintainers: all keywords listed here should be included in ParserExtensions.TryGetInternedString too!
     [StringMatcher(
         "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
         "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
         "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof")]
-    internal static partial string? TryGetInternedKeyword(ReadOnlySpan<char> id);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsKeyword(string id) => TryGetInternedKeyword(id.AsSpan()) is not null;
+    public static partial bool IsKeyword(string id);
 
     // https://tc39.github.io/ecma262/#sec-comments
 

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Esprima.Ast;
 
 namespace Esprima;
@@ -224,21 +225,26 @@ public partial class JavaScriptParser
     /// </summary>
     private protected string GetTokenRaw(in Token token)
     {
-        string? result = null;
-        var length = token.End - token.Start;
-        if (token.Type == TokenType.Punctuator && length < 4)
+        // In the following cases token.Value is already a single-character cached string or interned string.
+        // (See Scanner.ScanIdentifier and Scanner.ScanPunctuator)
+        switch (token.Type)
         {
-            var stringValue = (string) token.Value!;
-            result = length switch
-            {
-                1 => ParserExtensions.CharToString(stringValue[0]),
-                2 => Scanner.TryGetInternedTwoCharacterPunctuator(stringValue.AsSpan()),
-                3 => Scanner.TryGetInternedThreeCharacterPunctuator(stringValue.AsSpan()),
-                _ => null
-            };
+            case TokenType.Punctuator:
+                return (string) token.Value!;
+
+            case TokenType.Keyword:
+            case TokenType.NullLiteral:
+            case TokenType.BooleanLiteral:
+                var stringValue = (string) token.Value!;
+                // In tolerant mode identifers like "nul\u{6c}" may be accepted as keywords, null or boolean literals.
+                if (stringValue.Length == token.End - token.Start)
+                {
+                    return (string) token.Value!;
+                }
+                break;
         }
 
-        return result ?? _scanner.Source.Slice(token.Start, token.End, ref _scanner._stringPool);
+        return _scanner.Source.Slice(token.Start, token.End, ref _scanner._stringPool);
     }
 
     private protected SyntaxToken ConvertToken(in Token token)

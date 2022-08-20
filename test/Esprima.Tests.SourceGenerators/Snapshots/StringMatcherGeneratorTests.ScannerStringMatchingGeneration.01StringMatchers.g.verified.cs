@@ -138,81 +138,81 @@ public partial class JavaScriptParser
 
 public partial class Scanner
 {
-    internal static partial string? TryGetInternedFutureReservedWord(ReadOnlySpan<char> input)
+    public static partial bool IsFutureReservedWord(string input)
     {
         switch (input.Length)
         {
             case 4:
             {
-                return input[0] == 'e' && input[1] == 'n' && input[2] == 'u' && input[3] == 'm' ? "enum" : null;
+                return input == "enum";
             }
             case 5:
             {
-                return input[0] == 's' && input[1] == 'u' && input[2] == 'p' && input[3] == 'e' && input[4] == 'r' ? "super" : null;
+                return input == "super";
             }
             case 6:
             {
                 return input[0] switch
                 {
-                    'e' => input[1] == 'x' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "export" : null,
-                    'i' => input[1] == 'm' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "import" : null,
-                    _ => null
+                    'e' => input == "export",
+                    'i' => input == "import",
+                    _ => false
                 };
             }
             default:
-               return null;
+               return false;
         }
     }
 
-    internal static partial string? TryGetInternedStrictModeReservedWord(ReadOnlySpan<char> input)
+    public static partial bool IsStrictModeReservedWord(string input)
     {
         switch (input.Length)
         {
             case 3:
             {
-                return input[0] == 'l' && input[1] == 'e' && input[2] == 't' ? "let" : null;
+                return input == "let";
             }
             case 5:
             {
-                return input[0] == 'y' && input[1] == 'i' && input[2] == 'e' && input[3] == 'l' && input[4] == 'd' ? "yield" : null;
+                return input == "yield";
             }
             case 6:
             {
                 return input[0] switch
                 {
-                    'p' => input[1] == 'u' && input[2] == 'b' && input[3] == 'l' && input[4] == 'i' && input[5] == 'c' ? "public" : null,
-                    's' => input[1] == 't' && input[2] == 'a' && input[3] == 't' && input[4] == 'i' && input[5] == 'c' ? "static" : null,
-                    _ => null
+                    'p' => input == "public",
+                    's' => input == "static",
+                    _ => false
                 };
             }
             case 7:
             {
                 return input[1] switch
                 {
-                    'a' => input[0] == 'p' && input[2] == 'c' && input[3] == 'k' && input[4] == 'a' && input[5] == 'g' && input[6] == 'e' ? "package" : null,
-                    'r' => input[0] == 'p' && input[2] == 'i' && input[3] == 'v' && input[4] == 'a' && input[5] == 't' && input[6] == 'e' ? "private" : null,
-                    _ => null
+                    'a' => input == "package",
+                    'r' => input == "private",
+                    _ => false
                 };
             }
             case 9:
             {
                 return input[0] switch
                 {
-                    'i' => input[1] == 'n' && input[2] == 't' && input[3] == 'e' && input[4] == 'r' && input[5] == 'f' && input[6] == 'a' && input[7] == 'c' && input[8] == 'e' ? "interface" : null,
-                    'p' => input[1] == 'r' && input[2] == 'o' && input[3] == 't' && input[4] == 'e' && input[5] == 'c' && input[6] == 't' && input[7] == 'e' && input[8] == 'd' ? "protected" : null,
-                    _ => null
+                    'i' => input == "interface",
+                    'p' => input == "protected",
+                    _ => false
                 };
             }
             case 10:
             {
-                return input.SequenceEqual("implements".AsSpan()) ? "implements" : null;
+                return input == "implements";
             }
             default:
-               return null;
+               return false;
         }
     }
 
-    internal static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> input)
+    private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> input)
     {
         var c1 = input[1];
         if (input[0] == '-')
@@ -346,7 +346,7 @@ public partial class Scanner
         return null;
     }
 
-    internal static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> input)
+    private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> input)
     {
         var c1 = input[1];
         var c2 = input[2];
@@ -413,7 +413,7 @@ public partial class Scanner
         return null;
     }
 
-    internal static partial string? TryGetInternedKeyword(ReadOnlySpan<char> input)
+    public static partial bool IsKeyword(string input)
     {
         switch (input.Length)
         {
@@ -421,91 +421,91 @@ public partial class Scanner
             {
                 return input[1] switch
                 {
-                    'o' => input[0] == 'd' ? "do" : null,
-                    'f' => input[0] == 'i' ? "if" : null,
-                    'n' => input[0] == 'i' ? "in" : null,
-                    _ => null
+                    'o' => input == "do",
+                    'f' => input == "if",
+                    'n' => input == "in",
+                    _ => false
                 };
             }
             case 3:
             {
                 return input[0] switch
                 {
-                    'f' => input[1] == 'o' && input[2] == 'r' ? "for" : null,
-                    'l' => input[1] == 'e' && input[2] == 't' ? "let" : null,
-                    'n' => input[1] == 'e' && input[2] == 'w' ? "new" : null,
-                    't' => input[1] == 'r' && input[2] == 'y' ? "try" : null,
-                    'v' => input[1] == 'a' && input[2] == 'r' ? "var" : null,
-                    _ => null
+                    'f' => input == "for",
+                    'l' => input == "let",
+                    'n' => input == "new",
+                    't' => input == "try",
+                    'v' => input == "var",
+                    _ => false
                 };
             }
             case 4:
             {
                 return input[1] switch
                 {
-                    'a' => input[0] == 'c' && input[2] == 's' && input[3] == 'e' ? "case" : null,
-                    'l' => input[0] == 'e' && input[2] == 's' && input[3] == 'e' ? "else" : null,
-                    'n' => input[0] == 'e' && input[2] == 'u' && input[3] == 'm' ? "enum" : null,
-                    'h' => input[0] == 't' && input[2] == 'i' && input[3] == 's' ? "this" : null,
-                    'o' => input[0] == 'v' && input[2] == 'i' && input[3] == 'd' ? "void" : null,
-                    'i' => input[0] == 'w' && input[2] == 't' && input[3] == 'h' ? "with" : null,
-                    _ => null
+                    'a' => input == "case",
+                    'l' => input == "else",
+                    'n' => input == "enum",
+                    'h' => input == "this",
+                    'o' => input == "void",
+                    'i' => input == "with",
+                    _ => false
                 };
             }
             case 5:
             {
                 return input[4] switch
                 {
-                    'k' => input[0] == 'b' && input[1] == 'r' && input[2] == 'e' && input[3] == 'a' ? "break" : null,
-                    'h' => input[0] == 'c' && input[1] == 'a' && input[2] == 't' && input[3] == 'c' ? "catch" : null,
-                    's' => input[0] == 'c' && input[1] == 'l' && input[2] == 'a' && input[3] == 's' ? "class" : null,
-                    't' => input[0] == 'c' && input[1] == 'o' && input[2] == 'n' && input[3] == 's' ? "const" : null,
-                    'r' => input[0] == 's' && input[1] == 'u' && input[2] == 'p' && input[3] == 'e' ? "super" : null,
-                    'w' => input[0] == 't' && input[1] == 'h' && input[2] == 'r' && input[3] == 'o' ? "throw" : null,
-                    'e' => input[0] == 'w' && input[1] == 'h' && input[2] == 'i' && input[3] == 'l' ? "while" : null,
-                    'd' => input[0] == 'y' && input[1] == 'i' && input[2] == 'e' && input[3] == 'l' ? "yield" : null,
-                    _ => null
+                    'k' => input == "break",
+                    'h' => input == "catch",
+                    's' => input == "class",
+                    't' => input == "const",
+                    'r' => input == "super",
+                    'w' => input == "throw",
+                    'e' => input == "while",
+                    'd' => input == "yield",
+                    _ => false
                 };
             }
             case 6:
             {
                 return input[0] switch
                 {
-                    'd' => input[1] == 'e' && input[2] == 'l' && input[3] == 'e' && input[4] == 't' && input[5] == 'e' ? "delete" : null,
-                    'e' => input[1] == 'x' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "export" : null,
-                    'i' => input[1] == 'm' && input[2] == 'p' && input[3] == 'o' && input[4] == 'r' && input[5] == 't' ? "import" : null,
-                    'r' => input[1] == 'e' && input[2] == 't' && input[3] == 'u' && input[4] == 'r' && input[5] == 'n' ? "return" : null,
-                    's' => input[1] == 'w' && input[2] == 'i' && input[3] == 't' && input[4] == 'c' && input[5] == 'h' ? "switch" : null,
-                    't' => input[1] == 'y' && input[2] == 'p' && input[3] == 'e' && input[4] == 'o' && input[5] == 'f' ? "typeof" : null,
-                    _ => null
+                    'd' => input == "delete",
+                    'e' => input == "export",
+                    'i' => input == "import",
+                    'r' => input == "return",
+                    's' => input == "switch",
+                    't' => input == "typeof",
+                    _ => false
                 };
             }
             case 7:
             {
                 return input[0] switch
                 {
-                    'd' => input[1] == 'e' && input[2] == 'f' && input[3] == 'a' && input[4] == 'u' && input[5] == 'l' && input[6] == 't' ? "default" : null,
-                    'e' => input[1] == 'x' && input[2] == 't' && input[3] == 'e' && input[4] == 'n' && input[5] == 'd' && input[6] == 's' ? "extends" : null,
-                    'f' => input[1] == 'i' && input[2] == 'n' && input[3] == 'a' && input[4] == 'l' && input[5] == 'l' && input[6] == 'y' ? "finally" : null,
-                    _ => null
+                    'd' => input == "default",
+                    'e' => input == "extends",
+                    'f' => input == "finally",
+                    _ => false
                 };
             }
             case 8:
             {
                 return input[0] switch
                 {
-                    'c' => input[1] == 'o' && input[2] == 'n' && input[3] == 't' && input[4] == 'i' && input[5] == 'n' && input[6] == 'u' && input[7] == 'e' ? "continue" : null,
-                    'd' => input[1] == 'e' && input[2] == 'b' && input[3] == 'u' && input[4] == 'g' && input[5] == 'g' && input[6] == 'e' && input[7] == 'r' ? "debugger" : null,
-                    'f' => input[1] == 'u' && input[2] == 'n' && input[3] == 'c' && input[4] == 't' && input[5] == 'i' && input[6] == 'o' && input[7] == 'n' ? "function" : null,
-                    _ => null
+                    'c' => input == "continue",
+                    'd' => input == "debugger",
+                    'f' => input == "function",
+                    _ => false
                 };
             }
             case 10:
             {
-                return input.SequenceEqual("instanceof".AsSpan()) ? "instanceof" : null;
+                return input == "instanceof";
             }
             default:
-               return null;
+               return false;
         }
     }
 
