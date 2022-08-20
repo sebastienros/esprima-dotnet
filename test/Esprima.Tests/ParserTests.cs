@@ -455,10 +455,6 @@ block comment", comment.Value);
     }
 
     [Theory]
-    [InlineData("&&")]
-    [InlineData("||")]
-    [InlineData("===")]
-    [InlineData("!==")]
     [InlineData("as")]
     [InlineData("do")]
     [InlineData("if")]

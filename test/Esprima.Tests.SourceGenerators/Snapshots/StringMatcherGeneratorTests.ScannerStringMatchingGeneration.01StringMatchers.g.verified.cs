@@ -212,7 +212,7 @@ public partial class Scanner
         }
     }
 
-    private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> input)
+    internal static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> input)
     {
         var c1 = input[1];
         if (input[0] == '-')
@@ -346,7 +346,7 @@ public partial class Scanner
         return null;
     }
 
-    private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> input)
+    internal static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> input)
     {
         var c1 = input[1];
         var c2 = input[2];
@@ -411,246 +411,6 @@ public partial class Scanner
             return null;
         }
         return null;
-    }
-
-    internal static partial string? TryGetInternedPunctuator(ReadOnlySpan<char> input)
-    {
-        switch (input.Length)
-        {
-            case 2:
-            {
-                var c1 = input[1];
-                if (input[0] == '-')
-                {
-                    if (c1 == '-')
-                    {
-                        return "--";
-                    }
-                    if (c1 == '=')
-                    {
-                        return "-=";
-                    }
-                    return null;
-                }
-                if (input[0] == '!')
-                {
-                    if (c1 == '=')
-                    {
-                        return "!=";
-                    }
-                    return null;
-                }
-                if (input[0] == '?')
-                {
-                    if (c1 == '?')
-                    {
-                        return "??";
-                    }
-                    if (c1 == '.')
-                    {
-                        return "?.";
-                    }
-                    return null;
-                }
-                if (input[0] == '*')
-                {
-                    if (c1 == '*')
-                    {
-                        return "**";
-                    }
-                    if (c1 == '=')
-                    {
-                        return "*=";
-                    }
-                    return null;
-                }
-                if (input[0] == '/')
-                {
-                    if (c1 == '=')
-                    {
-                        return "/=";
-                    }
-                    return null;
-                }
-                if (input[0] == '&')
-                {
-                    if (c1 == '&')
-                    {
-                        return "&&";
-                    }
-                    if (c1 == '=')
-                    {
-                        return "&=";
-                    }
-                    return null;
-                }
-                if (input[0] == '%')
-                {
-                    if (c1 == '=')
-                    {
-                        return "%=";
-                    }
-                    return null;
-                }
-                if (input[0] == '^')
-                {
-                    if (c1 == '=')
-                    {
-                        return "^=";
-                    }
-                    return null;
-                }
-                if (input[0] == '+')
-                {
-                    if (c1 == '+')
-                    {
-                        return "++";
-                    }
-                    if (c1 == '=')
-                    {
-                        return "+=";
-                    }
-                    return null;
-                }
-                if (input[0] == '<')
-                {
-                    if (c1 == '<')
-                    {
-                        return "<<";
-                    }
-                    if (c1 == '=')
-                    {
-                        return "<=";
-                    }
-                    return null;
-                }
-                if (input[0] == '=')
-                {
-                    if (c1 == '=')
-                    {
-                        return "==";
-                    }
-                    if (c1 == '>')
-                    {
-                        return "=>";
-                    }
-                    return null;
-                }
-                if (input[0] == '>')
-                {
-                    if (c1 == '=')
-                    {
-                        return ">=";
-                    }
-                    if (c1 == '>')
-                    {
-                        return ">>";
-                    }
-                    return null;
-                }
-                if (input[0] == '|')
-                {
-                    if (c1 == '=')
-                    {
-                        return "|=";
-                    }
-                    if (c1 == '|')
-                    {
-                        return "||";
-                    }
-                    return null;
-                }
-                return null;
-            }
-            case 3:
-            {
-                var c1 = input[1];
-                var c2 = input[2];
-                if (input[0] == '!')
-                {
-                    if (c1 == '=' && c2 == '=')
-                    {
-                        return "!==";
-                    }
-                    return null;
-                }
-                if (input[0] == '?')
-                {
-                    if (c1 == '?' && c2 == '=')
-                    {
-                        return "??=";
-                    }
-                    return null;
-                }
-                if (input[0] == '.')
-                {
-                    if (c1 == '.' && c2 == '.')
-                    {
-                        return "...";
-                    }
-                    return null;
-                }
-                if (input[0] == '*')
-                {
-                    if (c1 == '*' && c2 == '=')
-                    {
-                        return "**=";
-                    }
-                    return null;
-                }
-                if (input[0] == '&')
-                {
-                    if (c1 == '&' && c2 == '=')
-                    {
-                        return "&&=";
-                    }
-                    return null;
-                }
-                if (input[0] == '<')
-                {
-                    if (c1 == '<' && c2 == '=')
-                    {
-                        return "<<=";
-                    }
-                    return null;
-                }
-                if (input[0] == '=')
-                {
-                    if (c1 == '=' && c2 == '=')
-                    {
-                        return "===";
-                    }
-                    return null;
-                }
-                if (input[0] == '>')
-                {
-                    if (c1 == '>' && c2 == '=')
-                    {
-                        return ">>=";
-                    }
-                    if (c1 == '>' && c2 == '>')
-                    {
-                        return ">>>";
-                    }
-                    return null;
-                }
-                if (input[0] == '|')
-                {
-                    if (c1 == '|' && c2 == '=')
-                    {
-                        return "||=";
-                    }
-                    return null;
-                }
-                return null;
-            }
-            case 4:
-            {
-                return input[0] == '>' && input[1] == '>' && input[2] == '>' && input[3] == '=' ? ">>>=" : null;
-            }
-            default:
-               return null;
-        }
     }
 
     internal static partial string? TryGetInternedKeyword(ReadOnlySpan<char> input)
@@ -812,8 +572,6 @@ internal partial class ParserExtensions
             {
                 return input[1] switch
                 {
-                    '&' => input[0] == '&' ? "&&" : null,
-                    '|' => input[0] == '|' ? "||" : null,
                     's' => input[0] == 'a' ? "as" : null,
                     'o' => input[0] == 'd' ? "do" : null,
                     'f' => input[0] == 'i' ? "if" : null,
@@ -825,8 +583,6 @@ internal partial class ParserExtensions
             {
                 return input[0] switch
                 {
-                    '!' => input[1] == '=' && input[2] == '=' ? "!==" : null,
-                    '=' => input[1] == '=' && input[2] == '=' ? "===" : null,
                     'f' => input[1] == 'o' && input[2] == 'r' ? "for" : null,
                     'g' => input[1] == 'e' && input[2] == 't' ? "get" : null,
                     'k' => input[1] == 'e' && input[2] == 'y' ? "key" : null,

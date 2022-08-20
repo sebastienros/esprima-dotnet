@@ -224,7 +224,21 @@ public partial class JavaScriptParser
     /// </summary>
     private protected string GetTokenRaw(in Token token)
     {
-        return _scanner.Source.Slice(token.Start, token.End, ref _scanner._stringPool);
+        string? result = null;
+        var length = token.End - token.Start;
+        if (token.Type == TokenType.Punctuator && length < 4)
+        {
+            var stringValue = (string) token.Value!;
+            result = length switch
+            {
+                1 => ParserExtensions.CharToString(stringValue[0]),
+                2 => Scanner.TryGetInternedTwoCharacterPunctuator(stringValue.AsSpan()),
+                3 => Scanner.TryGetInternedThreeCharacterPunctuator(stringValue.AsSpan()),
+                _ => null
+            };
+        }
+
+        return result ?? _scanner.Source.Slice(token.Start, token.End, ref _scanner._stringPool);
     }
 
     private protected SyntaxToken ConvertToken(in Token token)

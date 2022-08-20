@@ -22,7 +22,7 @@ internal static partial class ParserExtensions
         "undefined", "true", "false", "null", "get", "set", "constructor", "as",
         // some common ones in our test data set (benchmarks + test suite)
         "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
-        "options", "value", "name", "self", "&&", "||", "===", "!==", "key", "\"use strict\"", "use strict"
+        "options", "value", "name", "self", "key", "\"use strict\"", "use strict"
     )]
     internal static partial string? TryGetInternedString(ReadOnlySpan<char> source);
 
@@ -36,11 +36,12 @@ internal static partial class ParserExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string CharToString(char c)
     {
-        if (c >= 0 && c < s_charToString.Length)
+        int index = c;
+        var temp = s_charToString;
+        if ((uint) index < temp.Length)
         {
-            return s_charToString[c];
+            return temp[index];
         }
-
         return c.ToString();
     }
 

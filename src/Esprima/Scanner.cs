@@ -164,20 +164,10 @@ public sealed partial class Scanner
     public static bool IsRestrictedWord(string id) => TryGetInternedRestrictedWord(id.AsSpan()) is not null;
 
     [StringMatcher("&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**")]
-    private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> id);
+    internal static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> id);
 
     [StringMatcher("===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=")]
-    private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> id);
-
-    [StringMatcher(
-        // 2-character
-        "&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**", "??", "?.",
-        // 3-character
-        "===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=", "??=", "...",
-        // 4-character
-        ">>>="
-    )]
-    internal static partial string? TryGetInternedPunctuator(ReadOnlySpan<char> id);
+    internal static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> id);
 
     // https://tc39.github.io/ecma262/#sec-keywords
 
