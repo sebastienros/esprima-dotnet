@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Esprima;
 
@@ -11,24 +13,45 @@ namespace Esprima;
 /// is an allowed (and the default) value but considered an invalid
 /// position.
 /// </remarks>
-public readonly struct Position : IEquatable<Position>
+public readonly struct Position : IEquatable<Position>, IComparable<Position>
 {
-    public int Line { get; }
-    public int Column { get; }
+    public readonly int Line;
+    public readonly int Column;
 
-    public Position(int line, int column)
+    private static bool Validate(int line, int column, bool throwOnError)
     {
-#if LOCATION_ASSERTS
-        if (line < 0)
+        if (line < 0 || line == 0 && column != 0)
         {
-            EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(line), line, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            if (throwOnError)
+            {
+                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(line), line, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            }
+            return false;
         }
 
-        if ((line <= 0 || column < 0) && (line != 0 || column != 0))
+        if (column < 0)
         {
-            EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(column), column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            if (throwOnError)
+            {
+                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(column), column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+            }
+            return false;
         }
-#endif
+
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Position From(int line, int column)
+    {
+        Validate(line, column, throwOnError: true);
+        return new Position(line, column);
+    }
+
+    internal Position(int line, int column)
+    {
+        Debug.Assert(Validate(line, column, throwOnError: false));
+
         Line = line;
         Column = column;
     }
@@ -43,6 +66,46 @@ public readonly struct Position : IEquatable<Position>
         return Line == other.Line && Column == other.Column;
     }
 
+    public int CompareTo(Position other)
+    {
+        return
+            Line < other.Line ? -1 :
+            Line > other.Line ? 1 :
+            Column < other.Column ? -1 :
+            Column > other.Column ? 1 :
+            0;
+    }
+
+    public static bool operator ==(Position left, Position right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Position left, Position right)
+    {
+        return !left.Equals(right);
+    }
+
+    public static bool operator <(Position left, Position right)
+    {
+        return left.CompareTo(right) < 0;
+    }
+
+    public static bool operator <=(Position left, Position right)
+    {
+        return left.CompareTo(right) <= 0;
+    }
+
+    public static bool operator >(Position left, Position right)
+    {
+        return left.CompareTo(right) > 0;
+    }
+
+    public static bool operator >=(Position left, Position right)
+    {
+        return left.CompareTo(right) >= 0;
+    }
+
     public override int GetHashCode()
     {
         return unchecked((Line * 397) ^ Column);
@@ -55,15 +118,53 @@ public readonly struct Position : IEquatable<Position>
                + Column.ToString(CultureInfo.InvariantCulture);
     }
 
-    public static bool operator ==(Position left, Position right)
+    private static bool TryParseCore(ReadOnlySpan<char> s, bool throwIfInvalid, out Position result)
     {
-        return left.Equals(right);
+        if (s.Length < 3)
+        {
+            goto InvalidFormat;
+        }
+
+        if (!ParserExtensions.TryConsumeInt(ref s, out var line))
+        {
+            goto InvalidFormat;
+        }
+
+        if (s.Length < 2 || s[0] != ',')
+        {
+            goto InvalidFormat;
+        }
+        s = s.Slice(1);
+
+        if (!ParserExtensions.TryConsumeInt(ref s, out var column) || s.Length > 0)
+        {
+            goto InvalidFormat;
+        }
+
+        if (Validate(line, column, throwIfInvalid))
+        {
+            result = new Position(line, column);
+            return true;
+        }
+
+InvalidFormat:
+        result = default;
+        return false;
     }
 
-    public static bool operator !=(Position left, Position right)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool TryParse(ReadOnlySpan<char> s, out Position result) => TryParseCore(s, throwIfInvalid: false, out result);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool TryParse(string s, out Position result) => TryParse(s.AsSpan(), out result);
+
+    public static Position Parse(ReadOnlySpan<char> s)
     {
-        return !left.Equals(right);
+        return TryParseCore(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Position Parse(string s) => Parse(s.AsSpan());
 
     public void Deconstruct(out int line, out int column)
     {
