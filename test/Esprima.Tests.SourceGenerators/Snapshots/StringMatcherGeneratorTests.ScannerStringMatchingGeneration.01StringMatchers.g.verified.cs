@@ -509,57 +509,6 @@ public partial class Scanner
         }
     }
 
-    internal static partial string? TryGetInternedContextualKeyword(ReadOnlySpan<char> input)
-    {
-        switch (input.Length)
-        {
-            case 2:
-            {
-                return input[0] switch
-                {
-                    'a' => input[1] == 's' ? "as" : null,
-                    'o' => input[1] == 'f' ? "of" : null,
-                    _ => null
-                };
-            }
-            case 3:
-            {
-                return input[0] switch
-                {
-                    'g' => input[1] == 'e' && input[2] == 't' ? "get" : null,
-                    's' => input[1] == 'e' && input[2] == 't' ? "set" : null,
-                    _ => null
-                };
-            }
-            case 4:
-            {
-                return input[0] switch
-                {
-                    'f' => input[1] == 'r' && input[2] == 'o' && input[3] == 'm' ? "from" : null,
-                    'n' => input[1] == 'u' && input[2] == 'l' && input[3] == 'l' ? "null" : null,
-                    't' => input[1] == 'r' && input[2] == 'u' && input[3] == 'e' ? "true" : null,
-                    _ => null
-                };
-            }
-            case 5:
-            {
-                return input[1] switch
-                {
-                    's' => input[0] == 'a' && input[2] == 'y' && input[3] == 'n' && input[4] == 'c' ? "async" : null,
-                    'w' => input[0] == 'a' && input[2] == 'a' && input[3] == 'i' && input[4] == 't' ? "await" : null,
-                    'a' => input[0] == 'f' && input[2] == 'l' && input[3] == 's' && input[4] == 'e' ? "false" : null,
-                    _ => null
-                };
-            }
-            case 11:
-            {
-                return input.SequenceEqual("constructor".AsSpan()) ? "constructor" : null;
-            }
-            default:
-               return null;
-        }
-    }
-
 }
 
 internal partial class ParserExtensions
