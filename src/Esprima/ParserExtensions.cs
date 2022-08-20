@@ -2,7 +2,7 @@
 
 namespace Esprima;
 
-internal static class ParserExtensions
+internal static partial class ParserExtensions
 {
     private static readonly string[] s_charToString = new string[256];
 
@@ -15,16 +15,16 @@ internal static class ParserExtensions
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string? TryGetInternedString(ReadOnlySpan<char> source)
-    {
-        return
-            Scanner.TryGetInternedKeyword(source) ??
-            Scanner.TryGetInternedContextualKeyword(source) ??
-            Scanner.TryGetInternedStrictModeReservedWord(source) ??
-            Scanner.TryGetInternedRestrictedWord(source) ??
-            Scanner.TryGetInternedPunctuator(source);
-    }
+    [StringMatcher(
+        "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum", "await",
+        "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
+        "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof", "async", "static",
+        "undefined", "true", "false", "null", "get", "set", "constructor", "as",
+        // some common ones in our test data set (benchmarks + test suite)
+        "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
+        "options", "value", "name", "self", "&&", "||", "===", "!==", "key", "\"use strict\"", "use strict"
+    )]
+    internal static partial string? TryGetInternedString(ReadOnlySpan<char> source);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string Slice(this string source, int start, int end, ref StringPool stringPool)

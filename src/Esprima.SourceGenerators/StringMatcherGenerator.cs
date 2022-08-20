@@ -39,7 +39,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
             methodDeclarationSyntax.Body is null;
     }
 
-    sealed record StringMatcherMethod(string ContainingType, string Modifiers, string ReturnType, string Name, string InputType, string[] Alternatives);
+    sealed record StringMatcherMethod(string TypeModifiers, string ContainingType, string Modifiers, string ReturnType, string Name, string InputType, string[] Alternatives);
 
     private static StringMatcherMethod? GetSemanticTargetForGeneration(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
@@ -111,11 +111,12 @@ public class StringMatcherGenerator : IIncrementalGenerator
             returnType = "string";
         }*/
 
+        var typeModifiers = method.ContainingSymbol.DeclaredAccessibility.ToString().ToLower();
         var containingType = method.ContainingType.Name;
         var modifiers = methodDeclarationSyntax.Modifiers.ToString();
         var inputType = method.Parameters.Single().Type.ToString();
 
-        return new StringMatcherMethod(containingType, modifiers, returnType, method.Name, inputType, targets.ToArray());
+        return new StringMatcherMethod(typeModifiers, containingType, modifiers, returnType, method.Name, inputType, targets.ToArray());
     }
 
     private static void Execute(SourceProductionContext context, ImmutableArray<StringMatcherMethod> methods)
@@ -130,9 +131,10 @@ public class StringMatcherGenerator : IIncrementalGenerator
 
         var indent = new string(' ', 4);
 
-        foreach (var typeGrouping in methods.GroupBy(x => x.ContainingType))
+        foreach (var typeGrouping in methods.GroupBy(x => (x.TypeModifiers, x.ContainingType)))
         {
-            sourceBuilder.Append("public partial class ").AppendLine(typeGrouping.Key)
+            var (typeModifiers, type) = typeGrouping.Key;
+            sourceBuilder.Append(typeModifiers).Append(" partial class ").AppendLine(type)
                 .AppendLine("{");
 
             foreach (var method in typeGrouping)
