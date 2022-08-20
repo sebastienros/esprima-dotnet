@@ -9,11 +9,11 @@ public readonly struct Location : IEquatable<Location>
     public readonly Position End;
     public readonly string? Source;
 
-    private static bool Validate(in Position start, in Position end, bool @throw = true)
+    private static bool Validate(in Position start, in Position end, bool throwOnError = true)
     {
         if (start == default && end != default)
         {
-            if (@throw)
+            if (throwOnError)
             {
                 EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(start), start, Exception<ArgumentOutOfRangeException>.DefaultMessage);
             }
@@ -22,7 +22,7 @@ public readonly struct Location : IEquatable<Location>
 
         if (end == default ? start != default : end < start)
         {
-            if (@throw)
+            if (throwOnError)
             {
                 EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(end), end, Exception<ArgumentOutOfRangeException>.DefaultMessage);
             }
@@ -56,7 +56,12 @@ public readonly struct Location : IEquatable<Location>
 
     public Location WithPosition(in Position start, in Position end)
     {
-        return new Location(start, end, Source);
+        return From(start, end, Source);
+    }
+
+    public Location WithSource(string source)
+    {
+        return new Location(in Start, in End, source);
     }
 
     public override bool Equals(object obj)
@@ -107,7 +112,7 @@ public readonly struct Location : IEquatable<Location>
         return Source is not null ? interval + ": " + Source : interval;
     }
 
-    private static bool TryParse(ReadOnlySpan<char> s, bool throwIfInvalid, out Location result)
+    private static bool TryParseCore(ReadOnlySpan<char> s, bool throwIfInvalid, out Location result)
     {
         int i;
         if (s[0] != '[' || (i = s.IndexOf(')')) < 0 || ++i < 5)
@@ -212,15 +217,14 @@ InvalidFormat:
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryParse(ReadOnlySpan<char> s, out Location result) => TryParse(s, throwIfInvalid: false, out result);
+    public static bool TryParse(ReadOnlySpan<char> s, out Location result) => TryParseCore(s, throwIfInvalid: false, out result);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TryParse(string s, out Location result) => TryParse(s.AsSpan(), out result);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location Parse(ReadOnlySpan<char> s)
     {
-        return TryParse(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
+        return TryParseCore(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

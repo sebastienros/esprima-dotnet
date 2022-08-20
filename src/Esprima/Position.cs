@@ -17,11 +17,11 @@ public readonly struct Position : IEquatable<Position>, IComparable<Position>
     public readonly int Line;
     public readonly int Column;
 
-    private static bool Validate(int line, int column, bool @throw = true)
+    private static bool Validate(int line, int column, bool throwOnError = true)
     {
         if (line < 0 || line == 0 && column != 0)
         {
-            if (@throw)
+            if (throwOnError)
             {
                 EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(line), line, Exception<ArgumentOutOfRangeException>.DefaultMessage);
             }
@@ -30,7 +30,7 @@ public readonly struct Position : IEquatable<Position>, IComparable<Position>
 
         if (column < 0)
         {
-            if (@throw)
+            if (throwOnError)
             {
                 EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(column), column, Exception<ArgumentOutOfRangeException>.DefaultMessage);
             }
@@ -119,7 +119,7 @@ public readonly struct Position : IEquatable<Position>, IComparable<Position>
                + Column.ToString(CultureInfo.InvariantCulture);
     }
 
-    private static bool TryParse(ReadOnlySpan<char> s, bool throwIfInvalid, out Position result)
+    private static bool TryParseCore(ReadOnlySpan<char> s, bool throwIfInvalid, out Position result)
     {
         if (s.Length < 3)
         {
@@ -154,15 +154,14 @@ InvalidFormat:
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryParse(ReadOnlySpan<char> s, out Position result) => TryParse(s, throwIfInvalid: false, out result);
+    public static bool TryParse(ReadOnlySpan<char> s, out Position result) => TryParseCore(s, throwIfInvalid: false, out result);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TryParse(string s, out Position result) => TryParse(s.AsSpan(), out result);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Position Parse(ReadOnlySpan<char> s)
     {
-        return TryParse(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
+        return TryParseCore(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -8,11 +8,11 @@ public readonly struct Range : IEquatable<Range>
     public readonly int Start;
     public readonly int End;
 
-    private static bool Validate(int start, int end, bool @throw = true)
+    private static bool Validate(int start, int end, bool throwOnError = true)
     {
         if (start < 0)
         {
-            if (@throw)
+            if (throwOnError)
             {
                 EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(start), start, Exception<ArgumentOutOfRangeException>.DefaultMessage);
             }
@@ -21,7 +21,7 @@ public readonly struct Range : IEquatable<Range>
 
         if (end < start)
         {
-            if (@throw)
+            if (throwOnError)
             {
                 EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(end), end, Exception<ArgumentOutOfRangeException>.DefaultMessage);
             }
@@ -80,7 +80,7 @@ public readonly struct Range : IEquatable<Range>
             : string.Format(CultureInfo.InvariantCulture, "[{0})", Start);
     }
 
-    private static bool TryParse(ReadOnlySpan<char> s, bool throwIfInvalid, out Range result)
+    private static bool TryParseCore(ReadOnlySpan<char> s, bool throwIfInvalid, out Range result)
     {
         if (s.Length < 3 || s[0] != '[' || s[s.Length - 1] != ')')
         {
@@ -123,15 +123,14 @@ InvalidFormat:
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryParse(ReadOnlySpan<char> s, out Range result) => TryParse(s, throwIfInvalid: false, out result);
+    public static bool TryParse(ReadOnlySpan<char> s, out Range result) => TryParseCore(s, throwIfInvalid: false, out result);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TryParse(string s, out Range result) => TryParse(s.AsSpan(), out result);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Range Parse(ReadOnlySpan<char> s)
     {
-        return TryParse(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
+        return TryParseCore(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
