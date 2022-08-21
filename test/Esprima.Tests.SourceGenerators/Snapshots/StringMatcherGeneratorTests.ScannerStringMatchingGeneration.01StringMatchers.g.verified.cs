@@ -46,7 +46,7 @@ public partial class JavaScriptParser
                 return input == ">>>=";
             }
             default:
-               return false;
+                return false;
         }
     }
 
@@ -80,7 +80,7 @@ public partial class JavaScriptParser
                 };
             }
             default:
-               return false;
+                return false;
         }
     }
 
@@ -130,7 +130,7 @@ public partial class JavaScriptParser
                 return input == "function";
             }
             default:
-               return false;
+                return false;
         }
     }
 
@@ -160,7 +160,7 @@ public partial class Scanner
                 };
             }
             default:
-               return false;
+                return false;
         }
     }
 
@@ -208,7 +208,7 @@ public partial class Scanner
                 return input == "implements";
             }
             default:
-               return false;
+                return false;
         }
     }
 
@@ -505,7 +505,7 @@ public partial class Scanner
                 return input == "instanceof";
             }
             default:
-               return false;
+                return false;
         }
     }
 
@@ -889,7 +889,7 @@ internal partial class ParserExtensions
                 return input.SequenceEqual("\"use strict\"".AsSpan()) ? "\"use strict\"" : null;
             }
             default:
-               return null;
+                return null;
         }
     }
 

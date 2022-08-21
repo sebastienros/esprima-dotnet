@@ -149,7 +149,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 var returnString = method.ReturnType.StartsWith("string");
                 var sourceIsSpan = method.InputType.Contains("Span");
 
-                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4, checkNull, returnString, sourceIsSpan));
+                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, indent: "    ", indentionLevel: 2, checkNull, returnString, sourceIsSpan));
                 sourceBuilder.Append(indent).AppendLine("}");
                 sourceBuilder.AppendLine();
             }
