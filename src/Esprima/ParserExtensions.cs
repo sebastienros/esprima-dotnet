@@ -67,13 +67,13 @@ internal static partial class ParserExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static char CharCodeAt(this string source, int index)
     {
-        if (index < 0 || index > source.Length - 1)
+        if ((uint) index < source.Length)
         {
-            // char.MinValue is used as the null value
-            return char.MinValue;
+            return source[index];
         }
 
-        return source[index];
+        // char.MinValue is used as the null value
+        return char.MinValue;
     }
 
     internal static bool TryConsumeInt(this ref ReadOnlySpan<char> s, out int result)

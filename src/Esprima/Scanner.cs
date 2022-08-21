@@ -185,7 +185,7 @@ public sealed partial class Scanner
 
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             ++Index;
             if (Character.IsLineTerminator(ch))
             {
@@ -252,7 +252,7 @@ public sealed partial class Scanner
 
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             if (Character.IsLineTerminator(ch))
             {
                 if (ch == 0x0D && Source.CharCodeAt(Index + 1) == 0x0A)
@@ -325,7 +325,7 @@ public sealed partial class Scanner
         var start = Index == 0;
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
 
             if (Character.IsWhiteSpace(ch))
             {
@@ -547,7 +547,7 @@ public sealed partial class Scanner
         var start = Index++;
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             if (ch == 0x5C)
             {
                 // Blackslash (U+005C) marks Unicode escape sequence.
@@ -659,7 +659,7 @@ public sealed partial class Scanner
         var octal = ch != '0';
         var code = OctalValue(ch);
 
-        if (!Eof() && Character.IsOctalDigit(Source.CharCodeAt(Index)))
+        if (!Eof() && Character.IsOctalDigit(Source[Index]))
         {
             octal = true;
             code = code * 8 + OctalValue(Source[Index++]);
@@ -683,7 +683,7 @@ public sealed partial class Scanner
         var start = Index;
 
         // Backslash (U+005C) starts an escaped character.
-        var id = Source.CharCodeAt(start) == 0x5C ? GetComplexIdentifier() : GetIdentifier();
+        var id = Source[Index] == 0x5C ? GetComplexIdentifier() : GetIdentifier();
 
         // There is no keyword or literal with only one character.
         // Thus, it must be an identifier.
@@ -959,7 +959,7 @@ public sealed partial class Scanner
 
         if (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             if (ch == 'n')
             {
                 Index++;
@@ -1490,7 +1490,7 @@ public sealed partial class Scanner
                         default:
                             if (ch == '0')
                             {
-                                if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
+                                if (Character.IsDecimalDigit(Source[Index]))
                                 {
                                     // NotEscapeSequence: \01 \02 and so on
                                     notEscapeSequenceHead = '0';
@@ -2412,7 +2412,7 @@ public sealed partial class Scanner
             return Token.CreateEof(Index, LineNumber, LineStart);
         }
 
-        var cp = Source.CharCodeAt(Index);
+        var cp = Source[Index];
 
         if (Character.IsIdentifierStart(cp))
         {
