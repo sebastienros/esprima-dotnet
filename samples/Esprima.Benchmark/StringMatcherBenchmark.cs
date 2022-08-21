@@ -22,12 +22,26 @@ public class StringMatcherBenchmark
     }
 
     [Benchmark]
-    public int CountKeywords()
+    public int IsKeyword()
     {
         int count = 0;
         foreach (var token in _tokens)
         {
             if (Scanner.IsKeyword(token.Value))
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    [Benchmark]
+    public int TryGetInternedString()
+    {
+        int count = 0;
+        foreach (var token in _tokens)
+        {
+            if (ParserExtensions.TryGetInternedString(token.Value.AsSpan()) is not null)
             {
                 count++;
             }

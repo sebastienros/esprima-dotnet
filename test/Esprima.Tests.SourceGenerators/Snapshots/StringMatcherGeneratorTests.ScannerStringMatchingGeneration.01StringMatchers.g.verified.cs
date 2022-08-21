@@ -400,12 +400,17 @@ internal partial class ParserExtensions
         {
             case 2:
             {
-                return input[1] switch
+                return input[0] switch
                 {
-                    's' => input[0] == 'a' ? "as" : null,
-                    'o' => input[0] == 'd' ? "do" : null,
-                    'f' => input[0] == 'i' ? "if" : null,
-                    'n' => input[0] == 'i' ? "in" : null,
+                    'a' => input[1] == 's' ? "as" : null,
+                    'd' => input[1] == 'o' ? "do" : null,
+                    'i' => input[1] switch
+                    {
+                        'f' => "if",
+                        'n' => "in",
+                        _ => null
+                    },
+                    'o' => input[1] == 'f' ? "of" : null,
                     _ => null
                 };
             }
@@ -444,6 +449,7 @@ internal partial class ParserExtensions
                         'n' => input[2] == 'u' && input[3] == 'm' ? "enum" : null,
                         _ => null
                     },
+                    'f' => input[1] == 'r' && input[2] == 'o' && input[3] == 'm' ? "from" : null,
                     'n' => input[1] switch
                     {
                         'a' => input[2] == 'm' && input[3] == 'e' ? "name" : null,
