@@ -134,14 +134,11 @@ public class StringMatcherGenerator : IIncrementalGenerator
         bool firstType = true;
         foreach (var typeGrouping in methods.GroupBy(x => (x.TypeModifiers, x.ContainingType)))
         {
-            if (firstType)
-            {
-                firstType = false;
-            }
-            else
+            if (!firstType)
             {
                 sourceBuilder.AppendLine();
             }
+            firstType = false;
 
             var (typeModifiers, type) = typeGrouping.Key;
             sourceBuilder.Append(typeModifiers).Append(" partial class ").AppendLine(type)
@@ -150,14 +147,11 @@ public class StringMatcherGenerator : IIncrementalGenerator
             bool firstMethod = true;
             foreach (var method in typeGrouping)
             {
-                if (firstMethod)
-                {
-                    firstMethod = false;
-                }
-                else
+                if (!firstMethod)
                 {
                     sourceBuilder.AppendLine();
                 }
+                firstMethod = false;
 
                 context.CancellationToken.ThrowIfCancellationRequested();
 
