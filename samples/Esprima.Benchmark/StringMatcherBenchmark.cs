@@ -34,18 +34,4 @@ public class StringMatcherBenchmark
         }
         return count;
     }
-
-    [Benchmark]
-    public int CountInterned()
-    {
-        int count = 0;
-        foreach (var token in _tokens)
-        {
-            if (Scanner.TryGetInternedKeyword(token.Value.AsSpan()) is not null)
-            {
-                count++;
-            }
-        }
-        return count;
-    }
 }

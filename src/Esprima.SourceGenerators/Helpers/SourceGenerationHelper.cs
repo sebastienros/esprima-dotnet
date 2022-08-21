@@ -31,7 +31,12 @@ internal class StringMatcherAttribute : System.Attribute
     {
         var sb = new StringBuilder();
 
-        var byLength = alternatives.ToLookup(x => x.Length).OrderBy(x => x.Key).ToArray();
+        var byLength = alternatives
+            .Distinct()
+            .ToLookup(x => x.Length)
+            .OrderBy(x => x.Key)
+            .Select(x => (Key: x.Key, x.OrderBy(x => x).ToArray()))
+            .ToArray();
 
         var indentStr = new string(' ', indent);
         var baseIndent = byLength.Length > 1 ? "        " : "    ";
@@ -50,17 +55,17 @@ internal class StringMatcherAttribute : System.Attribute
             sb.Append(indentStr).AppendLine("    {");
         }
 
-        foreach (var group in byLength)
+        foreach (var (length, group) in byLength)
         {
             if (byLength.Length > 1)
             {
-                sb.Append(indentStr).Append("        case ").Append(group.Key).AppendLine(":");
+                sb.Append(indentStr).Append("        case ").Append(length).AppendLine(":");
                 sb.Append(indentStr).AppendLine("        {");
             }
 
-            if (group.Count() == 1)
+            if (group.Length == 1)
             {
-                var item = group.First();
+                var item = group[0];
                 sb.Append(indentStr).Append(baseIndent).Append("    return ");
                 StringEquality(sb, item, sourceIsSpan, startIndex: 0, discriminatorIndex: -1, charLookupGenerated: false);
                 if (returnString)
@@ -83,7 +88,7 @@ internal class StringMatcherAttribute : System.Attribute
                         indentToUse += indentStr;
                     }
 
-                    for (var i = 1; i < group.Key; ++i)
+                    for (var i = 1; i < length; ++i)
                     {
                         sb.Append(indentToUse).Append("var c").Append(i).Append(" = input[").Append(i).AppendLine("];");
                     }
@@ -138,7 +143,7 @@ internal class StringMatcherAttribute : System.Attribute
 
     private static void BuildDiscriminatorMatching(
         StringBuilder sb,
-        IGrouping<int, string> group,
+        string[] group,
         int discriminatorIndex,
         string indent,
         bool returnString,
@@ -161,7 +166,7 @@ internal class StringMatcherAttribute : System.Attribute
             }
             sb.Append("' => ");
 
-            if (group.Key == 1)
+            if (group.Length == 1)
             {
                 sb.Append("true");
             }
@@ -316,10 +321,10 @@ internal class StringMatcherAttribute : System.Attribute
         return s.Replace("\"", "\\\"");
     }
 
-    private static int FindDiscriminatorIndex(IGrouping<int, string> grouping, int start)
+    private static int FindDiscriminatorIndex(string[] grouping, int start)
     {
         var chars = new HashSet<char>();
-        for (var i = start; i < grouping.Key; ++i)
+        for (var i = start; i < grouping[0].Length; ++i)
         {
             chars.Clear();
             var allDifferent = true;

@@ -32,6 +32,8 @@ internal readonly record struct LexOptions(bool Strict, bool AllowIdentifierEsca
 
 public sealed partial class Scanner
 {
+    internal const int NonIdentifierInterningThreshold = 20;
+
     private readonly IErrorHandler _errorHandler;
     private readonly bool _trackComment;
     private readonly bool _adaptRegexp;
@@ -141,27 +143,15 @@ public sealed partial class Scanner
     // https://tc39.github.io/ecma262/#sec-future-reserved-words
 
     [StringMatcher("enum", "export", "import", "super")]
-    internal static partial string? TryGetInternedFutureReservedWord(ReadOnlySpan<char> id);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsFutureReservedWord(string id) => TryGetInternedFutureReservedWord(id.AsSpan()) is not null;
+    public static partial bool IsFutureReservedWord(string id);
 
     [StringMatcher("implements", "interface", "package", "private", "protected", "public", "static", "yield", "let")]
-    internal static partial string? TryGetInternedStrictModeReservedWord(ReadOnlySpan<char> id);
+    public static partial bool IsStrictModeReservedWord(string id);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsStrictModeReservedWord(string id) => TryGetInternedStrictModeReservedWord(id.AsSpan()) is not null;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string? TryGetInternedRestrictedWord(ReadOnlySpan<char> id) => id switch
+    public static bool IsRestrictedWord(string id)
     {
-        "eval" => "eval",
-        "arguments" => "arguments",
-        _ => null
-    };
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsRestrictedWord(string id) => TryGetInternedRestrictedWord(id.AsSpan()) is not null;
+        return id is "eval" or "arguments";
+    }
 
     [StringMatcher("&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**")]
     private static partial string? TryGetInternedTwoCharacterPunctuator(ReadOnlySpan<char> id);
@@ -169,29 +159,14 @@ public sealed partial class Scanner
     [StringMatcher("===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=")]
     private static partial string? TryGetInternedThreeCharacterPunctuator(ReadOnlySpan<char> id);
 
-    [StringMatcher(
-        // 2-character
-        "&&", "||", "==", "!=", "+=", "-=", "*=", "/=", "++", "--", "<<", ">>", "&=", "|=", "^=", "%=", "<=", ">=", "=>", "**", "??", "?.",
-        // 3-character
-        "===", "!==", ">>>", "<<=", ">>=", "**=", "&&=", "||=", "??=", "...",
-        // 4-character
-        ">>>="
-    )]
-    internal static partial string? TryGetInternedPunctuator(ReadOnlySpan<char> id);
-
     // https://tc39.github.io/ecma262/#sec-keywords
 
+    // Note for maintainers: all keywords listed here should be included in ParserExtensions.TryGetInternedString too!
     [StringMatcher(
         "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
         "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
         "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof")]
-    internal static partial string? TryGetInternedKeyword(ReadOnlySpan<char> id);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsKeyword(string id) => TryGetInternedKeyword(id.AsSpan()) is not null;
-
-    [StringMatcher("as", "of", "get", "set", "false", "from", "null", "true", "async", "await", "constructor")]
-    internal static partial string? TryGetInternedContextualKeyword(ReadOnlySpan<char> id);
+    public static partial bool IsKeyword(string id);
 
     // https://tc39.github.io/ecma262/#sec-comments
 
@@ -210,7 +185,7 @@ public sealed partial class Scanner
 
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             ++Index;
             if (Character.IsLineTerminator(ch))
             {
@@ -277,7 +252,7 @@ public sealed partial class Scanner
 
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             if (Character.IsLineTerminator(ch))
             {
                 if (ch == 0x0D && Source.CharCodeAt(Index + 1) == 0x0A)
@@ -350,7 +325,7 @@ public sealed partial class Scanner
         var start = Index == 0;
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
 
             if (Character.IsWhiteSpace(ch))
             {
@@ -572,7 +547,7 @@ public sealed partial class Scanner
         var start = Index++;
         while (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             if (ch == 0x5C)
             {
                 // Blackslash (U+005C) marks Unicode escape sequence.
@@ -596,7 +571,7 @@ public sealed partial class Scanner
             }
         }
 
-        return Source.Slice(start, Index, ref _stringPool);
+        return Source.Between(start, Index).ToInternedString(ref _stringPool);
     }
 
     private string GetComplexIdentifier()
@@ -684,7 +659,7 @@ public sealed partial class Scanner
         var octal = ch != '0';
         var code = OctalValue(ch);
 
-        if (!Eof() && Character.IsOctalDigit(Source.CharCodeAt(Index)))
+        if (!Eof() && Character.IsOctalDigit(Source[Index]))
         {
             octal = true;
             code = code * 8 + OctalValue(Source[Index++]);
@@ -708,7 +683,7 @@ public sealed partial class Scanner
         var start = Index;
 
         // Backslash (U+005C) starts an escaped character.
-        var id = Source.CharCodeAt(start) == 0x5C ? GetComplexIdentifier() : GetIdentifier();
+        var id = Source[Index] == 0x5C ? GetComplexIdentifier() : GetIdentifier();
 
         // There is no keyword or literal with only one character.
         // Thus, it must be an identifier.
@@ -984,7 +959,7 @@ public sealed partial class Scanner
 
         if (!Eof())
         {
-            var ch = Source.CharCodeAt(Index);
+            var ch = Source[Index];
             if (ch == 'n')
             {
                 Index++;
@@ -1515,7 +1490,7 @@ public sealed partial class Scanner
                         default:
                             if (ch == '0')
                             {
-                                if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
+                                if (Character.IsDecimalDigit(Source[Index]))
                                 {
                                     // NotEscapeSequence: \01 \02 and so on
                                     notEscapeSequenceHead = '0';
@@ -1576,7 +1551,9 @@ public sealed partial class Scanner
             _curlyStack.RemoveAt(_curlyStack.Count - 1);
         }
 
-        var rawTemplate = Source.Slice(start + 1, Index - rawOffset, ref _stringPool);
+        var startRaw = start + 1;
+        var endRaw = Index - rawOffset;
+        var rawTemplate = Source.AsSpan(startRaw, endRaw - startRaw).ToInternedString(ref _stringPool, NonIdentifierInterningThreshold);
         var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
 
         return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
@@ -2435,7 +2412,7 @@ public sealed partial class Scanner
             return Token.CreateEof(Index, LineNumber, LineStart);
         }
 
-        var cp = Source.CharCodeAt(Index);
+        var cp = Source[Index];
 
         if (Character.IsIdentifierStart(cp))
         {

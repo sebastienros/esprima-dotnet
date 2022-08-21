@@ -1,8 +1,9 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Esprima;
 
-internal static class ParserExtensions
+internal static partial class ParserExtensions
 {
     private static readonly string[] s_charToString = new string[256];
 
@@ -16,44 +17,63 @@ internal static class ParserExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string? TryGetInternedString(ReadOnlySpan<char> source)
+    internal static ReadOnlySpan<char> Between(this string s, int start, int end)
     {
-        return
-            Scanner.TryGetInternedKeyword(source) ??
-            Scanner.TryGetInternedContextualKeyword(source) ??
-            Scanner.TryGetInternedStrictModeReservedWord(source) ??
-            Scanner.TryGetInternedRestrictedWord(source) ??
-            Scanner.TryGetInternedPunctuator(source);
+        return s.AsSpan(start, end - start);
+    }
+
+    [StringMatcher(
+        // basic keywords (should include all keywords defined in Scanner.IsKeyword)
+        "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
+        "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
+        "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof",
+        // contextual keywords (should at least include "null", "false" and "true")
+        "as", /*"of",*/ "get", "set", "false", /*"from",*/ "null", "true", "async", "await", "static", "constructor",
+        // some common identifiers/literals in our test data set (benchmarks + test suite)
+        "undefined", "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
+        "options", "value", "name", "self", "key", "\"use strict\"", "use strict"
+    )]
+    internal static partial string? TryGetInternedString(ReadOnlySpan<char> source);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string ToInternedString(this ReadOnlySpan<char> source, ref StringPool stringPool)
+    {
+        if (source.Length == 1)
+        {
+            return CharToString(source[0]);
+        }
+
+        return TryGetInternedString(source) ?? stringPool.GetOrCreate(source);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string Slice(this string source, int start, int end, ref StringPool stringPool)
+    internal static string ToInternedString(this ReadOnlySpan<char> source, ref StringPool stringPool, int interningThreshold)
     {
-        var sourceSpan = source.AsSpan(start, end - start);
-        return TryGetInternedString(sourceSpan) ?? stringPool.GetOrCreate(sourceSpan);
+        return source.Length <= interningThreshold ? source.ToInternedString(ref stringPool) : source.ToString();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string CharToString(char c)
     {
-        if (c >= 0 && c < s_charToString.Length)
+        int index = c;
+        var temp = s_charToString;
+        if ((uint) index < temp.Length)
         {
-            return s_charToString[c];
+            return temp[index];
         }
-
         return c.ToString();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static char CharCodeAt(this string source, int index)
     {
-        if (index < 0 || index > source.Length - 1)
+        if ((uint) index < source.Length)
         {
-            // char.MinValue is used as the null value
-            return char.MinValue;
+            return source[index];
         }
 
-        return source[index];
+        // char.MinValue is used as the null value
+        return char.MinValue;
     }
 
     internal static bool TryConsumeInt(this ref ReadOnlySpan<char> s, out int result)

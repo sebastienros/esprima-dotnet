@@ -8,6 +8,10 @@ public class StringMatcherGeneratorTests : SourceGeneratorTest
     [Fact]
     public Task ScannerStringMatchingGeneration()
     {
-        return Verify<StringMatcherGenerator>(LoadEsprimaSourceFile("JavascriptParser.cs"), LoadEsprimaSourceFile("Scanner.cs"));
+        return Verify<StringMatcherGenerator>(
+            LoadEsprimaSourceFile("JavascriptParser.cs"),
+            LoadEsprimaSourceFile("Scanner.cs"),
+            LoadEsprimaSourceFile("ParserExtensions.cs")
+        );
     }
 }

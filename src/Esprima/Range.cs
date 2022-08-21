@@ -9,6 +9,8 @@ public readonly struct Range : IEquatable<Range>
     public readonly int Start;
     public readonly int End;
 
+    public int Length { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => End - Start; }
+
     private static bool Validate(int start, int end, bool throwOnError)
     {
         if (start < 0)

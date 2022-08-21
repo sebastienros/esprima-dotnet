@@ -482,7 +482,7 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            var id = _scanner.Source.Slice(start, _scanner.Index, ref _scanner._stringPool);
+            var id = _scanner.Source.Between(start, _scanner.Index).ToInternedString(ref _scanner._stringPool);
             return JsxToken.CreateIdentifier(id, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
         }
 
