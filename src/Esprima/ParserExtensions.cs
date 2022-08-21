@@ -28,7 +28,7 @@ internal static partial class ParserExtensions
         "while", "break", "catch", "throw", "const", "yield", "class", "super", "return", "typeof", "delete", "switch",
         "export", "import", "default", "finally", "extends", "function", "continue", "debugger", "instanceof",
         // contextual keywords (should at least include "null", "false" and "true")
-        "as", /*"of",*/ "get", "set", "false", /*"from",*/ "null", "true", "async", "await", "static", "constructor",
+        "as", "of", "get", "set", "false", "from", "null", "true", "async", "await", "static", "constructor",
         // some common identifiers/literals in our test data set (benchmarks + test suite)
         "undefined", "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
         "options", "value", "name", "self", "key", "\"use strict\"", "use strict"

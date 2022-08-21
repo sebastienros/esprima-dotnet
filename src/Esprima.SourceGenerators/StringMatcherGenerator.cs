@@ -131,14 +131,28 @@ public class StringMatcherGenerator : IIncrementalGenerator
 
         var indent = new string(' ', 4);
 
+        bool firstType = true;
         foreach (var typeGrouping in methods.GroupBy(x => (x.TypeModifiers, x.ContainingType)))
         {
+            if (!firstType)
+            {
+                sourceBuilder.AppendLine();
+            }
+            firstType = false;
+
             var (typeModifiers, type) = typeGrouping.Key;
             sourceBuilder.Append(typeModifiers).Append(" partial class ").AppendLine(type)
                 .AppendLine("{");
 
+            bool firstMethod = true;
             foreach (var method in typeGrouping)
             {
+                if (!firstMethod)
+                {
+                    sourceBuilder.AppendLine();
+                }
+                firstMethod = false;
+
                 context.CancellationToken.ThrowIfCancellationRequested();
 
                 sourceBuilder.Append(indent);
@@ -149,13 +163,11 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 var returnString = method.ReturnType.StartsWith("string");
                 var sourceIsSpan = method.InputType.Contains("Span");
 
-                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, 4, checkNull, returnString, sourceIsSpan));
+                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, indent: "    ", indentionLevel: 2, checkNull, returnString, sourceIsSpan));
                 sourceBuilder.Append(indent).AppendLine("}");
-                sourceBuilder.AppendLine();
             }
 
             sourceBuilder.AppendLine("}");
-            sourceBuilder.AppendLine();
         }
 
         context.AddSource("StringMatchers.g.cs", sourceBuilder.ToString());
