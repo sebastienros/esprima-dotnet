@@ -13,4 +13,14 @@ public static class StringBuilderExtensions
 
         return sb;
     }
+
+    public static StringBuilder AppendEscaped(this StringBuilder sb, char c)
+    {
+        return c == '\'' ? sb.Append("\\'") : sb.Append(c);
+    }
+
+    public static StringBuilder AppendEscaped(this StringBuilder sb, string s)
+    {
+        return sb.Append(s.Replace("\"", "\\\""));
+    }
 }

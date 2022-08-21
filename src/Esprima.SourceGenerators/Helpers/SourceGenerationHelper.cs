@@ -73,7 +73,7 @@ internal class StringMatcherAttribute : System.Attribute
                 StringEquality(sb, item, sourceIsSpan, startIndex: 0, discriminatorIndex: -1, charLookupGenerated: false);
                 if (returnString)
                 {
-                    sb.Append(" ? ").Append("\"").Append(Escape(item)).Append("\"").Append(" : null");
+                    sb.Append(" ? ").Append("\"").AppendEscaped(item).Append("\"").Append(" : null");
                 }
                 sb.AppendLine(";");
             }
@@ -84,41 +84,9 @@ internal class StringMatcherAttribute : System.Attribute
                 if (discriminatorIndex == -1)
                 {
                     // try next best effort
-                    var startChars = group.Select(x => x[0]).Distinct();
-
-                    for (var i = 1; i < length; ++i)
-                    {
-                        sb.AppendIndent(indent, indentionLevel).Append("var c").Append(i).Append(" = input[").Append(i).AppendLine("];");
-                    }
-
-                    foreach (var c in startChars)
-                    {
-                        sb.AppendIndent(indent, indentionLevel).Append("if (input[0] == '").Append(c).AppendLine("')");
-                        sb.AppendIndent(indent, indentionLevel).AppendLine("{");
-                        indentionLevel++;
-
-                        GenerateIfForStringContent(sb, group.Where(x => x[0] == c), indent, indentionLevel, returnString, sourceIsSpan, startIndex: 1, charLookupGenerated: true);
-
-                        indentionLevel--;
-                        sb.AppendIndent(indent, indentionLevel).AppendLine("}");
-                    }
-
-                    sb.AppendIndent(indent, indentionLevel).Append("return ").Append(returnString ? "null" : "false").AppendLine(";");
-
-                    /* alternatives
-                    if (group.Key > 4)
-                    {
-                        var indentToUse = byLength.Length > 1 ? indentStr + indentStr + baseIndent : indentStr + baseIndent;
-                        // hash-based or equality-based then, let compiler generate decision tree
-                        GenerateSwitchForStringContent(sb, group, indentToUse, returnString);
-                    }
-                    else
-                    {
-                        // smaller strings are fast to just brute-force check
-                        var indentToUse = byLength.Length > 1 ? indentStr + indentStr + baseIndent : indentStr + baseIndent;
-                        GenerateIfForStringContent(sb, group, indentToUse, returnString, sourceIsSpan);
-                    }
-                    */
+                    sb.AppendIndent(indent, indentionLevel).Append("return ");
+                    GenerateSwitchForStringContent(sb, discriminatorIndex: 0, length, group, indent, indentionLevel, returnString, sourceIsSpan);
+                    sb.AppendLine(";");
                 }
                 else
                 {
@@ -163,17 +131,7 @@ internal class StringMatcherAttribute : System.Attribute
 
         foreach (var item in group)
         {
-            sb.AppendIndent(indent, indentionLevel).Append("'");
-            var value = item[discriminatorIndex];
-            if (value == '\'')
-            {
-                sb.Append("\\'");
-            }
-            else
-            {
-                sb.Append(value);
-            }
-            sb.Append("' => ");
+            sb.AppendIndent(indent, indentionLevel).Append("'").AppendEscaped(item[discriminatorIndex]).Append("' => ");
 
             if (group.Length == 1)
             {
@@ -184,7 +142,7 @@ internal class StringMatcherAttribute : System.Attribute
                 StringEquality(sb, item, sourceIsSpan, startIndex: 0, discriminatorIndex, charLookupGenerated: false);
                 if (returnString)
                 {
-                    sb.Append(" ? ").Append("\"").Append(Escape(item)).Append("\"").Append(" : null");
+                    sb.Append(" ? ").Append("\"").AppendEscaped(item).Append("\"").Append(" : null");
                 }
             }
             sb.AppendLine(",");
@@ -212,7 +170,7 @@ internal class StringMatcherAttribute : System.Attribute
             }
 
             builder.Append("input == \"");
-            builder.Append(Escape(toCheck));
+            builder.AppendEscaped(toCheck);
             builder.Append("\"");
         }
         else
@@ -246,7 +204,7 @@ internal class StringMatcherAttribute : System.Attribute
                         builder.Append("input[").Append(i).Append("]");
                     }
 
-                    builder.Append(" == '").Append(toCheck[i]).Append("'");
+                    builder.Append(" == '").AppendEscaped(toCheck[i]).Append("'");
                     addAnd = true;
                 }
             }
@@ -261,7 +219,7 @@ internal class StringMatcherAttribute : System.Attribute
                     builder.Append("input.AsSpan(").Append(startIndex).Append(")");
                 }
                 builder.Append(".SequenceEqual(\"");
-                builder.Append(Escape(toCheck.AsSpan(startIndex).ToString()));
+                builder.AppendEscaped(toCheck.AsSpan(startIndex).ToString());
                 builder.Append("\".AsSpan())");
             }
         }
@@ -269,85 +227,60 @@ internal class StringMatcherAttribute : System.Attribute
 
     private static void GenerateSwitchForStringContent(
         StringBuilder sb,
-        IGrouping<int, string> group,
-        string indent,
-        int indentionLevel,
-        bool returnString)
-    {
-        sb.AppendIndent(indent, indentionLevel).AppendLine("switch (input)");
-        sb.AppendIndent(indent, indentionLevel).AppendLine("{");
-        indentionLevel++;
-
-        if (returnString)
-        {
-            foreach (var item in group)
-            {
-                sb.AppendIndent(indent, indentionLevel).Append("case \"").Append(Escape(item)).AppendLine("\":");
-                indentionLevel++;
-
-                sb.AppendIndent(indent, indentionLevel).Append("return \"").Append(Escape(item)).AppendLine("\";");
-                indentionLevel--;
-            }
-        }
-        else
-        {
-            foreach (var item in group)
-            {
-                sb.AppendIndent(indent, indentionLevel).Append("case \"").Append(Escape(item)).AppendLine("\":");
-            }
-            indentionLevel++;
-
-            sb.AppendIndent(indent, indentionLevel).AppendLine("return true;");
-            indentionLevel--;
-        }
-
-        sb.AppendIndent(indent, indentionLevel).AppendLine("default:");
-        indentionLevel++;
-
-        sb.AppendIndent(indent, indentionLevel).Append("return ").Append(returnString ? "null" : "false").AppendLine(";");
-        indentionLevel--;
-
-        indentionLevel--;
-        sb.AppendIndent(indent, indentionLevel).AppendLine("}");
-    }
-
-    private static void GenerateIfForStringContent(
-        StringBuilder sb,
-        IEnumerable<string> group,
+        int discriminatorIndex,
+        int length,
+        string[] group,
         string indent,
         int indentionLevel,
         bool returnString,
-        bool sourceIsSpan,
-        int startIndex,
-        bool charLookupGenerated)
+        bool sourceIsSpan)
     {
-        foreach (var item in group)
-        {
-            sb.AppendIndent(indent, indentionLevel).Append("if (");
-            StringEquality(sb, item, sourceIsSpan, startIndex, discriminatorIndex: -1, charLookupGenerated);
-            sb.AppendLine(")");
-            sb.AppendIndent(indent, indentionLevel).AppendLine("{");
-            indentionLevel++;
+        var subGroups = group
+            .GroupBy(x => x[discriminatorIndex])
+            .OrderBy(x => x.Key)
+            .Select(x => (x.Key, x.OrderBy(x => x).ToArray()));
 
-            if (returnString)
+        sb.Append("input[").Append(discriminatorIndex).AppendLine("] switch");
+        sb.AppendIndent(indent, indentionLevel).AppendLine("{");
+        indentionLevel++;
+
+        foreach (var (discriminator, subGroup) in subGroups)
+        {
+            sb.AppendIndent(indent, indentionLevel).Append("'").AppendEscaped(discriminator).Append("' => ");
+
+            if (subGroup.Length == 1 ||
+                discriminatorIndex == length - 1) // Guard against duplicate strings.
             {
-                sb.AppendIndent(indent, indentionLevel).Append("return \"").Append(Escape(item)).AppendLine("\";");
+                var item = subGroup.First();
+                if (discriminatorIndex < length - 1)
+                {
+                    StringEquality(sb, item, sourceIsSpan, discriminatorIndex + 1, discriminatorIndex: discriminatorIndex, charLookupGenerated: false);
+                    if (returnString)
+                    {
+                        sb.Append(" ? ").Append("\"").AppendEscaped(item).Append("\"").Append(" : null");
+                    }
+                }
+                else if (returnString)
+                {
+                    sb.Append("\"").AppendEscaped(item).Append("\"");
+                }
+                else
+                {
+                    sb.Append("true");
+                }
             }
             else
             {
-                sb.AppendIndent(indent, indentionLevel).AppendLine("return false;");
+                GenerateSwitchForStringContent(sb, discriminatorIndex + 1, length, subGroup, indent, indentionLevel, returnString, sourceIsSpan);
             }
 
-            indentionLevel--;
-            sb.AppendIndent(indent, indentionLevel).AppendLine("}");
+            sb.AppendLine(",");
         }
 
-        sb.AppendIndent(indent, indentionLevel).Append("return ").Append(returnString ? "null" : "false").AppendLine(";");
-    }
+        sb.AppendIndent(indent, indentionLevel).Append("_ => ").AppendLine(returnString ? "null" : "false");
 
-    private static string Escape(string s)
-    {
-        return s.Replace("\"", "\\\"");
+        indentionLevel--;
+        sb.AppendIndent(indent, indentionLevel).Append("}");
     }
 
     private static int FindDiscriminatorIndex(string[] grouping, int start)
