@@ -504,7 +504,7 @@ block comment", comment.Value);
         var stringPool = new StringPool();
 
         var nonInternedToken = new string(token.ToCharArray());
-        var slicedToken = nonInternedToken.Slice(0, nonInternedToken.Length, ref stringPool);
+        var slicedToken = nonInternedToken.AsSpan().ToInternedString(ref stringPool);
         Assert.Equal(token, slicedToken);
 
         Assert.NotNull(string.IsInterned(slicedToken));
@@ -517,11 +517,11 @@ block comment", comment.Value);
         var stringPool = new StringPool();
 
         var token = "pow2";
-        var slicedToken1 = "pow2".Slice(0, token.Length, ref stringPool);
+        var slicedToken1 = "pow2".AsSpan().ToInternedString(ref stringPool);
         Assert.Equal(token, slicedToken1);
 
         var source = "async function pow2(x) { return x ** 2; }";
-        var slicedToken2 = source.Slice(15, 15 + token.Length, ref stringPool);
+        var slicedToken2 = source.AsSpan(15, token.Length).ToInternedString(ref stringPool);
         Assert.Equal(token, slicedToken2);
 
         Assert.Same(slicedToken1, slicedToken2);

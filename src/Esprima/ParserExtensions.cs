@@ -16,6 +16,12 @@ internal static partial class ParserExtensions
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ReadOnlySpan<char> Between(this string s, int start, int end)
+    {
+        return s.AsSpan(start, end - start);
+    }
+
     [StringMatcher(
         // basic keywords (should include all keywords defined in Scanner.IsKeyword)
         "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",
@@ -30,19 +36,20 @@ internal static partial class ParserExtensions
     internal static partial string? TryGetInternedString(ReadOnlySpan<char> source);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string Slice(this string source, int start, int end, ref StringPool stringPool)
+    internal static string ToInternedString(this ReadOnlySpan<char> source, ref StringPool stringPool)
     {
-        var sourceSpan = source.AsSpan(start, end - start);
-
-        if (sourceSpan.Length == 1)
+        if (source.Length == 1)
         {
-            return CharToString(sourceSpan[0]);
+            return CharToString(source[0]);
         }
 
-        return TryGetInternedString(sourceSpan) ??
-            (sourceSpan.Length <= 20
-            ? stringPool.GetOrCreate(sourceSpan)
-            : sourceSpan.ToString()); // too long to pool)
+        return TryGetInternedString(source) ?? stringPool.GetOrCreate(source);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string ToInternedString(this ReadOnlySpan<char> source, ref StringPool stringPool, int interningThreshold)
+    {
+        return source.Length <= interningThreshold ? source.ToInternedString(ref stringPool) : source.ToString();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

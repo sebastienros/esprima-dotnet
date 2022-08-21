@@ -32,6 +32,8 @@ internal readonly record struct LexOptions(bool Strict, bool AllowIdentifierEsca
 
 public sealed partial class Scanner
 {
+    internal const int NonIdentifierInterningThreshold = 20;
+
     private readonly IErrorHandler _errorHandler;
     private readonly bool _trackComment;
     private readonly bool _adaptRegexp;
@@ -569,7 +571,7 @@ public sealed partial class Scanner
             }
         }
 
-        return Source.Slice(start, Index, ref _stringPool);
+        return Source.Between(start, Index).ToInternedString(ref _stringPool);
     }
 
     private string GetComplexIdentifier()
@@ -1549,7 +1551,9 @@ public sealed partial class Scanner
             _curlyStack.RemoveAt(_curlyStack.Count - 1);
         }
 
-        var rawTemplate = Source.Slice(start + 1, Index - rawOffset, ref _stringPool);
+        var startRaw = start + 1;
+        var endRaw = Index - rawOffset;
+        var rawTemplate = Source.AsSpan(startRaw, endRaw - startRaw).ToInternedString(ref _stringPool, NonIdentifierInterningThreshold);
         var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
 
         return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);

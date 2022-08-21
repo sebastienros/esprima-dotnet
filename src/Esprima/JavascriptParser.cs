@@ -209,7 +209,10 @@ public partial class JavaScriptParser
             {
                 var e = comments[i];
 
-                var comment = new SyntaxComment(e.Type, value: _scanner.Source.Slice(e.Slice.Start, e.Slice.End, ref _scanner._stringPool))
+                var value = _scanner.Source.AsSpan(e.Slice.Start, e.Slice.Length)
+                    .ToInternedString(ref _scanner._stringPool, Scanner.NonIdentifierInterningThreshold);
+
+                var comment = new SyntaxComment(e.Type, value)
                 {
                     Range = new Range(e.Start, e.End),
                     Location = new Location(in e.StartPosition, in e.EndPosition, _errorHandler.Source)
@@ -225,26 +228,35 @@ public partial class JavaScriptParser
     /// </summary>
     private protected string GetTokenRaw(in Token token)
     {
-        // In the following cases token.Value is already a single-character cached string or interned string.
-        // (See Scanner.ScanIdentifier and Scanner.ScanPunctuator)
         switch (token.Type)
         {
+            // In the following cases token.Value is already a single-character cached string or interned string.
+            // (See Scanner.ScanIdentifier and Scanner.ScanPunctuator)
             case TokenType.Punctuator:
                 return (string) token.Value!;
 
+            case TokenType.Identifier:
             case TokenType.Keyword:
             case TokenType.NullLiteral:
             case TokenType.BooleanLiteral:
                 var stringValue = (string) token.Value!;
-                // In tolerant mode identifers like "nul\u{6c}" may be accepted as keywords, null or boolean literals.
+                // Identifiers may contain escaped characters.
+                // (In tolerant mode even identifers like "nul\u{6c}" may be accepted as keywords, null or boolean literals.)
                 if (stringValue.Length == token.End - token.Start)
                 {
                     return (string) token.Value!;
                 }
                 break;
+
+            // In these cases we want to intern short literals only.
+            case TokenType.StringLiteral:
+            case TokenType.RegularExpression:
+            case TokenType.Template:
+                return _scanner.Source.Between(token.Start, token.End)
+                    .ToInternedString(ref _scanner._stringPool, Scanner.NonIdentifierInterningThreshold);
         }
 
-        return _scanner.Source.Slice(token.Start, token.End, ref _scanner._stringPool);
+        return _scanner.Source.Between(token.Start, token.End).ToInternedString(ref _scanner._stringPool);
     }
 
     private protected SyntaxToken ConvertToken(in Token token)
@@ -4185,7 +4197,7 @@ public partial class JavaScriptParser
         var expr = ParseExpression();
         if (expr.Type == Nodes.Literal)
         {
-            directive = _scanner.Source.Slice(token.Start + 1, token.End - 1, ref _scanner._stringPool);
+            directive = _scanner.Source.Between(token.Start + 1, token.End - 1).ToInternedString(ref _scanner._stringPool);
         }
 
         ConsumeSemicolon();
