@@ -1,4 +1,3 @@
-﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
@@ -63,7 +62,6 @@ public partial class JavaScriptParser
         public bool AllowSuper;
         public bool AllowYield;
         public bool IsAsync;
-        public Token? FirstCoverInitializedNameError;
         public bool IsAssignmentTarget;
         public bool IsBindingElement;
         public bool InFunctionBody;
@@ -76,6 +74,10 @@ public partial class JavaScriptParser
         public ArrayList<Decorator> Decorators;
 
         public HashSet<string?> LabelSet;
+
+        // we use an boxed object instead of Token to reduce stack size and improve
+        // *CoverGrammar method inlining, this is used only for error conditions
+        public object? FirstCoverInitializedNameError;
     }
 
     // cache frequently called Func so we don't need to build Func<T> instances all the time
@@ -511,12 +513,40 @@ public partial class JavaScriptParser
     }
 
     /// <summary>
+    /// Return true if the next token matches the specified punctuator.
+    /// </summary>
+    private bool Match(char value1, char value2, char value3, char value4)
+    {
+        if (_lookahead.Type != TokenType.Punctuator || _lookahead.Length != 1)
+        {
+            return false;
+        }
+
+        var c = ((string) _lookahead.Value!)[0];
+        return c == value1 || c == value2 || c == value3 || c == value4;
+    }
+
+    /// <summary>
     /// Return true if the next token matches the specified keyword
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchKeyword(string keyword)
     {
         return _lookahead.Type == TokenType.Keyword && keyword.Equals((string) _lookahead.Value!);
+    }
+
+    /// <summary>
+    /// Return true if the next token matches the specified keyword
+    /// </summary>
+    private bool MatchKeyword(string keyword1, string keyword2, string keyword3)
+    {
+        if (_lookahead.Type != TokenType.Keyword)
+        {
+            return false;
+        }
+
+        var value = (string) _lookahead.Value!;
+        return value == keyword1 || value == keyword2 ||value == keyword3;
     }
 
     // Return true if the next token matches the specified contextual keyword
@@ -568,7 +598,7 @@ public partial class JavaScriptParser
     // the flags outside of the parser. This means the production the parser parses is used as a part of a potential
     // pattern. The CoverInitializedName check is deferred.
 
-    private T IsolateCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction)
+    private T IsolateCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction) where T : Node
     {
         var previousIsBindingElement = _context.IsBindingElement;
         var previousIsAssignmentTarget = _context.IsAssignmentTarget;
@@ -579,9 +609,9 @@ public partial class JavaScriptParser
         _context.FirstCoverInitializedNameError = null;
 
         var result = parseFunction(this);
-        if (_context.FirstCoverInitializedNameError != null)
+        if (_context.FirstCoverInitializedNameError is not null)
         {
-            ThrowUnexpectedToken(_context.FirstCoverInitializedNameError.Value);
+            ThrowUnexpectedToken(_context.FirstCoverInitializedNameError);
         }
 
         _context.IsBindingElement = previousIsBindingElement;
@@ -1903,6 +1933,7 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-update-expressions
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Expression ParseUpdateExpression()
     {
         Expression expr;
@@ -1910,55 +1941,63 @@ public partial class JavaScriptParser
 
         if (Match("++") || Match("--"))
         {
-            var node = StartNode(startToken);
-            var token = NextToken();
-            expr = InheritCoverGrammar(parseUnaryExpression);
-            if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
-            {
-                TolerateError(Messages.StrictLHSPrefix);
-            }
-
-            if (!_context.IsAssignmentTarget)
-            {
-                TolerateError(Messages.InvalidLHSInAssignment);
-            }
-
-            var prefix = true;
-            expr = Finalize(node, new UpdateExpression((string) token.Value!, expr, prefix));
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
+            expr = ParsePrefixUnaryExpression(startToken);
         }
         else
         {
             expr = InheritCoverGrammar(parseLeftHandSideExpressionAllowCall);
-            if (!_hasLineTerminator && _lookahead.Type == TokenType.Punctuator)
+            if (!_hasLineTerminator && _lookahead.Type == TokenType.Punctuator && (Match("++") || Match("--")))
             {
-                if (Match("++") || Match("--"))
-                {
-                    if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
-                    {
-                        TolerateError(Messages.StrictLHSPostfix);
-                    }
-
-                    if (!_context.IsAssignmentTarget)
-                    {
-                        TolerateError(Messages.InvalidLHSInAssignment);
-                    }
-
-                    _context.IsAssignmentTarget = false;
-                    _context.IsBindingElement = false;
-                    var op = NextToken().Value;
-                    var prefix = false;
-                    expr = Finalize(StartNode(startToken), new UpdateExpression((string) op!, expr, prefix));
-                }
+                expr = ParsePostfixUnaryExpression(expr, startToken);
             }
         }
 
         return expr;
     }
 
+    private Expression ParsePostfixUnaryExpression(Expression expr, Token startToken)
+    {
+        if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
+        {
+            TolerateError(Messages.StrictLHSPostfix);
+        }
+
+        if (!_context.IsAssignmentTarget)
+        {
+            TolerateError(Messages.InvalidLHSInAssignment);
+        }
+
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        var op = NextToken().Value;
+        expr = Finalize(StartNode(startToken), new UpdateExpression((string)op!, expr, prefix: false));
+        return expr;
+    }
+
+    private Expression ParsePrefixUnaryExpression(Token startToken)
+    {
+        Expression expr;
+        var node = StartNode(startToken);
+        var token = NextToken();
+        expr = InheritCoverGrammar(parseUnaryExpression);
+        if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
+        {
+            TolerateError(Messages.StrictLHSPrefix);
+        }
+
+        if (!_context.IsAssignmentTarget)
+        {
+            TolerateError(Messages.InvalidLHSInAssignment);
+        }
+
+        expr = Finalize(node, new UpdateExpression((string)token.Value!, expr, prefix: true));
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        return expr;
+    }
+
     // https://tc39.github.io/ecma262/#sec-unary-operators
-    private Expression ParseAwaitExpression()
+    private AwaitExpression ParseAwaitExpression()
     {
         var node = CreateNode();
         NextToken();
@@ -1966,17 +2005,16 @@ public partial class JavaScriptParser
         return Finalize(node, new AwaitExpression(argument));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Expression ParseUnaryExpression()
     {
         Expression expr;
-
-        if (Match("+") || Match("-") || Match("~") || Match("!") ||
-            MatchKeyword("delete") || MatchKeyword("void") || MatchKeyword("typeof"))
+        if (Match('+', '-', '~', '!') || _lookahead.Type == TokenType.Keyword && MatchUnaryKeyword((string) _lookahead.Value!))
         {
             var node = StartNode(_lookahead);
             var token = NextToken();
             expr = InheritCoverGrammar(parseUnaryExpression);
-            expr = Finalize(node, new UnaryExpression((string) token.Value!, expr));
+            expr = Finalize(node, new UnaryExpression((string)token.Value!, expr));
             var unaryExpr = expr.As<UnaryExpression>();
             if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
             {
@@ -1997,6 +2035,9 @@ public partial class JavaScriptParser
 
         return expr;
     }
+
+    [StringMatcher("delete", "void", "typeof")]
+    private partial bool MatchUnaryKeyword(string input);
 
     private static BinaryExpression CreateBinaryExpression(string op, Expression left, Expression right)
     {
@@ -3425,7 +3466,7 @@ public partial class JavaScriptParser
         return left == null
             ? Finalize(node, new ForStatement(init, test, update, body))
             : forIn
-                ? (Statement) Finalize(node, new ForInStatement(left, right!, body))
+                ? Finalize(node, new ForInStatement(left, right!, body))
                 : Finalize(node, new ForOfStatement(left, right!, body, @await));
     }
 
@@ -5387,13 +5428,22 @@ public partial class JavaScriptParser
     }
 
     [DoesNotReturn]
-    private protected void ThrowUnexpectedToken(in Token token = default, string? message = null)
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private protected void ThrowUnexpectedToken(object? boxedToken)
+    {
+        throw UnexpectedTokenError(boxedToken is not null ? (Token) boxedToken : default);
+    }
+
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private protected T ThrowUnexpectedToken<T>(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);
     }
 
     [DoesNotReturn]
-    private protected T ThrowUnexpectedToken<T>(in Token token = default, string? message = null)
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private protected void ThrowUnexpectedToken(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);
     }

@@ -558,8 +558,9 @@ public class JsxParser : JavaScriptParser
 
     private void ExpectJsx(string value)
     {
-        var token = this.NextJsxToken();
-        if (token.Type != TokenType.Punctuator || token.Value is string val && val != value)
+        var token = NextJsxToken();
+        if (token.Type != TokenType.Punctuator
+            || (token.Value is string s && s != value || token.Value is JsxToken.JsxHolder holder && holder.Value != value))
         {
             ThrowUnexpectedToken(token);
         }
@@ -567,8 +568,9 @@ public class JsxParser : JavaScriptParser
 
     private bool MatchJsx(string value)
     {
-        var next = this.PeekJsxToken();
-        return next.Type == TokenType.Punctuator && next.Value is string val && val == value;
+        var next = PeekJsxToken();
+        return next.Type == TokenType.Punctuator
+               && (next.Value is string s && s == value || next.Value is JsxToken.JsxHolder holder && holder.Value == value);
     }
 
     private JsxIdentifier ParseJsxIdentifier()
@@ -580,7 +582,8 @@ public class JsxParser : JavaScriptParser
             ThrowUnexpectedToken(token);
         }
 
-        return Finalize(node, new JsxIdentifier((string) token.Value!));
+        var holder = (JsxToken.JsxHolder) token.Value!;
+        return Finalize(node, new JsxIdentifier(holder.Value));
     }
 
     private JsxExpression ParseJsxElementName()
@@ -804,7 +807,7 @@ public class JsxParser : JavaScriptParser
             if (token.Start < token.End)
             {
                 var raw = GetTokenRaw(token);
-                var child = Finalize(node, new JsxText(token.Value as string, raw));
+                var child = Finalize(node, new JsxText(((JsxToken.JsxHolder) token.Value!).Value, raw));
                 children.Add(child);
             }
 
