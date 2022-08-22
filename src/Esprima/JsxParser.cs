@@ -288,7 +288,7 @@ public class JsxParser : JavaScriptParser
         { "rang", "\u27E9" }
     };
 
-    public JsxParser() : this(new JsxParserOptions())
+    public JsxParser() : this(JsxParserOptions.Default)
     {
     }
 

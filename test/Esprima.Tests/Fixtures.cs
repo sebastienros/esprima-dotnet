@@ -86,15 +86,16 @@ public class Fixtures
     [MemberData(nameof(SourceFiles), "Fixtures")]
     public void ExecuteTestCase(string fixture)
     {
-        var (parserOptions, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX")
-            ? (new JsxParserOptions(),
+        static T CreateParserOptions<T>(bool tolerant, bool adaptRegex) where T : ParserOptions, new() =>
+            new T { Tokens = true, Tolerant = tolerant, AdaptRegexp = adaptRegex };
+
+        var (parserOptionsFactory, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX")
+            ? (CreateParserOptions<JsxParserOptions>,
                 opts => new JsxParser((JsxParserOptions) opts),
                 JsxAstToJsonOptions.Default)
-            : (new ParserOptions(),
+            : (new Func<bool, bool, ParserOptions>(CreateParserOptions<ParserOptions>),
                 new Func<ParserOptions, JavaScriptParser>(opts => new JavaScriptParser(opts)),
                 AstToJsonOptions.Default);
-
-        parserOptions.Tokens = true;
 
         string treeFilePath, failureFilePath, moduleFilePath;
         var jsFilePath = Path.Combine(GetFixturesPath(), FixturesDirName, fixture);
@@ -145,7 +146,7 @@ public class Fixtures
             metadata = FixtureMetadata.Default;
         }
 
-        parserOptions.AdaptRegexp = !metadata.IgnoresRegex;
+        var parserOptions = parserOptionsFactory(false, !metadata.IgnoresRegex);
 
         var conversionOptions = metadata.CreateConversionOptions(conversionDefaultOptions);
 
@@ -195,14 +196,14 @@ public class Fixtures
 
         if (!invalid)
         {
-            parserOptions.Tolerant = true;
+            parserOptions = parserOptionsFactory(true, parserOptions.AdaptRegexp);
 
             var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
             CompareTreesAndAssert(actual, expected, metadata);
         }
         else
         {
-            parserOptions.Tolerant = false;
+            parserOptions = parserOptionsFactory(false, parserOptions.AdaptRegexp);
 
             // TODO: check the accuracy of the message and of the location
             Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions));

@@ -695,15 +695,14 @@ if (b == 2) {
     [MemberData(nameof(SourceFiles), "Fixtures")]
     public void OriginalAndReparsedASTsShouldMatch(string fixture)
     {
-        var (parserOptions, parserFactory) = fixture.StartsWith("JSX")
-            ? (new JsxParserOptions(),
-                opts => new JsxParser((JsxParserOptions) opts))
-            : (new ParserOptions(),
-                new Func<ParserOptions, JavaScriptParser>(opts => new JavaScriptParser(opts)));
+        static T CreateParserOptions<T>() where T : ParserOptions, new() =>
+            new T { Tokens = false, Tolerant = false, AdaptRegexp = false };
 
-        parserOptions.Tokens = false;
-        parserOptions.AdaptRegexp = false;
-        parserOptions.Tolerant = false;
+        var (parserOptionsFactory, parserFactory) = fixture.StartsWith("JSX")
+            ? (CreateParserOptions<JsxParserOptions>,
+                opts => new JsxParser((JsxParserOptions) opts))
+            : (new Func<ParserOptions>(CreateParserOptions<ParserOptions>),
+                new Func<ParserOptions, JavaScriptParser>(opts => new JavaScriptParser(opts)));
 
         string treeFilePath, failureFilePath, moduleFilePath;
         var jsFilePath = Path.Combine(Fixtures.GetFixturesPath(), Fixtures.FixturesDirName, fixture);
@@ -761,6 +760,8 @@ if (b == 2) {
         {
             return;
         }
+
+        var parserOptions = parserOptionsFactory();
 
         try { expectedAst = Parse(sourceType, script, parserOptions, parserFactory); }
         catch (ParserException) { return; }

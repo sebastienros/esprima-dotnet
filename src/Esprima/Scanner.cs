@@ -101,7 +101,7 @@ public sealed partial class Scanner
         _curlyStack = new List<string>();
     }
 
-    public Scanner(string code) : this(code, new ParserOptions())
+    public Scanner(string code) : this(code, ParserOptions.Default)
     {
     }
 
@@ -109,7 +109,7 @@ public sealed partial class Scanner
     {
     }
 
-    public Scanner(string code, string? source) : this(code, source, new ParserOptions())
+    public Scanner(string code, string? source) : this(code, source, ParserOptions.Default)
     {
     }
 

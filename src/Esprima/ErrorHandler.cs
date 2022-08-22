@@ -5,6 +5,8 @@ namespace Esprima;
 /// </summary>
 public class ErrorHandler : IErrorHandler
 {
+    public static readonly ErrorHandler Default = new();
+
     public virtual void RecordError(ParserException error)
     {
     }

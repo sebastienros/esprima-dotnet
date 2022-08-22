@@ -136,7 +136,7 @@ public partial class JavaScriptParser
     /// <summary>
     /// Creates a new <see cref="JavaScriptParser" /> instance.
     /// </summary>
-    public JavaScriptParser() : this(new ParserOptions())
+    public JavaScriptParser() : this(ParserOptions.Default)
     {
     }
 
