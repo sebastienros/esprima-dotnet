@@ -41,17 +41,17 @@ public sealed partial class Scanner
     private readonly TimeSpan _regexTimeout;
 
     private int _length;
-    internal string Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] private set; }
-    internal string? _sourceName;
+    internal string _source; // should be named _code to match the corresponding ctor parameter name but internally we keep this name to match Esprima.org naming
+    internal string? _sourceLocation; // should be named _source to match the corresponding ctor parameter name
 
-    internal int Index { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] set; }
-    internal int LineNumber { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] set; }
-    internal int LineStart { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; [MethodImpl(MethodImplOptions.AggressiveInlining)] set; }
+    internal int _index;
+    internal int _lineNumber;
+    internal int _lineStart;
 
-    internal bool IsModule;
+    internal bool _isModule;
 
     private List<string> _curlyStack;
-    private readonly StringBuilder strb = new();
+    private readonly StringBuilder _sb = new();
 
     internal StringPool _stringPool;
 
@@ -97,7 +97,7 @@ public sealed partial class Scanner
         _tolerant = options.Tolerant;
         _trackComment = options.Comment;
 
-        Source = string.Empty;
+        _source = string.Empty;
         _curlyStack = new List<string>();
     }
 
@@ -127,19 +127,19 @@ public sealed partial class Scanner
     {
         if (_length > 0)
         {
-            Index = 0 <= startIndex && startIndex < _length ? startIndex : throw new ArgumentOutOfRangeException(nameof(startIndex));
-            LineNumber = lineNumber > 0 ? lineNumber : throw new ArgumentOutOfRangeException(nameof(lineNumber));
-            LineStart = 0 <= lineStartIndex && lineStartIndex <= Index ? lineStartIndex : throw new ArgumentOutOfRangeException(nameof(lineStartIndex));
+            _index = 0 <= startIndex && startIndex < _length ? startIndex : throw new ArgumentOutOfRangeException(nameof(startIndex));
+            _lineNumber = lineNumber > 0 ? lineNumber : throw new ArgumentOutOfRangeException(nameof(lineNumber));
+            _lineStart = 0 <= lineStartIndex && lineStartIndex <= _index ? lineStartIndex : throw new ArgumentOutOfRangeException(nameof(lineStartIndex));
         }
         else
         {
-            Index = startIndex == 0 ? startIndex : throw new ArgumentOutOfRangeException(nameof(startIndex));
-            LineNumber = lineNumber == 0 ? lineNumber : throw new ArgumentOutOfRangeException(nameof(lineNumber));
-            LineStart = lineStartIndex == 0 ? lineStartIndex : throw new ArgumentOutOfRangeException(nameof(lineStartIndex));
+            _index = startIndex == 0 ? startIndex : throw new ArgumentOutOfRangeException(nameof(startIndex));
+            _lineNumber = lineNumber == 0 ? lineNumber : throw new ArgumentOutOfRangeException(nameof(lineNumber));
+            _lineStart = lineStartIndex == 0 ? lineStartIndex : throw new ArgumentOutOfRangeException(nameof(lineStartIndex));
         }
 
         _curlyStack.Clear();
-        strb.Clear();
+        _sb.Clear();
     }
 
     internal void Reset(string code, string? source)
@@ -149,13 +149,13 @@ public sealed partial class Scanner
 
     internal void Reset(string code, string? source, int startIndex, int lineNumber, int lineStartIndex)
     {
-        Source = code ?? throw new ArgumentNullException(nameof(code));
+        _source = code ?? throw new ArgumentNullException(nameof(code));
         _length = code.Length;
-        _sourceName = source;
+        _sourceLocation = source;
 
         Reset(startIndex, lineNumber, lineStartIndex);
         _stringPool = default;
-        IsModule = false;
+        _isModule = false;
     }
 
     internal void ReleaseLargeBuffers()
@@ -166,53 +166,59 @@ public sealed partial class Scanner
             _curlyStack.Capacity = 16;
         }
 
-        strb.Clear();
-        if (strb.Capacity > 1024)
+        _sb.Clear();
+        if (_sb.Capacity > 1024)
         {
-            strb.Capacity = 1024;
+            _sb.Capacity = 1024;
         }
 
         _stringPool = default;
     }
 
+    public string Code { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _source; }
+
+    public int Index { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _index; }
+    public int LineNumber { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _lineNumber; }
+    public int LineStart { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _lineStart; }
+
     internal ScannerState SaveState()
     {
-        return new ScannerState(Index, LineNumber, LineStart, new List<string>(_curlyStack));
+        return new ScannerState(_index, _lineNumber, _lineStart, new List<string>(_curlyStack));
     }
 
     internal void RestoreState(in ScannerState state)
     {
-        Index = state.Index;
-        LineNumber = state.LineNumber;
-        LineStart = state.LineStart;
+        _index = state.Index;
+        _lineNumber = state.LineNumber;
+        _lineStart = state.LineStart;
         _curlyStack = state.CurlyStack;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool Eof()
     {
-        return Index >= _length;
+        return _index >= _length;
     }
 
     private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);
     }
 
     private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);
     }
 
     private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        _errorHandler.TolerateError(_sourceName, Index, LineNumber, Index - LineStart + 1, message, _tolerant);
+        _errorHandler.TolerateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message, _tolerant);
     }
 
     private StringBuilder GetStringBuilder()
     {
-        strb.Clear();
-        return strb;
+        _sb.Clear();
+        return _sb;
     }
 
     // https://tc39.github.io/ecma262/#sec-future-reserved-words
@@ -254,26 +260,26 @@ public sealed partial class Scanner
 
         if (_trackComment)
         {
-            start = Index - offset;
-            startPosition = new Position(LineNumber, Index - LineStart - offset);
+            start = _index - offset;
+            startPosition = new Position(_lineNumber, _index - _lineStart - offset);
         }
 
         while (!Eof())
         {
-            var ch = Source[Index];
-            ++Index;
+            var ch = _source[_index];
+            ++_index;
             if (Character.IsLineTerminator(ch))
             {
                 if (_trackComment)
                 {
-                    endPosition = new Position(LineNumber, Index - LineStart - 1);
-                    slice = new Esprima.Range(start + offset, Index - 1);
+                    endPosition = new Position(_lineNumber, _index - _lineStart - 1);
+                    slice = new Esprima.Range(start + offset, _index - 1);
                     var entry = new Comment
                     (
                         type: CommentType.Line,
                         slice: in slice,
                         start: start,
-                        end: Index - 1,
+                        end: _index - 1,
                         in startPosition,
                         in endPosition
                     );
@@ -281,27 +287,27 @@ public sealed partial class Scanner
                     comments.Add(entry);
                 }
 
-                if (ch == 13 && Source.CharCodeAt(Index) == 10)
+                if (ch == 13 && _source.CharCodeAt(_index) == 10)
                 {
-                    ++Index;
+                    ++_index;
                 }
 
-                ++LineNumber;
-                LineStart = Index;
+                ++_lineNumber;
+                _lineStart = _index;
                 return comments;
             }
         }
 
         if (_trackComment)
         {
-            endPosition = new Position(LineNumber, Index - LineStart);
-            slice = new Esprima.Range(start + offset, Index);
+            endPosition = new Position(_lineNumber, _index - _lineStart);
+            slice = new Esprima.Range(start + offset, _index);
             var entry = new Comment
             (
                 type: CommentType.Line,
                 slice: in slice,
                 start: start,
-                end: Index,
+                end: _index,
                 in startPosition,
                 in endPosition
             );
@@ -321,40 +327,40 @@ public sealed partial class Scanner
 
         if (_trackComment)
         {
-            start = Index - 2;
-            startPosition = new Position(LineNumber, Index - LineStart - 2);
+            start = _index - 2;
+            startPosition = new Position(_lineNumber, _index - _lineStart - 2);
         }
 
         while (!Eof())
         {
-            var ch = Source[Index];
+            var ch = _source[_index];
             if (Character.IsLineTerminator(ch))
             {
-                if (ch == 0x0D && Source.CharCodeAt(Index + 1) == 0x0A)
+                if (ch == 0x0D && _source.CharCodeAt(_index + 1) == 0x0A)
                 {
-                    ++Index;
+                    ++_index;
                 }
 
-                ++LineNumber;
-                ++Index;
-                LineStart = Index;
+                ++_lineNumber;
+                ++_index;
+                _lineStart = _index;
             }
             else if (ch == 0x2A)
             {
                 // Block comment ends with '*/'.
-                if (Source.CharCodeAt(Index + 1) == 0x2F)
+                if (_source.CharCodeAt(_index + 1) == 0x2F)
                 {
-                    Index += 2;
+                    _index += 2;
                     if (_trackComment)
                     {
-                        endPosition = new Position(LineNumber, Index - LineStart);
-                        slice = new Esprima.Range(start + 2, Index - 2);
+                        endPosition = new Position(_lineNumber, _index - _lineStart);
+                        slice = new Esprima.Range(start + 2, _index - 2);
                         var entry = new Comment
                         (
                             type: CommentType.Block,
                             slice: in slice,
                             start: start,
-                            end: Index,
+                            end: _index,
                             in startPosition,
                             in endPosition
                         );
@@ -364,25 +370,25 @@ public sealed partial class Scanner
                     return comments;
                 }
 
-                ++Index;
+                ++_index;
             }
             else
             {
-                ++Index;
+                ++_index;
             }
         }
 
         // Ran off the end of the file - the whole thing is a comment
         if (_trackComment)
         {
-            endPosition = new Position(LineNumber, Index - LineStart);
-            slice = new Esprima.Range(start + 2, Index);
+            endPosition = new Position(_lineNumber, _index - _lineStart);
+            slice = new Esprima.Range(start + 2, _index);
             var entry = new Comment
             (
                 type: CommentType.Block,
                 slice: in slice,
                 start: start,
-                end: Index,
+                end: _index,
                 in startPosition,
                 in endPosition
             );
@@ -397,34 +403,34 @@ public sealed partial class Scanner
     {
         var comments = new ArrayList<Comment>();
 
-        var start = Index == 0;
+        var start = _index == 0;
         while (!Eof())
         {
-            var ch = Source[Index];
+            var ch = _source[_index];
 
             if (Character.IsWhiteSpace(ch))
             {
-                ++Index;
+                ++_index;
             }
             else if (Character.IsLineTerminator(ch))
             {
-                ++Index;
-                if (ch == 0x0D && Source.CharCodeAt(Index) == 0x0A)
+                ++_index;
+                if (ch == 0x0D && _source.CharCodeAt(_index) == 0x0A)
                 {
-                    ++Index;
+                    ++_index;
                 }
 
-                ++LineNumber;
-                LineStart = Index;
+                ++_lineNumber;
+                _lineStart = _index;
                 start = true;
             }
             else if (ch == 0x2F)
             {
                 // U+002F is '/'
-                ch = Source.CharCodeAt(Index + 1);
+                ch = _source.CharCodeAt(_index + 1);
                 if (ch == 0x2F)
                 {
-                    Index += 2;
+                    _index += 2;
                     var comment = SkipSingleLineComment(2);
                     if (_trackComment)
                     {
@@ -436,7 +442,7 @@ public sealed partial class Scanner
                 else if (ch == 0x2A)
                 {
                     // U+002A is '*'
-                    Index += 2;
+                    _index += 2;
                     var comment = SkipMultiLineComment();
                     if (_trackComment)
                     {
@@ -452,10 +458,10 @@ public sealed partial class Scanner
             {
                 // U+002D is '-'
                 // U+003E is '>'
-                if (Source.CharCodeAt(Index + 1) == 0x2D && Source.CharCodeAt(Index + 2) == 0x3E)
+                if (_source.CharCodeAt(_index + 1) == 0x2D && _source.CharCodeAt(_index + 2) == 0x3E)
                 {
                     // '-->' is a single-line comment
-                    Index += 3;
+                    _index += 3;
                     var comment = SkipSingleLineComment(3);
                     if (_trackComment)
                     {
@@ -470,16 +476,16 @@ public sealed partial class Scanner
             else if (ch == 0x3C)
             {
                 // U+003C is '<'
-                if (Source[Index + 1] == '!'
-                    && Source[Index + 2] == '-'
-                    && Source[Index + 3] == '-')
+                if (_source[_index + 1] == '!'
+                    && _source[_index + 2] == '-'
+                    && _source[_index + 3] == '-')
                 {
-                    if (IsModule)
+                    if (_isModule)
                     {
                         ThrowUnexpectedToken();
                     }
 
-                    Index += 4; // `<!--`
+                    _index += 4; // `<!--`
                     var comment = SkipSingleLineComment(4);
                     if (_trackComment)
                     {
@@ -491,24 +497,24 @@ public sealed partial class Scanner
                     break;
                 }
             }
-            else if (Index == 0 && ch == '#')
+            else if (_index == 0 && ch == '#')
             {
-                if (Source[Index + 1] != '!')
+                if (_source[_index + 1] != '!')
                 {
                     ThrowUnexpectedToken();
                 }
 
                 // hashbang
-                Index += 2;
+                _index += 2;
                 while (!Eof())
                 {
-                    ch = Source.CharCodeAt(Index);
-                    if (ch == '/' && Source.CharCodeAt(Index + 1) == '*')
+                    ch = _source.CharCodeAt(_index);
+                    if (ch == '/' && _source.CharCodeAt(_index + 1) == '*')
                     {
                         ThrowUnexpectedToken();
                     }
 
-                    Index++;
+                    _index++;
                     if (Character.IsLineTerminator(ch))
                     {
                         break;
@@ -553,11 +559,11 @@ public sealed partial class Scanner
         {
             if (!Eof())
             {
-                var d = Source[Index];
+                var d = _source[_index];
                 if (Character.IsHexDigit(d))
                 {
                     code = code * 16 + HexValue(d);
-                    Index++;
+                    _index++;
                 }
                 else
                 {
@@ -578,7 +584,7 @@ public sealed partial class Scanner
 
     private string? TryToScanUnicodeCodePointEscape()
     {
-        var ch = Source[Index];
+        var ch = _source[_index];
         var code = 0;
 
         // At least, one hex digit is required.
@@ -589,7 +595,7 @@ public sealed partial class Scanner
 
         while (!Eof())
         {
-            ch = Source[Index++];
+            ch = _source[_index++];
             if (!Character.IsHexDigit(ch))
             {
                 break;
@@ -619,26 +625,26 @@ public sealed partial class Scanner
 
     private string GetIdentifier()
     {
-        var start = Index++;
+        var start = _index++;
         while (!Eof())
         {
-            var ch = Source[Index];
+            var ch = _source[_index];
             if (ch == 0x5C)
             {
                 // Blackslash (U+005C) marks Unicode escape sequence.
-                Index = start;
+                _index = start;
                 return GetComplexIdentifier();
             }
             else if (ch >= 0xD800 && ch < 0xDFFF)
             {
                 // Need to handle surrogate pairs.
-                Index = start;
+                _index = start;
                 return GetComplexIdentifier();
             }
 
             if (Character.IsIdentifierPart(ch))
             {
-                ++Index;
+                ++_index;
             }
             else
             {
@@ -646,28 +652,28 @@ public sealed partial class Scanner
             }
         }
 
-        return Source.Between(start, Index).ToInternedString(ref _stringPool);
+        return _source.Between(start, _index).ToInternedString(ref _stringPool);
     }
 
     private string GetComplexIdentifier()
     {
-        var cp = CodePointAt(Source, Index);
+        var cp = CodePointAt(_source, _index);
         var id = Character.FromCodePoint(cp);
-        Index += id.Length;
+        _index += id.Length;
 
         // '\u' (U+005C, U+0075) denotes an escaped character.
         string ch;
         if (cp == 0x5C)
         {
-            if (Source.CharCodeAt(Index) != 0x75)
+            if (_source.CharCodeAt(_index) != 0x75)
             {
                 ThrowUnexpectedToken();
             }
 
-            ++Index;
-            if (Source[Index] == '{')
+            ++_index;
+            if (_source[_index] == '{')
             {
-                ++Index;
+                ++_index;
                 ch = ScanUnicodeCodePointEscape();
             }
             else
@@ -686,7 +692,7 @@ public sealed partial class Scanner
 
         while (!Eof())
         {
-            cp = CodePointAt(Source, Index);
+            cp = CodePointAt(_source, _index);
             ch = Character.FromCodePoint(cp);
             if (!Character.IsIdentifierPart(ch))
             {
@@ -694,21 +700,21 @@ public sealed partial class Scanner
             }
 
             id += ch;
-            Index += ch.Length;
+            _index += ch.Length;
 
             // '\u' (U+005C, U+0075) denotes an escaped character.
             if (cp == 0x5C)
             {
                 id = id.Substring(0, id.Length - 1);
-                if (Source.CharCodeAt(Index) != 0x75)
+                if (_source.CharCodeAt(_index) != 0x75)
                 {
                     ThrowUnexpectedToken();
                 }
 
-                ++Index;
-                if (Index < Source.Length && Source[Index] == '{')
+                ++_index;
+                if (_index < _source.Length && _source[_index] == '{')
                 {
-                    ++Index;
+                    ++_index;
                     ch = ScanUnicodeCodePointEscape();
                 }
                 else
@@ -734,16 +740,16 @@ public sealed partial class Scanner
         var octal = ch != '0';
         var code = OctalValue(ch);
 
-        if (!Eof() && Character.IsOctalDigit(Source[Index]))
+        if (!Eof() && Character.IsOctalDigit(_source[_index]))
         {
             octal = true;
-            code = code * 8 + OctalValue(Source[Index++]);
+            code = code * 8 + OctalValue(_source[_index++]);
 
             // 3 digits are only allowed when string starts
             // with 0, 1, 2, 3
-            if (ch >= '0' && ch <= '3' && !Eof() && Character.IsOctalDigit(Source.CharCodeAt(Index)))
+            if (ch >= '0' && ch <= '3' && !Eof() && Character.IsOctalDigit(_source.CharCodeAt(_index)))
             {
-                code = code * 8 + OctalValue(Source[Index++]);
+                code = code * 8 + OctalValue(_source[_index++]);
             }
         }
 
@@ -755,10 +761,10 @@ public sealed partial class Scanner
     private Token ScanIdentifier(bool allowEscapes)
     {
         TokenType type;
-        var start = Index;
+        var start = _index;
 
         // Backslash (U+005C) starts an escaped character.
-        var id = Source[Index] == 0x5C ? GetComplexIdentifier() : GetIdentifier();
+        var id = _source[_index] == 0x5C ? GetComplexIdentifier() : GetIdentifier();
 
         // There is no keyword or literal with only one character.
         // Thus, it must be an identifier.
@@ -783,54 +789,54 @@ public sealed partial class Scanner
             type = TokenType.Identifier;
         }
 
-        if (type != TokenType.Identifier && start + id.Length != Index)
+        if (type != TokenType.Identifier && start + id.Length != _index)
         {
-            var restore = Index;
-            Index = start;
+            var restore = _index;
+            _index = start;
             if (!allowEscapes)
             {
                 TolerateUnexpectedToken(Messages.InvalidEscapedReservedWord);
             }
-            Index = restore;
+            _index = restore;
         }
 
-        return Token.Create(type, id, start, end: Index, LineNumber, LineStart);
+        return Token.Create(type, id, start, end: _index, _lineNumber, _lineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-punctuators
 
     private Token ScanPunctuator()
     {
-        var start = Index;
+        var start = _index;
 
         // Check for most common single-character punctuators.
-        var c = Source[Index];
+        var c = _source[_index];
         var str = ParserExtensions.CharToString(c);
 
         switch (c)
         {
             case '(':
-                ++Index;
+                ++_index;
                 break;
 
             case '{':
                 _curlyStack.Add("{");
-                ++Index;
+                ++_index;
                 break;
 
             case '.':
-                ++Index;
-                if (Source.Length >= Index + 2 && Source[Index] == '.' && Source[Index + 1] == '.')
+                ++_index;
+                if (_source.Length >= _index + 2 && _source[_index] == '.' && _source[_index + 1] == '.')
                 {
                     // Spread operator: ...
-                    Index += 2;
+                    _index += 2;
                     str = "...";
                 }
 
                 break;
 
             case '}':
-                ++Index;
+                ++_index;
                 if (_curlyStack.Count > 0)
                 {
                     _curlyStack.RemoveAt(_curlyStack.Count - 1);
@@ -839,13 +845,13 @@ public sealed partial class Scanner
                 break;
 
             case '?':
-                ++Index;
-                if (Source[Index] == '?')
+                ++_index;
+                if (_source[_index] == '?')
                 {
-                    ++Index;
-                    if (Source[Index] == '=')
+                    ++_index;
+                    if (_source[_index] == '=')
                     {
-                        ++Index;
+                        ++_index;
                         str = "??=";
                     }
                     else
@@ -854,11 +860,11 @@ public sealed partial class Scanner
                     }
                 }
 
-                if (Source[Index] == '.' && !char.IsDigit(Source[Index + 1]))
+                if (_source[_index] == '.' && !char.IsDigit(_source[_index + 1]))
                 {
                     // "?." in "foo?.3:0" should not be treated as optional chaining.
                     // See https://github.com/tc39/proposal-optional-chaining#notes
-                    ++Index;
+                    ++_index;
                     str = "?.";
                 }
 
@@ -872,25 +878,25 @@ public sealed partial class Scanner
             case ':':
             case '~':
             case '@':
-                ++Index;
+                ++_index;
                 break;
 
             default:
                 // 4-character punctuator.
-                if (Index + 4 <= Source.Length && Source.AsSpan(Index, 4).SequenceEqual(">>>=".AsSpan()))
+                if (_index + 4 <= _source.Length && _source.AsSpan(_index, 4).SequenceEqual(">>>=".AsSpan()))
                 {
-                    Index += 4;
+                    _index += 4;
                     str = ">>>=";
                 }
                 // 3-character punctuators.
-                else if (Index + 3 <= Source.Length && (str = TryGetInternedThreeCharacterPunctuator(Source.AsSpan(Index, 3))) is not null)
+                else if (_index + 3 <= _source.Length && (str = TryGetInternedThreeCharacterPunctuator(_source.AsSpan(_index, 3))) is not null)
                 {
-                    Index += 3;
+                    _index += 3;
                 }
                 // 2-character punctuators.
-                else if (Index + 2 <= Source.Length && (str = TryGetInternedTwoCharacterPunctuator(Source.AsSpan(Index, 2))) is not null)
+                else if (_index + 2 <= _source.Length && (str = TryGetInternedTwoCharacterPunctuator(_source.AsSpan(_index, 2))) is not null)
                 {
-                    Index += 2;
+                    _index += 2;
                 }
                 // 1-character punctuators.
                 else
@@ -898,19 +904,19 @@ public sealed partial class Scanner
                     str = ParserExtensions.CharToString(c);
                     if ("<>=!+-*%&|^/".IndexOf(c) >= 0)
                     {
-                        ++Index;
+                        ++_index;
                     }
                 }
 
                 break;
         }
 
-        if (Index == start)
+        if (_index == start)
         {
             ThrowUnexpectedToken();
         }
 
-        return Token.CreatePunctuator(str, start, end: Index, LineNumber, LineStart);
+        return Token.CreatePunctuator(str, start, end: _index, _lineNumber, _lineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
@@ -924,12 +930,12 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        var ch = Source.CharCodeAt(Index);
+        var ch = _source.CharCodeAt(_index);
         if (Character.IsIdentifierStart(ch))
         {
             if (ch == 'n')
             {
-                Index++;
+                _index++;
                 return ScanBigIntLiteral(start, number, JavaScriptNumberStyle.Hex);
             }
             ThrowUnexpectedToken();
@@ -971,7 +977,7 @@ public sealed partial class Scanner
             }
         }
 
-        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(value, octal: false, start, end: _index, _lineNumber, _lineStart);
     }
 
     private enum JavaScriptNumberStyle
@@ -1019,7 +1025,7 @@ public sealed partial class Scanner
 #endif
         }
 
-        return Token.CreateBigIntLiteral(bigInt, start, end: Index, LineNumber, LineStart);
+        return Token.CreateBigIntLiteral(bigInt, start, end: _index, _lineNumber, _lineStart);
     }
 
     private Token ScanBinaryLiteral(int start)
@@ -1034,10 +1040,10 @@ public sealed partial class Scanner
 
         if (!Eof())
         {
-            var ch = Source[Index];
+            var ch = _source[_index];
             if (ch == 'n')
             {
-                Index++;
+                _index++;
                 return ScanBigIntLiteral(start, number, JavaScriptNumberStyle.Binary);
             }
 
@@ -1049,7 +1055,7 @@ public sealed partial class Scanner
 
         var numberString = number.ToString();
         var value = Convert.ToUInt32(numberString, 2);
-        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(value, octal: false, start, end: _index, _lineNumber, _lineStart);
     }
 
     private Token ScanOctalLiteral(char prefix, int start, bool isLegacyOctalDigital = false)
@@ -1060,11 +1066,11 @@ public sealed partial class Scanner
         if (Character.IsOctalDigit(prefix))
         {
             octal = true;
-            sb.Append("0").Append(Source[Index++]);
+            sb.Append("0").Append(_source[_index++]);
         }
         else
         {
-            ++Index;
+            ++_index;
         }
 
         sb.Append(this.ScanLiteralPart(Character.IsOctalDigitFunc, allowNumericSeparator: true, out _));
@@ -1076,7 +1082,7 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        var ch = Source.CharCodeAt(Index);
+        var ch = _source.CharCodeAt(_index);
 
         if (ch == 'n')
         {
@@ -1085,7 +1091,7 @@ public sealed partial class Scanner
                 ThrowUnexpectedToken();
             }
 
-            Index++;
+            _index++;
             return ScanBigIntLiteral(start, number.AsSpan(), JavaScriptNumberStyle.Octal);
         }
 
@@ -1104,16 +1110,16 @@ public sealed partial class Scanner
             return ThrowUnexpectedToken<Token>($"Value {number} was either too large or too small for a UInt64.");
         }
 
-        return Token.CreateNumericLiteral(numericValue, octal, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(numericValue, octal, start, end: _index, _lineNumber, _lineStart);
     }
 
     private bool IsImplicitOctalLiteral()
     {
         // Implicit octal, unless there is a non-octal digit.
         // (Annex B.1.1 on Numeric Literals)
-        for (var i = Index + 1; i < _length; ++i)
+        for (var i = _index + 1; i < _length; ++i)
         {
-            var ch = Source[i];
+            var ch = _source[i];
             if (ch == '8' || ch == '9')
             {
                 return false;
@@ -1131,9 +1137,9 @@ public sealed partial class Scanner
     private ReadOnlySpan<char> ScanLiteralPart(Func<char, bool> check, bool allowNumericSeparator, out bool hasUpperCase)
     {
         hasUpperCase = false;
-        var start = Index;
+        var start = _index;
 
-        var charCode = Source.CharCodeAt(Index);
+        var charCode = _source.CharCodeAt(_index);
         if (charCode == '_')
         {
             ThrowUnexpectedToken(Messages.NumericSeparatorNotAllowedHere);
@@ -1153,8 +1159,8 @@ public sealed partial class Scanner
 
             hasUpperCase |= char.IsUpper(charCode);
 
-            Index++;
-            var newCharCode = Source.CharCodeAt(Index);
+            _index++;
+            var newCharCode = _source.CharCodeAt(_index);
             if (charCode == '_')
             {
                 if (newCharCode == '_')
@@ -1175,12 +1181,12 @@ public sealed partial class Scanner
             charCode = newCharCode;
         }
 
-        if (Source[Index - 1] == '_')
+        if (_source[_index - 1] == '_')
         {
             ThrowUnexpectedToken(Messages.NumericSeparatorNotAllowedHere);
         }
 
-        var span = Source.AsSpan(start, Index - start);
+        var span = _source.AsSpan(start, _index - start);
         return needsCleanup
             ? span.ToString().Replace("_", "").AsSpan()
             : span;
@@ -1189,16 +1195,16 @@ public sealed partial class Scanner
     private Token ScanNumericLiteral(bool strict)
     {
         var sb = GetStringBuilder();
-        var start = Index;
-        var ch = Source[start];
+        var start = _index;
+        var ch = _source[start];
         //assert(Character.IsDecimalDigit(ch) || (ch == '.'),
         //    'Numeric literal must start with a decimal digit or a decimal point');
 
         var nonOctal = false;
         if (ch != '.')
         {
-            var first = Source[Index++];
-            ch = Source.CharCodeAt(Index);
+            var first = _source[_index++];
+            ch = _source.CharCodeAt(_index);
 
             // Hex number starts with '0x'.
             // Octal number starts with '0'.
@@ -1208,13 +1214,13 @@ public sealed partial class Scanner
             {
                 if (ch is 'x' or 'X')
                 {
-                    ++Index;
+                    ++_index;
                     return ScanHexLiteral(start);
                 }
 
                 if (ch is 'b' or 'B')
                 {
-                    ++Index;
+                    ++_index;
                     return ScanBinaryLiteral(start);
                 }
 
@@ -1243,29 +1249,29 @@ public sealed partial class Scanner
                 }
             }
 
-            --Index;
+            --_index;
             sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal, out _));
-            ch = Source.CharCodeAt(Index);
+            ch = _source.CharCodeAt(_index);
         }
 
         if (ch == '.')
         {
-            sb.Append(Source[Index++]);
+            sb.Append(_source[_index++]);
             sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal, out _));
-            ch = Source.CharCodeAt(Index);
+            ch = _source.CharCodeAt(_index);
         }
 
         if (ch == 'e' || ch == 'E')
         {
-            sb.Append(Source[Index++]);
+            sb.Append(_source[_index++]);
 
-            ch = Source.CharCodeAt(Index);
+            ch = _source.CharCodeAt(_index);
             if (ch == '+' || ch == '-')
             {
-                sb.Append(Source[Index++]);
+                sb.Append(_source[_index++]);
             }
 
-            if (Character.IsDecimalDigit(Source.CharCodeAt(Index)))
+            if (Character.IsDecimalDigit(_source.CharCodeAt(_index)))
             {
                 sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: true, out _));
             }
@@ -1281,11 +1287,11 @@ public sealed partial class Scanner
                 ThrowUnexpectedToken();
             }
 
-            Index++;
+            _index++;
             return ScanBigIntLiteral(start, sb.ToString().AsSpan(), JavaScriptNumberStyle.Integer);
         }
 
-        if (Character.IsIdentifierStart(Source.CharCodeAt(Index)))
+        if (Character.IsIdentifierStart(_source.CharCodeAt(_index)))
         {
             ThrowUnexpectedToken();
         }
@@ -1317,26 +1323,26 @@ public sealed partial class Scanner
             value = d;
         }
 
-        return Token.CreateNumericLiteral(value, octal: false, start, end: Index, LineNumber, LineStart);
+        return Token.CreateNumericLiteral(value, octal: false, start, end: _index, _lineNumber, _lineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-string-literals
 
     private Token ScanStringLiteral(bool strict)
     {
-        var start = Index;
-        var quote = Source[start];
+        var start = _index;
+        var quote = _source[start];
         //assert((quote == '\'' || quote == '"'),
         //    'String literal must starts with a quote');
 
-        ++Index;
+        ++_index;
         var octal = false;
         var str = GetStringBuilder();
 
         while (!Eof())
         {
-            var ch = Index < Source.Length ? Source[Index] : char.MinValue;
-            Index++;
+            var ch = _index < _source.Length ? _source[_index] : char.MinValue;
+            _index++;
 
             if (ch == quote)
             {
@@ -1345,16 +1351,16 @@ public sealed partial class Scanner
             }
             else if (ch == '\\')
             {
-                ch = Index < Source.Length ? Source[Index] : char.MinValue;
-                Index++;
+                ch = _index < _source.Length ? _source[_index] : char.MinValue;
+                _index++;
                 if (ch == char.MinValue || !Character.IsLineTerminator(ch))
                 {
                     switch (ch)
                     {
                         case 'u':
-                            if (Index < Source.Length && Source[Index] == '{')
+                            if (_index < _source.Length && _source[_index] == '{')
                             {
-                                ++Index;
+                                ++_index;
                                 str.Append(ScanUnicodeCodePointEscape());
                             }
                             else
@@ -1429,13 +1435,13 @@ public sealed partial class Scanner
                 }
                 else
                 {
-                    ++LineNumber;
-                    if (ch == '\r' && Source[Index] == '\n')
+                    ++_lineNumber;
+                    if (ch == '\r' && _source[_index] == '\n')
                     {
-                        ++Index;
+                        ++_index;
                     }
 
-                    LineStart = Index;
+                    _lineStart = _index;
                 }
             }
             else if (Character.IsLineTerminator(ch))
@@ -1450,11 +1456,11 @@ public sealed partial class Scanner
 
         if (quote != char.MinValue)
         {
-            Index = start;
+            _index = start;
             ThrowUnexpectedToken();
         }
 
-        return Token.CreateStringLiteral(str.ToString(), octal, start, end: Index, LineNumber, LineStart);
+        return Token.CreateStringLiteral(str.ToString(), octal, start, end: _index, _lineNumber, _lineStart);
     }
 
     // https://tc39.github.io/ecma262/#sec-template-literal-lexical-components
@@ -1463,18 +1469,18 @@ public sealed partial class Scanner
     {
         var cooked = GetStringBuilder();
         var terminated = false;
-        var start = Index;
+        var start = _index;
 
-        var head = Source[start] == '`';
+        var head = _source[start] == '`';
         var tail = false;
         char notEscapeSequenceHead = default;
         var rawOffset = 2;
 
-        ++Index;
+        ++_index;
 
         while (!Eof())
         {
-            var ch = Source[Index++];
+            var ch = _source[_index++];
             if (ch == '`')
             {
                 rawOffset = 1;
@@ -1484,10 +1490,10 @@ public sealed partial class Scanner
             }
             else if (ch == '$')
             {
-                if (Source[Index] == '{')
+                if (_source[_index] == '{')
                 {
                     _curlyStack.Add("${");
-                    ++Index;
+                    ++_index;
                     terminated = true;
                     break;
                 }
@@ -1500,7 +1506,7 @@ public sealed partial class Scanner
             }
             else if (ch == '\\')
             {
-                ch = Source[Index++];
+                ch = _source[_index++];
                 if (!Character.IsLineTerminator(ch))
                 {
                     switch (ch)
@@ -1515,9 +1521,9 @@ public sealed partial class Scanner
                             cooked.Append("\t");
                             break;
                         case 'u':
-                            if (Source[Index] == '{')
+                            if (_source[_index] == '{')
                             {
-                                ++Index;
+                                ++_index;
                                 var unicodeCodePointEscape = TryToScanUnicodeCodePointEscape();
                                 if (unicodeCodePointEscape is null)
                                 {
@@ -1565,7 +1571,7 @@ public sealed partial class Scanner
                         default:
                             if (ch == '0')
                             {
-                                if (Character.IsDecimalDigit(Source[Index]))
+                                if (Character.IsDecimalDigit(_source[_index]))
                                 {
                                     // NotEscapeSequence: \01 \02 and so on
                                     notEscapeSequenceHead = '0';
@@ -1590,24 +1596,24 @@ public sealed partial class Scanner
                 }
                 else
                 {
-                    ++LineNumber;
-                    if (ch == '\r' && Source[Index] == '\n')
+                    ++_lineNumber;
+                    if (ch == '\r' && _source[_index] == '\n')
                     {
-                        ++Index;
+                        ++_index;
                     }
 
-                    LineStart = Index;
+                    _lineStart = _index;
                 }
             }
             else if (Character.IsLineTerminator(ch))
             {
-                ++LineNumber;
-                if (ch == '\r' && Source[Index] == '\n')
+                ++_lineNumber;
+                if (ch == '\r' && _source[_index] == '\n')
                 {
-                    ++Index;
+                    ++_index;
                 }
 
-                LineStart = Index;
+                _lineStart = _index;
                 cooked.Append("\n");
             }
             else
@@ -1627,11 +1633,11 @@ public sealed partial class Scanner
         }
 
         var startRaw = start + 1;
-        var endRaw = Index - rawOffset;
-        var rawTemplate = Source.AsSpan(startRaw, endRaw - startRaw).ToInternedString(ref _stringPool, NonIdentifierInterningThreshold);
+        var endRaw = _index - rawOffset;
+        var rawTemplate = _source.AsSpan(startRaw, endRaw - startRaw).ToInternedString(ref _stringPool, NonIdentifierInterningThreshold);
         var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
 
-        return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: Index, LineNumber, LineStart);
+        return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: _index, _lineNumber, _lineStart);
     }
 
     private static string FromCharCode(uint[] codeUnits)
@@ -2356,21 +2362,21 @@ public sealed partial class Scanner
 
     private string ScanRegExpBody()
     {
-        var ch = Source[Index];
+        var ch = _source[_index];
         //assert(ch == '/', 'Regular expression literal must start with a slash');
 
         var str = GetStringBuilder();
-        str.Append(Source[Index++]);
+        str.Append(_source[_index++]);
         var classMarker = false;
         var terminated = false;
 
         while (!Eof())
         {
-            ch = Source[Index++];
+            ch = _source[_index++];
             str.Append(ch);
             if (ch == '\\')
             {
-                ch = Source[Index++];
+                ch = _source[_index++];
                 // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
                 if (Character.IsLineTerminator(ch))
                 {
@@ -2419,27 +2425,27 @@ public sealed partial class Scanner
         var flags = "";
         while (!Eof())
         {
-            var ch = Source[Index];
+            var ch = _source[_index];
             if (!Character.IsIdentifierPart(ch))
             {
                 break;
             }
 
-            ++Index;
+            ++_index;
             if (ch == '\\' && !Eof())
             {
-                ch = Source[Index];
+                ch = _source[_index];
                 if (ch == 'u')
                 {
-                    ++Index;
-                    var restore = Index;
+                    ++_index;
+                    var restore = _index;
                     if (ScanHexEscape('u', out ch))
                     {
                         flags += ch;
                     }
                     else
                     {
-                        Index = restore;
+                        _index = restore;
                         flags += 'u';
                     }
 
@@ -2461,14 +2467,14 @@ public sealed partial class Scanner
 
     internal Token ScanRegExp()
     {
-        var start = Index;
+        var start = _index;
 
         var body = ScanRegExpBody();
         var flags = ScanRegExpFlags();
 
         var value = _adaptRegexp ? ParseRegex(body, flags, _regexTimeout) : null;
 
-        return Token.CreateRegexLiteral(value, new RegexValue(body, flags), start, end: Index, LineNumber, LineStart);
+        return Token.CreateRegexLiteral(value, new RegexValue(body, flags), start, end: _index, _lineNumber, _lineStart);
     }
 
     public Token Lex() => Lex(new LexOptions());
@@ -2479,10 +2485,10 @@ public sealed partial class Scanner
         {
             ReleaseLargeBuffers();
 
-            return Token.CreateEof(Index, LineNumber, LineStart);
+            return Token.CreateEof(_index, _lineNumber, _lineStart);
         }
 
-        var cp = Source[Index];
+        var cp = _source[_index];
 
         if (Character.IsIdentifierStart(cp))
         {
@@ -2505,7 +2511,7 @@ public sealed partial class Scanner
         // to check the next character.
         if (cp == 0x2E)
         {
-            if (Character.IsDecimalDigit(Source.CharCodeAt(Index + 1)))
+            if (Character.IsDecimalDigit(_source.CharCodeAt(_index + 1)))
             {
                 return ScanNumericLiteral(options.Strict);
             }
@@ -2528,7 +2534,7 @@ public sealed partial class Scanner
         // Possible identifier start in a surrogate pair.
         if (cp >= 0xD800 && cp < 0xDFFF)
         {
-            if (char.IsLetter(Source, Index)) // Character.IsIdentifierStart(CodePointAt(Index))
+            if (char.IsLetter(_source, _index)) // Character.IsIdentifierStart(CodePointAt(Index))
             {
                 return ScanIdentifier(options.AllowIdentifierEscape);
             }
@@ -2631,7 +2637,7 @@ public sealed partial class Scanner
         return options;
     }
 
-    internal Marker GetMarker() => new(Index, LineNumber, Column: Index - LineStart);
+    internal Marker GetMarker() => new(_index, _lineNumber, Column: _index - _lineStart);
 }
 
 internal readonly record struct OctalValue(int Code, bool Octal);

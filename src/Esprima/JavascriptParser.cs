@@ -207,7 +207,7 @@ public partial class JavaScriptParser
 
         _context.Reset();
 
-        _startMarker = new Marker(Index: 0, Line: _scanner.LineNumber, Column: 0);
+        _startMarker = new Marker(Index: 0, Line: _scanner._lineNumber, Column: 0);
 
         NextToken();
 
@@ -233,7 +233,7 @@ public partial class JavaScriptParser
         {
             _context.Strict = true;
             _context.IsModule = true;
-            _scanner.IsModule = true;
+            _scanner._isModule = true;
 
             var node = CreateNode();
             var body = ParseDirectivePrologues();
@@ -289,13 +289,13 @@ public partial class JavaScriptParser
             {
                 var e = comments[i];
 
-                var value = _scanner.Source.AsSpan(e.Slice.Start, e.Slice.Length)
+                var value = _scanner._source.AsSpan(e.Slice.Start, e.Slice.Length)
                     .ToInternedString(ref _scanner._stringPool, Scanner.NonIdentifierInterningThreshold);
 
                 var comment = new SyntaxComment(e.Type, value)
                 {
                     Range = new Range(e.Start, e.End),
-                    Location = new Location(in e.StartPosition, in e.EndPosition, _scanner._sourceName)
+                    Location = new Location(in e.StartPosition, in e.EndPosition, _scanner._sourceLocation)
                 };
 
                 _comments.Add(comment);
@@ -332,17 +332,17 @@ public partial class JavaScriptParser
             case TokenType.StringLiteral:
             case TokenType.RegularExpression:
             case TokenType.Template:
-                return _scanner.Source.Between(token.Start, token.End)
+                return _scanner._source.Between(token.Start, token.End)
                     .ToInternedString(ref _scanner._stringPool, Scanner.NonIdentifierInterningThreshold);
         }
 
-        return _scanner.Source.Between(token.Start, token.End).ToInternedString(ref _scanner._stringPool);
+        return _scanner._source.Between(token.Start, token.End).ToInternedString(ref _scanner._stringPool);
     }
 
     private protected SyntaxToken ConvertToken(in Token token)
     {
         var start = new Position(_startMarker.Line, _startMarker.Column);
-        var end = new Position(_scanner.LineNumber, _scanner.Index - _scanner.LineStart);
+        var end = new Position(_scanner._lineNumber, _scanner._index - _scanner._lineStart);
 
         return new SyntaxToken(token.Type, GetTokenRaw(token), token.RegexValue)
         {
@@ -359,7 +359,7 @@ public partial class JavaScriptParser
 
         CollectComments();
 
-        if (_scanner.Index != _startMarker.Index)
+        if (_scanner._index != _startMarker.Index)
         {
             _startMarker = _scanner.GetMarker();
         }
@@ -435,7 +435,7 @@ public partial class JavaScriptParser
         var start = new Position(marker.Line, marker.Column);
         var end = new Position(_lastMarker.Line, _lastMarker.Column);
 
-        node.Location = new Location(start, end, _scanner._sourceName);
+        node.Location = new Location(start, end, _scanner._sourceLocation);
 
         _onNodeCreated?.Invoke(node);
 
@@ -707,7 +707,7 @@ public partial class JavaScriptParser
                     case "/=":
                         _context.IsAssignmentTarget = false;
                         _context.IsBindingElement = false;
-                        _scanner.Index = _startMarker.Index;
+                        _scanner._index = _startMarker.Index;
                         token = NextRegexToken();
                         raw = GetTokenRaw(token);
                         expr = Finalize(node, new Literal(token.RegexValue!.Pattern, token.RegexValue.Flags, token.Value, raw));
@@ -4290,7 +4290,7 @@ public partial class JavaScriptParser
         var expr = ParseExpression();
         if (expr.Type == Nodes.Literal)
         {
-            directive = _scanner.Source.Between(token.Start + 1, token.End - 1).ToInternedString(ref _scanner._stringPool);
+            directive = _scanner._source.Between(token.Start + 1, token.End - 1).ToInternedString(ref _scanner._stringPool);
         }
 
         ConsumeSemicolon();
@@ -5311,7 +5311,7 @@ public partial class JavaScriptParser
         var index = _lastMarker.Index;
         var line = _lastMarker.Line;
         var column = _lastMarker.Column + 1;
-        return _errorHandler.CreateError(_scanner._sourceName, index, line, column, msg);
+        return _errorHandler.CreateError(_scanner._sourceLocation, index, line, column, msg);
     }
 
     private protected void TolerateError(string messageFormat, params object?[] values)
@@ -5319,9 +5319,9 @@ public partial class JavaScriptParser
         var msg = string.Format(messageFormat, values);
 
         var index = _lastMarker.Index;
-        var line = _scanner.LineNumber;
+        var line = _scanner._lineNumber;
         var column = _lastMarker.Column + 1;
-        _errorHandler.TolerateError(_scanner._sourceName, index, line, column, msg, _tolerant);
+        _errorHandler.TolerateError(_scanner._sourceLocation, index, line, column, msg, _tolerant);
     }
 
     private ParserException UnexpectedTokenError(in Token token, string? message = null)
@@ -5370,14 +5370,14 @@ public partial class JavaScriptParser
             var line = token.LineNumber;
             var lastMarkerLineStart = _lastMarker.Index - _lastMarker.Column;
             var column = token.Start - lastMarkerLineStart + 1;
-            return _errorHandler.CreateError(_scanner._sourceName, index, line, column, msg);
+            return _errorHandler.CreateError(_scanner._sourceLocation, index, line, column, msg);
         }
         else
         {
             var index = _lastMarker.Index;
             var line = _lastMarker.Line;
             var column = _lastMarker.Column + 1;
-            return _errorHandler.CreateError(_scanner._sourceName, index, line, column, msg);
+            return _errorHandler.CreateError(_scanner._sourceLocation, index, line, column, msg);
         }
     }
 
