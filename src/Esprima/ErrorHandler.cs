@@ -3,15 +3,17 @@ namespace Esprima;
 /// <summary>
 /// Default error handling logic for Esprima.
 /// </summary>
-public class ErrorHandler : IErrorHandler
+public class ErrorHandler
 {
     public static readonly ErrorHandler Default = new();
 
-    public virtual void RecordError(ParserException error)
+    protected internal virtual void Reset() { }
+
+    protected virtual void RecordError(ParserException error)
     {
     }
 
-    public void Tolerate(ParserException error, bool tolerant)
+    internal void Tolerate(ParserException error, bool tolerant)
     {
         if (tolerant)
         {
@@ -23,12 +25,12 @@ public class ErrorHandler : IErrorHandler
         }
     }
 
-    public ParserException CreateError(string? source, int index, int line, int col, string description)
+    protected internal virtual ParserException CreateError(string? source, int index, int line, int col, string description)
     {
         return new(new ParseError(description, source, index, new Position(line, col)));
     }
 
-    public void TolerateError(string? source, int index, int line, int col, string description, bool tolerant)
+    internal void TolerateError(string? source, int index, int line, int col, string description, bool tolerant)
     {
         var error = CreateError(source, index, line, col, description);
         Tolerate(error, tolerant);

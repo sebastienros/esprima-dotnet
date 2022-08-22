@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
 
@@ -85,7 +86,7 @@ public partial class JavaScriptParser
     private protected Marker _startMarker;
     private protected Marker _lastMarker;
 
-    private protected readonly IErrorHandler _errorHandler;
+    private protected readonly ErrorHandler _errorHandler;
     private protected readonly bool _tolerant;
     private protected readonly bool _collectTokens;
     private protected readonly bool _collectComments;
@@ -5294,11 +5295,13 @@ public partial class JavaScriptParser
         return exportDeclaration;
     }
 
+    [DoesNotReturn]
     internal void ThrowError(string messageFormat, params object?[] values)
     {
         throw CreateError(messageFormat, values);
     }
 
+    [DoesNotReturn]
     internal T ThrowError<T>(string messageFormat, params object?[] values)
     {
         throw CreateError(messageFormat, values);
@@ -5381,11 +5384,13 @@ public partial class JavaScriptParser
         }
     }
 
+    [DoesNotReturn]
     private protected void ThrowUnexpectedToken(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);
     }
 
+    [DoesNotReturn]
     private protected T ThrowUnexpectedToken<T>(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);

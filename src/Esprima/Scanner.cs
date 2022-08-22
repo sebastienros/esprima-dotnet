@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -34,7 +35,7 @@ public sealed partial class Scanner
 {
     internal const int NonIdentifierInterningThreshold = 20;
 
-    private readonly IErrorHandler _errorHandler;
+    private readonly ErrorHandler _errorHandler;
     private readonly bool _tolerant;
     private readonly bool _trackComment;
     private readonly bool _adaptRegexp;
@@ -140,6 +141,8 @@ public sealed partial class Scanner
 
         _curlyStack.Clear();
         _sb.Clear();
+
+        _errorHandler.Reset();
     }
 
     internal void Reset(string code, string? source)
@@ -200,11 +203,13 @@ public sealed partial class Scanner
         return _index >= _length;
     }
 
+    [DoesNotReturn]
     private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
         throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);
     }
 
+    [DoesNotReturn]
     private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
     {
         throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);

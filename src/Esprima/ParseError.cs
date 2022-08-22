@@ -15,13 +15,7 @@ public sealed class ParseError
     public int LineNumber => Position.Line;
     public int Column => Position.Column;
 
-    public ParseError(string description) :
-        this(description, null, -1, default)
-    {
-    }
-
-    public ParseError(string description,
-        string? source, int index, in Position position)
+    public ParseError(string description, string? source = null, int index = -1, in Position position = default)
     {
         Description = description ?? ThrowArgumentNullException<string>(nameof(description));
         Source = source;

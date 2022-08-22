@@ -25,9 +25,9 @@ public record class ParserOptions
     public bool Tolerant { get; init; } = true;
 
     /// <summary>
-    /// Gets or sets the <see cref="IErrorHandler"/> to use.
+    /// Gets or sets the <see cref="ErrorHandler"/> to use.
     /// </summary>
-    public IErrorHandler ErrorHandler { get; init; } = Esprima.ErrorHandler.Default;
+    public ErrorHandler ErrorHandler { get; init; } = Esprima.ErrorHandler.Default;
 
     /// <summary>
     /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one.
