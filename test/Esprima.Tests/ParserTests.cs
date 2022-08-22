@@ -1,6 +1,8 @@
-﻿using Esprima.Ast;
+﻿using System.Xml.Linq;
+using Esprima.Ast;
 using Esprima.Test;
 using Esprima.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace Esprima.Tests;
 
@@ -530,5 +532,29 @@ block comment", comment.Value);
 
         Assert.Same(slicedToken1, slicedToken2);
         Assert.Equal(1, stringPool.Count);
+    }
+
+    [Fact]
+    public void CanReuseParser()
+    {
+        var parser = new JavaScriptParser(new ParserOptions { Comments = true, Tokens = true });
+
+        var code = "var /* c1 */ foo=1; // c2";
+        var script = parser.ParseScript(code);
+
+        Assert.Equal(new string[] { "var", "foo", "=", "1", ";" }, script.Tokens!.Select(t => t.Value).ToArray());
+        Assert.Equal(0, script.Tokens![0].Range.Start);
+
+        Assert.Equal(new string[] { " c1 ", " c2" }, script.Comments!.Select(c => c.Value).ToArray());
+        Assert.Equal(4, script.Comments![0].Range.Start);
+
+        code = "/* c1 */ foo=1; // c2";
+        script = parser.ParseScript(code);
+
+        Assert.Equal(new string[] { "foo", "=", "1", ";" }, script.Tokens!.Select(t => t.Value).ToArray());
+        Assert.Equal(9, script.Tokens![0].Range.Start);
+
+        Assert.Equal(new string[] { " c1 ", " c2" }, script.Comments!.Select(c => c.Value).ToArray());
+        Assert.Equal(0, script.Comments![0].Range.Start);
     }
 }
