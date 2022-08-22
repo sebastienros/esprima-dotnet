@@ -5,7 +5,7 @@ public class ScannerTests
     [Fact]
     public void CanScanMultiLineComment()
     {
-        var scanner = new Scanner("var foo=1; /* \"330413500\" */", new ParserOptions { Comment = true });
+        var scanner = new Scanner("var foo=1; /* \"330413500\" */", new ParserOptions { Comments = true });
 
         var results = new List<string>();
         Token token;

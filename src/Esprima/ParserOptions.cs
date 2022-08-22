@@ -17,7 +17,7 @@ public record class ParserOptions
     /// <summary>
     /// Gets or sets whether the comments are included in the parsed tree.
     /// </summary>
-    public bool Comment { get; init; } = false;
+    public bool Comments { get; init; } = false;
 
     /// <summary>
     /// Gets or sets whether the parser is tolerant to errors.

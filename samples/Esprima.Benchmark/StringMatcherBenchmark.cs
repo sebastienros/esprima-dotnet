@@ -17,8 +17,8 @@ public class StringMatcherBenchmark
         var filePath = Path.Combine(AppContext.BaseDirectory, "3rdparty", "bundle.js");
         var code = File.ReadAllText(filePath);
         var parser = new JavaScriptParser(new ParserOptions { Tokens = true });
-        parser.ParseScript(code);
-        _tokens = parser.Tokens.ToArray();
+        var script = parser.ParseScript(code);
+        _tokens = script.Tokens.ToArray();
     }
 
     [Benchmark]

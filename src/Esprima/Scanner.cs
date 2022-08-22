@@ -96,7 +96,7 @@ public sealed partial class Scanner
         _regexTimeout = options.RegexTimeout;
         _errorHandler = options.ErrorHandler;
         _tolerant = options.Tolerant;
-        _trackComment = options.Comment;
+        _trackComment = options.Comments;
 
         _source = string.Empty;
         _curlyStack = new List<string>();

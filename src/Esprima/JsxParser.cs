@@ -323,7 +323,7 @@ public class JsxParser : JavaScriptParser
         StartJsx();
         ExpectJsx("}");
 
-        if (_collectTokens)
+        if (_tokens is not null)
         {
             _tokens.RemoveAt(_tokens.Count - 1);
         }
@@ -497,7 +497,7 @@ public class JsxParser : JavaScriptParser
 
         _lastMarker = _scanner.GetMarker();
 
-        if (_collectTokens)
+        if (_tokens is not null)
         {
             _tokens.Add(ConvertToken(token));
         }
@@ -539,7 +539,7 @@ public class JsxParser : JavaScriptParser
 
         var token = JsxToken.CreateText(text, start, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
 
-        if (text.Length > 0 && _collectTokens)
+        if (text.Length > 0 && _tokens is not null)
         {
             _tokens.Add(ConvertToken(token));
         }
@@ -913,7 +913,7 @@ public class JsxParser : JavaScriptParser
 
     private JsxElement ParseJsxRoot()
     {
-        if (_collectTokens)
+        if (_tokens is not null)
         {
             _tokens.RemoveAt(_tokens.Count - 1);
         }

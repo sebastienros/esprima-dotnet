@@ -88,33 +88,14 @@ public partial class JavaScriptParser
 
     private protected readonly ErrorHandler _errorHandler;
     private protected readonly bool _tolerant;
-    private protected readonly bool _collectTokens;
-    private protected readonly bool _collectComments;
     private protected readonly int _maxAssignmentDepth;
     private readonly Action<Node>? _onNodeCreated;
 
     private protected readonly Scanner _scanner;
     private protected bool _hasLineTerminator;
 
-    private protected readonly List<SyntaxToken> _tokens = new();
-
-    /// <summary>
-    /// Returns the list of tokens that were parsed.
-    /// </summary>
-    /// <remarks>
-    /// It requires the parser options to be configured to generate to tokens.
-    /// </remarks>
-    public IReadOnlyList<SyntaxToken> Tokens => _tokens;
-
-    private protected readonly List<SyntaxComment> _comments = new();
-
-    /// <summary>
-    /// Returns the list of comments that were parsed.
-    /// </summary>
-    /// <remarks>
-    /// It requires the parser options to be configured to generate comments.
-    /// </remarks>
-    public IReadOnlyList<SyntaxComment> Comments => _comments;
+    private protected List<SyntaxToken>? _tokens;
+    private protected List<SyntaxComment>? _comments;
 
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
@@ -171,8 +152,8 @@ public partial class JavaScriptParser
 
         _errorHandler = options.ErrorHandler;
         _tolerant = options.Tolerant;
-        _collectTokens = options.Tokens;
-        _collectComments = options.Comment;
+        _tokens = options.Tokens ? new List<SyntaxToken>() : null;
+        _comments = options.Comments ? new List<SyntaxComment>() : null;
         _maxAssignmentDepth = options.MaxAssignmentDepth;
         _onNodeCreated = options.OnNodeCreated;
 
@@ -192,17 +173,8 @@ public partial class JavaScriptParser
         _sharedStack = null;
         _parseVariableBindingParameters = null;
 
-        _tokens.Clear();
-        if (_tokens.Capacity > 256)
-        {
-            _tokens.Capacity = 256;
-        }
-
-        _comments.Clear();
-        if (_comments.Capacity > 64)
-        {
-            _comments.Capacity = 64;
-        }
+        _tokens?.Clear();
+        _comments?.Clear();
 
         _scanner.Reset(code, source);
 
@@ -243,7 +215,7 @@ public partial class JavaScriptParser
                 body.Push(ParseStatementListItem());
             }
 
-            return Finalize(node, new Module(NodeList.From(ref body)));
+            return FinalizeRoot(Finalize(node, new Module(NodeList.From(ref body))));
         }
         finally
         {
@@ -268,7 +240,7 @@ public partial class JavaScriptParser
                 body.Push(ParseStatementListItem());
             }
 
-            return Finalize(node, new Script(NodeList.From(ref body), _context.Strict));
+            return FinalizeRoot(Finalize(node, new Script(NodeList.From(ref body), _context.Strict)));
         }
         finally
         {
@@ -278,7 +250,7 @@ public partial class JavaScriptParser
 
     private protected void CollectComments()
     {
-        if (!_collectComments)
+        if (_comments is null)
         {
             _scanner.ScanComments();
         }
@@ -379,7 +351,7 @@ public partial class JavaScriptParser
 
         _lookahead = next!;
 
-        if (_collectTokens && next.Type != TokenType.Unknown && next.Type != TokenType.EOF)
+        if (_tokens is not null && next.Type != TokenType.Unknown && next.Type != TokenType.EOF)
         {
             _tokens.Add(ConvertToken(next));
         }
@@ -393,7 +365,7 @@ public partial class JavaScriptParser
 
         var token = _scanner.ScanRegExp();
 
-        if (_collectTokens)
+        if (_tokens is not null)
         {
             // Pop the previous token, '/' or '/='
             // This is added from the lookahead token.
@@ -439,6 +411,25 @@ public partial class JavaScriptParser
         node.Location = new Location(start, end, _scanner._sourceLocation);
 
         _onNodeCreated?.Invoke(node);
+
+        return node;
+    }
+
+    private T FinalizeRoot<T>(T node) where T : Node, ISyntaxTreeRoot
+    {
+        if (_tokens is not null)
+        {
+            _tokens.TrimExcess();
+            node.Tokens = _tokens;
+            _tokens = new List<SyntaxToken>();
+        }
+
+        if (_comments is not null)
+        {
+            _comments.TrimExcess();
+            node.Comments = _comments;
+            _comments = new List<SyntaxComment>();
+        }
 
         return node;
     }
@@ -2574,7 +2565,7 @@ public partial class JavaScriptParser
         Reset(code, source: null);
         try
         {
-            return ParseExpression();
+            return FinalizeRoot(ParseExpression());
         }
         finally
         {

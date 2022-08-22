@@ -373,12 +373,12 @@ class aa {
     [Fact]
     public void ShouldParseLineComment()
     {
-        var parser = new JavaScriptParser(new ParserOptions { Comment = true });
-        parser.ParseScript(@"
+        var parser = new JavaScriptParser(new ParserOptions { Comments = true });
+        var script = parser.ParseScript(@"
 //this is a line comment
 ");
 
-        var comment = parser.Comments.First();
+        var comment = script.Comments!.First();
 
         Assert.Equal(CommentType.Line, comment.Type);
         Assert.Equal("this is a line comment", comment.Value);
@@ -387,13 +387,13 @@ class aa {
     [Fact]
     public void ShouldParseBlockComment()
     {
-        var parser = new JavaScriptParser(new ParserOptions { Comment = true });
-        parser.ParseScript(@"
+        var parser = new JavaScriptParser(new ParserOptions { Comments = true });
+        var script = parser.ParseScript(@"
 /*this is a
 block comment*/
 ");
 
-        var comment = parser.Comments.First();
+        var comment = script.Comments!.First();
 
         Assert.Equal(CommentType.Block, comment.Type);
         Assert.Equal(@"this is a
