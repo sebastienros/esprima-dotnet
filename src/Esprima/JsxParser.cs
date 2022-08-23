@@ -8,7 +8,7 @@ namespace Esprima;
 /// </summary>
 /// <remarks>
 /// Use the <see cref="JavaScriptParser.ParseScript" />, <see cref="JavaScriptParser.ParseModule" /> or
-/// <see cref="JavaScriptParser.ParseExpression" /> methods to parse the JSX code.
+/// <see cref="JavaScriptParser.ParseExpression(string)" /> methods to parse the JSX code.
 /// </remarks>
 public class JsxParser : JavaScriptParser
 {
@@ -288,11 +288,11 @@ public class JsxParser : JavaScriptParser
         { "rang", "\u27E9" }
     };
 
-    public JsxParser(string code) : this(code, new JsxParserOptions())
+    public JsxParser() : this(JsxParserOptions.Default)
     {
     }
 
-    public JsxParser(string code, JsxParserOptions options) : base(code, options)
+    public JsxParser(JsxParserOptions options) : base(options)
     {
     }
 
@@ -308,9 +308,9 @@ public class JsxParser : JavaScriptParser
 
     private void StartJsx()
     {
-        _scanner.Index = _startMarker.Index;
-        _scanner.LineNumber = _startMarker.Line;
-        _scanner.LineStart = _startMarker.Index - _startMarker.Column;
+        _scanner._index = _startMarker.Index;
+        _scanner._lineNumber = _startMarker.Line;
+        _scanner._lineStart = _startMarker.Index - _startMarker.Column;
     }
 
     private void FinishJsx()
@@ -323,7 +323,7 @@ public class JsxParser : JavaScriptParser
         StartJsx();
         ExpectJsx("}");
 
-        if (_config.Tokens)
+        if (_tokens is not null)
         {
             _tokens.RemoveAt(_tokens.Count - 1);
         }
@@ -332,12 +332,12 @@ public class JsxParser : JavaScriptParser
     private Marker CreateJsxNode()
     {
         CollectComments();
-        return new Marker(_scanner.Index, _scanner.LineNumber, _scanner.Index - _scanner.LineStart);
+        return new Marker(_scanner._index, _scanner._lineNumber, _scanner._index - _scanner._lineStart);
     }
 
     private Marker CreateJsxChildNode()
     {
-        return new Marker(_scanner.Index, _scanner.LineNumber, _scanner.Index - _scanner.LineStart);
+        return new Marker(_scanner._index, _scanner._lineNumber, _scanner._index - _scanner._lineStart);
     }
 
     private string ScanXHTMLEntity(char quote)
@@ -351,7 +351,7 @@ public class JsxParser : JavaScriptParser
 
         while (!_scanner.Eof() && valid && !terminated)
         {
-            var ch = _scanner.Source[_scanner.Index];
+            var ch = _scanner._source[_scanner._index];
             if (ch == quote)
             {
                 break;
@@ -359,7 +359,7 @@ public class JsxParser : JavaScriptParser
 
             terminated = (ch == ';');
             result += ch;
-            ++_scanner.Index;
+            ++_scanner._index;
             if (!terminated)
             {
                 switch (result.Length)
@@ -407,24 +407,24 @@ public class JsxParser : JavaScriptParser
 
     private Token LexJsx()
     {
-        var cp = (int) _scanner.Source[_scanner.Index];
+        var cp = (int) _scanner._source[_scanner._index];
 
         // < > / : = { }
         if (cp is (60 or 62 or 47 or 58 or 61 or 123 or 125))
         {
-            var value = _scanner.Source[_scanner.Index++];
-            return Token.CreatePunctuator(value.ToString(), start: _scanner.Index - 1, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            var value = _scanner._source[_scanner._index++];
+            return Token.CreatePunctuator(value.ToString(), start: _scanner._index - 1, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
         }
 
         // " '
         if (cp is (34 or 39))
         {
-            var start = _scanner.Index;
-            var quote = _scanner.Source[_scanner.Index++];
+            var start = _scanner._index;
+            var quote = _scanner._source[_scanner._index++];
             var str = "";
             while (!_scanner.Eof())
             {
-                var ch = _scanner.Source[_scanner.Index++];
+                var ch = _scanner._source[_scanner._index++];
                 if (ch == quote)
                 {
                     break;
@@ -440,41 +440,41 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            return Token.CreateStringLiteral(str, octal: false, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return Token.CreateStringLiteral(str, octal: false, start, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
         }
 
         if (cp == 46)
         {
-            var n1 = _scanner.Source[_scanner.Index + 1];
-            var n2 = _scanner.Source[_scanner.Index + 2];
+            var n1 = _scanner._source[_scanner._index + 1];
+            var n2 = _scanner._source[_scanner._index + 2];
             var value = (n1 == '.' && n2 == '.') ? "..." : ".";
-            var start = _scanner.Index;
-            _scanner.Index += value.Length;
-            return Token.CreatePunctuator(value, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            var start = _scanner._index;
+            _scanner._index += value.Length;
+            return Token.CreatePunctuator(value, start, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
         }
 
         // `
         if (cp == 96)
         {
-            return Token.CreateTemplate(cooked: null, rawTemplate: "", head: false, tail: false, notEscapeSequenceHead: ' ', start: _scanner.Index, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            return Token.CreateTemplate(cooked: null, rawTemplate: "", head: false, tail: false, notEscapeSequenceHead: ' ', start: _scanner._index, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
         }
 
         // Identifer can not contain backslash (char code 92).
         if (Character.IsIdentifierStart((char) cp) && cp != 92)
         {
-            var start = _scanner.Index;
-            ++_scanner.Index;
+            var start = _scanner._index;
+            ++_scanner._index;
             while (!_scanner.Eof())
             {
-                var ch = _scanner.Source[_scanner.Index];
+                var ch = _scanner._source[_scanner._index];
                 if (Character.IsIdentifierPart(ch) && ch != 92)
                 {
-                    ++_scanner.Index;
+                    ++_scanner._index;
                 }
                 else if (ch == 45)
                 {
                     // Hyphen (char code 45) can be part of an identifier.
-                    ++_scanner.Index;
+                    ++_scanner._index;
                 }
                 else
                 {
@@ -482,8 +482,8 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            var id = _scanner.Source.Between(start, _scanner.Index).ToInternedString(ref _scanner._stringPool);
-            return JsxToken.CreateIdentifier(id, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+            var id = _scanner._source.Between(start, _scanner._index).ToInternedString(ref _scanner._stringPool);
+            return JsxToken.CreateIdentifier(id, start, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
         }
 
         return this._scanner.Lex();
@@ -497,7 +497,7 @@ public class JsxParser : JavaScriptParser
 
         _lastMarker = _scanner.GetMarker();
 
-        if (_config.Tokens)
+        if (_tokens is not null)
         {
             _tokens.Add(ConvertToken(token));
         }
@@ -509,37 +509,37 @@ public class JsxParser : JavaScriptParser
     {
         _startMarker = _scanner.GetMarker();
 
-        var start = _scanner.Index;
+        var start = _scanner._index;
 
         var text = "";
 
         while (!_scanner.Eof())
         {
-            var ch = _scanner.Source[_scanner.Index];
+            var ch = _scanner._source[_scanner._index];
             if (ch is '{' or '<')
             {
                 break;
             }
 
-            ++_scanner.Index;
+            ++_scanner._index;
             text += ch;
             if (Character.IsLineTerminator(ch))
             {
-                ++_scanner.LineNumber;
-                if (ch == '\r' && _scanner.Source[_scanner.Index] == '\n')
+                ++_scanner._lineNumber;
+                if (ch == '\r' && _scanner._source[_scanner._index] == '\n')
                 {
-                    ++_scanner.Index;
+                    ++_scanner._index;
                 }
 
-                _scanner.LineStart = _scanner.Index;
+                _scanner._lineStart = _scanner._index;
             }
         }
 
         _lastMarker = _scanner.GetMarker();
 
-        var token = JsxToken.CreateText(text, start, end: _scanner.Index, _scanner.LineNumber, _scanner.LineStart);
+        var token = JsxToken.CreateText(text, start, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
 
-        if (text.Length > 0 && _config.Tokens)
+        if (text.Length > 0 && _tokens is not null)
         {
             _tokens.Add(ConvertToken(token));
         }
@@ -810,9 +810,9 @@ public class JsxParser : JavaScriptParser
 
             if (_scanner.Eof())
             {
-                ThrowUnexpectedToken(Token.CreateEof(_scanner.Index, _scanner.LineNumber, _scanner.LineStart));
+                ThrowUnexpectedToken(Token.CreateEof(_scanner._index, _scanner._lineNumber, _scanner._lineStart));
             }
-            if (_scanner.Source[_scanner.Index] == '{')
+            if (_scanner._source[_scanner._index] == '{')
             {
                 var container = ParseJsxExpressionContainer();
                 children.Add(container);
@@ -913,7 +913,7 @@ public class JsxParser : JavaScriptParser
 
     private JsxElement ParseJsxRoot()
     {
-        if (_config.Tokens)
+        if (_tokens is not null)
         {
             _tokens.RemoveAt(_tokens.Count - 1);
         }

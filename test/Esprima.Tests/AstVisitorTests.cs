@@ -9,8 +9,8 @@ public class AstVisitorTests
     [Fact]
     public void CanVisitIfWithNoElse()
     {
-        var parser = new JavaScriptParser("if (true) { p(); }");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("if (true) { p(); }");
 
         var visitor = new AstVisitor();
         visitor.Visit(program);
@@ -19,12 +19,12 @@ public class AstVisitorTests
     [Fact]
     public void CanVisitSwitchCase()
     {
-        var parser = new JavaScriptParser(@"switch(foo) {
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript(@"switch(foo) {
     case 'A':
         p();
         break;
 }");
-        var program = parser.ParseScript();
 
         var visitor = new AstVisitor();
         visitor.Visit(program);
@@ -33,12 +33,12 @@ public class AstVisitorTests
     [Fact]
     public void CanVisitDefaultSwitchCase()
     {
-        var parser = new JavaScriptParser(@"switch(foo) {
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript(@"switch(foo) {
     default:
         p();
         break;
 }");
-        var program = parser.ParseScript();
 
         var visitor = new AstVisitor();
         visitor.Visit(program);
@@ -47,8 +47,8 @@ public class AstVisitorTests
     [Fact]
     public void CanVisitForWithNoTest()
     {
-        var parser = new JavaScriptParser(@"for (var a = []; ; ) { }");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript(@"for (var a = []; ; ) { }");
 
         var visitor = new AstVisitor();
         visitor.Visit(program);
@@ -57,8 +57,8 @@ public class AstVisitorTests
     [Fact]
     public void CanVisitForOfStatement()
     {
-        var parser = new JavaScriptParser(@"for (var elem of list) { }");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript(@"for (var elem of list) { }");
 
         var visitor = new AstVisitor();
         visitor.Visit(program);
@@ -72,8 +72,8 @@ public class AstVisitorTests
         Script program;
         try
         {
-            var parser = new JavaScriptParser(File.ReadAllText(jsFilePath), new ParserOptions { Tolerant = true });
-            program = parser.ParseScript();
+            var parser = new JavaScriptParser(new ParserOptions { Tolerant = true });
+            program = parser.ParseScript(File.ReadAllText(jsFilePath));
         }
         catch (ParserException)
         {

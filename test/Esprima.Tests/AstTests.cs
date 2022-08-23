@@ -75,8 +75,8 @@ public class AstTests
     {
         var source = File.ReadAllText(Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "3rdparty", "bundle.js"));
 
-        var parser = new JavaScriptParser(source);
-        var script = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var script = parser.ParseScript(source);
 
         new ChildNodesVerifier().Visit(script);
     }
@@ -145,8 +145,8 @@ public class AstTests
     [MemberData(nameof(ReusedNodeInstancesData))]
     public void ReusedNodeInstancesEnumeratedOnlyOnce(string source, Func<IEnumerable<Node>, IEnumerable<Node>> reusedNodeSelector)
     {
-        var parser = new JavaScriptParser(source);
-        var module = parser.ParseModule();
+        var parser = new JavaScriptParser();
+        var module = parser.ParseModule(source);
 
         var nodes = module.DescendantNodes();
 
@@ -175,8 +175,8 @@ public class AstTests
     [MemberData(nameof(ReusedNodeInstancesData))]
     public void ReusedNodeInstancesVisitedOnlyOnce(string source, Func<IEnumerable<Node>, IEnumerable<Node>> reusedNodeSelector)
     {
-        var parser = new JavaScriptParser(source);
-        var module = parser.ParseModule();
+        var parser = new JavaScriptParser();
+        var module = parser.ParseModule(source);
 
         var nodes = new VisitedNodesCollector().Collect(module);
 
@@ -205,8 +205,8 @@ public class AstTests
     [MemberData(nameof(ReusedNodeInstancesData))]
     public void ReusedNodeInstancesRewrittenOnlyOnce(string source, Func<IEnumerable<Node>, IEnumerable<Node>> reusedNodeSelector)
     {
-        var parser = new JavaScriptParser(source);
-        var module = parser.ParseModule();
+        var parser = new JavaScriptParser();
+        var module = parser.ParseModule(source);
 
         var nodes = new RewrittenNodesCollector().Collect(module);
 

@@ -1,16 +1,6 @@
 ﻿namespace Esprima;
 
-public class JsxParserOptions : ParserOptions
+public record class JsxParserOptions : ParserOptions
 {
-    public JsxParserOptions()
-    {
-    }
-
-    public JsxParserOptions(string source) : base(source)
-    {
-    }
-
-    public JsxParserOptions(IErrorHandler errorHandler) : base(errorHandler)
-    {
-    }
+    public static new readonly JsxParserOptions Default = new();
 }

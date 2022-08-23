@@ -1,7 +1,10 @@
+| :mega: Important notices |
+|--------------|
+|If you are upgrading from an older version, please note that version 3 ships with numerous breaking changes to the public API because virtually all areas of the library have been revised.<br />Documentation of the previous major version is available [here](https://github.com/sebastienros/esprima-dotnet/tree/v2.1.3). |
+
 [![Build](https://github.com/sebastienros/esprima-dotnet/actions/workflows/staging.yml/badge.svg)](https://github.com/sebastienros/esprima-dotnet/actions/workflows/staging.yml)
 [![NuGet](https://img.shields.io/nuget/v/esprima.svg)](https://www.nuget.org/packages/esprima)
 [![MyGet](https://img.shields.io/myget/esprimadotnet/v/esprima?label=MyGet)](https://www.myget.org/feed/esprimadotnet/package/nuget/Esprima)
-
 
 **Esprima .NET** (BSD license) is a .NET port of the [esprima.org](http://esprima.org) project.
 It is a standard-compliant [ECMAScript](http://www.ecma-international.org/publications/standards/Ecma-262.htm)
@@ -23,11 +26,31 @@ Esprima can be used to perform [lexical analysis](https://en.wikipedia.org/wiki/
 A simple C# example:
 
 ```csharp
-var parser = new JavaScriptParser("const answer = 42");
-var program = parser.ParseProgram();
+var parser = new JavaScriptParser();
+var program = parser.ParseScript("const answer = 42");
 ```
 
-Will return this when serialized in json:
+You can control the behavior of the parser by initializing and passing a `ParserOptions` to the parser's constructor. (For the available options, see the XML comments of the `ParserOptions` class.)
+
+Instead of `ParseScript`, you may use `ParseModule` or `ParseExpression` to make the parser treat the input as an ES6 module or as a plain JavaScript expression respectively.
+
+In case the input is syntactically correct, each of these methods returns the root node of the resulting *abstract syntax tree (AST)*, which you can freely analyze or transform. The library provides the `AstVisitor` and `AstRewriter` visitor classes to help you with such tasks.
+
+When the input contains a severe syntax error, a `ParserException` is thrown. By catching it you can get details about the error. There are syntax errors though which can be tolerated by the parser. Such errors are ignored by default. You can record them by setting `ParserOptions.ErrorHandler` to an instance of `CollectingErrorHandler`. Alternatively, you can set `ParserOptions.Tolerant` to false to make the parser throw exceptions also in the case of tolerable syntax errors.
+
+The library is able to write the AST (except for comments) back to JavaScript code:
+
+```csharp
+var code = program.ToJavaScriptString(format: true);
+```
+
+It is also possible to serialize the AST into a JSON representation:
+
+```csharp
+var astJson = program.ToJsonString(indent: "    ");
+```
+
+Considering the example above this call will return the following JSON:
 
 ```json
 {
@@ -52,7 +75,8 @@ Will return this when serialized in json:
             "kind": "const"
         }
     ],
-    "sourceType": "script"
+    "sourceType": "script",
+    "strict": false
 }
 ```
 

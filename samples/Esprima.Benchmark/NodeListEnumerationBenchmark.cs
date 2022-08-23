@@ -24,7 +24,7 @@ public class NodeListEnumerationBenchmark
     {
         var filePath = Path.Combine(AppContext.BaseDirectory, "3rdparty", $"{FileName}.js");
         var code = File.ReadAllText(filePath);
-        var ast = new JavaScriptParser(code).ParseScript();
+        var ast = new JavaScriptParser().ParseScript(code);
 
         _nodeLists = new NodeList<Node>[3];
         _nodeLists[0] = NodeList.Create(ast.DescendantNodesAndSelf());

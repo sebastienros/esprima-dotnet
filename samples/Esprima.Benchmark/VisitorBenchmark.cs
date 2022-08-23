@@ -22,7 +22,7 @@ public class VisitorBenchmark
     {
         var filePath = Path.Combine(AppContext.BaseDirectory, "3rdparty", $"{FileName}.js");
         var code = File.ReadAllText(filePath);
-        _ast = new JavaScriptParser(code).ParseScript();
+        _ast = new JavaScriptParser().ParseScript(code);
 
         _visitor = new AstVisitor();
         _rewriter = new AstRewriter();

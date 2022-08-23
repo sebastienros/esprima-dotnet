@@ -5,6 +5,9 @@ namespace Esprima.Ast;
 
 public abstract class Node : SyntaxElement
 {
+    private protected static readonly object s_tokensAdditionalDataKey = new();
+    private protected static readonly object s_commentsAdditionalDataKey = new();
+
     protected Node(Nodes type)
     {
         Type = type;

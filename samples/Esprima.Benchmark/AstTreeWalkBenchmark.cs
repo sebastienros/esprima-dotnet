@@ -14,8 +14,8 @@ public class AstTreeWalkBenchmark
     public void Setup()
     {
         var code = File.ReadAllText("3rdparty/angular-1.7.9.js");
-        var parser = new JavaScriptParser(code);
-        _script = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        _script = parser.ParseScript(code);
     }
 
     [Benchmark]

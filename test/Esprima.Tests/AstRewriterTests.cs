@@ -9,7 +9,7 @@ public class AstRewriterTests
 {
     private static Module ParseExpression(string code, bool jsx = false)
     {
-        return new JsxParser(code, new JsxParserOptions()).ParseModule();
+        return new JsxParser(new JsxParserOptions()).ParseModule(code);
     }
 
     private static object? FindNearTypeOfDescendTyped(Type type, Node node)
@@ -21,8 +21,8 @@ public class AstRewriterTests
     public void CanUpdateScript()
     {
         // Arrange
-        var parser = new JavaScriptParser("return true;");
-        var program = parser.ParseScript();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("return true;");
         var visitor = new TestRewriter(typeof(Script));
 
         // Act
@@ -36,8 +36,8 @@ public class AstRewriterTests
     public void CanUpdateModule()
     {
         // Arrange
-        var parser = new JavaScriptParser("return true;");
-        var program = parser.ParseModule();
+        var parser = new JavaScriptParser();
+        var program = parser.ParseModule("return true;");
         var visitor = new TestRewriter(typeof(Module));
 
         // Act

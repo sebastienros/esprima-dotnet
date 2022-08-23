@@ -5,7 +5,7 @@ public class ScannerTests
     [Fact]
     public void CanScanMultiLineComment()
     {
-        var scanner = new Scanner("var foo=1; /* \"330413500\" */", new ParserOptions { Comment = true });
+        var scanner = new Scanner("var foo=1; /* \"330413500\" */", new ParserOptions { Comments = true });
 
         var results = new List<string>();
         Token token;
@@ -20,5 +20,67 @@ public class ScannerTests
         } while (token.Type != TokenType.EOF);
 
         Assert.Equal(new[] { "11-28" }, results);
+    }
+
+    [Fact]
+    public void CanResetScanner()
+    {
+        var scanner = new Scanner("var /* c1 */ foo=1; // c2", new ParserOptions { Comments = true });
+
+        for (var n = 0; n < 3; n++, scanner.Reset())
+        {
+            var tokens = new List<Token>();
+            var comments = new List<Comment>();
+            for (; ; )
+            {
+                foreach (var comment in scanner.ScanComments())
+                {
+                    comments.Add(comment);
+                }
+
+                var token = scanner.Lex();
+                if (token.Type != TokenType.EOF)
+                {
+                    tokens.Add(token);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            Assert.Equal(new object[] { "var", "foo", "=", 1.0, ";" }, tokens.Select(t => t.Value).ToArray());
+            Assert.Equal(new string[] { " c1 ", " c2" }, comments.Select(c => scanner.Code.AsSpan(c.Slice.Start, c.Slice.Length).ToString()).ToArray());
+        }
+    }
+
+    [Fact]
+    public void CanResetScannerToCustomPosition()
+    {
+        var scanner = new Scanner("var /* c1 */ foo=1; // c2", new ParserOptions { Comments = true });
+        scanner.Reset(4, 1, 0);
+
+        var tokens = new List<Token>();
+        var comments = new List<Comment>();
+        for (; ; )
+        {
+            foreach (var comment in scanner.ScanComments())
+            {
+                comments.Add(comment);
+            }
+
+            var token = scanner.Lex();
+            if (token.Type != TokenType.EOF)
+            {
+                tokens.Add(token);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        Assert.Equal(new object[] { "foo", "=", 1.0, ";" }, tokens.Select(t => t.Value).ToArray());
+        Assert.Equal(new string[] { " c1 ", " c2" }, comments.Select(c => scanner.Code.AsSpan(c.Slice.Start, c.Slice.Length).ToString()).ToArray());
     }
 }

@@ -19,6 +19,8 @@ public class FileParsingBenchmark
         { "angular-1.2.5", null }
     };
 
+    private JavaScriptParser _parser;
+
     [GlobalSetup]
     public void Setup()
     {
@@ -26,9 +28,12 @@ public class FileParsingBenchmark
         {
             files[fileName] = File.ReadAllText($"3rdparty/{fileName}.js");
         }
+
+        _parser = new JavaScriptParser();
     }
 
-    [ParamsSource(nameof(FileNames))] public string FileName { get; set; }
+    [ParamsSource(nameof(FileNames))]
+    public string FileName { get; set; }
 
     public IEnumerable<string> FileNames()
     {
@@ -41,7 +46,6 @@ public class FileParsingBenchmark
     [Benchmark]
     public void ParseProgram()
     {
-        var parser = new JavaScriptParser(files[FileName]);
-        parser.ParseScript();
+        _parser.ParseScript(files[FileName]);
     }
 }

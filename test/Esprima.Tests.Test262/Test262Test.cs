@@ -6,22 +6,22 @@ public abstract partial class Test262Test
 {
     private JavaScriptParser BuildTestExecutor(Test262File file)
     {
-        var options = new ParserOptions(file.FileName)
+        var options = new ParserOptions()
         {
             Tolerant = false
         };
-        return new JavaScriptParser(file.Program, options);
+        return new JavaScriptParser(options);
     }
 
     private static void ExecuteTest(JavaScriptParser parser, Test262File file)
     {
         if (file.Type == ProgramType.Script)
         {
-            parser.ParseScript(file.Strict);
+            parser.ParseScript(file.Program, file.FileName, file.Strict);
         }
         else
         {
-            parser.ParseModule();
+            parser.ParseModule(file.Program, file.FileName);
         }
     }
 

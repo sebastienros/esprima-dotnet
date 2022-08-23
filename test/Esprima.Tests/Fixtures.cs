@@ -19,11 +19,11 @@ public class Fixtures
     private static Lazy<Dictionary<string, FixtureMetadata>> Metadata { get; } = new(() => FixtureMetadata.ReadMetadata());
 
     private static string ParseAndFormat(SourceType sourceType, string source,
-        ParserOptions parserOptions, Func<string, ParserOptions, JavaScriptParser> parserFactory,
+        ParserOptions parserOptions, Func<ParserOptions, JavaScriptParser> parserFactory,
         AstToJsonOptions conversionOptions)
     {
-        var parser = parserFactory(source, parserOptions);
-        var program = sourceType == SourceType.Script ? (Program) parser.ParseScript() : parser.ParseModule();
+        var parser = parserFactory(parserOptions);
+        var program = sourceType == SourceType.Script ? (Program) parser.ParseScript(source) : parser.ParseModule(source);
 
         return program.ToJsonString(conversionOptions, indent: "  ");
     }
@@ -86,15 +86,16 @@ public class Fixtures
     [MemberData(nameof(SourceFiles), "Fixtures")]
     public void ExecuteTestCase(string fixture)
     {
-        var (parserOptions, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX")
-            ? (new JsxParserOptions(),
-                (src, opts) => new JsxParser(src, (JsxParserOptions) opts),
-                JsxAstToJsonOptions.Default)
-            : (new ParserOptions(),
-                new Func<string, ParserOptions, JavaScriptParser>((src, opts) => new JavaScriptParser(src, opts)),
-                AstToJsonOptions.Default);
+        static T CreateParserOptions<T>(bool tolerant, bool adaptRegex) where T : ParserOptions, new() =>
+            new T { Tokens = true, Tolerant = tolerant, AdaptRegexp = adaptRegex };
 
-        parserOptions.Tokens = true;
+        var (parserOptionsFactory, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX")
+            ? (CreateParserOptions<JsxParserOptions>,
+                opts => new JsxParser((JsxParserOptions) opts),
+                JsxAstToJsonOptions.Default)
+            : (new Func<bool, bool, ParserOptions>(CreateParserOptions<ParserOptions>),
+                new Func<ParserOptions, JavaScriptParser>(opts => new JavaScriptParser(opts)),
+                AstToJsonOptions.Default);
 
         string treeFilePath, failureFilePath, moduleFilePath;
         var jsFilePath = Path.Combine(GetFixturesPath(), FixturesDirName, fixture);
@@ -115,8 +116,8 @@ public class Fixtures
         var script = File.ReadAllText(jsFilePath);
         if (jsFilePath.EndsWith(".source.js"))
         {
-            var parser = new JavaScriptParser(script);
-            var program = parser.ParseScript();
+            var parser = new JavaScriptParser();
+            var program = parser.ParseScript(script);
             var source = program.Body.First().As<VariableDeclaration>().Declarations.First().As<VariableDeclarator>().Init!.As<Literal>().StringValue!;
             script = source;
         }
@@ -145,7 +146,7 @@ public class Fixtures
             metadata = FixtureMetadata.Default;
         }
 
-        parserOptions.AdaptRegexp = !metadata.IgnoresRegex;
+        var parserOptions = parserOptionsFactory(false, !metadata.IgnoresRegex);
 
         var conversionOptions = metadata.CreateConversionOptions(conversionDefaultOptions);
 
@@ -195,14 +196,14 @@ public class Fixtures
 
         if (!invalid)
         {
-            parserOptions.Tolerant = true;
+            parserOptions = parserOptionsFactory(true, parserOptions.AdaptRegexp);
 
             var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
             CompareTreesAndAssert(actual, expected, metadata);
         }
         else
         {
-            parserOptions.Tolerant = false;
+            parserOptions = parserOptionsFactory(false, parserOptions.AdaptRegexp);
 
             // TODO: check the accuracy of the message and of the location
             Assert.Throws<ParserException>(() => ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions));
