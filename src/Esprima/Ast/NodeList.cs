@@ -48,12 +48,12 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
         get
         {
             // Following trick can reduce the range check by one
-            if ((uint) index >= (uint) _count)
+            if ((uint) index < (uint) _count)
             {
-                ThrowArgumentOutOfRangeException(nameof(index), index, null);
+                return _items![index];
             }
 
-            return _items![index];
+            return ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
     }
 

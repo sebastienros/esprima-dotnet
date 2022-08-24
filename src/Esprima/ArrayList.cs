@@ -158,12 +158,12 @@ internal struct ArrayList<T> : IReadOnlyList<T>
             AssertUnchanged();
 
             // Following trick can reduce the range check by one
-            if ((uint) index >= (uint) _count)
+            if ((uint) index < (uint) _count)
             {
-                ThrowArgumentOutOfRangeException(nameof(index), index, null);
+                return _items![index];
             }
 
-            return _items![index];
+            return ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -171,12 +171,14 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         {
             AssertUnchanged();
 
-            if (index < 0 || index >= _count)
+            // Following trick can reduce the range check by one
+            if ((uint) index < (uint) _count)
             {
-                ThrowArgumentOutOfRangeException(nameof(index), index, null);
+                _items![index] = value;
+                return;
             }
 
-            _items![index] = value;
+            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
     }
 

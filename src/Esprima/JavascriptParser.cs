@@ -78,7 +78,6 @@ public partial class JavaScriptParser
         public HashSet<string?> LabelSet;
     }
 
-
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
     private static readonly Func<JavaScriptParser, Expression> parseAssignmentExpression;
