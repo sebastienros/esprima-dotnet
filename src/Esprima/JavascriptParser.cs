@@ -2005,24 +2005,12 @@ public partial class JavaScriptParser
         return Finalize(node, new AwaitExpression(argument));
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Expression ParseUnaryExpression()
     {
         Expression expr;
         if (Match('+', '-', '~', '!') || _lookahead.Type == TokenType.Keyword && MatchUnaryKeyword((string) _lookahead.Value!))
         {
-            var node = StartNode(_lookahead);
-            var token = NextToken();
-            expr = InheritCoverGrammar(parseUnaryExpression);
-            expr = Finalize(node, new UnaryExpression((string)token.Value!, expr));
-            var unaryExpr = expr.As<UnaryExpression>();
-            if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
-            {
-                TolerateError(Messages.StrictDelete);
-            }
-
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
+            expr = ParseBasicUnaryExpression();
         }
         else if (_context.IsAsync && MatchContextualKeyword("await"))
         {
@@ -2033,6 +2021,24 @@ public partial class JavaScriptParser
             expr = ParseUpdateExpression();
         }
 
+        return expr;
+    }
+
+    private Expression ParseBasicUnaryExpression()
+    {
+        Expression expr;
+        var node = StartNode(_lookahead);
+        var token = NextToken();
+        expr = InheritCoverGrammar(parseUnaryExpression);
+        expr = Finalize(node, new UnaryExpression((string) token.Value!, expr));
+        var unaryExpr = expr.As<UnaryExpression>();
+        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
+        {
+            TolerateError(Messages.StrictDelete);
+        }
+
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
         return expr;
     }
 
