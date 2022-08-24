@@ -1764,7 +1764,9 @@ public partial class JavaScriptParser
         }
         else
         {
-            expr = MatchKeyword("new") ? InheritCoverGrammar(parseNewExpression) : InheritCoverGrammar(parsePrimaryExpression);
+            expr = MatchKeyword("new")
+                ? InheritCoverGrammar(parseNewExpression)
+                : InheritCoverGrammar(parsePrimaryExpression);
         }
 
         if (isSuper && !_context.AllowSuper)
@@ -1948,11 +1950,10 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-update-expressions
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Expression ParseUpdateExpression()
     {
         Expression expr;
-        var startToken = _lookahead;
+        var startToken = StartNode(_lookahead);
 
         if (Match("++") || Match("--"))
         {
@@ -1970,7 +1971,7 @@ public partial class JavaScriptParser
         return expr;
     }
 
-    private Expression ParsePostfixUnaryExpression(Expression expr, Token startToken)
+    private Expression ParsePostfixUnaryExpression(Expression expr, in Marker marker)
     {
         if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
         {
@@ -1985,16 +1986,14 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
         var op = NextToken().Value;
-        expr = Finalize(StartNode(startToken), new UpdateExpression((string)op!, expr, prefix: false));
+        expr = Finalize(marker, new UpdateExpression((string)op!, expr, prefix: false));
         return expr;
     }
 
-    private Expression ParsePrefixUnaryExpression(Token startToken)
+    private Expression ParsePrefixUnaryExpression(in Marker marker)
     {
-        Expression expr;
-        var node = StartNode(startToken);
         var token = NextToken();
-        expr = InheritCoverGrammar(parseUnaryExpression);
+        var expr = InheritCoverGrammar(parseUnaryExpression);
         if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
         {
             TolerateError(Messages.StrictLHSPrefix);
@@ -2005,7 +2004,7 @@ public partial class JavaScriptParser
             TolerateError(Messages.InvalidLHSInAssignment);
         }
 
-        expr = Finalize(node, new UpdateExpression((string)token.Value!, expr, prefix: true));
+        expr = Finalize(marker, new UpdateExpression((string)token.Value!, expr, prefix: true));
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
         return expr;
