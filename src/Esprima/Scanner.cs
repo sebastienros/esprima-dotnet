@@ -13,9 +13,9 @@ internal readonly struct ScannerState
     public readonly int Index;
     public readonly int LineNumber;
     public readonly int LineStart;
-    public readonly List<string> CurlyStack;
+    public readonly ArrayList<string> CurlyStack;
 
-    public ScannerState(int index, int lineNumber, int lineStart, List<string> curlyStack)
+    public ScannerState(int index, int lineNumber, int lineStart, ArrayList<string> curlyStack)
     {
         Index = index;
         LineNumber = lineNumber;
@@ -51,7 +51,7 @@ public sealed partial class Scanner
 
     internal bool _isModule;
 
-    private List<string> _curlyStack;
+    private ArrayList<string> _curlyStack;
     private readonly StringBuilder _sb = new();
 
     internal StringPool _stringPool;
@@ -99,7 +99,6 @@ public sealed partial class Scanner
         _trackComment = options.Comments;
 
         _source = string.Empty;
-        _curlyStack = new List<string>();
     }
 
     public Scanner(string code) : this(code, ParserOptions.Default)
@@ -186,7 +185,7 @@ public sealed partial class Scanner
 
     internal ScannerState SaveState()
     {
-        return new ScannerState(_index, _lineNumber, _lineStart, new List<string>(_curlyStack));
+        return new ScannerState(_index, _lineNumber, _lineStart, new ArrayList<string>(_curlyStack.ToArray()));
     }
 
     internal void RestoreState(in ScannerState state)
@@ -1665,7 +1664,7 @@ public sealed partial class Scanner
         {
             if (codePoint < 0 || codePoint > 0x10FFFF)
             {
-                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(codePoint), codePoint, "Invalid code point.");
+                throw new ArgumentOutOfRangeException(nameof(codePoint), codePoint, "Invalid code point.");
             }
 
             var point = codePoint;

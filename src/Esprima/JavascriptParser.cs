@@ -13,9 +13,6 @@ namespace Esprima;
 /// </remarks>
 public partial class JavaScriptParser
 {
-    [StringMatcher("=", "*=", "**=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "&&=", "||=", "??=")]
-    private static partial bool IsAssignmentOperator(string id);
-
     internal sealed class Context
     {
         public Context()
@@ -48,9 +45,10 @@ public partial class JavaScriptParser
 
         public void ReleaseLargeBuffers()
         {
-            if (Decorators.Count > 64)
+            Decorators.Clear();
+            if (Decorators.Capacity > 64)
             {
-                Decorators.Resize(64);
+                Decorators.Capacity = 64;
             }
 
             if (LabelSet.Count > 64)
@@ -80,6 +78,53 @@ public partial class JavaScriptParser
         public HashSet<string?> LabelSet;
     }
 
+    // cache frequently called Func so we don't need to build Func<T> instances all the time
+    // can be revisited with NET 7 SDK where things have improved
+    private static readonly Func<JavaScriptParser, Expression> parseAssignmentExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseExponentiationExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseUnaryExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseNewExpression;
+    private static readonly Func<JavaScriptParser, Expression> parsePrimaryExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseGroupExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseArrayInitializer;
+    private static readonly Func<JavaScriptParser, Expression> parseObjectInitializer;
+    private static readonly Func<JavaScriptParser, Expression> parseBinaryExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseLeftHandSideExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseLeftHandSideExpressionAllowCall;
+    private static readonly Func<JavaScriptParser, Statement> parseStatement;
+    private static readonly Func<JavaScriptParser, BlockStatement> parseFunctionSourceElements;
+    private static readonly Func<JavaScriptParser, Expression> parseAsyncArgument;
+
+    static JavaScriptParser()
+    {
+        var dummyInstance = new JavaScriptParser();
+
+        parseAssignmentExpression = BuildCachedDelegateFor(dummyInstance.ParseAssignmentExpression);
+        parseExponentiationExpression = BuildCachedDelegateFor(dummyInstance.ParseExponentiationExpression);
+        parseUnaryExpression = BuildCachedDelegateFor(dummyInstance.ParseUnaryExpression);
+        parseExpression = BuildCachedDelegateFor(dummyInstance.ParseExpression);
+        parseNewExpression = BuildCachedDelegateFor(dummyInstance.ParseNewExpression);
+        parsePrimaryExpression = BuildCachedDelegateFor(dummyInstance.ParsePrimaryExpression);
+        parseGroupExpression = BuildCachedDelegateFor(dummyInstance.ParseGroupExpression);
+        parseArrayInitializer = BuildCachedDelegateFor(dummyInstance.ParseArrayInitializer);
+        parseObjectInitializer = BuildCachedDelegateFor(dummyInstance.ParseObjectInitializer);
+        parseBinaryExpression = BuildCachedDelegateFor(dummyInstance.ParseBinaryExpression);
+        parseLeftHandSideExpression = BuildCachedDelegateFor(dummyInstance.ParseLeftHandSideExpression);
+        parseLeftHandSideExpressionAllowCall = BuildCachedDelegateFor(dummyInstance.ParseLeftHandSideExpressionAllowCall);
+        parseStatement = BuildCachedDelegateFor(dummyInstance.ParseStatement);
+        parseFunctionSourceElements = BuildCachedDelegateFor(dummyInstance.ParseFunctionSourceElements);
+        parseAsyncArgument = BuildCachedDelegateFor(dummyInstance.ParseAsyncArgument);
+
+        static Func<JavaScriptParser, T> BuildCachedDelegateFor<T>(Func<T> func)
+        {
+            return (Func<JavaScriptParser, T>) Delegate.CreateDelegate(typeof(Func<JavaScriptParser, T>), null, func.Method);
+        }
+    }
+
+    [StringMatcher("=", "*=", "**=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "&&=", "||=", "??=")]
+    private static partial bool IsAssignmentOperator(string id);
+
     private protected Token _lookahead;
     private protected readonly Context _context;
 
@@ -96,24 +141,6 @@ public partial class JavaScriptParser
 
     private protected List<SyntaxToken>? _tokens;
     private protected List<SyntaxComment>? _comments;
-
-    // cache frequently called Func so we don't need to build Func<T> instances all the time
-    // can be revisited with NET 7 SDK where things have improved
-    private readonly Func<Expression> parseAssignmentExpression;
-    private readonly Func<Expression> parseExponentiationExpression;
-    private readonly Func<Expression> parseUnaryExpression;
-    private readonly Func<Expression> parseExpression;
-    private readonly Func<Expression> parseNewExpression;
-    private readonly Func<Expression> parsePrimaryExpression;
-    private readonly Func<Expression> parseGroupExpression;
-    private readonly Func<Expression> parseArrayInitializer;
-    private readonly Func<Expression> parseObjectInitializer;
-    private readonly Func<Expression> parseBinaryExpression;
-    private readonly Func<Expression> parseLeftHandSideExpression;
-    private readonly Func<Expression> parseLeftHandSideExpressionAllowCall;
-    private readonly Func<Statement> parseStatement;
-    private readonly Func<BlockStatement> parseFunctionSourceElements;
-    private readonly Func<Expression> parseAsyncArgument;
 
     /// <summary>
     /// Creates a new <see cref="JavaScriptParser" /> instance.
@@ -133,22 +160,6 @@ public partial class JavaScriptParser
         {
             throw new ArgumentNullException(nameof(options));
         }
-
-        parseAssignmentExpression = ParseAssignmentExpression;
-        parseExponentiationExpression = ParseExponentiationExpression;
-        parseUnaryExpression = ParseUnaryExpression;
-        parseExpression = ParseExpression;
-        parseNewExpression = ParseNewExpression;
-        parsePrimaryExpression = ParsePrimaryExpression;
-        parseGroupExpression = ParseGroupExpression;
-        parseArrayInitializer = ParseArrayInitializer;
-        parseObjectInitializer = ParseObjectInitializer;
-        parseBinaryExpression = ParseBinaryExpression;
-        parseLeftHandSideExpression = ParseLeftHandSideExpression;
-        parseLeftHandSideExpressionAllowCall = ParseLeftHandSideExpressionAllowCall;
-        parseStatement = ParseStatement;
-        parseFunctionSourceElements = ParseFunctionSourceElements;
-        parseAsyncArgument = ParseAsyncArgument;
 
         _errorHandler = options.ErrorHandler;
         _tolerant = options.Tolerant;
@@ -557,7 +568,7 @@ public partial class JavaScriptParser
     // the flags outside of the parser. This means the production the parser parses is used as a part of a potential
     // pattern. The CoverInitializedName check is deferred.
 
-    private T IsolateCoverGrammar<T>(Func<T> parseFunction)
+    private T IsolateCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction)
     {
         var previousIsBindingElement = _context.IsBindingElement;
         var previousIsAssignmentTarget = _context.IsAssignmentTarget;
@@ -567,7 +578,7 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = true;
         _context.FirstCoverInitializedNameError = null;
 
-        var result = parseFunction();
+        var result = parseFunction(this);
         if (_context.FirstCoverInitializedNameError != null)
         {
             ThrowUnexpectedToken(_context.FirstCoverInitializedNameError.Value);
@@ -581,7 +592,7 @@ public partial class JavaScriptParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private T InheritCoverGrammar<T>(Func<T> parseFunction) where T : Node
+    private T InheritCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction) where T : Node
     {
         var previousIsBindingElement = _context.IsBindingElement;
         var previousIsAssignmentTarget = _context.IsAssignmentTarget;
@@ -591,7 +602,7 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = true;
         _context.FirstCoverInitializedNameError = null;
 
-        var result = parseFunction();
+        var result = parseFunction(this);
 
         _context.IsBindingElement = _context.IsBindingElement && previousIsBindingElement;
         _context.IsAssignmentTarget = _context.IsAssignmentTarget && previousIsAssignmentTarget;
@@ -4675,7 +4686,7 @@ public partial class JavaScriptParser
                 if (Match("="))
                 {
                     NextToken();
-                    value = IsolateCoverGrammar(this.parseAssignmentExpression);
+                    value = IsolateCoverGrammar(parseAssignmentExpression);
                 }
             }
         }

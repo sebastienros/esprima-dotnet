@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
-using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast;
 
@@ -83,7 +82,7 @@ public class BinaryExpression : Expression
             "||" => BinaryOperator.LogicalOr,
             "**" => BinaryOperator.Exponentiation,
             "??" => BinaryOperator.NullishCoalescing,
-            _ => ThrowArgumentOutOfRangeException<BinaryOperator>(nameof(op), "Invalid binary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid binary operator: " + op)
         };
     }
 
@@ -116,7 +115,7 @@ public class BinaryExpression : Expression
             BinaryOperator.LogicalOr => "||",
             BinaryOperator.Exponentiation => "**",
             BinaryOperator.NullishCoalescing => "??",
-            _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid binary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid binary operator: " + op)
         };
     }
 

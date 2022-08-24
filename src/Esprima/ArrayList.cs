@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
@@ -16,7 +14,9 @@ namespace Esprima;
 [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}, Version = {_localVersion}")]
 internal struct ArrayList<T> : IReadOnlyList<T>
 {
-    private T[] _items;
+    private const int MinAllocatedCount = 4;
+
+    private T[]? _items;
     private int _count;
 
     // Having a struct intended for modification can introduce some very
@@ -69,7 +69,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     //     Console.WriteLine(a.Count); // will throw
 
 #if DEBUG
-    private int[] _sharedVersion;
+    private int[]? _sharedVersion;
     private int _localVersion;
 #endif
 
@@ -77,7 +77,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         if (initialCapacity < 0)
         {
-            ThrowArgumentOutOfRangeException(nameof(initialCapacity), initialCapacity);
+            throw new ArgumentOutOfRangeException(nameof(initialCapacity), initialCapacity, null);
         }
 
         _items = initialCapacity > 0 ? new T[initialCapacity] : null;
@@ -85,30 +85,60 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
 #if DEBUG
         _localVersion = 0;
-        _sharedVersion = initialCapacity > 0 ? new[] { _localVersion } : null;
+        _sharedVersion = null;
 #endif
     }
 
-    /// <summary>
-    /// Note, expects ownership of the array!
-    /// </summary>
-    public ArrayList(T[] initialData)
+    /// <remarks>
+    /// Expects ownership of the array!
+    /// </remarks>
+    internal ArrayList(T[] items)
     {
-        if (initialData is null)
-        {
-            ThrowArgumentNullException(nameof(initialData));
-        }
-
-        _items = initialData;
-        _count = initialData.Length;
+        _items = items;
+        _count = items.Length;
 
 #if DEBUG
         _localVersion = 0;
-        _sharedVersion = _count > 0 ? new[] { _localVersion } : null;
+        _sharedVersion = null;
 #endif
     }
 
-    private int Capacity => _items?.Length ?? 0;
+    public int Capacity
+    {
+        get
+        {
+            AssertUnchanged();
+            return _items?.Length ?? 0;
+        }
+        set
+        {
+            AssertUnchanged();
+
+            if (value < _count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, null);
+            }
+            else if (value == (_items?.Length ?? 0))
+            {
+                return;
+            }
+            else if (value > 0)
+            {
+                T[] array = new T[value];
+                if (_count > 0)
+                {
+                    Array.Copy(_items, 0, array, 0, _count);
+                }
+                _items = array;
+            }
+            else
+            {
+                _items = null;
+            }
+
+            OnChanged();
+        }
+    }
 
     public int Count
     {
@@ -120,79 +150,36 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         }
     }
 
-    internal void AddRange<TSource>(ArrayList<TSource> list) where TSource : T
+    public T this[int index]
     {
-        AssertUnchanged();
-
-        var listCount = list.Count;
-        if (listCount == 0)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
         {
-            return;
+            AssertUnchanged();
+
+            // Following trick can reduce the range check by one
+            if ((uint) index < (uint) _count)
+            {
+                return _items![index];
+            }
+
+            return ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
 
-        var oldCount = _count;
-        var newCount = oldCount + listCount;
-
-        if (Capacity < newCount)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set
         {
-            Resize(newCount);
+            AssertUnchanged();
+
+            // Following trick can reduce the range check by one
+            if ((uint) index < (uint) _count)
+            {
+                _items![index] = value;
+                return;
+            }
+
+            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
-
-        Debug.Assert(_items != null);
-        Array.Copy(list._items, 0, _items, oldCount, listCount);
-        _count = newCount;
-
-        OnChanged();
-    }
-
-    internal void Add(T item)
-    {
-        AssertUnchanged();
-
-        var capacity = Capacity;
-
-        if (_count == capacity)
-        {
-            Resize(Math.Max(capacity * 2, 4));
-        }
-
-        Debug.Assert(_items != null);
-        _items[_count] = item;
-        _count++;
-
-        OnChanged();
-    }
-
-    internal void Clear()
-    {
-        AssertUnchanged();
-
-        if (this._count > 0)
-        {
-            Array.Clear(this._items, 0, this._count);
-            this._count = 0;
-        }
-#if DEBUG
-        else if (_sharedVersion is null)
-        {
-            _sharedVersion = new[] { 0 };
-            _localVersion = 0;
-        }
-#endif
-
-        OnChanged();
-    }
-
-    internal void Resize(int size)
-    {
-#if DEBUG
-        if (_sharedVersion == null)
-        {
-            _sharedVersion = new[] { 1 };
-        }
-#endif
-
-        Array.Resize(ref _items, size);
     }
 
     [Conditional("DEBUG")]
@@ -210,22 +197,80 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     private void OnChanged()
     {
 #if DEBUG
+        _sharedVersion ??= new[] { 0 };
+
         ref var version = ref _sharedVersion[0];
         version++;
         _localVersion = version;
 #endif
     }
 
-    internal void RemoveAt(int index)
+    public void AddRange<TSource>(ArrayList<TSource> list) where TSource : T
+    {
+        AssertUnchanged();
+
+        var listCount = list.Count;
+        if (listCount == 0)
+        {
+            return;
+        }
+
+        var oldCount = _count;
+        var newCount = oldCount + listCount;
+
+        if (Capacity < newCount)
+        {
+            Array.Resize(ref _items, Math.Max(newCount, MinAllocatedCount));
+        }
+
+        Debug.Assert(_items is not null);
+        Array.Copy(list._items, 0, _items, oldCount, listCount);
+        _count = newCount;
+
+        OnChanged();
+    }
+
+    public void Add(T item)
+    {
+        AssertUnchanged();
+
+        var capacity = Capacity;
+
+        if (_count == capacity)
+        {
+            Array.Resize(ref _items, Math.Max(capacity * 2, MinAllocatedCount));
+        }
+
+        Debug.Assert(_items is not null);
+        _items![_count] = item;
+        _count++;
+
+        OnChanged();
+    }
+
+    public void Clear()
+    {
+        AssertUnchanged();
+
+        if (_count > 0)
+        {
+            Array.Clear(_items, 0, _count);
+            _count = 0;
+        }
+
+        OnChanged();
+    }
+
+    public void RemoveAt(int index)
     {
         AssertUnchanged();
 
         if (index < 0 || index >= _count)
         {
-            ThrowArgumentOutOfRangeException(nameof(index), index, null);
+            throw new ArgumentOutOfRangeException(nameof(index), index, null);
         }
 
-        _items[index] = default;
+        _items![index] = default!;
         _count--;
 
         if (index < _count - 1)
@@ -236,42 +281,14 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         OnChanged();
     }
 
-    public T this[int index]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            // Following trick can reduce the range check by one
-            if ((uint) index >= (uint) _count)
-            {
-                ThrowIndexOutOfRangeException();
-            }
-
-            AssertUnchanged();
-            return _items[index];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set
-        {
-            if (index < 0 || index >= _count)
-            {
-                ThrowIndexOutOfRangeException();
-            }
-
-            AssertUnchanged();
-            _items[index] = value;
-        }
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void Push(T item)
+    public void Push(T item)
     {
         Add(item);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal T Pop()
+    public T Pop()
     {
         var lastIndex = _count - 1;
         var last = this[lastIndex];
@@ -279,34 +296,36 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         return last;
     }
 
-    public void Yield(out T[] items, out int count)
+    public void Yield(out T[]? items, out int count)
     {
         items = _items;
         count = _count;
         this = default;
     }
 
-    internal ArrayList<TResult> Select<TResult>(Func<T, TResult> selector)
-    {
-        if (selector == null)
-        {
-            ThrowArgumentNullException(nameof(selector));
-        }
-
-        var list = new ArrayList<TResult> { _count = Count, _items = new TResult[Count] };
-
-        for (var i = 0; i < Count; i++)
-        {
-            list._items[i] = selector(_items[i]);
-        }
-
-        return list;
-    }
-
     /// <remarks>
     /// Items should not be added or removed from the <see cref="ArrayList{T}"/> while the returned <see cref="Span{T}"/> is in use!
     /// </remarks>
     public Span<T> AsSpan() => new Span<T>(_items, 0, _count);
+
+#if NETSTANDARD2_1_OR_GREATER
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public T[] ToArray()
+    {
+#if NETSTANDARD2_1_OR_GREATER
+        return AsSpan().ToArray();
+#else
+        if (_count == 0)
+        {
+            return Array.Empty<T>();
+        }
+
+        var array = new T[_count];
+        Array.Copy(_items, 0, array, 0, _count);
+        return array;
+#endif
+    }
 
     public Enumerator GetEnumerator()
     {
@@ -331,13 +350,13 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     /// </remarks>
     public struct Enumerator : IEnumerator<T>
     {
-        private readonly T[] _items; // Usually null when count is zero
+        private readonly T[]? _items; // Usually null when count is zero
         private readonly int _count;
 
         private int _index;
-        private T _current;
+        private T? _current;
 
-        internal Enumerator(T[] items, int count) : this()
+        internal Enumerator(T[]? items, int count) : this()
         {
             _index = 0;
             _items = items;
@@ -352,7 +371,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         {
             if (_index < _count)
             {
-                _current = _items[_index];
+                _current = _items![_index];
                 _index++;
                 return true;
             }
@@ -373,15 +392,15 @@ internal struct ArrayList<T> : IReadOnlyList<T>
             _current = default;
         }
 
-        public T Current => _current;
+        public T Current => _current!;
 
-        object IEnumerator.Current
+        object? IEnumerator.Current
         {
             get
             {
                 if (_index == 0 || _index == _count + 1)
                 {
-                    ThrowInvalidOperationException<object>();
+                    throw new InvalidOperationException();
                 }
 
                 return Current;
@@ -394,13 +413,7 @@ internal static class ArrayList
 {
     public static ArrayList<T> Create<T>(in NodeList<T> source) where T : Node
     {
-        if (source._count == 0)
-        {
-            return new ArrayList<T>();
-        }
-
-        var items = new T[source.Count];
-        Array.Copy(source._items!, 0, items, 0, source._count);
+        var items = source.ToArray();
         return new ArrayList<T>(items);
     }
 

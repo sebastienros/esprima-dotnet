@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima;
 
@@ -16,7 +17,7 @@ public readonly struct Location : IEquatable<Location>
         {
             if (throwOnError)
             {
-                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(start), start, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+                throw new ArgumentOutOfRangeException(nameof(start), start, null);
             }
             return false;
         }
@@ -25,7 +26,7 @@ public readonly struct Location : IEquatable<Location>
         {
             if (throwOnError)
             {
-                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(end), end, Exception<ArgumentOutOfRangeException>.DefaultMessage);
+                throw new ArgumentOutOfRangeException(nameof(end), end, null);
             }
             return false;
         }
@@ -221,9 +222,10 @@ InvalidFormat:
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TryParse(string s, out Location result) => TryParse(s.AsSpan(), out result);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location Parse(ReadOnlySpan<char> s)
     {
-        return TryParseCore(s, throwIfInvalid: true, out var result) ? result : throw new FormatException("Input string was not in a correct format.");
+        return TryParseCore(s, throwIfInvalid: true, out var result) ? result : ThrowFormatException<Location>("Input string was not in a correct format.");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

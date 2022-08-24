@@ -52,7 +52,7 @@ internal sealed class JsonTextWriter : JsonWriter
 
     public JsonTextWriter(TextWriter writer, string? indent)
     {
-        _writer = writer ?? ThrowArgumentNullException<TextWriter>(nameof(writer));
+        _writer = writer ?? throw new ArgumentNullException(nameof(writer));
 
         if (!string.IsNullOrWhiteSpace(indent))
         {
@@ -90,17 +90,17 @@ internal sealed class JsonTextWriter : JsonWriter
     {
         if (name == null)
         {
-            ThrowArgumentNullException(nameof(name));
+            throw new ArgumentNullException(nameof(name));
         }
 
         if (Depth == 0 || _structures.Top != StructureKind.Object)
         {
-            ThrowInvalidOperationException("Member must be within an object.");
+            throw new InvalidOperationException("Member must be within an object.");
         }
 
         if (_memberName != null)
         {
-            ThrowInvalidOperationException("Missing value for member: " + _memberName);
+            throw new InvalidOperationException("Missing value for member: " + _memberName);
         }
 
         _memberName = name;
@@ -142,7 +142,7 @@ internal sealed class JsonTextWriter : JsonWriter
     {
         if (double.IsNaN(n) || double.IsInfinity(n))
         {
-            ThrowArgumentOutOfRangeException(nameof(n), n, null);
+            throw new ArgumentOutOfRangeException(nameof(n), n, null);
         }
 
         Write(n.ToString(CultureInfo.InvariantCulture), TokenKind.Scalar);
@@ -185,12 +185,12 @@ internal sealed class JsonTextWriter : JsonWriter
     {
         if (Depth == 0)
         {
-            ThrowInvalidOperationException("No JSON structure in effect.");
+            throw new InvalidOperationException("No JSON structure in effect.");
         }
 
         if (_memberName != null)
         {
-            ThrowInvalidOperationException("Missing value for member: " + _memberName);
+            throw new InvalidOperationException("Missing value for member: " + _memberName);
         }
 
         if (_counters.Top > 0)
@@ -211,7 +211,7 @@ internal sealed class JsonTextWriter : JsonWriter
 
         if (Depth == 0 && kind == TokenKind.Scalar)
         {
-            ThrowInvalidOperationException("JSON text must start with an object or an array.");
+            throw new InvalidOperationException("JSON text must start with an object or an array.");
         }
 
         var writer = _writer;
@@ -220,7 +220,7 @@ internal sealed class JsonTextWriter : JsonWriter
         {
             if (_structures.Top == StructureKind.Object && _memberName == null)
             {
-                ThrowInvalidOperationException("JSON object member name is undefined.");
+                throw new InvalidOperationException("JSON object member name is undefined.");
             }
 
             if (_counters.Top > 0)
@@ -341,7 +341,7 @@ internal sealed class JsonTextWriter : JsonWriter
             {
                 if (Count <= 0)
                 {
-                    ThrowInvalidOperationException<object>();
+                    throw new InvalidOperationException();
                 }
 
                 return ref _items[Count - 1];
@@ -377,7 +377,7 @@ internal sealed class JsonTextWriter : JsonWriter
         {
             if (Count == 0)
             {
-                ThrowInvalidOperationException();
+                throw new InvalidOperationException();
             }
 
             var top = Top;

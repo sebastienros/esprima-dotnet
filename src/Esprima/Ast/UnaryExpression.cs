@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
-using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast;
 
@@ -51,7 +50,7 @@ public class UnaryExpression : Expression
             "typeof" => UnaryOperator.TypeOf,
             "++" => UnaryOperator.Increment,
             "--" => UnaryOperator.Decrement,
-            _ => ThrowArgumentOutOfRangeException<UnaryOperator>(nameof(op), "Invalid unary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid unary operator: " + op)
         };
     }
 
@@ -68,7 +67,7 @@ public class UnaryExpression : Expression
             UnaryOperator.TypeOf => "typeof",
             UnaryOperator.Increment => "++",
             UnaryOperator.Decrement => "--",
-            _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid unary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid unary operator: " + op)
         };
     }
 
