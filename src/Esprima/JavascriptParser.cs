@@ -83,7 +83,7 @@ public partial class JavaScriptParser
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
     private static readonly Func<JavaScriptParser, Expression> parseAssignmentExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseExponentiationExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseBinaryExpressionOperand;
     private static readonly Func<JavaScriptParser, Expression> parseUnaryExpression;
     private static readonly Func<JavaScriptParser, Expression> parseExpression;
     private static readonly Func<JavaScriptParser, Expression> parseNewExpression;
@@ -103,7 +103,7 @@ public partial class JavaScriptParser
         var dummyInstance = new JavaScriptParser();
 
         parseAssignmentExpression = BuildCachedDelegateFor(dummyInstance.ParseAssignmentExpression);
-        parseExponentiationExpression = BuildCachedDelegateFor(dummyInstance.ParseExponentiationExpression);
+        parseBinaryExpressionOperand = BuildCachedDelegateFor(dummyInstance.ParseBinaryExpressionOperand);
         parseUnaryExpression = BuildCachedDelegateFor(dummyInstance.ParseUnaryExpression);
         parseExpression = BuildCachedDelegateFor(dummyInstance.ParseExpression);
         parseNewExpression = BuildCachedDelegateFor(dummyInstance.ParseNewExpression);
@@ -510,6 +510,21 @@ public partial class JavaScriptParser
     private protected bool Match(string value)
     {
         return _lookahead.Type == TokenType.Punctuator && value.Equals((string) _lookahead.Value!);
+    }
+
+    /// <summary>
+    /// Return true if the next token matches the specified punctuator and consumes the next token.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private protected bool ConsumeMatch(string value)
+    {
+        if (Match(value))
+        {
+            NextToken();
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -2058,26 +2073,30 @@ public partial class JavaScriptParser
         }
     }
 
-    private Expression ParseExponentiationExpression()
+    private Expression ParseBinaryExpressionOperand()
     {
-        var startToken = _lookahead;
+        var startMarker = StartNode(_lookahead);
 
         var isLeftParenthesized = this.Match("(");
         var expr = InheritCoverGrammar(parseUnaryExpression);
 
         var exponentAllowed = expr.Type != Nodes.UnaryExpression || isLeftParenthesized;
 
-        if (exponentAllowed && Match("**"))
+        if (exponentAllowed && ConsumeMatch("**"))
         {
-            NextToken();
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
-            var left = expr;
-            var right = IsolateCoverGrammar(parseExponentiationExpression);
-            expr = Finalize(StartNode(startToken), CreateBinaryExpression("**", left, right));
+            expr = ParseExponentiationExpression(expr, startMarker);
         }
 
         return expr;
+    }
+
+    private BinaryExpression ParseExponentiationExpression(Expression expr, in Marker marker)
+    {
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        var left = expr;
+        var right = IsolateCoverGrammar(parseBinaryExpressionOperand);
+        return Finalize(marker, CreateBinaryExpression("**", left, right));
     }
 
     // https://tc39.github.io/ecma262/#sec-exp-operator
@@ -2183,7 +2202,7 @@ public partial class JavaScriptParser
     {
         var startToken = _lookahead;
 
-        var expr = InheritCoverGrammar(parseExponentiationExpression);
+        var expr = InheritCoverGrammar(parseBinaryExpressionOperand);
 
         var allowAndOr = true;
         var allowNullishCoalescing = true;
@@ -2220,7 +2239,7 @@ public partial class JavaScriptParser
             markers.Push(_lookahead);
 
             var left = expr;
-            var right = IsolateCoverGrammar(parseExponentiationExpression);
+            var right = IsolateCoverGrammar(parseBinaryExpressionOperand);
 
             var stack = _sharedStack ?? new ArrayList<object>(3);
             _sharedStack = null;
@@ -2269,7 +2288,7 @@ public partial class JavaScriptParser
                 stack.Push(NextToken().Value!);
                 precedences.Push(prec);
                 markers.Push(_lookahead);
-                stack.Push(IsolateCoverGrammar(parseExponentiationExpression));
+                stack.Push(IsolateCoverGrammar(parseBinaryExpressionOperand));
             }
 
             // Final reduce to clean-up the stack.
