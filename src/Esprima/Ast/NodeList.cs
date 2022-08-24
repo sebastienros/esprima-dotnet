@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using static Esprima.EsprimaExceptionHelper;
 
@@ -6,22 +7,28 @@ namespace Esprima.Ast;
 
 public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
 {
-    internal readonly T[]? _items;
-    internal readonly int _count;
+    private readonly T[]? _items;
+    private readonly int _count;
 
     internal NodeList(ICollection<T> collection)
     {
         collection ??= ThrowArgumentNullException<ICollection<T>>(nameof(collection));
 
-        var count = _count = collection.Count;
-        if ((_items = count == 0 ? null : new T[count]) != null)
+        _count = collection.Count;
+        if (_count > 0)
         {
+            _items = new T[_count];
             collection.CopyTo(_items, 0);
         }
     }
 
+    /// <remarks>
+    /// Expects ownership of the array!
+    /// </remarks>
     internal NodeList(T[]? items, int count)
     {
+        Debug.Assert(count <= (items?.Length ?? 0));
+
         _items = items;
         _count = count;
     }
@@ -31,6 +38,25 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _count;
     }
+
+
+    public T this[int index]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            // Following trick can reduce the range check by one
+            if ((uint) index >= (uint) _count)
+            {
+                ThrowIndexOutOfRangeException();
+            }
+
+            return _items![index];
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsSameAs(in NodeList<T> other) => ReferenceEquals(_items, other._items);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public NodeList<Node?> AsNodes()
@@ -48,19 +74,23 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
 
     public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(_items, 0, _count);
 
-    public T this[int index]
+#if NETSTANDARD2_1_OR_GREATER
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public T[] ToArray()
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
+#if NETSTANDARD2_1_OR_GREATER
+        return AsSpan().ToArray();
+#else
+        if (_count == 0)
         {
-            // Following trick can reduce the range check by one
-            if ((uint) index >= (uint) _count)
-            {
-                ThrowIndexOutOfRangeException();
-            }
-
-            return _items![index];
+            return Array.Empty<T>();
         }
+
+        var array = new T[_count];
+        Array.Copy(_items, 0, array, 0, _count);
+        return array;
+#endif
     }
 
     public Enumerator GetEnumerator()
@@ -192,16 +222,15 @@ public static class NodeList
 
             default:
                 {
-                    var count
-                        = source is IReadOnlyCollection<T> collection
-                            ? collection.Count
-                            : (int?) null;
+                    var count = source is IReadOnlyCollection<T> collection
+                        ? collection.Count
+                        : (int?) null;
 
                     var list = count is int initialCapacity
                         ? new ArrayList<T>(initialCapacity)
                         : new ArrayList<T>();
 
-                    if (count == null || count > 0)
+                    if (count is null || count > 0)
                     {
                         foreach (var item in source)
                         {
@@ -217,6 +246,6 @@ public static class NodeList
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool AreSame<T>(in NodeList<T> nodeList1, in NodeList<T> nodeList2) where T : Node?
     {
-        return nodeList1._items == nodeList2._items;
+        return nodeList1.IsSameAs(in nodeList2);
     }
 }

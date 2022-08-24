@@ -48,9 +48,10 @@ public partial class JavaScriptParser
 
         public void ReleaseLargeBuffers()
         {
-            if (Decorators.Count > 64)
+            Decorators.Clear();
+            if (Decorators.Capacity > 64)
             {
-                Decorators.Resize(64);
+                Decorators.Capacity = 64;
             }
 
             if (LabelSet.Count > 64)

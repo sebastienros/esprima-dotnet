@@ -11,6 +11,8 @@ namespace Esprima;
 // * https://github.com/CommunityToolkit/WindowsCommunityToolkit/blob/v7.1.2/Microsoft.Toolkit.HighPerformance/Buffers/StringPool.cs
 internal struct StringPool
 {
+    private const int MinAllocatedCount = 4;
+
     private int[]? _buckets;
     private Entry[]? _entries;
     private int _count;
@@ -76,7 +78,7 @@ internal struct StringPool
     {
         if (_buckets is null)
         {
-            Initialize(4);
+            Initialize(MinAllocatedCount);
         }
         Debug.Assert(_buckets is not null);
 
