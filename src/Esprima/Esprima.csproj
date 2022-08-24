@@ -43,16 +43,15 @@
 
   <!-- For checking generated output-->
 
-  <!--
   <PropertyGroup>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- Stops CS0121 in VS 2022 (https://stackoverflow.com/a/70968184/8656352) -->
+  <ItemGroup Condition="'$(EmitCompilerGeneratedFiles)' == 'true'">
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
-    <Content Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
   </ItemGroup>
-  -->
 
 </Project>
