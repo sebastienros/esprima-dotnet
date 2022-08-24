@@ -12,7 +12,10 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
 
     internal NodeList(ICollection<T> collection)
     {
-        collection ??= ThrowArgumentNullException<ICollection<T>>(nameof(collection));
+        if (collection is null)
+        {
+            throw new ArgumentNullException(nameof(collection));
+        }
 
         _count = collection.Count;
         if (_count > 0)
@@ -39,7 +42,6 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
         get => _count;
     }
 
-
     public T this[int index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,7 +50,7 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
             // Following trick can reduce the range check by one
             if ((uint) index >= (uint) _count)
             {
-                ThrowIndexOutOfRangeException();
+                ThrowArgumentOutOfRangeException(nameof(index), index, null);
             }
 
             return _items![index];
@@ -165,7 +167,7 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
             {
                 if (_index == 0 || _index == _count + 1)
                 {
-                    ThrowInvalidOperationException<object>();
+                    throw new InvalidOperationException();
                 }
 
                 return Current;
@@ -189,7 +191,7 @@ public static class NodeList
         {
             case null:
                 {
-                    return ThrowArgumentNullException<NodeList<T>>(nameof(source));
+                    throw new ArgumentNullException(nameof(source));
                 }
 
             case NodeList<T> list:

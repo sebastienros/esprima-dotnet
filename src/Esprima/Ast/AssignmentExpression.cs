@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
-using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast;
 
@@ -65,7 +64,7 @@ public sealed class AssignmentExpression : Expression
             "??=" => AssignmentOperator.NullishAssign,
             "&&=" => AssignmentOperator.AndAssign,
             "||=" => AssignmentOperator.OrAssign,
-            _ => ThrowArgumentOutOfRangeException<AssignmentOperator>(nameof(op), "Invalid assignment operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid assignment operator: " + op)
         };
     }
 
@@ -89,7 +88,7 @@ public sealed class AssignmentExpression : Expression
             AssignmentOperator.NullishAssign => "??=",
             AssignmentOperator.AndAssign => "&&=",
             AssignmentOperator.OrAssign => "||=",
-            _ => ThrowArgumentOutOfRangeException<string>(nameof(op), "Invalid assignment operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid assignment operator: " + op)
         };
     }
 

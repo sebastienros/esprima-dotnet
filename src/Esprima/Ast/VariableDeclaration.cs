@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Esprima.Utils;
-using static Esprima.EsprimaExceptionHelper;
 
 namespace Esprima.Ast;
 
@@ -13,7 +12,7 @@ public sealed class VariableDeclaration : Declaration
             VariableDeclarationKind.Var => "var",
             VariableDeclarationKind.Let => "let",
             VariableDeclarationKind.Const => "const",
-            _ => ThrowArgumentOutOfRangeException<string>(nameof(kind), "Invalid variable declaration kind: " + kind)
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), "Invalid variable declaration kind: " + kind)
         };
     }
 

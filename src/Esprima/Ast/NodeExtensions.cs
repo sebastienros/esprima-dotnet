@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using static Esprima.EsprimaExceptionHelper;
 using NodeSysList = System.Collections.Generic.List<Esprima.Ast.Node>;
 
 namespace Esprima.Ast;
@@ -18,7 +17,7 @@ public static class NodeExtensions
     {
         if (node is null)
         {
-            return ThrowArgumentNullException<IEnumerable<Node>>(nameof(node));
+            throw new ArgumentNullException(nameof(node));
         }
 
         return Impl(node);
@@ -55,12 +54,12 @@ public static class NodeExtensions
     {
         if (node is null)
         {
-            return ThrowArgumentNullException<IEnumerable<Node>>(nameof(node));
+            throw new ArgumentNullException(nameof(node));
         }
 
         if (rootNode is null)
         {
-            return ThrowArgumentNullException<IEnumerable<Node>>(nameof(rootNode));
+            throw new ArgumentNullException(nameof(rootNode));
         }
 
         if (node == rootNode)
@@ -92,12 +91,12 @@ public static class NodeExtensions
     {
         if (node is null)
         {
-            return ThrowArgumentNullException<IEnumerable<Node>>(nameof(node));
+            throw new ArgumentNullException(nameof(node));
         }
 
         if (rootNode is null)
         {
-            return ThrowArgumentNullException<IEnumerable<Node>>(nameof(rootNode));
+            throw new ArgumentNullException(nameof(rootNode));
         }
 
         if (node == rootNode)

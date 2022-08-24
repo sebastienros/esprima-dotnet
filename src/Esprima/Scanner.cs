@@ -1664,7 +1664,7 @@ public sealed partial class Scanner
         {
             if (codePoint < 0 || codePoint > 0x10FFFF)
             {
-                EsprimaExceptionHelper.ThrowArgumentOutOfRangeException(nameof(codePoint), codePoint, "Invalid code point.");
+                throw new ArgumentOutOfRangeException(nameof(codePoint), codePoint, "Invalid code point.");
             }
 
             var point = codePoint;
