@@ -678,9 +678,7 @@ if (b == 2) {
         public int GetHashCode(Node? obj) => obj?.GetHashCode() ?? 0;
     }
 
-    public static IEnumerable<object[]> SourceFiles(string relativePath) => Fixtures.SourceFiles(relativePath)
-        // TODO: enable JSX fixtures once JSX writer gets implemented
-        .Where(items => !((string) items[0]).StartsWith("JSX"));
+    public static IEnumerable<object[]> SourceFiles(string relativePath) => Fixtures.SourceFiles(relativePath);
 
     private static Program Parse(SourceType sourceType, string source,
         ParserOptions parserOptions, Func<ParserOptions, JavaScriptParser> parserFactory)
@@ -698,11 +696,13 @@ if (b == 2) {
         static T CreateParserOptions<T>() where T : ParserOptions, new() =>
             new T { Tokens = false, Tolerant = false, AdaptRegexp = false };
 
-        var (parserOptionsFactory, parserFactory) = fixture.StartsWith("JSX")
+        var (parserOptionsFactory, parserFactory, convertToCode) = fixture.StartsWith("JSX")
             ? (CreateParserOptions<JsxParserOptions>,
-                opts => new JsxParser((JsxParserOptions) opts))
+                opts => new JsxParser((JsxParserOptions) opts),
+                (node, format) => node.ToJavaScriptString(format ? KnRJavaScriptTextFormatterOptions.Default : JavaScriptTextWriterOptions.Default, JsxAstToJavaScriptOptions.Default))
             : (new Func<ParserOptions>(CreateParserOptions<ParserOptions>),
-                new Func<ParserOptions, JavaScriptParser>(opts => new JavaScriptParser(opts)));
+                new Func<ParserOptions, JavaScriptParser>(opts => new JavaScriptParser(opts)),
+                new Func<Node, bool, string>((node, format) => node.ToJavaScriptString(format)));
 
         string treeFilePath, failureFilePath, moduleFilePath;
         var jsFilePath = Path.Combine(Fixtures.GetFixturesPath(), Fixtures.FixturesDirName, fixture);
@@ -766,7 +766,7 @@ if (b == 2) {
         try { expectedAst = Parse(sourceType, script, parserOptions, parserFactory); }
         catch (ParserException) { return; }
 
-        var generatedScript = expectedAst.ToJavaScriptString();
+        var generatedScript = convertToCode(expectedAst, false);
 
         var actualAst = Parse(sourceType, generatedScript, parserOptions, parserFactory);
 
@@ -774,7 +774,7 @@ if (b == 2) {
         // TODO: more detailed comparison.
         Assert.Equal(expectedAst.DescendantNodesAndSelf(), actualAst.DescendantNodesAndSelf(), NodeTypeEqualityComparer.Default);
 
-        generatedScript = expectedAst.ToJavaScriptString(format: true);
+        generatedScript = convertToCode(expectedAst, true);
 
         actualAst = Parse(sourceType, generatedScript, parserOptions, parserFactory);
 
