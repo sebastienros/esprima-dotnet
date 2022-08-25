@@ -509,7 +509,9 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected bool Match(string value)
     {
-        return _lookahead.Type == TokenType.Punctuator && value.Equals((string) _lookahead.Value!);
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Punctuator && value.Equals((string) token.Value!);
     }
 
     /// <summary>
@@ -532,12 +534,14 @@ public partial class JavaScriptParser
     /// </summary>
     private bool Match(char value1, char value2, char value3, char value4)
     {
-        if (_lookahead.Type != TokenType.Punctuator || _lookahead.Length != 1)
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        if (token.Type != TokenType.Punctuator || token.Length != 1)
         {
             return false;
         }
 
-        var c = ((string) _lookahead.Value!)[0];
+        var c = ((string) token.Value!)[0];
         return c == value1 || c == value2 || c == value3 || c == value4;
     }
 
@@ -547,21 +551,9 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Keyword && keyword.Equals((string) _lookahead.Value!);
-    }
-
-    /// <summary>
-    /// Return true if the next token matches the specified keyword
-    /// </summary>
-    private bool MatchKeyword(string keyword1, string keyword2, string keyword3)
-    {
-        if (_lookahead.Type != TokenType.Keyword)
-        {
-            return false;
-        }
-
-        var value = (string) _lookahead.Value!;
-        return value == keyword1 || value == keyword2 ||value == keyword3;
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Keyword && keyword.Equals((string) token.Value!);
     }
 
     // Return true if the next token matches the specified contextual keyword
@@ -570,7 +562,9 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchContextualKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Identifier && keyword.Equals((string) _lookahead.Value!);
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Identifier && keyword.Equals((string) token.Value!);
     }
 
     // Return true if the next token is an assignment operator
@@ -578,7 +572,9 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchAssign()
     {
-        return _lookahead.Type == TokenType.Punctuator && IsAssignmentOperator((string) _lookahead.Value!);
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Punctuator && IsAssignmentOperator((string) token.Value!);
     }
 
     // Cover grammar support.
@@ -691,7 +687,16 @@ public partial class JavaScriptParser
                     TolerateUnexpectedToken(_lookahead);
                 }
 
-                expr = MatchAsyncFunction() ? ParseFunctionExpression() : Finalize(node, new Identifier((string) NextToken().Value!));
+                if (MatchAsyncFunction())
+                {
+                    expr = ParseFunctionExpression();
+                }
+                else
+                {
+                    token = NextToken();
+                    expr = Finalize(node, new Identifier((string) token.Value!));
+                }
+
                 break;
 
             case TokenType.StringLiteral:
@@ -762,18 +767,15 @@ public partial class JavaScriptParser
                         break;
                     case "#":
                         NextToken();
-                        expr = Finalize(node, new PrivateIdentifier((string) NextToken().Value!));
+                        token = NextToken();
+                        expr = Finalize(node, new PrivateIdentifier((string) token.Value!));
                         break;
                     case "@":
-                        var previousDecorators = _context.Decorators;
-                        _context.Decorators = ParseDecorators();
-                        var expression = ParsePrimaryExpression();
-                        _context.Decorators = previousDecorators;
-
-                        expr = Finalize(node, expression);
+                        expr = ParseDecoratedPrimaryExpression(node);
                         break;
                     default:
-                        return ThrowUnexpectedToken<Expression>(NextToken());
+                        token = NextToken();
+                        return ThrowUnexpectedToken<Expression>(token);
                 }
 
                 break;
@@ -785,7 +787,8 @@ public partial class JavaScriptParser
                 }
                 else if (!_context.Strict && MatchKeyword("let"))
                 {
-                    expr = Finalize(node, new Identifier((string) NextToken().Value!));
+                    token = NextToken();
+                    expr = Finalize(node, new Identifier((string) token.Value!));
                 }
                 else
                 {
@@ -823,16 +826,28 @@ public partial class JavaScriptParser
                     }
                     else
                     {
-                        return ThrowUnexpectedToken<Expression>(NextToken());
+                        token = NextToken();
+                        return ThrowUnexpectedToken<Expression>(token);
                     }
                 }
 
                 break;
             default:
-                return ThrowUnexpectedToken<Expression>(NextToken());
+                token = NextToken();
+                return ThrowUnexpectedToken<Expression>(token);
         }
 
         return expr;
+    }
+
+    private Expression ParseDecoratedPrimaryExpression(in Marker node)
+    {
+        var previousDecorators = _context.Decorators;
+        _context.Decorators = ParseDecorators();
+        var expression = ParsePrimaryExpression();
+        _context.Decorators = previousDecorators;
+
+        return Finalize(node, expression);
     }
 
     // https://tc39.es/proposal-template-literal-revision/#sec-static-semantics-template-early-errors
@@ -1751,7 +1766,7 @@ public partial class JavaScriptParser
 
     private Expression ParseLeftHandSideExpressionAllowCall()
     {
-        var startToken = _lookahead;
+        var startMarker = StartNode(_lookahead);
         var maybeAsync = MatchContextualKeyword("async");
 
         var previousAllowIn = _context.AllowIn;
@@ -1794,21 +1809,7 @@ public partial class JavaScriptParser
 
             if (Match("("))
             {
-                var asyncArrow = maybeAsync && startToken.LineNumber == _lookahead.LineNumber;
-                _context.IsBindingElement = false;
-                _context.IsAssignmentTarget = false;
-                var args = asyncArrow ? ParseAsyncArguments() : ParseArguments();
-                expr = Finalize(StartNode(startToken), new CallExpression(expr, args, optional));
-                if (asyncArrow && Match("=>"))
-                {
-                    var nodeArguments = new ArrayList<Node>();
-                    for (var i = 0; i < args.Count; ++i)
-                    {
-                        nodeArguments.Add(ReinterpretExpressionAsPattern(args[i]));
-                    }
-
-                    expr = new ArrowParameterPlaceHolder(NodeList.From(ref nodeArguments), true);
-                }
+                expr = ParseCallExpression(maybeAsync, startMarker, expr, optional);
             }
             else if (Match("["))
             {
@@ -1817,7 +1818,7 @@ public partial class JavaScriptParser
                 Expect("[");
                 var property = IsolateCoverGrammar(parseExpression);
                 Expect("]");
-                expr = Finalize(StartNode(startToken), new ComputedMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new ComputedMemberExpression(expr, property, optional));
             }
             else if (_lookahead.Type == TokenType.Template && _lookahead.Head)
             {
@@ -1834,7 +1835,7 @@ public partial class JavaScriptParser
                 }
 
                 var quasi = ParseTemplateLiteral(true);
-                expr = Finalize(StartNode(startToken), new TaggedTemplateExpression(expr, quasi));
+                expr = Finalize(startMarker, new TaggedTemplateExpression(expr, quasi));
             }
             else if (Match(".") || optional)
             {
@@ -1850,7 +1851,7 @@ public partial class JavaScriptParser
 
                 var property = ParseIdentifierOrPrivateIdentifierName();
                 _context.AllowIdentifierEscape = previousAllowIdentifierEscape;
-                expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new StaticMemberExpression(expr, property, optional));
             }
             else
             {
@@ -1863,6 +1864,28 @@ public partial class JavaScriptParser
         if (hasOptional)
         {
             return new ChainExpression(expr);
+        }
+
+        return expr;
+    }
+
+    private Expression ParseCallExpression(bool maybeAsync, in Marker startToken, Expression callee, bool optional)
+    {
+        var asyncArrow = maybeAsync && startToken.Line == _lookahead.LineNumber;
+        _context.IsBindingElement = false;
+        _context.IsAssignmentTarget = false;
+        var args = asyncArrow ? ParseAsyncArguments() : ParseArguments();
+
+        Expression expr = Finalize(startToken, new CallExpression(callee, args, optional));
+        if (asyncArrow && Match("=>"))
+        {
+            var nodeArguments = new ArrayList<Node>();
+            for (var i = 0; i < args.Count; ++i)
+            {
+                nodeArguments.Add(ReinterpretExpressionAsPattern(args[i]));
+            }
+
+            expr = new ArrowParameterPlaceHolder(NodeList.From(ref nodeArguments), true);
         }
 
         return expr;
@@ -1885,7 +1908,7 @@ public partial class JavaScriptParser
     {
         //assert(_context.AllowIn, 'callee of new expression always allow in keyword.');
 
-        var node = StartNode(_lookahead);
+        var startMarker = StartNode(_lookahead);
         var expr = MatchKeyword("super") && _context.InFunctionBody
             ? ParseSuper()
             : MatchKeyword("new")
@@ -1910,7 +1933,7 @@ public partial class JavaScriptParser
                 Expect("[");
                 var property = IsolateCoverGrammar(parseExpression);
                 Expect("]");
-                expr = Finalize(node, new ComputedMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new ComputedMemberExpression(expr, property, optional));
             }
             else if (_lookahead.Type == TokenType.Template && _lookahead.Head)
             {
@@ -1927,7 +1950,7 @@ public partial class JavaScriptParser
                 }
 
                 var quasi = ParseTemplateLiteral(true);
-                expr = Finalize(node, new TaggedTemplateExpression(expr, quasi));
+                expr = Finalize(startMarker, new TaggedTemplateExpression(expr, quasi));
             }
             else if (Match(".") || optional)
             {
@@ -1939,7 +1962,7 @@ public partial class JavaScriptParser
                 }
 
                 var property = ParseIdentifierName();
-                expr = Finalize(node, new StaticMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new StaticMemberExpression(expr, property, optional));
             }
             else
             {
@@ -1960,18 +1983,18 @@ public partial class JavaScriptParser
     private Expression ParseUpdateExpression()
     {
         Expression expr;
-        var startToken = StartNode(_lookahead);
+        var startMarker = StartNode(_lookahead);
 
         if (Match("++") || Match("--"))
         {
-            expr = ParsePrefixUnaryExpression(startToken);
+            expr = ParsePrefixUnaryExpression(startMarker);
         }
         else
         {
             expr = InheritCoverGrammar(parseLeftHandSideExpressionAllowCall);
             if (!_hasLineTerminator && _lookahead.Type == TokenType.Punctuator && (Match("++") || Match("--")))
             {
-                expr = ParsePostfixUnaryExpression(expr, startToken);
+                expr = ParsePostfixUnaryExpression(expr, startMarker);
             }
         }
 
@@ -2045,14 +2068,12 @@ public partial class JavaScriptParser
         return expr;
     }
 
-    private Expression ParseBasicUnaryExpression()
+    private UnaryExpression ParseBasicUnaryExpression()
     {
-        Expression expr;
-        var node = StartNode(_lookahead);
+        var startMarker = StartNode(_lookahead);
         var token = NextToken();
-        expr = InheritCoverGrammar(parseUnaryExpression);
-        expr = Finalize(node, new UnaryExpression((string) token.Value!, expr));
-        var unaryExpr = expr.As<UnaryExpression>();
+        var expr = InheritCoverGrammar(parseUnaryExpression);
+        var unaryExpr = Finalize(startMarker, new UnaryExpression((string) token.Value!, expr));
         if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
         {
             TolerateError(Messages.StrictDelete);
@@ -2060,7 +2081,7 @@ public partial class JavaScriptParser
 
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
-        return expr;
+        return unaryExpr;
     }
 
     [StringMatcher("delete", "void", "typeof")]
@@ -4155,18 +4176,18 @@ public partial class JavaScriptParser
 
     private bool MatchAsyncFunction()
     {
-        var match = MatchContextualKeyword("async");
-        if (match)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static bool ValidateMatch(Scanner scanner, Context context)
         {
-            var state = _scanner.SaveState();
-            _scanner.ScanComments();
-            var next = _scanner.Lex(new LexOptions(_context));
-            _scanner.RestoreState(state);
+            var state = scanner.SaveState();
+            scanner.ScanComments();
+            var next = scanner.Lex(new LexOptions(context));
+            scanner.RestoreState(state);
 
-            match = state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
+            return state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
         }
 
-        return match;
+        return MatchContextualKeyword("async") && ValidateMatch(_scanner, _context);
     }
 
     private FunctionDeclaration ParseFunctionDeclaration(bool identifierIsOptional = false)
@@ -5507,7 +5528,7 @@ public partial class JavaScriptParser
             HasDuplicateParameterNames = false;
         }
 
-        public bool ParamSetContains(string? key)
+        public readonly bool ParamSetContains(string? key)
         {
             return paramSet != null && paramSet.Contains(key);
         }
