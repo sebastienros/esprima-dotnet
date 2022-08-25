@@ -33,6 +33,7 @@ internal static partial class ParserExtensions
         "undefined", "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
         "options", "value", "name", "self", "key", "\"use strict\"", "use strict"
     )]
+    [MethodImpl((MethodImplOptions) 512)]
     internal static partial string? TryGetInternedString(ReadOnlySpan<char> source);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

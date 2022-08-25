@@ -362,7 +362,7 @@ public partial class JavaScriptParser
             }
         }
 
-        _lookahead = next!;
+        _lookahead = next;
 
         if (_tokens is not null && next.Type != TokenType.Unknown && next.Type != TokenType.EOF)
         {
@@ -2317,29 +2317,20 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-conditional-operator
 
-    private Expression ParseConditionalExpression()
+    private ConditionalExpression ParseConditionalExpression(Expression expr, in Marker marker)
     {
-        var startToken = _lookahead;
+        var previousAllowIn = _context.AllowIn;
+        _context.AllowIn = true;
+        var consequent = IsolateCoverGrammar(parseAssignmentExpression);
+        _context.AllowIn = previousAllowIn;
 
-        var expr = InheritCoverGrammar(parseBinaryExpression);
-        if (Match("?"))
-        {
-            NextToken();
+        Expect(":");
+        var alternate = IsolateCoverGrammar(parseAssignmentExpression);
 
-            var previousAllowIn = _context.AllowIn;
-            _context.AllowIn = true;
-            var consequent = IsolateCoverGrammar(parseAssignmentExpression);
-            _context.AllowIn = previousAllowIn;
-
-            Expect(":");
-            var alternate = IsolateCoverGrammar(parseAssignmentExpression);
-
-            expr = Finalize(StartNode(startToken), new ConditionalExpression(expr, consequent, alternate));
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
-        }
-
-        return expr;
+        var conditionalExpression = Finalize(marker, new ConditionalExpression(expr, consequent, alternate));
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        return conditionalExpression;
     }
 
     // https://tc39.github.io/ecma262/#sec-assignment-operators
@@ -2476,9 +2467,13 @@ public partial class JavaScriptParser
         }
         else
         {
-            var startToken = _lookahead;
-            var token = startToken;
-            expr = ParseConditionalExpression();
+            var token = _lookahead;
+
+            expr = InheritCoverGrammar(parseBinaryExpression);
+            if (ConsumeMatch("?"))
+            {
+                expr = ParseConditionalExpression(expr, StartNode(token));
+            }
 
             if (token.Type == TokenType.Identifier && token.LineNumber == _lookahead.LineNumber && (string?) token.Value == "async")
             {
@@ -2519,7 +2514,7 @@ public partial class JavaScriptParser
                     _context.AllowYield = true;
                     _context.IsAsync = isAsync;
 
-                    var node = StartNode(startToken);
+                    var node = StartNode(token);
                     Expect("=>");
 
                     StatementListItem body;
@@ -2592,9 +2587,9 @@ public partial class JavaScriptParser
                         left = ReinterpretExpressionAsPattern(expr);
                     }
 
-                    token = NextToken();
+                    var next = NextToken();
                     var right = IsolateCoverGrammar(parseAssignmentExpression);
-                    expr = Finalize(StartNode(startToken), new AssignmentExpression((string) token.Value!, left, right));
+                    expr = Finalize(StartNode(token), new AssignmentExpression((string) next.Value!, left, right));
                     _context.FirstCoverInitializedNameError = null;
                 }
             }
