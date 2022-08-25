@@ -1359,10 +1359,9 @@ public partial class JavaScriptParser
         else
         {
             var startToken = _lookahead;
-            ArrayList<Token> parameters;
             if (Match("..."))
             {
-                parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+                var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
                 _parseVariableBindingParameters = null;
                 parameters.Clear();
 
@@ -1386,74 +1385,7 @@ public partial class JavaScriptParser
 
                 if (Match(","))
                 {
-                    var expressions = new ArrayList<Expression>();
-
-                    _context.IsAssignmentTarget = false;
-                    expressions.Add(expr);
-                    while (_lookahead.Type != TokenType.EOF)
-                    {
-                        if (!Match(","))
-                        {
-                            break;
-                        }
-
-                        NextToken();
-                        if (Match(")"))
-                        {
-                            NextToken();
-                            var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count);
-                            for (var i = 0; i < expressions.Count; i++)
-                            {
-                                reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expressions[i]));
-                            }
-
-                            arrow = true;
-                            expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
-                            break;
-                        }
-                        else if (Match("..."))
-                        {
-                            if (!_context.IsBindingElement)
-                            {
-                                ThrowUnexpectedToken(_lookahead);
-                            }
-
-                            parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
-                            _parseVariableBindingParameters = null;
-                            parameters.Clear();
-
-                            var restElement = ParseRestElement(ref parameters);
-
-                            _parseVariableBindingParameters = parameters;
-
-                            Expect(")");
-                            if (!Match("=>"))
-                            {
-                                Expect("=>");
-                            }
-
-                            _context.IsBindingElement = false;
-                            var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count + 1);
-                            foreach (var expression in expressions)
-                            {
-                                reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression));
-                            }
-                            reinterpretedExpressions.Add(restElement);
-
-                            arrow = true;
-                            expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
-                            break;
-                        }
-                        else
-                        {
-                            expressions.Add(InheritCoverGrammar(parseAssignmentExpression));
-                        }
-                    }
-
-                    if (!arrow)
-                    {
-                        expr = Finalize(StartNode(startToken), new SequenceExpression(NodeList.From(ref expressions)));
-                    }
+                    expr = ParseSequenceExpression(expr, startToken, ref arrow);
                 }
 
                 if (!arrow)
@@ -1493,6 +1425,81 @@ public partial class JavaScriptParser
                     _context.IsBindingElement = false;
                 }
             }
+        }
+
+        return expr;
+    }
+
+    private Expression ParseSequenceExpression(Expression expr, in Token startToken, ref bool arrow)
+    {
+        var expressions = new ArrayList<Expression>();
+
+        _context.IsAssignmentTarget = false;
+        expressions.Add(expr);
+        while (_lookahead.Type != TokenType.EOF)
+        {
+            if (!Match(","))
+            {
+                break;
+            }
+
+            NextToken();
+            if (Match(")"))
+            {
+                NextToken();
+                var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count);
+                for (var i = 0; i < expressions.Count; i++)
+                {
+                    reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expressions[i]));
+                }
+
+                arrow = true;
+                expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
+                break;
+            }
+            else if (Match("..."))
+            {
+                if (!_context.IsBindingElement)
+                {
+                    ThrowUnexpectedToken(_lookahead);
+                }
+
+                var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+                _parseVariableBindingParameters = null;
+                parameters.Clear();
+
+                var restElement = ParseRestElement(ref parameters);
+
+                _parseVariableBindingParameters = parameters;
+
+                Expect(")");
+                if (!Match("=>"))
+                {
+                    Expect("=>");
+                }
+
+                _context.IsBindingElement = false;
+                var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count + 1);
+                foreach (var expression in expressions)
+                {
+                    reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression));
+                }
+
+                reinterpretedExpressions.Add(restElement);
+
+                arrow = true;
+                expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
+                break;
+            }
+            else
+            {
+                expressions.Add(InheritCoverGrammar(parseAssignmentExpression));
+            }
+        }
+
+        if (!arrow)
+        {
+            expr = Finalize(StartNode(startToken), new SequenceExpression(NodeList.From(ref expressions)));
         }
 
         return expr;
