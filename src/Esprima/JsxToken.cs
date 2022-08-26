@@ -11,7 +11,7 @@ public enum JsxTokenType
 
 public static class JsxToken
 {
-    internal sealed record JsxHolder(JsxTokenType Type, string Value);
+    private sealed record JsxHolder(JsxTokenType Type, object? Value) : Token.ValueHolder(Value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateIdentifier(string value, int start, int end, int lineNumber, int lineStart)
@@ -26,5 +26,5 @@ public static class JsxToken
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static JsxTokenType JsxTokenType(this Token token) => token.Type == TokenType.Extension && token.Value is JsxHolder holder ? holder.Type : Esprima.JsxTokenType.Unknown;
+    public static JsxTokenType JsxTokenType(this in Token token) => token.Type == TokenType.Extension && token._value is JsxHolder holder ? holder.Type : Esprima.JsxTokenType.Unknown;
 }
