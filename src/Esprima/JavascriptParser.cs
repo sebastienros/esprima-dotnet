@@ -1,4 +1,3 @@
-﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
@@ -63,7 +62,6 @@ public partial class JavaScriptParser
         public bool AllowSuper;
         public bool AllowYield;
         public bool IsAsync;
-        public Token? FirstCoverInitializedNameError;
         public bool IsAssignmentTarget;
         public bool IsBindingElement;
         public bool InFunctionBody;
@@ -76,12 +74,14 @@ public partial class JavaScriptParser
         public ArrayList<Decorator> Decorators;
 
         public HashSet<string?> LabelSet;
+
+        public StrongBox<Token>? FirstCoverInitializedNameError;
     }
 
     // cache frequently called Func so we don't need to build Func<T> instances all the time
     // can be revisited with NET 7 SDK where things have improved
     private static readonly Func<JavaScriptParser, Expression> parseAssignmentExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseExponentiationExpression;
+    private static readonly Func<JavaScriptParser, Expression> parseBinaryExpressionOperand;
     private static readonly Func<JavaScriptParser, Expression> parseUnaryExpression;
     private static readonly Func<JavaScriptParser, Expression> parseExpression;
     private static readonly Func<JavaScriptParser, Expression> parseNewExpression;
@@ -101,7 +101,7 @@ public partial class JavaScriptParser
         var dummyInstance = new JavaScriptParser();
 
         parseAssignmentExpression = BuildCachedDelegateFor(dummyInstance.ParseAssignmentExpression);
-        parseExponentiationExpression = BuildCachedDelegateFor(dummyInstance.ParseExponentiationExpression);
+        parseBinaryExpressionOperand = BuildCachedDelegateFor(dummyInstance.ParseBinaryExpressionOperand);
         parseUnaryExpression = BuildCachedDelegateFor(dummyInstance.ParseUnaryExpression);
         parseExpression = BuildCachedDelegateFor(dummyInstance.ParseExpression);
         parseNewExpression = BuildCachedDelegateFor(dummyInstance.ParseNewExpression);
@@ -360,7 +360,7 @@ public partial class JavaScriptParser
             }
         }
 
-        _lookahead = next!;
+        _lookahead = next;
 
         if (_tokens is not null && next.Type != TokenType.Unknown && next.Type != TokenType.EOF)
         {
@@ -507,7 +507,40 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected bool Match(string value)
     {
-        return _lookahead.Type == TokenType.Punctuator && value.Equals((string) _lookahead.Value!);
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Punctuator && value.Equals((string) token.Value!);
+    }
+
+    /// <summary>
+    /// Return true if the next token matches the specified punctuator and consumes the next token.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private protected bool ConsumeMatch(string value)
+    {
+        if (Match(value))
+        {
+            NextToken();
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Return true if the next token matches any of the specified punctuators.
+    /// </summary>
+    private bool MatchAny(char value1, char value2, char value3, char value4)
+    {
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        if (token.Type != TokenType.Punctuator || token.End - token.Start != 1)
+        {
+            return false;
+        }
+
+        var c = ((string) token.Value!)[0];
+        return c == value1 || c == value2 || c == value3 || c == value4;
     }
 
     /// <summary>
@@ -516,7 +549,9 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Keyword && keyword.Equals((string) _lookahead.Value!);
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Keyword && keyword.Equals((string) token.Value!);
     }
 
     // Return true if the next token matches the specified contextual keyword
@@ -525,7 +560,9 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchContextualKeyword(string keyword)
     {
-        return _lookahead.Type == TokenType.Identifier && keyword.Equals((string) _lookahead.Value!);
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Identifier && keyword.Equals((string) token.Value!);
     }
 
     // Return true if the next token is an assignment operator
@@ -533,7 +570,9 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool MatchAssign()
     {
-        return _lookahead.Type == TokenType.Punctuator && IsAssignmentOperator((string) _lookahead.Value!);
+        // ReSharper disable once InlineTemporaryVariable
+        ref readonly var token = ref _lookahead;
+        return token.Type == TokenType.Punctuator && IsAssignmentOperator((string) token.Value!);
     }
 
     // Cover grammar support.
@@ -568,7 +607,7 @@ public partial class JavaScriptParser
     // the flags outside of the parser. This means the production the parser parses is used as a part of a potential
     // pattern. The CoverInitializedName check is deferred.
 
-    private T IsolateCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction)
+    private T IsolateCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction) where T : Node
     {
         var previousIsBindingElement = _context.IsBindingElement;
         var previousIsAssignmentTarget = _context.IsAssignmentTarget;
@@ -579,7 +618,7 @@ public partial class JavaScriptParser
         _context.FirstCoverInitializedNameError = null;
 
         var result = parseFunction(this);
-        if (_context.FirstCoverInitializedNameError != null)
+        if (_context.FirstCoverInitializedNameError is not null)
         {
             ThrowUnexpectedToken(_context.FirstCoverInitializedNameError.Value);
         }
@@ -646,7 +685,16 @@ public partial class JavaScriptParser
                     TolerateUnexpectedToken(_lookahead);
                 }
 
-                expr = MatchAsyncFunction() ? ParseFunctionExpression() : Finalize(node, new Identifier((string) NextToken().Value!));
+                if (MatchAsyncFunction())
+                {
+                    expr = ParseFunctionExpression();
+                }
+                else
+                {
+                    token = NextToken();
+                    expr = Finalize(node, new Identifier((string) token.Value!));
+                }
+
                 break;
 
             case TokenType.StringLiteral:
@@ -717,18 +765,15 @@ public partial class JavaScriptParser
                         break;
                     case "#":
                         NextToken();
-                        expr = Finalize(node, new PrivateIdentifier((string) NextToken().Value!));
+                        token = NextToken();
+                        expr = Finalize(node, new PrivateIdentifier((string) token.Value!));
                         break;
                     case "@":
-                        var previousDecorators = _context.Decorators;
-                        _context.Decorators = ParseDecorators();
-                        var expression = ParsePrimaryExpression();
-                        _context.Decorators = previousDecorators;
-
-                        expr = Finalize(node, expression);
+                        expr = ParseDecoratedPrimaryExpression(node);
                         break;
                     default:
-                        return ThrowUnexpectedToken<Expression>(NextToken());
+                        token = NextToken();
+                        return ThrowUnexpectedToken<Expression>(token);
                 }
 
                 break;
@@ -740,7 +785,8 @@ public partial class JavaScriptParser
                 }
                 else if (!_context.Strict && MatchKeyword("let"))
                 {
-                    expr = Finalize(node, new Identifier((string) NextToken().Value!));
+                    token = NextToken();
+                    expr = Finalize(node, new Identifier((string) token.Value!));
                 }
                 else
                 {
@@ -778,16 +824,28 @@ public partial class JavaScriptParser
                     }
                     else
                     {
-                        return ThrowUnexpectedToken<Expression>(NextToken());
+                        token = NextToken();
+                        return ThrowUnexpectedToken<Expression>(token);
                     }
                 }
 
                 break;
             default:
-                return ThrowUnexpectedToken<Expression>(NextToken());
+                token = NextToken();
+                return ThrowUnexpectedToken<Expression>(token);
         }
 
         return expr;
+    }
+
+    private Expression ParseDecoratedPrimaryExpression(in Marker node)
+    {
+        var previousDecorators = _context.Decorators;
+        _context.Decorators = ParseDecorators();
+        var expression = ParsePrimaryExpression();
+        _context.Decorators = previousDecorators;
+
+        return Finalize(node, expression);
     }
 
     // https://tc39.es/proposal-template-literal-revision/#sec-static-semantics-template-early-errors
@@ -1114,7 +1172,7 @@ public partial class JavaScriptParser
                 var id = (Identifier) key;
                 if (Match("="))
                 {
-                    _context.FirstCoverInitializedNameError = _lookahead;
+                    _context.FirstCoverInitializedNameError = new StrongBox<Token>(_lookahead);
                     NextToken();
                     shorthand = true;
                     var init = IsolateCoverGrammar(parseAssignmentExpression);
@@ -1314,10 +1372,9 @@ public partial class JavaScriptParser
         else
         {
             var startToken = _lookahead;
-            ArrayList<Token> parameters;
             if (Match("..."))
             {
-                parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+                var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
                 _parseVariableBindingParameters = null;
                 parameters.Clear();
 
@@ -1341,74 +1398,7 @@ public partial class JavaScriptParser
 
                 if (Match(","))
                 {
-                    var expressions = new ArrayList<Expression>();
-
-                    _context.IsAssignmentTarget = false;
-                    expressions.Add(expr);
-                    while (_lookahead.Type != TokenType.EOF)
-                    {
-                        if (!Match(","))
-                        {
-                            break;
-                        }
-
-                        NextToken();
-                        if (Match(")"))
-                        {
-                            NextToken();
-                            var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count);
-                            for (var i = 0; i < expressions.Count; i++)
-                            {
-                                reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expressions[i]));
-                            }
-
-                            arrow = true;
-                            expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
-                            break;
-                        }
-                        else if (Match("..."))
-                        {
-                            if (!_context.IsBindingElement)
-                            {
-                                ThrowUnexpectedToken(_lookahead);
-                            }
-
-                            parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
-                            _parseVariableBindingParameters = null;
-                            parameters.Clear();
-
-                            var restElement = ParseRestElement(ref parameters);
-
-                            _parseVariableBindingParameters = parameters;
-
-                            Expect(")");
-                            if (!Match("=>"))
-                            {
-                                Expect("=>");
-                            }
-
-                            _context.IsBindingElement = false;
-                            var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count + 1);
-                            foreach (var expression in expressions)
-                            {
-                                reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression));
-                            }
-                            reinterpretedExpressions.Add(restElement);
-
-                            arrow = true;
-                            expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
-                            break;
-                        }
-                        else
-                        {
-                            expressions.Add(InheritCoverGrammar(parseAssignmentExpression));
-                        }
-                    }
-
-                    if (!arrow)
-                    {
-                        expr = Finalize(StartNode(startToken), new SequenceExpression(NodeList.From(ref expressions)));
-                    }
+                    expr = ParseSequenceExpression(expr, startToken, ref arrow);
                 }
 
                 if (!arrow)
@@ -1448,6 +1438,81 @@ public partial class JavaScriptParser
                     _context.IsBindingElement = false;
                 }
             }
+        }
+
+        return expr;
+    }
+
+    private Expression ParseSequenceExpression(Expression expr, in Token startToken, ref bool arrow)
+    {
+        var expressions = new ArrayList<Expression>();
+
+        _context.IsAssignmentTarget = false;
+        expressions.Add(expr);
+        while (_lookahead.Type != TokenType.EOF)
+        {
+            if (!Match(","))
+            {
+                break;
+            }
+
+            NextToken();
+            if (Match(")"))
+            {
+                NextToken();
+                var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count);
+                for (var i = 0; i < expressions.Count; i++)
+                {
+                    reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expressions[i]));
+                }
+
+                arrow = true;
+                expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
+                break;
+            }
+            else if (Match("..."))
+            {
+                if (!_context.IsBindingElement)
+                {
+                    ThrowUnexpectedToken(_lookahead);
+                }
+
+                var parameters = _parseVariableBindingParameters ?? new ArrayList<Token>();
+                _parseVariableBindingParameters = null;
+                parameters.Clear();
+
+                var restElement = ParseRestElement(ref parameters);
+
+                _parseVariableBindingParameters = parameters;
+
+                Expect(")");
+                if (!Match("=>"))
+                {
+                    Expect("=>");
+                }
+
+                _context.IsBindingElement = false;
+                var reinterpretedExpressions = new ArrayList<Node>(initialCapacity: expressions.Count + 1);
+                foreach (var expression in expressions)
+                {
+                    reinterpretedExpressions.Add(ReinterpretExpressionAsPattern(expression));
+                }
+
+                reinterpretedExpressions.Add(restElement);
+
+                arrow = true;
+                expr = new ArrowParameterPlaceHolder(NodeList.From(ref reinterpretedExpressions), false);
+                break;
+            }
+            else
+            {
+                expressions.Add(InheritCoverGrammar(parseAssignmentExpression));
+            }
+        }
+
+        if (!arrow)
+        {
+            expr = Finalize(StartNode(startToken), new SequenceExpression(NodeList.From(ref expressions)));
         }
 
         return expr;
@@ -1699,7 +1764,7 @@ public partial class JavaScriptParser
 
     private Expression ParseLeftHandSideExpressionAllowCall()
     {
-        var startToken = _lookahead;
+        var startMarker = StartNode(_lookahead);
         var maybeAsync = MatchContextualKeyword("async");
 
         var previousAllowIn = _context.AllowIn;
@@ -1719,7 +1784,9 @@ public partial class JavaScriptParser
         }
         else
         {
-            expr = MatchKeyword("new") ? InheritCoverGrammar(parseNewExpression) : InheritCoverGrammar(parsePrimaryExpression);
+            expr = MatchKeyword("new")
+                ? InheritCoverGrammar(parseNewExpression)
+                : InheritCoverGrammar(parsePrimaryExpression);
         }
 
         if (isSuper && !_context.AllowSuper)
@@ -1740,21 +1807,7 @@ public partial class JavaScriptParser
 
             if (Match("("))
             {
-                var asyncArrow = maybeAsync && startToken.LineNumber == _lookahead.LineNumber;
-                _context.IsBindingElement = false;
-                _context.IsAssignmentTarget = false;
-                var args = asyncArrow ? ParseAsyncArguments() : ParseArguments();
-                expr = Finalize(StartNode(startToken), new CallExpression(expr, args, optional));
-                if (asyncArrow && Match("=>"))
-                {
-                    var nodeArguments = new ArrayList<Node>();
-                    for (var i = 0; i < args.Count; ++i)
-                    {
-                        nodeArguments.Add(ReinterpretExpressionAsPattern(args[i]));
-                    }
-
-                    expr = new ArrowParameterPlaceHolder(NodeList.From(ref nodeArguments), true);
-                }
+                expr = ParseCallExpression(maybeAsync, startMarker, expr, optional);
             }
             else if (Match("["))
             {
@@ -1763,7 +1816,7 @@ public partial class JavaScriptParser
                 Expect("[");
                 var property = IsolateCoverGrammar(parseExpression);
                 Expect("]");
-                expr = Finalize(StartNode(startToken), new ComputedMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new ComputedMemberExpression(expr, property, optional));
             }
             else if (_lookahead.Type == TokenType.Template && _lookahead.Head)
             {
@@ -1780,7 +1833,7 @@ public partial class JavaScriptParser
                 }
 
                 var quasi = ParseTemplateLiteral(true);
-                expr = Finalize(StartNode(startToken), new TaggedTemplateExpression(expr, quasi));
+                expr = Finalize(startMarker, new TaggedTemplateExpression(expr, quasi));
             }
             else if (Match(".") || optional)
             {
@@ -1796,7 +1849,7 @@ public partial class JavaScriptParser
 
                 var property = ParseIdentifierOrPrivateIdentifierName();
                 _context.AllowIdentifierEscape = previousAllowIdentifierEscape;
-                expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new StaticMemberExpression(expr, property, optional));
             }
             else
             {
@@ -1809,6 +1862,28 @@ public partial class JavaScriptParser
         if (hasOptional)
         {
             return new ChainExpression(expr);
+        }
+
+        return expr;
+    }
+
+    private Expression ParseCallExpression(bool maybeAsync, in Marker startToken, Expression callee, bool optional)
+    {
+        var asyncArrow = maybeAsync && startToken.Line == _lookahead.LineNumber;
+        _context.IsBindingElement = false;
+        _context.IsAssignmentTarget = false;
+        var args = asyncArrow ? ParseAsyncArguments() : ParseArguments();
+
+        Expression expr = Finalize(startToken, new CallExpression(callee, args, optional));
+        if (asyncArrow && Match("=>"))
+        {
+            var nodeArguments = new ArrayList<Node>();
+            for (var i = 0; i < args.Count; ++i)
+            {
+                nodeArguments.Add(ReinterpretExpressionAsPattern(args[i]));
+            }
+
+            expr = new ArrowParameterPlaceHolder(NodeList.From(ref nodeArguments), true);
         }
 
         return expr;
@@ -1831,7 +1906,7 @@ public partial class JavaScriptParser
     {
         //assert(_context.AllowIn, 'callee of new expression always allow in keyword.');
 
-        var node = StartNode(_lookahead);
+        var startMarker = StartNode(_lookahead);
         var expr = MatchKeyword("super") && _context.InFunctionBody
             ? ParseSuper()
             : MatchKeyword("new")
@@ -1856,7 +1931,7 @@ public partial class JavaScriptParser
                 Expect("[");
                 var property = IsolateCoverGrammar(parseExpression);
                 Expect("]");
-                expr = Finalize(node, new ComputedMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new ComputedMemberExpression(expr, property, optional));
             }
             else if (_lookahead.Type == TokenType.Template && _lookahead.Head)
             {
@@ -1873,7 +1948,7 @@ public partial class JavaScriptParser
                 }
 
                 var quasi = ParseTemplateLiteral(true);
-                expr = Finalize(node, new TaggedTemplateExpression(expr, quasi));
+                expr = Finalize(startMarker, new TaggedTemplateExpression(expr, quasi));
             }
             else if (Match(".") || optional)
             {
@@ -1885,7 +1960,7 @@ public partial class JavaScriptParser
                 }
 
                 var property = ParseIdentifierName();
-                expr = Finalize(node, new StaticMemberExpression(expr, property, optional));
+                expr = Finalize(startMarker, new StaticMemberExpression(expr, property, optional));
             }
             else
             {
@@ -1906,59 +1981,65 @@ public partial class JavaScriptParser
     private Expression ParseUpdateExpression()
     {
         Expression expr;
-        var startToken = _lookahead;
+        var startMarker = StartNode(_lookahead);
 
         if (Match("++") || Match("--"))
         {
-            var node = StartNode(startToken);
-            var token = NextToken();
-            expr = InheritCoverGrammar(parseUnaryExpression);
-            if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
-            {
-                TolerateError(Messages.StrictLHSPrefix);
-            }
-
-            if (!_context.IsAssignmentTarget)
-            {
-                TolerateError(Messages.InvalidLHSInAssignment);
-            }
-
-            var prefix = true;
-            expr = Finalize(node, new UpdateExpression((string) token.Value!, expr, prefix));
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
+            expr = ParsePrefixUnaryExpression(startMarker);
         }
         else
         {
             expr = InheritCoverGrammar(parseLeftHandSideExpressionAllowCall);
-            if (!_hasLineTerminator && _lookahead.Type == TokenType.Punctuator)
+            if (!_hasLineTerminator && _lookahead.Type == TokenType.Punctuator && (Match("++") || Match("--")))
             {
-                if (Match("++") || Match("--"))
-                {
-                    if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
-                    {
-                        TolerateError(Messages.StrictLHSPostfix);
-                    }
-
-                    if (!_context.IsAssignmentTarget)
-                    {
-                        TolerateError(Messages.InvalidLHSInAssignment);
-                    }
-
-                    _context.IsAssignmentTarget = false;
-                    _context.IsBindingElement = false;
-                    var op = NextToken().Value;
-                    var prefix = false;
-                    expr = Finalize(StartNode(startToken), new UpdateExpression((string) op!, expr, prefix));
-                }
+                expr = ParsePostfixUnaryExpression(expr, startMarker);
             }
         }
 
         return expr;
     }
 
+    private Expression ParsePostfixUnaryExpression(Expression expr, in Marker marker)
+    {
+        if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
+        {
+            TolerateError(Messages.StrictLHSPostfix);
+        }
+
+        if (!_context.IsAssignmentTarget)
+        {
+            TolerateError(Messages.InvalidLHSInAssignment);
+        }
+
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        var op = NextToken().Value;
+        expr = Finalize(marker, new UpdateExpression((string)op!, expr, prefix: false));
+        return expr;
+    }
+
+    private Expression ParsePrefixUnaryExpression(in Marker marker)
+    {
+        var token = NextToken();
+        var expr = InheritCoverGrammar(parseUnaryExpression);
+        if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
+        {
+            TolerateError(Messages.StrictLHSPrefix);
+        }
+
+        if (!_context.IsAssignmentTarget)
+        {
+            TolerateError(Messages.InvalidLHSInAssignment);
+        }
+
+        expr = Finalize(marker, new UpdateExpression((string)token.Value!, expr, prefix: true));
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        return expr;
+    }
+
     // https://tc39.github.io/ecma262/#sec-unary-operators
-    private Expression ParseAwaitExpression()
+    private AwaitExpression ParseAwaitExpression()
     {
         var node = CreateNode();
         NextToken();
@@ -1969,22 +2050,9 @@ public partial class JavaScriptParser
     private Expression ParseUnaryExpression()
     {
         Expression expr;
-
-        if (Match("+") || Match("-") || Match("~") || Match("!") ||
-            MatchKeyword("delete") || MatchKeyword("void") || MatchKeyword("typeof"))
+        if (MatchAny('+', '-', '~', '!') || _lookahead.Type == TokenType.Keyword && MatchUnaryKeyword((string) _lookahead.Value!))
         {
-            var node = StartNode(_lookahead);
-            var token = NextToken();
-            expr = InheritCoverGrammar(parseUnaryExpression);
-            expr = Finalize(node, new UnaryExpression((string) token.Value!, expr));
-            var unaryExpr = expr.As<UnaryExpression>();
-            if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
-            {
-                TolerateError(Messages.StrictDelete);
-            }
-
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
+            expr = ParseBasicUnaryExpression();
         }
         else if (_context.IsAsync && MatchContextualKeyword("await"))
         {
@@ -1997,6 +2065,25 @@ public partial class JavaScriptParser
 
         return expr;
     }
+
+    private UnaryExpression ParseBasicUnaryExpression()
+    {
+        var startMarker = StartNode(_lookahead);
+        var token = NextToken();
+        var expr = InheritCoverGrammar(parseUnaryExpression);
+        var unaryExpr = Finalize(startMarker, new UnaryExpression((string) token.Value!, expr));
+        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
+        {
+            TolerateError(Messages.StrictDelete);
+        }
+
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        return unaryExpr;
+    }
+
+    [StringMatcher("delete", "void", "typeof")]
+    private partial bool MatchUnaryKeyword(string input);
 
     private static BinaryExpression CreateBinaryExpression(string op, Expression left, Expression right)
     {
@@ -2011,26 +2098,30 @@ public partial class JavaScriptParser
         }
     }
 
-    private Expression ParseExponentiationExpression()
+    private Expression ParseBinaryExpressionOperand()
     {
-        var startToken = _lookahead;
+        var startMarker = StartNode(_lookahead);
 
         var isLeftParenthesized = this.Match("(");
         var expr = InheritCoverGrammar(parseUnaryExpression);
 
         var exponentAllowed = expr.Type != Nodes.UnaryExpression || isLeftParenthesized;
 
-        if (exponentAllowed && Match("**"))
+        if (exponentAllowed && ConsumeMatch("**"))
         {
-            NextToken();
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
-            var left = expr;
-            var right = IsolateCoverGrammar(parseExponentiationExpression);
-            expr = Finalize(StartNode(startToken), CreateBinaryExpression("**", left, right));
+            expr = ParseExponentiationExpression(expr, startMarker);
         }
 
         return expr;
+    }
+
+    private BinaryExpression ParseExponentiationExpression(Expression expr, in Marker marker)
+    {
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        var left = expr;
+        var right = IsolateCoverGrammar(parseBinaryExpressionOperand);
+        return Finalize(marker, CreateBinaryExpression("**", left, right));
     }
 
     // https://tc39.github.io/ecma262/#sec-exp-operator
@@ -2136,7 +2227,7 @@ public partial class JavaScriptParser
     {
         var startToken = _lookahead;
 
-        var expr = InheritCoverGrammar(parseExponentiationExpression);
+        var expr = InheritCoverGrammar(parseBinaryExpressionOperand);
 
         var allowAndOr = true;
         var allowNullishCoalescing = true;
@@ -2173,7 +2264,7 @@ public partial class JavaScriptParser
             markers.Push(_lookahead);
 
             var left = expr;
-            var right = IsolateCoverGrammar(parseExponentiationExpression);
+            var right = IsolateCoverGrammar(parseBinaryExpressionOperand);
 
             var stack = _sharedStack ?? new ArrayList<object>(3);
             _sharedStack = null;
@@ -2222,7 +2313,7 @@ public partial class JavaScriptParser
                 stack.Push(NextToken().Value!);
                 precedences.Push(prec);
                 markers.Push(_lookahead);
-                stack.Push(IsolateCoverGrammar(parseExponentiationExpression));
+                stack.Push(IsolateCoverGrammar(parseBinaryExpressionOperand));
             }
 
             // Final reduce to clean-up the stack.
@@ -2252,29 +2343,20 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-conditional-operator
 
-    private Expression ParseConditionalExpression()
+    private ConditionalExpression ParseConditionalExpression(Expression expr, in Marker marker)
     {
-        var startToken = _lookahead;
+        var previousAllowIn = _context.AllowIn;
+        _context.AllowIn = true;
+        var consequent = IsolateCoverGrammar(parseAssignmentExpression);
+        _context.AllowIn = previousAllowIn;
 
-        var expr = InheritCoverGrammar(parseBinaryExpression);
-        if (Match("?"))
-        {
-            NextToken();
+        Expect(":");
+        var alternate = IsolateCoverGrammar(parseAssignmentExpression);
 
-            var previousAllowIn = _context.AllowIn;
-            _context.AllowIn = true;
-            var consequent = IsolateCoverGrammar(parseAssignmentExpression);
-            _context.AllowIn = previousAllowIn;
-
-            Expect(":");
-            var alternate = IsolateCoverGrammar(parseAssignmentExpression);
-
-            expr = Finalize(StartNode(startToken), new ConditionalExpression(expr, consequent, alternate));
-            _context.IsAssignmentTarget = false;
-            _context.IsBindingElement = false;
-        }
-
-        return expr;
+        var conditionalExpression = Finalize(marker, new ConditionalExpression(expr, consequent, alternate));
+        _context.IsAssignmentTarget = false;
+        _context.IsBindingElement = false;
+        return conditionalExpression;
     }
 
     // https://tc39.github.io/ecma262/#sec-assignment-operators
@@ -2411,9 +2493,13 @@ public partial class JavaScriptParser
         }
         else
         {
-            var startToken = _lookahead;
-            var token = startToken;
-            expr = ParseConditionalExpression();
+            var token = _lookahead;
+
+            expr = InheritCoverGrammar(parseBinaryExpression);
+            if (ConsumeMatch("?"))
+            {
+                expr = ParseConditionalExpression(expr, StartNode(token));
+            }
 
             if (token.Type == TokenType.Identifier && token.LineNumber == _lookahead.LineNumber && (string?) token.Value == "async")
             {
@@ -2454,7 +2540,7 @@ public partial class JavaScriptParser
                     _context.AllowYield = true;
                     _context.IsAsync = isAsync;
 
-                    var node = StartNode(startToken);
+                    var node = StartNode(token);
                     Expect("=>");
 
                     StatementListItem body;
@@ -2527,9 +2613,9 @@ public partial class JavaScriptParser
                         left = ReinterpretExpressionAsPattern(expr);
                     }
 
-                    token = NextToken();
+                    var next = NextToken();
                     var right = IsolateCoverGrammar(parseAssignmentExpression);
-                    expr = Finalize(StartNode(startToken), new AssignmentExpression((string) token.Value!, left, right));
+                    expr = Finalize(StartNode(token), new AssignmentExpression((string) next.Value!, left, right));
                     _context.FirstCoverInitializedNameError = null;
                 }
             }
@@ -3425,7 +3511,7 @@ public partial class JavaScriptParser
         return left == null
             ? Finalize(node, new ForStatement(init, test, update, body))
             : forIn
-                ? (Statement) Finalize(node, new ForInStatement(left, right!, body))
+                ? Finalize(node, new ForInStatement(left, right!, body))
                 : Finalize(node, new ForOfStatement(left, right!, body, @await));
     }
 
@@ -4088,18 +4174,18 @@ public partial class JavaScriptParser
 
     private bool MatchAsyncFunction()
     {
-        var match = MatchContextualKeyword("async");
-        if (match)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static bool ValidateMatch(Scanner scanner, Context context)
         {
-            var state = _scanner.SaveState();
-            _scanner.ScanComments();
-            var next = _scanner.Lex(new LexOptions(_context));
-            _scanner.RestoreState(state);
+            var state = scanner.SaveState();
+            scanner.ScanComments();
+            var next = scanner.Lex(new LexOptions(context));
+            scanner.RestoreState(state);
 
-            match = state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
+            return state.LineNumber == next.LineNumber && next.Type == TokenType.Keyword && (string?) next.Value == "function";
         }
 
-        return match;
+        return MatchContextualKeyword("async") && ValidateMatch(_scanner, _context);
     }
 
     private FunctionDeclaration ParseFunctionDeclaration(bool identifierIsOptional = false)
@@ -5387,13 +5473,15 @@ public partial class JavaScriptParser
     }
 
     [DoesNotReturn]
-    private protected void ThrowUnexpectedToken(in Token token = default, string? message = null)
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private protected T ThrowUnexpectedToken<T>(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);
     }
 
     [DoesNotReturn]
-    private protected T ThrowUnexpectedToken<T>(in Token token = default, string? message = null)
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private protected void ThrowUnexpectedToken(in Token token = default, string? message = null)
     {
         throw UnexpectedTokenError(token, message);
     }
@@ -5431,7 +5519,7 @@ public partial class JavaScriptParser
             HasDuplicateParameterNames = false;
         }
 
-        public bool ParamSetContains(string? key)
+        public readonly bool ParamSetContains(string? key)
         {
             return paramSet != null && paramSet.Contains(key);
         }

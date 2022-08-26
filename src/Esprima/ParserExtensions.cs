@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace Esprima;
 
 internal static partial class ParserExtensions
 {
+    // old framework doesn't know this flag
+    private const int MethodImplOptionsAggressiveOptimization = 512;
+
     private static readonly string[] s_charToString = new string[256];
 
     static ParserExtensions()
@@ -33,6 +35,7 @@ internal static partial class ParserExtensions
         "undefined", "length", "object", "Object", "obj", "Array", "Math", "data", "done", "args", "arguments", "Symbol", "prototype",
         "options", "value", "name", "self", "key", "\"use strict\"", "use strict"
     )]
+    [MethodImpl((MethodImplOptions) MethodImplOptionsAggressiveOptimization)]
     internal static partial string? TryGetInternedString(ReadOnlySpan<char> source);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

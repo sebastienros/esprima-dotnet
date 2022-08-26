@@ -11,21 +11,20 @@ public enum JsxTokenType
 
 public static class JsxToken
 {
-    private static readonly object s_boxedIdentifierTokenType = Esprima.JsxTokenType.Identifier;
-    private static readonly object s_boxedTextTokenType = Esprima.JsxTokenType.Text;
+    internal sealed record JsxHolder(JsxTokenType Type, string Value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateIdentifier(string value, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.Extension, value, start, end, lineNumber, lineStart, customValue: s_boxedIdentifierTokenType);
+        return new Token(TokenType.Extension, new JsxHolder(Esprima.JsxTokenType.Identifier, value), start, end, lineNumber, lineStart);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateText(string value, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.Extension, value, start, end, lineNumber, lineStart, customValue: s_boxedTextTokenType);
+        return new Token(TokenType.Extension, new JsxHolder(Esprima.JsxTokenType.Text, value), start, end, lineNumber, lineStart);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static JsxTokenType JsxTokenType(this Token token) => token.Type == TokenType.Extension && token._customValue is JsxTokenType type ? type : Esprima.JsxTokenType.Unknown;
+    public static JsxTokenType JsxTokenType(this Token token) => token.Type == TokenType.Extension && token.Value is JsxHolder holder ? holder.Type : Esprima.JsxTokenType.Unknown;
 }

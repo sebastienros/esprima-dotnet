@@ -50,6 +50,28 @@ public partial class JavaScriptParser
         }
     }
 
+    private partial bool MatchUnaryKeyword(string input)
+    {
+        switch (input.Length)
+        {
+            case 4:
+            {
+                return input == "void";
+            }
+            case 6:
+            {
+                return input[0] switch
+                {
+                    'd' => input == "delete",
+                    't' => input == "typeof",
+                    _ => false
+                };
+            }
+            default:
+                return false;
+        }
+    }
+
     private static partial bool IsPunctuatorExpressionStart(string input)
     {
         switch (input.Length)

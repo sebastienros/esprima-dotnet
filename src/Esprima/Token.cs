@@ -27,6 +27,8 @@ public enum TokenType : byte
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct Token
 {
+    private readonly object? _value;
+
     internal Token(
         TokenType type,
         object? value,
@@ -34,23 +36,16 @@ public readonly record struct Token
         int end,
         int lineNumber,
         int lineStart,
-        bool octal = false,
-        char notEscapeSequenceHead = (char) 0,
-        bool head = false,
-        bool tail = false,
-        object? customValue = null)
+        bool octal = false)
     {
         Type = type;
+        _value = value;
+
         Octal = octal;
         Start = start;
         End = end;
         LineNumber = lineNumber;
         LineStart = lineStart;
-        Value = value;
-        NotEscapeSequenceHead = notEscapeSequenceHead;
-        Head = head;
-        Tail = tail;
-        _customValue = customValue;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -65,10 +60,12 @@ public readonly record struct Token
         return new Token(TokenType.StringLiteral, str, start, end, lineNumber, lineStart, octal);
     }
 
+    private sealed record RegexHolder(Regex? Value, RegexValue RegexValue);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateRegexLiteral(Regex? value, RegexValue regexValue, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.RegularExpression, value, start, end, lineNumber, lineStart, customValue: regexValue);
+        return new Token(TokenType.RegularExpression, new RegexHolder(value, regexValue), start, end, lineNumber, lineStart);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,6 +90,8 @@ public readonly record struct Token
         return new Token(TokenType.Punctuator, str, start, end, lineNumber, lineStart);
     }
 
+    private sealed record TemplateHolder(string? Cooked, string RawTemplate, char NotEscapeSequenceHead, bool Head, bool Tail);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateTemplate(
         string? cooked,
@@ -105,7 +104,8 @@ public readonly record struct Token
         int lineNumber,
         int lineStart)
     {
-        return new Token(TokenType.Template, cooked, start, end, lineNumber, lineStart, notEscapeSequenceHead: notEscapeSequenceHead, customValue: rawTemplate, head: head, tail: tail);
+        var value = new TemplateHolder(cooked, rawTemplate, notEscapeSequenceHead, head, tail);
+        return new Token(TokenType.Template, value, start, end, lineNumber, lineStart);
     }
 
     public readonly TokenType Type;
@@ -116,18 +116,31 @@ public readonly record struct Token
     public readonly int LineNumber;
     public readonly int LineStart;
 
-    public readonly object? Value;
+    public object? Value => Type switch
+    {
+        TokenType.Template => ((TemplateHolder) _value!).Cooked,
+        TokenType.RegularExpression => ((RegexHolder) _value!).Value,
+        _ => _value
+    };
 
-    public readonly char NotEscapeSequenceHead;
-    public readonly bool Head;
-    public readonly bool Tail;
+    internal char NotEscapeSequenceHead => Type == TokenType.Template ? ((TemplateHolder) _value!).NotEscapeSequenceHead : char.MinValue;
+    public bool Head => Type == TokenType.Template && ((TemplateHolder) _value!).Head;
+    public bool Tail => Type == TokenType.Template && ((TemplateHolder) _value!).Tail;
 
-    internal readonly object? _customValue;
-    public string? RawTemplate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Type == TokenType.Template ? (string?) _customValue : null; }
-    public RegexValue? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Type == TokenType.RegularExpression ? (RegexValue?) _customValue : null; }
+    public string? RawTemplate
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => Type == TokenType.Template ? ((TemplateHolder) _value!).RawTemplate : null;
+    }
+
+    public RegexValue? RegexValue
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => Type == TokenType.RegularExpression ? ((RegexHolder) _value!).RegexValue : null;
+    }
 
     internal Token ChangeType(TokenType newType)
     {
-        return new Token(newType, Value, Start, End, LineNumber, LineStart, Octal, NotEscapeSequenceHead, Head, Tail, _customValue);
+        return new Token(newType, _value, Start, End, LineNumber, LineStart, Octal);
     }
 }

@@ -2483,7 +2483,7 @@ public sealed partial class Scanner
 
     public Token Lex() => Lex(new LexOptions());
 
-    internal Token Lex(LexOptions options)
+    internal Token Lex(in LexOptions options)
     {
         if (Eof())
         {
