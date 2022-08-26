@@ -1,6 +1,4 @@
-﻿using System.Data.Common;
-
-namespace Esprima.Tests;
+﻿namespace Esprima.Tests;
 
 public class PositionTests
 {

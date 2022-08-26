@@ -1,8 +1,6 @@
-﻿using System.Xml.Linq;
-using Esprima.Ast;
+﻿using Esprima.Ast;
 using Esprima.Test;
 using Esprima.Utils;
-using Newtonsoft.Json.Linq;
 
 namespace Esprima.Tests;
 

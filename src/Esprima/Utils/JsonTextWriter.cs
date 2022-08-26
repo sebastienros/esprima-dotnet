@@ -19,7 +19,6 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
-using static Esprima.EsprimaExceptionHelper;
 using SysArray = System.Array;
 
 namespace Esprima.Utils;

@@ -75,9 +75,7 @@ public partial class JavaScriptParser
 
         public HashSet<string?> LabelSet;
 
-        // we use an boxed object instead of Token to reduce stack size and improve
-        // *CoverGrammar method inlining, this is used only for error conditions
-        public object? FirstCoverInitializedNameError;
+        public StrongBox<Token>? FirstCoverInitializedNameError;
     }
 
     // cache frequently called Func so we don't need to build Func<T> instances all the time
@@ -530,13 +528,13 @@ public partial class JavaScriptParser
     }
 
     /// <summary>
-    /// Return true if the next token matches the specified punctuator.
+    /// Return true if the next token matches any of the specified punctuators.
     /// </summary>
-    private bool Match(char value1, char value2, char value3, char value4)
+    private bool MatchAny(char value1, char value2, char value3, char value4)
     {
         // ReSharper disable once InlineTemporaryVariable
         ref readonly var token = ref _lookahead;
-        if (token.Type != TokenType.Punctuator || token.Length != 1)
+        if (token.Type != TokenType.Punctuator || token.End - token.Start != 1)
         {
             return false;
         }
@@ -622,7 +620,7 @@ public partial class JavaScriptParser
         var result = parseFunction(this);
         if (_context.FirstCoverInitializedNameError is not null)
         {
-            ThrowUnexpectedToken(_context.FirstCoverInitializedNameError);
+            ThrowUnexpectedToken(_context.FirstCoverInitializedNameError.Value);
         }
 
         _context.IsBindingElement = previousIsBindingElement;
@@ -1174,7 +1172,7 @@ public partial class JavaScriptParser
                 var id = (Identifier) key;
                 if (Match("="))
                 {
-                    _context.FirstCoverInitializedNameError = _lookahead;
+                    _context.FirstCoverInitializedNameError = new StrongBox<Token>(_lookahead);
                     NextToken();
                     shorthand = true;
                     var init = IsolateCoverGrammar(parseAssignmentExpression);
@@ -2052,7 +2050,7 @@ public partial class JavaScriptParser
     private Expression ParseUnaryExpression()
     {
         Expression expr;
-        if (Match('+', '-', '~', '!') || _lookahead.Type == TokenType.Keyword && MatchUnaryKeyword((string) _lookahead.Value!))
+        if (MatchAny('+', '-', '~', '!') || _lookahead.Type == TokenType.Keyword && MatchUnaryKeyword((string) _lookahead.Value!))
         {
             expr = ParseBasicUnaryExpression();
         }
@@ -5472,13 +5470,6 @@ public partial class JavaScriptParser
             var column = _lastMarker.Column + 1;
             return _errorHandler.CreateError(_scanner._sourceLocation, index, line, column, msg);
         }
-    }
-
-    [DoesNotReturn]
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private protected void ThrowUnexpectedToken(object? boxedToken)
-    {
-        throw UnexpectedTokenError(boxedToken is not null ? (Token) boxedToken : default);
     }
 
     [DoesNotReturn]

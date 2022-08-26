@@ -12,9 +12,9 @@ public class JavaScriptParserTests
     {
         var parser = new JavaScriptParser(new ParserOptions { MaxAssignmentDepth = 1000 });
 #if DEBUG
-        const int Depth = 220;
+        const int Depth = 210;
 #else
-        const int Depth = 500;
+        const int Depth = 460;
 #endif
         var input = $"if ({new string('(', Depth)}true{new string(')', Depth)}) {{ }}";
         parser.ParseScript(input);

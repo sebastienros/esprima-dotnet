@@ -1,6 +1,4 @@
-﻿using static Esprima.EsprimaExceptionHelper;
-
-namespace Esprima;
+﻿namespace Esprima;
 
 public sealed class ParseError
 {

@@ -559,8 +559,7 @@ public class JsxParser : JavaScriptParser
     private void ExpectJsx(string value)
     {
         var token = NextJsxToken();
-        if (token.Type != TokenType.Punctuator
-            || (token.Value is string s && s != value || token.Value is JsxToken.JsxHolder holder && holder.Value != value))
+        if (token.Type != TokenType.Punctuator || token.Value is string s && s != value)
         {
             ThrowUnexpectedToken(token);
         }
@@ -569,8 +568,7 @@ public class JsxParser : JavaScriptParser
     private bool MatchJsx(string value)
     {
         var next = PeekJsxToken();
-        return next.Type == TokenType.Punctuator
-               && (next.Value is string s && s == value || next.Value is JsxToken.JsxHolder holder && holder.Value == value);
+        return next.Type == TokenType.Punctuator && next.Value is string s && s == value;
     }
 
     private JsxIdentifier ParseJsxIdentifier()

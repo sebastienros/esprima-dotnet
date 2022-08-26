@@ -43,7 +43,7 @@ public readonly record struct Token
 
         Octal = octal;
         Start = start;
-        Length = (ushort) (end - start);
+        End = end;
         LineNumber = lineNumber;
         LineStart = lineStart;
     }
@@ -112,8 +112,7 @@ public readonly record struct Token
     public readonly bool Octal;
 
     public readonly int Start; // Range[0]
-    internal readonly ushort Length;
-    public int End => Start + Length; // Range[1]
+    public readonly int End; // Range[1]
     public readonly int LineNumber;
     public readonly int LineStart;
 
