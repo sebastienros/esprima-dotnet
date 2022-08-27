@@ -2,13 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Esprima.Sample</AssemblyName>
+    <AssemblyName>esprimatest</AssemblyName>
+    <RootNamespace>Esprima.Sample</RootNamespace>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.1" />
+    <PackageReference Include="System.Text.Json" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
   </ItemGroup>
 
