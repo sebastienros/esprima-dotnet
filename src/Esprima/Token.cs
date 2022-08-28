@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Configuration;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -27,7 +28,9 @@ public enum TokenType : byte
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct Token
 {
-    private readonly object? _value;
+    internal abstract record ValueHolder(object? Value);
+
+    internal readonly object? _value;
 
     internal Token(
         TokenType type,
@@ -60,7 +63,7 @@ public readonly record struct Token
         return new Token(TokenType.StringLiteral, str, start, end, lineNumber, lineStart, octal);
     }
 
-    private sealed record RegexHolder(Regex? Value, RegexValue RegexValue);
+    private sealed record RegexHolder(object? Value, RegexValue RegexValue) : ValueHolder(Value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateRegexLiteral(Regex? value, RegexValue regexValue, int start, int end, int lineNumber, int lineStart)
@@ -90,7 +93,7 @@ public readonly record struct Token
         return new Token(TokenType.Punctuator, str, start, end, lineNumber, lineStart);
     }
 
-    private sealed record TemplateHolder(string? Cooked, string RawTemplate, char NotEscapeSequenceHead, bool Head, bool Tail);
+    private sealed record TemplateHolder(object? Value, string RawTemplate, char NotEscapeSequenceHead, bool Head, bool Tail) : ValueHolder(Value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateTemplate(
@@ -116,12 +119,20 @@ public readonly record struct Token
     public readonly int LineNumber;
     public readonly int LineStart;
 
-    public object? Value => Type switch
+    public object? Value
     {
-        TokenType.Template => ((TemplateHolder) _value!).Cooked,
-        TokenType.RegularExpression => ((RegexHolder) _value!).Value,
-        _ => _value
-    };
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            // NOTE: This condition must not be inverted, otherwise the runtime (.NET 6) fail to inline the accessor correctly.
+            return Type is not (TokenType.RegularExpression or TokenType.Template or TokenType.Extension)
+                ? _value
+                : GetValueFromHolder(in this);
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static object? GetValueFromHolder(in Token token) => ((ValueHolder) token._value!).Value;
+        }
+    }
 
     internal char NotEscapeSequenceHead => Type == TokenType.Template ? ((TemplateHolder) _value!).NotEscapeSequenceHead : char.MinValue;
     public bool Head => Type == TokenType.Template && ((TemplateHolder) _value!).Head;

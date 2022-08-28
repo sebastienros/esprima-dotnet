@@ -580,8 +580,7 @@ public class JsxParser : JavaScriptParser
             ThrowUnexpectedToken(token);
         }
 
-        var holder = (JsxToken.JsxHolder) token.Value!;
-        return Finalize(node, new JsxIdentifier(holder.Value));
+        return Finalize(node, new JsxIdentifier((string) token.Value!));
     }
 
     private JsxExpression ParseJsxElementName()
@@ -805,7 +804,7 @@ public class JsxParser : JavaScriptParser
             if (token.Start < token.End)
             {
                 var raw = GetTokenRaw(token);
-                var child = Finalize(node, new JsxText(((JsxToken.JsxHolder) token.Value!).Value, raw));
+                var child = Finalize(node, new JsxText((string) token.Value!, raw));
                 children.Add(child);
             }
 
