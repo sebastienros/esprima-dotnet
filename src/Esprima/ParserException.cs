@@ -5,10 +5,19 @@ public sealed class ParserException : Exception
     public ParseError? Error { get; }
 
     public string? Description => Error?.Description;
-    public string? SourceText => Error?.Source;
+    public string? SourceLocation => Error?.Source;
+    /// <summary>
+    /// Zero-based index within <see cref="SourceLocation"/>. (Can be negative if code is not available.)
+    /// </summary>
     public int Index => Error?.Index ?? -1;
+    /// <summary>
+    /// One-based line number. (Can be zero if code is not available.)
+    /// </summary>
     public int LineNumber => Error?.LineNumber ?? 0;
-    public int Column => Error?.Column ?? 0;
+    /// <summary>
+    /// One-based column index.
+    /// </summary>
+    public int Column => Error?.Column ?? 1;
 
     public ParserException() : this(null, null, null)
     {

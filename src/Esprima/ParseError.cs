@@ -6,12 +6,21 @@ public sealed class ParseError
     public string? Source { get; }
 
     public bool IsIndexDefined => Index >= 0;
+    /// <summary>
+    /// Zero-based index within <see cref="Source"/>. (Can be negative if code is not available.)
+    /// </summary>
     public int Index { get; }
 
     public bool IsPositionDefined => Position.Line > 0;
     public Position Position { get; }
+    /// <summary>
+    /// One-based line number. (Can be zero if code is not available.)
+    /// </summary>
     public int LineNumber => Position.Line;
-    public int Column => Position.Column;
+    /// <summary>
+    /// One-based column index.
+    /// </summary>
+    public int Column => Position.Column + 1;
 
     public ParseError(string description, string? source = null, int index = -1, in Position position = default)
     {
@@ -24,5 +33,10 @@ public sealed class ParseError
     public override string ToString()
     {
         return LineNumber > 0 ? $"Line {LineNumber}: {Description}" : Description;
+    }
+
+    public ParserException ToException()
+    {
+        return new ParserException(this);
     }
 }
