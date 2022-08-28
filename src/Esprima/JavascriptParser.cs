@@ -5390,22 +5390,22 @@ public partial class JavaScriptParser
     [DoesNotReturn]
     internal void ThrowError(string messageFormat, params object?[] values)
     {
-        throw CreateError(messageFormat, values);
+        throw CreateError(messageFormat, values).ToException();
     }
 
     [DoesNotReturn]
     internal T ThrowError<T>(string messageFormat, params object?[] values)
     {
-        throw CreateError(messageFormat, values);
+        throw CreateError(messageFormat, values).ToException();
     }
 
-    private ParserException CreateError(string messageFormat, params object?[] values)
+    private ParseError CreateError(string messageFormat, params object?[] values)
     {
         var msg = string.Format(messageFormat, values);
 
         var index = _lastMarker.Index;
         var line = _lastMarker.Line;
-        var column = _lastMarker.Column + 1;
+        var column = _lastMarker.Column;
         return _errorHandler.CreateError(_scanner._sourceLocation, index, line, column, msg);
     }
 
@@ -5415,11 +5415,11 @@ public partial class JavaScriptParser
 
         var index = _lastMarker.Index;
         var line = _scanner._lineNumber;
-        var column = _lastMarker.Column + 1;
+        var column = _lastMarker.Column;
         _errorHandler.TolerateError(_scanner._sourceLocation, index, line, column, msg, _tolerant);
     }
 
-    private ParserException UnexpectedTokenError(in Token token, string? message = null)
+    private ParseError UnexpectedTokenError(in Token token, string? message = null)
     {
         var msg = message ?? Messages.UnexpectedToken;
         string value;
@@ -5464,14 +5464,14 @@ public partial class JavaScriptParser
             var index = token.Start;
             var line = token.LineNumber;
             var lastMarkerLineStart = _lastMarker.Index - _lastMarker.Column;
-            var column = token.Start - lastMarkerLineStart + 1;
+            var column = token.Start - lastMarkerLineStart;
             return _errorHandler.CreateError(_scanner._sourceLocation, index, line, column, msg);
         }
         else
         {
             var index = _lastMarker.Index;
             var line = _lastMarker.Line;
-            var column = _lastMarker.Column + 1;
+            var column = _lastMarker.Column;
             return _errorHandler.CreateError(_scanner._sourceLocation, index, line, column, msg);
         }
     }
@@ -5480,14 +5480,14 @@ public partial class JavaScriptParser
     [MethodImpl(MethodImplOptions.NoInlining)]
     private protected T ThrowUnexpectedToken<T>(in Token token = default, string? message = null)
     {
-        throw UnexpectedTokenError(token, message);
+        throw UnexpectedTokenError(token, message).ToException();
     }
 
     [DoesNotReturn]
     [MethodImpl(MethodImplOptions.NoInlining)]
     private protected void ThrowUnexpectedToken(in Token token = default, string? message = null)
     {
-        throw UnexpectedTokenError(token, message);
+        throw UnexpectedTokenError(token, message).ToException();
     }
 
     private protected void TolerateUnexpectedToken(in Token token, string? message = null)

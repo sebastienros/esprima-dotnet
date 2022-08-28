@@ -9,11 +9,11 @@ public class ErrorHandler
 
     protected internal virtual void Reset() { }
 
-    protected virtual void RecordError(ParserException error)
+    protected virtual void RecordError(ParseError error)
     {
     }
 
-    internal void Tolerate(ParserException error, bool tolerant)
+    internal void Tolerate(ParseError error, bool tolerant)
     {
         if (tolerant)
         {
@@ -21,13 +21,13 @@ public class ErrorHandler
         }
         else
         {
-            throw error;
+            throw error.ToException();
         }
     }
 
-    protected internal virtual ParserException CreateError(string? source, int index, int line, int col, string description)
+    protected internal virtual ParseError CreateError(string? source, int index, int line, int col, string description)
     {
-        return new(new ParseError(description, source, index, new Position(line, col)));
+        return new ParseError(description, source, index, new Position(line, col));
     }
 
     internal void TolerateError(string? source, int index, int line, int col, string description, bool tolerant)

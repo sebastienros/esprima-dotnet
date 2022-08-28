@@ -205,18 +205,18 @@ public sealed partial class Scanner
     [DoesNotReturn]
     private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message).ToException();
     }
 
     [DoesNotReturn]
     private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message).ToException();
     }
 
     private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        _errorHandler.TolerateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message, _tolerant);
+        _errorHandler.TolerateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message, _tolerant);
     }
 
     private StringBuilder GetStringBuilder()
