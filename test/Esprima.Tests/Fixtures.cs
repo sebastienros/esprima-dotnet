@@ -302,8 +302,8 @@ public class Fixtures
         public AstToJsonOptions CreateConversionOptions(AstToJsonOptions defaultOptions) => defaultOptions with
         {
             TestCompatibilityMode = TestCompatibilityMode,
-            IncludingLineColumn = IncludesLocation,
-            IncludingRange = IncludesRange,
+            IncludeLineColumn = IncludesLocation,
+            IncludeRange = IncludesRange,
         };
     }
 }

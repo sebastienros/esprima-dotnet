@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast;
 
-public sealed class SyntaxToken : SyntaxElement
+public class SyntaxToken : SyntaxElement
 {
     public SyntaxToken(TokenType type, string value, RegexValue? regexValue = null)
     {

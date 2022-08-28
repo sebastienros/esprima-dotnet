@@ -314,6 +314,20 @@
               "column": 6
             }
           }
+        },
+        "range": [
+          16,
+          22
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 0
+          },
+          "end": {
+            "line": 3,
+            "column": 6
+          }
         }
       },
       "range": [
@@ -391,6 +405,20 @@
                 "line": 4,
                 "column": 5
               }
+            }
+          },
+          "range": [
+            25,
+            29
+          ],
+          "loc": {
+            "start": {
+              "line": 4,
+              "column": 1
+            },
+            "end": {
+              "line": 4,
+              "column": 5
             }
           }
         },

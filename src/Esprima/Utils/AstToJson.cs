@@ -18,8 +18,11 @@ public record class AstToJsonOptions
 {
     public static readonly AstToJsonOptions Default = new();
 
-    public bool IncludingLineColumn { get; init; }
-    public bool IncludingRange { get; init; }
+    public bool IncludeTokens { get; init; }
+    public bool IncludeComments { get; init; }
+
+    public bool IncludeLineColumn { get; init; }
+    public bool IncludeRange { get; init; }
     public LocationMembersPlacement LocationMembersPlacement { get; init; }
     /// <summary>
     /// This switch is intended for enabling a compatibility mode for <see cref="AstToJsonConverter"/> to build a JSON output

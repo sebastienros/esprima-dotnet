@@ -323,16 +323,20 @@ public partial class JavaScriptParser
         return _scanner._source.Between(token.Start, token.End).ToInternedString(ref _scanner._stringPool);
     }
 
+    private protected SyntaxToken FinalizeToken(int start, int end, SyntaxToken token)
+    {
+        var startPosition = new Position(_startMarker.Line, _startMarker.Column);
+        var endPosition = new Position(_scanner._lineNumber, _scanner._index - _scanner._lineStart);
+
+        token.Range = new Range(start, end);
+        token.Location = new Location(in startPosition, in endPosition);
+
+        return token;
+    }
+
     private protected SyntaxToken ConvertToken(in Token token)
     {
-        var start = new Position(_startMarker.Line, _startMarker.Column);
-        var end = new Position(_scanner._lineNumber, _scanner._index - _scanner._lineStart);
-
-        return new SyntaxToken(token.Type, GetTokenRaw(token), token.RegexValue)
-        {
-            Range = new Range(token.Start, token.End),
-            Location = new Location(in start, in end)
-        };
+        return FinalizeToken(token.Start, token.End, new SyntaxToken(token.Type, GetTokenRaw(token), token.RegexValue));
     }
 
     private protected Token NextToken(bool allowIdentifierEscape = false)
@@ -1861,7 +1865,7 @@ public partial class JavaScriptParser
 
         if (hasOptional)
         {
-            return new ChainExpression(expr);
+            return Finalize(startMarker, new ChainExpression(expr));
         }
 
         return expr;
@@ -1970,7 +1974,7 @@ public partial class JavaScriptParser
 
         if (hasOptional)
         {
-            return new ChainExpression(expr);
+            return Finalize(startMarker, new ChainExpression(expr));
         }
 
         return expr;

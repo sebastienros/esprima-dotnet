@@ -489,6 +489,14 @@ public class JsxParser : JavaScriptParser
         return this._scanner.Lex();
     }
 
+    private SyntaxToken ConvertJsxToken(in Token token)
+    {
+        var jsxTokenType = token.JsxTokenType();
+        return jsxTokenType == JsxTokenType.Unknown
+            ? ConvertToken(token)
+            : FinalizeToken(token.Start, token.End, new JsxSyntaxToken(jsxTokenType, GetTokenRaw(token)));
+    }
+
     private Token NextJsxToken()
     {
         CollectComments();
@@ -499,7 +507,7 @@ public class JsxParser : JavaScriptParser
 
         if (_tokens is not null)
         {
-            _tokens.Add(ConvertToken(token));
+            _tokens.Add(ConvertJsxToken(token));
         }
 
         return token;
@@ -541,7 +549,7 @@ public class JsxParser : JavaScriptParser
 
         if (text.Length > 0 && _tokens is not null)
         {
-            _tokens.Add(ConvertToken(token));
+            _tokens.Add(ConvertJsxToken(token));
         }
 
         return token;

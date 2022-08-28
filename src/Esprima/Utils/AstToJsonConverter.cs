@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Globalization;
 using System.Numerics;
 using System.Reflection;
@@ -11,6 +12,8 @@ namespace Esprima.Utils;
 public class AstToJsonConverter : AstVisitor
 {
     private readonly JsonWriter _writer;
+    private protected readonly bool _includeTokens;
+    private protected readonly bool _includeComments;
     private protected readonly bool _includeLineColumn;
     private protected readonly bool _includeRange;
     private protected readonly LocationMembersPlacement _locationMembersPlacement;
@@ -25,20 +28,21 @@ public class AstToJsonConverter : AstVisitor
             throw new ArgumentNullException(nameof(options));
         }
 
-        _includeLineColumn = options.IncludingLineColumn;
-        _includeRange = options.IncludingRange;
+        _includeTokens = options.IncludeTokens;
+        _includeComments = options.IncludeComments;
+        _includeLineColumn = options.IncludeLineColumn;
+        _includeRange = options.IncludeRange;
         _locationMembersPlacement = options.LocationMembersPlacement;
         _testCompatibilityMode = options.TestCompatibilityMode;
     }
 
-    protected virtual string GetNodeType(Node node)
-    {
-        return node.Type.ToString();
-    }
+    protected virtual string GetNodeType(Node node) => node.Type.ToString();
+    protected virtual string GetTokenType(SyntaxToken token) => token.Type.ToString();
+    protected virtual string GetCommentType(SyntaxComment comment) => comment.Type.ToString();
 
-    private void WriteLocationInfo(Node node)
+    private void WriteLocationInfo(SyntaxElement element)
     {
-        if (node is ChainExpression)
+        if (_testCompatibilityMode == AstToJsonTestCompatibilityMode.EsprimaOrg && element is ChainExpression)
         {
             return;
         }
@@ -47,8 +51,8 @@ public class AstToJsonConverter : AstVisitor
         {
             _writer.Member("range");
             _writer.StartArray();
-            _writer.Number(node.Range.Start);
-            _writer.Number(node.Range.End);
+            _writer.Number(element.Range.Start);
+            _writer.Number(element.Range.End);
             _writer.EndArray();
         }
 
@@ -57,9 +61,9 @@ public class AstToJsonConverter : AstVisitor
             _writer.Member("loc");
             _writer.StartObject();
             _writer.Member("start");
-            Write(node.Location.Start);
+            Write(element.Location.Start);
             _writer.Member("end");
-            Write(node.Location.End);
+            Write(element.Location.End);
             _writer.EndObject();
         }
 
@@ -72,25 +76,62 @@ public class AstToJsonConverter : AstVisitor
         }
     }
 
-    private void OnStartNodeObject(Node node)
+    private void WriteRegexValue(RegexValue value)
+    {
+        _writer.StartObject();
+        Member("pattern", value.Pattern);
+        Member("flags", value.Flags);
+        _writer.EndObject();
+    }
+
+    private void WriteTokens(IReadOnlyList<SyntaxToken> tokens)
+    {
+        _writer.StartArray();
+        foreach (var token in tokens)
+        {
+            OnStartSyntaxElementObject(token);
+            Member("type", GetTokenType(token));
+            Member("value", token.Value);
+            if (token.RegexValue is not null)
+            {
+                _writer.Member("regex");
+                WriteRegexValue(token.RegexValue);
+            }
+            OnEndSyntaxElementObject(token);
+        }
+        _writer.EndArray();
+    }
+
+    private void WriteComments(IReadOnlyList<SyntaxComment> comments)
+    {
+        _writer.StartArray();
+        foreach (var comment in comments)
+        {
+            OnStartSyntaxElementObject(comment);
+            Member("type", GetCommentType(comment));
+            Member("value", comment.Value);
+            OnEndSyntaxElementObject(comment);
+        }
+        _writer.EndArray();
+    }
+
+    private void OnStartSyntaxElementObject(SyntaxElement element)
     {
         _writer.StartObject();
 
         if ((_includeLineColumn || _includeRange)
             && _locationMembersPlacement == LocationMembersPlacement.Start)
         {
-            WriteLocationInfo(node);
+            WriteLocationInfo(element);
         }
-
-        Member("type", GetNodeType(node));
     }
 
-    private void OnFinishNodeObject(Node node)
+    private void OnEndSyntaxElementObject(SyntaxElement element)
     {
         if ((_includeLineColumn || _includeRange)
             && _locationMembersPlacement == LocationMembersPlacement.End)
         {
-            WriteLocationInfo(node);
+            WriteLocationInfo(element);
         }
 
         _writer.EndObject();
@@ -109,13 +150,29 @@ public class AstToJsonConverter : AstVisitor
 
         public void Dispose()
         {
-            _converter.OnFinishNodeObject(_node);
+            if (_node is ISyntaxTreeRoot root)
+            {
+                if (_converter._includeComments && root.Comments is not null and var comments)
+                {
+                    _converter._writer.Member("comments");
+                    _converter.WriteComments(comments);
+                }
+
+                if (_converter._includeTokens && root.Tokens is not null and var tokens)
+                {
+                    _converter._writer.Member("tokens");
+                    _converter.WriteTokens(tokens);
+                }
+            }
+
+            _converter.OnEndSyntaxElementObject(_node);
         }
     }
 
     protected NodeObjectDisposable StartNodeObject(Node node)
     {
-        OnStartNodeObject(node);
+        OnStartSyntaxElementObject(node);
+        Member("type", GetNodeType(node));
         return new NodeObjectDisposable(this, node);
     }
 
@@ -773,10 +830,7 @@ public class AstToJsonConverter : AstVisitor
             if (literal.Regex is not null)
             {
                 _writer.Member("regex");
-                _writer.StartObject();
-                Member("pattern", literal.Regex.Pattern);
-                Member("flags", literal.Regex.Flags);
-                _writer.EndObject();
+                WriteRegexValue(literal.Regex);
             }
             else if (literal.Value is BigInteger bigInt)
             {

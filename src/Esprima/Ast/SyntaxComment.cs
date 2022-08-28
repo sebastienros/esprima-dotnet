@@ -3,7 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class SyntaxComment : SyntaxElement
+public class SyntaxComment : SyntaxElement
 {
     public SyntaxComment(CommentType type, string value)
     {
