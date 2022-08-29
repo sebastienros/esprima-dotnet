@@ -29,6 +29,16 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return base.GetNodeType(node);
     }
 
+    protected override string GetTokenType(SyntaxToken token)
+    {
+        if (token is JsxSyntaxToken jsxToken)
+        {
+            return "JSX" + jsxToken.Type.ToString();
+        }
+
+        return base.GetTokenType(token);
+    }
+
     object? IJsxAstVisitor.VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
         using (StartNodeObject(jsxAttribute))

@@ -5,9 +5,9 @@
 /// </summary>
 public sealed class CollectingErrorHandler : ErrorHandler
 {
-    private readonly List<ParserException> _errors = new();
+    private readonly List<ParseError> _errors = new();
 
-    public IReadOnlyCollection<ParserException> Errors => _errors;
+    public IReadOnlyCollection<ParseError> Errors => _errors;
 
     protected internal override void Reset()
     {
@@ -18,7 +18,7 @@ public sealed class CollectingErrorHandler : ErrorHandler
         }
     }
 
-    protected override void RecordError(ParserException error)
+    protected override void RecordError(ParseError error)
     {
         _errors.Add(error);
     }

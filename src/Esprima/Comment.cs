@@ -13,11 +13,11 @@ public readonly record struct Comment
 {
     internal Comment(
         CommentType type,
-        in Range slice,
+        Range slice,
         int start,
         int end,
-        in Position startPosition,
-        in Position endPosition)
+        Position startPosition,
+        Position endPosition)
     {
         Type = type;
         Slice = slice;

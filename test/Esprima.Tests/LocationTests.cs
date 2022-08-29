@@ -12,7 +12,7 @@ public class LocationTests
     {
         var start = Position.From(startLine, startColumn);
         var end = Position.From(endLine, endColumn);
-        var (actualStart, actualEnd) = Location.From(in start, in end);
+        var (actualStart, actualEnd) = Location.From(start, end);
         Assert.Equal(start, actualStart);
         Assert.Equal(end, actualEnd);
     }
@@ -27,7 +27,7 @@ public class LocationTests
         var start = Position.From(startLine, startColumn);
         var end = Position.From(endLine, endColumn);
         var e = Assert.Throws<ArgumentOutOfRangeException>(() =>
-            Location.From(in start, in end));
+            Location.From(start, end));
         Assert.Equal(paramName, e.ParamName);
         Assert.Equal(paramName == "end" ? end : start, e.ActualValue);
     }
@@ -41,7 +41,7 @@ public class LocationTests
     {
         var start = Position.From(startLine, startColumn);
         var end = Position.From(endLine, endColumn);
-        var location = Location.From(in start, in end, source);
+        var location = Location.From(start, end, source);
         Assert.Equal(expected, location.ToString());
     }
 
@@ -54,7 +54,7 @@ public class LocationTests
     {
         var start = Position.From(startLine, startColumn);
         var end = Position.From(endLine, endColumn);
-        var location = Location.From(in start, in end, source);
+        var location = Location.From(start, end, source);
         Assert.Equal(location, Location.Parse(location.ToString()));
     }
 

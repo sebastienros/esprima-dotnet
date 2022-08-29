@@ -85,7 +85,7 @@ public sealed partial class Scanner
         return ch - '0';
     }
 
-    internal Scanner(ParserOptions options)
+    internal Scanner(IScannerOptions options)
     {
         if (options == null)
         {
@@ -101,19 +101,19 @@ public sealed partial class Scanner
         _source = string.Empty;
     }
 
-    public Scanner(string code) : this(code, ParserOptions.Default)
+    public Scanner(string code) : this(code, ScannerOptions.Default)
     {
     }
 
-    public Scanner(string code, ParserOptions options) : this(code, null, options)
+    public Scanner(string code, ScannerOptions options) : this(code, null, options)
     {
     }
 
-    public Scanner(string code, string? source) : this(code, source, ParserOptions.Default)
+    public Scanner(string code, string? source) : this(code, source, ScannerOptions.Default)
     {
     }
 
-    public Scanner(string code, string? source, ParserOptions options) : this(options)
+    public Scanner(string code, string? source, ScannerOptions options) : this(options)
     {
         Reset(code, source);
     }
@@ -205,18 +205,18 @@ public sealed partial class Scanner
     [DoesNotReturn]
     private void ThrowUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message).ToException();
     }
 
     [DoesNotReturn]
     private T ThrowUnexpectedToken<T>(string message = Messages.UnexpectedTokenIllegal)
     {
-        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message);
+        throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message).ToException();
     }
 
     private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        _errorHandler.TolerateError(_sourceLocation, _index, _lineNumber, _index - _lineStart + 1, message, _tolerant);
+        _errorHandler.TolerateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message, _tolerant);
     }
 
     private StringBuilder GetStringBuilder()
@@ -281,11 +281,11 @@ public sealed partial class Scanner
                     var entry = new Comment
                     (
                         type: CommentType.Line,
-                        slice: in slice,
+                        slice,
                         start: start,
                         end: _index - 1,
-                        in startPosition,
-                        in endPosition
+                        startPosition,
+                        endPosition
                     );
 
                     comments.Add(entry);
@@ -309,11 +309,11 @@ public sealed partial class Scanner
             var entry = new Comment
             (
                 type: CommentType.Line,
-                slice: in slice,
+                slice,
                 start: start,
                 end: _index,
-                in startPosition,
-                in endPosition
+                startPosition,
+                endPosition
             );
 
             comments.Add(entry);
@@ -362,11 +362,11 @@ public sealed partial class Scanner
                         var entry = new Comment
                         (
                             type: CommentType.Block,
-                            slice: in slice,
+                            slice,
                             start: start,
                             end: _index,
-                            in startPosition,
-                            in endPosition
+                            startPosition,
+                            endPosition
                         );
                         comments.Add(entry);
                     }
@@ -390,11 +390,11 @@ public sealed partial class Scanner
             var entry = new Comment
             (
                 type: CommentType.Block,
-                slice: in slice,
+                slice,
                 start: start,
                 end: _index,
-                in startPosition,
-                in endPosition
+                startPosition,
+                endPosition
             );
             comments.Add(entry);
         }
