@@ -5,7 +5,7 @@ public class ScannerTests
     [Fact]
     public void CanScanMultiLineComment()
     {
-        var scanner = new Scanner("var foo=1; /* \"330413500\" */", new ParserOptions { Comments = true });
+        var scanner = new Scanner("var foo=1; /* \"330413500\" */", new ScannerOptions { Comments = true });
 
         var results = new List<string>();
         Token token;
@@ -25,7 +25,7 @@ public class ScannerTests
     [Fact]
     public void CanResetScanner()
     {
-        var scanner = new Scanner("var /* c1 */ foo=1; // c2", new ParserOptions { Comments = true });
+        var scanner = new Scanner("var /* c1 */ foo=1; // c2", new ScannerOptions { Comments = true });
 
         for (var n = 0; n < 3; n++, scanner.Reset())
         {
@@ -57,7 +57,7 @@ public class ScannerTests
     [Fact]
     public void CanResetScannerToCustomPosition()
     {
-        var scanner = new Scanner("var /* c1 */ foo=1; // c2", new ParserOptions { Comments = true });
+        var scanner = new Scanner("var /* c1 */ foo=1; // c2", new ScannerOptions { Comments = true });
         scanner.Reset(4, 1, 0);
 
         var tokens = new List<Token>();

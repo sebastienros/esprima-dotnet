@@ -85,7 +85,7 @@ public sealed partial class Scanner
         return ch - '0';
     }
 
-    internal Scanner(ParserOptions options)
+    internal Scanner(IScannerOptions options)
     {
         if (options == null)
         {
@@ -101,19 +101,19 @@ public sealed partial class Scanner
         _source = string.Empty;
     }
 
-    public Scanner(string code) : this(code, ParserOptions.Default)
+    public Scanner(string code) : this(code, ScannerOptions.Default)
     {
     }
 
-    public Scanner(string code, ParserOptions options) : this(code, null, options)
+    public Scanner(string code, ScannerOptions options) : this(code, null, options)
     {
     }
 
-    public Scanner(string code, string? source) : this(code, source, ParserOptions.Default)
+    public Scanner(string code, string? source) : this(code, source, ScannerOptions.Default)
     {
     }
 
-    public Scanner(string code, string? source, ParserOptions options) : this(options)
+    public Scanner(string code, string? source, ScannerOptions options) : this(options)
     {
         Reset(code, source);
     }

@@ -15,7 +15,7 @@ public class RegExpTests
 
     private static Regex CreateRegex(string code)
     {
-        var options = new ParserOptions { AdaptRegexp = true };
+        var options = new ScannerOptions { AdaptRegexp = true };
         var token = new Scanner(code, options).ScanRegExp();
         return (Regex) token.Value!;
     }
@@ -186,7 +186,7 @@ public class RegExpTests
     [Fact]
     public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
     {
-        var scanner = new Scanner("", new ParserOptions { AdaptRegexp = true });
+        var scanner = new Scanner("", new ScannerOptions { AdaptRegexp = true });
         var regex = scanner.ParseRegex("\\$", "gm", TimeSpan.FromSeconds(10));
         Assert.NotNull(regex);
     }

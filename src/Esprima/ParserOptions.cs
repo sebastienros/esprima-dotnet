@@ -5,32 +5,34 @@ namespace Esprima;
 /// <summary>
 /// Parser options.
 /// </summary>
-public record class ParserOptions
+public record class ParserOptions : IScannerOptions
 {
     public static readonly ParserOptions Default = new();
 
-    /// <summary>
-    /// Gets or sets whether the tokens are included in the parsed tree.
-    /// </summary>
-    public bool Tokens { get; init; } = false;
+    internal readonly ScannerOptions _scannerOptions = new();
 
     /// <summary>
-    /// Gets or sets whether the comments are included in the parsed tree.
+    /// Gets or sets whether the tokens are included in the parsed tree, defaults to <see langword="false"/>.
     /// </summary>
-    public bool Comments { get; init; } = false;
+    public bool Tokens { get; init; }
 
     /// <summary>
-    /// Gets or sets whether the parser is tolerant to errors.
+    /// Gets or sets whether the comments are included in the parsed tree, defaults to <see langword="false"/>.
+    /// </summary>
+    public bool Comments { get; init; }
+
+    /// <summary>
+    /// Gets or sets whether the parser is tolerant to errors, defaults to <see langword="true"/>.
     /// </summary>
     public bool Tolerant { get; init; } = true;
 
     /// <summary>
-    /// Gets or sets the <see cref="ErrorHandler"/> to use.
+    /// Gets or sets the <see cref="ErrorHandler"/> to use, defaults to <see cref="ErrorHandler.Default"/>.
     /// </summary>
-    public ErrorHandler ErrorHandler { get; init; } = Esprima.ErrorHandler.Default;
+    public ErrorHandler ErrorHandler { get; init; } = ErrorHandler.Default;
 
     /// <summary>
-    /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one.
+    /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one, defaults to <see langword="true"/>.
     /// </summary>
     public bool AdaptRegexp { get; init; } = true;
 
