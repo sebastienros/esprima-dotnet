@@ -22,7 +22,7 @@ public sealed class ParseError
     /// </summary>
     public int Column => Position.Column + 1;
 
-    public ParseError(string description, string? source = null, int index = -1, in Position position = default)
+    public ParseError(string description, string? source = null, int index = -1, Position position = default)
     {
         Description = description ?? throw new ArgumentNullException(nameof(description));
         Source = source;

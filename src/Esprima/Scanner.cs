@@ -281,11 +281,11 @@ public sealed partial class Scanner
                     var entry = new Comment
                     (
                         type: CommentType.Line,
-                        slice: in slice,
+                        slice,
                         start: start,
                         end: _index - 1,
-                        in startPosition,
-                        in endPosition
+                        startPosition,
+                        endPosition
                     );
 
                     comments.Add(entry);
@@ -309,11 +309,11 @@ public sealed partial class Scanner
             var entry = new Comment
             (
                 type: CommentType.Line,
-                slice: in slice,
+                slice,
                 start: start,
                 end: _index,
-                in startPosition,
-                in endPosition
+                startPosition,
+                endPosition
             );
 
             comments.Add(entry);
@@ -362,11 +362,11 @@ public sealed partial class Scanner
                         var entry = new Comment
                         (
                             type: CommentType.Block,
-                            slice: in slice,
+                            slice,
                             start: start,
                             end: _index,
-                            in startPosition,
-                            in endPosition
+                            startPosition,
+                            endPosition
                         );
                         comments.Add(entry);
                     }
@@ -390,11 +390,11 @@ public sealed partial class Scanner
             var entry = new Comment
             (
                 type: CommentType.Block,
-                slice: in slice,
+                slice,
                 start: start,
                 end: _index,
-                in startPosition,
-                in endPosition
+                startPosition,
+                endPosition
             );
             comments.Add(entry);
         }

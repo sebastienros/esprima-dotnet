@@ -11,7 +11,7 @@ public readonly struct Location : IEquatable<Location>
     public readonly Position End;
     public readonly string? Source;
 
-    private static bool Validate(in Position start, in Position end, bool throwOnError)
+    private static bool Validate(Position start, Position end, bool throwOnError)
     {
         if (start == default && end != default)
         {
@@ -35,33 +35,33 @@ public readonly struct Location : IEquatable<Location>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Location From(in Position start, in Position end, string? source = null)
+    public static Location From(Position start, Position end, string? source = null)
     {
-        Validate(in start, in end, throwOnError: true);
+        Validate(start, end, throwOnError: true);
         return new Location(start, end, source);
     }
 
-    internal Location(in Position start, in Position end) : this(start, end, null)
+    internal Location(Position start, Position end) : this(start, end, null)
     {
     }
 
-    internal Location(in Position start, in Position end, string? source)
+    internal Location(Position start, Position end, string? source)
     {
-        Debug.Assert(Validate(in start, in end, throwOnError: false));
+        Debug.Assert(Validate(start, end, throwOnError: false));
 
         Start = start;
         End = end;
         Source = source;
     }
 
-    public Location WithPosition(in Position start, in Position end)
+    public Location WithPosition(Position start, Position end)
     {
         return From(start, end, Source);
     }
 
     public Location WithSource(string source)
     {
-        return new Location(in Start, in End, source);
+        return new Location(Start, End, source);
     }
 
     public override bool Equals(object obj)
@@ -69,12 +69,14 @@ public readonly struct Location : IEquatable<Location>
         return obj is Location other && Equals(other);
     }
 
-    public bool Equals(Location other)
+    public bool Equals(in Location other)
     {
         return Start.Equals(other.Start)
                && End.Equals(other.End)
                && string.Equals(Source, other.Source);
     }
+
+    bool IEquatable<Location>.Equals(Location other) => Equals(in other);
 
     public static bool operator ==(in Location left, in Location right)
     {
@@ -205,9 +207,9 @@ SourcePart:
         var start = new Position(startLine, startColumn);
         var end = new Position(endLine, endColumn);
 
-        if (Validate(in start, in end, throwIfInvalid))
+        if (Validate(start, end, throwIfInvalid))
         {
-            result = new Location(in start, in end, source.Length > 0 ? source.ToString() : null);
+            result = new Location(start, end, source.Length > 0 ? source.ToString() : null);
             return true;
         }
 

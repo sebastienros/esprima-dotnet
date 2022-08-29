@@ -279,7 +279,7 @@ public partial class JavaScriptParser
                 var comment = new SyntaxComment(e.Type, value)
                 {
                     Range = new Range(e.Start, e.End),
-                    Location = new Location(in e.StartPosition, in e.EndPosition, _scanner._sourceLocation)
+                    Location = new Location(e.StartPosition, e.EndPosition, _scanner._sourceLocation)
                 };
 
                 _comments.Add(comment);
@@ -329,7 +329,7 @@ public partial class JavaScriptParser
         var endPosition = new Position(_scanner._lineNumber, _scanner._index - _scanner._lineStart);
 
         token.Range = new Range(start, end);
-        token.Location = new Location(in startPosition, in endPosition);
+        token.Location = new Location(startPosition, endPosition);
 
         return token;
     }
