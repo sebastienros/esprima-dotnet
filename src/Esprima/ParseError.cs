@@ -3,20 +3,25 @@
 public sealed class ParseError
 {
     public string Description { get; }
+
     public string? Source { get; }
 
     public bool IsIndexDefined => Index >= 0;
+
     /// <summary>
-    /// Zero-based index within the parsed code string. (Can be negative if code is not available.)
+    /// Zero-based index within the parsed code string. (Can be negative if location information is available.)
     /// </summary>
     public int Index { get; }
 
     public bool IsPositionDefined => Position.Line > 0;
+
     public Position Position { get; }
+
     /// <summary>
-    /// One-based line number. (Can be zero if code is not available.)
+    /// One-based line number. (Can be zero if location information is not available.)
     /// </summary>
     public int LineNumber => Position.Line;
+
     /// <summary>
     /// One-based column index.
     /// </summary>
