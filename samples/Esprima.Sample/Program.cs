@@ -1,46 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Esprima.Utils;
-using Newtonsoft.Json;
+using System.Linq;
+using Esprima.Sample.Commands;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Esprima.Sample;
 
+[Command("esprimatest", Description = "A command line tool for testing Esprima.NET features.",
+    UnrecognizedArgumentHandling = UnrecognizedArgumentHandling.StopParsingAndCollect)]
+[HelpOption(Inherited = true)]
+[Subcommand(typeof(ParseCommand), typeof(TokenizeCommand))]
 public class Program
 {
-    public static void Main(string[] args)
+    public static int Main(string[] args)
     {
-        const string code = @"
-""use strict"";
-try { } catch (evil) { }
+        var console = PhysicalConsole.Singleton;
 
-";
-        var scanner = new Scanner(code);
-        Tokenize(scanner);
-        //Parse(scanner);
-    }
-
-    private static void Tokenize(Scanner scanner)
-    {
-        var tokens = new List<Token>();
-        Token token;
-
-        do
+        using var app = new CommandLineApplication<Program>(console, Environment.CurrentDirectory);
+        app.Conventions.UseDefaultConventions();
+        try
         {
-            scanner.ScanComments();
-            token = scanner.Lex();
-            tokens.Add(token);
-        } while (token.Type != TokenType.EOF);
-
-        Console.WriteLine(JsonConvert.SerializeObject(tokens, Formatting.Indented));
+            return app.Execute(args);
+        }
+        catch (ParserException ex)
+        {
+            console.Error.WriteLine(ex.LineNumber > 0 ? $"{ex.LineNumber},{ex.Column}: {ex.Description}" : ex.Description);
+            return -1;
+        }
+        catch (CommandParsingException ex)
+        {
+            console.Error.WriteLine(ex.Message);
+            return 1;
+        }
     }
 
-    private static void Parse(string source, TextWriter output)
+    public int OnExecute(CommandLineApplication app)
     {
-        var parser = new JavaScriptParser();
-        var program = parser.ParseScript(source);
-
-        program.WriteJson(output);
-        Console.WriteLine();
+        var args = app.RemainingArguments.Prepend(ParseCommand.CommandName).ToArray();
+        return app.Execute(args);
     }
 }
