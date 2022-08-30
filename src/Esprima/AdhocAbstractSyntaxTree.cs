@@ -1543,6 +1543,16 @@ namespace Esprima
                         expr = new ArrowParameterPlaceHolder(NodeList.From(ref nodeArguments), true);
                     }
                 }
+                else if (Match("{"))
+                {
+                    _context.IsBindingElement = false;
+                    _context.IsAssignmentTarget = !optional;
+
+                    Expect("{");
+                    var property = IsolateCoverGrammar(parseExpression);
+                    Expect("}");
+                    expr = Finalize(StartNode(startToken), new ObjectSelectorMemberExpression(expr, property, optional));
+                }
                 else if (Match("["))
                 {
                     _context.IsBindingElement = false;
@@ -1603,18 +1613,6 @@ namespace Esprima
 
                     var property = ParseIdentifierName();
                     expr = Finalize(StartNode(startToken), new StaticMemberExpression(expr, property, optional));
-                }
-                else if (Match("->"))
-                {
-                    _context.IsBindingElement = false;
-                    _context.IsAssignmentTarget = !optional;
-                    if (!optional)
-                    {
-                        Expect("->");
-                    }
-
-                    var property = ParseIdentifierName();
-                    expr = Finalize(StartNode(startToken), new ObjectSelectorMemberExpression(expr, property, optional));
                 }
                 else
                 {
@@ -1717,18 +1715,6 @@ namespace Esprima
 
                     var property = ParseIdentifierName();
                     expr = Finalize(node, new StaticMemberExpression(expr, property, optional));
-                }
-                else if (Match("->")) // ADHOC: Object selector
-                {
-                    _context.IsBindingElement = false;
-                    _context.IsAssignmentTarget = !optional;
-                    if (!optional)
-                    {
-                        Expect("->");
-                    }
-
-                    var property = ParseIdentifierName();
-                    expr = Finalize(node, new ObjectSelectorMemberExpression(expr, property, optional));
                 }
                 else
                 {
