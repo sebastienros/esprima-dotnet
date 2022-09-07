@@ -4,7 +4,7 @@ internal struct AdditionalDataContainer
 {
     private static readonly object s_internalDataKey = new();
 
-    private object? _data;
+    internal object? _data;
 
     internal object? InternalData
     {
