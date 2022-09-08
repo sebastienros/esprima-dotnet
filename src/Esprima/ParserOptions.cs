@@ -57,7 +57,7 @@ public record class ParserOptions : IScannerOptions
     /// { 
     ///     foreach (var child in node.ChildNodes)
     ///     {
-    ///         child.SetAdditionalData("Parent", node);
+    ///         child.AdditionalData["Parent"] = node;
     ///     }
     /// };
     /// </code>

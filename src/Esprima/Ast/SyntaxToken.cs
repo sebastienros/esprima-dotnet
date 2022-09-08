@@ -19,9 +19,9 @@ public class SyntaxToken : SyntaxElement
     public RegexValue? RegexValue
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (RegexValue?) _additionalDataContainer.InternalData;
+        get => (RegexValue?) _additionalDataSlot.InternalData;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private set => _additionalDataContainer.InternalData = value;
+        private set => _additionalDataSlot.InternalData = value;
     }
 
     public override string ToString() => Value;

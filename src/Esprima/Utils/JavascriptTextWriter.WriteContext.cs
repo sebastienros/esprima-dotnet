@@ -16,7 +16,7 @@ partial class JavaScriptTextWriter
         public WriteContext From(Node? parentNode, Node node) =>
             new WriteContext(parentNode, node ?? ThrowArgumentNullException<Node>(nameof(node)));
 
-        internal AdditionalDataContainer _additionalDataContainer;
+        internal AdditionalDataSlot _additionalDataSlot;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal WriteContext(Node? parentNode, Node node)
@@ -25,7 +25,7 @@ partial class JavaScriptTextWriter
             Node = node;
             _nodePropertyName = null;
             _nodePropertyValueAccessor = null;
-            _additionalDataContainer = default;
+            _additionalDataSlot = default;
         }
 
         public Node? ParentNode { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
@@ -94,21 +94,15 @@ partial class JavaScriptTextWriter
             SetNodeProperty(name ?? ThrowArgumentNullException<string>(nameof(name)), listValueAccessor ?? ThrowArgumentNullException<NodePropertyListValueAccessor<T>>(nameof(listValueAccessor)));
 
         /// <summary>
-        /// Gets additional, user-defined data associated with the specified key.
+        /// Gets the container of user-defined data.
         /// </summary>
         /// <remarks>
         /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
         /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public object? GetAdditionalData(object key) => _additionalDataContainer.GetData(key);
-
-        /// <summary>
-        /// Sets additional, user-defined data associated with the specified key.
-        /// </summary>
-        /// <remarks>
-        /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetAdditionalData(object key, object? value) => _additionalDataContainer.SetData(key, value);
+        public AdditionalDataContainer AdditionalData
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _additionalDataSlot.GetOrCreateContainer();
+        }
     }
 }

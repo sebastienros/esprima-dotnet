@@ -7,25 +7,19 @@ namespace Esprima.Ast;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(), nq}}")]
 public abstract class SyntaxElement
 {
-    private protected AdditionalDataContainer _additionalDataContainer;
+    private protected AdditionalDataSlot _additionalDataSlot;
 
     /// <summary>
-    /// Gets additional, user-defined data associated with the specified key.
+    /// Gets the container of user-defined data.
     /// </summary>
     /// <remarks>
     /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public object? GetAdditionalData(object key) => _additionalDataContainer.GetData(key);
-
-    /// <summary>
-    /// Sets additional, user-defined data associated with the specified key.
-    /// </summary>
-    /// <remarks>
-    /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetAdditionalData(object key, object? value) => _additionalDataContainer.SetData(key, value);
+    public AdditionalDataContainer AdditionalData
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _additionalDataSlot.GetOrCreateContainer();
+    }
 
     public Range Range;
     public Location Location;

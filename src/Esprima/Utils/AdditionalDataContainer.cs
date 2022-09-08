@@ -1,99 +1,76 @@
-﻿namespace Esprima.Utils;
+﻿using System.Diagnostics;
 
-internal struct AdditionalDataContainer
+namespace Esprima.Utils;
+
+public sealed class AdditionalDataContainer
 {
-    private static readonly object s_internalDataKey = new();
+    private Dictionary<object, object>? _dictionary;
 
-    private object? _data;
-
-    internal object? InternalData
+    /// <summary>
+    /// Gets or sets user-defined data associated with the specified key.
+    /// </summary>
+    /// <remarks>
+    /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
+    /// </remarks>
+    public object? this[object key]
     {
-        get
-        {
-            if (_data is Dictionary<object, object?> dataDictionary)
-            {
-                return dataDictionary.TryGetValue(s_internalDataKey, out var value) ? value : null;
-            }
-
-            return _data;
-        }
+        get => _dictionary is not null && _dictionary.TryGetValue(key, out var value) ? value : null;
         set
         {
             if (value is not null)
             {
-                if (value is Dictionary<object, object?>)
-                {
-                    throw new ArgumentException($"Value of type {value.GetType()} is not allowed.", nameof(value));
-                }
-
-                if (_data is Dictionary<object, object?> dataDictionary)
-                {
-                    dataDictionary[s_internalDataKey] = value;
-                }
-                else
-                {
-                    // we can store an object without allocation until user data is set
-                    _data = value;
-                }
+                (_dictionary ??= new Dictionary<object, object>())[key] = value;
             }
             else
             {
-                if (_data is Dictionary<object, object?> dataDictionary)
-                {
-                    dataDictionary.Remove(s_internalDataKey);
-                }
-                else
-                {
-                    _data = null;
-                }
+                _dictionary?.Remove(key);
             }
         }
     }
 
-    public object? GetData(object key)
-    {
-        if (_data is Dictionary<object, object?> dataDictionary)
-        {
-            return dataDictionary.TryGetValue(key, out var value) ? value : null;
-        }
+    /// <summary>
+    /// Gets or sets user-defined data object. (Can be used to avoid dictionary lookup in performance-critical scenarios.)
+    /// </summary>
+    public object? StaticData { get; set; }
 
-        return null;
-    }
+    internal object? InternalData { get; set; }
+}
 
-    public void SetData(object key, object? value)
+internal struct AdditionalDataSlot
+{
+    private object? _data;
+
+    internal object? InternalData
     {
-        if (value is not null)
+        get => _data is AdditionalDataContainer container ? container.InternalData : _data;
+        set
         {
-            if (_data is Dictionary<object, object?> dataDictionary)
+            Debug.Assert(value is not AdditionalDataContainer, $"Value of type {value?.GetType()} is not allowed.");
+
+            if (_data is AdditionalDataContainer container)
             {
-                dataDictionary[key] = value;
-            }
-            else if (_data is null)
-            {
-                _data = new Dictionary<object, object?>(capacity: 1)
-                {
-                    [key] = value,
-                };
+                container.InternalData = value;
             }
             else
             {
-                _data = new Dictionary<object, object?>(capacity: 2)
-                {
-                    [s_internalDataKey] = _data,
-                    [key] = value,
-                };
+                // we can store an object without allocation until user data is set
+                _data = value;
             }
         }
-        else
+    }
+
+    public AdditionalDataContainer GetOrCreateContainer()
+    {
+        if (_data is AdditionalDataContainer container)
         {
-            if (_data is Dictionary<object, object?> dataDictionary)
-            {
-                dataDictionary.Remove(key);
-            }
-            else if (key is null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            return container;
         }
+
+        container = new AdditionalDataContainer
+        {
+            InternalData = _data
+        };
+        _data = container;
+        return container;
     }
 }
