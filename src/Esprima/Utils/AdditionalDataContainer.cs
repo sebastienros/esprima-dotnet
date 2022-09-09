@@ -14,7 +14,7 @@ internal struct AdditionalDataSlot
     private object? _data;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref object? GetPrimaryDataRef(ref AdditionalDataSlot slot)
+    private static ref object? GetPrimaryDataRef(ref AdditionalDataSlot slot)
     {
         return ref (slot._data is not AdditionalDataHolder[] array ? ref slot._data : ref array[0].Data);
     }
@@ -33,15 +33,19 @@ internal struct AdditionalDataSlot
     {
         get
         {
+            Debug.Assert(index >= 0, "Index must be greater than or equal to 0.");
+
             if (index == 0)
             {
                 return GetPrimaryDataRef(ref this);
             }
 
-            return _data is AdditionalDataHolder[] array && index < array.Length ? array[index].Data : null;
+            return _data is AdditionalDataHolder[] array && (uint) index < (uint) array.Length ? array[index].Data : null;
         }
         set
         {
+            Debug.Assert(index >= 0, "Index must be greater than or equal to 0.");
+
             if (index == 0)
             {
                 Debug.Assert(value is not AdditionalDataHolder[], $"Value of type {typeof(AdditionalDataHolder[])} is not allowed.");
@@ -51,7 +55,7 @@ internal struct AdditionalDataSlot
 
             if (_data is AdditionalDataHolder[] array)
             {
-                if (index >= array.Length)
+                if ((uint) index >= (uint) array.Length)
                 {
                     if (value is null)
                     {
