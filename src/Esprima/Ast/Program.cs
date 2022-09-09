@@ -27,9 +27,9 @@ public abstract class Program : Node, ISyntaxTreeRoot
     public IReadOnlyList<SyntaxToken>? Tokens
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (IReadOnlyList<SyntaxToken>?) GetAdditionalData(s_tokensAdditionalDataKey);
+        get => (IReadOnlyList<SyntaxToken>?) GetDynamicPropertyValue(TokensPropertyIndex);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => SetAdditionalData(s_tokensAdditionalDataKey, value);
+        set => SetDynamicPropertyValue(TokensPropertyIndex, value);
     }
 
     /// <summary>
@@ -42,9 +42,9 @@ public abstract class Program : Node, ISyntaxTreeRoot
     public IReadOnlyList<SyntaxComment>? Comments
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (IReadOnlyList<SyntaxComment>?) GetAdditionalData(s_commentsAdditionalDataKey);
+        get => (IReadOnlyList<SyntaxComment>?) GetDynamicPropertyValue(CommentsPropertyIndex);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => SetAdditionalData(s_commentsAdditionalDataKey, value);
+        set => SetDynamicPropertyValue(CommentsPropertyIndex, value);
     }
 
     internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);

@@ -413,14 +413,14 @@ block comment", comment.Value);
     {
         public void Check(Node node)
         {
-            Assert.Null(node.GetAdditionalData("Parent"));
+            Assert.Null(node.AssociatedData);
 
             base.Visit(node);
         }
 
         public override object? Visit(Node node)
         {
-            var parent = (Node?) node.GetAdditionalData("Parent");
+            var parent = (Node?) node.AssociatedData;
             Assert.NotNull(parent);
             Assert.Contains(node, parent!.ChildNodes);
 
@@ -435,7 +435,7 @@ block comment", comment.Value);
         {
             foreach (var child in node.ChildNodes)
             {
-                child.SetAdditionalData("Parent", node);
+                child.AssociatedData = node;
             }
         };
 

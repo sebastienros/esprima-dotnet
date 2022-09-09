@@ -1,99 +1,84 @@
-﻿namespace Esprima.Utils;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-internal struct AdditionalDataContainer
+namespace Esprima.Utils;
+
+// NOTE: We need an internal type to make our logic foolproof. (See the type check in AdditionalDataSlot.GetPrimaryDataRef method below.)
+internal struct AdditionalDataHolder
 {
-    private static readonly object s_internalDataKey = new();
+    public object? Data;
+}
 
+internal struct AdditionalDataSlot
+{
     private object? _data;
 
-    internal object? InternalData
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ref object? GetPrimaryDataRef(ref AdditionalDataSlot slot)
+    {
+        return ref (slot._data is not AdditionalDataHolder[] array ? ref slot._data : ref array[0].Data);
+    }
+
+    public object? PrimaryData
+    {
+        get => GetPrimaryDataRef(ref this);
+        set
+        {
+            Debug.Assert(value is not AdditionalDataHolder[], $"Value of type {typeof(AdditionalDataHolder[])} is not allowed.");
+            GetPrimaryDataRef(ref this) = value;
+        }
+    }
+
+    public object? this[int index]
     {
         get
         {
-            if (_data is Dictionary<object, object?> dataDictionary)
+            Debug.Assert(index >= 0, "Index must be greater than or equal to 0.");
+
+            if (index == 0)
             {
-                return dataDictionary.TryGetValue(s_internalDataKey, out var value) ? value : null;
+                return GetPrimaryDataRef(ref this);
             }
 
-            return _data;
+            return _data is AdditionalDataHolder[] array && (uint) index < (uint) array.Length ? array[index].Data : null;
         }
         set
         {
-            if (value is not null)
-            {
-                if (value is Dictionary<object, object?>)
-                {
-                    throw new ArgumentException($"Value of type {value.GetType()} is not allowed.", nameof(value));
-                }
+            Debug.Assert(index >= 0, "Index must be greater than or equal to 0.");
 
-                if (_data is Dictionary<object, object?> dataDictionary)
+            if (index == 0)
+            {
+                Debug.Assert(value is not AdditionalDataHolder[], $"Value of type {typeof(AdditionalDataHolder[])} is not allowed.");
+                GetPrimaryDataRef(ref this) = value;
+                return;
+            }
+
+            if (_data is AdditionalDataHolder[] array)
+            {
+                if ((uint) index >= (uint) array.Length)
                 {
-                    dataDictionary[s_internalDataKey] = value;
-                }
-                else
-                {
-                    // we can store an object without allocation until user data is set
-                    _data = value;
+                    if (value is null)
+                    {
+                        return;
+                    }
+
+                    Array.Resize(ref array, index + 1);
+                    _data = array;
                 }
             }
             else
             {
-                if (_data is Dictionary<object, object?> dataDictionary)
+                if (value is null)
                 {
-                    dataDictionary.Remove(s_internalDataKey);
+                    return;
                 }
-                else
-                {
-                    _data = null;
-                }
-            }
-        }
-    }
 
-    public object? GetData(object key)
-    {
-        if (_data is Dictionary<object, object?> dataDictionary)
-        {
-            return dataDictionary.TryGetValue(key, out var value) ? value : null;
-        }
+                array = new AdditionalDataHolder[index + 1];
+                array[0].Data = _data;
+                _data = array;
+            }
 
-        return null;
-    }
-
-    public void SetData(object key, object? value)
-    {
-        if (value is not null)
-        {
-            if (_data is Dictionary<object, object?> dataDictionary)
-            {
-                dataDictionary[key] = value;
-            }
-            else if (_data is null)
-            {
-                _data = new Dictionary<object, object?>(capacity: 1)
-                {
-                    [key] = value,
-                };
-            }
-            else
-            {
-                _data = new Dictionary<object, object?>(capacity: 2)
-                {
-                    [s_internalDataKey] = _data,
-                    [key] = value,
-                };
-            }
-        }
-        else
-        {
-            if (_data is Dictionary<object, object?> dataDictionary)
-            {
-                dataDictionary.Remove(key);
-            }
-            else if (key is null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            array[index].Data = value;
         }
     }
 }
