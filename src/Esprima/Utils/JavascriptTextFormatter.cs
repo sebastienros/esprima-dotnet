@@ -280,12 +280,12 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
 
     protected void StoreStatementBodyIntoContext(Statement statement, ref WriteContext context)
     {
-        context._additionalDataSlot.InternalData = statement;
+        context._additionalDataSlot.PrimaryData = statement;
     }
 
     protected Statement RetrieveStatementBodyFromContext(ref WriteContext context)
     {
-        return (Statement) (context._additionalDataSlot.InternalData ?? throw new InvalidOperationException());
+        return (Statement) (context._additionalDataSlot.PrimaryData ?? throw new InvalidOperationException());
     }
 
     public override void StartStatement(StatementFlags flags, ref WriteContext context)

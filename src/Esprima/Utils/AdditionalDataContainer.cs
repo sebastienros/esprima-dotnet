@@ -1,76 +1,80 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Esprima.Utils;
 
-public sealed class AdditionalDataContainer
+// NOTE: We need an internal type to make our logic foolproof. (See the type check in AdditionalDataSlot.GetPrimaryDataRef method below.)
+internal struct AdditionalDataHolder
 {
-    private Dictionary<object, object>? _dictionary;
-
-    /// <summary>
-    /// Gets or sets user-defined data associated with the specified key.
-    /// </summary>
-    /// <remarks>
-    /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
-    /// </remarks>
-    public object? this[object key]
-    {
-        get => _dictionary is not null && _dictionary.TryGetValue(key, out var value) ? value : null;
-        set
-        {
-            if (value is not null)
-            {
-                (_dictionary ??= new Dictionary<object, object>())[key] = value;
-            }
-            else
-            {
-                _dictionary?.Remove(key);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets user-defined data object. (Can be used to avoid dictionary lookup in performance-critical scenarios.)
-    /// </summary>
-    public object? StaticData { get; set; }
-
-    internal object? InternalData { get; set; }
+    public object? Data;
 }
 
 internal struct AdditionalDataSlot
 {
     private object? _data;
 
-    internal object? InternalData
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ref object? GetPrimaryDataRef(ref AdditionalDataSlot slot)
     {
-        get => _data is AdditionalDataContainer container ? container.InternalData : _data;
+        return ref (slot._data is not AdditionalDataHolder[] array ? ref slot._data : ref array[0].Data);
+    }
+
+    public object? PrimaryData
+    {
+        get => GetPrimaryDataRef(ref this);
         set
         {
-            Debug.Assert(value is not AdditionalDataContainer, $"Value of type {value?.GetType()} is not allowed.");
-
-            if (_data is AdditionalDataContainer container)
-            {
-                container.InternalData = value;
-            }
-            else
-            {
-                // we can store an object without allocation until user data is set
-                _data = value;
-            }
+            Debug.Assert(value is not AdditionalDataHolder[], $"Value of type {typeof(AdditionalDataHolder[])} is not allowed.");
+            GetPrimaryDataRef(ref this) = value;
         }
     }
 
-    public AdditionalDataContainer GetOrCreateContainer()
+    public object? this[int index]
     {
-        if (_data is AdditionalDataContainer container)
+        get
         {
-            return container;
-        }
+            if (index == 0)
+            {
+                return GetPrimaryDataRef(ref this);
+            }
 
-        container = new AdditionalDataContainer
+            return _data is AdditionalDataHolder[] array && index < array.Length ? array[index].Data : null;
+        }
+        set
         {
-            InternalData = _data
-        };
-        _data = container;
-        return container;
+            if (index == 0)
+            {
+                Debug.Assert(value is not AdditionalDataHolder[], $"Value of type {typeof(AdditionalDataHolder[])} is not allowed.");
+                GetPrimaryDataRef(ref this) = value;
+                return;
+            }
+
+            if (_data is AdditionalDataHolder[] array)
+            {
+                if (index >= array.Length)
+                {
+                    if (value is null)
+                    {
+                        return;
+                    }
+
+                    Array.Resize(ref array, index + 1);
+                    _data = array;
+                }
+            }
+            else
+            {
+                if (value is null)
+                {
+                    return;
+                }
+
+                array = new AdditionalDataHolder[index + 1];
+                array[0].Data = _data;
+                _data = array;
+            }
+
+            array[index].Data = value;
+        }
     }
 }

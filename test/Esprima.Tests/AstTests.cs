@@ -48,10 +48,10 @@ public class AstTests
             // Save visited child nodes into parent's additional data.
             if (_parentNode is not null)
             {
-                var children = (List<Node>?) _parentNode.AdditionalData["Children"];
+                var children = (List<Node>?) _parentNode.AssociatedData;
                 if (children is null)
                 {
-                    _parentNode.AdditionalData["Children"] = children = new List<Node>();
+                    _parentNode.AssociatedData = children = new List<Node>();
                 }
                 children.Add(node);
             }
@@ -64,7 +64,7 @@ public class AstTests
             _parentNode = originalParentNode;
 
             // Verify that the list of visited children matches ChildNodes.
-            Assert.True(node.ChildNodes.SequenceEqualUnordered((IEnumerable<Node>?) node.AdditionalData["Children"] ?? Enumerable.Empty<Node>()));
+            Assert.True(node.ChildNodes.SequenceEqualUnordered((IEnumerable<Node>?) node.AssociatedData ?? Enumerable.Empty<Node>()));
 
             return result;
         }

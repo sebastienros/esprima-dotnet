@@ -94,15 +94,17 @@ partial class JavaScriptTextWriter
             SetNodeProperty(name ?? ThrowArgumentNullException<string>(nameof(name)), listValueAccessor ?? ThrowArgumentNullException<NodePropertyListValueAccessor<T>>(nameof(listValueAccessor)));
 
         /// <summary>
-        /// Gets the container of user-defined data.
+        /// Gets or sets the arbitrary, user-defined data object associated with the current <see cref="WriteContext"/>.
         /// </summary>
         /// <remarks>
         /// The operation is not guaranteed to be thread-safe. In case concurrent access or update is possible, the necessary synchronization is caller's responsibility.
         /// </remarks>
-        public AdditionalDataContainer AdditionalData
+        public object? AssociatedData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _additionalDataSlot.GetOrCreateContainer();
+            get => _additionalDataSlot[1];
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => _additionalDataSlot[1] = value;
         }
     }
 }

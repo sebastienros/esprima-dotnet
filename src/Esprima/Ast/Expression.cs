@@ -21,9 +21,9 @@ public abstract class Expression : StatementListItem, ISyntaxTreeRoot
     public IReadOnlyList<SyntaxToken>? Tokens
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (IReadOnlyList<SyntaxToken>?) AdditionalData[s_tokensAdditionalDataKey];
+        get => (IReadOnlyList<SyntaxToken>?) GetDynamicPropertyValue(TokensPropertyIndex);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => AdditionalData[s_tokensAdditionalDataKey] = value;
+        set => SetDynamicPropertyValue(TokensPropertyIndex, value);
     }
 
     /// <summary>
@@ -36,8 +36,8 @@ public abstract class Expression : StatementListItem, ISyntaxTreeRoot
     public IReadOnlyList<SyntaxComment>? Comments
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (IReadOnlyList<SyntaxComment>?) AdditionalData[s_commentsAdditionalDataKey];
+        get => (IReadOnlyList<SyntaxComment>?) GetDynamicPropertyValue(CommentsPropertyIndex);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => AdditionalData[s_commentsAdditionalDataKey] = value;
+        set => SetDynamicPropertyValue(CommentsPropertyIndex, value);
     }
 }

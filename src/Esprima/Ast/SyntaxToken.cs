@@ -4,6 +4,8 @@ namespace Esprima.Ast;
 
 public class SyntaxToken : SyntaxElement
 {
+    private const int RegexValuePropertyIndex = 1;
+
     public SyntaxToken(TokenType type, string value, RegexValue? regexValue = null)
     {
         Type = type;
@@ -19,9 +21,9 @@ public class SyntaxToken : SyntaxElement
     public RegexValue? RegexValue
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (RegexValue?) _additionalDataSlot.InternalData;
+        get => (RegexValue?) GetDynamicPropertyValue(RegexValuePropertyIndex);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private set => _additionalDataSlot.InternalData = value;
+        private set => SetDynamicPropertyValue(RegexValuePropertyIndex, value);
     }
 
     public override string ToString() => Value;
