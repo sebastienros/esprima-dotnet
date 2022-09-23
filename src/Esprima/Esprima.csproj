@@ -17,6 +17,9 @@
     <!-- to get switch over span -->
     <LangVersion>preview</LangVersion>
 
+    <!-- SkipLocalsInit -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
 
@@ -39,6 +42,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\Compatibility\IsExternalInit.cs" Link="Compatibility\IsExternalInit.cs" />
     <Compile Include="..\Shared\Compatibility\NullableAttributes.cs" Link="Compatibility\NullableAttributes.cs" />
+    <Compile Include="..\Shared\Compatibility\SkipLocalsInitAttribute.cs" Link="Compatibility\SkipLocalsInitAttribute.cs" />
   </ItemGroup>
 
   <!-- For checking generated output-->
