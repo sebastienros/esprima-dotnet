@@ -7,12 +7,18 @@
     <LangVersion>latest</LangVersion>
     <AssemblyOriginatorKeyFile>../../src/Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\test\Esprima.Tests\Fixtures\3rdparty\**" CopyToOutputDirectory="PreserveNewest" LinkBase="3rdparty" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\test\Esprima.Tests\CharMaskGeneratorTest.cs" Link="CharMaskGeneratorTest.cs" />
   </ItemGroup>
 </Project>
