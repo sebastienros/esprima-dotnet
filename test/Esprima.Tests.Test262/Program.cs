@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Spectre.Console;
 using Test262Harness;
@@ -23,9 +24,10 @@ public static class Program
             .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("#"))
         );
 
-        // this should be same in both Test262Harness.settings.json and here
-        const string Sha = "53d6cd6d463df461e1c506e0d2be4e36de0ef6fa";
-        var stream = await Test262StreamExtensions.FromGitHub(Sha);
+        var serializerOptions = new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip };
+        var settings = JsonSerializer.Deserialize<Dictionary<string, object>>(await File.ReadAllTextAsync("Test262Harness.settings.json"), serializerOptions)!;
+        var sha = settings["SuiteGitSha"].ToString()!;
+        var stream = await Test262StreamExtensions.FromGitHub(sha);
 
         // we materialize to give better feedback on progress
         var test262Files = new ConcurrentBag<Test262File>();
