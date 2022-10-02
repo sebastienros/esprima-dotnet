@@ -2547,93 +2547,68 @@ public sealed partial class Scanner
         return ScanPunctuator();
     }
 
-    public RegexOptions ParseRegexOptions(string flags)
+    [Flags]
+    private enum RegexFlags
     {
-        var isGlobal = false;
-        var multiline = false;
-        var ignoreCase = false;
-        var unicode = false;
-        var sticky = false;
-        var dotAll = false;
+        None = 0,
+        Global = 1,
+        Multiline = 2,
+        IgnoreCase = 4,
+        Unicode = 8,
+        Sticky = 16,
+        DotAll = 32,
+        Indices = 64,
+        UnicodeSets = 128
+    }
 
-        for (var k = 0; k < flags.Length; k++)
+    public RegexOptions ParseRegexOptions(string input)
+    {
+        var flags = RegexFlags.None;
+        foreach (var c in input)
         {
-            var c = flags[k];
-            if (c == 'g')
+            var flag = c switch
             {
-                if (isGlobal)
-                {
-                    ThrowUnexpectedToken(Messages.InvalidRegExp);
-                }
+                'g' => RegexFlags.Global,
+                'i' => RegexFlags.IgnoreCase,
+                'm' => RegexFlags.Multiline,
+                'u' => RegexFlags.Unicode,
+                'y' => RegexFlags.Sticky,
+                's' => RegexFlags.DotAll,
+                'd' => RegexFlags.Indices,
+                'v' => RegexFlags.UnicodeSets,
+                _ => RegexFlags.None
+            };
 
-                isGlobal = true;
-            }
-            else if (c == 'i')
+            if (flag == RegexFlags.None || (flags & flag) != 0)
             {
-                if (ignoreCase)
-                {
-                    ThrowUnexpectedToken(Messages.InvalidRegExp);
-                }
+                // unknown or already set
+                ThrowUnexpectedToken(Messages.InvalidRegExpFlags);
+            }
 
-                ignoreCase = true;
-            }
-            else if (c == 'm')
-            {
-                if (multiline)
-                {
-                    ThrowUnexpectedToken(Messages.InvalidRegExp);
-                }
+            flags |= flag;
+        }
 
-                multiline = true;
-            }
-            else if (c == 'u')
-            {
-                if (unicode)
-                {
-                    ThrowUnexpectedToken(Messages.InvalidRegExp);
-                }
-
-                unicode = true;
-            }
-            else if (c == 'y')
-            {
-                if (sticky)
-                {
-                    ThrowUnexpectedToken(Messages.InvalidRegExp);
-                }
-
-                sticky = true;
-            }
-            else if (c == 's')
-            {
-                if (dotAll)
-                {
-                    ThrowUnexpectedToken(Messages.InvalidRegExp);
-                }
-
-                dotAll = true;
-            }
-            else
-            {
-                ThrowUnexpectedToken(Messages.InvalidRegExp);
-            }
+        if ((flags & RegexFlags.Unicode) != 0 && (flags & RegexFlags.UnicodeSets) != 0)
+        {
+            // cannot have them both
+            ThrowUnexpectedToken(Messages.InvalidRegExpFlags);
         }
 
         var options = RegexOptions.ECMAScript;
 
-        if (multiline)
+        if ((flags & RegexFlags.Multiline) != 0)
         {
             options |= RegexOptions.Multiline;
         }
 
-        if (dotAll)
+        if ((flags & RegexFlags.DotAll) != 0)
         {
-            // cannot use ECMA mode with singe line
+            // cannot use ECMA mode with single line
             options |= RegexOptions.Singleline;
             options &= ~RegexOptions.ECMAScript;
         }
 
-        if (ignoreCase)
+        if ((flags & RegexFlags.IgnoreCase) != 0)
         {
             options |= RegexOptions.IgnoreCase;
         }
