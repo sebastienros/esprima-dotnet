@@ -78,52 +78,26 @@ public partial class JavaScriptParser
         public StrongBox<Token>? FirstCoverInitializedNameError;
     }
 
-    // cache frequently called Func so we don't need to build Func<T> instances all the time
-    // can be revisited with NET 7 SDK where things have improved
-    private static readonly Func<JavaScriptParser, Expression> parseAssignmentExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseBinaryExpressionOperand;
-    private static readonly Func<JavaScriptParser, Expression> parseUnaryExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseNewExpression;
-    private static readonly Func<JavaScriptParser, Expression> parsePrimaryExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseGroupExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseArrayInitializer;
-    private static readonly Func<JavaScriptParser, Expression> parseObjectInitializer;
-    private static readonly Func<JavaScriptParser, Expression> parseBinaryExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseLeftHandSideExpression;
-    private static readonly Func<JavaScriptParser, Expression> parseLeftHandSideExpressionAllowCall;
-    private static readonly Func<JavaScriptParser, Statement> parseStatement;
-    private static readonly Func<JavaScriptParser, BlockStatement> parseFunctionSourceElements;
-    private static readonly Func<JavaScriptParser, Expression> parseAsyncArgument;
-
-    static JavaScriptParser()
-    {
-        var dummyInstance = new JavaScriptParser();
-
-        parseAssignmentExpression = BuildCachedDelegateFor(dummyInstance.ParseAssignmentExpression);
-        parseBinaryExpressionOperand = BuildCachedDelegateFor(dummyInstance.ParseBinaryExpressionOperand);
-        parseUnaryExpression = BuildCachedDelegateFor(dummyInstance.ParseUnaryExpression);
-        parseExpression = BuildCachedDelegateFor(dummyInstance.ParseExpression);
-        parseNewExpression = BuildCachedDelegateFor(dummyInstance.ParseNewExpression);
-        parsePrimaryExpression = BuildCachedDelegateFor(dummyInstance.ParsePrimaryExpression);
-        parseGroupExpression = BuildCachedDelegateFor(dummyInstance.ParseGroupExpression);
-        parseArrayInitializer = BuildCachedDelegateFor(dummyInstance.ParseArrayInitializer);
-        parseObjectInitializer = BuildCachedDelegateFor(dummyInstance.ParseObjectInitializer);
-        parseBinaryExpression = BuildCachedDelegateFor(dummyInstance.ParseBinaryExpression);
-        parseLeftHandSideExpression = BuildCachedDelegateFor(dummyInstance.ParseLeftHandSideExpression);
-        parseLeftHandSideExpressionAllowCall = BuildCachedDelegateFor(dummyInstance.ParseLeftHandSideExpressionAllowCall);
-        parseStatement = BuildCachedDelegateFor(dummyInstance.ParseStatement);
-        parseFunctionSourceElements = BuildCachedDelegateFor(dummyInstance.ParseFunctionSourceElements);
-        parseAsyncArgument = BuildCachedDelegateFor(dummyInstance.ParseAsyncArgument);
-
-        static Func<JavaScriptParser, T> BuildCachedDelegateFor<T>(Func<T> func)
-        {
-            return (Func<JavaScriptParser, T>) Delegate.CreateDelegate(typeof(Func<JavaScriptParser, T>), null, func.Method);
-        }
-    }
-
     [StringMatcher("=", "*=", "**=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "&&=", "||=", "??=")]
     private static partial bool IsAssignmentOperator(string id);
+
+    // cache frequently called Func so we don't need to build Func<T> instances all the time
+    // can be revisited with NET 7 SDK where things have improved
+    private readonly Func<Expression> _parseAssignmentExpression;
+    private readonly Func<Expression> _parseBinaryExpressionOperand;
+    private readonly Func<Expression> _parseUnaryExpression;
+    private readonly Func<Expression> _parseExpression;
+    private readonly Func<Expression> _parseNewExpression;
+    private readonly Func<Expression> _parsePrimaryExpression;
+    private readonly Func<Expression> _parseGroupExpression;
+    private readonly Func<Expression> _parseArrayInitializer;
+    private readonly Func<Expression> _parseObjectInitializer;
+    private readonly Func<Expression> _parseBinaryExpression;
+    private readonly Func<Expression> _parseLeftHandSideExpression;
+    private readonly Func<Expression> _parseLeftHandSideExpressionAllowCall;
+    private readonly Func<Statement> _parseStatement;
+    private readonly Func<BlockStatement> _parseFunctionSourceElements;
+    private readonly Func<Expression> _parseAsyncArgument;
 
     private protected Token _lookahead;
     private protected readonly Context _context;
@@ -171,6 +145,22 @@ public partial class JavaScriptParser
         _scanner = new Scanner(options);
 
         _context = new Context();
+
+        _parseAssignmentExpression = ParseAssignmentExpression;
+        _parseBinaryExpressionOperand = ParseBinaryExpressionOperand;
+        _parseUnaryExpression = ParseUnaryExpression;
+        _parseExpression = ParseExpression;
+        _parseNewExpression = ParseNewExpression;
+        _parsePrimaryExpression = ParsePrimaryExpression;
+        _parseGroupExpression = ParseGroupExpression;
+        _parseArrayInitializer = ParseArrayInitializer;
+        _parseObjectInitializer = ParseObjectInitializer;
+        _parseBinaryExpression = ParseBinaryExpression;
+        _parseLeftHandSideExpression = ParseLeftHandSideExpression;
+        _parseLeftHandSideExpressionAllowCall = ParseLeftHandSideExpressionAllowCall;
+        _parseStatement = ParseStatement;
+        _parseFunctionSourceElements = ParseFunctionSourceElements;
+        _parseAsyncArgument = ParseAsyncArgument;
     }
 
     private void Reset(string code, string? source)
@@ -611,7 +601,7 @@ public partial class JavaScriptParser
     // the flags outside of the parser. This means the production the parser parses is used as a part of a potential
     // pattern. The CoverInitializedName check is deferred.
 
-    private T IsolateCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction) where T : Node
+    private T IsolateCoverGrammar<T>(Func<T> parseFunction) where T : Node
     {
         var previousIsBindingElement = _context.IsBindingElement;
         var previousIsAssignmentTarget = _context.IsAssignmentTarget;
@@ -621,7 +611,7 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = true;
         _context.FirstCoverInitializedNameError = null;
 
-        var result = parseFunction(this);
+        var result = parseFunction();
         if (_context.FirstCoverInitializedNameError is not null)
         {
             ThrowUnexpectedToken(_context.FirstCoverInitializedNameError.Value);
@@ -635,7 +625,7 @@ public partial class JavaScriptParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private T InheritCoverGrammar<T>(Func<JavaScriptParser, T> parseFunction) where T : Node
+    private T InheritCoverGrammar<T>(Func<T> parseFunction) where T : Node
     {
         var previousIsBindingElement = _context.IsBindingElement;
         var previousIsAssignmentTarget = _context.IsAssignmentTarget;
@@ -645,7 +635,7 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = true;
         _context.FirstCoverInitializedNameError = null;
 
-        var result = parseFunction(this);
+        var result = parseFunction();
 
         _context.IsBindingElement = _context.IsBindingElement && previousIsBindingElement;
         _context.IsAssignmentTarget = _context.IsAssignmentTarget && previousIsAssignmentTarget;
@@ -750,13 +740,13 @@ public partial class JavaScriptParser
                 {
                     case "(":
                         _context.IsBindingElement = false;
-                        expr = InheritCoverGrammar(parseGroupExpression);
+                        expr = InheritCoverGrammar(_parseGroupExpression);
                         break;
                     case "[":
-                        expr = InheritCoverGrammar(parseArrayInitializer);
+                        expr = InheritCoverGrammar(_parseArrayInitializer);
                         break;
                     case "{":
-                        expr = InheritCoverGrammar(parseObjectInitializer);
+                        expr = InheritCoverGrammar(_parseObjectInitializer);
                         break;
                     case "/":
                     case "/=":
@@ -887,7 +877,7 @@ public partial class JavaScriptParser
     {
         var node = CreateNode();
         Expect("...");
-        var arg = InheritCoverGrammar(parseAssignmentExpression);
+        var arg = InheritCoverGrammar(_parseAssignmentExpression);
         return Finalize(node, new SpreadElement(arg));
     }
 
@@ -919,7 +909,7 @@ public partial class JavaScriptParser
             }
             else
             {
-                elements.Add(InheritCoverGrammar(parseAssignmentExpression));
+                elements.Add(InheritCoverGrammar(_parseAssignmentExpression));
 
                 if (!Match("]"))
                 {
@@ -943,7 +933,7 @@ public partial class JavaScriptParser
         var previousStrict = _context.Strict;
         var previousAllowStrictDirective = _context.AllowStrictDirective;
         _context.AllowStrictDirective = parameters.Simple;
-        var body = IsolateCoverGrammar(parseFunctionSourceElements);
+        var body = IsolateCoverGrammar(_parseFunctionSourceElements);
         hasStrictDirective = _context.Strict;
         if (_context.Strict && parameters.FirstRestricted != null)
         {
@@ -1024,7 +1014,7 @@ public partial class JavaScriptParser
             case TokenType.Punctuator:
                 if ("[".Equals(token.Value))
                 {
-                    key = IsolateCoverGrammar(parseAssignmentExpression);
+                    key = IsolateCoverGrammar(_parseAssignmentExpression);
                     Expect("]");
                 }
                 else
@@ -1161,7 +1151,7 @@ public partial class JavaScriptParser
                 }
 
                 NextToken();
-                value = InheritCoverGrammar(parseAssignmentExpression);
+                value = InheritCoverGrammar(_parseAssignmentExpression);
             }
             else if (Match("("))
             {
@@ -1179,7 +1169,7 @@ public partial class JavaScriptParser
                     _context.FirstCoverInitializedNameError = new StrongBox<Token>(_lookahead);
                     NextToken();
                     shorthand = true;
-                    var init = IsolateCoverGrammar(parseAssignmentExpression);
+                    var init = IsolateCoverGrammar(_parseAssignmentExpression);
                     value = Finalize(node, new AssignmentPattern(id, init));
                 }
                 else
@@ -1398,7 +1388,7 @@ public partial class JavaScriptParser
             {
                 var arrow = false;
                 _context.IsBindingElement = true;
-                expr = InheritCoverGrammar(parseAssignmentExpression);
+                expr = InheritCoverGrammar(_parseAssignmentExpression);
 
                 if (Match(","))
                 {
@@ -1510,7 +1500,7 @@ public partial class JavaScriptParser
             }
             else
             {
-                expressions.Add(InheritCoverGrammar(parseAssignmentExpression));
+                expressions.Add(InheritCoverGrammar(_parseAssignmentExpression));
             }
         }
 
@@ -1536,7 +1526,7 @@ public partial class JavaScriptParser
             {
                 var expr = Match("...")
                     ? ParseSpreadElement()
-                    : IsolateCoverGrammar(parseAssignmentExpression);
+                    : IsolateCoverGrammar(_parseAssignmentExpression);
 
                 args.Add(expr);
                 if (Match(")"))
@@ -1630,7 +1620,7 @@ public partial class JavaScriptParser
         }
         else
         {
-            var callee = IsolateCoverGrammar(parseLeftHandSideExpression);
+            var callee = IsolateCoverGrammar(_parseLeftHandSideExpression);
             var args = Match("(") ? ParseArguments() : new NodeList<Expression>();
             expr = new NewExpression(callee, args);
             _context.IsAssignmentTarget = false;
@@ -1656,7 +1646,7 @@ public partial class JavaScriptParser
         {
             while (true)
             {
-                var expr = Match("...") ? ParseSpreadElement() : IsolateCoverGrammar(parseAsyncArgument);
+                var expr = Match("...") ? ParseSpreadElement() : IsolateCoverGrammar(_parseAsyncArgument);
                 args.Add(expr);
                 if (Match(")"))
                 {
@@ -1789,8 +1779,8 @@ public partial class JavaScriptParser
         else
         {
             expr = MatchKeyword("new")
-                ? InheritCoverGrammar(parseNewExpression)
-                : InheritCoverGrammar(parsePrimaryExpression);
+                ? InheritCoverGrammar(_parseNewExpression)
+                : InheritCoverGrammar(_parsePrimaryExpression);
         }
 
         if (isSuper && !_context.AllowSuper)
@@ -1818,7 +1808,7 @@ public partial class JavaScriptParser
                 _context.IsBindingElement = false;
                 _context.IsAssignmentTarget = !optional;
                 Expect("[");
-                var property = IsolateCoverGrammar(parseExpression);
+                var property = IsolateCoverGrammar(_parseExpression);
                 Expect("]");
                 expr = Finalize(startMarker, new ComputedMemberExpression(expr, property, optional));
             }
@@ -1914,8 +1904,8 @@ public partial class JavaScriptParser
         var expr = MatchKeyword("super") && _context.InFunctionBody
             ? ParseSuper()
             : MatchKeyword("new")
-                ? InheritCoverGrammar(parseNewExpression)
-                : InheritCoverGrammar(parsePrimaryExpression);
+                ? InheritCoverGrammar(_parseNewExpression)
+                : InheritCoverGrammar(_parsePrimaryExpression);
 
         var hasOptional = false;
         while (true)
@@ -1933,7 +1923,7 @@ public partial class JavaScriptParser
                 _context.IsBindingElement = false;
                 _context.IsAssignmentTarget = !optional;
                 Expect("[");
-                var property = IsolateCoverGrammar(parseExpression);
+                var property = IsolateCoverGrammar(_parseExpression);
                 Expect("]");
                 expr = Finalize(startMarker, new ComputedMemberExpression(expr, property, optional));
             }
@@ -1993,7 +1983,7 @@ public partial class JavaScriptParser
         }
         else
         {
-            expr = InheritCoverGrammar(parseLeftHandSideExpressionAllowCall);
+            expr = InheritCoverGrammar(_parseLeftHandSideExpressionAllowCall);
             if (!_hasLineTerminator && _lookahead.Type == TokenType.Punctuator && (Match("++") || Match("--")))
             {
                 expr = ParsePostfixUnaryExpression(expr, startMarker);
@@ -2025,7 +2015,7 @@ public partial class JavaScriptParser
     private Expression ParsePrefixUnaryExpression(in Marker marker)
     {
         var token = NextToken();
-        var expr = InheritCoverGrammar(parseUnaryExpression);
+        var expr = InheritCoverGrammar(_parseUnaryExpression);
         if (_context.Strict && expr.Type == Nodes.Identifier && Scanner.IsRestrictedWord(expr.As<Identifier>().Name))
         {
             TolerateError(Messages.StrictLHSPrefix);
@@ -2074,7 +2064,7 @@ public partial class JavaScriptParser
     {
         var startMarker = StartNode(_lookahead);
         var token = NextToken();
-        var expr = InheritCoverGrammar(parseUnaryExpression);
+        var expr = InheritCoverGrammar(_parseUnaryExpression);
         var unaryExpr = Finalize(startMarker, new UnaryExpression((string) token.Value!, expr));
         if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument.Type == Nodes.Identifier)
         {
@@ -2107,7 +2097,7 @@ public partial class JavaScriptParser
         var startMarker = StartNode(_lookahead);
 
         var isLeftParenthesized = this.Match("(");
-        var expr = InheritCoverGrammar(parseUnaryExpression);
+        var expr = InheritCoverGrammar(_parseUnaryExpression);
 
         var exponentAllowed = expr.Type != Nodes.UnaryExpression || isLeftParenthesized;
 
@@ -2124,7 +2114,7 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
         var left = expr;
-        var right = IsolateCoverGrammar(parseBinaryExpressionOperand);
+        var right = IsolateCoverGrammar(_parseBinaryExpressionOperand);
         return Finalize(marker, CreateBinaryExpression("**", left, right));
     }
 
@@ -2231,7 +2221,7 @@ public partial class JavaScriptParser
     {
         var startToken = _lookahead;
 
-        var expr = InheritCoverGrammar(parseBinaryExpressionOperand);
+        var expr = InheritCoverGrammar(_parseBinaryExpressionOperand);
 
         var allowAndOr = true;
         var allowNullishCoalescing = true;
@@ -2268,7 +2258,7 @@ public partial class JavaScriptParser
             markers.Push(_lookahead);
 
             var left = expr;
-            var right = IsolateCoverGrammar(parseBinaryExpressionOperand);
+            var right = IsolateCoverGrammar(_parseBinaryExpressionOperand);
 
             var stack = _sharedStack ?? new ArrayList<object>(3);
             _sharedStack = null;
@@ -2317,7 +2307,7 @@ public partial class JavaScriptParser
                 stack.Push(NextToken().Value!);
                 precedences.Push(prec);
                 markers.Push(_lookahead);
-                stack.Push(IsolateCoverGrammar(parseBinaryExpressionOperand));
+                stack.Push(IsolateCoverGrammar(_parseBinaryExpressionOperand));
             }
 
             // Final reduce to clean-up the stack.
@@ -2351,11 +2341,11 @@ public partial class JavaScriptParser
     {
         var previousAllowIn = _context.AllowIn;
         _context.AllowIn = true;
-        var consequent = IsolateCoverGrammar(parseAssignmentExpression);
+        var consequent = IsolateCoverGrammar(_parseAssignmentExpression);
         _context.AllowIn = previousAllowIn;
 
         Expect(":");
-        var alternate = IsolateCoverGrammar(parseAssignmentExpression);
+        var alternate = IsolateCoverGrammar(_parseAssignmentExpression);
 
         var conditionalExpression = Finalize(marker, new ConditionalExpression(expr, consequent, alternate));
         _context.IsAssignmentTarget = false;
@@ -2499,7 +2489,7 @@ public partial class JavaScriptParser
         {
             var token = _lookahead;
 
-            expr = InheritCoverGrammar(parseBinaryExpression);
+            expr = InheritCoverGrammar(_parseBinaryExpression);
             if (ConsumeMatch("?"))
             {
                 expr = ParseConditionalExpression(expr, StartNode(token));
@@ -2557,7 +2547,7 @@ public partial class JavaScriptParser
                     }
                     else
                     {
-                        body = IsolateCoverGrammar(parseAssignmentExpression);
+                        body = IsolateCoverGrammar(_parseAssignmentExpression);
                     }
 
                     var expression = body.Type != Nodes.BlockStatement;
@@ -2618,7 +2608,7 @@ public partial class JavaScriptParser
                     }
 
                     var next = NextToken();
-                    var right = IsolateCoverGrammar(parseAssignmentExpression);
+                    var right = IsolateCoverGrammar(_parseAssignmentExpression);
                     expr = Finalize(StartNode(token), new AssignmentExpression((string) next.Value!, left, right));
                     _context.FirstCoverInitializedNameError = null;
                 }
@@ -2635,7 +2625,7 @@ public partial class JavaScriptParser
     private Expression ParseExpression()
     {
         var startToken = _lookahead;
-        var expr = IsolateCoverGrammar(parseAssignmentExpression);
+        var expr = IsolateCoverGrammar(_parseAssignmentExpression);
 
         if (Match(","))
         {
@@ -2649,7 +2639,7 @@ public partial class JavaScriptParser
                 }
 
                 NextToken();
-                expressions.Push(IsolateCoverGrammar(parseAssignmentExpression));
+                expressions.Push(IsolateCoverGrammar(_parseAssignmentExpression));
             }
 
             expr = Finalize(StartNode(startToken), new SequenceExpression(NodeList.From(ref expressions)));
@@ -2794,7 +2784,7 @@ public partial class JavaScriptParser
                 if (Match("="))
                 {
                     NextToken();
-                    init = IsolateCoverGrammar(parseAssignmentExpression);
+                    init = IsolateCoverGrammar(_parseAssignmentExpression);
                 }
                 else
                 {
@@ -2805,7 +2795,7 @@ public partial class JavaScriptParser
         else if (!inFor && id.Type != Nodes.Identifier || Match("="))
         {
             Expect("=");
-            init = IsolateCoverGrammar(parseAssignmentExpression);
+            init = IsolateCoverGrammar(_parseAssignmentExpression);
         }
 
         return Finalize(node, new VariableDeclarator(id, init));
@@ -3035,7 +3025,7 @@ public partial class JavaScriptParser
             NextToken();
             var previousAllowYield = _context.AllowYield;
             _context.AllowYield = true;
-            var right = IsolateCoverGrammar(parseAssignmentExpression);
+            var right = IsolateCoverGrammar(_parseAssignmentExpression);
             _context.AllowYield = previousAllowYield;
             pattern = Finalize(StartNode(startToken), new AssignmentPattern(pattern, right));
         }
@@ -3108,7 +3098,7 @@ public partial class JavaScriptParser
         if (Match("="))
         {
             NextToken();
-            init = IsolateCoverGrammar(parseAssignmentExpression);
+            init = IsolateCoverGrammar(_parseAssignmentExpression);
         }
         else if (id.Type != Nodes.Identifier && !inFor)
         {
@@ -3418,7 +3408,7 @@ public partial class JavaScriptParser
 
                 var previousAllowIn = _context.AllowIn;
                 _context.AllowIn = false;
-                init = InheritCoverGrammar(parseAssignmentExpression);
+                init = InheritCoverGrammar(_parseAssignmentExpression);
                 _context.AllowIn = previousAllowIn;
 
                 if (MatchKeyword("in"))
@@ -3469,7 +3459,7 @@ public partial class JavaScriptParser
                         while (Match(","))
                         {
                             NextToken();
-                            initSeq.Push(IsolateCoverGrammar(parseAssignmentExpression));
+                            initSeq.Push(IsolateCoverGrammar(_parseAssignmentExpression));
                         }
 
                         init = Finalize(StartNode(initStartToken), new SequenceExpression(NodeList.From(ref initSeq)));
@@ -3484,13 +3474,13 @@ public partial class JavaScriptParser
         {
             if (!Match(";"))
             {
-                test = IsolateCoverGrammar(parseExpression);
+                test = IsolateCoverGrammar(_parseExpression);
             }
 
             Expect(";");
             if (!Match(")"))
             {
-                update = IsolateCoverGrammar(parseExpression);
+                update = IsolateCoverGrammar(_parseExpression);
             }
         }
 
@@ -3508,7 +3498,7 @@ public partial class JavaScriptParser
 
             var previousInIteration = _context.InIteration;
             _context.InIteration = true;
-            body = IsolateCoverGrammar(parseStatement);
+            body = IsolateCoverGrammar(_parseStatement);
             _context.InIteration = previousInIteration;
         }
 
@@ -4606,7 +4596,7 @@ public partial class JavaScriptParser
         _context.AllowYield = true;
         _context.IsAsync = false;
 
-        var expression = IsolateCoverGrammar(parseLeftHandSideExpressionAllowCall);
+        var expression = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
         _context.Strict = previousStrict;
         _context.AllowYield = previousAllowYield;
         _context.IsAsync = previousIsAsync;
@@ -4776,7 +4766,7 @@ public partial class JavaScriptParser
                 if (Match("="))
                 {
                     NextToken();
-                    value = IsolateCoverGrammar(parseAssignmentExpression);
+                    value = IsolateCoverGrammar(_parseAssignmentExpression);
                 }
             }
         }
@@ -4905,7 +4895,7 @@ public partial class JavaScriptParser
         if (MatchKeyword("extends"))
         {
             NextToken();
-            superClass = IsolateCoverGrammar(parseLeftHandSideExpressionAllowCall);
+            superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
         }
 
         var classBody = ParseClassBody();
@@ -4950,7 +4940,7 @@ public partial class JavaScriptParser
         if (MatchKeyword("extends"))
         {
             NextToken();
-            superClass = IsolateCoverGrammar(parseLeftHandSideExpressionAllowCall);
+            superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
         }
 
         var classBody = ParseClassBody();
