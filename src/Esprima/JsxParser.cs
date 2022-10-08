@@ -296,9 +296,9 @@ public class JsxParser : JavaScriptParser
     {
     }
 
-    private protected override Expression ParsePrimaryExpression()
+    private protected override Expression? ParseExtensionExpression()
     {
-        return Match("<") ? ParseJsxRoot() : base.ParsePrimaryExpression();
+        return Match("<") ? ParseJsxRoot() : null;
     }
 
     private protected override bool IsStartOfExpression()
