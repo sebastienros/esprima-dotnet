@@ -111,7 +111,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
             returnType = "string";
         }*/
 
-        var typeModifiers = method.ContainingSymbol.DeclaredAccessibility.ToString().ToLower();
+        var typeModifiers = method.ContainingSymbol.DeclaredAccessibility.ToString().ToLowerInvariant();
         var containingType = method.ContainingType.Name;
         var modifiers = methodDeclarationSyntax.Modifiers.ToString();
         var inputType = method.Parameters.Single().Type.ToString();
