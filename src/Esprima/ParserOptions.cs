@@ -5,11 +5,11 @@ namespace Esprima;
 /// <summary>
 /// Parser options.
 /// </summary>
-public record class ParserOptions : IScannerOptions
+public record class ParserOptions
 {
     public static readonly ParserOptions Default = new();
 
-    internal readonly ScannerOptions _scannerOptions = new();
+    public ScannerOptions ScannerOptions { get; } = new();
 
     /// <summary>
     /// Gets or sets whether the tokens are included in the parsed tree, defaults to <see langword="false"/>.
@@ -19,27 +19,27 @@ public record class ParserOptions : IScannerOptions
     /// <summary>
     /// Gets or sets whether the comments are included in the parsed tree, defaults to <see langword="false"/>.
     /// </summary>
-    public bool Comments { get; init; }
+    public bool Comments { get => ScannerOptions._comments; init => ScannerOptions._comments = value; }
 
     /// <summary>
     /// Gets or sets whether the parser is tolerant to errors, defaults to <see langword="true"/>.
     /// </summary>
-    public bool Tolerant { get; init; } = true;
+    public bool Tolerant { get => ScannerOptions._tolerant; init => ScannerOptions._tolerant = value; }
 
     /// <summary>
     /// Gets or sets the <see cref="ErrorHandler"/> to use, defaults to <see cref="ErrorHandler.Default"/>.
     /// </summary>
-    public ErrorHandler ErrorHandler { get; init; } = ErrorHandler.Default;
+    public ErrorHandler ErrorHandler { get => ScannerOptions._errorHandler; init => ScannerOptions._errorHandler = value; }
 
     /// <summary>
     /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one, defaults to <see langword="true"/>.
     /// </summary>
-    public bool AdaptRegexp { get; init; } = true;
+    public bool AdaptRegexp { get => ScannerOptions._adaptRegexp; init => ScannerOptions._adaptRegexp = value; }
 
     /// <summary>
     /// Default timeout for created regexes, defaults to 10 seconds.
     /// </summary>
-    public TimeSpan RegexTimeout { get; init; } = TimeSpan.FromSeconds(10);
+    public TimeSpan RegexTimeout { get => ScannerOptions._regexTimeout; init => ScannerOptions._regexTimeout = value; }
 
     /// <summary>
     /// The maximum depth of assignments allowed, defaults to 200.
@@ -57,7 +57,7 @@ public record class ParserOptions : IScannerOptions
     /// { 
     ///     foreach (var child in node.ChildNodes)
     ///     {
-    ///         child.AdditionalData["Parent"] = node;
+    ///         child.AdditionalData = node;
     ///     }
     /// };
     /// </code>
