@@ -21,7 +21,7 @@ public static class Program
         var allowListFile = Path.Combine(projectRoot, "allow-list.txt");
         var lines = File.Exists(allowListFile) ? await File.ReadAllLinesAsync(allowListFile) : Array.Empty<string>();
         var knownFailing = new HashSet<string>(lines
-            .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("#"))
+            .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("#", StringComparison.Ordinal))
         );
 
         var serializerOptions = new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip };

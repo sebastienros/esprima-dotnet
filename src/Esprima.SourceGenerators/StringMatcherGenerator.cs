@@ -57,7 +57,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
         static string CleanTarget(string s)
         {
             s = s.TrimStart('"');
-            if (s.EndsWith("\""))
+            if (s.EndsWith("\"", StringComparison.Ordinal))
             {
                 s = s.Substring(0, s.Length - 1);
             }
@@ -159,8 +159,8 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 sourceBuilder.Append(method.Modifiers).Append(" ").Append(method.ReturnType).Append(" ").Append(method.Name).Append("(").Append(method.InputType).AppendLine(" input)");
                 sourceBuilder.Append(indent).AppendLine("{");
 
-                var checkNull = method.InputType.EndsWith("?");
-                var returnString = method.ReturnType.StartsWith("string");
+                var checkNull = method.InputType.EndsWith("?", StringComparison.Ordinal);
+                var returnString = method.ReturnType.StartsWith("string", StringComparison.Ordinal);
                 var sourceIsSpan = method.InputType.Contains("Span");
 
                 sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, indent: "    ", indentionLevel: 2, checkNull, returnString, sourceIsSpan));

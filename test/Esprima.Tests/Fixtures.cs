@@ -89,7 +89,7 @@ public class Fixtures
         static T CreateParserOptions<T>(bool tolerant, bool adaptRegex) where T : ParserOptions, new() =>
             new T { Tokens = true, Tolerant = tolerant, AdaptRegexp = adaptRegex };
 
-        var (parserOptionsFactory, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX")
+        var (parserOptionsFactory, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX", StringComparison.Ordinal)
             ? (CreateParserOptions<JsxParserOptions>,
                 opts => new JsxParser((JsxParserOptions) opts),
                 JsxAstToJsonOptions.Default)
@@ -100,7 +100,7 @@ public class Fixtures
         string treeFilePath, failureFilePath, moduleFilePath;
         var jsFilePath = Path.Combine(GetFixturesPath(), FixturesDirName, fixture);
         var jsFileDirectoryName = Path.GetDirectoryName(jsFilePath)!;
-        if (jsFilePath.EndsWith(".source.js"))
+        if (jsFilePath.EndsWith(".source.js", StringComparison.Ordinal))
         {
             treeFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".tree.json";
             failureFilePath = Path.Combine(jsFileDirectoryName, Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(jsFilePath))) + ".failure.json";
@@ -114,7 +114,7 @@ public class Fixtures
         }
 
         var script = File.ReadAllText(jsFilePath);
-        if (jsFilePath.EndsWith(".source.js"))
+        if (jsFilePath.EndsWith(".source.js", StringComparison.Ordinal))
         {
             var parser = new JavaScriptParser();
             var program = parser.ParseScript(script);
