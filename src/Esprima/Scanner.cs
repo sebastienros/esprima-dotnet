@@ -85,7 +85,7 @@ public sealed partial class Scanner
         return ch - '0';
     }
 
-    internal Scanner(IScannerOptions options)
+    internal Scanner(ScannerOptions options)
     {
         if (options == null)
         {

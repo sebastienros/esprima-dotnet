@@ -142,7 +142,7 @@ public partial class JavaScriptParser
         _maxAssignmentDepth = options.MaxAssignmentDepth;
         _onNodeCreated = options.OnNodeCreated;
 
-        _scanner = new Scanner(options);
+        _scanner = new Scanner(options.ScannerOptions);
 
         _context = new Context();
 
