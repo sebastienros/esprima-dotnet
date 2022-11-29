@@ -2835,21 +2835,6 @@ namespace Esprima
             return Finalize(node, new IfStatement(test, consequent, alternate));
         }
 
-        // ADHOC: Object finalizer
-        private FinalizerStatement ParseFinalizer()
-        {
-            var node = CreateNode();
-            ExpectKeyword("finally");
-
-            var right = ParseExpression();
-            if (right.Type != Nodes.ArrowFunctionExpression && right.Type != Nodes.FunctionExpression)
-            {
-                return ThrowError<FinalizerStatement>("Expected finalizer body to be a function expression or arrow function.", _lookahead.Value);
-            }
-
-            return Finalize(node, new FinalizerStatement(right));
-        }
-
         // https://tc39.github.io/ecma262/#sec-do-while-statement
 
         private DoWhileStatement ParseDoWhileStatement()
@@ -3376,43 +3361,6 @@ namespace Esprima
             return Finalize(node, statement);
         }
 
-        // Adhoc
-        private UndefStatement ParseUndefStatement()
-        {
-            var node = CreateNode();
-            ExpectKeyword("undef");
-
-            if (_hasLineTerminator)
-            {
-                ThrowError(Messages.NewlineAfterThrow);
-            }
-
-
-            Token token = NextToken();
-            if (token.Type != TokenType.Identifier)
-                ThrowError("Undef must be identifiers");
-
-            string str = token.Value as string;
-
-            while (Match("::"))
-            {
-                NextToken();
-                if (_lookahead.Type == TokenType.Identifier)
-                {
-                    token = NextToken();
-                    str += $"::{token.Value as string}";
-                }
-                else
-                {
-                    ThrowUnexpectedToken(_lookahead);
-                }
-            }
-
-            ConsumeSemicolon();
-
-            return Finalize(node, new UndefStatement(str));
-        }
-
         // https://tc39.github.io/ecma262/#sec-throw-statement
 
         private ThrowStatement ParseThrowStatement()
@@ -3552,6 +3500,10 @@ namespace Esprima
                         case "break":
                             statement = ParseBreakStatement();
                             break;
+                        case "ctor":
+                            statement = ParseCtorStatement();
+                            break;
+
                         case "continue":
                             statement = ParseContinueStatement();
                             break;
@@ -3688,6 +3640,75 @@ namespace Esprima
             }
 
             options.ParamSetAdd(key);
+        }
+
+        /* ADHOC: MODULE_CONSTRUCTOR
+         * 
+         * Arbitrary syntax
+         * "ctor <identifier, attribute expression> { ... }"
+         * Real is probably "<variable> module { ... }" - Engine does not contain the "ctor" keyword in the list, so I don't know */
+        private Statement ParseCtorStatement()
+        {
+            var node = CreateNode();
+
+            NextToken();
+            var exp = IsolateCoverGrammar(parseLeftHandSideExpression);
+            var body = ParseStatement();
+
+            return Finalize(node, new ModuleConstructorStatement(exp, body));
+        }
+
+
+        // ADHOC: UNDEF 
+        private UndefStatement ParseUndefStatement()
+        {
+            var node = CreateNode();
+            ExpectKeyword("undef");
+
+            if (_hasLineTerminator)
+            {
+                ThrowError(Messages.NewlineAfterThrow);
+            }
+
+
+            Token token = NextToken();
+            if (token.Type != TokenType.Identifier)
+                ThrowError("Undef must be identifiers");
+
+            string str = token.Value as string;
+
+            while (Match("::"))
+            {
+                NextToken();
+                if (_lookahead.Type == TokenType.Identifier)
+                {
+                    token = NextToken();
+                    str += $"::{token.Value as string}";
+                }
+                else
+                {
+                    ThrowUnexpectedToken(_lookahead);
+                }
+            }
+
+            ConsumeSemicolon();
+
+            return Finalize(node, new UndefStatement(str));
+        }
+
+        // ADHOC: Object finalizer
+        private FinalizerStatement ParseFinalizer()
+        {
+            var node = CreateNode();
+            ExpectKeyword("finally");
+
+            var right = ParseExpression();
+            if (right.Type != Nodes.ArrowFunctionExpression && right.Type != Nodes.FunctionExpression)
+            {
+                return ThrowError<FinalizerStatement>("Expected finalizer body to be a function expression or arrow function.", _lookahead.Value);
+            }
+
+            return Finalize(node, new FinalizerStatement(right));
         }
 
         private void ValidateParam2(ParsedParameters options, Token param, string? name)

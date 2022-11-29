@@ -96,6 +96,7 @@ namespace Esprima
             "debugger",
             "instanceof",
             "undef", // ADHOC
+            "ctor", // ADHOC
         };
 
         private static readonly HashSet<string> StrictModeReservedWords = new()
@@ -841,12 +842,7 @@ namespace Esprima
                     break;
                 case '-': 
                     ++Index;
-                    if (Source[Index] == '>') // Adhoc object selector
-                    {
-                        ++Index;
-                        str = "->";
-                    }
-                    else if (Source[Index] == '-')
+                    if (Source[Index] == '-')
                     {
                         ++Index;
                         str = "--";
@@ -1400,6 +1396,15 @@ namespace Esprima
                     token.NumericValue = l;
                     token.NumericTokenType = NumericTokenType.Long;
                     token.Value = l;
+                }
+                else if (float.TryParse(
+                    number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,
+                    CultureInfo.InvariantCulture,
+                    out var f))
+                {
+                    token.NumericValue = f;
+                    token.NumericTokenType = NumericTokenType.Float;
+                    token.Value = f;
                 }
                 else if (double.TryParse(
                     number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign,

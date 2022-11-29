@@ -81,5 +81,6 @@
         UndefStatement,
         MethodExpression,
         SourceFileStatement,
+        ModuleConstructorStatement,
     };
 }
