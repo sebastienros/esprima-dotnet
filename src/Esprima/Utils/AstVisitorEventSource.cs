@@ -112,6 +112,8 @@ public class AstVisitorEventSource : AstVisitor
     public event EventHandler<Property>? VisitedProperty;
     public event EventHandler<PropertyDefinition>? VisitingPropertyDefinition;
     public event EventHandler<PropertyDefinition>? VisitedPropertyDefinition;
+    public event EventHandler<AccessorProperty>? VisitingAccessorProperty;
+    public event EventHandler<AccessorProperty>? VisitedAccessorProperty;
     public event EventHandler<RestElement>? VisitingRestElement;
     public event EventHandler<RestElement>? VisitedRestElement;
     public event EventHandler<ReturnStatement>? VisitingReturnStatement;
@@ -566,6 +568,14 @@ public class AstVisitorEventSource : AstVisitor
         VisitingPropertyDefinition?.Invoke(this, propertyDefinition);
         var result = base.VisitPropertyDefinition(propertyDefinition);
         VisitedPropertyDefinition?.Invoke(this, propertyDefinition);
+        return result;
+    }
+
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        VisitingAccessorProperty?.Invoke(this, accessorProperty);
+        var result = base.VisitAccessorProperty(accessorProperty);
+        VisitedAccessorProperty?.Invoke(this, accessorProperty);
         return result;
     }
 

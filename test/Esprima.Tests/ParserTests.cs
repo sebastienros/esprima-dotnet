@@ -555,4 +555,47 @@ block comment", comment.Value);
         Assert.Equal(new string[] { " c1 ", " c2" }, script.Comments!.Select(c => c.Value).ToArray());
         Assert.Equal(0, script.Comments![0].Range.Start);
     }
+
+    [Fact]
+    public void PropertyNamedAccessorIsStillValid()
+    {
+        var parser = new JavaScriptParser();
+        var program = parser.ParseModule(@"
+class aa {
+    static accessor = true;
+    accessor = true;
+    #accessor = true;
+}
+class bb {
+    static accessor() { };
+    accessor() { }
+    #accessor() { };
+}
+class cc {
+    static async accessor() { };
+    async accessor() { }
+    async #accessor() { };
+}");
+        var json = program.ToJsonString();
+        var expected = "{\"type\":\"Program\",\"body\":[{\"type\":\"ClassDeclaration\",\"id\":{\"type\":\"Identifier\",\"name\":\"aa\"},\"superClass\":null,\"body\":{\"type\":\"ClassBody\",\"body\":[{\"type\":\"PropertyDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"accessor\"},\"computed\":false,\"value\":{\"type\":\"Literal\",\"value\":true,\"raw\":\"true\"},\"kind\":\"property\",\"static\":true},{\"type\":\"PropertyDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"accessor\"},\"computed\":false,\"value\":{\"type\":\"Literal\",\"value\":true,\"raw\":\"true\"},\"kind\":\"property\",\"static\":false},{\"type\":\"PropertyDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"#accessor\"},\"computed\":false,\"value\":{\"type\":\"Literal\",\"value\":true,\"raw\":\"true\"},\"kind\":\"property\",\"static\":false}]}},{\"type\":\"ClassDeclaration\",\"id\":{\"type\":\"Identifier\",\"name\":\"bb\"},\"superClass\":null,\"body\":{\"type\":\"ClassBody\",\"body\":[{\"type\":\"MethodDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"accessor\"},\"computed\":false,\"value\":{\"type\":\"FunctionExpression\",\"id\":null,\"params\":[],\"body\":{\"type\":\"BlockStatement\",\"body\":[]},\"generator\":false,\"expression\":false,\"strict\":true,\"async\":false},\"kind\":\"method\",\"static\":true},{\"type\":\"MethodDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"accessor\"},\"computed\":false,\"value\":{\"type\":\"FunctionExpression\",\"id\":null,\"params\":[],\"body\":{\"type\":\"BlockStatement\",\"body\":[]},\"generator\":false,\"expression\":false,\"strict\":true,\"async\":false},\"kind\":\"method\",\"static\":false},{\"type\":\"MethodDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"#accessor\"},\"computed\":false,\"value\":{\"type\":\"FunctionExpression\",\"id\":null,\"params\":[],\"body\":{\"type\":\"BlockStatement\",\"body\":[]},\"generator\":false,\"expression\":false,\"strict\":true,\"async\":false},\"kind\":\"method\",\"static\":false}]}},{\"type\":\"ClassDeclaration\",\"id\":{\"type\":\"Identifier\",\"name\":\"cc\"},\"superClass\":null,\"body\":{\"type\":\"ClassBody\",\"body\":[{\"type\":\"MethodDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"accessor\"},\"computed\":false,\"value\":{\"type\":\"FunctionExpression\",\"id\":null,\"params\":[],\"body\":{\"type\":\"BlockStatement\",\"body\":[]},\"generator\":false,\"expression\":false,\"strict\":true,\"async\":true},\"kind\":\"method\",\"static\":true},{\"type\":\"MethodDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"accessor\"},\"computed\":false,\"value\":{\"type\":\"FunctionExpression\",\"id\":null,\"params\":[],\"body\":{\"type\":\"BlockStatement\",\"body\":[]},\"generator\":false,\"expression\":false,\"strict\":true,\"async\":true},\"kind\":\"method\",\"static\":false},{\"type\":\"MethodDefinition\",\"key\":{\"type\":\"Identifier\",\"name\":\"#accessor\"},\"computed\":false,\"value\":{\"type\":\"FunctionExpression\",\"id\":null,\"params\":[],\"body\":{\"type\":\"BlockStatement\",\"body\":[]},\"generator\":false,\"expression\":false,\"strict\":true,\"async\":true},\"kind\":\"method\",\"static\":false}]}}],\"sourceType\":\"module\"}";
+
+        Assert.Equal(expected, json);
+    }
+
+    [Fact]
+    public void CanParseAccessorKeyword()
+    {
+        var parser = new JavaScriptParser();
+        var program = parser.ParseModule(@"
+class aa {
+    static accessor a = true;
+    accessor b = true;
+    accessor #c = true;
+}");
+
+        var json = program.ToJsonString();
+        var expected = "";
+
+        Assert.Equal(expected, json);
+    }
 }
