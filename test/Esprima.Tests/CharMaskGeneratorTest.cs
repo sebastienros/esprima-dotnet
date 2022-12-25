@@ -87,7 +87,6 @@ public class CharMaskGeneratorTest
                ch >= 'A' && ch <= 'Z' ||
                ch >= 'a' && ch <= 'z' ||
                ch == '\\' ||
-               ch == '#' ||
                ch >= 0x80 && NonAsciiIdentifierStart.IsMatch(ParserExtensions.CharToString(ch));
     }
 

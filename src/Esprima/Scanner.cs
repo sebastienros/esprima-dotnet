@@ -874,6 +874,7 @@ public sealed partial class Scanner
 
                 break;
 
+            case '#':
             case ')':
             case ';':
             case ',':
