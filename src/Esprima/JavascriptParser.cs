@@ -4635,6 +4635,7 @@ public partial class JavaScriptParser
         var isAsync = false;
         var isGenerator = false;
         var isPrivate = false;
+        var isAccessor = false;
 
         var decorators = ParseDecorators();
 
@@ -4726,6 +4727,18 @@ public partial class JavaScriptParser
                     }
                 }
             }
+        }
+
+        if (object.Equals(token.Value, "accessor") && (_lookahead.Type == TokenType.Identifier || object.Equals(_lookahead.Value, "#")))
+        {
+            isAccessor = true;
+            if (Match("#"))
+            {
+                isPrivate = true;
+                NextToken();
+                token = _lookahead;
+            }
+            key = ParseObjectPropertyKey(isPrivate);
         }
 
         var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
@@ -4836,6 +4849,12 @@ public partial class JavaScriptParser
 
                 kind = PropertyKind.Constructor;
             }
+        }
+
+        if (isAccessor)
+        {
+            ConsumeSemicolon();
+            return Finalize(node, new AccessorProperty(key!, computed, value!, isStatic, NodeList.From(ref decorators)));
         }
 
         if (kind == PropertyKind.Property)

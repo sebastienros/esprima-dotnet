@@ -13,7 +13,7 @@ public sealed class AccessorProperty : ClassProperty
         Expression? value,
         bool isStatic,
         in NodeList<Decorator> decorators)
-        : base(Nodes.PropertyDefinition, PropertyKind.Property, key, computed)
+        : base(Nodes.AccessorProperty, PropertyKind.Property, key, computed)
     {
         Value = value;
         Static = isStatic;
