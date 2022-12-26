@@ -3882,9 +3882,11 @@ public partial class JavaScriptParser
             case TokenType.Punctuator:
                 switch ((string?) _lookahead.Value)
                 {
+                    case "#!":
+                        ThrowUnexpectedToken(_lookahead);
+                        statement = null;
+                        break;
                     case "#":
-                        if ((string?) _lookahead.Value == "!")
-                            ThrowUnexpectedToken(_lookahead);
                         statement = MatchAsyncFunction() ? ParseFunctionDeclaration() : ParseLabelledStatement();                     
                         break;
                     case "{":

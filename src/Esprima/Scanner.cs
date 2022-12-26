@@ -875,6 +875,13 @@ public sealed partial class Scanner
                 break;
 
             case '#':
+                ++_index;
+                if (_source.Length >= _index + 1 && _source[_index] == '!')
+                {
+                    _index += 1;
+                    str = "#!";
+                }
+                break;
             case ')':
             case ';':
             case ',':
