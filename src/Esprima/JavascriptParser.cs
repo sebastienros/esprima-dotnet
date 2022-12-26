@@ -3882,6 +3882,11 @@ public partial class JavaScriptParser
             case TokenType.Punctuator:
                 switch ((string?) _lookahead.Value)
                 {
+                    case "#":
+                        if ((string?) _lookahead.Value == "!")
+                            ThrowUnexpectedToken(_lookahead);
+                        statement = MatchAsyncFunction() ? ParseFunctionDeclaration() : ParseLabelledStatement();                     
+                        break;
                     case "{":
                         statement = ParseBlock();
                         break;
@@ -4656,7 +4661,10 @@ public partial class JavaScriptParser
             if (Match("#"))
             {
                 isPrivate = true;
+                token = _lookahead;
                 NextToken();
+                if (token.End != _lookahead.Start)
+                    ThrowUnexpectedToken(_lookahead);
                 token = _lookahead;
             }
             key = ParseObjectPropertyKey(isPrivate);
@@ -4677,11 +4685,16 @@ public partial class JavaScriptParser
                     computed = Match("[");
                     if (Match("*"))
                     {
+                        isGenerator = true;
                         NextToken();
+                        computed = Match("[");
                         if (Match("#"))
                         {
                             isPrivate = true;
+                            token = _lookahead;
                             NextToken();
+                            if (token.End != _lookahead.Start)
+                                ThrowUnexpectedToken(_lookahead);
                             token = _lookahead;
                         }
                     }
@@ -4690,11 +4703,14 @@ public partial class JavaScriptParser
                         if (Match("#"))
                         {
                             isPrivate = true;
+                            token = _lookahead;
                             NextToken();
+                            if (token.End != _lookahead.Start)
+                                ThrowUnexpectedToken(_lookahead);
                             token = _lookahead;
                         }
-                        key = ParseObjectPropertyKey();
                     }
+                    key = ParseObjectPropertyKey();
                 }
                 else if (Match("{"))
                 {
@@ -4716,7 +4732,10 @@ public partial class JavaScriptParser
                     if (Match("#"))
                     {
                         isPrivate = true;
+                        token = _lookahead;
                         NextToken();
+                        if (token.End != _lookahead.Start)
+                            ThrowUnexpectedToken(_lookahead);
                     }
 
                     token = _lookahead;
@@ -4736,7 +4755,10 @@ public partial class JavaScriptParser
             if (Match("#"))
             {
                 isPrivate = true;
+                token = _lookahead;
                 NextToken();
+                if (token.End != _lookahead.Start)
+                    ThrowUnexpectedToken(_lookahead);
                 token = _lookahead;
             }
             key = ParseObjectPropertyKey(isPrivate);
@@ -4751,7 +4773,10 @@ public partial class JavaScriptParser
                 if (Match("#"))
                 {
                     isPrivate = true;
+                    token = _lookahead;
                     NextToken();
+                    if (token.End != _lookahead.Start)
+                        ThrowUnexpectedToken(_lookahead);
                     token = _lookahead;
                 }
                 computed = Match("[");
@@ -4765,7 +4790,10 @@ public partial class JavaScriptParser
                 if (Match("#"))
                 {
                     isPrivate = true;
+                    token = _lookahead;
                     NextToken();
+                    if (token.End != _lookahead.Start)
+                        ThrowUnexpectedToken(_lookahead);
                     token = _lookahead;
                 }
                 computed = Match("[");
@@ -4790,7 +4818,10 @@ public partial class JavaScriptParser
             if (Match("#"))
             {
                 isPrivate = true;
+                token = _lookahead;
                 NextToken();
+                if (token.End != _lookahead.Start)
+                    ThrowUnexpectedToken(_lookahead);
                 token = _lookahead;
             }
             computed = Match("[");
@@ -4827,7 +4858,7 @@ public partial class JavaScriptParser
 
         if (!computed)
         {
-            if (isStatic && IsPropertyKey(key!, "prototype"))
+            if (isStatic && !isPrivate && IsPropertyKey(key!, "prototype"))
             {
                 ThrowUnexpectedToken(token, Messages.StaticPrototype);
             }
