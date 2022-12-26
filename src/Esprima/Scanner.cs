@@ -2361,6 +2361,17 @@ public sealed partial class Scanner
             pattern = pattern.Replace("[^]", @"[\s\S]");
         }
 
+        if (pattern.Contains("--"))
+        {
+            pattern = pattern.Replace("--[", "-[");
+            var r = new Regex("--([^\\[\\]]*)");
+            pattern = r.Replace(pattern, "-[$1]"); //it should only be replaced when inside of a "[", but for this we need a regex parser.
+        }
+
+        if (pattern.Contains("?<$"))
+        {
+            pattern = pattern.Replace("?<$", "?<a");
+        }
 
         // .NET doesn't support [] which should not match any characters (inverse of [^])
         if (pattern.Contains("[]"))
