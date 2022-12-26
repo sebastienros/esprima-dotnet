@@ -68,6 +68,7 @@ public partial class JavaScriptParser
         public bool InIteration;
         public bool InSwitch;
         public bool InClassConstructor;
+        public bool InClassBody;
         public bool Strict;
         public bool AllowIdentifierEscape;
 
@@ -758,6 +759,8 @@ public partial class JavaScriptParser
                         expr = Finalize(node, new Literal(token.RegexValue!.Pattern, token.RegexValue.Flags, token.Value, raw));
                         break;
                     case "#":
+                        if (!_context.InClassBody)
+                            ThrowUnexpectedToken(_lookahead);
                         NextToken();
                         token = NextToken();
                         expr = Finalize(node, new PrivateIdentifier((string) token.Value!));
@@ -4926,7 +4929,10 @@ public partial class JavaScriptParser
     private ClassBody ParseClassBody()
     {
         var node = CreateNode();
+        var previousInClassBody = _context.InClassBody;
+        _context.InClassBody = true;
         var elementList = ParseClassElementList();
+        _context.InClassBody = previousInClassBody;
 
         return Finalize(node, new ClassBody(NodeList.From(ref elementList)));
     }
