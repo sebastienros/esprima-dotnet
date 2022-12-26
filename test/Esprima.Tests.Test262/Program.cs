@@ -27,7 +27,13 @@ public static class Program
         var serializerOptions = new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip };
         var settings = JsonSerializer.Deserialize<Dictionary<string, object>>(await File.ReadAllTextAsync("Test262Harness.settings.json"), serializerOptions)!;
         var sha = settings["SuiteGitSha"].ToString()!;
+        var excludedFeatures = ((JsonElement) settings["ExcludedFeatures"]).EnumerateArray().Select(x => x.ToString()).ToArray();
         var stream = await Test262StreamExtensions.FromGitHub(sha);
+
+        if (excludedFeatures.Length > 0)
+        {
+            AnsiConsole.MarkupLine("Features excluded: [yellow]{0}[/]", string.Join(", ", excludedFeatures));
+        }
 
         // we materialize to give better feedback on progress
         var test262Files = new ConcurrentBag<Test262File>();
@@ -74,7 +80,7 @@ public static class Program
                             parser.ParseModule(file.Program);
                         }
                     },
-                    IsIgnored = file => knownFailing.Contains(file.ToString()),
+                    IsIgnored = file => file.Features.IndexOfAny(excludedFeatures.AsSpan()) != -1 || knownFailing.Contains(file.ToString()),
                     IsParseError = exception => exception is ParserException,
                     ShouldThrow = file => file.NegativeTestCase?.Type == ExpectedErrorType.SyntaxError || file.NegativeTestCase?.Phase == TestingPhase.Parse,
                     OnTestExecuted = _ => testTask.Increment(1)
