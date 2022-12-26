@@ -958,6 +958,7 @@ public partial class JavaScriptParser
         var previousAllowYield = _context.AllowYield;
         _context.AllowYield = true;
         var parameters = ParseFormalParameters();
+        _context.AllowYield = !isGenerator;
         var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
         _context.AllowYield = previousAllowYield;
 
