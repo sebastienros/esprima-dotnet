@@ -4770,7 +4770,8 @@ public partial class JavaScriptParser
         }
 
         var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
-        if (token.Type == TokenType.Identifier)
+        if (token.Type == TokenType.Identifier ||
+            (token.Type == TokenType.Punctuator && (string?) token.Value != "*"))
         {
             if (lookaheadPropertyKey && (string?) token.Value == "get")
             {
@@ -4808,8 +4809,7 @@ public partial class JavaScriptParser
             else if (!Match("("))
             {
                 kind = PropertyKind.Property;
-                computed = false;
-
+                
                 if (Match("="))
                 {
                     NextToken();
@@ -4834,7 +4834,7 @@ public partial class JavaScriptParser
             value = ParseGeneratorMethod(isAsync);
             method = true;
         }
-
+        
         if (kind == PropertyKind.None && key != null)
         {
             if (Match("("))
