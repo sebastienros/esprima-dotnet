@@ -3,6 +3,7 @@
 // Error messages should be identical to V8.
 public static class Messages
 {
+    public const string ArgumentsNotAllowedInClassField = "'arguments' is not allowed in class field initializer or static initialization block";
     public const string AsyncFunctionInSingleStatementContext = "Async functions can only be declared at the top level or inside a block.";
     public const string BadGetterArity = "Getter must not have any formal parameters";
     public const string BadSetterArity = "Setter must have exactly one formal parameter";

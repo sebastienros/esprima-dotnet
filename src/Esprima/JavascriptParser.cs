@@ -4813,6 +4813,8 @@ public partial class JavaScriptParser
                 if (Match("="))
                 {
                     NextToken();
+                    if (_lookahead.Type == TokenType.Identifier && (string?)_lookahead.Value == "arguments")
+                        ThrowUnexpectedToken(token, Messages.ArgumentsNotAllowedInClassField);
                     value = IsolateCoverGrammar(_parseAssignmentExpression);
                 }
             }
