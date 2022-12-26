@@ -76,6 +76,7 @@ public enum Nodes
     ExportAllDeclaration,
     ExportDefaultDeclaration,
     ClassExpression,
+    AccessorProperty,
 
     Extension = int.MaxValue
 };

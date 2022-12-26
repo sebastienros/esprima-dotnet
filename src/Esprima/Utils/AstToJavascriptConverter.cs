@@ -1395,6 +1395,45 @@ WriteSource:
         return propertyDefinition;
     }
 
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        if (accessorProperty.Decorators.Count > 0)
+        {
+            _writeContext.SetNodeProperty(nameof(accessorProperty.Decorators), static node => ref node.As<AccessorProperty>().Decorators);
+            VisitAuxiliaryNodeList(accessorProperty.Decorators, separator: string.Empty);
+
+            _writeContext.ClearNodeProperty();
+        }
+
+        if (accessorProperty.Static)
+        {
+            _writeContext.SetNodeProperty(nameof(accessorProperty.Static), static node => node.As<AccessorProperty>().Static);
+            Writer.WriteKeyword("static", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+        }
+        else
+        {
+            Writer.SpaceRecommendedAfterLastToken();
+        }
+
+        Writer.WriteKeyword("accessor", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+
+        _writeContext.SetNodeProperty(nameof(accessorProperty.Key), static node => node.As<AccessorProperty>().Key);
+        VisitPropertyKey(accessorProperty.Key, accessorProperty.Computed, leadingBracketFlags: TokenFlags.LeadingSpaceRecommended);
+
+        if (accessorProperty.Value is not null)
+        {
+            _writeContext.ClearNodeProperty();
+            Writer.WritePunctuator("=", TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+
+            _writeContext.SetNodeProperty(nameof(accessorProperty.Value), static node => node.As<AccessorProperty>().Value);
+            VisitRootExpression(accessorProperty.Value, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(accessorProperty.Value)));
+        }
+
+        Writer.WritePunctuator(";", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref _writeContext);
+
+        return accessorProperty;
+    }
+
     protected internal override object? VisitRestElement(RestElement restElement)
     {
         _writeContext.SetNodeProperty(nameof(restElement.Argument), static node => node.As<RestElement>().Argument);

@@ -68,6 +68,7 @@ public partial class JavaScriptParser
         public bool InIteration;
         public bool InSwitch;
         public bool InClassConstructor;
+        public bool InClassBody;
         public bool Strict;
         public bool AllowIdentifierEscape;
 
@@ -758,6 +759,8 @@ public partial class JavaScriptParser
                         expr = Finalize(node, new Literal(token.RegexValue!.Pattern, token.RegexValue.Flags, token.Value, raw));
                         break;
                     case "#":
+                        if (!_context.InClassBody)
+                            ThrowUnexpectedToken(_lookahead);
                         NextToken();
                         token = NextToken();
                         expr = Finalize(node, new PrivateIdentifier((string) token.Value!));
@@ -958,6 +961,7 @@ public partial class JavaScriptParser
         var previousAllowYield = _context.AllowYield;
         _context.AllowYield = true;
         var parameters = ParseFormalParameters();
+        _context.AllowYield = !isGenerator;
         var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
         _context.AllowYield = previousAllowYield;
 
@@ -3881,6 +3885,13 @@ public partial class JavaScriptParser
             case TokenType.Punctuator:
                 switch ((string?) _lookahead.Value)
                 {
+                    case "#!":
+                        ThrowUnexpectedToken(_lookahead);
+                        statement = null;
+                        break;
+                    case "#":
+                        statement = MatchAsyncFunction() ? ParseFunctionDeclaration() : ParseLabelledStatement();                     
+                        break;
                     case "{":
                         statement = ParseBlock();
                         break;
@@ -4635,6 +4646,7 @@ public partial class JavaScriptParser
         var isAsync = false;
         var isGenerator = false;
         var isPrivate = false;
+        var isAccessor = false;
 
         var decorators = ParseDecorators();
 
@@ -4654,7 +4666,10 @@ public partial class JavaScriptParser
             if (Match("#"))
             {
                 isPrivate = true;
+                token = _lookahead;
                 NextToken();
+                if (token.End != _lookahead.Start)
+                    ThrowUnexpectedToken(_lookahead);
                 token = _lookahead;
             }
             key = ParseObjectPropertyKey(isPrivate);
@@ -4675,11 +4690,16 @@ public partial class JavaScriptParser
                     computed = Match("[");
                     if (Match("*"))
                     {
+                        isGenerator = true;
                         NextToken();
+                        computed = Match("[");
                         if (Match("#"))
                         {
                             isPrivate = true;
+                            token = _lookahead;
                             NextToken();
+                            if (token.End != _lookahead.Start)
+                                ThrowUnexpectedToken(_lookahead);
                             token = _lookahead;
                         }
                     }
@@ -4688,11 +4708,14 @@ public partial class JavaScriptParser
                         if (Match("#"))
                         {
                             isPrivate = true;
+                            token = _lookahead;
                             NextToken();
+                            if (token.End != _lookahead.Start)
+                                ThrowUnexpectedToken(_lookahead);
                             token = _lookahead;
                         }
-                        key = ParseObjectPropertyKey();
                     }
+                    key = ParseObjectPropertyKey();
                 }
                 else if (Match("{"))
                 {
@@ -4714,7 +4737,10 @@ public partial class JavaScriptParser
                     if (Match("#"))
                     {
                         isPrivate = true;
+                        token = _lookahead;
                         NextToken();
+                        if (token.End != _lookahead.Start)
+                            ThrowUnexpectedToken(_lookahead);
                     }
 
                     token = _lookahead;
@@ -4728,6 +4754,21 @@ public partial class JavaScriptParser
             }
         }
 
+        if (object.Equals(token.Value, "accessor") && (_lookahead.Type == TokenType.Identifier || object.Equals(_lookahead.Value, "#")))
+        {
+            isAccessor = true;
+            if (Match("#"))
+            {
+                isPrivate = true;
+                token = _lookahead;
+                NextToken();
+                if (token.End != _lookahead.Start)
+                    ThrowUnexpectedToken(_lookahead);
+                token = _lookahead;
+            }
+            key = ParseObjectPropertyKey(isPrivate);
+        }
+
         var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
         if (token.Type == TokenType.Identifier)
         {
@@ -4737,7 +4778,10 @@ public partial class JavaScriptParser
                 if (Match("#"))
                 {
                     isPrivate = true;
+                    token = _lookahead;
                     NextToken();
+                    if (token.End != _lookahead.Start)
+                        ThrowUnexpectedToken(_lookahead);
                     token = _lookahead;
                 }
                 computed = Match("[");
@@ -4751,7 +4795,10 @@ public partial class JavaScriptParser
                 if (Match("#"))
                 {
                     isPrivate = true;
+                    token = _lookahead;
                     NextToken();
+                    if (token.End != _lookahead.Start)
+                        ThrowUnexpectedToken(_lookahead);
                     token = _lookahead;
                 }
                 computed = Match("[");
@@ -4776,7 +4823,10 @@ public partial class JavaScriptParser
             if (Match("#"))
             {
                 isPrivate = true;
+                token = _lookahead;
                 NextToken();
+                if (token.End != _lookahead.Start)
+                    ThrowUnexpectedToken(_lookahead);
                 token = _lookahead;
             }
             computed = Match("[");
@@ -4813,7 +4863,7 @@ public partial class JavaScriptParser
 
         if (!computed)
         {
-            if (isStatic && IsPropertyKey(key!, "prototype"))
+            if (isStatic && !isPrivate && IsPropertyKey(key!, "prototype"))
             {
                 ThrowUnexpectedToken(token, Messages.StaticPrototype);
             }
@@ -4836,6 +4886,12 @@ public partial class JavaScriptParser
 
                 kind = PropertyKind.Constructor;
             }
+        }
+
+        if (isAccessor)
+        {
+            ConsumeSemicolon();
+            return Finalize(node, new AccessorProperty(key!, computed, value!, isStatic, NodeList.From(ref decorators)));
         }
 
         if (kind == PropertyKind.Property)
@@ -4873,7 +4929,10 @@ public partial class JavaScriptParser
     private ClassBody ParseClassBody()
     {
         var node = CreateNode();
+        var previousInClassBody = _context.InClassBody;
+        _context.InClassBody = true;
         var elementList = ParseClassElementList();
+        _context.InClassBody = previousInClassBody;
 
         return Finalize(node, new ClassBody(NodeList.From(ref elementList)));
     }

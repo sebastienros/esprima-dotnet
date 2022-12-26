@@ -411,6 +411,12 @@ sealed class TestRewriter : JsxAstRewriter
             node => new PropertyDefinition(node.Key, node.Computed, node.Value!, node.Static, node.Decorators));
     }
 
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        return ForceNewObjectByControlType((AccessorProperty) base.VisitAccessorProperty(accessorProperty)!,
+            node => new AccessorProperty(node.Key, node.Computed, node.Value!, node.Static, node.Decorators));
+    }
+
     protected internal override object? VisitChainExpression(ChainExpression chainExpression)
     {
         return ForceNewObjectByControlType((ChainExpression) base.VisitChainExpression(chainExpression)!,
