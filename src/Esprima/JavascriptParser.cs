@@ -2077,6 +2077,10 @@ public partial class JavaScriptParser
         {
             TolerateError(Messages.StrictDelete);
         }
+        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument is MemberExpression m && m.ChildNodes.Last() is PrivateIdentifier)
+        {
+            TolerateError(Messages.PrivateFieldNoDelete);
+        }
 
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;

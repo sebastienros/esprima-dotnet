@@ -49,6 +49,7 @@ public static class Messages
     public const string NumericSeparatorNotAllowedHere = "Numeric separator is not allowed here";
     public const string NumericSeparatorOneUnderscore = "Numeric separator must be exactly one underscore";
     public const string ParameterAfterRestParameter = "Rest parameter must be last formal parameter";
+    public const string PrivateFieldNoDelete = "Private fields can not be deleted";
     public const string PropertyAfterRestProperty = "Unexpected token";
     public const string Redeclaration = "{0} \"{1}\" has already been declared";
     public const string RegexIncompleteQuantifier = "Invalid regular expression: Incomplete quantifier";
