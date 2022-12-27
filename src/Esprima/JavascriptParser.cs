@@ -1702,7 +1702,7 @@ public partial class JavaScriptParser
             NextToken();
 
             if (!Match(")"))
-                attributes = ParseExpression();
+                attributes = ParseAssignmentExpression();
         }
 
         _context.IsAssignmentTarget = previousIsAssignmentTarget;
