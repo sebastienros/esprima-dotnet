@@ -1712,6 +1712,8 @@ public partial class JavaScriptParser
         }
         else
         {
+            if (Match(","))
+                NextToken();
             this.Expect(")");
         }
 
