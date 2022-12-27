@@ -1791,7 +1791,7 @@ public partial class JavaScriptParser
                 : InheritCoverGrammar(_parsePrimaryExpression);
         }
 
-        if (isSuper && !_context.AllowSuper)
+        if (isSuper && !_context.AllowSuper && (!_context.InClassConstructor || (string?) _lookahead.Value != "."))
         {
             TolerateError(Messages.UnexpectedSuper);
         }
@@ -4823,7 +4823,10 @@ public partial class JavaScriptParser
                     NextToken();
                     if (_lookahead.Type == TokenType.Identifier && (string?)_lookahead.Value == "arguments")
                         ThrowUnexpectedToken(token, Messages.ArgumentsNotAllowedInClassField);
+                    var previousAllowSuper = _context.AllowSuper;
+                    _context.AllowSuper = true;
                     value = IsolateCoverGrammar(_parseAssignmentExpression);
+                    _context.AllowSuper = previousAllowSuper;
                 }
             }
         }
@@ -4852,7 +4855,8 @@ public partial class JavaScriptParser
                 var previousAllowSuper = _context.AllowSuper;
                 var previousInClassConstructor = _context.InClassConstructor;
                 _context.InClassConstructor = Equals(token.Value, "constructor");
-                _context.AllowSuper = true;
+                if (!_context.InClassConstructor)
+                    _context.AllowSuper = true;
                 kind = PropertyKind.Init;
                 value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
                 _context.InClassConstructor = previousInClassConstructor;
@@ -4952,7 +4956,7 @@ public partial class JavaScriptParser
         var previousStrict = _context.Strict;
         var previousAllowSuper = _context.AllowSuper;
         _context.Strict = true;
-        _context.AllowSuper = true;
+        _context.AllowSuper = false;
 
         ExpectKeyword("class");
 
@@ -4965,6 +4969,7 @@ public partial class JavaScriptParser
         {
             NextToken();
             superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
+            _context.AllowSuper = true;
         }
 
         var classBody = ParseClassBody();
@@ -4998,7 +5003,7 @@ public partial class JavaScriptParser
         var previousStrict = _context.Strict;
         var previousAllowSuper = _context.AllowSuper;
         _context.Strict = true;
-        _context.AllowSuper = true;
+        _context.AllowSuper = false;
 
         ExpectKeyword("class");
         var id = _lookahead.Type == TokenType.Identifier
@@ -5010,6 +5015,7 @@ public partial class JavaScriptParser
         {
             NextToken();
             superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
+            _context.AllowSuper = true;
         }
 
         var classBody = ParseClassBody();
