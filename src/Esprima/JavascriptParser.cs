@@ -1700,8 +1700,9 @@ public partial class JavaScriptParser
         if (Match(","))
         {
             NextToken();
+
             if (!Match(")"))
-                attributes = ParseObjectInitializer();
+                attributes = ParseExpression();
         }
 
         _context.IsAssignmentTarget = previousIsAssignmentTarget;
