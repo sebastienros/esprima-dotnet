@@ -616,4 +616,34 @@ class X {
 
         Assert.Equal(expected, json);
     }
+
+    [Theory]
+    [InlineData("script", true)]
+    [InlineData("module", false)]
+    [InlineData("expression", false)]
+    public void ShouldParseTopLevelAwait(string sourceType, bool shouldThrow)
+    {
+        const string code = "await import('x')";
+
+        var parser = new JavaScriptParser();
+        Func<JavaScriptParser, Node> parseAction = sourceType switch
+        {
+            "script" => parser => parser.ParseScript(code),
+            "module" => parser => parser.ParseModule(code),
+            "expression" => parser => parser.ParseExpression(code),
+            _ => throw new InvalidOperationException()
+        };
+
+        if (!shouldThrow)
+        {
+            var node = parseAction(parser);
+            var awaitExpression = node.DescendantNodesAndSelf().OfType<AwaitExpression>().FirstOrDefault();
+            Assert.NotNull(awaitExpression);
+            Assert.IsType<Import>(awaitExpression.Argument);
+        }
+        else
+        {
+            Assert.Throws<ParserException>(() => parseAction(parser));
+        }
+    }
 }
