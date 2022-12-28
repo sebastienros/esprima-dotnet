@@ -4723,7 +4723,7 @@ public partial class JavaScriptParser
                             token = _lookahead;
                         }
                     }
-                    key = ParseObjectPropertyKey();
+                    key = ParseObjectPropertyKey(isPrivate);
                 }
                 else if (Match("{"))
                 {
