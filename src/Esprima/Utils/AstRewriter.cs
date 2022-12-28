@@ -64,6 +64,15 @@ public class AstRewriter : AstVisitor
         return false;
     }
 
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        VisitAndConvert(accessorProperty.Decorators, out var decorators);
+        var key = VisitAndConvert(accessorProperty.Key);
+        var value = VisitAndConvert(accessorProperty.Value, allowNull: true);
+
+        return accessorProperty.UpdateWith(key, value, decorators);
+    }
+
     protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
         VisitAndConvert(arrayExpression.Elements, out var elements, allowNullElement: true);
