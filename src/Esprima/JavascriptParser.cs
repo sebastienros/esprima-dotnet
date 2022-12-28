@@ -2059,6 +2059,11 @@ public partial class JavaScriptParser
         }
         else if (_context.IsAsync && MatchContextualKeyword("await"))
         {
+            if (_lookahead.End - _lookahead.Start != "await".Length)
+            {
+                TolerateUnexpectedToken(_lookahead, Messages.InvalidEscapedReservedWord);
+            }
+
             expr = ParseAwaitExpression();
         }
         else
