@@ -257,6 +257,24 @@ public class AstToJsonConverter : AstVisitor
         }
     }
 
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        using (StartNodeObject(accessorProperty))
+        {
+            Member("key", accessorProperty.Key);
+            Member("computed", accessorProperty.Computed);
+            Member("value", accessorProperty.Value);
+            Member("kind", accessorProperty.Kind);
+            Member("static", accessorProperty.Static);
+            if (accessorProperty.Decorators.Count > 0)
+            {
+                Member("decorators", accessorProperty.Decorators);
+            }
+        }
+
+        return accessorProperty;
+    }
+
     protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
         using (StartNodeObject(arrayExpression))
@@ -972,24 +990,6 @@ public class AstToJsonConverter : AstVisitor
         }
 
         return propertyDefinition;
-    }
-
-    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
-    {
-        using (StartNodeObject(accessorProperty))
-        {
-            Member("key", accessorProperty.Key);
-            Member("computed", accessorProperty.Computed);
-            Member("value", accessorProperty.Value);
-            Member("kind", accessorProperty.Kind);
-            Member("static", accessorProperty.Static);
-            if (accessorProperty.Decorators.Count > 0)
-            {
-                Member("decorators", accessorProperty.Decorators);
-            }
-        }
-
-        return accessorProperty;
     }
 
     protected internal override object? VisitRestElement(RestElement restElement)
