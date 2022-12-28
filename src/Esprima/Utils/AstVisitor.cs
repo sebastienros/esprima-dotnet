@@ -13,6 +13,24 @@ public class AstVisitor
         return node.Accept(this);
     }
 
+    protected internal virtual object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    {
+        ref readonly var decorators = ref accessorProperty.Decorators;
+        for (var i = 0; i < decorators.Count; i++)
+        {
+            Visit(decorators[i]);
+        }
+
+        Visit(accessorProperty.Key);
+
+        if (accessorProperty.Value is not null)
+        {
+            Visit(accessorProperty.Value);
+        }
+
+        return accessorProperty;
+    }
+
     protected internal virtual object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
         ref readonly var elements = ref arrayExpression.Elements;
@@ -600,24 +618,6 @@ public class AstVisitor
         }
 
         return propertyDefinition;
-    }
-
-    protected internal virtual object? VisitAccessorProperty(AccessorProperty accessorProperty)
-    {
-        ref readonly var decorators = ref accessorProperty.Decorators;
-        for (var i = 0; i < decorators.Count; i++)
-        {
-            Visit(decorators[i]);
-        }
-
-        Visit(accessorProperty.Key);
-
-        if (accessorProperty.Value is not null)
-        {
-            Visit(accessorProperty.Value);
-        }
-
-        return accessorProperty;
     }
 
     protected internal virtual object? VisitRestElement(RestElement restElement)
