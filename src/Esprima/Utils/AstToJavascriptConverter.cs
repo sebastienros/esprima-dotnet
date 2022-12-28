@@ -1409,6 +1409,8 @@ WriteSource:
         {
             _writeContext.SetNodeProperty(nameof(accessorProperty.Static), static node => node.As<AccessorProperty>().Static);
             Writer.WriteKeyword("static", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+
+            _writeContext.ClearNodeProperty();
         }
         else
         {
