@@ -2078,7 +2078,7 @@ public partial class JavaScriptParser
         {
             TolerateError(Messages.StrictDelete);
         }
-        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument is MemberExpression m && m.ChildNodes.Last() is PrivateIdentifier)
+        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument is MemberExpression m && m.Property is PrivateIdentifier)
         {
             TolerateError(Messages.PrivateFieldNoDelete);
         }
