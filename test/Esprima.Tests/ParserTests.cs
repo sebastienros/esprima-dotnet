@@ -598,4 +598,22 @@ class aa {
 
         Assert.Equal(expected, json);
     }
+
+    [Fact]
+    public void CanParsePrivateStaticClassMembers()
+    {
+        var parser = new JavaScriptParser();
+        var program = parser.ParseModule(@"
+class X {
+  static #privateField = 'super';
+  static #getPrivateField() {
+    return X.#privateField;
+  }
+}");
+
+        var json = program.ToJsonString();
+        var expected = "{\"type\":\"Program\",\"body\":[{\"type\":\"ClassDeclaration\",\"id\":{\"type\":\"Identifier\",\"name\":\"X\"},\"superClass\":null,\"body\":{\"type\":\"ClassBody\",\"body\":[{\"type\":\"PropertyDefinition\",\"key\":{\"type\":\"PrivateIdentifier\",\"name\":\"privateField\"},\"computed\":false,\"value\":{\"type\":\"Literal\",\"value\":\"super\",\"raw\":\"'super'\"},\"kind\":\"property\",\"static\":true},{\"type\":\"MethodDefinition\",\"key\":{\"type\":\"PrivateIdentifier\",\"name\":\"getPrivateField\"},\"computed\":false,\"value\":{\"type\":\"FunctionExpression\",\"id\":null,\"params\":[],\"body\":{\"type\":\"BlockStatement\",\"body\":[{\"type\":\"ReturnStatement\",\"argument\":{\"type\":\"MemberExpression\",\"computed\":false,\"object\":{\"type\":\"Identifier\",\"name\":\"X\"},\"property\":{\"type\":\"PrivateIdentifier\",\"name\":\"privateField\"},\"optional\":false}}]},\"generator\":false,\"expression\":false,\"strict\":true,\"async\":false},\"kind\":\"method\",\"static\":true}]}}],\"sourceType\":\"module\"}";
+
+        Assert.Equal(expected, json);
+    }
 }
