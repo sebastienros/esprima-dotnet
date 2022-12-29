@@ -619,7 +619,6 @@
       "ES6/identifier/estimated.js",
       "ES6/identifier/ethiopic_digits.js",
       "ES6/identifier/invalid_escaped_surrogate_pairs.js",
-      "ES6/identifier/invalid_expression_await.module.js",
       "ES6/identifier/invalid_function_await.module.js",
       "ES6/identifier/invalid_id_smp.js",
       "ES6/identifier/invalid_lone_surrogate.source.js",
@@ -629,7 +628,6 @@
       "ES6/identifier/math_dal_part.js",
       "ES6/identifier/math_kaf_lam.js",
       "ES6/identifier/math_zain_start.js",
-      "ES6/identifier/module_await.js",
       "ES6/identifier/valid_await.js",
       "ES6/identifier/weierstrass.js",
       "ES6/identifier/weierstrass_weierstrass.js",
@@ -1709,6 +1707,13 @@
     "files": [
       "expression/primary/literal/numeric/migrated_0003.js",
       "expression/primary/literal/regular-expression/migrated_0008.js"
+    ]
+  },
+  {
+    "flags": [ "EsprimaOrgFixture", "Skip" ],
+    "files": [
+      "ES6/identifier/invalid_expression_await.module.js",
+      "ES6/identifier/module_await.js"
     ]
   }
 ]

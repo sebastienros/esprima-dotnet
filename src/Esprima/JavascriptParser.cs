@@ -207,6 +207,7 @@ public partial class JavaScriptParser
         try
         {
             _context.Strict = true;
+            _context.IsAsync = true;
             _context.IsModule = true;
             _scanner._isModule = true;
 
@@ -675,7 +676,7 @@ public partial class JavaScriptParser
         switch (_lookahead.Type)
         {
             case TokenType.Identifier:
-                if ((_context.IsModule || _context.IsAsync) && "await".Equals(_lookahead.Value))
+                if (_context.IsAsync && "await".Equals(_lookahead.Value))
                 {
                     TolerateUnexpectedToken(_lookahead);
                 }
@@ -2058,6 +2059,11 @@ public partial class JavaScriptParser
         }
         else if (_context.IsAsync && MatchContextualKeyword("await"))
         {
+            if (_lookahead.End - _lookahead.Start != "await".Length)
+            {
+                TolerateUnexpectedToken(_lookahead, Messages.InvalidEscapedReservedWord);
+            }
+
             expr = ParseAwaitExpression();
         }
         else
@@ -2668,6 +2674,7 @@ public partial class JavaScriptParser
         Reset(code, source: null);
         try
         {
+            _context.IsAsync = true;
             return FinalizeRoot(ParseExpression());
         }
         finally
@@ -3079,7 +3086,7 @@ public partial class JavaScriptParser
                 }
             }
         }
-        else if ((_context.IsModule || _context.IsAsync) && !allowAwaitKeyword && token.Type == TokenType.Identifier && (string?) token.Value == "await")
+        else if (_context.IsAsync && !allowAwaitKeyword && token.Type == TokenType.Identifier && (string?) token.Value == "await")
         {
             TolerateUnexpectedToken(token);
         }

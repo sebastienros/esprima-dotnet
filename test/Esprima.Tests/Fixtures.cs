@@ -146,11 +146,14 @@ public class Fixtures
             metadata = FixtureMetadata.Default;
         }
 
+        if (metadata.Skip)
+        {
+            return;
+        }
+
         var parserOptions = parserOptionsFactory(false, !metadata.IgnoresRegex);
 
         var conversionOptions = metadata.CreateConversionOptions(conversionDefaultOptions);
-
-#pragma warning disable 162
         if (File.Exists(moduleFilePath))
         {
             sourceType = SourceType.Module;
@@ -182,7 +185,6 @@ public class Fixtures
                 if (!CompareTrees(actual, expected, metadata))
                     File.WriteAllText(failureFilePath, actual);
             }
-#pragma warning restore 162
         }
         else
         {
@@ -236,12 +238,15 @@ public class Fixtures
 
     private sealed class FixtureMetadata
     {
-        public static readonly FixtureMetadata Default = new FixtureMetadata(
-            testCompatibilityMode: AstToJsonTestCompatibilityMode.None,
-            includesLocation: true,
-            includesRange: true,
-            includesLocationSource: false,
-            ignoresRegex: false);
+        public static readonly FixtureMetadata Default = new()
+        {
+            TestCompatibilityMode = AstToJsonTestCompatibilityMode.None,
+            IncludesLocation = true,
+            IncludesRange = true,
+            IncludesLocationSource = false,
+            IgnoresRegex = false,
+            Skip = false,
+        };
 
         private sealed class Group
         {
@@ -276,28 +281,25 @@ public class Fixtures
 
         private static FixtureMetadata CreateFrom(HashSet<string> flags)
         {
-            return new FixtureMetadata(
-                testCompatibilityMode: flags.Contains("EsprimaOrgFixture") ? AstToJsonTestCompatibilityMode.EsprimaOrg : AstToJsonTestCompatibilityMode.None,
-                includesLocation: flags.Contains("IncludesLocation"),
-                includesRange: flags.Contains("IncludesRange"),
-                includesLocationSource: flags.Contains("IncludesLocationSource"),
-                ignoresRegex: flags.Contains("IgnoresRegex"));
+            return new FixtureMetadata
+            {
+                TestCompatibilityMode = flags.Contains("EsprimaOrgFixture") ? AstToJsonTestCompatibilityMode.EsprimaOrg : AstToJsonTestCompatibilityMode.None,
+                IncludesLocation = flags.Contains("IncludesLocation"),
+                IncludesRange = flags.Contains("IncludesRange"),
+                IncludesLocationSource = flags.Contains("IncludesLocationSource"),
+                IgnoresRegex = flags.Contains("IgnoresRegex"),
+                Skip = flags.Contains("Skip"),
+            };
         }
 
-        private FixtureMetadata(AstToJsonTestCompatibilityMode testCompatibilityMode, bool includesLocation, bool includesRange, bool includesLocationSource, bool ignoresRegex)
-        {
-            TestCompatibilityMode = testCompatibilityMode;
-            IncludesLocation = includesLocation;
-            IncludesRange = includesRange;
-            IncludesLocationSource = includesLocationSource;
-            IgnoresRegex = ignoresRegex;
-        }
+        private FixtureMetadata() { }
 
-        public AstToJsonTestCompatibilityMode TestCompatibilityMode { get; }
-        public bool IncludesLocation { get; }
-        public bool IncludesRange { get; }
-        public bool IncludesLocationSource { get; }
-        public bool IgnoresRegex { get; }
+        public AstToJsonTestCompatibilityMode TestCompatibilityMode { get; init; }
+        public bool IncludesLocation { get; init; }
+        public bool IncludesRange { get; init; }
+        public bool IncludesLocationSource { get; init; }
+        public bool IgnoresRegex { get; init; }
+        public bool Skip { get; init; }
 
         public AstToJsonOptions CreateConversionOptions(AstToJsonOptions defaultOptions) => defaultOptions with
         {
