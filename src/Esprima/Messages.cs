@@ -10,8 +10,10 @@ public static class Messages
     public const string BadSetterRestParameter = "Setter function argument must not be a rest parameter";
     public const string CannotUseImportMetaOutsideAModule = "Cannot use 'import.meta' outside a module";
     public const string CannotUseImportWithNew = "Cannot use new with import";
+    public const string ConstructorIsAccessor = "Class constructor may not be an accessor";
     public const string ConstructorIsAsync = "Class constructor may not be an async method";
-    public const string ConstructorSpecialMethod = "Class constructor may not be an accessor";
+    public const string ConstructorIsField = "Classes may not have a field named 'constructor'";
+    public const string ConstructorIsGenerator = "Class constructor may not be a generator";
     public const string DeclarationMissingInitializer = "Missing initializer in {0} declaration";
     public const string DefaultRestParameter = "Unexpected token =";
     public const string DefaultRestProperty = "Unexpected token =";
@@ -50,6 +52,7 @@ public static class Messages
     public const string NumericSeparatorOneUnderscore = "Numeric separator must be exactly one underscore";
     public const string ParameterAfterRestParameter = "Rest parameter must be last formal parameter";
     public const string PrivateFieldNoDelete = "Private fields can not be deleted";
+    public const string PrivateFieldOutsideClass = "Private field '{0}' must be declared in an enclosing class";
     public const string PropertyAfterRestProperty = "Unexpected token";
     public const string Redeclaration = "{0} \"{1}\" has already been declared";
     public const string RegexIncompleteQuantifier = "Invalid regular expression: Incomplete quantifier";

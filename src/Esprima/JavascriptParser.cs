@@ -760,11 +760,11 @@ public partial class JavaScriptParser
                         expr = Finalize(node, new Literal(token.RegexValue!.Pattern, token.RegexValue.Flags, token.Value, raw));
                         break;
                     case "#":
+                        expr = ParsePrivateIdentifier(node);
                         if (!_context.InClassBody)
-                            ThrowUnexpectedToken(_lookahead);
-                        NextToken();
-                        token = NextToken();
-                        expr = Finalize(node, new PrivateIdentifier((string) token.Value!));
+                        {
+                            ThrowError(Messages.PrivateFieldOutsideClass, "#" + expr.As<PrivateIdentifier>().Name);
+                        }
                         break;
                     case "@":
                         expr = ParseDecoratedPrimaryExpression(node);
@@ -961,9 +961,11 @@ public partial class JavaScriptParser
 
         var previousAllowYield = _context.AllowYield;
         _context.AllowYield = true;
+
         var parameters = ParseFormalParameters();
         _context.AllowYield = !isGenerator;
         var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
+
         _context.AllowYield = previousAllowYield;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, false));
@@ -975,18 +977,20 @@ public partial class JavaScriptParser
 
         var previousAllowYield = _context.AllowYield;
         var previousIsAsync = _context.IsAsync;
-        _context.AllowYield = false;
+        _context.AllowYield = true;
         _context.IsAsync = true;
 
         var parameters = ParseFormalParameters();
+        _context.AllowYield = !isGenerator;
         var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
+
         _context.AllowYield = previousAllowYield;
         _context.IsAsync = previousIsAsync;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, true));
     }
 
-    private Expression ParseObjectPropertyKey(bool isPrivate = false)
+    private Expression ParseObjectPropertyKey()
     {
         var node = CreateNode();
         var token = NextToken();
@@ -1013,20 +1017,13 @@ public partial class JavaScriptParser
             case TokenType.BooleanLiteral:
             case TokenType.NullLiteral:
             case TokenType.Keyword:
-                key = isPrivate ? Finalize(node, new PrivateIdentifier((string) token.Value!)) : Finalize(node, new Identifier((string?) token.Value!));
+                key = Finalize(node, new Identifier((string?) token.Value!));
                 break;
 
-            case TokenType.Punctuator:
-                if ("[".Equals(token.Value))
-                {
-                    key = IsolateCoverGrammar(_parseAssignmentExpression);
-                    Expect("]");
-                }
-                else
-                {
-                    return ThrowUnexpectedToken<Expression>(token);
-                }
+            case TokenType.Punctuator when "[".Equals(token.Value):
 
+                key = IsolateCoverGrammar(_parseAssignmentExpression);
+                Expect("]");
                 break;
 
             default:
@@ -1034,6 +1031,33 @@ public partial class JavaScriptParser
         }
 
         return key;
+    }
+
+    private PrivateIdentifier ParsePrivateIdentifier()
+    {
+        return ParsePrivateIdentifier(CreateNode());
+    }
+
+    private PrivateIdentifier ParsePrivateIdentifier(in Marker node)
+    {
+        var prefixEnd = _lookahead.End;
+        NextToken();
+        if (prefixEnd != _lookahead.Start)
+            ThrowUnexpectedToken(_lookahead);
+
+        var token = NextToken();
+
+        switch (token.Type)
+        {
+            case TokenType.Identifier:
+            case TokenType.BooleanLiteral:
+            case TokenType.NullLiteral:
+            case TokenType.Keyword:
+                return Finalize(node, new PrivateIdentifier((string) token.Value!));
+
+            default:
+                return ThrowUnexpectedToken<PrivateIdentifier>(token);
+        }
     }
 
     private static bool IsPropertyKey(Node key, string value)
@@ -1576,26 +1600,26 @@ public partial class JavaScriptParser
 
     private Expression ParseIdentifierOrPrivateIdentifierName()
     {
-        var isPrivateField = false;
-
         var node = CreateNode();
 
-        var token = NextToken();
-
-        if (Equals(token.Value, "#"))
+        if (Match("#"))
         {
-            token = NextToken();
-            isPrivateField = true;
+            var privateIdentifier = ParsePrivateIdentifier(node);
+            if (!_context.InClassBody)
+            {
+                ThrowError(Messages.PrivateFieldOutsideClass, "#" + privateIdentifier.Name);
+            }
+            return privateIdentifier;
         }
+
+        var token = NextToken();
 
         if (!IsIdentifierName(token))
         {
             return ThrowUnexpectedToken<Identifier>(token);
         }
 
-        return isPrivateField
-            ? Finalize(node, new PrivateIdentifier((string) token.Value!))
-            : Finalize(node, new Identifier((string) token.Value!));
+        return Finalize(node, new Identifier((string) token.Value!));
     }
 
     private Expression ParseNewExpression()
@@ -3900,13 +3924,6 @@ public partial class JavaScriptParser
             case TokenType.Punctuator:
                 switch ((string?) _lookahead.Value)
                 {
-                    case "#!":
-                        ThrowUnexpectedToken(_lookahead);
-                        statement = null;
-                        break;
-                    case "#":
-                        statement = MatchAsyncFunction() ? ParseFunctionDeclaration() : ParseLabelledStatement();                     
-                        break;
                     case "{":
                         statement = ParseBlock();
                         break;
@@ -3916,6 +3933,9 @@ public partial class JavaScriptParser
                     case ";":
                         statement = ParseEmptyStatement();
                         break;
+                    case "#!":
+                        return ThrowUnexpectedToken<Statement>(_lookahead);
+                    case "#":
                     case "(":
                     default:
                         statement = ParseExpressionStatement();
@@ -4460,13 +4480,13 @@ public partial class JavaScriptParser
     {
         return token.Type switch
         {
-            TokenType.Identifier => true,
-            TokenType.StringLiteral => true,
-            TokenType.BooleanLiteral => true,
-            TokenType.NullLiteral => true,
-            TokenType.NumericLiteral => true,
+            TokenType.Identifier or
+            TokenType.StringLiteral or
+            TokenType.BooleanLiteral or
+            TokenType.NullLiteral or
+            TokenType.NumericLiteral or
             TokenType.Keyword => true,
-            TokenType.Punctuator => Equals(token.Value, "[") || Equals(token.Value, "#"),
+            TokenType.Punctuator => "[".Equals(token.Value) || "#".Equals(token.Value),
             _ => false
         };
     }
@@ -4519,12 +4539,16 @@ public partial class JavaScriptParser
         var node = CreateNode();
 
         var previousAllowYield = _context.AllowYield;
-
+        var previousIsAsync = _context.IsAsync;
         _context.AllowYield = true;
+        _context.IsAsync = isAsync;
+
         var parameters = ParseFormalParameters();
         _context.AllowYield = false;
         var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
+
         _context.AllowYield = previousAllowYield;
+        _context.IsAsync = previousIsAsync;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, true, hasStrictDirective, isAsync));
     }
@@ -4649,279 +4673,240 @@ public partial class JavaScriptParser
 
     private ClassElement ParseClassElement(ref bool hasConstructor)
     {
-        var token = _lookahead;
+        Token token;
         var node = CreateNode();
 
+        var decorators = ParseDecorators();
+        Expression? key;
+        Expression? value;
         var kind = PropertyKind.None;
-        Expression? key = null;
-        Expression? value = null;
         var computed = false;
-        var method = false;
         var isStatic = false;
         var isAsync = false;
         var isGenerator = false;
         var isPrivate = false;
         var isAccessor = false;
 
-        var decorators = ParseDecorators();
+        isGenerator = Match("*");
+        if (isGenerator)
+        {
+            NextToken();
+            kind = PropertyKind.Method;
+            goto ParseKey;
+        }
 
-        if (decorators.Count > 0)
+        if (_lookahead.Type is not (TokenType.Identifier or TokenType.Keyword))
+        {
+            goto ParseKey;
+        }
+
+        if ((string?) _lookahead.Value == "static")
         {
             token = _lookahead;
-        }
+            key = ParseObjectPropertyKey();
 
-        if (Match("*"))
-        {
-            isGenerator = true;
-            NextToken();
-        }
-        else
-        {
-            computed = Match("[");
-            if (Match("#"))
+            if (Match("{"))
             {
-                isPrivate = true;
-                token = _lookahead;
+                return ParseStaticBlock();
+            }
+
+            isGenerator = Match("*");
+            if (isGenerator)
+            {
                 NextToken();
-                if (token.End != _lookahead.Start)
-                    ThrowUnexpectedToken(_lookahead);
+                isStatic = true;
+                kind = PropertyKind.Method;
+                goto ParseKey;
+            }
+
+            if (!QualifiedPropertyName(_lookahead))
+            {
+                goto ParseValue;
+            }
+
+            isStatic = true;
+        }
+
+        if (_lookahead.Type is not (TokenType.Identifier or TokenType.Keyword))
+        {
+            goto ParseKey;
+        }
+
+        switch ((string?) _lookahead.Value)
+        {
+            case "async":
                 token = _lookahead;
-            }
-            key = ParseObjectPropertyKey(isPrivate);
-            var id = key switch
-            {
-                Identifier identifier => identifier.Name,
-                PrivateIdentifier privateIdentifier => privateIdentifier.Name,
-                Literal literal => literal.StringValue, // "constructor"
-                _ => null
-            };
+                key = ParseObjectPropertyKey();
 
-            if (id == "static")
-            {
-                if (QualifiedPropertyName(_lookahead) || Match("*"))
+                if (_hasLineTerminator)
                 {
-                    token = _lookahead;
-                    isStatic = true;
-                    computed = Match("[");
-                    if (Match("*"))
-                    {
-                        isGenerator = true;
-                        NextToken();
-                        computed = Match("[");
-                        if (Match("#"))
-                        {
-                            isPrivate = true;
-                            token = _lookahead;
-                            NextToken();
-                            if (token.End != _lookahead.Start)
-                                ThrowUnexpectedToken(_lookahead);
-                            token = _lookahead;
-                        }
-                    }
-                    else
-                    {
-                        if (Match("#"))
-                        {
-                            isPrivate = true;
-                            token = _lookahead;
-                            NextToken();
-                            if (token.End != _lookahead.Start)
-                                ThrowUnexpectedToken(_lookahead);
-                            token = _lookahead;
-                        }
-                    }
-                    key = ParseObjectPropertyKey(isPrivate);
+                    goto ParseValue;
                 }
-                else if (Match("{"))
-                {
-                    return ParseStaticBlock();
-                }
-            }
 
-            if (token.Type == TokenType.Identifier && !_hasLineTerminator && (string?) token.Value == "async")
-            {
-                if (_lookahead.Type != TokenType.Punctuator || _lookahead.Value is not (":" or "(" or ";"))
+                isGenerator = Match("*");
+                if (isGenerator)
                 {
+                    NextToken();
                     isAsync = true;
-                    isGenerator = Match("*");
-                    if (isGenerator)
-                    {
-                        NextToken();
-                    }
+                    kind = PropertyKind.Method;
+                    goto ParseKey;
+                }
 
-                    if (Match("#"))
-                    {
-                        isPrivate = true;
-                        token = _lookahead;
-                        NextToken();
-                        if (token.End != _lookahead.Start)
-                            ThrowUnexpectedToken(_lookahead);
-                    }
+                if (!QualifiedPropertyName(_lookahead))
+                {
+                    goto ParseValue;
+                }
 
-                    token = _lookahead;
-                    computed = Match("[");
-                    key = ParseObjectPropertyKey(isPrivate);
-                    if (token.Type == TokenType.Identifier && !isStatic && !isGenerator && (string?) token.Value == "constructor")
+                isAsync = true;
+                break;
+
+            case "get":
+            case "set":
+                token = _lookahead;
+                key = ParseObjectPropertyKey();
+
+                if (!QualifiedPropertyName(_lookahead))
+                {
+                    goto ParseValue;
+                }
+
+                kind = ((string) token.Value!)[0] == 'g' ? PropertyKind.Get : PropertyKind.Set;
+                break;
+
+            case "accessor":
+                token = _lookahead;
+                key = ParseObjectPropertyKey();
+
+                if (!QualifiedPropertyName(_lookahead))
+                {
+                    goto ParseValue;
+                }
+
+                isAccessor = true;
+                kind = PropertyKind.Property;
+                break;
+        }
+
+ParseKey:
+        token = _lookahead;
+        computed = Match("[");
+        isPrivate = Match("#");
+        key = !isPrivate ? ParseObjectPropertyKey() : ParsePrivateIdentifier();
+
+ParseValue:
+        if (kind == PropertyKind.None)
+        {
+            kind = Match("(") ? PropertyKind.Method : PropertyKind.Property;
+        }
+
+        if (!computed && !isPrivate)
+        {
+            if (isStatic)
+            {
+                if (IsPropertyKey(key, "prototype"))
+                {
+                    ThrowUnexpectedToken(token, Messages.StaticPrototype);
+                }
+                else if (IsPropertyKey(key, "constructor"))
+                {
+                    // Interestingly, `static get constructor() {}`, etc. are allowed...
+                    if (kind == PropertyKind.Property && !isAccessor)
+                    {
+                        ThrowUnexpectedToken(token, Messages.ConstructorIsField);
+                    }
+                }
+            }
+            else
+            {
+                if (IsPropertyKey(key, "constructor"))
+                {
+                    if (kind == PropertyKind.Property && !isAccessor)
+                    {
+                        ThrowUnexpectedToken(token, Messages.ConstructorIsField);
+                    }
+                    else if (kind is PropertyKind.Get or PropertyKind.Set || kind == PropertyKind.Property && isAccessor)
+                    {
+                        ThrowUnexpectedToken(token, Messages.ConstructorIsAccessor);
+                    }
+                    else if (isGenerator)
+                    {
+                        TolerateUnexpectedToken(token, Messages.ConstructorIsGenerator);
+                    }
+                    else if (isAsync)
                     {
                         TolerateUnexpectedToken(token, Messages.ConstructorIsAsync);
                     }
+
+                    if (hasConstructor)
+                    {
+                        ThrowUnexpectedToken(token, Messages.DuplicateConstructor);
+                    }
+                    else
+                    {
+                        hasConstructor = true;
+                    }
+
+                    kind = PropertyKind.Constructor;
                 }
             }
         }
 
-        if (object.Equals(token.Value, "accessor") && (_lookahead.Type == TokenType.Identifier || object.Equals(_lookahead.Value, "#")))
+        switch (kind)
         {
-            isAccessor = true;
-            if (Match("#"))
-            {
-                isPrivate = true;
-                token = _lookahead;
-                NextToken();
-                if (token.End != _lookahead.Start)
-                    ThrowUnexpectedToken(_lookahead);
-                token = _lookahead;
-            }
-            key = ParseObjectPropertyKey(isPrivate);
-        }
-
-        var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
-        if (token.Type == TokenType.Identifier ||
-            (token.Type == TokenType.Punctuator && (string?) token.Value != "*"))
-        {
-            if (lookaheadPropertyKey && (string?) token.Value == "get")
-            {
-                kind = PropertyKind.Get;
-                if (Match("#"))
-                {
-                    isPrivate = true;
-                    token = _lookahead;
-                    NextToken();
-                    if (token.End != _lookahead.Start)
-                        ThrowUnexpectedToken(_lookahead);
-                    token = _lookahead;
-                }
-                computed = Match("[");
-                key = ParseObjectPropertyKey(isPrivate);
+            case PropertyKind.Get:
+            case PropertyKind.Set:
                 _context.AllowYield = false;
-                value = ParseGetterMethod();
-            }
-            else if (lookaheadPropertyKey && (string?) token.Value == "set")
-            {
-                kind = PropertyKind.Set;
-                if (Match("#"))
+                value = kind == PropertyKind.Get ? ParseGetterMethod() : ParseSetterMethod();
+                return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression) value!, kind, isStatic, NodeList.From(ref decorators)));
+
+            case PropertyKind.Constructor:
+            case PropertyKind.Method:
+                if (!isGenerator)
                 {
-                    isPrivate = true;
-                    token = _lookahead;
-                    NextToken();
-                    if (token.End != _lookahead.Start)
-                        ThrowUnexpectedToken(_lookahead);
-                    token = _lookahead;
+                    var previousAllowSuper = _context.AllowSuper;
+                    var previousInClassConstructor = _context.InClassConstructor;
+                    _context.InClassConstructor = kind == PropertyKind.Constructor;
+                    if (!_context.InClassConstructor)
+                    {
+                        _context.AllowSuper = true;
+                    }
+                    value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
+                    _context.InClassConstructor = previousInClassConstructor;
+                    _context.AllowSuper = previousAllowSuper;
                 }
-                computed = Match("[");
-                key = ParseObjectPropertyKey(isPrivate);
-                value = ParseSetterMethod();
-            }
-            else if (!Match("("))
-            {
-                kind = PropertyKind.Property;
-                
+                else
+                {
+                    value = ParseGeneratorMethod(isAsync);
+                }
+                return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression) value!, kind, isStatic, NodeList.From(ref decorators)));
+
+            case PropertyKind.Property:
                 if (Match("="))
                 {
                     NextToken();
-                    if (_lookahead.Type == TokenType.Identifier && (string?)_lookahead.Value == "arguments")
-                        ThrowUnexpectedToken(token, Messages.ArgumentsNotAllowedInClassField);
+                    if (_lookahead.Type == TokenType.Identifier && (string?) _lookahead.Value == "arguments")
+                    {
+                        ThrowUnexpectedToken(_lookahead, Messages.ArgumentsNotAllowedInClassField);
+                    }
                     var previousAllowSuper = _context.AllowSuper;
                     _context.AllowSuper = true;
                     value = IsolateCoverGrammar(_parseAssignmentExpression);
                     _context.AllowSuper = previousAllowSuper;
                 }
-            }
-        }
-        else if (token.Type == TokenType.Punctuator && (string?) token.Value == "*" && lookaheadPropertyKey)
-        {
-            kind = PropertyKind.Init;
-            if (Match("#"))
-            {
-                isPrivate = true;
-                token = _lookahead;
-                NextToken();
-                if (token.End != _lookahead.Start)
-                    ThrowUnexpectedToken(_lookahead);
-                token = _lookahead;
-            }
-            computed = Match("[");
-            key = ParseObjectPropertyKey(isPrivate);
-            value = ParseGeneratorMethod(isAsync);
-            method = true;
-        }
-        
-        if (kind == PropertyKind.None && key != null)
-        {
-            if (Match("("))
-            {
-                var previousAllowSuper = _context.AllowSuper;
-                var previousInClassConstructor = _context.InClassConstructor;
-                _context.InClassConstructor = Equals(token.Value, "constructor");
-                if (!_context.InClassConstructor)
-                    _context.AllowSuper = true;
-                kind = PropertyKind.Init;
-                value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
-                _context.InClassConstructor = previousInClassConstructor;
-                _context.AllowSuper = previousAllowSuper;
-                method = true;
-            }
-        }
-
-        if (kind == PropertyKind.None)
-        {
-            ThrowUnexpectedToken(_lookahead);
-        }
-
-        if (kind == PropertyKind.Init)
-        {
-            kind = PropertyKind.Method;
-        }
-
-        if (!computed)
-        {
-            if (isStatic && !isPrivate && IsPropertyKey(key!, "prototype"))
-            {
-                ThrowUnexpectedToken(token, Messages.StaticPrototype);
-            }
-
-            if (!isStatic && IsPropertyKey(key!, "constructor"))
-            {
-                if (kind != PropertyKind.Method || !method || ((FunctionExpression) value!).Generator)
-                {
-                    ThrowUnexpectedToken(token, Messages.ConstructorSpecialMethod);
-                }
-
-                if (hasConstructor)
-                {
-                    ThrowUnexpectedToken(token, Messages.DuplicateConstructor);
-                }
                 else
                 {
-                    hasConstructor = true;
+                    value = null;
                 }
 
-                kind = PropertyKind.Constructor;
-            }
-        }
+                ConsumeSemicolon();
 
-        if (isAccessor)
-        {
-            ConsumeSemicolon();
-            return Finalize(node, new AccessorProperty(key!, computed, value!, isStatic, NodeList.From(ref decorators)));
-        }
+                return !isAccessor
+                    ? Finalize(node, new PropertyDefinition(key!, computed, value, isStatic, NodeList.From(ref decorators)))
+                    : Finalize(node, new AccessorProperty(key!, computed, value, isStatic, NodeList.From(ref decorators)));
 
-        if (kind == PropertyKind.Property)
-        {
-            ConsumeSemicolon();
-            return Finalize(node, new PropertyDefinition(key!, computed, value!, isStatic, NodeList.From(ref decorators)));
+            default:
+                return ThrowError<ClassElement>("Unknown property kind '{0}'", kind);
         }
-
-        return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression) value!, kind, isStatic, NodeList.From(ref decorators)));
     }
 
     private ArrayList<ClassElement> ParseClassElementList()
