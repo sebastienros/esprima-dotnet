@@ -25,7 +25,8 @@ public partial class JavaScriptParser
             IsModule = false;
             AllowIn = true;
             AllowStrictDirective = true;
-            AllowSuper = false;
+            AllowSuperCall = false;
+            AllowSuperAccess = false;
             AllowYield = true;
             IsAsync = false;
             FirstCoverInitializedNameError = null;
@@ -34,7 +35,6 @@ public partial class JavaScriptParser
             InFunctionBody = false;
             InIteration = false;
             InSwitch = false;
-            InClassConstructor = false;
             Strict = false;
             AllowIdentifierEscape = false;
 
@@ -59,7 +59,8 @@ public partial class JavaScriptParser
         public bool IsModule;
         public bool AllowIn;
         public bool AllowStrictDirective;
-        public bool AllowSuper;
+        public bool AllowSuperCall;
+        public bool AllowSuperAccess;
         public bool AllowYield;
         public bool IsAsync;
         public bool IsAssignmentTarget;
@@ -67,7 +68,6 @@ public partial class JavaScriptParser
         public bool InFunctionBody;
         public bool InIteration;
         public bool InSwitch;
-        public bool InClassConstructor;
         public bool InClassBody;
         public bool Strict;
         public bool AllowIdentifierEscape;
@@ -955,39 +955,30 @@ public partial class JavaScriptParser
         return body;
     }
 
-    private FunctionExpression ParsePropertyMethodFunction(bool isGenerator)
+    private FunctionExpression ParsePropertyMethodFunction(bool isAsync, bool isGenerator, bool allowSuperCall)
     {
         var node = CreateNode();
 
-        var previousAllowYield = _context.AllowYield;
-        _context.AllowYield = true;
-
-        var parameters = ParseFormalParameters();
-        _context.AllowYield = !isGenerator;
-        var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
-
-        _context.AllowYield = previousAllowYield;
-
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, false));
-    }
-
-    private FunctionExpression ParsePropertyMethodAsyncFunction(bool isGenerator)
-    {
-        var node = CreateNode();
-
-        var previousAllowYield = _context.AllowYield;
         var previousIsAsync = _context.IsAsync;
-        _context.AllowYield = true;
-        _context.IsAsync = true;
+        var previousAllowYield = _context.AllowYield;
+        var previousAllowSuperAccess = _context.AllowSuperAccess;
+        var previousAllowSuperCall = _context.AllowSuperCall;
 
+        _context.IsAsync = isAsync;
+        _context.AllowYield = true;
+        _context.AllowSuperAccess = true;
+        _context.AllowSuperCall = allowSuperCall;
         var parameters = ParseFormalParameters();
+
         _context.AllowYield = !isGenerator;
         var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
 
-        _context.AllowYield = previousAllowYield;
         _context.IsAsync = previousIsAsync;
+        _context.AllowYield = previousAllowYield;
+        _context.AllowSuperAccess = previousAllowSuperAccess;
+        _context.AllowSuperCall = previousAllowSuperCall;
 
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, true));
+        return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, isAsync));
     }
 
     private Expression ParseObjectPropertyKey()
@@ -1125,13 +1116,7 @@ public partial class JavaScriptParser
             kind = PropertyKind.Get;
             computed = Match("[");
             key = ParseObjectPropertyKey();
-            var previousAllowYield = _context.AllowYield;
-            var previousAllowSuper = _context.AllowSuper;
-            _context.AllowYield = false;
-            _context.AllowSuper = true;
             value = ParseGetterMethod();
-            _context.AllowYield = previousAllowYield;
-            _context.AllowSuper = previousAllowSuper;
         }
         else if (token.Type == TokenType.Identifier && !isAsync && "set".Equals(token.Value) && lookaheadPropertyKey)
         {
@@ -1143,20 +1128,14 @@ public partial class JavaScriptParser
             kind = PropertyKind.Set;
             computed = Match("[");
             key = ParseObjectPropertyKey();
-            var previousAllowSuper = _context.AllowSuper;
-            _context.AllowSuper = true;
             value = ParseSetterMethod();
-            _context.AllowSuper = previousAllowSuper;
         }
         else if (token.Type == TokenType.Punctuator && "*".Equals(token.Value) && lookaheadPropertyKey)
         {
             kind = PropertyKind.Init;
             computed = Match("[");
             key = ParseObjectPropertyKey();
-            var previousAllowSuper = _context.AllowSuper;
-            _context.AllowSuper = true;
             value = ParseGeneratorMethod(isAsync);
-            _context.AllowSuper = previousAllowSuper;
             method = true;
         }
         else
@@ -1184,10 +1163,7 @@ public partial class JavaScriptParser
             }
             else if (Match("("))
             {
-                var previousAllowSuper = _context.AllowSuper;
-                _context.AllowSuper = true;
-                value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
-                _context.AllowSuper = previousAllowSuper;
+                value = ParsePropertyMethodFunction(isAsync, isGenerator, allowSuperCall: false);
                 method = true;
             }
             else if (token.Type == TokenType.Identifier)
@@ -1799,14 +1775,28 @@ public partial class JavaScriptParser
 
         Expression expr;
         var isSuper = MatchKeyword("super");
-        if (isSuper && _context.InFunctionBody)
+        if (isSuper)
         {
             var node = CreateNode();
             NextToken();
             expr = Finalize(node, new Super());
-            if (!Match("(") && !Match(".") && !Match("["))
+            if (Match("("))
             {
-                ThrowUnexpectedToken(_lookahead);
+                if (!_context.AllowSuperCall)
+                {
+                    TolerateError(Messages.UnexpectedSuper);
+                }
+            }
+            else if (Match(".") || Match("["))
+            {
+                if (!_context.AllowSuperAccess)
+                {
+                    TolerateError(Messages.UnexpectedSuper);
+                }
+            }
+            else
+            {
+                TolerateError(Messages.UnexpectedSuper);
             }
         }
         else
@@ -1814,11 +1804,6 @@ public partial class JavaScriptParser
             expr = MatchKeyword("new")
                 ? InheritCoverGrammar(_parseNewExpression)
                 : InheritCoverGrammar(_parsePrimaryExpression);
-        }
-
-        if (isSuper && !_context.AllowSuper && (!_context.InClassConstructor || (string?) _lookahead.Value != "."))
-        {
-            TolerateError(Messages.UnexpectedSuper);
         }
 
         var hasOptional = false;
@@ -1875,6 +1860,12 @@ public partial class JavaScriptParser
                 }
 
                 var property = ParseIdentifierOrPrivateIdentifierName();
+
+                if (isSuper && property.Type == Nodes.PrivateIdentifier)
+                {
+                    TolerateError(Messages.UnexpectedPrivateField);
+                }
+
                 _context.AllowIdentifierEscape = previousAllowIdentifierEscape;
                 expr = Finalize(startMarker, new StaticMemberExpression(expr, property, optional));
             }
@@ -1916,7 +1907,7 @@ public partial class JavaScriptParser
         return expr;
     }
 
-    private Super ParseSuper()
+    private Super ParseSuperAccess()
     {
         var node = CreateNode();
 
@@ -1935,7 +1926,7 @@ public partial class JavaScriptParser
 
         var startMarker = StartNode(_lookahead);
         var expr = MatchKeyword("super") && _context.InFunctionBody
-            ? ParseSuper()
+            ? ParseSuperAccess()
             : MatchKeyword("new")
                 ? InheritCoverGrammar(_parseNewExpression)
                 : InheritCoverGrammar(_parsePrimaryExpression);
@@ -1987,6 +1978,7 @@ public partial class JavaScriptParser
                 }
 
                 var property = ParseIdentifierName();
+
                 expr = Finalize(startMarker, new StaticMemberExpression(expr, property, optional));
             }
             else
@@ -4495,9 +4487,15 @@ public partial class JavaScriptParser
     {
         var node = CreateNode();
 
-        const bool isGenerator = false;
+        var previousIsAsync = _context.IsAsync;
         var previousAllowYield = _context.AllowYield;
-        _context.AllowYield = !isGenerator;
+        var previousAllowSuperAccess = _context.AllowSuperAccess;
+        var previousAllowSuperCall = _context.AllowSuperCall;
+
+        _context.IsAsync = false;
+        _context.AllowYield = true;
+        _context.AllowSuperAccess = true;
+        _context.AllowSuperCall = false;
         var formalParameters = ParseFormalParameters();
         if (formalParameters.Parameters.Count > 0)
         {
@@ -4505,19 +4503,28 @@ public partial class JavaScriptParser
         }
 
         var method = ParsePropertyMethod(ref formalParameters, out var hasStrictDirective);
-        _context.AllowYield = previousAllowYield;
 
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, isGenerator, hasStrictDirective, false));
+        _context.IsAsync = previousIsAsync;
+        _context.AllowYield = previousAllowYield;
+        _context.AllowSuperAccess = previousAllowSuperAccess;
+        _context.AllowSuperCall = previousAllowSuperCall;
+
+        return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, hasStrictDirective, false));
     }
 
     private FunctionExpression ParseSetterMethod()
     {
         var node = CreateNode();
 
-        const bool isGenerator = false;
+        var previousIsAsync = _context.IsAsync;
         var previousAllowYield = _context.AllowYield;
-        _context.AllowYield = !isGenerator;
+        var previousAllowSuperAccess = _context.AllowSuperAccess;
+        var previousAllowSuperCall = _context.AllowSuperCall;
 
+        _context.IsAsync = false;
+        _context.AllowYield = true;
+        _context.AllowSuperAccess = true;
+        _context.AllowSuperCall = false;
         var formalParameters = ParseFormalParameters();
         if (formalParameters.Parameters.Count != 1)
         {
@@ -4529,28 +4536,39 @@ public partial class JavaScriptParser
         }
 
         var method = ParsePropertyMethod(ref formalParameters, out var hasStrictDirective);
-        _context.AllowYield = previousAllowYield;
 
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, isGenerator, hasStrictDirective, false));
+        _context.IsAsync = previousIsAsync;
+        _context.AllowYield = previousAllowYield;
+        _context.AllowSuperAccess = previousAllowSuperAccess;
+        _context.AllowSuperCall = previousAllowSuperCall;
+
+        return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, hasStrictDirective, false));
     }
 
-    private FunctionExpression ParseGeneratorMethod(bool isAsync = false)
+    private FunctionExpression ParseGeneratorMethod(bool isAsync)
     {
         var node = CreateNode();
 
-        var previousAllowYield = _context.AllowYield;
         var previousIsAsync = _context.IsAsync;
-        _context.AllowYield = true;
-        _context.IsAsync = isAsync;
+        var previousAllowYield = _context.AllowYield;
+        var previousAllowSuperAccess = _context.AllowSuperAccess;
+        var previousAllowSuperCall = _context.AllowSuperCall;
 
+        _context.IsAsync = isAsync;
+        _context.AllowYield = true;
+        _context.AllowSuperAccess = true;
+        _context.AllowSuperCall = false;
         var parameters = ParseFormalParameters();
+
         _context.AllowYield = false;
         var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
 
-        _context.AllowYield = previousAllowYield;
         _context.IsAsync = previousIsAsync;
+        _context.AllowYield = previousAllowYield;
+        _context.AllowSuperAccess = previousAllowSuperAccess;
+        _context.AllowSuperCall = previousAllowSuperCall;
 
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, true, hasStrictDirective, isAsync));
+        return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: true, hasStrictDirective, isAsync));
     }
 
     // https://tc39.github.io/ecma262/#sec-generator-function-definitions
@@ -4618,6 +4636,11 @@ public partial class JavaScriptParser
 
         Expect("{");
 
+        var previousAllowSuperAccess = _context.AllowSuperAccess;
+        var previousAllowSuperCall = _context.AllowSuperCall;
+        _context.AllowSuperAccess = true;
+        _context.AllowSuperCall = false;
+
         var block = new ArrayList<Statement>();
         while (true)
         {
@@ -4628,6 +4651,9 @@ public partial class JavaScriptParser
 
             block.Add(ParseStatementListItem());
         }
+
+        _context.AllowSuperAccess = previousAllowSuperAccess;
+        _context.AllowSuperCall = previousAllowSuperCall;
 
         Expect("}");
 
@@ -4671,7 +4697,7 @@ public partial class JavaScriptParser
         return decorators;
     }
 
-    private ClassElement ParseClassElement(ref bool hasConstructor)
+    private ClassElement ParseClassElement(bool hasSuperClass, ref bool hasConstructor)
     {
         Token token;
         var node = CreateNode();
@@ -4855,29 +4881,14 @@ ParseValue:
         {
             case PropertyKind.Get:
             case PropertyKind.Set:
-                _context.AllowYield = false;
                 value = kind == PropertyKind.Get ? ParseGetterMethod() : ParseSetterMethod();
-                return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression) value!, kind, isStatic, NodeList.From(ref decorators)));
+                return Finalize(node, new MethodDefinition(key, computed, (FunctionExpression) value!, kind, isStatic, NodeList.From(ref decorators)));
 
             case PropertyKind.Constructor:
             case PropertyKind.Method:
-                if (!isGenerator)
-                {
-                    var previousAllowSuper = _context.AllowSuper;
-                    var previousInClassConstructor = _context.InClassConstructor;
-                    _context.InClassConstructor = kind == PropertyKind.Constructor;
-                    if (!_context.InClassConstructor)
-                    {
-                        _context.AllowSuper = true;
-                    }
-                    value = isAsync ? ParsePropertyMethodAsyncFunction(isGenerator) : ParsePropertyMethodFunction(isGenerator);
-                    _context.InClassConstructor = previousInClassConstructor;
-                    _context.AllowSuper = previousAllowSuper;
-                }
-                else
-                {
-                    value = ParseGeneratorMethod(isAsync);
-                }
+                value = !isGenerator
+                    ? ParsePropertyMethodFunction(isAsync, isGenerator, allowSuperCall: kind == PropertyKind.Constructor && hasSuperClass)
+                    : ParseGeneratorMethod(isAsync);
                 return Finalize(node, new MethodDefinition(key!, computed, (FunctionExpression) value!, kind, isStatic, NodeList.From(ref decorators)));
 
             case PropertyKind.Property:
@@ -4888,10 +4899,13 @@ ParseValue:
                     {
                         ThrowUnexpectedToken(_lookahead, Messages.ArgumentsNotAllowedInClassField);
                     }
-                    var previousAllowSuper = _context.AllowSuper;
-                    _context.AllowSuper = true;
+                    var previousAllowSuperAccess = _context.AllowSuperAccess;
+                    var previousAllowSuperCall = _context.AllowSuperCall;
+                    _context.AllowSuperAccess = true;
+                    _context.AllowSuperCall = false;
                     value = IsolateCoverGrammar(_parseAssignmentExpression);
-                    _context.AllowSuper = previousAllowSuper;
+                    _context.AllowSuperAccess = previousAllowSuperAccess;
+                    _context.AllowSuperCall = previousAllowSuperCall;
                 }
                 else
                 {
@@ -4909,7 +4923,7 @@ ParseValue:
         }
     }
 
-    private ArrayList<ClassElement> ParseClassElementList()
+    private ArrayList<ClassElement> ParseClassElementList(bool hasSuperClass)
     {
         var body = new ArrayList<ClassElement>();
         var hasConstructor = false;
@@ -4923,7 +4937,7 @@ ParseValue:
             }
             else
             {
-                body.Push(ParseClassElement(ref hasConstructor));
+                body.Push(ParseClassElement(hasSuperClass, ref hasConstructor));
             }
         }
 
@@ -4932,12 +4946,12 @@ ParseValue:
         return body;
     }
 
-    private ClassBody ParseClassBody()
+    private ClassBody ParseClassBody(bool hasSuperClass)
     {
         var node = CreateNode();
         var previousInClassBody = _context.InClassBody;
         _context.InClassBody = true;
-        var elementList = ParseClassElementList();
+        var elementList = ParseClassElementList(hasSuperClass);
         _context.InClassBody = previousInClassBody;
 
         return Finalize(node, new ClassBody(NodeList.From(ref elementList)));
@@ -4946,9 +4960,7 @@ ParseValue:
     private ClassDeclaration ParseClassDeclarationCore(in Marker node, bool identifierIsOptional = false)
     {
         var previousStrict = _context.Strict;
-        var previousAllowSuper = _context.AllowSuper;
         _context.Strict = true;
-        _context.AllowSuper = false;
 
         ExpectKeyword("class");
 
@@ -4961,12 +4973,10 @@ ParseValue:
         {
             NextToken();
             superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
-            _context.AllowSuper = true;
         }
 
-        var classBody = ParseClassBody();
+        var classBody = ParseClassBody(hasSuperClass: superClass is not null);
         _context.Strict = previousStrict;
-        _context.AllowSuper = previousAllowSuper;
 
         return Finalize(node, new ClassDeclaration(id, superClass, classBody, NodeList.From(ref _context.Decorators)));
     }
@@ -4993,9 +5003,7 @@ ParseValue:
         var node = CreateNode();
 
         var previousStrict = _context.Strict;
-        var previousAllowSuper = _context.AllowSuper;
         _context.Strict = true;
-        _context.AllowSuper = false;
 
         ExpectKeyword("class");
         var id = _lookahead.Type == TokenType.Identifier
@@ -5007,12 +5015,10 @@ ParseValue:
         {
             NextToken();
             superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
-            _context.AllowSuper = true;
         }
 
-        var classBody = ParseClassBody();
+        var classBody = ParseClassBody(hasSuperClass: superClass is not null);
         _context.Strict = previousStrict;
-        _context.AllowSuper = previousAllowSuper;
 
         return Finalize(node, new ClassExpression(id, superClass, classBody, NodeList.From(ref _context.Decorators)));
     }

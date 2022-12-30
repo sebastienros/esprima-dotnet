@@ -1,7 +1,7 @@
 ﻿namespace Esprima;
 
 // Error messages should be identical to V8.
-public static class Messages
+internal static class Messages
 {
     public const string ArgumentsNotAllowedInClassField = "'arguments' is not allowed in class field initializer or static initialization block";
     public const string AsyncFunctionInSingleStatementContext = "Async functions can only be declared at the top level or inside a block.";
@@ -80,6 +80,7 @@ public static class Messages
     public const string UnexpectedEOS = "Unexpected end of input";
     public const string UnexpectedIdentifier = "Unexpected identifier";
     public const string UnexpectedNumber = "Unexpected number";
+    public const string UnexpectedPrivateField = "Unexpected private field";
     public const string UnexpectedReserved = "Unexpected reserved word";
     public const string UnexpectedString = "Unexpected string";
     public const string UnexpectedSuper = "'super' keyword unexpected here";
