@@ -11,7 +11,10 @@ namespace Esprima;
 // An empty list, however causes no heap allocation; that is, the array is
 // allocated on first addition.
 
+#if DEBUG
 [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}, Version = {_localVersion}")]
+[DebuggerTypeProxy(typeof(ArrayList<>.DebugView))]
+#endif
 internal struct ArrayList<T> : IReadOnlyList<T>
 {
     private const int MinAllocatedCount = 4;
@@ -261,6 +264,30 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         OnChanged();
     }
 
+    public void Insert(int index, T item)
+    {
+        AssertUnchanged();
+
+        if ((uint) index > (uint) _count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), index, null);
+        }
+
+        var capacity = Capacity;
+
+        if (_count == capacity)
+        {
+            Array.Resize(ref _items, Math.Max(capacity * 2, MinAllocatedCount));
+        }
+
+        Debug.Assert(_items is not null);
+        Array.Copy(_items, index, _items, index + 1, Count - index);
+        _items![index] = item;
+        _count++;
+
+        OnChanged();
+    }
+
     public void RemoveAt(int index)
     {
         AssertUnchanged();
@@ -278,6 +305,18 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         }
 
         _items![_count] = default!;
+
+        OnChanged();
+    }
+
+    public void Sort(IComparer<T>? comparer = null)
+    {
+        AssertUnchanged();
+
+        if (_count > 1)
+        {
+            Array.Sort(_items, 0, _count, comparer);
+        }
 
         OnChanged();
     }
@@ -408,6 +447,36 @@ internal struct ArrayList<T> : IReadOnlyList<T>
             }
         }
     }
+
+#if DEBUG
+    [DebuggerNonUserCode]
+    private sealed class DebugView
+    {
+        readonly ArrayList<T> _list;
+
+        public DebugView(ArrayList<T> list)
+        {
+            _list = list;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public T[] Items
+        {
+            get
+            {
+                // NOTE: We can't simply call ToArray() because it breaks VS debugger for some reason
+                // (probably it's related to the span-based implementation)
+                if (_list._count == 0)
+                {
+                    return Array.Empty<T>();
+                }
+                var array = new T[_list._count];
+                Array.Copy(_list._items, array, _list._count);
+                return array;
+            }
+        }
+    }
+#endif
 }
 
 internal static class ArrayList

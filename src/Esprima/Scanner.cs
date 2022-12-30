@@ -52,9 +52,10 @@ public sealed partial class Scanner
     internal bool _isModule;
 
     private ArrayList<string> _curlyStack;
-    private readonly StringBuilder _sb = new();
+    private StringBuilder _sb = new();
 
     internal StringPool _stringPool;
+    internal CodePointRange.Cache? _codePointRangeCache;
 
     private static int OctalValue(char ch)
     {
@@ -133,6 +134,7 @@ public sealed partial class Scanner
 
         Reset(startIndex, lineNumber, lineStartIndex);
         _stringPool = default;
+        _codePointRangeCache = null;
         _isModule = false;
     }
 
@@ -151,6 +153,7 @@ public sealed partial class Scanner
         }
 
         _stringPool = default;
+        _codePointRangeCache = null;
     }
 
     public string Code { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _source; }
@@ -614,7 +617,7 @@ public sealed partial class Scanner
         return cp;
     }
 
-    private string GetIdentifier()
+    private string GetIdentifier(bool allowEscapedSurrogates = false)
     {
         var start = _index++;
         while (!Eof())
@@ -625,7 +628,7 @@ public sealed partial class Scanner
                 or >= 0xD800 and <= 0xDFFF) // Need to handle surrogate pairs. 
             {
                 _index = start;
-                return GetComplexIdentifier();
+                return GetComplexIdentifier(allowEscapedSurrogates);
             }
 
             if (Character.IsIdentifierPart(ch))
@@ -641,13 +644,8 @@ public sealed partial class Scanner
         return _source.Between(start, _index).ToInternedString(ref _stringPool);
     }
 
-    private string GetComplexIdentifier()
+    private string GetComplexIdentifier(bool allowEscapedSurrogates = false)
     {
-        if (CharUnicodeInfo.GetUnicodeCategory(_source, _index) == UnicodeCategory.OtherSymbol)
-        {
-            ThrowUnexpectedToken();
-        }
-
         var sb = GetStringBuilder();
 
         var cp = CodePointAt(_source, _index);
@@ -678,9 +676,9 @@ public sealed partial class Scanner
                 _index += ch.Length;
             }
         }
-        // '\u' (U+005C, U+0075) denotes an escaped character.
         else
         {
+            // '\u' (U+005C, U+0075) denotes an escaped character.
             ++_index;
             if (_source.CharCodeAt(_index) != 0x75)
             {
@@ -697,34 +695,50 @@ public sealed partial class Scanner
                         ? Messages.UndefinedUnicodeCodePoint
                         : Messages.InvalidUnicodeEscapeSequence);
                 }
-
-                if (chcp > char.MaxValue)
-                {
-                    if (!Character.IsIdentifierStartAstral(chcp))
-                    {
-                        ThrowUnexpectedToken();
-                    }
-                    sb.Append(ParserExtensions.CodePointToString(chcp));
-                }
-                else
-                {
-                    if (char.IsSurrogate((char) chcp) || !Character.IsIdentifierStart((char) chcp))
-                    {
-                        ThrowUnexpectedToken();
-                    }
-                    sb.Append((char) chcp);
-                }
             }
             else
             {
-                if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierStart(ch1) || char.IsSurrogate(ch1))
+                if (!ScanHexEscape('u', out var ch1) || ch1 == '\\')
                 {
                     ThrowUnexpectedToken();
                 }
-                sb.Append(ch1);
+
+                if (!char.IsSurrogate(ch1))
+                {
+                    if (!Character.IsIdentifierStart(ch1))
+                    {
+                        ThrowUnexpectedToken();
+                    }
+
+                    sb.Append(ch1);
+                    goto ParseIdentifierPart;
+                }
+                else if (!allowEscapedSurrogates || !char.IsHighSurrogate(ch1) || !TryGetEscapedSurrogate(ch1, out chcp))
+                {
+                    ThrowUnexpectedToken();
+                    chcp = default; // keeps the compiler happy
+                }
+            }
+
+            if (chcp > char.MaxValue)
+            {
+                if (!Character.IsIdentifierStartAstral(chcp))
+                {
+                    ThrowUnexpectedToken();
+                }
+                sb.Append(ParserExtensions.CodePointToString(chcp));
+            }
+            else
+            {
+                if (char.IsSurrogate((char) chcp) || !Character.IsIdentifierStart((char) chcp))
+                {
+                    ThrowUnexpectedToken();
+                }
+                sb.Append((char) chcp);
             }
         }
 
+ParseIdentifierPart:
         while (!Eof())
         {
             cp = CodePointAt(_source, _index);
@@ -758,9 +772,9 @@ public sealed partial class Scanner
                     _index += ch.Length;
                 }
             }
-            // '\u' (U+005C, U+0075) denotes an escaped character.
             else
             {
+                // '\u' (U+005C, U+0075) denotes an escaped character.
                 ++_index;
                 if (_source.CharCodeAt(_index) != 0x75)
                 {
@@ -777,36 +791,67 @@ public sealed partial class Scanner
                             ? Messages.UndefinedUnicodeCodePoint
                             : Messages.InvalidUnicodeEscapeSequence);
                     }
-
-                    if (chcp > char.MaxValue)
-                    {
-                        if (!Character.IsIdentifierPartAstral(chcp))
-                        {
-                            ThrowUnexpectedToken();
-                        }
-                        sb.Append(ParserExtensions.CodePointToString(chcp));
-                    }
-                    else
-                    {
-                        if (char.IsSurrogate((char) chcp) || !Character.IsIdentifierPart((char) chcp))
-                        {
-                            ThrowUnexpectedToken();
-                        }
-                        sb.Append((char) chcp);
-                    }
                 }
                 else
                 {
-                    if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierPart(ch1) || char.IsSurrogate(ch1))
+                    if (!ScanHexEscape('u', out var ch1) || ch1 == '\\')
                     {
                         ThrowUnexpectedToken();
                     }
-                    sb.Append(ch1);
+
+                    if (!char.IsSurrogate(ch1))
+                    {
+                        if (!Character.IsIdentifierPart(ch1))
+                        {
+                            ThrowUnexpectedToken();
+                        }
+
+                        sb.Append(ch1);
+                        continue;
+                    }
+                    else if (!allowEscapedSurrogates || !char.IsHighSurrogate(ch1) || !TryGetEscapedSurrogate(ch1, out chcp))
+                    {
+                        ThrowUnexpectedToken();
+                        chcp = default; // keeps the compiler happy
+                    }
+                }
+
+                if (chcp > char.MaxValue)
+                {
+                    if (!Character.IsIdentifierPartAstral(chcp))
+                    {
+                        ThrowUnexpectedToken();
+                    }
+                    sb.Append(ParserExtensions.CodePointToString(chcp));
+                }
+                else
+                {
+                    if (char.IsSurrogate((char) chcp) || !Character.IsIdentifierPart((char) chcp))
+                    {
+                        ThrowUnexpectedToken();
+                    }
+                    sb.Append((char) chcp);
                 }
             }
         }
 
         return sb.ToString().AsSpan().ToInternedString(ref _stringPool);
+    }
+
+    private bool TryGetEscapedSurrogate(char highSurrogate, out int cp)
+    {
+        if (_source[_index] == '\\' && _source.CharCodeAt(_index + 1) == 'u')
+        {
+            _index += 2;
+            if (ScanHexEscape('u', out var lowSurrogate) && char.IsLowSurrogate(lowSurrogate))
+            {
+                cp = char.ConvertToUtf32(highSurrogate, lowSurrogate);
+                return true;
+            }
+        }
+
+        cp = default;
+        return false;
     }
 
     private OctalValue OctalToDecimal(char ch)
@@ -1033,7 +1078,7 @@ public sealed partial class Scanner
 #if !HAS_SPAN_PARSE
             value = Convert.ToInt64(number.ToString(), 16);
 #else
-            value = long.Parse(number, NumberStyles.HexNumber, null);
+            value = long.Parse(number, NumberStyles.AllowHexSpecifier, null);
 #endif
         }
         else if (number.Length > 255)
@@ -1099,8 +1144,8 @@ public sealed partial class Scanner
 
             var parseStyle = style switch
             {
-                JavaScriptNumberStyle.Integer => NumberStyles.Integer,
-                JavaScriptNumberStyle.Hex => NumberStyles.HexNumber,
+                JavaScriptNumberStyle.Integer => NumberStyles.None,
+                JavaScriptNumberStyle.Hex => NumberStyles.AllowHexSpecifier,
                 _ => NumberStyles.None
             };
 #if HAS_SPAN_PARSE
@@ -1727,735 +1772,38 @@ public sealed partial class Scanner
         return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: _index, _lineNumber, _lineStart);
     }
 
-    private static string FromCharCode(uint[] codeUnits)
-    {
-        var chars = new char[codeUnits.Length];
-        for (var i = 0; i < chars.Length; i++)
-        {
-            chars[i] = (char) codeUnits[i];
-        }
-
-        return new string(chars);
-    }
-
-    private string FromCodePoint(params uint[] codePoints)
-    {
-        var codeUnits = new List<uint>();
-        var result = "";
-
-        foreach (var codePoint in codePoints)
-        {
-            if (codePoint < 0 || codePoint > 0x10FFFF)
-            {
-                throw new ArgumentOutOfRangeException(nameof(codePoint), codePoint, "Invalid code point.");
-            }
-
-            var point = codePoint;
-            if (point <= 0xFFFF)
-            {
-                // BMP code point
-                codeUnits.Add(point);
-            }
-            else
-            {
-                // Astral code point; split in surrogate halves
-                // https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
-                point -= 0x10000;
-                codeUnits.Add((point >> 10) + 0xD800); // highSurrogate
-                codeUnits.Add((point % 0x400) + 0xDC00); // lowSurrogate
-            }
-            if (codeUnits.Count >= 0x3fff)
-            {
-                result += FromCharCode(codeUnits.ToArray());
-                codeUnits.Clear();
-            }
-        }
-
-        return result + FromCharCode(codeUnits.ToArray());
-    }
-
     /// <summary>
     /// Converts an ECMAScript regular expression to a <see cref="Regex"/> instance and tries to adapt regex
     /// to work in .NET when possible.
     /// </summary>
-    public Regex ParseRegex(string pattern, string flags, TimeSpan matchTimeout)
+    /// <returns>
+    /// The equivalent <see cref="Regex"/> if the conversion was possible, otherwise <see langword="null"/>.
+    /// </returns>
+    /// <exception cref="ParserException">
+    /// <paramref name="pattern"/> is an invalid regex pattern or, when <paramref name="tolerant"/> is <see langword="false"/>,
+    /// cannot be converted to an equivalent <see cref="Regex"/>.
+    /// </exception>
+    public static Regex? ParseRegex(string pattern, string flags, TimeSpan? matchTimeout = null, bool tolerant = true, ErrorHandler? errorHandler = null)
     {
-        var tmp = pattern;
-
-        var isUnicode = flags.IndexOf('u') >= 0;
-
-        CheckBracesBalance(pattern, isUnicode);
-
-        tmp = Regex
-            .Replace(tmp, @"(\\u[a-fA-F0-9]{4})+", (match) =>
-            {
-                // e.g., \uD83D\uDE80 (which is equivalent to \u{1F680}
-                var codePoints = new uint[match.Value.Length / 6];
-
-                for (var i = 0; i < codePoints.Length; i++)
-                {
-                    codePoints[i] = Convert.ToUInt32(match.Value.Substring(i * 6 + 2, 4), 16);
-                }
-
-                var sub = FromCodePoint(codePoints);
-
-                return sub;
-            });
-
-        if (isUnicode)
+        if (pattern is null)
         {
-            if (Regex.IsMatch(tmp, @"\\0[0-9]+"))
-            {
-                throw new ParserException("Invalid decimal escape");
-            }
-
-            if (Regex.IsMatch(tmp, @"\\[1-9]\d*"))
-            {
-                throw new ParserException("Invalid escape");
-            }
-
-            tmp = Regex
-                // Replace every Unicode escape sequence with the equivalent
-                // BMP character or a constant ASCII code point in the case of
-                // astral symbols. (See the above note on `astralSubstitute`
-                // for more information.)
-                .Replace(tmp, @"\\u\{([0-9a-fA-F]+)\}", (match) =>
-                {
-                    var codePoint = Convert.ToUInt32(match.Groups[1].Value, 16);
-
-                    if (codePoint > 0x10FFFF)
-                    {
-                        ThrowUnexpectedToken(Messages.InvalidRegExp);
-                    }
-
-                    return FromCodePoint(codePoint);
-                });
-
-            tmp = ConvertUnicodeRegexRanges(tmp);
+            throw new ArgumentNullException(nameof(pattern));
         }
 
-        // \u is a valid escape sequence in JS, but not in .NET
-        // search for any of these that are not valid \uxxxx values
-
-        tmp = Regex.Replace(tmp, @"(\\+)u(?![a-fA-F0-9]{4})", static match =>
+        if (flags is null)
         {
-            return new string('\\', match.Groups[1].Value.Length / 2 * 2) + 'u';
-        });
-
-        // First, detect invalid regular expressions.
-        var options = ParseRegexOptions(flags);
-
-        try
-        {
-            new Regex(tmp, options, matchTimeout);
-        }
-        catch
-        {
-            tmp = EscapeFailingRegex(tmp);
-
-            try
-            {
-                new Regex(tmp, options, matchTimeout);
-            }
-            catch (Exception ex)
-            {
-                ThrowUnexpectedToken($"{Messages.InvalidRegExp}: {ex.Message}");
-            }
+            throw new ArgumentNullException(nameof(flags));
         }
 
-        // Replace all non-escaped $ occurences by \r?$
-        // c.f. http://programmaticallyspeaking.com/regular-expression-multiline-mode-whats-a-newline.html
-
-        var index = 0;
-        var newPattern = tmp;
-
-        if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
-        {
-            while ((index = newPattern.IndexOf("$", index, StringComparison.Ordinal)) != -1)
-            {
-                if (index > 0 && newPattern[index - 1] != '\\')
-                {
-                    newPattern = newPattern.Substring(0, index) + @"\r?" + newPattern.Substring(index);
-                    index += 4;
-                }
-                else
-                {
-                    index++;
-                }
-            }
-        }
-
-        pattern = newPattern;
-
-        return new Regex(pattern, options, matchTimeout);
-    }
-
-    /// <summary>
-    /// Ensures the braces are balanced in a unicode Regex
-    /// </summary>
-    private void CheckBracesBalance(string pattern, bool unicode)
-    {
-        var inGroup = 0;
-        var inQuantifier = false;
-        var inSet = false;
-
-        for (var i = 0; i < pattern.Length; i++)
-        {
-            var ch = pattern[i];
-
-            if (ch == '\\')
-            {
-                // Skip escape
-
-                i++;
-                continue;
-            }
-
-            switch (ch)
-            {
-                case '(':
-
-                    if (inSet)
-                    {
-                        break;
-                    }
-
-                    inGroup++;
-
-                    break;
-
-                case ')':
-
-                    if (inSet)
-                    {
-                        break;
-                    }
-
-                    if (inGroup == 0)
-                    {
-                        throw new ParserException(Messages.RegexUnmatchedOpenParen);
-                    }
-
-                    inGroup--;
-
-                    break;
-
-                case '{':
-
-                    if (inSet)
-                    {
-                        break;
-                    }
-
-                    if (!inQuantifier)
-                    {
-                        inQuantifier = true;
-                    }
-                    else if (unicode)
-                    {
-                        throw new ParserException(Messages.RegexIncompleteQuantifier);
-                    }
-
-                    break;
-
-                case '}':
-
-                    if (inSet)
-                    {
-                        break;
-                    }
-
-                    if (inQuantifier)
-                    {
-                        inQuantifier = false;
-                    }
-                    else if (unicode)
-                    {
-                        throw new ParserException(Messages.RegexLoneQuantifierBrackets);
-                    }
-
-                    break;
-
-                case '[':
-
-                    if (inSet)
-                    {
-                        break;
-                    }
-
-                    inSet = true;
-
-                    break;
-
-                case ']':
-
-                    if (inSet)
-                    {
-                        inSet = false;
-                    }
-                    else if (unicode)
-                    {
-                        throw new ParserException(Messages.RegexLoneQuantifierBrackets);
-                    }
-
-                    break;
-
-                default: break;
-            }
-        }
-
-        if (inGroup > 0)
-        {
-            throw new ParserException(Messages.RegexUnterminatedGroup);
-        }
-
-        if (inSet)
-        {
-            throw new ParserException(Messages.RegexUnterminatedCharacterClass);
-        }
-
-        if (unicode)
-        {
-            if (inQuantifier)
-            {
-                throw new ParserException(Messages.RegexLoneQuantifierBrackets);
-            }
-        }
-    }
-
-    private string ConvertUnicodeRegexRanges(string pattern)
-    {
-        if (String.IsNullOrEmpty(pattern))
-        {
-            return pattern;
-        }
-
-        bool converted = false;
-
-        var sb = GetStringBuilder();
-
-        for (var i = 0; i < pattern.Length; i++)
-        {
-            var ch = pattern[i];
-
-            // Sets have to be converted char by char
-            if (ch == '[' && i + 1 < pattern.Length)
-            {
-                var inverted = pattern[i + 1] == '^';
-
-                if (inverted)
-                {
-                    i++;
-                }
-
-                var next = i + 1;
-
-                while (next < pattern.Length && pattern[next] != ']')
-                {
-                    // Consume escaped chars
-                    if (pattern[next] == '\\')
-                    {
-                        next++;
-                    }
-
-                    next++;
-                }
-
-                // Reached end of pattern
-                if (next >= pattern.Length)
-                {
-                    sb.Append('[');
-                    continue;
-                }
-
-                var set = pattern.Substring(i + 1, next - i - 1);
-
-                // Convert the set of chars into their unicode
-
-                AppendConvertUnicodeSet(sb, set, inverted);
-
-                i = next;
-
-                converted = true;
-            }
-            else if (ch == '.')
-            {
-                converted = true;
-
-                sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|.)");
-            }
-            else if (ch == '\\' && i + 1 < pattern.Length)
-            {
-                ch = pattern[++i];
-
-                if (ch == 'D' || ch == 'S' || ch == 'W')
-                {
-                    converted = true;
-
-                    sb.Append("(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|\\").Append(ch).Append(')');
-                }
-                else
-                {
-                    converted = true;
-
-                    sb.Append('\\').Append(ch);
-                }
-            }
-            else
-            {
-                sb.Append(ch);
-            }
-        }
-
-        return converted ? sb.ToString() : pattern;
-    }
-
-    /// <summary>
-    /// Converts a range ([..]) with a unicode flag to a compatible one for RegEx.
-    /// </summary>
-    internal static void AppendConvertUnicodeSet(StringBuilder sb, string set, bool inverted)
-    {
-        // \u{1F4A9} == 💩 == \ud83d\udca9
-        // \u{1F4AB} == 💫 == \ud83d\udcab
-
-        // Regex only looks at single System.Char units. U+1F4A9 for example is two Chars that, from Regex 's perspective, are independent.
-        // "[💩-💫]" is "[\ud83d\udca9-\ud83d\udcab]", so it just looks at the individual Char values, it sees "\udca9-\ud83d", which is not ordered, hence the error.
-        // This is a known design / limitation of Regex that's existed since it was added, and there are currently no plans to improve that.
-        // The Regex needs to be rewritten to (?:\ud83d[\udca9-\udcab])
-
-        // Each char or special notation (\s, \d, ...) is converted to a char range such they can be sorted, groupped or inverted.
-
-        if (String.IsNullOrEmpty(set))
-        {
-            sb.Append("[]");
-            return;
-        }
-
-        var ranges = CreateRanges(set);
-
-        if (inverted)
-        {
-            InvertRanges(ranges);
-        }
-
-        var singleCharRanges = new List<Range>(ranges.Length);
-
-        foreach (var range in ranges)
-        {
-            if (range.Start > range.End)
-            {
-                throw new ParserException("Invalid regular expression: Range out of order in character class");
-            }
-
-            // If Start is not single char, End can't be either (greater), skip
-            if (range.Start >= 0x10000)
-            {
-                continue;
-            }
-            else if (range.End >= 0x10000)
-            {
-                singleCharRanges.Add(new Range(range.Start, 0xFFFF));
-            }
-            else
-            {
-                singleCharRanges.Add(range);
-            }
-
-            break;
-        }
-
-        var multiCharRanges = new List<Range>(ranges.Length - singleCharRanges.Count + 1);
-
-        for (var i = 0; i < ranges.Length; i++)
-        {
-            if (ranges[i].Start >= 0x10000)
-            {
-                multiCharRanges.Add(ranges[i]);
-            }
-            else if (ranges[i].End >= 0x10000)
-            {
-                multiCharRanges.Add(new Range(0x10000, ranges[i].End));
-            }
-        }
-
-        sb.Append("(?:");
-
-        if (multiCharRanges.Count > 0)
-        {
-            sb.Append("(?:");
-
-            for (var i = 0; i < multiCharRanges.Count; i++)
-            {
-                if (i > 0)
-                {
-                    sb.Append('|');
-                }
-
-                var c = multiCharRanges[i];
-
-                if (c.Start == c.End)
-                {
-                    sb.Append(char.ConvertFromUtf32(c.Start));
-                }
-                else
-                {
-                    var start = char.ConvertFromUtf32(c.Start);
-                    var stop = char.ConvertFromUtf32(c.End);
-
-                    if (start[0] == stop[0])
-                    {
-                        sb.Append(start[0]).Append('[').Append(start[1]).Append('-').Append(stop[1]).Append(']');
-                    }
-                    else
-                    {
-                        var s1 = (start[1] > 0xDC00) ? 1 : 0;
-                        var s2 = (stop[1] < 0xDFFF) ? 1 : 0;
-
-                        if (s1 != 0)
-                        {
-                            sb.Append(start[0]).Append('[').Append(start[1]).Append("-\uDFFF]|");
-                        }
-
-                        if (stop[0] - start[0] >= s1 + s2)
-                        {
-                            sb.Append('[');
-                            sb.Append((char) (start[0] + s1));
-                            sb.Append('-');
-                            sb.Append((char) (stop[0] - s2));
-                            sb.Append(']');
-                            sb.Append("[\uDC00-\uDFFF]|");
-                        }
-
-                        if (s2 != 0)
-                        {
-                            sb.Append(stop[0]).Append("[\uDC00-").Append(stop[1]).Append(']');
-                        }
-                    }
-                }
-            }
-
-            sb.Append(")");
-        }
-
-        if (singleCharRanges.Count > 0)
-        {
-            if (multiCharRanges.Count > 0)
-            {
-                sb.Append('|');
-            }
-
-            sb.Append("[");
-
-            for (var i = 0; i < singleCharRanges.Count; i++)
-            {
-                var c = singleCharRanges[i];
-
-                if (c.Start == c.End)
-                {
-                    sb.Append("\\u").Append(c.Start.ToString("X4"));
-                }
-                else
-                {
-                    sb.Append("\\u").Append(c.Start.ToString("X4"));
-
-                    if (c.End > c.Start + 1)
-                    {
-                        sb.Append('-');
-                    }
-
-                    sb.Append("\\u").Append(c.End.ToString("X4"));
-                }
-            }
-
-            sb.Append("]");
-        }
-
-        sb.Append(")");
-    }
-
-    internal record struct Range(int Start, int End);
-
-    internal static Range[] CreateRanges(string range)
-    {
-        var r = new List<Range>();
-
-        char c;
-        int firstCodePoint;
-        int secondCodePoint;
-
-        for (var i = 0; i < range.Length; i++)
-        {
-            c = range[i];
-            firstCodePoint = CodePointAt(range, i);
-
-            if (char.IsHighSurrogate(c))
-            {
-                i++;
-            }
-
-            // Special char range?
-            //
-            if (c == '\\' && i + 1 < range.Length)
-            {
-                c = range[++i];
-
-                switch (c)
-                {
-                    case 'd':
-                        r.Add(new Range(48, 57));
-                        continue;
-
-                    case 'D': // Not a digit (inverse of d)
-                        r.Add(new Range(0, 47));
-                        r.Add(new Range(58, 0x10FFFF));
-                        continue;
-
-                    case 's':
-
-                        r.Add(new Range(9, 10));
-                        r.Add(new Range(13, 13));
-                        r.Add(new Range(32, 32));
-                        continue;
-
-                    case 'S': // Not a space (inverse of s)
-                        r.Add(new Range(0, 8));
-                        r.Add(new Range(11, 12));
-                        r.Add(new Range(14, 31));
-                        r.Add(new Range(33, 0x10FFFF));
-                        continue;
-
-                    case 'w':
-                        r.Add(new Range(48, 57));
-                        r.Add(new Range(65, 90));
-                        r.Add(new Range(95, 95));
-                        r.Add(new Range(97, 122));
-                        continue;
-
-                    case 'W': // Not a word letter (inverse of w)
-                        r.Add(new Range(0, 47));
-                        r.Add(new Range(58, 64));
-                        r.Add(new Range(91, 94));
-                        r.Add(new Range(96, 96));
-                        r.Add(new Range(123, 0x10FFFF));
-                        continue;
-
-                    default:
-                        i--;
-                        break;
-                }
-            }
-            else if (i < range.Length - 2 && range[i + 1] == '-')
-            {
-                i += 2;
-
-                secondCodePoint = CodePointAt(range, i);
-
-                if (secondCodePoint >= 0x10000)
-                {
-                    i++;
-                }
-
-                r.Add(new Range(firstCodePoint, secondCodePoint));
-                continue;
-            }
-
-            r.Add(new Range(firstCodePoint, firstCodePoint));
-        }
-
-        if (r.Count <= 1)
-        {
-            return r.ToArray();
-        }
-
-        r.Sort(new Comparison<Range>(new Func<Range, Range, int>((x, y) => x.Start - y.Start)));
-
-        // optimize
-
-        var rNew = new List<Range>();
-
-        var cr = r[0];
-        for (var i = 1; i < r.Count; i++)
-        {
-            if (r[i].End <= cr.End)
-            {
-                continue;
-            }
-
-            if (cr.End >= r[i].Start - 1)
-            {
-                cr.End = r[i].End;
-                continue;
-            }
-
-            rNew.Add(cr);
-            cr = r[i];
-        }
-        rNew.Add(cr);
-
-        return rNew.ToArray();
-    }
-
-    /// <summary>
-    /// Negates a Range set.  b-y -> \0-a;z-\u0x10FFFF
-    /// </summary>
-    /// <param name="ranges"></param>
-    /// <returns></returns>
-    private static Range[] InvertRanges(Range[] ranges)
-    {
-        if (ranges.Length == 0)
-        {
-            return new Range[] { new Range(0, 0x10FFFF) };
-        }
-
-        var inverted = new List<Range>();
-
-        if (ranges[0].Start > 0)
-        {
-            inverted.Add(new Range(0, ranges[0].Start - 1));
-        }
-
-        for (var i = 1; i < ranges.Length; i++)
-        {
-            inverted.Add(new Range(ranges[i - 1].End + 1, ranges[i].Start - 1));
-        }
-
-        if (ranges[ranges.Length - 1].End < 0x10FFFF)
-        {
-            inverted.Add(new Range(ranges[ranges.Length - 1].End + 1, 0x10FFFF));
-        }
-
-        return inverted.ToArray();
-    }
-
-    internal string EscapeFailingRegex(string pattern)
-    {
-        // .NET 4.x doesn't support [^] which should match any character including newline
-        // c.f. https://github.com/sebastienros/esprima-dotnet/issues/146
-        if (pattern.Contains("[^]"))
-        {
-            pattern = pattern.Replace("[^]", @"[\s\S]");
-        }
-
-        if (pattern.Contains("--"))
-        {
-            pattern = pattern.Replace("--[", "-[");
-            var r = new Regex("--([^\\[\\]]*)");
-            pattern = r.Replace(pattern, "-[$1]"); //it should only be replaced when inside of a "[", but for this we need a regex parser.
-        }
-
-        if (pattern.Contains("?<$"))
-        {
-            pattern = pattern.Replace("?<$", "?<a");
-        }
-
-        // .NET doesn't support [] which should not match any characters (inverse of [^])
-        if (pattern.Contains("[]"))
-        {
-            // This is a temporary solution to make the parser pass. It is not a correct replacement as it will match the \0 char.
-            pattern = pattern.Replace("[]", @"[\0]");
-        }
-
-        return pattern;
+        var defaultOptions = ScannerOptions.Default;
+        matchTimeout ??= defaultOptions.RegexTimeout;
+        errorHandler ??= defaultOptions.ErrorHandler;
+
+        var scannerOptions = matchTimeout.Value == defaultOptions.RegexTimeout && tolerant == defaultOptions.Tolerant && errorHandler == defaultOptions.ErrorHandler
+            ? ScannerOptions.Default
+            : new ScannerOptions { RegexTimeout = matchTimeout.Value, Tolerant = tolerant, ErrorHandler = errorHandler };
+
+        return new RegexParser(pattern, flags, scannerOptions).Parse(out _);
     }
 
     private string ScanRegExpBody()
@@ -2565,14 +1913,17 @@ public sealed partial class Scanner
 
     internal Token ScanRegExp()
     {
-        var start = _index;
-
+        var bodyStart = _index;
         var body = ScanRegExpBody();
+
+        var flagsStart = _index;
         var flags = ScanRegExpFlags();
 
-        var value = _adaptRegexp ? ParseRegex(body, flags, _regexTimeout) : null;
+        var value = _adaptRegexp
+            ? new RegexParser(body, bodyStart + 1, flags, flagsStart, this).Parse(out _)
+            : null;
 
-        return Token.CreateRegexLiteral(value, new RegexValue(body, flags), start, end: _index, _lineNumber, _lineStart);
+        return Token.CreateRegexLiteral(value, new RegexValue(body, flags), bodyStart, end: _index, _lineNumber, _lineStart);
     }
 
     public Token Lex() => Lex(new LexOptions());
@@ -2631,75 +1982,6 @@ public sealed partial class Scanner
         }
 
         return ScanPunctuator();
-    }
-
-    [Flags]
-    private enum RegexFlags
-    {
-        None = 0,
-        Global = 1,
-        Multiline = 2,
-        IgnoreCase = 4,
-        Unicode = 8,
-        Sticky = 16,
-        DotAll = 32,
-        Indices = 64,
-        UnicodeSets = 128
-    }
-
-    public RegexOptions ParseRegexOptions(string input)
-    {
-        var flags = RegexFlags.None;
-        foreach (var c in input)
-        {
-            var flag = c switch
-            {
-                'g' => RegexFlags.Global,
-                'i' => RegexFlags.IgnoreCase,
-                'm' => RegexFlags.Multiline,
-                'u' => RegexFlags.Unicode,
-                'y' => RegexFlags.Sticky,
-                's' => RegexFlags.DotAll,
-                'd' => RegexFlags.Indices,
-                'v' => RegexFlags.UnicodeSets,
-                _ => RegexFlags.None
-            };
-
-            if (flag == RegexFlags.None || (flags & flag) != 0)
-            {
-                // unknown or already set
-                ThrowUnexpectedToken(Messages.InvalidRegExpFlags);
-            }
-
-            flags |= flag;
-        }
-
-        if ((flags & RegexFlags.Unicode) != 0 && (flags & RegexFlags.UnicodeSets) != 0)
-        {
-            // cannot have them both
-            ThrowUnexpectedToken(Messages.InvalidRegExpFlags);
-        }
-
-        var options = RegexOptions.ECMAScript;
-
-        if ((flags & RegexFlags.Multiline) != 0)
-        {
-            options |= RegexOptions.Multiline;
-        }
-
-        if ((flags & RegexFlags.DotAll) != 0)
-        {
-            // cannot use ECMA mode with single line
-            options |= RegexOptions.Singleline;
-            options &= ~RegexOptions.ECMAScript;
-        }
-
-        if ((flags & RegexFlags.IgnoreCase) != 0)
-        {
-            options |= RegexOptions.IgnoreCase;
-        }
-
-        return options;
     }
 
     internal Marker GetMarker() => new(_index, _lineNumber, Column: _index - _lineStart);

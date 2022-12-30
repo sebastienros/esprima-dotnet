@@ -14,9 +14,6 @@
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <Version>3.0.0-beta-$(BuildNumber)</Version>
 
-    <!-- to get switch over span -->
-    <LangVersion>preview</LangVersion>
-
     <!-- SkipLocalsInit -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 

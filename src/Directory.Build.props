@@ -5,7 +5,7 @@
     <Copyright>Sebastien Ros</Copyright>
     <Authors>Sebastien Ros</Authors>
 
-    <LangVersion>latest</LangVersion>
+    <LangVersion>11</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 

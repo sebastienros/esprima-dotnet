@@ -50,7 +50,7 @@ public static partial class Character
     internal static bool IsIdentifierStartAstral(int cp)
     {
         Debug.Assert(cp > char.MaxValue);
-        return CharRange.CharSetContains(cp, s_identifierStartAstralRanges, s_rangeLengthLookup);
+        return CodePointRange.RangesContain(cp, s_identifierStartAstralRanges, s_rangeLengthLookup);
     }
 
     internal static bool IsIdentifierPart(char ch)
@@ -61,7 +61,7 @@ public static partial class Character
     internal static bool IsIdentifierPartAstral(int cp)
     {
         Debug.Assert(cp > char.MaxValue);
-        return CharRange.CharSetContains(cp, s_identifierPartAstralRanges, s_rangeLengthLookup);
+        return CodePointRange.RangesContain(cp, s_identifierPartAstralRanges, s_rangeLengthLookup);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-numeric-literals

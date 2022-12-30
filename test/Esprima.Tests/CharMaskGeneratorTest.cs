@@ -144,9 +144,9 @@ public class CharMaskGeneratorTest
             (UnicodeCharacterUtilities.IsIdentifierPart, "identifierPart"),
         })
         {
-            var ranges = new ArrayList<CharRange>();
+            var ranges = new ArrayList<CodePointRange>();
 
-            AddCharSet(ref ranges, match, start: 0x10000);
+            CodePointRange.AddRanges(ref ranges, match, start: 0x10000);
 
             if (ranges.Count == 0)
             {
@@ -161,7 +161,7 @@ public class CharMaskGeneratorTest
                 sb.Append("        ");
                 foreach (var range in chunk)
                 {
-                    sb.Append("0x").Append(EncodeCharRange(range, lengthLookup).ToString("X8", CultureInfo.InvariantCulture));
+                    sb.Append("0x").Append(EncodeRange(range, lengthLookup).ToString("X8", CultureInfo.InvariantCulture));
                     sb.Append(", ");
                 }
 
@@ -188,33 +188,7 @@ public class CharMaskGeneratorTest
         sb.AppendLine("    };");
     }
 
-    private static void AddCharSet(ref ArrayList<CharRange> ranges, Predicate<int> includesCodePoint, int start = 0, int end = Character.UnicodeLastCodePoint)
-    {
-        for (; start <= end; start++)
-        {
-            var cp = start;
-
-            if (!includesCodePoint(cp))
-            {
-                continue;
-            }
-
-            if (ranges.Count > 0)
-            {
-                var rangeSpan = ranges.AsSpan();
-                ref var range = ref rangeSpan[rangeSpan.Length - 1];
-                if (range.End == cp - 1)
-                {
-                    range = new CharRange(range.Start, cp);
-                    continue;
-                }
-            }
-
-            ranges.Add(new CharRange(cp, cp));
-        }
-    }
-
-    private static int EncodeCharRange(CharRange range, List<int> lengthLookup)
+    private static int EncodeRange(CodePointRange range, List<int> lengthLookup)
     {
         var lengthMinusOne = range.End - range.Start;
         var lengthLookupIndex = lengthLookup.IndexOf(lengthMinusOne);

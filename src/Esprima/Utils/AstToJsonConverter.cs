@@ -788,16 +788,7 @@ public class AstToJsonConverter : AstVisitor
             switch (value)
             {
                 case null:
-                    if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && literal.TokenType == TokenType.RegularExpression)
-                    {
-                        // This is how esprima.org actually renders regexes since it relies on Regex.toString
-                        _writer.String(literal.Raw);
-                    }
-                    else
-                    {
-                        _writer.Null();
-                    }
-
+                    _writer.Null();
                     break;
                 case bool b:
                     _writer.Boolean(b);

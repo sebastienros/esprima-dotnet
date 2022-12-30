@@ -394,7 +394,7 @@ public class JsxParser : JavaScriptParser
             else if (hex && str.Length > 2)
             {
                 result =
-                    ((char) int.Parse(str.Substring(2), System.Globalization.NumberStyles.HexNumber)).ToString();
+                    ((char) int.Parse(str.Substring(2), System.Globalization.NumberStyles.AllowHexSpecifier)).ToString();
             }
             else if (!numeric && !hex && XHTMLEntities.TryGetValue(str, out var entity))
             {
