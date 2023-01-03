@@ -1,5 +1,6 @@
 #if NET6_0_OR_GREATER
 
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -19,6 +20,35 @@ public class CharMaskGeneratorTest
     [Fact]
     public void CanGenerateMasks()
     {
+        // Assert.False(UnicodeCharacterUtilities.IsIdentifierPartCharacter((char) 65279));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('᧚'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter((char) 8204));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter('\u0061'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter('\\'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\u309B'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\u1885'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter('゛'));
+        // Assert.False(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\u2E2F'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter('\u00B7'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('ࠚ'));
+
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('$'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\\'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter('$'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter('\\'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\u2118'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierPartCharacter('\u212E'));
+
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\u2BC0'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('ࠚ'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('ꭩ'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('ꚜ'));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter((char) 55305));
+        // Assert.True(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\u0870'));
+
+        // Assert.False(UnicodeCharacterUtilities.IsIdentifierPartCharacter('\u2E2F'));
+        // Assert.False(UnicodeCharacterUtilities.IsIdentifierStartCharacter('\u2E2F'));
+
         var masks = new List<CharacterMask>(char.MaxValue);
         for (var c = char.MinValue; c < char.MaxValue; ++c)
         {
@@ -27,11 +57,11 @@ public class CharMaskGeneratorTest
             {
                 mask |= CharacterMask.WhiteSpace;
             }
-            if (IsIdentifierStart(c))
+            if (UnicodeCharacterUtilities.IsIdentifierStartCharacter(c))
             {
                 mask |= CharacterMask.IdentifierStart;
             }
-            if (IsIdentifierPart(c))
+            if (UnicodeCharacterUtilities.IsIdentifierPartCharacter(c))
             {
                 mask |= CharacterMask.IdentifierPart;
             }
@@ -111,6 +141,101 @@ public class CharMaskGeneratorTest
                cp >= 'A' && cp <= 'F' ||
                cp >= 'a' && cp <= 'f';
     }
-
 }
+
+// Following code was used as basis https://github.com/dotnet/roslyn/blob/e123a4207123d5df8c45fb1caba0fb3acbae0e00/src/Compilers/Core/Portable/InternalUtilities/UnicodeCharacterUtilities.cs
+// Original Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+
+internal static class UnicodeCharacterUtilities
+{
+    public static bool IsIdentifierStartCharacter(char ch)
+    {
+        if (ch < 'a') // '\u0061'
+        {
+            if (ch == '$')
+            {
+                return true;
+            }
+
+            if (ch < 'A') // '\u0041'
+            {
+                return false;
+            }
+
+            return ch is <= 'Z' or '_' or '\\';
+        }
+
+        if (ch <= 'z')
+        {
+            return true;
+        }
+
+        if (ch <= '\u007F') // max ASCII
+        {
+            return false;
+        }
+
+        // some manual checks which categories cannot handle at the moment
+
+        // VERTICAL TILDE (U+2E2F) is not recognized as ID_Start character - belongs to ModifierLetter
+        if (ch == '\u2E2F')
+        {
+            return false;
+        }
+
+        var cat = CharUnicodeInfo.GetUnicodeCategory(ch);
+        return Character.IsIdentifierStartUnicodeCategory(cat);
+    }
+
+    public static bool IsIdentifierPartCharacter(char ch)
+    {
+        if (ch < 'a') // '\u0061'
+        {
+            if (ch < 'A') // '\u0041'
+            {
+                return ch is >= '0' and <= '9' or '$';
+            }
+
+            return ch is <= 'Z' or '_' or '\\';
+        }
+
+        if (ch <= 'z') // '\u007A'
+        {
+            return true;
+        }
+
+        if (ch <= '\u007F') // max ASCII
+        {
+            return false;
+        }
+
+        var cat = CharUnicodeInfo.GetUnicodeCategory(ch);
+        return Character.IsIdentifierPartUnicodeCategory(cat);
+    }
+
+    public static bool IsValidIdentifier(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return false;
+        }
+
+        if (!IsIdentifierStartCharacter(name[0]))
+        {
+            return false;
+        }
+
+        var nameLength = name.Length;
+        for (var i = 1; i < nameLength; i++) //NB: start at 1
+        {
+            if (!IsIdentifierPartCharacter(name[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
 #endif

@@ -661,6 +661,11 @@ public sealed partial class Scanner
 
     private string GetComplexIdentifier()
     {
+        if (CharUnicodeInfo.GetUnicodeCategory(_source, _index) == UnicodeCategory.OtherSymbol)
+        {
+            ThrowUnexpectedToken();
+        }
+
         var cp = CodePointAt(_source, _index);
         var id = Character.FromCodePoint(cp);
         _index += id.Length;
@@ -682,8 +687,7 @@ public sealed partial class Scanner
             }
             else
             {
-                char ch1;
-                if (!ScanHexEscape('u', out ch1) || ch1 == '\\' || !Character.IsIdentifierStart(ch1))
+                if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierStart(ch1))
                 {
                     ThrowUnexpectedToken();
                 }
@@ -698,7 +702,12 @@ public sealed partial class Scanner
         {
             cp = CodePointAt(_source, _index);
             ch = Character.FromCodePoint(cp);
-            if (!Character.IsIdentifierPart(ch))
+
+            var identifierPart = ch.Length == 1
+                ? Character.IsIdentifierPart(ch[0])
+                : Character.IsIdentifierPart(_source, _index);
+
+            if (!identifierPart)
             {
                 break;
             }
@@ -723,7 +732,7 @@ public sealed partial class Scanner
                 }
                 else
                 {
-                    if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierPart(ch1))
+                    if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || char.IsLowSurrogate(ch1) || !Character.IsIdentifierPart(ch1))
                     {
                         ThrowUnexpectedToken();
                     }
@@ -2449,7 +2458,7 @@ public sealed partial class Scanner
         while (!Eof())
         {
             var ch = _source[_index];
-            if (!Character.IsIdentifierPart(ch))
+            if (!Character.IsIdentifierStart(ch))
             {
                 break;
             }
