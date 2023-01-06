@@ -8,6 +8,7 @@ public static class Messages
     public const string BadGetterArity = "Getter must not have any formal parameters";
     public const string BadSetterArity = "Setter must have exactly one formal parameter";
     public const string BadSetterRestParameter = "Setter function argument must not be a rest parameter";
+    public const string CannotUseAwaitInClassStaticBlock = "Cannot use await in class static initialization block";
     public const string CannotUseImportMetaOutsideAModule = "Cannot use 'import.meta' outside a module";
     public const string CannotUseImportWithNew = "Cannot use new with import";
     public const string ConstructorIsAccessor = "Class constructor may not be an accessor";

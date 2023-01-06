@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -154,4 +153,6 @@ public readonly record struct Token
     {
         return new Token(newType, _value, Start, End, LineNumber, LineStart, Octal);
     }
+
+    internal bool IsEscaped(string value) => value.Length != End - Start;
 }

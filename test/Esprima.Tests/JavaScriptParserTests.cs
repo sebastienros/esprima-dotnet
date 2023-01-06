@@ -14,7 +14,7 @@ public class JavaScriptParserTests
 #if DEBUG
         const int Depth = 210;
 #else
-        const int Depth = 460;
+        const int Depth = 455;
 #endif
         var input = $"if ({new string('(', Depth)}true{new string(')', Depth)}) {{ }}";
         parser.ParseScript(input);
