@@ -32,6 +32,8 @@ public partial class JavaScriptParser
             FirstCoverInitializedNameError = null;
             IsAssignmentTarget = false;
             IsBindingElement = false;
+            InClassFieldInit = false;
+            InClassStaticBlock = false;
             InFunctionBody = false;
             InIteration = false;
             InSwitch = false;
@@ -65,6 +67,8 @@ public partial class JavaScriptParser
         public bool IsAsync;
         public bool IsAssignmentTarget;
         public bool IsBindingElement;
+        public bool InClassFieldInit;
+        public bool InClassStaticBlock;
         public bool InFunctionBody;
         public bool InIteration;
         public bool InSwitch;
@@ -297,10 +301,10 @@ public partial class JavaScriptParser
             case TokenType.BooleanLiteral:
                 var stringValue = (string) token.Value!;
                 // Identifiers may contain escaped characters.
-                // (In tolerant mode even identifers like "nul\u{6c}" may be accepted as keywords, null or boolean literals.)
-                if (stringValue.Length == token.End - token.Start)
+                // (In tolerant mode even identifiers like "nul\u{6c}" may be accepted as keywords, null or boolean literals.)
+                if (!token.IsEscaped(stringValue))
                 {
-                    return (string) token.Value!;
+                    return stringValue;
                 }
                 break;
 
@@ -680,6 +684,10 @@ public partial class JavaScriptParser
                 {
                     TolerateUnexpectedToken(_lookahead);
                 }
+                if ((_context.InClassFieldInit || _context.InClassStaticBlock) && "arguments".Equals(_lookahead._value))
+                {
+                    TolerateError(Messages.ArgumentsNotAllowedInClassField);
+                }
 
                 if (MatchAsyncFunction())
                 {
@@ -934,8 +942,10 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
 
+        var previousInClassStaticBlock = _context.InClassStaticBlock;
         var previousStrict = _context.Strict;
         var previousAllowStrictDirective = _context.AllowStrictDirective;
+        _context.InClassStaticBlock = false;
         _context.AllowStrictDirective = parameters.Simple;
         var body = IsolateCoverGrammar(_parseFunctionSourceElements);
         hasStrictDirective = _context.Strict;
@@ -951,6 +961,7 @@ public partial class JavaScriptParser
 
         _context.Strict = previousStrict;
         _context.AllowStrictDirective = previousAllowStrictDirective;
+        _context.InClassStaticBlock = previousInClassStaticBlock;
 
         return body;
     }
@@ -959,11 +970,13 @@ public partial class JavaScriptParser
     {
         var node = CreateNode();
 
+        var previousInClassStaticBlock = _context.InClassStaticBlock;
         var previousIsAsync = _context.IsAsync;
         var previousAllowYield = _context.AllowYield;
         var previousAllowSuperAccess = _context.AllowSuperAccess;
         var previousAllowSuperCall = _context.AllowSuperCall;
 
+        _context.InClassStaticBlock = false;
         _context.IsAsync = isAsync;
         _context.AllowYield = true;
         _context.AllowSuperAccess = true;
@@ -977,6 +990,7 @@ public partial class JavaScriptParser
         _context.AllowYield = previousAllowYield;
         _context.AllowSuperAccess = previousAllowSuperAccess;
         _context.AllowSuperCall = previousAllowSuperCall;
+        _context.InClassStaticBlock = previousInClassStaticBlock;
 
         return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, isGenerator, hasStrictDirective, isAsync));
     }
@@ -1008,11 +1022,10 @@ public partial class JavaScriptParser
             case TokenType.BooleanLiteral:
             case TokenType.NullLiteral:
             case TokenType.Keyword:
-                key = Finalize(node, new Identifier((string?) token.Value!));
+                key = Finalize(node, new Identifier((string) token.Value!));
                 break;
 
             case TokenType.Punctuator when "[".Equals(token.Value):
-
                 key = IsolateCoverGrammar(_parseAssignmentExpression);
                 Expect("]");
                 break;
@@ -1609,7 +1622,7 @@ public partial class JavaScriptParser
         if (Match("."))
         {
             NextToken();
-            if (_lookahead.Type == TokenType.Identifier && _context.InFunctionBody && "target".Equals(_lookahead.Value))
+            if (_lookahead.Type == TokenType.Identifier && (_context.InFunctionBody || _context.InClassBody) && "target".Equals(_lookahead.Value))
             {
                 var property = ParseIdentifierName();
                 expr = new MetaProperty(id, property);
@@ -1738,7 +1751,7 @@ public partial class JavaScriptParser
                 match = meta.Type == TokenType.Identifier && Equals(meta.Value, "meta");
                 if (match)
                 {
-                    if (meta.End - meta.Start != "meta".Length)
+                    if (meta.IsEscaped("meta"))
                     {
                         TolerateUnexpectedToken(meta, Messages.InvalidEscapedReservedWord);
                     }
@@ -2075,7 +2088,7 @@ public partial class JavaScriptParser
         }
         else if (_context.IsAsync && MatchContextualKeyword("await"))
         {
-            if (_lookahead.End - _lookahead.Start != "await".Length)
+            if (_lookahead.IsEscaped("await"))
             {
                 TolerateUnexpectedToken(_lookahead, Messages.InvalidEscapedReservedWord);
             }
@@ -4274,8 +4287,10 @@ public partial class JavaScriptParser
             }
         }
 
+        var previousInClassStaticBlock = _context.InClassStaticBlock;
         var previousIsAsync = _context.IsAsync;
         var previousAllowYield = _context.AllowYield;
+        _context.InClassStaticBlock = false;
         _context.IsAsync = isAsync;
         _context.AllowYield = !isGenerator;
 
@@ -4307,6 +4322,7 @@ public partial class JavaScriptParser
         _context.Strict = previousStrict;
         _context.IsAsync = previousIsAsync;
         _context.AllowYield = previousAllowYield;
+        _context.InClassStaticBlock = previousInClassStaticBlock;
 
         var functionDeclaration = Finalize(node, new FunctionDeclaration(id, parameters, body, isGenerator, hasStrictDirective, isAsync));
         return functionDeclaration;
@@ -4334,8 +4350,10 @@ public partial class JavaScriptParser
         Expression? id = null;
         Token? firstRestricted = null;
 
+        var previousInClassStaticBlock = _context.InClassStaticBlock;
         var previousIsAsync = _context.IsAsync;
         var previousAllowYield = _context.AllowYield;
+        _context.InClassStaticBlock = false;
         _context.IsAsync = isAsync;
         _context.AllowYield = !isGenerator;
 
@@ -4396,6 +4414,7 @@ public partial class JavaScriptParser
         _context.AllowStrictDirective = previousAllowStrictDirective;
         _context.IsAsync = previousIsAsync;
         _context.AllowYield = previousAllowYield;
+        _context.InClassStaticBlock = previousInClassStaticBlock;
 
         return Finalize(node, new FunctionExpression((Identifier?) id, parameters, body, isGenerator, hasStrictDirective, isAsync));
     }
@@ -4485,55 +4504,56 @@ public partial class JavaScriptParser
 
     private FunctionExpression ParseGetterMethod()
     {
-        var node = CreateNode();
-
-        var previousIsAsync = _context.IsAsync;
-        var previousAllowYield = _context.AllowYield;
-        var previousAllowSuperAccess = _context.AllowSuperAccess;
-        var previousAllowSuperCall = _context.AllowSuperCall;
-
-        _context.IsAsync = false;
-        _context.AllowYield = true;
-        _context.AllowSuperAccess = true;
-        _context.AllowSuperCall = false;
-        var formalParameters = ParseFormalParameters();
-        if (formalParameters.Parameters.Count > 0)
+        var method = ParseMethod(isAsync: false, generator: false);
+        if (method.Params.Count > 0)
         {
             TolerateError(Messages.BadGetterArity);
         }
 
-        var method = ParsePropertyMethod(ref formalParameters, out var hasStrictDirective);
-
-        _context.IsAsync = previousIsAsync;
-        _context.AllowYield = previousAllowYield;
-        _context.AllowSuperAccess = previousAllowSuperAccess;
-        _context.AllowSuperCall = previousAllowSuperCall;
-
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, hasStrictDirective, false));
+        return method;
     }
 
     private FunctionExpression ParseSetterMethod()
     {
+        var method = ParseMethod(isAsync: false, generator: false);
+
+        ref readonly var parameters = ref method.Params;
+        if (parameters.Count != 1)
+        {
+            TolerateError(Messages.BadSetterArity);
+        }
+        else if (parameters[0] is RestElement)
+        {
+            TolerateError(Messages.BadSetterRestParameter);
+        }
+
+        return method;
+    }
+
+    private FunctionExpression ParseGeneratorMethod(bool isAsync)
+    {
+        return ParseMethod(isAsync, generator: true);
+    }
+
+    private FunctionExpression ParseMethod(bool isAsync, bool generator)
+    {
         var node = CreateNode();
 
+        var previousInClassStaticBlock = _context.InClassStaticBlock;
         var previousIsAsync = _context.IsAsync;
         var previousAllowYield = _context.AllowYield;
         var previousAllowSuperAccess = _context.AllowSuperAccess;
         var previousAllowSuperCall = _context.AllowSuperCall;
 
-        _context.IsAsync = false;
+        _context.InClassStaticBlock = false;
+        _context.IsAsync = isAsync;
         _context.AllowYield = true;
         _context.AllowSuperAccess = true;
         _context.AllowSuperCall = false;
+
         var formalParameters = ParseFormalParameters();
-        if (formalParameters.Parameters.Count != 1)
-        {
-            TolerateError(Messages.BadSetterArity);
-        }
-        else if (formalParameters.Parameters[0] is RestElement)
-        {
-            TolerateError(Messages.BadSetterRestParameter);
-        }
+
+        _context.AllowYield = !generator;
 
         var method = ParsePropertyMethod(ref formalParameters, out var hasStrictDirective);
 
@@ -4541,34 +4561,9 @@ public partial class JavaScriptParser
         _context.AllowYield = previousAllowYield;
         _context.AllowSuperAccess = previousAllowSuperAccess;
         _context.AllowSuperCall = previousAllowSuperCall;
+        _context.InClassStaticBlock = previousInClassStaticBlock;
 
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator: false, hasStrictDirective, false));
-    }
-
-    private FunctionExpression ParseGeneratorMethod(bool isAsync)
-    {
-        var node = CreateNode();
-
-        var previousIsAsync = _context.IsAsync;
-        var previousAllowYield = _context.AllowYield;
-        var previousAllowSuperAccess = _context.AllowSuperAccess;
-        var previousAllowSuperCall = _context.AllowSuperCall;
-
-        _context.IsAsync = isAsync;
-        _context.AllowYield = true;
-        _context.AllowSuperAccess = true;
-        _context.AllowSuperCall = false;
-        var parameters = ParseFormalParameters();
-
-        _context.AllowYield = false;
-        var method = ParsePropertyMethod(ref parameters, out var hasStrictDirective);
-
-        _context.IsAsync = previousIsAsync;
-        _context.AllowYield = previousAllowYield;
-        _context.AllowSuperAccess = previousAllowSuperAccess;
-        _context.AllowSuperCall = previousAllowSuperCall;
-
-        return Finalize(node, new FunctionExpression(null, NodeList.From(ref parameters.Parameters), method, generator: true, hasStrictDirective, isAsync));
+        return Finalize(node, new FunctionExpression(null, NodeList.From(ref formalParameters.Parameters), method, generator, hasStrictDirective, isAsync));
     }
 
     // https://tc39.github.io/ecma262/#sec-generator-function-definitions
@@ -4636,8 +4631,10 @@ public partial class JavaScriptParser
 
         Expect("{");
 
+        var previousInClassStaticBlock = _context.InClassStaticBlock;
         var previousAllowSuperAccess = _context.AllowSuperAccess;
         var previousAllowSuperCall = _context.AllowSuperCall;
+        _context.InClassStaticBlock = true;
         _context.AllowSuperAccess = true;
         _context.AllowSuperCall = false;
 
@@ -4654,6 +4651,7 @@ public partial class JavaScriptParser
 
         _context.AllowSuperAccess = previousAllowSuperAccess;
         _context.AllowSuperCall = previousAllowSuperCall;
+        _context.InClassStaticBlock = previousInClassStaticBlock;
 
         Expect("}");
 
@@ -4713,6 +4711,8 @@ public partial class JavaScriptParser
         var isPrivate = false;
         var isAccessor = false;
 
+        var escapedStatic = false;
+
         isGenerator = Match("*");
         if (isGenerator)
         {
@@ -4741,6 +4741,7 @@ public partial class JavaScriptParser
             {
                 NextToken();
                 isStatic = true;
+                escapedStatic = token.IsEscaped("static");
                 kind = PropertyKind.Method;
                 goto ParseKey;
             }
@@ -4750,12 +4751,18 @@ public partial class JavaScriptParser
                 goto ParseValue;
             }
 
+            escapedStatic = token.IsEscaped("static");
             isStatic = true;
         }
 
         if (_lookahead.Type is not (TokenType.Identifier or TokenType.Keyword))
         {
             goto ParseKey;
+        }
+
+        if (MatchContextualKeyword("async") && _lookahead.IsEscaped("async"))
+        {
+            TolerateError(Messages.InvalidEscapedReservedWord);
         }
 
         switch ((string?) _lookahead.Value)
@@ -4823,6 +4830,11 @@ ParseValue:
         if (kind == PropertyKind.None)
         {
             kind = Match("(") ? PropertyKind.Method : PropertyKind.Property;
+        }
+
+        if (isStatic && escapedStatic)
+        {
+            TolerateError(Messages.InvalidEscapedReservedWord);
         }
 
         if (!computed && !isPrivate)
@@ -4895,15 +4907,14 @@ ParseValue:
                 if (Match("="))
                 {
                     NextToken();
-                    if (_lookahead.Type == TokenType.Identifier && (string?) _lookahead.Value == "arguments")
-                    {
-                        ThrowUnexpectedToken(_lookahead, Messages.ArgumentsNotAllowedInClassField);
-                    }
                     var previousAllowSuperAccess = _context.AllowSuperAccess;
                     var previousAllowSuperCall = _context.AllowSuperCall;
+                    var previousInClassFieldInit = _context.InClassFieldInit;
                     _context.AllowSuperAccess = true;
                     _context.AllowSuperCall = false;
+                    _context.InClassFieldInit = true;
                     value = IsolateCoverGrammar(_parseAssignmentExpression);
+                    _context.InClassFieldInit = previousInClassFieldInit;
                     _context.AllowSuperAccess = previousAllowSuperAccess;
                     _context.AllowSuperCall = previousAllowSuperCall;
                 }
