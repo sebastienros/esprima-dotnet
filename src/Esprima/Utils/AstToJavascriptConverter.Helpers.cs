@@ -137,7 +137,7 @@ partial class AstToJavaScriptConverter
     {
         if (flags.HasFlagFast(ExpressionFlags.NeedsBrackets))
         {
-            return flags & ~ExpressionFlags.InOperatorIsAmbiguousInDeclaration;
+            return flags & ~ExpressionFlags.IsInAmbiguousInOperatorContext;
         }
 
         // Puts the left-most expression in brackets if necessary (in cases where it would be interpreted differently without brackets).
@@ -148,12 +148,12 @@ partial class AstToJavaScriptConverter
                 flags.HasFlagFast(ExpressionFlags.IsInsideArrowFunctionBody | ExpressionFlags.IsLeftMostInArrowFunctionBody) && ExpressionIsAmbiguousAsArrowFunctionBody(expression) ||
                 flags.HasFlagFast(ExpressionFlags.IsInsideNewCallee | ExpressionFlags.IsLeftMostInNewCallee) && ExpressionIsAmbiguousAsNewCallee(expression))
             {
-                return (flags | ExpressionFlags.NeedsBrackets) & ~ExpressionFlags.InOperatorIsAmbiguousInDeclaration;
+                return (flags | ExpressionFlags.NeedsBrackets) & ~ExpressionFlags.IsInAmbiguousInOperatorContext;
             }
             // Edge case: for (var a = b = (c in d in e) in x);
-            else if (flags.HasFlagFast(ExpressionFlags.InOperatorIsAmbiguousInDeclaration) && expression is BinaryExpression { Operator: BinaryOperator.In })
+            else if (flags.HasFlagFast(ExpressionFlags.IsInAmbiguousInOperatorContext) && expression is BinaryExpression { Operator: BinaryOperator.In })
             {
-                return (flags | ExpressionFlags.NeedsBrackets) & ~ExpressionFlags.InOperatorIsAmbiguousInDeclaration;
+                return (flags | ExpressionFlags.NeedsBrackets) & ~ExpressionFlags.IsInAmbiguousInOperatorContext;
             }
         }
 

@@ -514,7 +514,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
 
         VisitExpression(conditionalExpression.Consequent, SubExpressionFlags(operandNeedsBrackets, isLeftMost: false), static (@this, expression, flags) =>
             // Edge case: 'in' operators in for...in loop declarations are not ambigous when they are in the consequent part of the conditional expression.
-            @this.DisambiguateExpression(expression, ~ExpressionFlags.InOperatorIsAmbiguousInDeclaration & @this.PropagateExpressionFlags(flags)));
+            @this.DisambiguateExpression(expression, ~ExpressionFlags.IsInAmbiguousInOperatorContext & @this.PropagateExpressionFlags(flags)));
 
         // Alternate expressions with the same precendence as ternary operator are unambiguous without brackets, even conditional expressions because of right-to-left associativity.
         operandNeedsBrackets = GetOperatorPrecedence(conditionalExpression, out _) > GetOperatorPrecedence(conditionalExpression.Alternate, out _);
@@ -812,7 +812,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
             }
             else
             {
-                VisitRootExpression(forStatement.Init.As<Expression>(), RootExpressionFlags(needsBrackets: false));
+                VisitRootExpression(forStatement.Init.As<Expression>(), ExpressionFlags.IsInAmbiguousInOperatorContext | RootExpressionFlags(needsBrackets: false));
             }
         }
 
@@ -1747,7 +1747,7 @@ WriteSource:
             }
             else
             {
-                VisitRootExpression(variableDeclarator.Init, ExpressionFlags.InOperatorIsAmbiguousInDeclaration | RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(variableDeclarator.Init)));
+                VisitRootExpression(variableDeclarator.Init, ExpressionFlags.IsInAmbiguousInOperatorContext | RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(variableDeclarator.Init)));
             }
         }
 

@@ -1,0 +1,150 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ForStatement",
+      "init": {
+        "type": "BinaryExpression",
+        "operator": "in",
+        "left": {
+          "type": "BinaryExpression",
+          "operator": "in",
+          "left": {
+            "type": "Literal",
+            "value": "p",
+            "raw": "'p'",
+            "range": [
+              6,
+              9
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 6
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            }
+          },
+          "right": {
+            "type": "Literal",
+            "value": "q",
+            "raw": "'q'",
+            "range": [
+              13,
+              16
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 13
+              },
+              "end": {
+                "line": 1,
+                "column": 16
+              }
+            }
+          },
+          "range": [
+            6,
+            16
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 6
+            },
+            "end": {
+              "line": 1,
+              "column": 16
+            }
+          }
+        },
+        "right": {
+          "type": "ObjectExpression",
+          "properties": [],
+          "range": [
+            20,
+            22
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 20
+            },
+            "end": {
+              "line": 1,
+              "column": 22
+            }
+          }
+        },
+        "range": [
+          6,
+          22
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 6
+          },
+          "end": {
+            "line": 1,
+            "column": 22
+          }
+        }
+      },
+      "test": null,
+      "update": null,
+      "body": {
+        "type": "BlockStatement",
+        "body": [],
+        "range": [
+          28,
+          31
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 28
+          },
+          "end": {
+            "line": 1,
+            "column": 31
+          }
+        }
+      },
+      "range": [
+        0,
+        31
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 31
+        }
+      }
+    }
+  ],
+  "sourceType": "script",
+  "strict": false,
+  "range": [
+    0,
+    31
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 31
+    }
+  }
+}
