@@ -38,7 +38,7 @@ partial class AstToJavaScriptConverter
 
         IsMethod = 1 << 16,
 
-        InOperatorIsAmbiguousInDeclaration = 1 << 24, // automatically propagated to sub-expressions
+        IsInAmbiguousInOperatorContext = 1 << 24, // automatically propagated to sub-expressions
 
         IsLeftMostInArrowFunctionBody = 1 << 25,  // automatically combined and propagated to sub-expressions
         IsInsideArrowFunctionBody = 1 << 26, // automatically propagated to sub-expressions
@@ -52,6 +52,6 @@ partial class AstToJavaScriptConverter
 
         IsInsideStatementExpression = 1 << 31, // automatically propagated to sub-expressions
 
-        IsInPotentiallyAmbiguousContext = InOperatorIsAmbiguousInDeclaration | IsInsideArrowFunctionBody | IsInsideNewCallee | IsInsideLeftHandSideExpression | IsInsideStatementExpression,
+        IsInPotentiallyAmbiguousContext = IsInAmbiguousInOperatorContext | IsInsideArrowFunctionBody | IsInsideNewCallee | IsInsideLeftHandSideExpression | IsInsideStatementExpression,
     }
 }
