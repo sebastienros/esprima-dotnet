@@ -49,7 +49,7 @@ public abstract class Program : Node, ISyntaxTreeRoot
 
     internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
 
-    protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitProgram(this);
+    protected internal sealed override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitProgram(this);
 
     protected abstract Program Rewrite(in NodeList<Statement> body);
 

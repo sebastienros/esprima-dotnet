@@ -27,7 +27,7 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         _visitor = visitor;
     }
 
-    public virtual object? VisitJsxAttribute(JsxAttribute jsxAttribute)
+    public object? VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
         _visitor.Visit(jsxAttribute.Name);
         if (jsxAttribute.Value is not null)
@@ -38,19 +38,19 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxAttribute;
     }
 
-    public virtual object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    public object? VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
         _visitor.Visit(jsxClosingElement.Name);
 
         return jsxClosingElement;
     }
 
-    public virtual object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    public object? VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         return jsxClosingFragment;
     }
 
-    public virtual object? VisitJsxElement(JsxElement jsxElement)
+    public object? VisitJsxElement(JsxElement jsxElement)
     {
         _visitor.Visit(jsxElement.OpeningElement);
         ref readonly var children = ref jsxElement.Children;
@@ -67,24 +67,24 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxElement;
     }
 
-    public virtual object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    public object? VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
         return jsxEmptyExpression;
     }
 
-    public virtual object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    public object? VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
         _visitor.Visit(jsxExpressionContainer.Expression);
 
         return jsxExpressionContainer;
     }
 
-    public virtual object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    public object? VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
         return jsxIdentifier;
     }
 
-    public virtual object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    public object? VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
         _visitor.Visit(jsxMemberExpression.Object);
         _visitor.Visit(jsxMemberExpression.Property);
@@ -92,7 +92,7 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxMemberExpression;
     }
 
-    public virtual object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    public object? VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
         _visitor.Visit(jsxNamespacedName.Name);
         _visitor.Visit(jsxNamespacedName.Namespace);
@@ -100,7 +100,7 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxNamespacedName;
     }
 
-    public virtual object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    public object? VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         _visitor.Visit(jsxOpeningElement.Name);
         ref readonly var attributes = ref jsxOpeningElement.Attributes;
@@ -112,19 +112,19 @@ public class JsxAstVisitor : AstVisitor, IJsxAstVisitor
         return jsxOpeningElement;
     }
 
-    public virtual object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    public object? VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
         return jsxOpeningFragment;
     }
 
-    public virtual object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    public object? VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         _visitor.Visit(jsxSpreadAttribute.Argument);
 
         return jsxSpreadAttribute;
     }
 
-    public virtual object? VisitJsxText(JsxText jsxText)
+    public object? VisitJsxText(JsxText jsxText)
     {
         return jsxText;
     }

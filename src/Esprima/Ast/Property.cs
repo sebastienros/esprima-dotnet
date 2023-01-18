@@ -43,7 +43,7 @@ public sealed class Property : Node, IProperty
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextProperty(Key, Value, Shorthand);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitProperty(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitProperty(this);
 
     public Property UpdateWith(Expression key, Node value)
     {

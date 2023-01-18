@@ -17,7 +17,7 @@ public sealed class ChainExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expression);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitChainExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitChainExpression(this);
 
     public ChainExpression UpdateWith(Expression expression)
     {

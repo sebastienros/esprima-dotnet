@@ -16,7 +16,7 @@ public sealed class TaggedTemplateExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Tag, Quasi);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTaggedTemplateExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitTaggedTemplateExpression(this);
 
     public TaggedTemplateExpression UpdateWith(Expression tag, TemplateLiteral quasi)
     {

@@ -26,5 +26,5 @@ internal sealed class ArrowParameterPlaceHolder : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params);
 
-    protected internal override object? Accept(AstVisitor visitor) => throw new NotSupportedException();
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => throw new NotSupportedException();
 }

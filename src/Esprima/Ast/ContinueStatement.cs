@@ -14,7 +14,7 @@ public sealed class ContinueStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Label);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitContinueStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitContinueStatement(this);
 
     public ContinueStatement UpdateWith(Identifier? label)
     {

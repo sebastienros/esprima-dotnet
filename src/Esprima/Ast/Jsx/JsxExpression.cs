@@ -16,11 +16,11 @@ public abstract class JsxExpression : Expression
 
     public new JsxNodeType Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    protected abstract object? Accept(IJsxAstVisitor visitor);
+    protected internal abstract T Accept<T>(IJsxAstVisitor<T> visitor);
 
-    protected internal sealed override object? Accept(AstVisitor visitor)
+    protected internal sealed override T Accept<T>(AstVisitor<T> visitor)
     {
-        return visitor is IJsxAstVisitor jsxVisitor ? Accept(jsxVisitor) : AcceptAsExtension(visitor);
+        return visitor is IJsxAstVisitor<T> jsxVisitor ? Accept(jsxVisitor) : AcceptAsExtension(visitor);
     }
 
     private static readonly AstToJavaScriptOptions s_toStringOptions = JsxAstToJavaScriptOptions.Default with { IgnoreExtensions = true };

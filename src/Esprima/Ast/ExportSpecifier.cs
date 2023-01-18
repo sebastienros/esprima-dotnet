@@ -22,7 +22,7 @@ public sealed class ExportSpecifier : Node
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextExportSpecifier(Local, Exported);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportSpecifier(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitExportSpecifier(this);
 
     public ExportSpecifier UpdateWith(Expression local, Expression exported)
     {

@@ -24,7 +24,7 @@ public abstract class MemberExpression : Expression
 
     internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Object, Property);
 
-    protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitMemberExpression(this);
+    protected internal sealed override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitMemberExpression(this);
 
     protected abstract MemberExpression Rewrite(Expression obj, Expression property);
 

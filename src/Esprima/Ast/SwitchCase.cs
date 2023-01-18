@@ -18,7 +18,7 @@ public sealed class SwitchCase : Node
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Test, Consequent);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSwitchCase(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitSwitchCase(this);
 
     public SwitchCase UpdateWith(Expression? test, in NodeList<Statement> consequent)
     {

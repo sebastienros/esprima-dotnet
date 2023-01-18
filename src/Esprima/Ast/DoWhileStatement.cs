@@ -16,7 +16,7 @@ public sealed class DoWhileStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body, Test);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitDoWhileStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitDoWhileStatement(this);
 
     public DoWhileStatement UpdateWith(Statement body, Expression test)
     {

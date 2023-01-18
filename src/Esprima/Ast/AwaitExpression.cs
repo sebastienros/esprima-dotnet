@@ -14,7 +14,7 @@ public sealed class AwaitExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAwaitExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitAwaitExpression(this);
 
     public AwaitExpression UpdateWith(Expression argument)
     {

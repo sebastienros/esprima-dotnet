@@ -18,5 +18,5 @@ public sealed class JsxText : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxText(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxText(this);
 }

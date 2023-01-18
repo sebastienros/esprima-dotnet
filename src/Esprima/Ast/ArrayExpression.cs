@@ -19,7 +19,7 @@ public sealed class ArrayExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Elements);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrayExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitArrayExpression(this);
 
     public ArrayExpression UpdateWith(in NodeList<Expression?> elements)
     {

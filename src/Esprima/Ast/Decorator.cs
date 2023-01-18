@@ -14,7 +14,7 @@ public sealed class Decorator : Node
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expression);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitDecorator(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitDecorator(this);
 
     public Decorator UpdateWith(Expression expression)
     {

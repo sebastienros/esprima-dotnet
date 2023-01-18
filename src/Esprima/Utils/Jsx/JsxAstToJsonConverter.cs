@@ -39,7 +39,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return base.GetTokenType(token);
     }
 
-    object? IJsxAstVisitor.VisitJsxAttribute(JsxAttribute jsxAttribute)
+    object? IJsxAstVisitor<object?>.VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
         using (StartNodeObject(jsxAttribute))
         {
@@ -50,7 +50,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxAttribute;
     }
 
-    object? IJsxAstVisitor.VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    object? IJsxAstVisitor<object?>.VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
         using (StartNodeObject(jsxClosingElement))
         {
@@ -60,7 +60,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxClosingElement;
     }
 
-    object? IJsxAstVisitor.VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    object? IJsxAstVisitor<object?>.VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         using (StartNodeObject(jsxClosingFragment))
         {
@@ -69,7 +69,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxClosingFragment;
     }
 
-    object? IJsxAstVisitor.VisitJsxElement(JsxElement jsxElement)
+    object? IJsxAstVisitor<object?>.VisitJsxElement(JsxElement jsxElement)
     {
         using (StartNodeObject(jsxElement))
         {
@@ -81,7 +81,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxElement;
     }
 
-    object? IJsxAstVisitor.VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    object? IJsxAstVisitor<object?>.VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
         using (StartNodeObject(jsxEmptyExpression))
         {
@@ -90,7 +90,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxEmptyExpression;
     }
 
-    object? IJsxAstVisitor.VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    object? IJsxAstVisitor<object?>.VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
         using (StartNodeObject(jsxExpressionContainer))
         {
@@ -100,7 +100,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxExpressionContainer;
     }
 
-    object? IJsxAstVisitor.VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    object? IJsxAstVisitor<object?>.VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
         using (StartNodeObject(jsxIdentifier))
         {
@@ -110,7 +110,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxIdentifier;
     }
 
-    object? IJsxAstVisitor.VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    object? IJsxAstVisitor<object?>.VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
         using (StartNodeObject(jsxMemberExpression))
         {
@@ -121,7 +121,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxMemberExpression;
     }
 
-    object? IJsxAstVisitor.VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    object? IJsxAstVisitor<object?>.VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
         using (StartNodeObject(jsxNamespacedName))
         {
@@ -132,7 +132,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxNamespacedName;
     }
 
-    object? IJsxAstVisitor.VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    object? IJsxAstVisitor<object?>.VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         using (StartNodeObject(jsxOpeningElement))
         {
@@ -144,7 +144,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxOpeningElement;
     }
 
-    object? IJsxAstVisitor.VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    object? IJsxAstVisitor<object?>.VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
         using (StartNodeObject(jsxOpeningFragment))
         {
@@ -154,7 +154,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxOpeningFragment;
     }
 
-    object? IJsxAstVisitor.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    object? IJsxAstVisitor<object?>.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         using (StartNodeObject(jsxSpreadAttribute))
         {
@@ -164,7 +164,7 @@ public class JsxAstToJsonConverter : AstToJsonConverter, IJsxAstVisitor
         return jsxSpreadAttribute;
     }
 
-    object? IJsxAstVisitor.VisitJsxText(JsxText jsxText)
+    object? IJsxAstVisitor<object?>.VisitJsxText(JsxText jsxText)
     {
         using (StartNodeObject(jsxText))
         {

@@ -28,7 +28,7 @@ public sealed class ForStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_1_2(Init, Test, Update, Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitForStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitForStatement(this);
 
     public ForStatement UpdateWith(StatementListItem? init, Expression? test, Expression? update, Statement body)
     {

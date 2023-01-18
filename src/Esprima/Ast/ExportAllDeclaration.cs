@@ -27,7 +27,7 @@ public sealed class ExportAllDeclaration : ExportDeclaration
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Exported, Source, Assertions);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportAllDeclaration(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitExportAllDeclaration(this);
 
     public ExportAllDeclaration UpdateWith(Expression? exported, Literal source, in NodeList<ImportAttribute> assertions)
     {

@@ -10,5 +10,5 @@ public sealed class JsxClosingFragment : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxClosingFragment(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxClosingFragment(this);
 }

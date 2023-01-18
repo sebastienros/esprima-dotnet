@@ -14,7 +14,7 @@ public sealed class SpreadElement : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSpreadElement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitSpreadElement(this);
 
     public SpreadElement UpdateWith(Expression argument)
     {

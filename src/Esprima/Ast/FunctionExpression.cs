@@ -40,7 +40,7 @@ public sealed class FunctionExpression : Expression, IFunction
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Id, Params, Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitFunctionExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitFunctionExpression(this);
 
     public FunctionExpression UpdateWith(Identifier? id, in NodeList<Node> parameters, BlockStatement body)
     {

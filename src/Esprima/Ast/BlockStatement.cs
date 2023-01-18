@@ -16,7 +16,7 @@ public sealed class BlockStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitBlockStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitBlockStatement(this);
 
     public BlockStatement UpdateWith(in NodeList<Statement> body)
     {

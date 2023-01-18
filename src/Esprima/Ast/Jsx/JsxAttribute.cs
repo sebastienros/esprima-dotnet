@@ -16,7 +16,7 @@ public sealed class JsxAttribute : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Name, Value);
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxAttribute(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxAttribute(this);
 
     public JsxAttribute UpdateWith(JsxExpression name, Expression? value)
     {

@@ -14,5 +14,5 @@ public sealed class PrivateIdentifier : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitPrivateIdentifier(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitPrivateIdentifier(this);
 }

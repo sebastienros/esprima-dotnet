@@ -16,7 +16,7 @@ public sealed class SequenceExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expressions);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSequenceExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitSequenceExpression(this);
 
     public SequenceExpression UpdateWith(in NodeList<Expression> expressions)
     {

@@ -22,7 +22,7 @@ public sealed class IfStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(Test, Consequent, Alternate);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitIfStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitIfStatement(this);
 
     public IfStatement UpdateWith(Expression test, Statement consequent, Statement? alternate)
     {

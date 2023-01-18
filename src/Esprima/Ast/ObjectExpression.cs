@@ -19,7 +19,7 @@ public sealed class ObjectExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Properties);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitObjectExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitObjectExpression(this);
 
     public ObjectExpression UpdateWith(in NodeList<Node> properties)
     {

@@ -77,7 +77,7 @@ public class UnaryExpression : Expression
 
     internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-    protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitUnaryExpression(this);
+    protected internal sealed override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitUnaryExpression(this);
 
     protected virtual UnaryExpression Rewrite(Expression argument)
     {

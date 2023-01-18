@@ -22,7 +22,7 @@ public sealed class TemplateLiteral : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextTemplateLiteral(Quasis, Expressions);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTemplateLiteral(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitTemplateLiteral(this);
 
     public TemplateLiteral UpdateWith(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
     {

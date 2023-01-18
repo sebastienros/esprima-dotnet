@@ -10,5 +10,5 @@ public sealed class JsxEmptyExpression : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxEmptyExpression(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxEmptyExpression(this);
 }

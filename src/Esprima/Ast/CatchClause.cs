@@ -20,7 +20,7 @@ public sealed class CatchClause : Node
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Param, Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitCatchClause(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitCatchClause(this);
 
     public CatchClause UpdateWith(Node? param, BlockStatement body)
     {

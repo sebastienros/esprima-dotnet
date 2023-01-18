@@ -17,7 +17,7 @@ public sealed class ImportSpecifier : ImportDeclarationSpecifier
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextImportSpecifier(Imported, Local);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportSpecifier(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitImportSpecifier(this);
 
     public ImportSpecifier UpdateWith(Expression imported, Identifier local)
     {

@@ -21,7 +21,7 @@ public sealed class NewExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Callee, Arguments);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitNewExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitNewExpression(this);
 
     public NewExpression UpdateWith(Expression callee, in NodeList<Expression> arguments)
     {

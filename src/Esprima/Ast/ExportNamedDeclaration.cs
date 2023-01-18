@@ -31,7 +31,7 @@ public sealed class ExportNamedDeclaration : ExportDeclaration
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_2(Declaration, Specifiers, Source, Assertions);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportNamedDeclaration(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitExportNamedDeclaration(this);
 
     public ExportNamedDeclaration UpdateWith(Declaration? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
     {
