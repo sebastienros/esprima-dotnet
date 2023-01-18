@@ -20,7 +20,7 @@ public sealed class VariableDeclarator : Node
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Id, Init);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitVariableDeclarator(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitVariableDeclarator(this);
 
     public VariableDeclarator UpdateWith(Node id, Expression? init)
     {

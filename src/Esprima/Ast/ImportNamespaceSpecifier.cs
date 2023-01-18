@@ -10,7 +10,7 @@ public sealed class ImportNamespaceSpecifier : ImportDeclarationSpecifier
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Local);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportNamespaceSpecifier(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitImportNamespaceSpecifier(this);
 
     public ImportNamespaceSpecifier UpdateWith(Identifier local)
     {

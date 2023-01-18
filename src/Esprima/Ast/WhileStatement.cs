@@ -16,7 +16,7 @@ public sealed class WhileStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Test, Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitWhileStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitWhileStatement(this);
 
     public WhileStatement UpdateWith(Expression test, Statement body)
     {

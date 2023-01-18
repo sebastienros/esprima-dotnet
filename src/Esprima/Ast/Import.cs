@@ -20,7 +20,7 @@ public sealed class Import : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Source, Attributes);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImport(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitImport(this);
 
     public Import UpdateWith(Expression source, Expression? attributes)
     {

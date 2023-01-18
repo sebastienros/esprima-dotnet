@@ -23,7 +23,7 @@ public sealed class CallExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Callee, Arguments);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitCallExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitCallExpression(this);
 
     public CallExpression UpdateWith(Expression callee, in NodeList<Expression> arguments)
     {

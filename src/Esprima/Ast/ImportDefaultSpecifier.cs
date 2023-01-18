@@ -10,7 +10,7 @@ public sealed class ImportDefaultSpecifier : ImportDeclarationSpecifier
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Local);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportDefaultSpecifier(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitImportDefaultSpecifier(this);
 
     public ImportDefaultSpecifier UpdateWith(Identifier local)
     {

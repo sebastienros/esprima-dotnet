@@ -18,7 +18,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
     {
     }
 
-    object? IJsxAstVisitor.VisitJsxAttribute(JsxAttribute jsxAttribute)
+    object? IJsxAstVisitor<object?>.VisitJsxAttribute(JsxAttribute jsxAttribute)
     {
         Writer.SpaceRecommendedAfterLastToken();
 
@@ -37,7 +37,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxAttribute;
     }
 
-    object? IJsxAstVisitor.VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
+    object? IJsxAstVisitor<object?>.VisitJsxClosingElement(JsxClosingElement jsxClosingElement)
     {
         Writer.WritePunctuator("<", TokenFlags.Leading, ref WriteContext);
         Writer.WritePunctuator("/", ref WriteContext);
@@ -51,7 +51,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxClosingElement;
     }
 
-    object? IJsxAstVisitor.VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
+    object? IJsxAstVisitor<object?>.VisitJsxClosingFragment(JsxClosingFragment jsxClosingFragment)
     {
         Writer.WritePunctuator("<", TokenFlags.Leading, ref WriteContext);
         Writer.WritePunctuator("/", ref WriteContext);
@@ -60,7 +60,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxClosingFragment;
     }
 
-    object? IJsxAstVisitor.VisitJsxElement(JsxElement jsxElement)
+    object? IJsxAstVisitor<object?>.VisitJsxElement(JsxElement jsxElement)
     {
         WriteContext.SetNodeProperty(nameof(jsxElement.OpeningElement), static node => node.As<JsxElement>().OpeningElement);
         VisitAuxiliaryNode(jsxElement.OpeningElement);
@@ -77,12 +77,12 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxElement;
     }
 
-    object? IJsxAstVisitor.VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
+    object? IJsxAstVisitor<object?>.VisitJsxEmptyExpression(JsxEmptyExpression jsxEmptyExpression)
     {
         return jsxEmptyExpression;
     }
 
-    object? IJsxAstVisitor.VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
+    object? IJsxAstVisitor<object?>.VisitJsxExpressionContainer(JsxExpressionContainer jsxExpressionContainer)
     {
         Writer.WritePunctuator("{", TokenFlags.Leading, ref WriteContext);
 
@@ -95,7 +95,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxExpressionContainer;
     }
 
-    object? IJsxAstVisitor.VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
+    object? IJsxAstVisitor<object?>.VisitJsxIdentifier(JsxIdentifier jsxIdentifier)
     {
         WriteContext.SetNodeProperty(nameof(jsxIdentifier.Name), static node => node.As<JsxIdentifier>().Name);
         Writer.WriteIdentifier(jsxIdentifier.Name, ref WriteContext);
@@ -103,7 +103,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxIdentifier;
     }
 
-    object? IJsxAstVisitor.VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
+    object? IJsxAstVisitor<object?>.VisitJsxMemberExpression(JsxMemberExpression jsxMemberExpression)
     {
         WriteContext.SetNodeProperty(nameof(jsxMemberExpression.Object), static node => node.As<JsxMemberExpression>().Object);
         VisitAuxiliaryNode(jsxMemberExpression.Object);
@@ -117,7 +117,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxMemberExpression;
     }
 
-    object? IJsxAstVisitor.VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
+    object? IJsxAstVisitor<object?>.VisitJsxNamespacedName(JsxNamespacedName jsxNamespacedName)
     {
         WriteContext.SetNodeProperty(nameof(jsxNamespacedName.Namespace), static node => node.As<JsxNamespacedName>().Namespace);
         VisitAuxiliaryNode(jsxNamespacedName.Namespace);
@@ -131,7 +131,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxNamespacedName;
     }
 
-    object? IJsxAstVisitor.VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
+    object? IJsxAstVisitor<object?>.VisitJsxOpeningElement(JsxOpeningElement jsxOpeningElement)
     {
         Writer.WritePunctuator("<", TokenFlags.Leading, ref WriteContext);
 
@@ -152,7 +152,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxOpeningElement;
     }
 
-    object? IJsxAstVisitor.VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
+    object? IJsxAstVisitor<object?>.VisitJsxOpeningFragment(JsxOpeningFragment jsxOpeningFragment)
     {
         Writer.WritePunctuator("<", TokenFlags.Leading, ref WriteContext);
 
@@ -168,7 +168,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxOpeningFragment;
     }
 
-    object? IJsxAstVisitor.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
+    object? IJsxAstVisitor<object?>.VisitJsxSpreadAttribute(JsxSpreadAttribute jsxSpreadAttribute)
     {
         Writer.WritePunctuator("{", TokenFlags.Leading | TokenFlags.LeadingSpaceRecommended, ref WriteContext);
 
@@ -185,7 +185,7 @@ public class JsxAstToJavaScriptConverter : AstToJavaScriptConverter, IJsxAstVisi
         return jsxSpreadAttribute;
     }
 
-    object? IJsxAstVisitor.VisitJsxText(JsxText jsxText)
+    object? IJsxAstVisitor<object?>.VisitJsxText(JsxText jsxText)
     {
         Writer.WriteLiteral(jsxText.Raw, TokenType.Extension, ref WriteContext);
 

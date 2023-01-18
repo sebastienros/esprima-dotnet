@@ -14,7 +14,7 @@ public sealed class JsxExpressionContainer : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expression);
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxExpressionContainer(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxExpressionContainer(this);
 
     public JsxExpressionContainer UpdateWith(Expression expression)
     {

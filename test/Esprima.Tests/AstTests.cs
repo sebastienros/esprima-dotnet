@@ -92,7 +92,7 @@ public class AstTests
         public Node Node1 { get; }
         public Node Node2 { get; }
 
-        protected internal override object? Accept(AstVisitor visitor) => throw new NotSupportedException();
+        protected internal override T Accept<T>(AstVisitor<T> visitor) => throw new NotSupportedException();
 
         protected internal override IEnumerator<Node>? GetChildNodes()
         {

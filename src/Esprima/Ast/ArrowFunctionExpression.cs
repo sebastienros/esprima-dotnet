@@ -38,7 +38,7 @@ public sealed class ArrowFunctionExpression : Expression, IFunction
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params, Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitArrowFunctionExpression(this);
 
     public ArrowFunctionExpression UpdateWith(in NodeList<Node> parameters, StatementListItem body)
     {

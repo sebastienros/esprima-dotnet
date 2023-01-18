@@ -29,7 +29,7 @@ public sealed class MethodDefinition : ClassProperty
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Decorators, Key, Value);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitMethodDefinition(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitMethodDefinition(this);
 
     public MethodDefinition UpdateWith(Expression key, FunctionExpression value, in NodeList<Decorator> decorators)
     {

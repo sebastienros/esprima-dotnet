@@ -102,7 +102,7 @@ public sealed class AssignmentExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAssignmentExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitAssignmentExpression(this);
 
     public AssignmentExpression UpdateWith(Node left, Expression right)
     {

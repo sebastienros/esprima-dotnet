@@ -14,7 +14,7 @@ public sealed class JsxSpreadAttribute : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxSpreadAttribute(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxSpreadAttribute(this);
 
     public JsxSpreadAttribute UpdateWith(Expression argument)
     {

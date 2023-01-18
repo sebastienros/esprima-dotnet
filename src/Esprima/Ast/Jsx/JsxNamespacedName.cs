@@ -18,7 +18,7 @@ public sealed class JsxNamespacedName : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Name, Namespace);
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxNamespacedName(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxNamespacedName(this);
 
     public JsxNamespacedName UpdateWith(JsxIdentifier name, JsxIdentifier @namespace)
     {

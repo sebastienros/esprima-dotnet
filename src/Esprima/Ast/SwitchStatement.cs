@@ -18,7 +18,7 @@ public sealed class SwitchStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Discriminant, Cases);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSwitchStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitSwitchStatement(this);
 
     public SwitchStatement UpdateWith(Expression discriminant, in NodeList<SwitchCase> cases)
     {

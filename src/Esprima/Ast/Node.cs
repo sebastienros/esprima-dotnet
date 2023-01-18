@@ -25,16 +25,16 @@ public abstract class Node : SyntaxElement
     internal virtual Node? NextChildNode(ref ChildNodes.Enumerator enumerator) =>
         throw new NotImplementedException($"User-defined node types should override the {nameof(GetChildNodes)} method and provide an actual implementation.");
 
-    protected internal abstract object? Accept(AstVisitor visitor);
+    protected internal abstract T Accept<T>(AstVisitor<T> visitor);
 
     /// <summary>
     /// Dispatches the visitation of the current node to <see cref="AstVisitor.VisitExtension(Node)"/>.
     /// </summary>
     /// <remarks>
-    /// When defining custom node types, inheritors can use this method to implement the abstract <see cref="Accept(AstVisitor)"/> method.
+    /// When defining custom node types, inheritors can use this method to implement the abstract <see cref="Accept{T}"/> method.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected object? AcceptAsExtension(AstVisitor visitor)
+    protected T AcceptAsExtension<T>(AstVisitor<T> visitor)
     {
         return visitor.VisitExtension(this);
     }

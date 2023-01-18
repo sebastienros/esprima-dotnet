@@ -14,7 +14,7 @@ public sealed class JsxClosingElement : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Name);
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxClosingElement(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxClosingElement(this);
 
     public JsxClosingElement UpdateWith(JsxExpression name)
     {

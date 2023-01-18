@@ -19,7 +19,7 @@ public sealed class ObjectPattern : BindingPattern
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Properties);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitObjectPattern(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitObjectPattern(this);
 
     public ObjectPattern UpdateWith(in NodeList<Node> properties)
     {

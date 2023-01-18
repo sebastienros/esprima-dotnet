@@ -3,17 +3,9 @@ using Esprima.Ast;
 
 namespace Esprima.Utils;
 
-public class AstVisitor
+public class AstVisitor : AstVisitor<object?>
 {
-    private static Exception UnsupportedNodeType(Type nodeType, [CallerMemberName] string? callerName = null) =>
-        new NotImplementedException($"The visitor does not support nodes of type {nodeType}. You can override {callerName} to handle this case.");
-
-    public virtual object? Visit(Node node)
-    {
-        return node.Accept(this);
-    }
-
-    protected internal virtual object? VisitAccessorProperty(AccessorProperty accessorProperty)
+    protected internal override object? VisitAccessorProperty(AccessorProperty accessorProperty)
     {
         ref readonly var decorators = ref accessorProperty.Decorators;
         for (var i = 0; i < decorators.Count; i++)
@@ -31,7 +23,7 @@ public class AstVisitor
         return accessorProperty;
     }
 
-    protected internal virtual object? VisitArrayExpression(ArrayExpression arrayExpression)
+    protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
     {
         ref readonly var elements = ref arrayExpression.Elements;
         for (var i = 0; i < elements.Count; i++)
@@ -46,7 +38,7 @@ public class AstVisitor
         return arrayExpression;
     }
 
-    protected internal virtual object? VisitArrayPattern(ArrayPattern arrayPattern)
+    protected internal override object? VisitArrayPattern(ArrayPattern arrayPattern)
     {
         ref readonly var elements = ref arrayPattern.Elements;
         for (var i = 0; i < elements.Count; i++)
@@ -61,7 +53,7 @@ public class AstVisitor
         return arrayPattern;
     }
 
-    protected internal virtual object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
+    protected internal override object? VisitArrowFunctionExpression(ArrowFunctionExpression arrowFunctionExpression)
     {
         ref readonly var parameters = ref arrowFunctionExpression.Params;
         for (var i = 0; i < parameters.Count; i++)
@@ -74,7 +66,7 @@ public class AstVisitor
         return arrowFunctionExpression;
     }
 
-    protected internal virtual object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
+    protected internal override object? VisitAssignmentExpression(AssignmentExpression assignmentExpression)
     {
         Visit(assignmentExpression.Left);
         Visit(assignmentExpression.Right);
@@ -82,7 +74,7 @@ public class AstVisitor
         return assignmentExpression;
     }
 
-    protected internal virtual object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
+    protected internal override object? VisitAssignmentPattern(AssignmentPattern assignmentPattern)
     {
         Visit(assignmentPattern.Left);
         Visit(assignmentPattern.Right);
@@ -90,14 +82,14 @@ public class AstVisitor
         return assignmentPattern;
     }
 
-    protected internal virtual object? VisitAwaitExpression(AwaitExpression awaitExpression)
+    protected internal override object? VisitAwaitExpression(AwaitExpression awaitExpression)
     {
         Visit(awaitExpression.Argument);
 
         return awaitExpression;
     }
 
-    protected internal virtual object? VisitBinaryExpression(BinaryExpression binaryExpression)
+    protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
     {
         Visit(binaryExpression.Left);
         Visit(binaryExpression.Right);
@@ -105,7 +97,7 @@ public class AstVisitor
         return binaryExpression;
     }
 
-    protected internal virtual object? VisitBlockStatement(BlockStatement blockStatement)
+    protected internal override object? VisitBlockStatement(BlockStatement blockStatement)
     {
         ref readonly var body = ref blockStatement.Body;
         for (var i = 0; i < body.Count; i++)
@@ -116,7 +108,7 @@ public class AstVisitor
         return blockStatement;
     }
 
-    protected internal virtual object? VisitBreakStatement(BreakStatement breakStatement)
+    protected internal override object? VisitBreakStatement(BreakStatement breakStatement)
     {
         if (breakStatement.Label is not null)
         {
@@ -126,7 +118,7 @@ public class AstVisitor
         return breakStatement;
     }
 
-    protected internal virtual object? VisitCallExpression(CallExpression callExpression)
+    protected internal override object? VisitCallExpression(CallExpression callExpression)
     {
         Visit(callExpression.Callee);
         ref readonly var arguments = ref callExpression.Arguments;
@@ -138,7 +130,7 @@ public class AstVisitor
         return callExpression;
     }
 
-    protected internal virtual object? VisitCatchClause(CatchClause catchClause)
+    protected internal override object? VisitCatchClause(CatchClause catchClause)
     {
         if (catchClause.Param is not null)
         {
@@ -150,14 +142,14 @@ public class AstVisitor
         return catchClause;
     }
 
-    protected internal virtual object? VisitChainExpression(ChainExpression chainExpression)
+    protected internal override object? VisitChainExpression(ChainExpression chainExpression)
     {
         Visit(chainExpression.Expression);
 
         return chainExpression;
     }
 
-    protected internal virtual object? VisitClassBody(ClassBody classBody)
+    protected internal override object? VisitClassBody(ClassBody classBody)
     {
         ref readonly var body = ref classBody.Body;
         for (var i = 0; i < body.Count; i++)
@@ -168,7 +160,7 @@ public class AstVisitor
         return classBody;
     }
 
-    protected internal virtual object? VisitClassDeclaration(ClassDeclaration classDeclaration)
+    protected internal override object? VisitClassDeclaration(ClassDeclaration classDeclaration)
     {
         ref readonly var decorators = ref classDeclaration.Decorators;
         for (var i = 0; i < decorators.Count; i++)
@@ -191,7 +183,7 @@ public class AstVisitor
         return classDeclaration;
     }
 
-    protected internal virtual object? VisitClassExpression(ClassExpression classExpression)
+    protected internal override object? VisitClassExpression(ClassExpression classExpression)
     {
         ref readonly var decorators = ref classExpression.Decorators;
         for (var i = 0; i < decorators.Count; i++)
@@ -214,7 +206,7 @@ public class AstVisitor
         return classExpression;
     }
 
-    protected internal virtual object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
+    protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
     {
         Visit(conditionalExpression.Test);
         Visit(conditionalExpression.Consequent);
@@ -223,7 +215,7 @@ public class AstVisitor
         return conditionalExpression;
     }
 
-    protected internal virtual object? VisitContinueStatement(ContinueStatement continueStatement)
+    protected internal override object? VisitContinueStatement(ContinueStatement continueStatement)
     {
         if (continueStatement.Label is not null)
         {
@@ -233,19 +225,19 @@ public class AstVisitor
         return continueStatement;
     }
 
-    protected internal virtual object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
+    protected internal override object? VisitDebuggerStatement(DebuggerStatement debuggerStatement)
     {
         return debuggerStatement;
     }
 
-    protected internal virtual object? VisitDecorator(Decorator decorator)
+    protected internal override object? VisitDecorator(Decorator decorator)
     {
         Visit(decorator.Expression);
 
         return decorator;
     }
 
-    protected internal virtual object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
+    protected internal override object? VisitDoWhileStatement(DoWhileStatement doWhileStatement)
     {
         Visit(doWhileStatement.Body);
         Visit(doWhileStatement.Test);
@@ -253,12 +245,12 @@ public class AstVisitor
         return doWhileStatement;
     }
 
-    protected internal virtual object? VisitEmptyStatement(EmptyStatement emptyStatement)
+    protected internal override object? VisitEmptyStatement(EmptyStatement emptyStatement)
     {
         return emptyStatement;
     }
 
-    protected internal virtual object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
+    protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
         if (exportAllDeclaration.Exported is not null)
         {
@@ -276,14 +268,14 @@ public class AstVisitor
         return exportAllDeclaration;
     }
 
-    protected internal virtual object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
+    protected internal override object? VisitExportDefaultDeclaration(ExportDefaultDeclaration exportDefaultDeclaration)
     {
         Visit(exportDefaultDeclaration.Declaration);
 
         return exportDefaultDeclaration;
     }
 
-    protected internal virtual object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
+    protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
         if (exportNamedDeclaration.Declaration is not null)
         {
@@ -310,7 +302,7 @@ public class AstVisitor
         return exportNamedDeclaration;
     }
 
-    protected internal virtual object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
+    protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
     {
         Visit(exportSpecifier.Local);
 
@@ -322,14 +314,14 @@ public class AstVisitor
         return exportSpecifier;
     }
 
-    protected internal virtual object? VisitExpressionStatement(ExpressionStatement expressionStatement)
+    protected internal override object? VisitExpressionStatement(ExpressionStatement expressionStatement)
     {
         Visit(expressionStatement.Expression);
 
         return expressionStatement;
     }
 
-    protected internal virtual object? VisitExtension(Node node)
+    protected internal override object? VisitExtension(Node node)
     {
         // Node type Extension is used to represent extensions to the standard AST (for example, see JSX parsing).
         // Nodes of this type never appear in the tree returned by the core parser (JavaScriptParser),
@@ -339,7 +331,7 @@ public class AstVisitor
         throw UnsupportedNodeType(node.GetType());
     }
 
-    protected internal virtual object? VisitForInStatement(ForInStatement forInStatement)
+    protected internal override object? VisitForInStatement(ForInStatement forInStatement)
     {
         Visit(forInStatement.Left);
         Visit(forInStatement.Right);
@@ -348,7 +340,7 @@ public class AstVisitor
         return forInStatement;
     }
 
-    protected internal virtual object? VisitForOfStatement(ForOfStatement forOfStatement)
+    protected internal override object? VisitForOfStatement(ForOfStatement forOfStatement)
     {
         Visit(forOfStatement.Left);
         Visit(forOfStatement.Right);
@@ -357,7 +349,7 @@ public class AstVisitor
         return forOfStatement;
     }
 
-    protected internal virtual object? VisitForStatement(ForStatement forStatement)
+    protected internal override object? VisitForStatement(ForStatement forStatement)
     {
         if (forStatement.Init is not null)
         {
@@ -379,7 +371,7 @@ public class AstVisitor
         return forStatement;
     }
 
-    protected internal virtual object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
+    protected internal override object? VisitFunctionDeclaration(FunctionDeclaration functionDeclaration)
     {
         if (functionDeclaration.Id is not null)
         {
@@ -397,7 +389,7 @@ public class AstVisitor
         return functionDeclaration;
     }
 
-    protected internal virtual object? VisitFunctionExpression(FunctionExpression functionExpression)
+    protected internal override object? VisitFunctionExpression(FunctionExpression functionExpression)
     {
         if (functionExpression.Id is not null)
         {
@@ -415,12 +407,12 @@ public class AstVisitor
         return functionExpression;
     }
 
-    protected internal virtual object? VisitIdentifier(Identifier identifier)
+    protected internal override object? VisitIdentifier(Identifier identifier)
     {
         return identifier;
     }
 
-    protected internal virtual object? VisitIfStatement(IfStatement ifStatement)
+    protected internal override object? VisitIfStatement(IfStatement ifStatement)
     {
         Visit(ifStatement.Test);
         Visit(ifStatement.Consequent);
@@ -432,7 +424,7 @@ public class AstVisitor
         return ifStatement;
     }
 
-    protected internal virtual object? VisitImport(Import import)
+    protected internal override object? VisitImport(Import import)
     {
         Visit(import.Source);
 
@@ -444,7 +436,7 @@ public class AstVisitor
         return import;
     }
 
-    protected internal virtual object? VisitImportAttribute(ImportAttribute importAttribute)
+    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
     {
         Visit(importAttribute.Key);
         Visit(importAttribute.Value);
@@ -452,7 +444,7 @@ public class AstVisitor
         return importAttribute;
     }
 
-    protected internal virtual object? VisitImportDeclaration(ImportDeclaration importDeclaration)
+    protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         ref readonly var specifiers = ref importDeclaration.Specifiers;
         for (var i = 0; i < specifiers.Count; i++)
@@ -471,21 +463,21 @@ public class AstVisitor
         return importDeclaration;
     }
 
-    protected internal virtual object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
+    protected internal override object? VisitImportDefaultSpecifier(ImportDefaultSpecifier importDefaultSpecifier)
     {
         Visit(importDefaultSpecifier.Local);
 
         return importDefaultSpecifier;
     }
 
-    protected internal virtual object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
+    protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
     {
         Visit(importNamespaceSpecifier.Local);
 
         return importNamespaceSpecifier;
     }
 
-    protected internal virtual object? VisitImportSpecifier(ImportSpecifier importSpecifier)
+    protected internal override object? VisitImportSpecifier(ImportSpecifier importSpecifier)
     {
         if (importSpecifier.Imported != importSpecifier.Local)
         {
@@ -497,7 +489,7 @@ public class AstVisitor
         return importSpecifier;
     }
 
-    protected internal virtual object? VisitLabeledStatement(LabeledStatement labeledStatement)
+    protected internal override object? VisitLabeledStatement(LabeledStatement labeledStatement)
     {
         Visit(labeledStatement.Label);
         Visit(labeledStatement.Body);
@@ -505,12 +497,12 @@ public class AstVisitor
         return labeledStatement;
     }
 
-    protected internal virtual object? VisitLiteral(Literal literal)
+    protected internal override object? VisitLiteral(Literal literal)
     {
         return literal;
     }
 
-    protected internal virtual object? VisitMemberExpression(MemberExpression memberExpression)
+    protected internal override object? VisitMemberExpression(MemberExpression memberExpression)
     {
         Visit(memberExpression.Object);
         Visit(memberExpression.Property);
@@ -518,7 +510,7 @@ public class AstVisitor
         return memberExpression;
     }
 
-    protected internal virtual object? VisitMetaProperty(MetaProperty metaProperty)
+    protected internal override object? VisitMetaProperty(MetaProperty metaProperty)
     {
         Visit(metaProperty.Meta);
         Visit(metaProperty.Property);
@@ -526,7 +518,7 @@ public class AstVisitor
         return metaProperty;
     }
 
-    protected internal virtual object? VisitMethodDefinition(MethodDefinition methodDefinition)
+    protected internal override object? VisitMethodDefinition(MethodDefinition methodDefinition)
     {
         ref readonly var decorators = ref methodDefinition.Decorators;
         for (var i = 0; i < decorators.Count; i++)
@@ -540,7 +532,7 @@ public class AstVisitor
         return methodDefinition;
     }
 
-    protected internal virtual object? VisitNewExpression(NewExpression newExpression)
+    protected internal override object? VisitNewExpression(NewExpression newExpression)
     {
         Visit(newExpression.Callee);
         ref readonly var arguments = ref newExpression.Arguments;
@@ -552,7 +544,7 @@ public class AstVisitor
         return newExpression;
     }
 
-    protected internal virtual object? VisitObjectExpression(ObjectExpression objectExpression)
+    protected internal override object? VisitObjectExpression(ObjectExpression objectExpression)
     {
         ref readonly var properties = ref objectExpression.Properties;
         for (var i = 0; i < properties.Count; i++)
@@ -563,7 +555,7 @@ public class AstVisitor
         return objectExpression;
     }
 
-    protected internal virtual object? VisitObjectPattern(ObjectPattern objectPattern)
+    protected internal override object? VisitObjectPattern(ObjectPattern objectPattern)
     {
         ref readonly var properties = ref objectPattern.Properties;
         for (var i = 0; i < properties.Count; i++)
@@ -574,12 +566,12 @@ public class AstVisitor
         return objectPattern;
     }
 
-    protected internal virtual object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
+    protected internal override object? VisitPrivateIdentifier(PrivateIdentifier privateIdentifier)
     {
         return privateIdentifier;
     }
 
-    protected internal virtual object? VisitProgram(Program program)
+    protected internal override object? VisitProgram(Program program)
     {
         ref readonly var statements = ref program.Body;
         for (var i = 0; i < statements.Count; i++)
@@ -590,7 +582,7 @@ public class AstVisitor
         return program;
     }
 
-    protected internal virtual object? VisitProperty(Property property)
+    protected internal override object? VisitProperty(Property property)
     {
         if (!property.Shorthand)
         {
@@ -602,7 +594,7 @@ public class AstVisitor
         return property;
     }
 
-    protected internal virtual object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
+    protected internal override object? VisitPropertyDefinition(PropertyDefinition propertyDefinition)
     {
         ref readonly var decorators = ref propertyDefinition.Decorators;
         for (var i = 0; i < decorators.Count; i++)
@@ -620,14 +612,14 @@ public class AstVisitor
         return propertyDefinition;
     }
 
-    protected internal virtual object? VisitRestElement(RestElement restElement)
+    protected internal override object? VisitRestElement(RestElement restElement)
     {
         Visit(restElement.Argument);
 
         return restElement;
     }
 
-    protected internal virtual object? VisitReturnStatement(ReturnStatement returnStatement)
+    protected internal override object? VisitReturnStatement(ReturnStatement returnStatement)
     {
         if (returnStatement.Argument is not null)
         {
@@ -637,7 +629,7 @@ public class AstVisitor
         return returnStatement;
     }
 
-    protected internal virtual object? VisitSequenceExpression(SequenceExpression sequenceExpression)
+    protected internal override object? VisitSequenceExpression(SequenceExpression sequenceExpression)
     {
         ref readonly var expressions = ref sequenceExpression.Expressions;
         for (var i = 0; i < expressions.Count; i++)
@@ -648,14 +640,14 @@ public class AstVisitor
         return sequenceExpression;
     }
 
-    protected internal virtual object? VisitSpreadElement(SpreadElement spreadElement)
+    protected internal override object? VisitSpreadElement(SpreadElement spreadElement)
     {
         Visit(spreadElement.Argument);
 
         return spreadElement;
     }
 
-    protected internal virtual object? VisitStaticBlock(StaticBlock staticBlock)
+    protected internal override object? VisitStaticBlock(StaticBlock staticBlock)
     {
         ref readonly var body = ref staticBlock.Body;
         for (var i = 0; i < body.Count; i++)
@@ -666,12 +658,12 @@ public class AstVisitor
         return staticBlock;
     }
 
-    protected internal virtual object? VisitSuper(Super super)
+    protected internal override object? VisitSuper(Super super)
     {
         return super;
     }
 
-    protected internal virtual object? VisitSwitchCase(SwitchCase switchCase)
+    protected internal override object? VisitSwitchCase(SwitchCase switchCase)
     {
         if (switchCase.Test is not null)
         {
@@ -687,7 +679,7 @@ public class AstVisitor
         return switchCase;
     }
 
-    protected internal virtual object? VisitSwitchStatement(SwitchStatement switchStatement)
+    protected internal override object? VisitSwitchStatement(SwitchStatement switchStatement)
     {
         Visit(switchStatement.Discriminant);
         ref readonly var cases = ref switchStatement.Cases;
@@ -699,7 +691,7 @@ public class AstVisitor
         return switchStatement;
     }
 
-    protected internal virtual object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
+    protected internal override object? VisitTaggedTemplateExpression(TaggedTemplateExpression taggedTemplateExpression)
     {
         Visit(taggedTemplateExpression.Tag);
         Visit(taggedTemplateExpression.Quasi);
@@ -707,12 +699,12 @@ public class AstVisitor
         return taggedTemplateExpression;
     }
 
-    protected internal virtual object? VisitTemplateElement(TemplateElement templateElement)
+    protected internal override object? VisitTemplateElement(TemplateElement templateElement)
     {
         return templateElement;
     }
 
-    protected internal virtual object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
+    protected internal override object? VisitTemplateLiteral(TemplateLiteral templateLiteral)
     {
         ref readonly var quasis = ref templateLiteral.Quasis;
         ref readonly var expressions = ref templateLiteral.Expressions;
@@ -728,19 +720,19 @@ public class AstVisitor
         return templateLiteral;
     }
 
-    protected internal virtual object? VisitThisExpression(ThisExpression thisExpression)
+    protected internal override object? VisitThisExpression(ThisExpression thisExpression)
     {
         return thisExpression;
     }
 
-    protected internal virtual object? VisitThrowStatement(ThrowStatement throwStatement)
+    protected internal override object? VisitThrowStatement(ThrowStatement throwStatement)
     {
         Visit(throwStatement.Argument);
 
         return throwStatement;
     }
 
-    protected internal virtual object? VisitTryStatement(TryStatement tryStatement)
+    protected internal override object? VisitTryStatement(TryStatement tryStatement)
     {
         Visit(tryStatement.Block);
         if (tryStatement.Handler is not null)
@@ -756,14 +748,14 @@ public class AstVisitor
         return tryStatement;
     }
 
-    protected internal virtual object? VisitUnaryExpression(UnaryExpression unaryExpression)
+    protected internal override object? VisitUnaryExpression(UnaryExpression unaryExpression)
     {
         Visit(unaryExpression.Argument);
 
         return unaryExpression;
     }
 
-    protected internal virtual object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
+    protected internal override object? VisitVariableDeclaration(VariableDeclaration variableDeclaration)
     {
         ref readonly var declarations = ref variableDeclaration.Declarations;
         for (var i = 0; i < declarations.Count; i++)
@@ -774,7 +766,7 @@ public class AstVisitor
         return variableDeclaration;
     }
 
-    protected internal virtual object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
+    protected internal override object? VisitVariableDeclarator(VariableDeclarator variableDeclarator)
     {
         Visit(variableDeclarator.Id);
         if (variableDeclarator.Init is not null)
@@ -785,7 +777,7 @@ public class AstVisitor
         return variableDeclarator;
     }
 
-    protected internal virtual object? VisitWhileStatement(WhileStatement whileStatement)
+    protected internal override object? VisitWhileStatement(WhileStatement whileStatement)
     {
         Visit(whileStatement.Test);
         Visit(whileStatement.Body);
@@ -793,7 +785,7 @@ public class AstVisitor
         return whileStatement;
     }
 
-    protected internal virtual object? VisitWithStatement(WithStatement withStatement)
+    protected internal override object? VisitWithStatement(WithStatement withStatement)
     {
         Visit(withStatement.Object);
         Visit(withStatement.Body);
@@ -801,7 +793,7 @@ public class AstVisitor
         return withStatement;
     }
 
-    protected internal virtual object? VisitYieldExpression(YieldExpression yieldExpression)
+    protected internal override object? VisitYieldExpression(YieldExpression yieldExpression)
     {
         if (yieldExpression.Argument is not null)
         {

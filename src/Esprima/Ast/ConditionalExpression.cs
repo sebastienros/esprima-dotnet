@@ -21,7 +21,7 @@ public sealed class ConditionalExpression : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Test, Consequent, Alternate);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitConditionalExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitConditionalExpression(this);
 
     public ConditionalExpression UpdateWith(Expression test, Expression consequent, Expression alternate)
     {

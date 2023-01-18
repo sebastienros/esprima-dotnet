@@ -16,7 +16,7 @@ public sealed class WithStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Object, Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitWithStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitWithStatement(this);
 
     public WithStatement UpdateWith(Expression obj, Statement body)
     {

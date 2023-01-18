@@ -20,7 +20,7 @@ public sealed class JsxElement : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(OpeningElement, Children, ClosingElement);
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxElement(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxElement(this);
 
     public JsxElement UpdateWith(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
     {

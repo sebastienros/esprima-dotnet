@@ -26,7 +26,7 @@ public sealed class ClassExpression : Expression, IClass
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Decorators, Id, SuperClass, Body);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitClassExpression(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitClassExpression(this);
 
     public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)
     {

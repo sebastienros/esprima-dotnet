@@ -28,7 +28,7 @@ public sealed class PropertyDefinition : ClassProperty
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(Decorators, Key, Value);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitPropertyDefinition(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitPropertyDefinition(this);
 
     public PropertyDefinition UpdateWith(Expression key, Expression? value, in NodeList<Decorator> decorators)
     {

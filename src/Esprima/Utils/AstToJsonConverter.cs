@@ -696,7 +696,7 @@ public class AstToJsonConverter : AstVisitor
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-        protected internal override object? Accept(AstVisitor visitor) => ((AstToJsonConverter) visitor).VisitImportCompat(this);
+        protected internal override T Accept<T>(AstVisitor<T> visitor) => (T) ((visitor as AstToJsonConverter)?.VisitImportCompat(this) ?? throw new InvalidOperationException("Expected AstToJsonConverter"));
     }
 
     protected internal override object? VisitImport(Import import)

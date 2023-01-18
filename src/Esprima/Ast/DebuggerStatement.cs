@@ -8,5 +8,5 @@ public sealed class DebuggerStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitDebuggerStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitDebuggerStatement(this);
 }

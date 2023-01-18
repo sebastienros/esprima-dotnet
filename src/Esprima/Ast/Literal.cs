@@ -56,5 +56,5 @@ public sealed class Literal : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitLiteral(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitLiteral(this);
 }

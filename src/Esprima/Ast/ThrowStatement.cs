@@ -14,7 +14,7 @@ public sealed class ThrowStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitThrowStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitThrowStatement(this);
 
     public ThrowStatement UpdateWith(Expression argument)
     {

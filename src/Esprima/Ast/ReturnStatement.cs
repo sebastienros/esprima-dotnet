@@ -14,7 +14,7 @@ public sealed class ReturnStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Argument);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitReturnStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitReturnStatement(this);
 
     public ReturnStatement UpdateWith(Expression? argument)
     {

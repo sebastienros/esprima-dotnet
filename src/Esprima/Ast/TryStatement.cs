@@ -22,7 +22,7 @@ public sealed class TryStatement : Statement
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Block, Handler, Finalizer);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTryStatement(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitTryStatement(this);
 
     public TryStatement UpdateWith(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
     {

@@ -89,4 +89,54 @@ public class AstVisitorTests
     {
         return Fixtures.SourceFiles(relativePath);
     }
+
+    [Fact]
+    public void CanVisitGenericAstVisitor()
+    {
+        var parser = new JavaScriptParser();
+        var module = parser.ParseModule("10 + 5");
+
+        var visitor = new CalculatorVisitor();
+        var result = visitor.Visit(module);
+
+        Assert.Equal(15, result);
+    }
+
+    private class CalculatorVisitor : AstVisitor<double>
+    {
+        protected internal override double VisitLiteral(Literal literal)
+        {
+            return literal.NumericValue ?? throw new NotSupportedException("Only numeric literals are supported.");
+        }
+
+        protected internal override double VisitProgram(Program program)
+        {
+            if (program.Body.Count != 1)
+            {
+                throw new NotSupportedException("Only single expression programs are supported");
+            }
+
+            return Visit(program.Body[0]);
+        }
+
+        protected internal override double VisitExpressionStatement(ExpressionStatement expressionStatement)
+        {
+            return Visit(expressionStatement.Expression);
+        }
+
+        protected internal override double VisitBinaryExpression(BinaryExpression binaryExpression)
+        {
+            var left = Visit(binaryExpression.Left);
+            var right = Visit(binaryExpression.Right);
+
+            return binaryExpression.Operator switch
+            {
+                BinaryOperator.Plus => left + right,
+                BinaryOperator.Minus => left - right,
+                BinaryOperator.Times => left * right,
+                BinaryOperator.Divide => left / right,
+                _ => throw new NotSupportedException($"Operator {binaryExpression.Operator} is not supported.")
+            };
+        }
+    }
 }

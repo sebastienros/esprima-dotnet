@@ -21,7 +21,7 @@ public sealed class AssignmentPattern : Node
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAssignmentPattern(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitAssignmentPattern(this);
 
     public AssignmentPattern UpdateWith(Node left, Expression right)
     {

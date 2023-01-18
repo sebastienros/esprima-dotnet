@@ -25,7 +25,7 @@ public sealed class ImportDeclaration : Declaration
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Specifiers, Source, Assertions);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportDeclaration(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitImportDeclaration(this);
 
     public ImportDeclaration UpdateWith(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> assertions)
     {

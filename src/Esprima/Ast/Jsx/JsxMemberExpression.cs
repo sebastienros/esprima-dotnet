@@ -16,7 +16,7 @@ public sealed class JsxMemberExpression : JsxExpression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Object, Property);
 
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxMemberExpression(this);
+    protected internal override T Accept<T>(IJsxAstVisitor<T> visitor) => visitor.VisitJsxMemberExpression(this);
 
     public JsxMemberExpression UpdateWith(JsxExpression obj, JsxIdentifier property)
     {

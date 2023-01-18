@@ -16,7 +16,7 @@ public sealed class MetaProperty : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Meta, Property);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitMetaProperty(this);
+    protected internal override T Accept<T>(AstVisitor<T> visitor) => visitor.VisitMetaProperty(this);
 
     public MetaProperty UpdateWith(Identifier meta, Identifier property)
     {
