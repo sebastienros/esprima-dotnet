@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Declaration), nameof(Specifiers), nameof(Source), nameof(Assertions) })]
 public sealed class ExportNamedDeclaration : ExportDeclaration
 {
     private readonly NodeList<ExportSpecifier> _specifiers;

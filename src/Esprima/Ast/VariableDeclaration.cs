@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Declarations) })]
 public sealed class VariableDeclaration : Declaration
 {
     public static string GetVariableDeclarationKindToken(VariableDeclarationKind kind)

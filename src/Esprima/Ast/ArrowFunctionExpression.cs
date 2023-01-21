@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Params), nameof(Body) })]
 public sealed class ArrowFunctionExpression : Expression, IFunction
 {
     private readonly NodeList<Node> _params;

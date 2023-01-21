@@ -2,6 +2,7 @@
 
 namespace Esprima.Ast;
 
+[VisitableNode]
 public sealed class Super : Expression
 {
     public Super() : base(Nodes.Super)

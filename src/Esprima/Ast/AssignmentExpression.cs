@@ -23,6 +23,7 @@ public enum AssignmentOperator
     OrAssign
 }
 
+[VisitableNode(ChildProperties = new[] { nameof(Left), nameof(Right) })]
 public sealed class AssignmentExpression : Expression
 {
     public AssignmentExpression(

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
 public sealed class AwaitExpression : Expression
 {
     public AwaitExpression(Expression argument) : base(Nodes.AwaitExpression)

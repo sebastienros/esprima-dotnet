@@ -2,6 +2,7 @@
 
 namespace Esprima.Ast;
 
+[VisitableNode]
 public sealed class ThisExpression : Expression
 {
     public ThisExpression() : base(Nodes.ThisExpression)

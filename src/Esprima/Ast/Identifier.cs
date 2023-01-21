@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode]
 public sealed class Identifier : Expression
 {
     public Identifier(string name) : base(Nodes.Identifier)

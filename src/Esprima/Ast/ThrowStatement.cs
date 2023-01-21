@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
 public sealed class ThrowStatement : Statement
 {
     public ThrowStatement(Expression argument) : base(Nodes.ThrowStatement)

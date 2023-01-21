@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Body) })]
 public sealed class BlockStatement : Statement
 {
     private readonly NodeList<Statement> _body;

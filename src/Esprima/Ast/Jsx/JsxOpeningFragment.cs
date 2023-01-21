@@ -3,6 +3,7 @@ using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
+[VisitableNode(VisitorType = typeof(IJsxAstVisitor))]
 public sealed class JsxOpeningFragment : JsxExpression
 {
     public JsxOpeningFragment(bool selfClosing) : base(JsxNodeType.OpeningFragment)

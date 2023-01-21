@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Object), nameof(Body) })]
 public sealed class WithStatement : Statement
 {
     public WithStatement(Expression obj, Statement body) : base(Nodes.WithStatement)

@@ -2,6 +2,7 @@
 
 namespace Esprima.Ast;
 
+[VisitableNode]
 public sealed class DebuggerStatement : Statement
 {
     public DebuggerStatement() : base(Nodes.DebuggerStatement) { }

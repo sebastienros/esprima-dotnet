@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Callee), nameof(Arguments) })]
 public sealed class CallExpression : Expression
 {
     private readonly NodeList<Expression> _arguments;

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Body) }, SealOverrideMethods = true)]
 public abstract class Program : Node, ISyntaxTreeRoot
 {
     private readonly NodeList<Statement> _body;

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
 public sealed class YieldExpression : Expression
 {
     public YieldExpression(Expression? argument, bool @delegate) : base(Nodes.YieldExpression)

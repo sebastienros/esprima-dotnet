@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Key), nameof(Value) })]
 public sealed class Property : Node, IProperty
 {
     internal Node _value;

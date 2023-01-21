@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode]
 public sealed class TemplateElement : Node
 {
     public TemplateElement(TemplateElementValue value, bool tail) : base(Nodes.TemplateElement)

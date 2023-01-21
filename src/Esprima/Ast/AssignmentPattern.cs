@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Left), nameof(Right) })]
 public sealed class AssignmentPattern : Node
 {
     internal Expression _right;

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Param), nameof(Body) })]
 public sealed class CatchClause : Node
 {
     public CatchClause(Node? param, BlockStatement body) :

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Id), nameof(Init) })]
 public sealed class VariableDeclarator : Node
 {
     public VariableDeclarator(Node id, Expression? init) :

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Test), nameof(Body) })]
 public sealed class WhileStatement : Statement
 {
     public WhileStatement(Expression test, Statement body) : base(Nodes.WhileStatement)

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
 public sealed class SpreadElement : Expression
 {
     public SpreadElement(Expression argument) : base(Nodes.SpreadElement)

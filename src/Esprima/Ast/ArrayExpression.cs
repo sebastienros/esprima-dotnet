@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Elements) })]
 public sealed class ArrayExpression : Expression
 {
     private readonly NodeList<Expression?> _elements;

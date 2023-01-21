@@ -32,6 +32,7 @@ public enum BinaryOperator
     NullishCoalescing
 }
 
+[VisitableNode(ChildProperties = new[] { nameof(Left), nameof(Right) }, SealOverrideMethods = true)]
 public class BinaryExpression : Expression
 {
     public BinaryExpression(string op, Expression left, Expression right) : this(ParseBinaryOperator(op), left, right)

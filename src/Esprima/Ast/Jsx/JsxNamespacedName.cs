@@ -1,10 +1,9 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
-[DebuggerDisplay("{Namespace,nq}.{Name,nq}")]
+[VisitableNode(VisitorType = typeof(IJsxAstVisitor), ChildProperties = new[] { nameof(Name), nameof(Namespace) })]
 public sealed class JsxNamespacedName : JsxExpression
 {
     public JsxNamespacedName(JsxIdentifier @namespace, JsxIdentifier name) : base(JsxNodeType.NamespacedName)

@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Label) })]
 public sealed class BreakStatement : Statement
 {
     public BreakStatement(Identifier? label) : base(Nodes.BreakStatement)

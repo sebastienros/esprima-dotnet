@@ -3,6 +3,7 @@ using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
+[VisitableNode(VisitorType = typeof(IJsxAstVisitor), ChildProperties = new[] { nameof(Name), nameof(Value) })]
 public sealed class JsxAttribute : JsxExpression
 {
     public JsxAttribute(JsxExpression name, Expression? value) : base(JsxNodeType.Attribute)

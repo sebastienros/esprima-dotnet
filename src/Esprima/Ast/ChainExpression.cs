@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Expression) })]
 public sealed class ChainExpression : Expression
 {
     public ChainExpression(Expression expression) : base(Nodes.ChainExpression)

@@ -16,6 +16,7 @@ public enum UnaryOperator
     Decrement
 }
 
+[VisitableNode(ChildProperties = new[] { nameof(Argument) }, SealOverrideMethods = true)]
 public class UnaryExpression : Expression
 {
     public UnaryExpression(string op, Expression arg) : this(ParseUnaryOperator(op), arg)

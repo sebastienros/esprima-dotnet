@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
 public sealed class RestElement : Node
 {
     public RestElement(Node argument) : base(Nodes.RestElement)

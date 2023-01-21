@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Elements) })]
 public sealed class ArrayPattern : BindingPattern
 {
     private readonly NodeList<Node?> _elements;

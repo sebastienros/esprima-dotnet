@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Meta), nameof(Property) })]
 public sealed class MetaProperty : Expression
 {
     public MetaProperty(Identifier meta, Identifier property) : base(Nodes.MetaProperty)

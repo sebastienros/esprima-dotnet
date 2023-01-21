@@ -2,6 +2,7 @@
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Local) })]
 public sealed class ImportNamespaceSpecifier : ImportDeclarationSpecifier
 {
     public ImportNamespaceSpecifier(Identifier local) : base(local, Nodes.ImportNamespaceSpecifier)

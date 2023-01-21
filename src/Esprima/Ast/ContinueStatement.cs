@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Label) })]
 public sealed class ContinueStatement : Statement
 {
     public ContinueStatement(Identifier? label) : base(Nodes.ContinueStatement)

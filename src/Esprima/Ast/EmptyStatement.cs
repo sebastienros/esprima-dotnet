@@ -2,6 +2,7 @@
 
 namespace Esprima.Ast;
 
+[VisitableNode]
 public sealed class EmptyStatement : Statement
 {
     public EmptyStatement() : base(Nodes.EmptyStatement)

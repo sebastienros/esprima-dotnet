@@ -2,6 +2,7 @@
 
 namespace Esprima.Ast.Jsx;
 
+[VisitableNode(VisitorType = typeof(IJsxAstVisitor))]
 public sealed class JsxEmptyExpression : JsxExpression
 {
     public JsxEmptyExpression() : base(JsxNodeType.EmptyExpression)

@@ -5,6 +5,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode]
 public sealed class Literal : Expression
 {
     private static readonly object s_boxedTrue = true;

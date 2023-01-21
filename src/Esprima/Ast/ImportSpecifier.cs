@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Imported), nameof(Local) })]
 public sealed class ImportSpecifier : ImportDeclarationSpecifier
 {
     public ImportSpecifier(Identifier local, Expression imported) : base(local, Nodes.ImportSpecifier)

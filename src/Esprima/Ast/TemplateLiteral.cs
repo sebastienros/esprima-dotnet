@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Quasis), nameof(Expressions) })]
 public sealed class TemplateLiteral : Expression
 {
     private readonly NodeList<TemplateElement> _quasis;

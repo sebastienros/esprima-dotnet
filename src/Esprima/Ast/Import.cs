@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Source), nameof(Attributes) })]
 public sealed class Import : Expression
 {
     public Import(Expression source) : this(source, null)

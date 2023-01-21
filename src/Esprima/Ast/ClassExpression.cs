@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Decorators), nameof(Id), nameof(SuperClass), nameof(Body) })]
 public sealed class ClassExpression : Expression, IClass
 {
     private readonly NodeList<Decorator> _decorators;

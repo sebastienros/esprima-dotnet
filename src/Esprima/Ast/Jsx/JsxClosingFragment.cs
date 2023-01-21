@@ -2,6 +2,7 @@
 
 namespace Esprima.Ast.Jsx;
 
+[VisitableNode(VisitorType = typeof(IJsxAstVisitor))]
 public sealed class JsxClosingFragment : JsxExpression
 {
     public JsxClosingFragment() : base(JsxNodeType.ClosingFragment)

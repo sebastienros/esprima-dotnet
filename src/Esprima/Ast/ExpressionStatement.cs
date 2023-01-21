@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Expression) }, SealOverrideMethods = true)]
 public class ExpressionStatement : Statement
 {
     public ExpressionStatement(Expression expression) : base(Nodes.ExpressionStatement)

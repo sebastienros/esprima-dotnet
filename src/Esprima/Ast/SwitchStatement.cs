@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Discriminant), nameof(Cases) })]
 public sealed class SwitchStatement : Statement
 {
     private readonly NodeList<SwitchCase> _cases;

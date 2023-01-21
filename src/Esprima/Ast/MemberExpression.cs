@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Object), nameof(Property) }, SealOverrideMethods = true)]
 public abstract class MemberExpression : Expression
 {
     protected MemberExpression(Expression obj, Expression property, bool computed, bool optional)

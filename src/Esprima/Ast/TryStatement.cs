@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Block), nameof(Handler), nameof(Finalizer) })]
 public sealed class TryStatement : Statement
 {
     public TryStatement(

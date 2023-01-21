@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
+[VisitableNode(ChildProperties = new[] { nameof(Expression) })]
 public sealed class Decorator : Node
 {
     public Decorator(Expression expression) : base(Nodes.Decorator)
