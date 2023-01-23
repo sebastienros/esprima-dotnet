@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Block), nameof(Handler), nameof(Finalizer) })]
-public sealed class TryStatement : Statement
+public sealed partial class TryStatement : Statement
 {
     public TryStatement(
         BlockStatement block,
@@ -21,17 +20,9 @@ public sealed class TryStatement : Statement
     public CatchClause? Handler { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public BlockStatement? Finalizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Block, Handler, Finalizer);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTryStatement(this);
-
-    public TryStatement UpdateWith(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private TryStatement Rewrite(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
     {
-        if (block == Block && handler == Handler && finalizer == Finalizer)
-        {
-            return this;
-        }
-
         return new TryStatement(block, handler, finalizer);
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode]
-public sealed class TemplateElement : Node
+public sealed partial class TemplateElement : Node
 {
     public TemplateElement(TemplateElementValue value, bool tail) : base(Nodes.TemplateElement)
     {
@@ -16,8 +15,4 @@ public sealed class TemplateElement : Node
 
     public TemplateElementValue Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool Tail { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTemplateElement(this);
 }

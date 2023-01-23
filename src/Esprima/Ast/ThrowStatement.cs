@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Argument) })]
-public sealed class ThrowStatement : Statement
+public sealed partial class ThrowStatement : Statement
 {
     public ThrowStatement(Expression argument) : base(Nodes.ThrowStatement)
     {
@@ -13,18 +12,9 @@ public sealed class ThrowStatement : Statement
 
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitThrowStatement(this);
-
-    public ThrowStatement UpdateWith(Expression argument)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ThrowStatement Rewrite(Expression argument)
     {
-        if (argument == Argument)
-        {
-            return this;
-        }
-
         return new ThrowStatement(argument);
     }
-
 }

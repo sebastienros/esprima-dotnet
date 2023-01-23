@@ -4,7 +4,7 @@ using Esprima.Utils.Jsx;
 namespace Esprima.Ast.Jsx;
 
 [VisitableNode(VisitorType = typeof(IJsxAstVisitor), ChildProperties = new[] { nameof(Argument) })]
-public sealed class JsxSpreadAttribute : JsxExpression
+public sealed partial class JsxSpreadAttribute : JsxExpression
 {
     public JsxSpreadAttribute(Expression argument) : base(JsxNodeType.SpreadAttribute)
     {
@@ -13,17 +13,9 @@ public sealed class JsxSpreadAttribute : JsxExpression
 
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
-
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxSpreadAttribute(this);
-
-    public JsxSpreadAttribute UpdateWith(Expression argument)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private JsxSpreadAttribute Rewrite(Expression argument)
     {
-        if (argument == Argument)
-        {
-            return this;
-        }
-
         return new JsxSpreadAttribute(argument);
     }
 }

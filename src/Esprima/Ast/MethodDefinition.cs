@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Decorators), nameof(Key), nameof(Value) })]
-public sealed class MethodDefinition : ClassProperty
+public sealed partial class MethodDefinition : ClassProperty
 {
     private readonly NodeList<Decorator> _decorators;
 
@@ -28,17 +27,9 @@ public sealed class MethodDefinition : ClassProperty
     public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Decorators, Key, Value);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitMethodDefinition(this);
-
-    public MethodDefinition UpdateWith(Expression key, FunctionExpression value, in NodeList<Decorator> decorators)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private MethodDefinition Rewrite(in NodeList<Decorator> decorators, Expression key, FunctionExpression value)
     {
-        if (key == Key && value == Value && NodeList.AreSame(decorators, Decorators))
-        {
-            return this;
-        }
-
         return new MethodDefinition(key, Computed, value, Kind, Static, decorators);
     }
 }

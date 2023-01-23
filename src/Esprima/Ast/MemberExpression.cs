@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Object), nameof(Property) }, SealOverrideMethods = true)]
-public abstract class MemberExpression : Expression
+public abstract partial class MemberExpression : Expression
 {
     protected MemberExpression(Expression obj, Expression property, bool computed, bool optional)
         : base(Nodes.MemberExpression)
@@ -23,19 +22,5 @@ public abstract class MemberExpression : Expression
     public bool Computed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool Optional { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Object, Property);
-
-    protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitMemberExpression(this);
-
-    protected abstract MemberExpression Rewrite(Expression obj, Expression property);
-
-    public MemberExpression UpdateWith(Expression obj, Expression property)
-    {
-        if (obj == Object && property == Property)
-        {
-            return this;
-        }
-
-        return Rewrite(obj, property);
-    }
+    protected abstract MemberExpression Rewrite(Expression @object, Expression property);
 }

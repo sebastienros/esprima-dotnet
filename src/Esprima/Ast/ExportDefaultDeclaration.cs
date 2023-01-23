@@ -4,7 +4,7 @@ using Esprima.Utils;
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Declaration) })]
-public sealed class ExportDefaultDeclaration : ExportDeclaration
+public sealed partial class ExportDefaultDeclaration : ExportDeclaration
 {
     public ExportDefaultDeclaration(StatementListItem declaration) : base(Nodes.ExportDefaultDeclaration)
     {
@@ -16,17 +16,9 @@ public sealed class ExportDefaultDeclaration : ExportDeclaration
     /// </remarks>
     public StatementListItem Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Declaration);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportDefaultDeclaration(this);
-
-    public ExportDefaultDeclaration UpdateWith(StatementListItem declaration)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ExportDefaultDeclaration Rewrite(StatementListItem declaration)
     {
-        if (declaration == Declaration)
-        {
-            return this;
-        }
-
         return new ExportDefaultDeclaration(declaration);
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Local), nameof(Exported) })]
-public sealed class ExportSpecifier : Node
+public sealed partial class ExportSpecifier : Node
 {
     public ExportSpecifier(Expression local, Expression exported) : base(Nodes.ExportSpecifier)
     {
@@ -23,15 +22,9 @@ public sealed class ExportSpecifier : Node
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextExportSpecifier(Local, Exported);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportSpecifier(this);
-
-    public ExportSpecifier UpdateWith(Expression local, Expression exported)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ExportSpecifier Rewrite(Expression local, Expression exported)
     {
-        if (local == Local && exported == Exported)
-        {
-            return this;
-        }
-
         return new ExportSpecifier(local, exported);
     }
 }

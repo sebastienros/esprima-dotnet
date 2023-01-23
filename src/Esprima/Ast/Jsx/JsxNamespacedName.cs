@@ -4,7 +4,7 @@ using Esprima.Utils.Jsx;
 namespace Esprima.Ast.Jsx;
 
 [VisitableNode(VisitorType = typeof(IJsxAstVisitor), ChildProperties = new[] { nameof(Name), nameof(Namespace) })]
-public sealed class JsxNamespacedName : JsxExpression
+public sealed partial class JsxNamespacedName : JsxExpression
 {
     public JsxNamespacedName(JsxIdentifier @namespace, JsxIdentifier name) : base(JsxNodeType.NamespacedName)
     {
@@ -15,17 +15,9 @@ public sealed class JsxNamespacedName : JsxExpression
     public JsxIdentifier Namespace { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public JsxIdentifier Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Name, Namespace);
-
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxNamespacedName(this);
-
-    public JsxNamespacedName UpdateWith(JsxIdentifier name, JsxIdentifier @namespace)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private JsxNamespacedName Rewrite(JsxIdentifier name, JsxIdentifier @namespace)
     {
-        if (name == Name && @namespace == Namespace)
-        {
-            return this;
-        }
-
         return new JsxNamespacedName(@namespace, name);
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Declaration), nameof(Specifiers), nameof(Source), nameof(Assertions) })]
-public sealed class ExportNamedDeclaration : ExportDeclaration
+public sealed partial class ExportNamedDeclaration : ExportDeclaration
 {
     private readonly NodeList<ExportSpecifier> _specifiers;
     private readonly NodeList<ImportAttribute> _assertions;
@@ -30,17 +29,9 @@ public sealed class ExportNamedDeclaration : ExportDeclaration
     public Literal? Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_2(Declaration, Specifiers, Source, Assertions);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitExportNamedDeclaration(this);
-
-    public ExportNamedDeclaration UpdateWith(Declaration? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ExportNamedDeclaration Rewrite(Declaration? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> assertions)
     {
-        if (declaration == Declaration && NodeList.AreSame(specifiers, Specifiers) && source == Source && NodeList.AreSame(assertions, Assertions))
-        {
-            return this;
-        }
-
         return new ExportNamedDeclaration(declaration, specifiers, source, assertions);
     }
 }

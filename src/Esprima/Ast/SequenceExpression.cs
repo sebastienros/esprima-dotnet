@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Expressions) })]
-public sealed class SequenceExpression : Expression
+public sealed partial class SequenceExpression : Expression
 {
     private readonly NodeList<Expression> _expressions;
 
@@ -15,17 +14,9 @@ public sealed class SequenceExpression : Expression
 
     public ref readonly NodeList<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _expressions; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expressions);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSequenceExpression(this);
-
-    public SequenceExpression UpdateWith(in NodeList<Expression> expressions)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private SequenceExpression Rewrite(in NodeList<Expression> expressions)
     {
-        if (NodeList.AreSame(expressions, Expressions))
-        {
-            return this;
-        }
-
         return new SequenceExpression(expressions);
     }
 }

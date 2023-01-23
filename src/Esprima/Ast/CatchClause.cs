@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Param), nameof(Body) })]
-public sealed class CatchClause : Node
+public sealed partial class CatchClause : Node
 {
     public CatchClause(Node? param, BlockStatement body) :
         base(Nodes.CatchClause)
@@ -19,17 +18,9 @@ public sealed class CatchClause : Node
     public Node? Param { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public BlockStatement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Param, Body);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitCatchClause(this);
-
-    public CatchClause UpdateWith(Node? param, BlockStatement body)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private CatchClause Rewrite(Node? param, BlockStatement body)
     {
-        if (param == Param && body == Body)
-        {
-            return this;
-        }
-
         return new CatchClause(param, body);
     }
 }

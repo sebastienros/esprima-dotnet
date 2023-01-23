@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Body) }, SealOverrideMethods = true)]
-public abstract class Program : Node, ISyntaxTreeRoot
+public abstract partial class Program : Node, ISyntaxTreeRoot
 {
     private readonly NodeList<Statement> _body;
 
@@ -48,19 +47,5 @@ public abstract class Program : Node, ISyntaxTreeRoot
         set => SetDynamicPropertyValue(CommentsPropertyIndex, value);
     }
 
-    internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
-
-    protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitProgram(this);
-
     protected abstract Program Rewrite(in NodeList<Statement> body);
-
-    public Program UpdateWith(in NodeList<Statement> body)
-    {
-        if (NodeList.AreSame(body, Body))
-        {
-            return this;
-        }
-
-        return Rewrite(body);
-    }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Key), nameof(Value) })]
-public sealed class Property : Node, IProperty
+public sealed partial class Property : Node, IProperty
 {
     internal Node _value;
 
@@ -44,15 +43,9 @@ public sealed class Property : Node, IProperty
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextProperty(Key, Value, Shorthand);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitProperty(this);
-
-    public Property UpdateWith(Expression key, Node value)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private Property Rewrite(Expression key, Node value)
     {
-        if (key == Key && value == Value)
-        {
-            return this;
-        }
-
         return new Property(Kind, key, Computed, value, Method, Shorthand);
     }
 }

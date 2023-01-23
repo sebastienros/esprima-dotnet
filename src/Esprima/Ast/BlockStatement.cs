@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Body) })]
-public sealed class BlockStatement : Statement
+public sealed partial class BlockStatement : Statement
 {
     private readonly NodeList<Statement> _body;
 
@@ -15,17 +14,9 @@ public sealed class BlockStatement : Statement
 
     public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Body);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitBlockStatement(this);
-
-    public BlockStatement UpdateWith(in NodeList<Statement> body)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private BlockStatement Rewrite(in NodeList<Statement> body)
     {
-        if (NodeList.AreSame(body, Body))
-        {
-            return this;
-        }
-
         return new BlockStatement(body);
     }
 }

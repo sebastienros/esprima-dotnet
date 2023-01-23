@@ -70,7 +70,7 @@ public class AstRewriter : AstVisitor
         var key = VisitAndConvert(accessorProperty.Key);
         var value = VisitAndConvert(accessorProperty.Value, allowNull: true);
 
-        return accessorProperty.UpdateWith(key, value, decorators);
+        return accessorProperty.UpdateWith(decorators, key, value);
     }
 
     protected internal override object? VisitArrayExpression(ArrayExpression arrayExpression)
@@ -177,7 +177,7 @@ public class AstRewriter : AstVisitor
         var superClass = VisitAndConvert(classDeclaration.SuperClass, allowNull: true);
         var body = VisitAndConvert(classDeclaration.Body);
 
-        return classDeclaration.UpdateWith(id, superClass, body, decorators);
+        return classDeclaration.UpdateWith(decorators, id, superClass, body);
     }
 
     protected internal override object? VisitClassExpression(ClassExpression classExpression)
@@ -187,7 +187,7 @@ public class AstRewriter : AstVisitor
         var superClass = VisitAndConvert(classExpression.SuperClass, allowNull: true);
         var body = VisitAndConvert(classExpression.Body);
 
-        return classExpression.UpdateWith(id, superClass, body, decorators);
+        return classExpression.UpdateWith(decorators, id, superClass, body);
     }
 
     protected internal override object? VisitConditionalExpression(ConditionalExpression conditionalExpression)
@@ -416,7 +416,7 @@ public class AstRewriter : AstVisitor
         var key = VisitAndConvert(methodDefinition.Key);
         var value = VisitAndConvert(methodDefinition.Value);
 
-        return methodDefinition.UpdateWith(key, value, decorators);
+        return methodDefinition.UpdateWith(decorators, key, value);
     }
 
     protected internal override object? VisitNewExpression(NewExpression newExpression)
@@ -475,7 +475,7 @@ public class AstRewriter : AstVisitor
         var key = VisitAndConvert(propertyDefinition.Key);
         var value = VisitAndConvert(propertyDefinition.Value, allowNull: true);
 
-        return propertyDefinition.UpdateWith(key, value, decorators);
+        return propertyDefinition.UpdateWith(decorators, key, value);
     }
 
     protected internal override object? VisitRestElement(RestElement restElement)

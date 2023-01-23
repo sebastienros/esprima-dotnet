@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Decorators), nameof(Id), nameof(SuperClass), nameof(Body) })]
-public sealed class ClassExpression : Expression, IClass
+public sealed partial class ClassExpression : Expression, IClass
 {
     private readonly NodeList<Decorator> _decorators;
 
@@ -25,17 +24,9 @@ public sealed class ClassExpression : Expression, IClass
     public ClassBody Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1_2(Decorators, Id, SuperClass, Body);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitClassExpression(this);
-
-    public ClassExpression UpdateWith(Identifier? id, Expression? superClass, ClassBody body, in NodeList<Decorator> decorators)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ClassExpression Rewrite(in NodeList<Decorator> decorators, Identifier? id, Expression? superClass, ClassBody body)
     {
-        if (id == Id && superClass == SuperClass && body == Body && NodeList.AreSame(decorators, Decorators))
-        {
-            return this;
-        }
-
         return new ClassExpression(id, superClass, body, decorators);
     }
 }

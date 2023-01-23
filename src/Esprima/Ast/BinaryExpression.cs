@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
@@ -33,7 +32,7 @@ public enum BinaryOperator
 }
 
 [VisitableNode(ChildProperties = new[] { nameof(Left), nameof(Right) }, SealOverrideMethods = true)]
-public class BinaryExpression : Expression
+public partial class BinaryExpression : Expression
 {
     public BinaryExpression(string op, Expression left, Expression right) : this(ParseBinaryOperator(op), left, right)
     {
@@ -124,22 +123,8 @@ public class BinaryExpression : Expression
     public Expression Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitBinaryExpression(this);
-
     protected virtual BinaryExpression Rewrite(Expression left, Expression right)
     {
         return new BinaryExpression(Operator, left, right);
-    }
-
-    public BinaryExpression UpdateWith(Expression left, Expression right)
-    {
-        if (left == Left && right == Right)
-        {
-            return this;
-        }
-
-        return Rewrite(left, right);
     }
 }

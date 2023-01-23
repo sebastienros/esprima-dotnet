@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Declarations) })]
-public sealed class VariableDeclaration : Declaration
+public sealed partial class VariableDeclaration : Declaration
 {
     public static string GetVariableDeclarationKindToken(VariableDeclarationKind kind)
     {
@@ -31,17 +30,9 @@ public sealed class VariableDeclaration : Declaration
     public ref readonly NodeList<VariableDeclarator> Declarations { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _declarations; }
     public VariableDeclarationKind Kind { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Declarations);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitVariableDeclaration(this);
-
-    public VariableDeclaration UpdateWith(in NodeList<VariableDeclarator> declarations)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private VariableDeclaration Rewrite(in NodeList<VariableDeclarator> declarations)
     {
-        if (NodeList.AreSame(declarations, Declarations))
-        {
-            return this;
-        }
-
         return new VariableDeclaration(declarations, Kind);
     }
 }

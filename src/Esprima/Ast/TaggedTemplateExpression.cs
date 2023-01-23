@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Tag), nameof(Quasi) })]
-public sealed class TaggedTemplateExpression : Expression
+public sealed partial class TaggedTemplateExpression : Expression
 {
     public TaggedTemplateExpression(Expression tag, TemplateLiteral quasi) : base(Nodes.TaggedTemplateExpression)
     {
@@ -15,17 +14,9 @@ public sealed class TaggedTemplateExpression : Expression
     public Expression Tag { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public TemplateLiteral Quasi { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Tag, Quasi);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTaggedTemplateExpression(this);
-
-    public TaggedTemplateExpression UpdateWith(Expression tag, TemplateLiteral quasi)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private TaggedTemplateExpression Rewrite(Expression tag, TemplateLiteral quasi)
     {
-        if (tag == Tag && quasi == Quasi)
-        {
-            return this;
-        }
-
         return new TaggedTemplateExpression(tag, quasi);
     }
 }

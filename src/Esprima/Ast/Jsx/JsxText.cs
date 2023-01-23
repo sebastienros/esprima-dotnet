@@ -4,7 +4,7 @@ using Esprima.Utils.Jsx;
 namespace Esprima.Ast.Jsx;
 
 [VisitableNode(VisitorType = typeof(IJsxAstVisitor))]
-public sealed class JsxText : JsxExpression
+public sealed partial class JsxText : JsxExpression
 {
     public JsxText(string? value, string raw) : base(JsxNodeType.Text)
     {
@@ -14,8 +14,4 @@ public sealed class JsxText : JsxExpression
 
     public string? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public string Raw { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
-
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxText(this);
 }

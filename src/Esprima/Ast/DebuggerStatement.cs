@@ -1,13 +1,7 @@
-﻿using Esprima.Utils;
-
-namespace Esprima.Ast;
+﻿namespace Esprima.Ast;
 
 [VisitableNode]
-public sealed class DebuggerStatement : Statement
+public sealed partial class DebuggerStatement : Statement
 {
     public DebuggerStatement() : base(Nodes.DebuggerStatement) { }
-
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitDebuggerStatement(this);
 }
