@@ -4,6 +4,11 @@ namespace Esprima.SourceGenerators.Helpers;
 
 public static class StringBuilderExtensions
 {
+    public static StringBuilder AppendIndent(this StringBuilder sb, int indentionLevel)
+    {
+        return sb.AppendIndent("    ", indentionLevel);
+    }
+
     public static StringBuilder AppendIndent(this StringBuilder sb, string indent, int indentionLevel)
     {
         for (; indentionLevel > 0; indentionLevel--)

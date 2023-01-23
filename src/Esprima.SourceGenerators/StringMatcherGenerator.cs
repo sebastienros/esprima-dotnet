@@ -23,7 +23,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource(
-            "Attributes.g.cs", SourceText.From(SourceGenerationHelper.Attributes, Encoding.UTF8)));
+            "StringMatcherAttribute.g.cs", SourceText.From(StringMatcherGeneratorHelper.Attribute, Encoding.UTF8)));
 
         IncrementalValuesProvider<StringMatcherMethod> helperMethodInfos = context.SyntaxProvider
             .CreateSyntaxProvider(IsSyntaxTargetForGeneration, GetSemanticTargetForGeneration)
@@ -163,7 +163,7 @@ public class StringMatcherGenerator : IIncrementalGenerator
                 var returnString = method.ReturnType.StartsWith("string", StringComparison.Ordinal);
                 var sourceIsSpan = method.InputType.Contains("Span");
 
-                sourceBuilder.Append(SourceGenerationHelper.GenerateLookups(method.Alternatives, indent: "    ", indentionLevel: 2, checkNull, returnString, sourceIsSpan));
+                sourceBuilder.Append(StringMatcherGeneratorHelper.GenerateLookups(method.Alternatives, indent: "    ", indentionLevel: 2, checkNull, returnString, sourceIsSpan));
                 sourceBuilder.Append(indent).AppendLine("}");
             }
 
