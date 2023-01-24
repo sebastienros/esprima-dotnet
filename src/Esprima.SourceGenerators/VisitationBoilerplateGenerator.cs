@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.ComponentModel;
+using System.Data;
 using System.Globalization;
 using System.Text;
 using Esprima.SourceGenerators.Helpers;
@@ -45,7 +47,7 @@ internal sealed class VisitableNodeAttribute : Attribute
     private const string NodeCSharpTypeName = "Esprima.Ast.Node";
 
     private const string NodeListOfTTypeName = "Esprima.Ast.NodeList`1";
-    private const string NodeListOfTCSharpTypeName = "Esprima.Ast.NodeList<T>";
+    private const string NodeListOfTCSharpTypeName = "Esprima.Ast.NodeList<>";
 
     private const string ChildNodesEnumeratorTypeName = "Esprima.Ast.ChildNodes+Enumerator";
     private const string ChildNodesEnumeratorCSharpTypeName = "Esprima.Ast.ChildNodes.Enumerator";
@@ -299,9 +301,13 @@ internal sealed class VisitableNodeAttribute : Attribute
 
             sb.Clear();
         }
+
+        GenerateChildNodeEnumeratorHelpers(sb, visitableNodeInfos, context.CancellationToken);
+
+        context.AddSource($"ChildNodes.Helpers.g.cs", sb.ToString());
     }
 
-    private static void GenerateVisitableNodeClasses(StringBuilder sb, string? @namespace, IEnumerable<VisitableNodeInfo> visitableNodeInfos, CancellationToken cancellationToken)
+    private static void GenerateVisitableNodeClasses(StringBuilder sb, string? @namespace, IEnumerable<VisitableNodeInfo> nodeInfos, CancellationToken cancellationToken)
     {
         sb.AppendLine("#nullable enable");
         sb.AppendLine();
@@ -313,7 +319,7 @@ internal sealed class VisitableNodeAttribute : Attribute
 
         string? classSeparator = null;
         int indentionLevel = 0;
-        foreach (var nodeInfo in visitableNodeInfos.OrderBy(nodeInfo => nodeInfo.ClassName))
+        foreach (var nodeInfo in nodeInfos.OrderBy(nodeInfo => nodeInfo.ClassName))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -379,7 +385,7 @@ internal sealed class VisitableNodeAttribute : Attribute
         if (nodeInfo.ChildPropertyInfos.Length > 0)
         {
             sb.Append("enumerator.");
-            AppendChildNodesEnumeratorMoveNextMethodName(sb, nodeInfo.ChildPropertyInfos);
+            AppendChildNodesEnumeratorHelperMethodName(sb, nodeInfo.ChildPropertyInfos);
             sb.Append("(");
 
             string? paramSeparator = null;
@@ -468,7 +474,186 @@ internal sealed class VisitableNodeAttribute : Attribute
         sb.AppendIndent(indentionLevel).AppendLine("}");
     }
 
-    private static void AppendChildNodesEnumeratorMoveNextMethodName(StringBuilder sb, VisitableNodeChildPropertyInfo[] childPropertyInfos)
+    private sealed class ChildNodeEnumeratorHelperMethodSignatureEqualityComparer : IEqualityComparer<IChildNodeEnumeratorHelperParamInfo[]>
+    {
+        public bool Equals(IChildNodeEnumeratorHelperParamInfo[] x, IChildNodeEnumeratorHelperParamInfo[] y)
+        {
+            if (x.Length != y.Length)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < x.Length; i++)
+            {
+                var paramInfo1 = x[i];
+                var paramInfo2 = y[i];
+
+                if (paramInfo1.IsNodeList != paramInfo2.IsNodeList || paramInfo1.IsOptional != paramInfo2.IsOptional)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public int GetHashCode(IChildNodeEnumeratorHelperParamInfo[] obj)
+        {
+            var hashCode = 1327044938;
+            foreach (var paramInfo in obj)
+            {
+                hashCode = hashCode * -1521134295 + paramInfo.IsOptional.GetHashCode();
+                hashCode = hashCode * -1521134295 + paramInfo.IsNodeList.GetHashCode();
+            }
+            return hashCode;
+        }
+    }
+
+    private static void GenerateChildNodeEnumeratorHelpers(StringBuilder sb, IEnumerable<VisitableNodeInfo> nodeInfos, CancellationToken cancellationToken)
+    {
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine();
+        sb.AppendLine("namespace Esprima.Ast;");
+        sb.AppendLine();
+
+        var indentationLevel = 0;
+        sb.AppendIndent(indentationLevel).AppendLine("partial struct ChildNodes");
+        sb.AppendIndent(indentationLevel).AppendLine("{");
+        indentationLevel++;
+
+        sb.AppendIndent(indentationLevel).AppendLine("partial struct Enumerator");
+        sb.AppendIndent(indentationLevel).AppendLine("{");
+        indentationLevel++;
+
+        var methodSignatures = nodeInfos
+            .Where(nodeInfo => nodeInfo.GenerateNextChildNodeMethod && nodeInfo.ChildPropertyInfos.Length > 0)
+            .Select(nodeInfo => nodeInfo.ChildPropertyInfos)
+            .Distinct(new ChildNodeEnumeratorHelperMethodSignatureEqualityComparer())
+            .OrderBy(signature => signature.Length)
+            .ThenBy(signature => signature.Count(paramInfo => paramInfo.IsOptional))
+            .ThenBy(signature => signature
+                .Select((paramInfo, index) => (paramInfo, index))
+                .Aggregate(0UL, (weight, item) => item.paramInfo.IsOptional ? weight | 1UL << item.index : weight))
+            .ThenBy(signature => signature.Count(paramInfo => paramInfo.IsNodeList))
+            .ThenBy(signature => signature
+                .Select((paramInfo, index) => (paramInfo, index))
+                .Aggregate(0UL, (weight, item) => item.paramInfo.IsNodeList ? weight | 1UL << item.index : weight));
+
+        string? methodSeparator = null;
+        foreach (var methodSignature in methodSignatures)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            sb.Append(methodSeparator);
+            methodSeparator = Environment.NewLine;
+
+            AppendChildNodesEnumeratorHelperMethod(sb, methodSignature, ref indentationLevel);
+        }
+
+        indentationLevel--;
+        sb.AppendIndent(indentationLevel).AppendLine("}");
+
+        indentationLevel--;
+        sb.AppendIndent(indentationLevel).AppendLine("}");
+    }
+
+
+    private static void AppendChildNodesEnumeratorHelperMethod(StringBuilder sb, IChildNodeEnumeratorHelperParamInfo[] methodSignature, ref int indentionLevel)
+    {
+        // internal partial Node? MoveNext(Node arg0)
+        sb.AppendIndent(indentionLevel).Append($"internal {NodeCSharpTypeName}? ");
+        AppendChildNodesEnumeratorHelperMethodName(sb, methodSignature);
+
+        var isGeneric = false;
+        for (var i = 0; i < methodSignature.Length; i++)
+        {
+            var paramInfo = methodSignature[i];
+
+            if (paramInfo.IsNodeList)
+            {
+                if (!isGeneric)
+                {
+                    isGeneric = true;
+                    sb.Append("<");
+                }
+                else
+                {
+                    sb.Append(", ");
+                }
+
+                sb.Append("T").Append(i.ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        if (isGeneric)
+        {
+            sb.Append(">");
+        }
+
+        sb.Append("(");
+
+        string? paramSeparator = null;
+        for (var i = 0; i < methodSignature.Length; i++)
+        {
+            sb.Append(paramSeparator);
+            paramSeparator = ", ";
+
+            var paramInfo = methodSignature[i];
+            var paramIndex = i.ToString(CultureInfo.InvariantCulture);
+
+            if (paramInfo.IsNodeList)
+            {
+                sb.Append("in ").Append(NodeListOfTCSharpTypeName, 0, NodeListOfTCSharpTypeName.Length - 2);
+                sb.Append("<T").Append(paramIndex);
+                if (paramInfo.IsOptional)
+                {
+                    sb.Append("?");
+                }
+                sb.Append(">");
+            }
+            else
+            {
+                sb.Append(NodeCSharpTypeName);
+                if (paramInfo.IsOptional)
+                {
+                    sb.Append("?");
+                }
+            }
+
+            sb.Append(" arg").Append(paramIndex);
+        }
+
+        sb.Append(")");
+
+        if (isGeneric)
+        {
+            indentionLevel++;
+            for (var i = 0; i < methodSignature.Length; i++)
+            {
+                var paramInfo = methodSignature[i];
+
+                if (paramInfo.IsNodeList)
+                {
+                    sb.AppendLine();
+                    sb.AppendIndent(indentionLevel).Append("where T").Append(i.ToString(CultureInfo.InvariantCulture))
+                        .Append(" : ").Append(NodeCSharpTypeName);
+                }
+            }
+            indentionLevel--;
+        }
+
+        sb.AppendLine();
+
+        sb.AppendIndent(indentionLevel).AppendLine("{");
+        indentionLevel++;
+
+        AppendChildNodesEnumeratorHelperMethodBody(sb, methodSignature, ref indentionLevel);
+
+        indentionLevel--;
+        sb.AppendIndent(indentionLevel).AppendLine("}");
+    }
+
+    private static void AppendChildNodesEnumeratorHelperMethodName(StringBuilder sb, IChildNodeEnumeratorHelperParamInfo[] methodSignature)
     {
         // We can't use a single overloaded method name as NRT annotations are not part of the method signature.
         // Thus, to disambiguate method resolution, we encode nullability of the parameters into the method name as follows:
@@ -478,9 +663,9 @@ internal sealed class VisitableNodeAttribute : Attribute
         //   otherwise 'MoveNextNullableAt{NULLABLE_PARAM_INDICES_SEPARATED_BY_UNDERSCORE}'.
 
         sb.Append("MoveNext");
-        if (childPropertyInfos.Length == 1)
+        if (methodSignature.Length == 1)
         {
-            if (childPropertyInfos[0].IsOptional)
+            if (methodSignature[0].IsOptional)
             {
                 sb.Append("Nullable");
             }
@@ -488,9 +673,9 @@ internal sealed class VisitableNodeAttribute : Attribute
         else
         {
             var prefix = "NullableAt";
-            for (var i = 0; i < childPropertyInfos.Length; i++)
+            for (var i = 0; i < methodSignature.Length; i++)
             {
-                var propertyInfo = childPropertyInfos[i];
+                var propertyInfo = methodSignature[i];
 
                 if (propertyInfo.IsOptional)
                 {
@@ -500,6 +685,94 @@ internal sealed class VisitableNodeAttribute : Attribute
                     sb.Append(i.ToString(CultureInfo.InvariantCulture));
                 }
             }
+        }
+    }
+
+    private static void AppendChildNodesEnumeratorHelperMethodBody(StringBuilder sb, IChildNodeEnumeratorHelperParamInfo[] methodSignature, ref int indentionLevel)
+    {
+        sb.AppendIndent(indentionLevel).AppendLine("switch (_propertyIndex)");
+        sb.AppendIndent(indentionLevel).AppendLine("{");
+        indentionLevel++;
+
+        var itemVariable = NodeTypeName + "? item";
+        for (int i = 0, n = methodSignature.Length; i < n; i++)
+        {
+            var paramInfo = methodSignature[i];
+            var paramIndex = i.ToString(CultureInfo.InvariantCulture);
+            var paramName = "arg" + paramIndex;
+
+            sb.AppendIndent(indentionLevel).AppendLine($"case {paramIndex}:");
+            indentionLevel++;
+
+            if (paramInfo.IsNodeList)
+            {
+                sb.AppendIndent(indentionLevel).AppendLine($"if (_listIndex >= {paramName}.Count)");
+                sb.AppendIndent(indentionLevel).AppendLine("{");
+                indentionLevel++;
+
+                sb.AppendIndent(indentionLevel).AppendLine("_listIndex = 0;");
+                sb.AppendIndent(indentionLevel).AppendLine("_propertyIndex++;");
+                sb.AppendIndent(indentionLevel).AppendLine($"goto {GetJumpLabel(i + 1, n)};");
+
+                indentionLevel--;
+                sb.AppendIndent(indentionLevel).AppendLine("}");
+                sb.AppendIndent(indentionLevel).AppendLine();
+                sb.AppendIndent(indentionLevel).AppendLine($"{itemVariable} = {paramName}[_listIndex++];");
+                sb.AppendIndent(indentionLevel).AppendLine();
+
+                itemVariable = "item";
+
+                if (paramInfo.IsOptional)
+                {
+                    sb.AppendIndent(indentionLevel).AppendLine($"if ({itemVariable} is null)");
+                    sb.AppendIndent(indentionLevel).AppendLine("{");
+                    indentionLevel++;
+
+                    sb.AppendIndent(indentionLevel).AppendLine($"goto {GetJumpLabel(i, n)};");
+
+                    indentionLevel--;
+                    sb.AppendIndent(indentionLevel).AppendLine("}");
+                    sb.AppendIndent(indentionLevel).AppendLine();
+                }
+
+                sb.AppendIndent(indentionLevel).AppendLine($"return {itemVariable};");
+            }
+            else
+            {
+                sb.AppendIndent(indentionLevel).AppendLine("_propertyIndex++;");
+                sb.AppendIndent(indentionLevel).AppendLine();
+
+                if (paramInfo.IsOptional)
+                {
+                    sb.AppendIndent(indentionLevel).AppendLine($"if ({paramName} is null)");
+                    sb.AppendIndent(indentionLevel).AppendLine("{");
+                    indentionLevel++;
+
+                    sb.AppendIndent(indentionLevel).AppendLine($"goto {GetJumpLabel(i + 1, n)};");
+
+                    indentionLevel--;
+                    sb.AppendIndent(indentionLevel).AppendLine("}");
+                    sb.AppendIndent(indentionLevel).AppendLine();
+                }
+
+                sb.AppendIndent(indentionLevel).AppendLine($"return {paramName};");
+            }
+
+            indentionLevel--;
+        }
+
+        sb.AppendIndent(indentionLevel).AppendLine("default:");
+        indentionLevel++;
+
+        sb.AppendIndent(indentionLevel).AppendLine("return null;");
+        indentionLevel--;
+
+        indentionLevel--;
+        sb.AppendIndent(indentionLevel).AppendLine("}");
+
+        static string GetJumpLabel(int targetParamIndex, int paramCount)
+        {
+            return targetParamIndex >= paramCount ? "default" : $"case {targetParamIndex.ToString(CultureInfo.InvariantCulture)}";
         }
     }
 }
@@ -530,7 +803,7 @@ internal sealed record class VisitableNodeInfo
     public Diagnostic[] Diagnostics { get => _diagnostics.Target; init => _diagnostics = value; }
 }
 
-internal sealed record class VisitableNodeChildPropertyInfo
+internal sealed record class VisitableNodeChildPropertyInfo : IChildNodeEnumeratorHelperParamInfo
 {
     public VisitableNodeChildPropertyInfo(string propertyName, string propertyTypeFullName)
     {
@@ -552,4 +825,10 @@ internal sealed record class VisitableNodeChildPropertyInfo
     public bool IsNodeList { get; init; }
 
     public bool IsRefReadonly { get; init; }
+}
+
+internal interface IChildNodeEnumeratorHelperParamInfo
+{
+    bool IsOptional { get; }
+    bool IsNodeList { get; }
 }
