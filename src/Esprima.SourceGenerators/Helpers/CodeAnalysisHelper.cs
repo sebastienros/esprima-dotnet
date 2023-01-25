@@ -71,34 +71,6 @@ internal static class CodeAnalysisHelper
         return attributes;
     }
 
-    private static readonly SymbolDisplayFormat s_fullyQualifiedFormatWithoutAlias = new(
-        globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
-        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-        miscellaneousOptions:
-            SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-            SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-
-    public static string GetFullName(this ITypeSymbol type)
-    {
-        return type.ToDisplayString(s_fullyQualifiedFormatWithoutAlias);
-    }
-
-    private static readonly SymbolDisplayFormat s_fullyQualifiedFormatWithoutAliasWithNullability = new(
-        globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
-        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-        miscellaneousOptions:
-            SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-            SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-            SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
-
-    public static string GetFullNameWithNullability(this ITypeSymbol type)
-    {
-        return type.ToDisplayString(s_fullyQualifiedFormatWithoutAliasWithNullability);
-    }
-
-
     public static IEnumerable<INamedTypeSymbol> GetBaseTypes(this ITypeSymbol type)
     {
         for (var current = type.BaseType; current is not null; current = current.BaseType)
@@ -115,12 +87,5 @@ internal static class CodeAnalysisHelper
     public static bool InheritsFromOrIsSameAs(this ITypeSymbol type, ITypeSymbol baseType)
     {
         return SymbolEqualityComparer.Default.Equals(type, baseType) || type.InheritsFrom(baseType);
-    }
-
-    public static string MakeValidVariableName(string value)
-    {
-        return SyntaxFacts.GetKeywordKind(value) == SyntaxKind.None
-            ? value
-            : "@" + value;
     }
 }
