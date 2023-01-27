@@ -8,7 +8,7 @@ public class SourceGeneratorTest
         return File.ReadAllText(ToEsprimaSourcePath(file));
     }
 
-    private static string ToEsprimaSourcePath(string path)
+    protected static string ToEsprimaSourcePath(string path)
     {
         return Path.Combine("../../../../../src/Esprima/", path);
     }
