@@ -221,19 +221,6 @@ partial class AstToJavaScriptConverter
         _currentExpressionFlags = originalExpressionFlags;
     }
 
-    private void VisitAssertions(in NodeList<ImportAttribute> assertions)
-    {
-        // https://github.com/tc39/proposal-import-assertions
-
-        Writer.WriteKeyword("assert", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
-
-        Writer.StartObject(assertions.Count, ref _writeContext);
-
-        VisitAuxiliaryNodeList(in assertions, separator: ",");
-
-        Writer.EndObject(assertions.Count, ref _writeContext);
-    }
-
     private void VisitExportOrImportSpecifierIdentifier(Expression identifierExpression)
     {
         if (identifierExpression is Identifier { Name: "default" } identifier)

@@ -2,25 +2,19 @@
 
 namespace Esprima.Ast;
 
-[VisitableNode(ChildProperties = new[] { nameof(Source), nameof(Attributes) })]
+[VisitableNode(ChildProperties = new[] { nameof(Source) })]
 public sealed partial class Import : Expression
 {
-    public Import(Expression source) : this(source, null)
-    {
-    }
-
-    public Import(Expression source, Expression? attributes) : base(Nodes.Import)
+    public Import(Expression source) : base(Nodes.Import)
     {
         Source = source;
-        Attributes = attributes;
     }
 
     public Expression Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-    public Expression? Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Import Rewrite(Expression source, Expression? attributes)
+    private Import Rewrite(Expression source)
     {
-        return new Import(source, attributes);
+        return new Import(source);
     }
 }

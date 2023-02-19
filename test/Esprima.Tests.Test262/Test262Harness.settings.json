@@ -5,7 +5,8 @@
   "Namespace": "Esprima.Tests.Test262",
   "Parallel": true,
   "ExcludedFeatures": [
-    "regexp-unicode-property-escapes"
+    "regexp-unicode-property-escapes",
+    "import-assertions"
   ],
   "ExcludedFlags": [],
   "ExcludedDirectories": [],

@@ -438,13 +438,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
         return ForceNewObjectByControlType((ExportAllDeclaration) base.VisitExportAllDeclaration(exportAllDeclaration)!,
-            node => new ExportAllDeclaration(node.Source, node.Exported, exportAllDeclaration.Assertions));
+            node => new ExportAllDeclaration(node.Source, node.Exported));
     }
 
     protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
         return ForceNewObjectByControlType((ExportNamedDeclaration) base.VisitExportNamedDeclaration(exportNamedDeclaration)!,
-            node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source, exportNamedDeclaration.Assertions));
+            node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source));
     }
 
     protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
@@ -456,19 +456,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitImport(Import import)
     {
         return ForceNewObjectByControlType((Import) base.VisitImport(import)!,
-            node => new Import(node.Source, import.Attributes));
-    }
-
-    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
-    {
-        return ForceNewObjectByControlType((ImportAttribute) base.VisitImportAttribute(importAttribute)!,
-            node => new ImportAttribute(node.Key, node.Value));
+            node => new Import(node.Source));
     }
 
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         return ForceNewObjectByControlType((ImportDeclaration) base.VisitImportDeclaration(importDeclaration)!,
-            node => new ImportDeclaration(node.Specifiers, node.Source, importDeclaration.Assertions));
+            node => new ImportDeclaration(node.Specifiers, node.Source));
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
