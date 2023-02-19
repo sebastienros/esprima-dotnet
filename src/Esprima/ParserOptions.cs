@@ -57,7 +57,7 @@ public record class ParserOptions
     /// { 
     ///     foreach (var child in node.ChildNodes)
     ///     {
-    ///         child.AdditionalData = node;
+    ///         child.AssociatedData = node;
     ///     }
     /// };
     /// </code>
