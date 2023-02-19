@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class AssignmentPattern : Node
+[VisitableNode(ChildProperties = new[] { nameof(Left), nameof(Right) })]
+public sealed partial class AssignmentPattern : Node
 {
     internal Expression _right;
 
@@ -19,17 +19,9 @@ public sealed class AssignmentPattern : Node
     public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _right; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAssignmentPattern(this);
-
-    public AssignmentPattern UpdateWith(Node left, Expression right)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private AssignmentPattern Rewrite(Node left, Expression right)
     {
-        if (left == Left && right == Right)
-        {
-            return this;
-        }
-
         return new AssignmentPattern(left, right);
     }
 }

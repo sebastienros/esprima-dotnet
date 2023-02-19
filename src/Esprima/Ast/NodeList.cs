@@ -244,10 +244,4 @@ public static class NodeList
                 }
         }
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool AreSame<T>(in NodeList<T> nodeList1, in NodeList<T> nodeList2) where T : Node?
-    {
-        return nodeList1.IsSameAs(in nodeList2);
-    }
 }

@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class AwaitExpression : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
+public sealed partial class AwaitExpression : Expression
 {
     public AwaitExpression(Expression argument) : base(Nodes.AwaitExpression)
     {
@@ -12,17 +12,9 @@ public sealed class AwaitExpression : Expression
 
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAwaitExpression(this);
-
-    public AwaitExpression UpdateWith(Expression argument)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private AwaitExpression Rewrite(Expression argument)
     {
-        if (argument == Argument)
-        {
-            return this;
-        }
-
         return new AwaitExpression(argument);
     }
 }

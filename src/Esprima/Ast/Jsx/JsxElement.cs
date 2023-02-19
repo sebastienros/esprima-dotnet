@@ -3,7 +3,8 @@ using Esprima.Utils.Jsx;
 
 namespace Esprima.Ast.Jsx;
 
-public sealed class JsxElement : JsxExpression
+[VisitableNode(VisitorType = typeof(IJsxAstVisitor), ChildProperties = new[] { nameof(OpeningElement), nameof(Children), nameof(ClosingElement) })]
+public sealed partial class JsxElement : JsxExpression
 {
     private readonly NodeList<JsxExpression> _children;
 
@@ -18,17 +19,9 @@ public sealed class JsxElement : JsxExpression
     public Node? ClosingElement { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<JsxExpression> Children { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _children; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(OpeningElement, Children, ClosingElement);
-
-    protected override object? Accept(IJsxAstVisitor visitor) => visitor.VisitJsxElement(this);
-
-    public JsxElement UpdateWith(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private JsxElement Rewrite(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
     {
-        if (openingElement == OpeningElement && NodeList.AreSame(children, Children) && closingElement == ClosingElement)
-        {
-            return this;
-        }
-
         return new JsxElement(openingElement, children, closingElement);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class SpreadElement : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
+public sealed partial class SpreadElement : Expression
 {
     public SpreadElement(Expression argument) : base(Nodes.SpreadElement)
     {
@@ -12,17 +12,9 @@ public sealed class SpreadElement : Expression
 
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitSpreadElement(this);
-
-    public SpreadElement UpdateWith(Expression argument)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private SpreadElement Rewrite(Expression argument)
     {
-        if (argument == Argument)
-        {
-            return this;
-        }
-
         return new SpreadElement(argument);
     }
 }

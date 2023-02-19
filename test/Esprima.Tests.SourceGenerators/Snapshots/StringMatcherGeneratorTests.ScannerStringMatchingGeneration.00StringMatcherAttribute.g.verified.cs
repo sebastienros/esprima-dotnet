@@ -1,4 +1,5 @@
-﻿//HintName: Attributes.g.cs
+﻿//HintName: StringMatcherAttribute.g.cs
+#nullable enable
 
 namespace Esprima;
 

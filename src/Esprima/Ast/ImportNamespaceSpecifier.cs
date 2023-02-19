@@ -1,24 +1,17 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
 
 namespace Esprima.Ast;
 
-public sealed class ImportNamespaceSpecifier : ImportDeclarationSpecifier
+[VisitableNode(ChildProperties = new[] { nameof(Local) })]
+public sealed partial class ImportNamespaceSpecifier : ImportDeclarationSpecifier
 {
     public ImportNamespaceSpecifier(Identifier local) : base(local, Nodes.ImportNamespaceSpecifier)
     {
     }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Local);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportNamespaceSpecifier(this);
-
-    public ImportNamespaceSpecifier UpdateWith(Identifier local)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ImportNamespaceSpecifier Rewrite(Identifier local)
     {
-        if (local == Local)
-        {
-            return this;
-        }
-
         return new ImportNamespaceSpecifier(local);
     }
 }

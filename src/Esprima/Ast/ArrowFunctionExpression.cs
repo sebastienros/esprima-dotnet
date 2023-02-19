@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class ArrowFunctionExpression : Expression, IFunction
+[VisitableNode(ChildProperties = new[] { nameof(Params), nameof(Body) })]
+public sealed partial class ArrowFunctionExpression : Expression, IFunction
 {
     private readonly NodeList<Node> _params;
 
@@ -36,17 +36,9 @@ public sealed class ArrowFunctionExpression : Expression, IFunction
     public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Params, Body);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
-
-    public ArrowFunctionExpression UpdateWith(in NodeList<Node> parameters, StatementListItem body)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ArrowFunctionExpression Rewrite(in NodeList<Node> @params, StatementListItem body)
     {
-        if (NodeList.AreSame(parameters, Params) && body == Body)
-        {
-            return this;
-        }
-
-        return new ArrowFunctionExpression(parameters, body, Expression, Strict, Async);
+        return new ArrowFunctionExpression(@params, body, Expression, Strict, Async);
     }
 }

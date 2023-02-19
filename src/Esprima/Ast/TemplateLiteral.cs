@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class TemplateLiteral : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Quasis), nameof(Expressions) })]
+public sealed partial class TemplateLiteral : Expression
 {
     private readonly NodeList<TemplateElement> _quasis;
     private readonly NodeList<Expression> _expressions;
@@ -22,15 +22,9 @@ public sealed class TemplateLiteral : Expression
 
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextTemplateLiteral(Quasis, Expressions);
 
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitTemplateLiteral(this);
-
-    public TemplateLiteral UpdateWith(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private TemplateLiteral Rewrite(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
     {
-        if (NodeList.AreSame(quasis, Quasis) && NodeList.AreSame(expressions, Expressions))
-        {
-            return this;
-        }
-
         return new TemplateLiteral(quasis, expressions);
     }
 }

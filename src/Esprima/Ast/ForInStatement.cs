@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class ForInStatement : Statement
+[VisitableNode(ChildProperties = new[] { nameof(Left), nameof(Right), nameof(Body) })]
+public sealed partial class ForInStatement : Statement
 {
     public ForInStatement(
         Node left,
@@ -22,17 +22,9 @@ public sealed class ForInStatement : Statement
     public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right, Body);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitForInStatement(this);
-
-    public ForInStatement UpdateWith(Node left, Expression right, Statement body)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ForInStatement Rewrite(Node left, Expression right, Statement body)
     {
-        if (left == Left && right == Right && body == Body)
-        {
-            return this;
-        }
-
         return new ForInStatement(left, right, body);
     }
 }

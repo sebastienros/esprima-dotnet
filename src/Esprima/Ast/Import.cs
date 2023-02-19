@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class Import : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Source), nameof(Attributes) })]
+public sealed partial class Import : Expression
 {
     public Import(Expression source) : this(source, null)
     {
@@ -18,17 +18,9 @@ public sealed class Import : Expression
     public Expression Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Expression? Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Source, Attributes);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImport(this);
-
-    public Import UpdateWith(Expression source, Expression? attributes)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private Import Rewrite(Expression source, Expression? attributes)
     {
-        if (source == Source && attributes == Attributes)
-        {
-            return this;
-        }
-
         return new Import(source, attributes);
     }
 }

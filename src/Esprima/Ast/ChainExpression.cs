@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class ChainExpression : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Expression) })]
+public sealed partial class ChainExpression : Expression
 {
     public ChainExpression(Expression expression) : base(Nodes.ChainExpression)
     {
@@ -15,17 +15,9 @@ public sealed class ChainExpression : Expression
     /// </remarks>
     public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Expression);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitChainExpression(this);
-
-    public ChainExpression UpdateWith(Expression expression)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ChainExpression Rewrite(Expression expression)
     {
-        if (expression == Expression)
-        {
-            return this;
-        }
-
         return new ChainExpression(expression);
     }
 }

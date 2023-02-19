@@ -3,6 +3,7 @@ using Esprima.Utils;
 
 namespace Esprima.Tests;
 
+[Obsolete]
 public class AstVisitorEventSourceTests
 {
     private static T ParseExpression<T>(string code) where T : Expression

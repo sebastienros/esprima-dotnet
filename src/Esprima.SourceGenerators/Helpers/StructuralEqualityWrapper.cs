@@ -20,5 +20,5 @@ internal readonly struct StructuralEqualityWrapper<TTarget> : IEquatable<Structu
 
     public override int GetHashCode() => StructuralComparisons.StructuralEqualityComparer.GetHashCode(Target);
 
-    public override string ToString() => Target.ToString();
+    public override string ToString() => Target?.ToString() ?? string.Empty;
 }

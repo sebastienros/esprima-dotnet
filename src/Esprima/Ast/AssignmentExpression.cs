@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
@@ -23,7 +22,8 @@ public enum AssignmentOperator
     OrAssign
 }
 
-public sealed class AssignmentExpression : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Left), nameof(Right) })]
+public sealed partial class AssignmentExpression : Expression
 {
     public AssignmentExpression(
         string op,
@@ -100,17 +100,9 @@ public sealed class AssignmentExpression : Expression
     public Node Left { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Left, Right);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAssignmentExpression(this);
-
-    public AssignmentExpression UpdateWith(Node left, Expression right)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private AssignmentExpression Rewrite(Node left, Expression right)
     {
-        if (left == Left && right == Right)
-        {
-            return this;
-        }
-
         return new AssignmentExpression(Operator, left, right);
     }
 }

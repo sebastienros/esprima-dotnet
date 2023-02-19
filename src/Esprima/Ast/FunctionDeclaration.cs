@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class FunctionDeclaration : Declaration, IFunction
+[VisitableNode(ChildProperties = new[] { nameof(Id), nameof(Params), nameof(Body) })]
+public sealed partial class FunctionDeclaration : Declaration, IFunction
 {
     private readonly NodeList<Node> _params;
 
@@ -38,17 +38,9 @@ public sealed class FunctionDeclaration : Declaration, IFunction
     public bool Strict { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool Async { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Id, Params, Body);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitFunctionDeclaration(this);
-
-    public FunctionDeclaration UpdateWith(Identifier? id, in NodeList<Node> parameters, BlockStatement body)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private FunctionDeclaration Rewrite(Identifier? id, in NodeList<Node> @params, BlockStatement body)
     {
-        if (id == Id && NodeList.AreSame(parameters, Params) && body == Body)
-        {
-            return this;
-        }
-
-        return new FunctionDeclaration(id, parameters, body, Generator, Strict, Async);
+        return new FunctionDeclaration(id, @params, body, Generator, Strict, Async);
     }
 }

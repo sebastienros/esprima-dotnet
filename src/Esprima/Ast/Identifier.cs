@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class Identifier : Expression
+[VisitableNode]
+public sealed partial class Identifier : Expression
 {
     public Identifier(string name) : base(Nodes.Identifier)
     {
@@ -11,8 +11,4 @@ public sealed class Identifier : Expression
     }
 
     public string Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitIdentifier(this);
 }

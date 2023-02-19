@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
@@ -16,7 +15,8 @@ public enum UnaryOperator
     Decrement
 }
 
-public class UnaryExpression : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Argument) }, SealOverrideMethods = true)]
+public partial class UnaryExpression : Expression
 {
     public UnaryExpression(string op, Expression arg) : this(ParseUnaryOperator(op), arg)
     {
@@ -75,22 +75,8 @@ public class UnaryExpression : Expression
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool Prefix { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal sealed override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Argument);
-
-    protected internal sealed override object? Accept(AstVisitor visitor) => visitor.VisitUnaryExpression(this);
-
     protected virtual UnaryExpression Rewrite(Expression argument)
     {
         return new UnaryExpression(Operator, argument);
-    }
-
-    public UnaryExpression UpdateWith(Expression argument)
-    {
-        if (argument == Argument)
-        {
-            return this;
-        }
-
-        return Rewrite(argument);
     }
 }

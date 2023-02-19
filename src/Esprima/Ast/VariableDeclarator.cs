@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class VariableDeclarator : Node
+[VisitableNode(ChildProperties = new[] { nameof(Id), nameof(Init) })]
+public sealed partial class VariableDeclarator : Node
 {
     public VariableDeclarator(Node id, Expression? init) :
         base(Nodes.VariableDeclarator)
@@ -18,17 +18,9 @@ public sealed class VariableDeclarator : Node
     public Node Id { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public Expression? Init { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Id, Init);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitVariableDeclarator(this);
-
-    public VariableDeclarator UpdateWith(Node id, Expression? init)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private VariableDeclarator Rewrite(Node id, Expression? init)
     {
-        if (id == Id && init == Init)
-        {
-            return this;
-        }
-
         return new VariableDeclarator(id, init);
     }
 }

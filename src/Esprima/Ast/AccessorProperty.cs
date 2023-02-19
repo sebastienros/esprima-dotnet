@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class AccessorProperty : ClassProperty
+[VisitableNode(ChildProperties = new[] { nameof(Decorators), nameof(Key), nameof(Value) })]
+public sealed partial class AccessorProperty : ClassProperty
 {
     private readonly NodeList<Decorator> _decorators;
 
@@ -26,17 +26,9 @@ public sealed class AccessorProperty : ClassProperty
     public bool Static { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public ref readonly NodeList<Decorator> Decorators { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _decorators; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt2(Decorators, Key, Value);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitAccessorProperty(this);
-
-    public AccessorProperty UpdateWith(Expression key, Expression? value, in NodeList<Decorator> decorators)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private AccessorProperty Rewrite(in NodeList<Decorator> decorators, Expression key, Expression? value)
     {
-        if (key == Key && value == Value && NodeList.AreSame(decorators, Decorators))
-        {
-            return this;
-        }
-
         return new AccessorProperty(key, Computed, value, Static, decorators);
     }
 }

@@ -1,24 +1,17 @@
-﻿using Esprima.Utils;
+﻿using System.Runtime.CompilerServices;
 
 namespace Esprima.Ast;
 
-public sealed class ImportDefaultSpecifier : ImportDeclarationSpecifier
+[VisitableNode(ChildProperties = new[] { nameof(Local) })]
+public sealed partial class ImportDefaultSpecifier : ImportDeclarationSpecifier
 {
     public ImportDefaultSpecifier(Identifier local) : base(local, Nodes.ImportDefaultSpecifier)
     {
     }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Local);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitImportDefaultSpecifier(this);
-
-    public ImportDefaultSpecifier UpdateWith(Identifier local)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ImportDefaultSpecifier Rewrite(Identifier local)
     {
-        if (local == Local)
-        {
-            return this;
-        }
-
         return new ImportDefaultSpecifier(local);
     }
 }

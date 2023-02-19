@@ -3,7 +3,8 @@ using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class ArrayPattern : BindingPattern
+[VisitableNode(ChildProperties = new[] { nameof(Elements) })]
+public sealed partial class ArrayPattern : BindingPattern
 {
     private readonly NodeList<Node?> _elements;
 
@@ -17,17 +18,9 @@ public sealed class ArrayPattern : BindingPattern
     /// </summary>
     public ref readonly NodeList<Node?> Elements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _elements; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Elements);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitArrayPattern(this);
-
-    public ArrayPattern UpdateWith(in NodeList<Node?> elements)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ArrayPattern Rewrite(in NodeList<Node?> elements)
     {
-        if (NodeList.AreSame(elements, Elements))
-        {
-            return this;
-        }
-
         return new ArrayPattern(elements);
     }
 }

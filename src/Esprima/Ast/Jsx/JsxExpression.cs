@@ -16,7 +16,7 @@ public abstract class JsxExpression : Expression
 
     public new JsxNodeType Type { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    protected abstract object? Accept(IJsxAstVisitor visitor);
+    protected internal abstract object? Accept(IJsxAstVisitor visitor);
 
     protected internal sealed override object? Accept(AstVisitor visitor)
     {

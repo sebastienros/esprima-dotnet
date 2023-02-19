@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class YieldExpression : Expression
+[VisitableNode(ChildProperties = new[] { nameof(Argument) })]
+public sealed partial class YieldExpression : Expression
 {
     public YieldExpression(Expression? argument, bool @delegate) : base(Nodes.YieldExpression)
     {
@@ -14,17 +14,9 @@ public sealed class YieldExpression : Expression
     public Expression? Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public bool Delegate { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullable(Argument);
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitYieldExpression(this);
-
-    public YieldExpression UpdateWith(Expression? argument)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private YieldExpression Rewrite(Expression? argument)
     {
-        if (argument == Argument)
-        {
-            return this;
-        }
-
         return new YieldExpression(argument, Delegate);
     }
 }

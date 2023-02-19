@@ -2,6 +2,7 @@
 
 namespace Esprima.Utils.Jsx;
 
+[Obsolete("This class is planned to be removed from the next stable version.")]
 public class JsxAstVisitorEventSource : AstVisitorEventSource, IJsxAstVisitor
 {
     public event EventHandler<JsxAttribute>? VisitingJsxAttribute;

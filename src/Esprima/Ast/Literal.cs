@@ -1,11 +1,11 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Esprima.Utils;
 
 namespace Esprima.Ast;
 
-public sealed class Literal : Expression
+[VisitableNode]
+public sealed partial class Literal : Expression
 {
     private static readonly object s_boxedTrue = true;
     private static readonly object s_boxedFalse = false;
@@ -53,8 +53,4 @@ public sealed class Literal : Expression
     public double? NumericValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.NumericLiteral ? (double) Value! : null; }
     public Regex? RegexValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.RegularExpression ? (Regex?) Value : null; }
     public BigInteger? BigIntValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BigIntLiteral ? (BigInteger) Value! : null; }
-
-    internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
-
-    protected internal override object? Accept(AstVisitor visitor) => visitor.VisitLiteral(this);
 }
