@@ -146,4 +146,11 @@ InvalidFormat:
         start = Start;
         end = End;
     }
+
+#if NETSTANDARD2_1_OR_GREATER
+    public System.Range ToSystemRange()
+    {
+        return new System.Range(Start, End);
+    }
+#endif
 }
