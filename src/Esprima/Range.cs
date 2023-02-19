@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using static Esprima.EsprimaExceptionHelper;
@@ -139,9 +140,17 @@ InvalidFormat:
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Range Parse(string s) => Parse(s.AsSpan());
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void Deconstruct(out int start, out int end)
     {
         start = Start;
         end = End;
     }
+
+#if NETSTANDARD2_1_OR_GREATER
+    public System.Range ToSystemRange()
+    {
+        return new System.Range(Start, End);
+    }
+#endif
 }

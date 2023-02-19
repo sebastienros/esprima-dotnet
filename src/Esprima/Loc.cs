@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using static Esprima.EsprimaExceptionHelper;
@@ -233,12 +234,14 @@ InvalidFormat:
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Location Parse(string s) => Parse(s.AsSpan());
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void Deconstruct(out Position start, out Position end)
     {
         start = Start;
         end = End;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void Deconstruct(out Position start, out Position end, out string? source)
     {
         start = Start;
