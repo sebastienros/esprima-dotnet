@@ -1710,15 +1710,6 @@ public partial class JavaScriptParser
 
         var source = ParseAssignmentExpression();
 
-        Expression? attributes = null;
-        if (Match(","))
-        {
-            NextToken();
-
-            if (!Match(")"))
-                attributes = ParseAssignmentExpression();
-        }
-
         _context.IsAssignmentTarget = previousIsAssignmentTarget;
 
         if (!this.Match(")") && _tolerant)
@@ -1732,7 +1723,7 @@ public partial class JavaScriptParser
             this.Expect(")");
         }
 
-        return Finalize(node, new Import(source, attributes));
+        return Finalize(node, new Import(source));
     }
 
     private bool MatchImportMeta()
@@ -5050,66 +5041,6 @@ ParseValue:
         return Finalize(node, new Literal((string) token.Value!, raw));
     }
 
-    private ArrayList<ImportAttribute> ParseImportAttributes()
-    {
-        var attributes = new ArrayList<ImportAttribute>();
-        if (_lookahead.Value is not ("assert"))
-        {
-            return attributes;
-        }
-
-        NextToken();
-        Expect("{");
-
-        var parameterSet = new HashSet<string?>();
-        while (!Match("}"))
-        {
-            var importAttribute = ParseImportAttribute();
-
-            string? key = string.Empty;
-            switch (importAttribute.Key)
-            {
-                case Identifier identifier:
-                    key = identifier.Name;
-                    break;
-                case Literal literal:
-                    key = literal.StringValue;
-                    break;
-            }
-
-            if (!parameterSet.Add(key))
-            {
-                ThrowError(Messages.DuplicateAssertClauseProperty, key);
-            }
-
-            attributes.Add(importAttribute);
-            if (!Match("}"))
-            {
-                ExpectCommaSeparator();
-            }
-        }
-        Expect("}");
-        return attributes;
-    }
-
-    private ImportAttribute ParseImportAttribute()
-    {
-        var node = CreateNode();
-
-        Expression key = ParseObjectPropertyKey();
-        if (!Match(":"))
-        {
-            ThrowUnexpectedToken(NextToken());
-        }
-
-        NextToken();
-        var literalToken = NextToken();
-        var raw = GetTokenRaw(literalToken);
-        Literal value = Finalize(node, new Literal((string) literalToken.Value!, raw));
-
-        return Finalize(node, new ImportAttribute(key, value));
-    }
-
     // import {<foo as bar>} ...;
     private ImportSpecifier ParseImportSpecifier()
     {
@@ -5260,10 +5191,9 @@ ParseValue:
             src = ParseModuleSpecifier();
         }
 
-        var attributes = ParseImportAttributes();
         ConsumeSemicolon();
 
-        return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src, NodeList.From(ref attributes)));
+        return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src));
     }
 
     // https://tc39.github.io/ecma262/#sec-exports
@@ -5383,9 +5313,8 @@ ParseValue:
 
             NextToken();
             var src = ParseModuleSpecifier();
-            var attributes = ParseImportAttributes();
             ConsumeSemicolon();
-            exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported, NodeList.From(ref attributes)));
+            exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported));
         }
         else if (_lookahead.Type == TokenType.Keyword)
         {
@@ -5407,19 +5336,18 @@ ParseValue:
                     break;
             }
 
-            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration.As<Declaration>(), new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
+            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration.As<Declaration>(), new NodeList<ExportSpecifier>(), null));
         }
         else if (MatchAsyncFunction())
         {
             var declaration = ParseFunctionDeclaration();
-            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
+            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null));
         }
         else
         {
             var specifiers = new ArrayList<ExportSpecifier>();
             Literal? source = null;
             var isExportFromIdentifier = false;
-            ArrayList<ImportAttribute> attributes = new();
 
             Expect("{");
             while (!Match("}"))
@@ -5440,7 +5368,6 @@ ParseValue:
                 // export {foo} from 'foo';
                 NextToken();
                 source = ParseModuleSpecifier();
-                attributes = ParseImportAttributes();
                 ConsumeSemicolon();
             }
             else if (isExportFromIdentifier)
@@ -5455,7 +5382,7 @@ ParseValue:
                 ConsumeSemicolon();
             }
 
-            exportDeclaration = Finalize(node, new ExportNamedDeclaration(null, NodeList.From(ref specifiers), source, NodeList.From(ref attributes)));
+            exportDeclaration = Finalize(node, new ExportNamedDeclaration(null, NodeList.From(ref specifiers), source));
         }
 
         return exportDeclaration;

@@ -359,18 +359,18 @@ partial class EmptyStatement
 
 partial class ExportAllDeclaration
 {
-    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Exported, Source, Assertions);
+    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0(Exported, Source);
 
     protected internal override object? Accept(Esprima.Utils.AstVisitor visitor) => visitor.VisitExportAllDeclaration(this);
 
-    public ExportAllDeclaration UpdateWith(Esprima.Ast.Expression? exported, Esprima.Ast.Literal source, in Esprima.Ast.NodeList<Esprima.Ast.ImportAttribute> assertions)
+    public ExportAllDeclaration UpdateWith(Esprima.Ast.Expression? exported, Esprima.Ast.Literal source)
     {
-        if (ReferenceEquals(exported, Exported) && ReferenceEquals(source, Source) && assertions.IsSameAs(Assertions))
+        if (ReferenceEquals(exported, Exported) && ReferenceEquals(source, Source))
         {
             return this;
         }
         
-        return Rewrite(exported, source, assertions);
+        return Rewrite(exported, source);
     }
 }
 
@@ -393,18 +393,18 @@ partial class ExportDefaultDeclaration
 
 partial class ExportNamedDeclaration
 {
-    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_2(Declaration, Specifiers, Source, Assertions);
+    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt0_2(Declaration, Specifiers, Source);
 
     protected internal override object? Accept(Esprima.Utils.AstVisitor visitor) => visitor.VisitExportNamedDeclaration(this);
 
-    public ExportNamedDeclaration UpdateWith(Esprima.Ast.Declaration? declaration, in Esprima.Ast.NodeList<Esprima.Ast.ExportSpecifier> specifiers, Esprima.Ast.Literal? source, in Esprima.Ast.NodeList<Esprima.Ast.ImportAttribute> assertions)
+    public ExportNamedDeclaration UpdateWith(Esprima.Ast.Declaration? declaration, in Esprima.Ast.NodeList<Esprima.Ast.ExportSpecifier> specifiers, Esprima.Ast.Literal? source)
     {
-        if (ReferenceEquals(declaration, Declaration) && specifiers.IsSameAs(Specifiers) && ReferenceEquals(source, Source) && assertions.IsSameAs(Assertions))
+        if (ReferenceEquals(declaration, Declaration) && specifiers.IsSameAs(Specifiers) && ReferenceEquals(source, Source))
         {
             return this;
         }
         
-        return Rewrite(declaration, specifiers, source, assertions);
+        return Rewrite(declaration, specifiers, source);
     }
 }
 
@@ -551,52 +551,35 @@ partial class IfStatement
 
 partial class Import
 {
-    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNextNullableAt1(Source, Attributes);
+    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Source);
 
     protected internal override object? Accept(Esprima.Utils.AstVisitor visitor) => visitor.VisitImport(this);
 
-    public Import UpdateWith(Esprima.Ast.Expression source, Esprima.Ast.Expression? attributes)
+    public Import UpdateWith(Esprima.Ast.Expression source)
     {
-        if (ReferenceEquals(source, Source) && ReferenceEquals(attributes, Attributes))
+        if (ReferenceEquals(source, Source))
         {
             return this;
         }
         
-        return Rewrite(source, attributes);
-    }
-}
-
-partial class ImportAttribute
-{
-    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Key, Value);
-
-    protected internal override object? Accept(Esprima.Utils.AstVisitor visitor) => visitor.VisitImportAttribute(this);
-
-    public ImportAttribute UpdateWith(Esprima.Ast.Expression key, Esprima.Ast.Literal value)
-    {
-        if (ReferenceEquals(key, Key) && ReferenceEquals(value, Value))
-        {
-            return this;
-        }
-        
-        return Rewrite(key, value);
+        return Rewrite(source);
     }
 }
 
 partial class ImportDeclaration
 {
-    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Specifiers, Source, Assertions);
+    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => enumerator.MoveNext(Specifiers, Source);
 
     protected internal override object? Accept(Esprima.Utils.AstVisitor visitor) => visitor.VisitImportDeclaration(this);
 
-    public ImportDeclaration UpdateWith(in Esprima.Ast.NodeList<Esprima.Ast.ImportDeclarationSpecifier> specifiers, Esprima.Ast.Literal source, in Esprima.Ast.NodeList<Esprima.Ast.ImportAttribute> assertions)
+    public ImportDeclaration UpdateWith(in Esprima.Ast.NodeList<Esprima.Ast.ImportDeclarationSpecifier> specifiers, Esprima.Ast.Literal source)
     {
-        if (specifiers.IsSameAs(Specifiers) && ReferenceEquals(source, Source) && assertions.IsSameAs(Assertions))
+        if (specifiers.IsSameAs(Specifiers) && ReferenceEquals(source, Source))
         {
             return this;
         }
         
-        return Rewrite(specifiers, source, assertions);
+        return Rewrite(specifiers, source);
     }
 }
 

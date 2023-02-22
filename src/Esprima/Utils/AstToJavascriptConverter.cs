@@ -608,12 +608,6 @@ public partial class AstToJavaScriptConverter : AstVisitor
         _writeContext.SetNodeProperty(nameof(exportAllDeclaration.Source), static node => node.As<ExportAllDeclaration>().Source);
         VisitRootExpression(exportAllDeclaration.Source, RootExpressionFlags(needsBrackets: false));
 
-        if (exportAllDeclaration.Assertions.Count > 0)
-        {
-            _writeContext.SetNodeProperty(nameof(exportAllDeclaration.Assertions), static node => ref node.As<ExportAllDeclaration>().Assertions);
-            VisitAssertions(in exportAllDeclaration.Assertions);
-        }
-
         StatementNeedsSemicolon();
 
         return exportAllDeclaration;
@@ -662,12 +656,6 @@ public partial class AstToJavaScriptConverter : AstVisitor
 
                 _writeContext.SetNodeProperty(nameof(exportNamedDeclaration.Source), static node => node.As<ExportNamedDeclaration>().Source);
                 VisitRootExpression(exportNamedDeclaration.Source, RootExpressionFlags(needsBrackets: false));
-
-                if (exportNamedDeclaration.Assertions.Count > 0)
-                {
-                    _writeContext.SetNodeProperty(nameof(exportNamedDeclaration.Assertions), static node => ref node.As<ExportNamedDeclaration>().Assertions);
-                    VisitAssertions(in exportNamedDeclaration.Assertions);
-                }
             }
 
             StatementNeedsSemicolon();
@@ -991,21 +979,12 @@ public partial class AstToJavaScriptConverter : AstVisitor
 
         // Import arguments need special care because of the unusual model (separate expressions instead of an expression list).
 
-        var paramCount = import.Attributes is null ? 1 : 2;
+        const int paramCount = 1;
         Writer.StartExpressionList(paramCount, ref _writeContext);
 
         _writeContext.SetNodeProperty(nameof(Import.Source), static node => node.As<Import>().Source);
         VisitExpressionListItem(import.Source, 0, paramCount, static (@this, expression, _, _) =>
             s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
-
-        if (import.Attributes is not null)
-        {
-            // https://github.com/tc39/proposal-import-assertions
-
-            _writeContext.SetNodeProperty(nameof(Import.Attributes), static node => node.As<Import>().Attributes);
-            VisitExpressionListItem(import.Attributes, 1, paramCount, static (@this, expression, _, _) =>
-                s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
-        }
 
         Writer.EndExpressionList(paramCount, ref _writeContext);
 
@@ -1013,21 +992,6 @@ public partial class AstToJavaScriptConverter : AstVisitor
         Writer.WritePunctuator(")", TokenFlags.Trailing, ref _writeContext);
 
         return import;
-    }
-
-    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
-    {
-        // https://github.com/tc39/proposal-import-assertions
-
-        _writeContext.SetNodeProperty(nameof(importAttribute.Key), static node => node.As<ImportAttribute>().Key);
-        VisitPropertyKey(importAttribute.Key, computed: false);
-        Writer.WritePunctuator(":", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref _writeContext);
-
-        _writeContext.SetNodeProperty(nameof(importAttribute.Value), static node => node.As<ImportAttribute>().Value);
-
-        VisitRootExpression(importAttribute.Value, RootExpressionFlags(needsBrackets: false));
-
-        return importAttribute;
     }
 
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
@@ -1087,12 +1051,6 @@ EndSpecifiers:
 WriteSource:
         _writeContext.SetNodeProperty(nameof(importDeclaration.Source), static node => node.As<ImportDeclaration>().Source);
         VisitRootExpression(importDeclaration.Source, RootExpressionFlags(needsBrackets: false));
-
-        if (importDeclaration.Assertions.Count > 0)
-        {
-            _writeContext.SetNodeProperty(nameof(importDeclaration.Assertions), static node => ref node.As<ImportDeclaration>().Assertions);
-            VisitAssertions(in importDeclaration.Assertions);
-        }
 
         StatementNeedsSemicolon();
 

@@ -185,9 +185,7 @@ partial class AstRewriter
 
         var source = VisitAndConvert(exportAllDeclaration.Source);
 
-        VisitAndConvert(exportAllDeclaration.Assertions, out var assertions);
-
-        return exportAllDeclaration.UpdateWith(exported, source, assertions);
+        return exportAllDeclaration.UpdateWith(exported, source);
     }
 
     protected internal override object? VisitExportDefaultDeclaration(Esprima.Ast.ExportDefaultDeclaration exportDefaultDeclaration)
@@ -205,9 +203,7 @@ partial class AstRewriter
 
         var source = VisitAndConvert(exportNamedDeclaration.Source, allowNull: true);
 
-        VisitAndConvert(exportNamedDeclaration.Assertions, out var assertions);
-
-        return exportNamedDeclaration.UpdateWith(declaration, specifiers, source, assertions);
+        return exportNamedDeclaration.UpdateWith(declaration, specifiers, source);
     }
 
     protected internal override object? VisitExpressionStatement(Esprima.Ast.ExpressionStatement expressionStatement)
@@ -289,18 +285,7 @@ partial class AstRewriter
     {
         var source = VisitAndConvert(import.Source);
 
-        var attributes = VisitAndConvert(import.Attributes, allowNull: true);
-
-        return import.UpdateWith(source, attributes);
-    }
-
-    protected internal override object? VisitImportAttribute(Esprima.Ast.ImportAttribute importAttribute)
-    {
-        var key = VisitAndConvert(importAttribute.Key);
-
-        var value = VisitAndConvert(importAttribute.Value);
-
-        return importAttribute.UpdateWith(key, value);
+        return import.UpdateWith(source);
     }
 
     protected internal override object? VisitImportDeclaration(Esprima.Ast.ImportDeclaration importDeclaration)
@@ -309,9 +294,7 @@ partial class AstRewriter
 
         var source = VisitAndConvert(importDeclaration.Source);
 
-        VisitAndConvert(importDeclaration.Assertions, out var assertions);
-
-        return importDeclaration.UpdateWith(specifiers, source, assertions);
+        return importDeclaration.UpdateWith(specifiers, source);
     }
 
     protected internal override object? VisitImportDefaultSpecifier(Esprima.Ast.ImportDefaultSpecifier importDefaultSpecifier)
