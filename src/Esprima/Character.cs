@@ -20,7 +20,7 @@ public static partial class Character
 
     // https://tc39.github.io/ecma262/#sec-line-terminators
 
-    public static bool IsLineTerminator(char ch)
+    internal static bool IsLineTerminator(char ch)
     {
         return ch == 10
                || ch == 13
@@ -31,29 +31,29 @@ public static partial class Character
 
     // https://tc39.github.io/ecma262/#sec-white-space
 
-    public static bool IsWhiteSpace(char ch)
+    internal static bool IsWhiteSpace(char ch)
     {
         return (_characterData[ch] & (byte) CharacterMask.WhiteSpace) != 0;
     }
 
     // https://tc39.github.io/ecma262/#sec-names-and-keywords
 
-    public static bool IsIdentifierStart(char ch)
+    internal static bool IsIdentifierStart(char ch)
     {
         return (_characterData[ch] & (byte) CharacterMask.IdentifierStart) != 0;
     }
 
-    public static bool IsIdentifierStart(string s, int index)
+    internal static bool IsIdentifierStart(string s, int index)
     {
         return IsIdentifierStartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
     }
 
-    public static bool IsIdentifierPart(char ch)
+    internal static bool IsIdentifierPart(char ch)
     {
         return (_characterData[ch] & (byte) CharacterMask.IdentifierPart) != 0;
     }
 
-    public static bool IsIdentifierPart(string s, int index)
+    internal static bool IsIdentifierPart(string s, int index)
     {
         return IsIdentifierPartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
     }
@@ -72,11 +72,10 @@ public static partial class Character
 
     public static bool IsOctalDigit(char cp) => IsInRange(cp, '0', '7');
 
-    public static string FromCodePoint(int cp) => char.ConvertFromUtf32(cp);
+    internal static string FromCodePoint(int cp) => char.ConvertFromUtf32(cp);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsInRange(char c, char min, char max) => c - (uint) min <= max - (uint) min;
-
 
     internal static bool IsIdentifierStartUnicodeCategory(UnicodeCategory cat)
     {
