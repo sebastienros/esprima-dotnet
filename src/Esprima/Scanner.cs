@@ -56,30 +56,6 @@ public sealed partial class Scanner
 
     internal StringPool _stringPool;
 
-    private static int HexValue(char ch)
-    {
-        if (ch >= 'A')
-        {
-            if (ch >= 'a')
-            {
-                if (ch <= 'h')
-                {
-                    return ch - 'a' + 10;
-                }
-            }
-            else if (ch <= 'H')
-            {
-                return ch - 'A' + 10;
-            }
-        }
-        else if (ch <= '9')
-        {
-            return ch - '0';
-        }
-
-        return 0;
-    }
-
     private static int OctalValue(char ch)
     {
         return ch - '0';
@@ -566,7 +542,7 @@ public sealed partial class Scanner
                 var d = _source[_index];
                 if (Character.IsHexDigit(d))
                 {
-                    code = code * 16 + HexValue(d);
+                    code = code * 16 + HexConverter.FromChar(d);
                     _index++;
                 }
                 else
@@ -605,7 +581,8 @@ public sealed partial class Scanner
                 break;
             }
 
-            code = code * 16 + HexValue(ch);
+            try { code = checked(code * 16 + HexConverter.FromChar(ch)); }
+            catch (OverflowException) { return null; }
         }
 
         // Character.FromCodePoint (more precisely, the underlying char.ConvertFromUtf32 call) accepts
