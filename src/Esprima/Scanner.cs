@@ -562,7 +562,7 @@ public sealed partial class Scanner
         return true;
     }
 
-    private string? TryToScanUnicodeCodePointEscape(out int code)
+    private string? TryScanUnicodeCodePointEscape(out int code)
     {
         var ch = _source[_index];
         code = 0;
@@ -606,13 +606,13 @@ public sealed partial class Scanner
 
     private string ScanUnicodeCodePointEscape()
     {
-        var result = TryToScanUnicodeCodePointEscape(out _);
+        var result = TryScanUnicodeCodePointEscape(out _);
         if (result is null)
         {
             ThrowUnexpectedToken();
         }
 
-        return result!;
+        return result;
     }
 
     private string GetIdentifier()
@@ -672,7 +672,7 @@ public sealed partial class Scanner
             if (_source[_index] == '{')
             {
                 ++_index;
-                ch = TryToScanUnicodeCodePointEscape(out chcp);
+                ch = TryScanUnicodeCodePointEscape(out chcp);
                 if (ch is null
                     || (ch.Length == 1
                         ? !Character.IsIdentifierStart(ch[0])
@@ -724,7 +724,7 @@ public sealed partial class Scanner
                 if (_index < _source.Length && _source[_index] == '{')
                 {
                     ++_index;
-                    ch = TryToScanUnicodeCodePointEscape(out chcp);
+                    ch = TryScanUnicodeCodePointEscape(out chcp);
                     if (ch is null
                         || (ch.Length == 1
                             ? char.IsLowSurrogate(ch[0]) || !Character.IsIdentifierPart(ch[0])
@@ -1548,7 +1548,7 @@ public sealed partial class Scanner
                             if (_source[_index] == '{')
                             {
                                 ++_index;
-                                var unicodeCodePointEscape = TryToScanUnicodeCodePointEscape(out _);
+                                var unicodeCodePointEscape = TryScanUnicodeCodePointEscape(out _);
                                 if (unicodeCodePointEscape is null)
                                 {
                                     notEscapeSequenceHead = 'u';
