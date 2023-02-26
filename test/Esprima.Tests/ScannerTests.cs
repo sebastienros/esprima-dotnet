@@ -83,4 +83,29 @@ public class ScannerTests
         Assert.Equal(new object[] { "foo", "=", 1.0, ";" }, tokens.Select(t => t.Value).ToArray());
         Assert.Equal(new string[] { " c1 ", " c2" }, comments.Select(c => scanner.Code.AsSpan(c.Slice.Start, c.Slice.Length).ToString()).ToArray());
     }
+
+    [Fact]
+    public void ShouldRejectSurrogateRangeAsIdentifierStart()
+    {
+        var scanner = new Scanner(@"\u{d800}\u{dc00}");
+        var ex = Assert.Throws<ParserException>(new Func<object>(() => scanner.Lex()));
+        Assert.Equal(Messages.UnexpectedTokenIllegal, ex.Error?.Description);
+    }
+
+    [Fact]
+    public void ShouldRejectSurrogateRangeAsIdentifierPart()
+    {
+        var scanner = new Scanner(@"a\u{d800}\u{dc00}");
+        var ex = Assert.Throws<ParserException>(new Func<object>(() => scanner.Lex()));
+        Assert.Equal(Messages.UnexpectedTokenIllegal, ex.Error?.Description);
+    }
+
+    [Fact]
+    public void ShouldAcceptSurrogateRangeInLiterals()
+    {
+        var scanner = new Scanner(@"'a\u{d800}\u{dc00}'");
+        var token = scanner.Lex();
+        Assert.Equal(TokenType.StringLiteral, token.Type);
+        Assert.Equal("a\ud800\udc00", token.Value);
+    }
 }

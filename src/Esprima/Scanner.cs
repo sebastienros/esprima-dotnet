@@ -56,30 +56,6 @@ public sealed partial class Scanner
 
     internal StringPool _stringPool;
 
-    private static int HexValue(char ch)
-    {
-        if (ch >= 'A')
-        {
-            if (ch >= 'a')
-            {
-                if (ch <= 'h')
-                {
-                    return ch - 'a' + 10;
-                }
-            }
-            else if (ch <= 'H')
-            {
-                return ch - 'A' + 10;
-            }
-        }
-        else if (ch <= '9')
-        {
-            return ch - '0';
-        }
-
-        return 0;
-    }
-
     private static int OctalValue(char ch)
     {
         return ch - '0';
@@ -566,7 +542,7 @@ public sealed partial class Scanner
                 var d = _source[_index];
                 if (Character.IsHexDigit(d))
                 {
-                    code = code * 16 + HexValue(d);
+                    code = code * 16 + HexConverter.FromChar(d);
                     _index++;
                 }
                 else
@@ -586,10 +562,10 @@ public sealed partial class Scanner
         return true;
     }
 
-    private string? TryToScanUnicodeCodePointEscape()
+    private string? TryScanUnicodeCodePointEscape(out int code)
     {
         var ch = _source[_index];
-        var code = 0;
+        code = 0;
 
         // At least, one hex digit is required.
         if (ch == '}')
@@ -605,12 +581,24 @@ public sealed partial class Scanner
                 break;
             }
 
-            code = code * 16 + HexValue(ch);
+            try { code = checked(code * 16 + HexConverter.FromChar(ch)); }
+            catch (OverflowException) { return null; }
         }
+
+        // Character.FromCodePoint (more precisely, the underlying char.ConvertFromUtf32 call) accepts
+        // ranges [U+0000..U+D7FF] and [U+E000..U+10FFFF] only.
+        // See also: https://github.com/dotnet/runtime/blob/v6.0.14/src/libraries/System.Private.CoreLib/src/System/Text/UnicodeUtility.cs#L169
 
         if (code > 0x10FFFF || ch != '}')
         {
             return null;
+        }
+
+        // This range is valid in literals (e.g. "a\u{d800}\u{dc00}") but not valid in identifiers (e.g. a\u{d800}\u{dc00}).
+        // Let's return it in both cases and let Character.IsIdentifierStart/IsIdentifierPart deal with it.
+        if (code is >= 0xD800 and <= 0xDFFF)
+        {
+            return ParserExtensions.CharToString((char) code);
         }
 
         return Character.FromCodePoint(code);
@@ -618,13 +606,13 @@ public sealed partial class Scanner
 
     private string ScanUnicodeCodePointEscape()
     {
-        var result = TryToScanUnicodeCodePointEscape();
+        var result = TryScanUnicodeCodePointEscape(out _);
         if (result is null)
         {
             ThrowUnexpectedToken();
         }
 
-        return result!;
+        return result;
     }
 
     private string GetIdentifier()
@@ -671,7 +659,8 @@ public sealed partial class Scanner
         _index += id.Length;
 
         // '\u' (U+005C, U+0075) denotes an escaped character.
-        string ch;
+        string? ch;
+        int chcp;
         if (cp == 0x5C)
         {
             if (_source.CharCodeAt(_index) != 0x75)
@@ -683,7 +672,14 @@ public sealed partial class Scanner
             if (_source[_index] == '{')
             {
                 ++_index;
-                ch = ScanUnicodeCodePointEscape();
+                ch = TryScanUnicodeCodePointEscape(out chcp);
+                if (ch is null
+                    || (ch.Length == 1
+                        ? !Character.IsIdentifierStart(ch[0])
+                        : !Character.IsIdentifierStart(chcp)))
+                {
+                    ThrowUnexpectedToken();
+                }
             }
             else
             {
@@ -728,7 +724,14 @@ public sealed partial class Scanner
                 if (_index < _source.Length && _source[_index] == '{')
                 {
                     ++_index;
-                    ch = ScanUnicodeCodePointEscape();
+                    ch = TryScanUnicodeCodePointEscape(out chcp);
+                    if (ch is null
+                        || (ch.Length == 1
+                            ? char.IsLowSurrogate(ch[0]) || !Character.IsIdentifierPart(ch[0])
+                            : !Character.IsIdentifierPart(chcp)))
+                    {
+                        ThrowUnexpectedToken();
+                    }
                 }
                 else
                 {
@@ -1545,7 +1548,7 @@ public sealed partial class Scanner
                             if (_source[_index] == '{')
                             {
                                 ++_index;
-                                var unicodeCodePointEscape = TryToScanUnicodeCodePointEscape();
+                                var unicodeCodePointEscape = TryScanUnicodeCodePointEscape(out _);
                                 if (unicodeCodePointEscape is null)
                                 {
                                     notEscapeSequenceHead = 'u';
