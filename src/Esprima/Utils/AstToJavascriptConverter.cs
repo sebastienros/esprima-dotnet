@@ -608,6 +608,12 @@ public partial class AstToJavaScriptConverter : AstVisitor
         _writeContext.SetNodeProperty(nameof(exportAllDeclaration.Source), static node => node.As<ExportAllDeclaration>().Source);
         VisitRootExpression(exportAllDeclaration.Source, RootExpressionFlags(needsBrackets: false));
 
+        if (exportAllDeclaration.Assertions.Count > 0)
+        {
+            _writeContext.SetNodeProperty(nameof(exportAllDeclaration.Assertions), static node => ref node.As<ExportAllDeclaration>().Assertions);
+            VisitAssertions(in exportAllDeclaration.Assertions);
+        }
+
         StatementNeedsSemicolon();
 
         return exportAllDeclaration;
@@ -656,6 +662,12 @@ public partial class AstToJavaScriptConverter : AstVisitor
 
                 _writeContext.SetNodeProperty(nameof(exportNamedDeclaration.Source), static node => node.As<ExportNamedDeclaration>().Source);
                 VisitRootExpression(exportNamedDeclaration.Source, RootExpressionFlags(needsBrackets: false));
+
+                if (exportNamedDeclaration.Assertions.Count > 0)
+                {
+                    _writeContext.SetNodeProperty(nameof(exportNamedDeclaration.Assertions), static node => ref node.As<ExportNamedDeclaration>().Assertions);
+                    VisitAssertions(in exportNamedDeclaration.Assertions);
+                }
             }
 
             StatementNeedsSemicolon();
@@ -971,6 +983,21 @@ public partial class AstToJavaScriptConverter : AstVisitor
         return ifStatement;
     }
 
+    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
+    {
+        // https://github.com/tc39/proposal-import-assertions
+
+        _writeContext.SetNodeProperty(nameof(importAttribute.Key), static node => node.As<ImportAttribute>().Key);
+        VisitPropertyKey(importAttribute.Key, computed: false);
+        Writer.WritePunctuator(":", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref _writeContext);
+
+        _writeContext.SetNodeProperty(nameof(importAttribute.Value), static node => node.As<ImportAttribute>().Value);
+
+        VisitRootExpression(importAttribute.Value, RootExpressionFlags(needsBrackets: false));
+
+        return importAttribute;
+    }
+
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         Writer.WriteKeyword("import", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
@@ -1029,6 +1056,12 @@ WriteSource:
         _writeContext.SetNodeProperty(nameof(importDeclaration.Source), static node => node.As<ImportDeclaration>().Source);
         VisitRootExpression(importDeclaration.Source, RootExpressionFlags(needsBrackets: false));
 
+        if (importDeclaration.Assertions.Count > 0)
+        {
+            _writeContext.SetNodeProperty(nameof(importDeclaration.Assertions), static node => ref node.As<ImportDeclaration>().Assertions);
+            VisitAssertions(in importDeclaration.Assertions);
+        }
+
         StatementNeedsSemicolon();
 
         return importDeclaration;
@@ -1050,12 +1083,21 @@ WriteSource:
 
         // ImportExpression arguments need special care because of the unusual model (separate expressions instead of an expression list).
 
-        const int paramCount = 1;
+        var paramCount = importExpression.Attributes is null ? 1 : 2;
         Writer.StartExpressionList(paramCount, ref _writeContext);
 
         _writeContext.SetNodeProperty(nameof(ImportExpression.Source), static node => node.As<ImportExpression>().Source);
         VisitExpressionListItem(importExpression.Source, 0, paramCount, static (@this, expression, _, _) =>
             s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
+
+        if (importExpression.Attributes is not null)
+        {
+            // https://github.com/tc39/proposal-import-assertions
+
+            _writeContext.SetNodeProperty(nameof(ImportExpression.Attributes), static node => node.As<ImportExpression>().Attributes);
+            VisitExpressionListItem(importExpression.Attributes, 1, paramCount, static (@this, expression, _, _) =>
+                s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
+        }
 
         Writer.EndExpressionList(paramCount, ref _writeContext);
 

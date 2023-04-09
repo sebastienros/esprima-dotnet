@@ -69,6 +69,7 @@ public enum Nodes
     ImportSpecifier,
     ImportDefaultSpecifier,
     ImportNamespaceSpecifier,
+    ImportAttribute,
     ImportDeclaration,
     ExportSpecifier,
     ExportNamedDeclaration,

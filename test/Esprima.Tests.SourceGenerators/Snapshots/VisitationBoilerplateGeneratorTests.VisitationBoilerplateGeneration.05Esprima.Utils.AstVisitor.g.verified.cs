@@ -266,6 +266,12 @@ partial class AstVisitor
 
         Visit(exportAllDeclaration.Source);
 
+        ref readonly var assertions = ref exportAllDeclaration.Assertions;
+        for (var i = 0; i < assertions.Count; i++)
+        {
+            Visit(assertions[i]);
+        }
+
         return exportAllDeclaration;
     }
 
@@ -292,6 +298,12 @@ partial class AstVisitor
         if (exportNamedDeclaration.Source is not null)
         {
             Visit(exportNamedDeclaration.Source);
+        }
+
+        ref readonly var assertions = ref exportNamedDeclaration.Assertions;
+        for (var i = 0; i < assertions.Count; i++)
+        {
+            Visit(assertions[i]);
         }
 
         return exportNamedDeclaration;
@@ -403,6 +415,15 @@ partial class AstVisitor
         return ifStatement;
     }
 
+    protected internal virtual object? VisitImportAttribute(Esprima.Ast.ImportAttribute importAttribute)
+    {
+        Visit(importAttribute.Key);
+
+        Visit(importAttribute.Value);
+
+        return importAttribute;
+    }
+
     protected internal virtual object? VisitImportDeclaration(Esprima.Ast.ImportDeclaration importDeclaration)
     {
         ref readonly var specifiers = ref importDeclaration.Specifiers;
@@ -412,6 +433,12 @@ partial class AstVisitor
         }
 
         Visit(importDeclaration.Source);
+
+        ref readonly var assertions = ref importDeclaration.Assertions;
+        for (var i = 0; i < assertions.Count; i++)
+        {
+            Visit(assertions[i]);
+        }
 
         return importDeclaration;
     }
@@ -426,6 +453,11 @@ partial class AstVisitor
     protected internal virtual object? VisitImportExpression(Esprima.Ast.ImportExpression importExpression)
     {
         Visit(importExpression.Source);
+
+        if (importExpression.Attributes is not null)
+        {
+            Visit(importExpression.Attributes);
+        }
 
         return importExpression;
     }

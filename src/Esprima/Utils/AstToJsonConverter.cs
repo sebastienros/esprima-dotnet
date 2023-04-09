@@ -519,6 +519,10 @@ public class AstToJsonConverter : AstVisitor
             if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("exported", exportAllDeclaration.Exported);
+                if (exportAllDeclaration.Assertions.Count > 0)
+                {
+                    Member("assertions", exportAllDeclaration.Assertions);
+                }
             }
         }
 
@@ -542,6 +546,11 @@ public class AstToJsonConverter : AstVisitor
             Member("declaration", exportNamedDeclaration.Declaration);
             Member("specifiers", exportNamedDeclaration.Specifiers);
             Member("source", exportNamedDeclaration.Source);
+            // original Esprima doesn't include this information yet
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && exportNamedDeclaration.Assertions.Count > 0)
+            {
+                Member("assertions", exportNamedDeclaration.Assertions);
+            }
         }
 
         return exportNamedDeclaration;
@@ -674,6 +683,17 @@ public class AstToJsonConverter : AstVisitor
         return ifStatement;
     }
 
+    protected internal override object? VisitImportAttribute(ImportAttribute importAttribute)
+    {
+        using (StartNodeObject(importAttribute))
+        {
+            Member("key", importAttribute.Key);
+            Member("value", importAttribute.Value);
+        }
+
+        return importAttribute;
+    }
+
     private sealed class ImportCompat : Expression
     {
         public ImportCompat() : base(Nodes.ImportExpression) { }
@@ -697,6 +717,11 @@ public class AstToJsonConverter : AstVisitor
         {
             Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
             Member("source", importDeclaration.Source);
+            // original Esprima doesn't include this information yet
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && importDeclaration.Assertions.Count > 0)
+            {
+                Member("assertions", importDeclaration.Assertions);
+            }
         }
 
         return importDeclaration;
@@ -740,6 +765,11 @@ public class AstToJsonConverter : AstVisitor
             if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("source", importExpression.Source);
+
+                if (importExpression.Attributes is not null)
+                {
+                    Member("attributes", importExpression.Attributes);
+                }
             }
         }
 
