@@ -64,7 +64,7 @@ public sealed partial class AssignmentExpression : Expression
             "??=" => AssignmentOperator.NullishAssign,
             "&&=" => AssignmentOperator.AndAssign,
             "||=" => AssignmentOperator.OrAssign,
-            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid assignment operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), op, "Invalid assignment operator.")
         };
     }
 
@@ -88,7 +88,7 @@ public sealed partial class AssignmentExpression : Expression
             AssignmentOperator.NullishAssign => "??=",
             AssignmentOperator.AndAssign => "&&=",
             AssignmentOperator.OrAssign => "||=",
-            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid assignment operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), op, "Invalid assignment operator.")
         };
     }
 

@@ -40,6 +40,10 @@ public partial class BinaryExpression : Expression
 
     public BinaryExpression(BinaryOperator op, Expression left, Expression right) : this(Nodes.BinaryExpression, op, left, right)
     {
+        if (LogicalExpression.IsLogicalOperator(op))
+        {
+            throw new ArgumentOutOfRangeException(nameof(op), op, "Value must be a non-logical operator.");
+        }
     }
 
     private protected BinaryExpression(Nodes type, string op, Expression left, Expression right) : this(type, ParseBinaryOperator(op), left, right)
@@ -82,7 +86,7 @@ public partial class BinaryExpression : Expression
             "||" => BinaryOperator.LogicalOr,
             "**" => BinaryOperator.Exponentiation,
             "??" => BinaryOperator.NullishCoalescing,
-            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid binary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), op, "Invalid binary operator.")
         };
     }
 
@@ -115,7 +119,7 @@ public partial class BinaryExpression : Expression
             BinaryOperator.LogicalOr => "||",
             BinaryOperator.Exponentiation => "**",
             BinaryOperator.NullishCoalescing => "??",
-            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid binary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), op, "Invalid binary operator.")
         };
     }
 
