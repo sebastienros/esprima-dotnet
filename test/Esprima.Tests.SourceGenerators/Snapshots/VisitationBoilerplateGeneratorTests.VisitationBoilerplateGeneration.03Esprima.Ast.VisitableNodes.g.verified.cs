@@ -651,9 +651,9 @@ partial class LabeledStatement
 
 partial class Literal
 {
-    internal override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => null;
+    internal sealed override Esprima.Ast.Node? NextChildNode(ref Esprima.Ast.ChildNodes.Enumerator enumerator) => null;
 
-    protected internal override object? Accept(Esprima.Utils.AstVisitor visitor) => visitor.VisitLiteral(this);
+    protected internal sealed override object? Accept(Esprima.Utils.AstVisitor visitor) => visitor.VisitLiteral(this);
 }
 
 partial class MemberExpression

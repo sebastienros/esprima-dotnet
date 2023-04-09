@@ -816,10 +816,10 @@ public class AstToJsonConverter : AstVisitor
 
             Member("raw", literal.Raw);
 
-            if (literal.Regex is not null)
+            if (literal is RegExpLiteral regExpLiteral)
             {
                 _writer.Member("regex");
-                WriteRegexValue(literal.Regex);
+                WriteRegexValue(regExpLiteral.Regex);
             }
             else if (literal.Value is BigInteger bigInt)
             {

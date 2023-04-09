@@ -4,8 +4,8 @@ using System.Text.RegularExpressions;
 
 namespace Esprima.Ast;
 
-[VisitableNode]
-public sealed partial class Literal : Expression
+[VisitableNode(SealOverrideMethods = true)]
+public partial class Literal : Expression
 {
     private static readonly object s_boxedTrue = true;
     private static readonly object s_boxedFalse = false;
@@ -37,16 +37,9 @@ public sealed partial class Literal : Expression
     {
     }
 
-    public Literal(string pattern, string flags, object? value, string raw) : this(TokenType.RegularExpression, value, raw)
-    {
-        // value is null if a Regex object couldn't be created out of the pattern or options
-        Regex = new RegexValue(pattern, flags);
-    }
-
     public TokenType TokenType { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public object? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     public string Raw { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-    public RegexValue? Regex { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     public string? StringValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.StringLiteral ? (string) Value! : null; }
     public bool? BooleanValue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TokenType == TokenType.BooleanLiteral ? ReferenceEquals(Value, s_boxedTrue) : null; }

@@ -380,9 +380,9 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitLiteral(Literal literal)
     {
         return ForceNewObjectByControlType((Literal) base.VisitLiteral(literal)!,
-            node => node.TokenType switch
+            node => node switch
             {
-                TokenType.RegularExpression => new Literal(node.Regex!.Pattern, node.Regex.Flags, node.Value, node.Raw),
+                RegExpLiteral regExpLiteral => new RegExpLiteral(regExpLiteral.Regex.Pattern, regExpLiteral.Regex.Flags, node.Value, node.Raw),
                 _ => new Literal(node.TokenType, node.Value, node.Raw),
             });
     }
