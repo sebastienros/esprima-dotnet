@@ -2,7 +2,7 @@
 
 namespace Esprima.Ast;
 
-public abstract class ImportDeclarationSpecifier : Node
+public abstract class ImportDeclarationSpecifier : Node, IModuleSpecifier
 {
     protected ImportDeclarationSpecifier(Identifier local, Nodes type) : base(type)
     {
@@ -10,4 +10,5 @@ public abstract class ImportDeclarationSpecifier : Node
     }
 
     public Identifier Local { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    Expression IModuleSpecifier.Local => Local;
 }
