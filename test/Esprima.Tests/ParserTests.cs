@@ -639,7 +639,7 @@ class X {
             var node = parseAction(parser);
             var awaitExpression = node.DescendantNodesAndSelf().OfType<AwaitExpression>().FirstOrDefault();
             Assert.NotNull(awaitExpression);
-            Assert.IsType<Import>(awaitExpression.Argument);
+            Assert.IsType<ImportExpression>(awaitExpression.Argument);
         }
         else
         {

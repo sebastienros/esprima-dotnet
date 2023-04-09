@@ -1699,7 +1699,7 @@ public partial class JavaScriptParser
         return match;
     }
 
-    private Import ParseImportCall()
+    private ImportExpression ParseImportCall()
     {
         var node = CreateNode();
         ExpectKeyword("import");
@@ -1723,7 +1723,7 @@ public partial class JavaScriptParser
             this.Expect(")");
         }
 
-        return Finalize(node, new Import(source));
+        return Finalize(node, new ImportExpression(source));
     }
 
     private bool MatchImportMeta()

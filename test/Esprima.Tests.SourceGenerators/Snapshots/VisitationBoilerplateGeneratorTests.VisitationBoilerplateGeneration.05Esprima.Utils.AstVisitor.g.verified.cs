@@ -403,13 +403,6 @@ partial class AstVisitor
         return ifStatement;
     }
 
-    protected internal virtual object? VisitImport(Esprima.Ast.Import import)
-    {
-        Visit(import.Source);
-
-        return import;
-    }
-
     protected internal virtual object? VisitImportDeclaration(Esprima.Ast.ImportDeclaration importDeclaration)
     {
         ref readonly var specifiers = ref importDeclaration.Specifiers;
@@ -428,6 +421,13 @@ partial class AstVisitor
         Visit(importDefaultSpecifier.Local);
 
         return importDefaultSpecifier;
+    }
+
+    protected internal virtual object? VisitImportExpression(Esprima.Ast.ImportExpression importExpression)
+    {
+        Visit(importExpression.Source);
+
+        return importExpression;
     }
 
     protected internal virtual object? VisitImportNamespaceSpecifier(Esprima.Ast.ImportNamespaceSpecifier importNamespaceSpecifier)

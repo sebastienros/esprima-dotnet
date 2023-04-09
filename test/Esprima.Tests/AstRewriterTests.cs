@@ -159,7 +159,7 @@ public class AstRewriterTests
     [InlineData(typeof(ExportDefaultDeclaration), "export default (1 + 2);")]
     [InlineData(typeof(ExportAllDeclaration), "export * from 'foo';")]
     [InlineData(typeof(ExportNamedDeclaration), "export {foo as bar} from 'foo';")]
-    [InlineData(typeof(Import), "import(`lib/${fname}.js`).then(doSomething);")]
+    [InlineData(typeof(ImportExpression), "import(`lib/${fname}.js`).then(doSomething);")]
     [InlineData(typeof(ImportDeclaration), "import {a,b,c} from 'module'")]
     [InlineData(typeof(ImportNamespaceSpecifier), "import * as foo from \"foo\";")]
     [InlineData(typeof(ImportDefaultSpecifier), "import M from 'module'")]
@@ -453,16 +453,16 @@ sealed class TestRewriter : JsxAstRewriter
             node => new ExportSpecifier(node.Local, node.Exported));
     }
 
-    protected internal override object? VisitImport(Import import)
-    {
-        return ForceNewObjectByControlType((Import) base.VisitImport(import)!,
-            node => new Import(node.Source));
-    }
-
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         return ForceNewObjectByControlType((ImportDeclaration) base.VisitImportDeclaration(importDeclaration)!,
             node => new ImportDeclaration(node.Specifiers, node.Source));
+    }
+
+    protected internal override object? VisitImportExpression(ImportExpression importExpression)
+    {
+        return ForceNewObjectByControlType((ImportExpression) base.VisitImportExpression(importExpression)!,
+            node => new ImportExpression(node.Source));
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)

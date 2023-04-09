@@ -23,7 +23,7 @@ public enum Nodes
     FunctionExpression,
     Identifier,
     IfStatement,
-    Import,
+    ImportExpression,
     Literal,
     LabeledStatement,
     LogicalExpression,

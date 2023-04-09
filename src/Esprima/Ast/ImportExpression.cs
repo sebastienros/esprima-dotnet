@@ -3,9 +3,9 @@
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Source) })]
-public sealed partial class Import : Expression
+public sealed partial class ImportExpression : Expression
 {
-    public Import(Expression source) : base(Nodes.Import)
+    public ImportExpression(Expression source) : base(Nodes.ImportExpression)
     {
         Source = source;
     }
@@ -13,8 +13,8 @@ public sealed partial class Import : Expression
     public Expression Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Import Rewrite(Expression source)
+    private ImportExpression Rewrite(Expression source)
     {
-        return new Import(source);
+        return new ImportExpression(source);
     }
 }

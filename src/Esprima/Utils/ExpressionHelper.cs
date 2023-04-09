@@ -46,7 +46,7 @@ internal static class ExpressionHelper
                 goto case Nodes.MemberExpression;
             case Nodes.MemberExpression:
             case Nodes.CallExpression:
-            case Nodes.Import:
+            case Nodes.ImportExpression:
             case Nodes.NewExpression when expression.As<NewExpression>().Arguments.Count > 0:
                 return 1700;
 
