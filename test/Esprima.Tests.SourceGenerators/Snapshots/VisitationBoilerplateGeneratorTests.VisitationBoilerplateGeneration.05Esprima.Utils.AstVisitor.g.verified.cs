@@ -266,10 +266,10 @@ partial class AstVisitor
 
         Visit(exportAllDeclaration.Source);
 
-        ref readonly var assertions = ref exportAllDeclaration.Assertions;
-        for (var i = 0; i < assertions.Count; i++)
+        ref readonly var attributes = ref exportAllDeclaration.Attributes;
+        for (var i = 0; i < attributes.Count; i++)
         {
-            Visit(assertions[i]);
+            Visit(attributes[i]);
         }
 
         return exportAllDeclaration;
@@ -300,10 +300,10 @@ partial class AstVisitor
             Visit(exportNamedDeclaration.Source);
         }
 
-        ref readonly var assertions = ref exportNamedDeclaration.Assertions;
-        for (var i = 0; i < assertions.Count; i++)
+        ref readonly var attributes = ref exportNamedDeclaration.Attributes;
+        for (var i = 0; i < attributes.Count; i++)
         {
-            Visit(assertions[i]);
+            Visit(attributes[i]);
         }
 
         return exportNamedDeclaration;
@@ -434,10 +434,10 @@ partial class AstVisitor
 
         Visit(importDeclaration.Source);
 
-        ref readonly var assertions = ref importDeclaration.Assertions;
-        for (var i = 0; i < assertions.Count; i++)
+        ref readonly var attributes = ref importDeclaration.Attributes;
+        for (var i = 0; i < attributes.Count; i++)
         {
-            Visit(assertions[i]);
+            Visit(attributes[i]);
         }
 
         return importDeclaration;
@@ -454,9 +454,9 @@ partial class AstVisitor
     {
         Visit(importExpression.Source);
 
-        if (importExpression.Attributes is not null)
+        if (importExpression.Options is not null)
         {
-            Visit(importExpression.Attributes);
+            Visit(importExpression.Options);
         }
 
         return importExpression;

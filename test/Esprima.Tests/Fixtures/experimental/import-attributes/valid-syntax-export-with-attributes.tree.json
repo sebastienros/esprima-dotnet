@@ -78,24 +78,24 @@
           }
         }
       },
-      "assertions": [
+      "attributes": [
         {
           "type": "ImportAttribute",
           "key": {
             "type": "Identifier",
             "name": "type",
             "range": [
-              40,
-              44
+              38,
+              42
             ],
             "loc": {
               "start": {
                 "line": 1,
-                "column": 40
+                "column": 38
               },
               "end": {
                 "line": 1,
-                "column": 44
+                "column": 42
               }
             }
           },
@@ -104,39 +104,39 @@
             "value": "json",
             "raw": "\"json\"",
             "range": [
-              40,
-              52
+              38,
+              50
             ],
             "loc": {
               "start": {
                 "line": 1,
-                "column": 40
+                "column": 38
               },
               "end": {
                 "line": 1,
-                "column": 52
+                "column": 50
               }
             }
           },
           "range": [
-            40,
-            52
+            38,
+            50
           ],
           "loc": {
             "start": {
               "line": 1,
-              "column": 40
+              "column": 38
             },
             "end": {
               "line": 1,
-              "column": 52
+              "column": 50
             }
           }
         }
       ],
       "range": [
         0,
-        55
+        53
       ],
       "loc": {
         "start": {
@@ -145,7 +145,7 @@
         },
         "end": {
           "line": 1,
-          "column": 55
+          "column": 53
         }
       }
     }
@@ -153,7 +153,7 @@
   "sourceType": "module",
   "range": [
     0,
-    55
+    53
   ],
   "loc": {
     "start": {
@@ -162,7 +162,7 @@
     },
     "end": {
       "line": 1,
-      "column": 55
+      "column": 53
     }
   }
 }
