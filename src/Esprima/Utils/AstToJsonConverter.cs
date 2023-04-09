@@ -519,9 +519,9 @@ public class AstToJsonConverter : AstVisitor
             if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
             {
                 Member("exported", exportAllDeclaration.Exported);
-                if (exportAllDeclaration.Assertions.Count > 0)
+                if (exportAllDeclaration.Attributes.Count > 0)
                 {
-                    Member("assertions", exportAllDeclaration.Assertions);
+                    Member("attributes", exportAllDeclaration.Attributes);
                 }
             }
         }
@@ -547,9 +547,9 @@ public class AstToJsonConverter : AstVisitor
             Member("specifiers", exportNamedDeclaration.Specifiers);
             Member("source", exportNamedDeclaration.Source);
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && exportNamedDeclaration.Assertions.Count > 0)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && exportNamedDeclaration.Attributes.Count > 0)
             {
-                Member("assertions", exportNamedDeclaration.Assertions);
+                Member("attributes", exportNamedDeclaration.Attributes);
             }
         }
 
@@ -718,9 +718,9 @@ public class AstToJsonConverter : AstVisitor
             Member("specifiers", importDeclaration.Specifiers, e => (Node) e);
             Member("source", importDeclaration.Source);
             // original Esprima doesn't include this information yet
-            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && importDeclaration.Assertions.Count > 0)
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg && importDeclaration.Attributes.Count > 0)
             {
-                Member("assertions", importDeclaration.Assertions);
+                Member("attributes", importDeclaration.Attributes);
             }
         }
 
@@ -766,9 +766,9 @@ public class AstToJsonConverter : AstVisitor
             {
                 Member("source", importExpression.Source);
 
-                if (importExpression.Attributes is not null)
+                if (importExpression.Options is not null)
                 {
-                    Member("attributes", importExpression.Attributes);
+                    Member("options", importExpression.Options);
                 }
             }
         }

@@ -435,13 +435,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitExportAllDeclaration(ExportAllDeclaration exportAllDeclaration)
     {
         return ForceNewObjectByControlType((ExportAllDeclaration) base.VisitExportAllDeclaration(exportAllDeclaration)!,
-            node => new ExportAllDeclaration(node.Source, node.Exported, exportAllDeclaration.Assertions));
+            node => new ExportAllDeclaration(node.Source, node.Exported, exportAllDeclaration.Attributes));
     }
 
     protected internal override object? VisitExportNamedDeclaration(ExportNamedDeclaration exportNamedDeclaration)
     {
         return ForceNewObjectByControlType((ExportNamedDeclaration) base.VisitExportNamedDeclaration(exportNamedDeclaration)!,
-            node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source, exportNamedDeclaration.Assertions));
+            node => new ExportNamedDeclaration(node.Declaration, node.Specifiers, node.Source, exportNamedDeclaration.Attributes));
     }
 
     protected internal override object? VisitExportSpecifier(ExportSpecifier exportSpecifier)
@@ -459,13 +459,13 @@ sealed class TestRewriter : JsxAstRewriter
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         return ForceNewObjectByControlType((ImportDeclaration) base.VisitImportDeclaration(importDeclaration)!,
-            node => new ImportDeclaration(node.Specifiers, node.Source, importDeclaration.Assertions));
+            node => new ImportDeclaration(node.Specifiers, node.Source, importDeclaration.Attributes));
     }
 
     protected internal override object? VisitImportExpression(ImportExpression importExpression)
     {
         return ForceNewObjectByControlType((ImportExpression) base.VisitImportExpression(importExpression)!,
-            node => new ImportExpression(node.Source, node.Attributes));
+            node => new ImportExpression(node.Source, node.Options));
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)

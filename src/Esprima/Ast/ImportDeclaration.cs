@@ -2,30 +2,30 @@
 
 namespace Esprima.Ast;
 
-[VisitableNode(ChildProperties = new[] { nameof(Specifiers), nameof(Source), nameof(Assertions) })]
+[VisitableNode(ChildProperties = new[] { nameof(Specifiers), nameof(Source), nameof(Attributes) })]
 public sealed partial class ImportDeclaration : Declaration
 {
     private readonly NodeList<ImportDeclarationSpecifier> _specifiers;
-    private readonly NodeList<ImportAttribute> _assertions;
+    private readonly NodeList<ImportAttribute> _attributes;
 
     public ImportDeclaration(
         in NodeList<ImportDeclarationSpecifier> specifiers,
         Literal source,
-        in NodeList<ImportAttribute> assertions)
+        in NodeList<ImportAttribute> attributes)
         : base(Nodes.ImportDeclaration)
     {
         _specifiers = specifiers;
         Source = source;
-        _assertions = assertions;
+        _attributes = attributes;
     }
 
     public ref readonly NodeList<ImportDeclarationSpecifier> Specifiers { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _specifiers; }
     public Literal Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-    public ref readonly NodeList<ImportAttribute> Assertions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _assertions; }
+    public ref readonly NodeList<ImportAttribute> Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _attributes; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ImportDeclaration Rewrite(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> assertions)
+    private ImportDeclaration Rewrite(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> attributes)
     {
-        return new ImportDeclaration(specifiers, source, assertions);
+        return new ImportDeclaration(specifiers, source, attributes);
     }
 }

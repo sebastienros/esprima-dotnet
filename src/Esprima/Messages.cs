@@ -22,7 +22,8 @@ internal static class Messages
     public const string DuplicateConstructor = "A class may only have one constructor";
     public const string DuplicateParameter = "Duplicate parameter name not allowed in this context";
     public const string DuplicateProtoProperty = "Duplicate __proto__ fields are not allowed in object literals";
-    public const string DuplicateAssertClauseProperty = "Assert clause may not have duplicate keys {0}";
+    // TODO: Replace this with the actual V8 message once it becomes available (see https://github.com/v8/v8/blob/main/src/common/message-template.h).
+    public const string DuplicateKeyInImportAttributes = "Import attributes has duplicate key '{0}'";
     public const string ForInOfLoopInitializer = "'{0} loop variable declaration may not have an initializer";
     public const string GeneratorInLegacyContext = "Generator declarations are not allowed in legacy contexts";
     public const string IllegalBreak = "Illegal break statement";

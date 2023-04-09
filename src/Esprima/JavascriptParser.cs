@@ -5069,7 +5069,7 @@ ParseValue:
     private ArrayList<ImportAttribute> ParseImportAttributes()
     {
         var attributes = new ArrayList<ImportAttribute>();
-        if (_lookahead.Value is not ("assert"))
+        if (!MatchKeyword("with"))
         {
             return attributes;
         }
@@ -5095,7 +5095,7 @@ ParseValue:
 
             if (!parameterSet.Add(key))
             {
-                ThrowError(Messages.DuplicateAssertClauseProperty, key);
+                ThrowError(Messages.DuplicateKeyInImportAttributes, key);
             }
 
             attributes.Add(importAttribute);
