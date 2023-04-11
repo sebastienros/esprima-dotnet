@@ -3,7 +3,7 @@
 namespace Esprima.Ast;
 
 [VisitableNode(ChildProperties = new[] { nameof(Local), nameof(Exported) })]
-public sealed partial class ExportSpecifier : Node
+public sealed partial class ExportSpecifier : Node, IModuleSpecifier
 {
     public ExportSpecifier(Expression local, Expression exported) : base(Nodes.ExportSpecifier)
     {

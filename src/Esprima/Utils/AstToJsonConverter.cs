@@ -674,52 +674,20 @@ public class AstToJsonConverter : AstVisitor
         return ifStatement;
     }
 
-    private object? VisitImportCompat(ImportCompat import)
-    {
-        EmptyNodeObject(import);
-        return import;
-    }
-
     private sealed class ImportCompat : Expression
     {
-        public ImportCompat() : base(Nodes.Import) { }
+        public ImportCompat() : base(Nodes.ImportExpression) { }
 
         internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => null;
 
         protected internal override object? Accept(AstVisitor visitor) => ((AstToJsonConverter) visitor).VisitImportCompat(this);
     }
 
-    protected internal override object? VisitImport(Import import)
+    private object? VisitImportCompat(ImportCompat import)
     {
-        // original Esprima uses CallExpression to represent dynamic imports currently,
-        // so we need to rewrite our representation to match this expectation
-        if (_testCompatibilityMode == AstToJsonTestCompatibilityMode.EsprimaOrg)
-        {
-            const string importToken = "import";
-
-            var callee = new ImportCompat
-            {
-                Location = new Location(import.Location.Start, new Position(import.Location.Start.Line, import.Location.Start.Column + importToken.Length)),
-                Range = new Range(import.Range.Start, import.Range.Start + importToken.Length)
-            };
-            var args = new NodeList<Expression>(new Expression[] { import.Source });
-            var callExpression = new CallExpression(callee, args, optional: false)
-            {
-                Location = import.Location,
-                Range = import.Range,
-            };
-
-            return Visit(callExpression);
-        }
-
-        using (StartNodeObject(import))
-        {
-            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
-            {
-                Member("source", import.Source);
-            }
-        }
-
+        OnStartSyntaxElementObject(import);
+        Member("type", "Import");
+        using (new NodeObjectDisposable(this, import)) { }
         return import;
     }
 
@@ -742,6 +710,40 @@ public class AstToJsonConverter : AstVisitor
         }
 
         return importDefaultSpecifier;
+    }
+
+    protected internal override object? VisitImportExpression(ImportExpression importExpression)
+    {
+        // original Esprima uses CallExpression to represent dynamic imports currently,
+        // so we need to rewrite our representation to match this expectation
+        if (_testCompatibilityMode == AstToJsonTestCompatibilityMode.EsprimaOrg)
+        {
+            const string importToken = "import";
+
+            var callee = new ImportCompat
+            {
+                Location = new Location(importExpression.Location.Start, new Position(importExpression.Location.Start.Line, importExpression.Location.Start.Column + importToken.Length)),
+                Range = new Range(importExpression.Range.Start, importExpression.Range.Start + importToken.Length)
+            };
+            var args = new NodeList<Expression>(new Expression[] { importExpression.Source }, count: 1);
+            var callExpression = new CallExpression(callee, args, optional: false)
+            {
+                Location = importExpression.Location,
+                Range = importExpression.Range,
+            };
+
+            return Visit(callExpression);
+        }
+
+        using (StartNodeObject(importExpression))
+        {
+            if (_testCompatibilityMode != AstToJsonTestCompatibilityMode.EsprimaOrg)
+            {
+                Member("source", importExpression.Source);
+            }
+        }
+
+        return importExpression;
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)
@@ -814,10 +816,10 @@ public class AstToJsonConverter : AstVisitor
 
             Member("raw", literal.Raw);
 
-            if (literal.Regex is not null)
+            if (literal is RegExpLiteral regExpLiteral)
             {
                 _writer.Member("regex");
-                WriteRegexValue(literal.Regex);
+                WriteRegexValue(regExpLiteral.Regex);
             }
             else if (literal.Value is BigInteger bigInt)
             {

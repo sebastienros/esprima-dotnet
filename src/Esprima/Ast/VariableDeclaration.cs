@@ -12,7 +12,7 @@ public sealed partial class VariableDeclaration : Declaration
             VariableDeclarationKind.Var => "var",
             VariableDeclarationKind.Let => "let",
             VariableDeclarationKind.Const => "const",
-            _ => throw new ArgumentOutOfRangeException(nameof(kind), "Invalid variable declaration kind: " + kind)
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Invalid variable declaration kind.")
         };
     }
 

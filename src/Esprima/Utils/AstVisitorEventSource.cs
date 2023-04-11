@@ -77,12 +77,12 @@ public class AstVisitorEventSource : AstVisitor
     public event EventHandler<Identifier>? VisitedIdentifier;
     public event EventHandler<IfStatement>? VisitingIfStatement;
     public event EventHandler<IfStatement>? VisitedIfStatement;
-    public event EventHandler<Import>? VisitingImport;
-    public event EventHandler<Import>? VisitedImport;
     public event EventHandler<ImportDeclaration>? VisitingImportDeclaration;
     public event EventHandler<ImportDeclaration>? VisitedImportDeclaration;
     public event EventHandler<ImportDefaultSpecifier>? VisitingImportDefaultSpecifier;
     public event EventHandler<ImportDefaultSpecifier>? VisitedImportDefaultSpecifier;
+    public event EventHandler<ImportExpression>? VisitingImportExpression;
+    public event EventHandler<ImportExpression>? VisitedImportExpression;
     public event EventHandler<ImportNamespaceSpecifier>? VisitingImportNamespaceSpecifier;
     public event EventHandler<ImportNamespaceSpecifier>? VisitedImportNamespaceSpecifier;
     public event EventHandler<ImportSpecifier>? VisitingImportSpecifier;
@@ -434,14 +434,6 @@ public class AstVisitorEventSource : AstVisitor
         return result;
     }
 
-    protected internal override object? VisitImport(Import import)
-    {
-        VisitingImport?.Invoke(this, import);
-        var result = base.VisitImport(import);
-        VisitedImport?.Invoke(this, import);
-        return result;
-    }
-
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         VisitingImportDeclaration?.Invoke(this, importDeclaration);
@@ -455,6 +447,14 @@ public class AstVisitorEventSource : AstVisitor
         VisitingImportDefaultSpecifier?.Invoke(this, importDefaultSpecifier);
         var result = base.VisitImportDefaultSpecifier(importDefaultSpecifier);
         VisitedImportDefaultSpecifier?.Invoke(this, importDefaultSpecifier);
+        return result;
+    }
+
+    protected internal override object? VisitImportExpression(ImportExpression importExpression)
+    {
+        VisitingImportExpression?.Invoke(this, importExpression);
+        var result = base.VisitImportExpression(importExpression);
+        VisitedImportExpression?.Invoke(this, importExpression);
         return result;
     }
 

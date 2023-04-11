@@ -971,29 +971,6 @@ public partial class AstToJavaScriptConverter : AstVisitor
         return ifStatement;
     }
 
-    protected internal override object? VisitImport(Import import)
-    {
-        Writer.WriteKeyword("import", ref _writeContext);
-
-        Writer.WritePunctuator("(", TokenFlags.Leading, ref _writeContext);
-
-        // Import arguments need special care because of the unusual model (separate expressions instead of an expression list).
-
-        const int paramCount = 1;
-        Writer.StartExpressionList(paramCount, ref _writeContext);
-
-        _writeContext.SetNodeProperty(nameof(Import.Source), static node => node.As<Import>().Source);
-        VisitExpressionListItem(import.Source, 0, paramCount, static (@this, expression, _, _) =>
-            s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
-
-        Writer.EndExpressionList(paramCount, ref _writeContext);
-
-        _writeContext.ClearNodeProperty();
-        Writer.WritePunctuator(")", TokenFlags.Trailing, ref _writeContext);
-
-        return import;
-    }
-
     protected internal override object? VisitImportDeclaration(ImportDeclaration importDeclaration)
     {
         Writer.WriteKeyword("import", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
@@ -1063,6 +1040,29 @@ WriteSource:
         VisitAuxiliaryNode(importDefaultSpecifier.Local);
 
         return importDefaultSpecifier;
+    }
+
+    protected internal override object? VisitImportExpression(ImportExpression importExpression)
+    {
+        Writer.WriteKeyword("import", ref _writeContext);
+
+        Writer.WritePunctuator("(", TokenFlags.Leading, ref _writeContext);
+
+        // ImportExpression arguments need special care because of the unusual model (separate expressions instead of an expression list).
+
+        const int paramCount = 1;
+        Writer.StartExpressionList(paramCount, ref _writeContext);
+
+        _writeContext.SetNodeProperty(nameof(ImportExpression.Source), static node => node.As<ImportExpression>().Source);
+        VisitExpressionListItem(importExpression.Source, 0, paramCount, static (@this, expression, _, _) =>
+            s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
+
+        Writer.EndExpressionList(paramCount, ref _writeContext);
+
+        _writeContext.ClearNodeProperty();
+        Writer.WritePunctuator(")", TokenFlags.Trailing, ref _writeContext);
+
+        return importExpression;
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(ImportNamespaceSpecifier importNamespaceSpecifier)

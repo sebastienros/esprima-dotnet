@@ -24,6 +24,10 @@ public partial class UnaryExpression : Expression
 
     public UnaryExpression(UnaryOperator op, Expression arg) : this(Nodes.UnaryExpression, op, arg, prefix: true)
     {
+        if (UpdateExpression.IsUpdateOperator(op))
+        {
+            throw new ArgumentOutOfRangeException(nameof(op), op, "Value must be a non-update operator.");
+        }
     }
 
     private protected UnaryExpression(Nodes type, string op, Expression arg, bool prefix) : this(type, ParseUnaryOperator(op), arg, prefix)
@@ -50,7 +54,7 @@ public partial class UnaryExpression : Expression
             "typeof" => UnaryOperator.TypeOf,
             "++" => UnaryOperator.Increment,
             "--" => UnaryOperator.Decrement,
-            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid unary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), op, "Invalid unary operator.")
         };
     }
 
@@ -67,7 +71,7 @@ public partial class UnaryExpression : Expression
             UnaryOperator.TypeOf => "typeof",
             UnaryOperator.Increment => "++",
             UnaryOperator.Decrement => "--",
-            _ => throw new ArgumentOutOfRangeException(nameof(op), "Invalid unary operator: " + op)
+            _ => throw new ArgumentOutOfRangeException(nameof(op), op, "Invalid unary operator.")
         };
     }
 

@@ -765,7 +765,7 @@ public partial class JavaScriptParser
                         _scanner._index = _startMarker.Index;
                         token = NextRegexToken();
                         raw = GetTokenRaw(token);
-                        expr = Finalize(node, new Literal(token.RegexValue!.Pattern, token.RegexValue.Flags, token.Value, raw));
+                        expr = Finalize(node, new RegExpLiteral(token.RegexValue!, token.Value, raw));
                         break;
                     case "#":
                         expr = ParsePrivateIdentifier(node);
@@ -1699,7 +1699,7 @@ public partial class JavaScriptParser
         return match;
     }
 
-    private Import ParseImportCall()
+    private ImportExpression ParseImportCall()
     {
         var node = CreateNode();
         ExpectKeyword("import");
@@ -1723,7 +1723,7 @@ public partial class JavaScriptParser
             this.Expect(")");
         }
 
-        return Finalize(node, new Import(source));
+        return Finalize(node, new ImportExpression(source));
     }
 
     private bool MatchImportMeta()
