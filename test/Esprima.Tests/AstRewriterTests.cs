@@ -382,7 +382,7 @@ sealed class TestRewriter : JsxAstRewriter
         return ForceNewObjectByControlType((Literal) base.VisitLiteral(literal)!,
             node => node switch
             {
-                RegExpLiteral regExpLiteral => new RegExpLiteral(regExpLiteral.Regex.Pattern, regExpLiteral.Regex.Flags, node.Value, node.Raw),
+                RegExpLiteral regExpLiteral => new RegExpLiteral(regExpLiteral.Regex, node.Value, node.Raw),
                 _ => new Literal(node.TokenType, node.Value, node.Raw),
             });
     }
