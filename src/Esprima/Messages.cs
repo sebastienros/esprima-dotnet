@@ -77,6 +77,7 @@ internal static class Messages
     public const string StrictVarName = "Variable name may not be eval or arguments in strict mode";
     public const string TemplateEscape89 = "\\8 and \\9 are not allowed in template strings.";
     public const string TemplateOctalLiteral = "Octal literals are not allowed in template strings.";
+    public const string UndefinedUnicodeCodePoint = "Undefined Unicode code-point";
     public const string UnexpectedEOS = "Unexpected end of input";
     public const string UnexpectedIdentifier = "Unexpected identifier";
     public const string UnexpectedNumber = "Unexpected number";

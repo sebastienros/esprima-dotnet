@@ -85,17 +85,71 @@ public class ScannerTests
     }
 
     [Fact]
-    public void ShouldRejectSurrogateRangeAsIdentifierStart()
+    public void ShouldRejectInvalidUnescapedSurrogateAsIdentifierStart()
     {
-        var scanner = new Scanner(@"\u{d800}\u{dc00}");
+        // These values are altered by XUnit if passed in InlineData to the test method
+        foreach (var s in new[]
+        {
+            "\ud800",
+            "\ud800b",
+            "\ud800\ud800",
+            "\udc00",
+            "\udc00b",
+            "\udc00\ud800",
+            "\udc00\udc00",
+        })
+        {
+            var scanner = new Scanner(s);
+            var ex = Assert.Throws<ParserException>(new Func<object>(() => scanner.Lex()));
+            Assert.Equal(Messages.UnexpectedTokenIllegal, ex.Error?.Description);
+        }
+    }
+
+    [Fact]
+    public void ShouldRejectInvalidUnescapedSurrogateAsIdentifierPart()
+    {
+        // These values are altered by XUnit if passed in InlineData to the test method
+        foreach (var s in new[]
+        {
+            "a\ud800",
+            "a\ud800b",
+            "a\ud800\ud800",
+            "a\udc00",
+            "a\udc00b",
+            "a\udc00\ud800",
+            "a\udc00\udc00",
+        })
+        {
+            var scanner = new Scanner(s);
+            var ex = Assert.Throws<ParserException>(new Func<object>(() => scanner.Lex()));
+            Assert.Equal(Messages.UnexpectedTokenIllegal, ex.Error?.Description);
+        }
+    }
+
+    [InlineData(@"\ud800")]
+    [InlineData(@"\udc00")]
+    [InlineData(@"\ud800\udc00")]
+    [InlineData(@"\u{d800}")]
+    [InlineData(@"\u{dc00}")]
+    [InlineData(@"\u{d800}\u{dc00}")]
+    [Theory]
+    public void ShouldRejectEscapedSurrogateAsIdentifierStart(string s)
+    {
+        var scanner = new Scanner(s);
         var ex = Assert.Throws<ParserException>(new Func<object>(() => scanner.Lex()));
         Assert.Equal(Messages.UnexpectedTokenIllegal, ex.Error?.Description);
     }
 
-    [Fact]
-    public void ShouldRejectSurrogateRangeAsIdentifierPart()
+    [InlineData(@"a\ud800")]
+    [InlineData(@"a\udc00")]
+    [InlineData(@"a\ud800\udc00")]
+    [InlineData(@"a\u{d800}")]
+    [InlineData(@"a\u{dc00}")]
+    [InlineData(@"a\u{d800}\u{dc00}")]
+    [Theory]
+    public void ShouldRejectEscapedSurrogateAsIdentifierPart(string s)
     {
-        var scanner = new Scanner(@"a\u{d800}\u{dc00}");
+        var scanner = new Scanner(s);
         var ex = Assert.Throws<ParserException>(new Func<object>(() => scanner.Lex()));
         Assert.Equal(Messages.UnexpectedTokenIllegal, ex.Error?.Description);
     }

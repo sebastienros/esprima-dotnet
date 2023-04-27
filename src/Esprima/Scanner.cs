@@ -562,15 +562,15 @@ public sealed partial class Scanner
         return true;
     }
 
-    private string? TryScanUnicodeCodePointEscape(out int code)
+    private bool TryScanUnicodeCodePointEscape(out int code)
     {
-        var ch = _source[_index];
+        var ch = _source.CharCodeAt(_index);
         code = 0;
 
         // At least, one hex digit is required.
         if (ch == '}')
         {
-            return null;
+            return false;
         }
 
         while (!Eof())
@@ -581,38 +581,37 @@ public sealed partial class Scanner
                 break;
             }
 
-            try { code = checked(code * 16 + HexConverter.FromChar(ch)); }
-            catch (OverflowException) { return null; }
+            code = code * 16 + HexConverter.FromChar(ch);
+
+            // The Unicode standard guarantees that a code point above 0x10FFFF will never be assigned
+            // (see https://stackoverflow.com/a/52203901/8656352).
+            if (code > Character.UnicodeLastCodePoint)
+            {
+                return false;
+            }
         }
 
-        // Character.FromCodePoint (more precisely, the underlying char.ConvertFromUtf32 call) accepts
-        // ranges [U+0000..U+D7FF] and [U+E000..U+10FFFF] only.
-        // See also: https://github.com/dotnet/runtime/blob/v6.0.14/src/libraries/System.Private.CoreLib/src/System/Text/UnicodeUtility.cs#L169
-
-        if (code > 0x10FFFF || ch != '}')
+        if (ch != '}')
         {
-            return null;
+            return false;
         }
 
-        // This range is valid in literals (e.g. "a\u{d800}\u{dc00}") but not valid in identifiers (e.g. a\u{d800}\u{dc00}).
-        // Let's return it in both cases and let Character.IsIdentifierStart/IsIdentifierPart deal with it.
-        if (code is >= 0xD800 and <= 0xDFFF)
-        {
-            return ParserExtensions.CharToString((char) code);
-        }
+        // The surrogate range is valid in literals (e.g. "a\u{d800}\u{dc00}") but not valid in identifiers (e.g. a\u{d800}\u{dc00}).
+        // Let's return true in both cases and let the caller deal with it.
 
-        return Character.FromCodePoint(code);
+        return true;
     }
 
-    private string ScanUnicodeCodePointEscape()
+    private int ScanUnicodeCodePointEscape()
     {
-        var result = TryScanUnicodeCodePointEscape(out _);
-        if (result is null)
+        if (!TryScanUnicodeCodePointEscape(out var cp))
         {
-            ThrowUnexpectedToken();
+            ThrowUnexpectedToken(cp > Character.UnicodeLastCodePoint
+                ? Messages.UndefinedUnicodeCodePoint
+                : Messages.InvalidUnicodeEscapeSequence);
         }
 
-        return result;
+        return cp;
     }
 
     private string GetIdentifier()
@@ -627,7 +626,7 @@ public sealed partial class Scanner
                 _index = start;
                 return GetComplexIdentifier();
             }
-            else if (ch >= 0xD800 && ch < 0xDFFF)
+            else if ((ushort) ch is >= 0xD800 and <= 0xDFFF)
             {
                 // Need to handle surrogate pairs.
                 _index = start;
@@ -654,100 +653,148 @@ public sealed partial class Scanner
             ThrowUnexpectedToken();
         }
 
-        var cp = CodePointAt(_source, _index);
-        var id = Character.FromCodePoint(cp);
-        _index += id.Length;
+        var sb = GetStringBuilder();
 
-        // '\u' (U+005C, U+0075) denotes an escaped character.
-        string? ch;
+        var cp = CodePointAt(_source, _index);
+        string ch;
         int chcp;
-        if (cp == 0x5C)
+
+        if (cp != 0x5C)
         {
+            ch = ParserExtensions.CodePointOrSurrogateToString(cp);
+            if (ch.Length == 1 && char.IsSurrogate(ch[0]))
+            {
+                ThrowUnexpectedToken();
+            }
+            sb.Append(ch);
+            _index += ch.Length;
+        }
+        // '\u' (U+005C, U+0075) denotes an escaped character.
+        else
+        {
+            ++_index;
             if (_source.CharCodeAt(_index) != 0x75)
             {
                 ThrowUnexpectedToken();
             }
 
             ++_index;
-            if (_source[_index] == '{')
+            if (_source.CharCodeAt(_index) == '{')
             {
                 ++_index;
-                ch = TryScanUnicodeCodePointEscape(out chcp);
-                if (ch is null
-                    || (ch.Length == 1
-                        ? !Character.IsIdentifierStart(ch[0])
-                        : !Character.IsIdentifierStart(chcp)))
+                if (!TryScanUnicodeCodePointEscape(out chcp))
                 {
-                    ThrowUnexpectedToken();
+                    ThrowUnexpectedToken(chcp > Character.UnicodeLastCodePoint
+                        ? Messages.UndefinedUnicodeCodePoint
+                        : Messages.InvalidUnicodeEscapeSequence);
+                }
+
+                if (chcp > 0xFFFF)
+                {
+                    ch = ParserExtensions.CodePointToString(chcp);
+                    if (!Character.IsIdentifierStart(ch, 0))
+                    {
+                        ThrowUnexpectedToken();
+                    }
+                    sb.Append(ch);
+                }
+                else
+                {
+                    if (char.IsSurrogate((char) chcp) || !Character.IsIdentifierStart((char) chcp))
+                    {
+                        ThrowUnexpectedToken();
+                    }
+                    sb.Append((char) chcp);
                 }
             }
             else
             {
-                if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierStart(ch1))
+                if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierStart(ch1) || char.IsSurrogate(ch1))
                 {
                     ThrowUnexpectedToken();
                 }
-
-                ch = ParserExtensions.CharToString(ch1);
+                sb.Append(ch1);
             }
-
-            id = ch;
         }
 
         while (!Eof())
         {
             cp = CodePointAt(_source, _index);
-            ch = Character.FromCodePoint(cp);
 
-            var identifierPart = ch.Length == 1
-                ? Character.IsIdentifierPart(ch[0])
-                : Character.IsIdentifierPart(_source, _index);
-
-            if (!identifierPart)
+            if (cp != 0x5C)
             {
-                break;
+                ch = ParserExtensions.CodePointOrSurrogateToString(cp);
+
+                if (ch.Length == 1)
+                {
+                    // IsIdentifierPart also matches the surrogate range (U+D800..U+DFFF) currently.
+                    if (!Character.IsIdentifierPart(ch[0]))
+                    {
+                        break;
+                    }
+                    else if (char.IsSurrogate(ch[0]))
+                    {
+                        ThrowUnexpectedToken();
+                    }
+                }
+                else if (!Character.IsIdentifierPart(ch, 0))
+                {
+                    break;
+                }
+
+                sb.Append(ch);
+                _index += ch.Length;
             }
-
-            id += ch;
-            _index += ch.Length;
-
             // '\u' (U+005C, U+0075) denotes an escaped character.
-            if (cp == 0x5C)
+            else
             {
-                id = id.Substring(0, id.Length - 1);
+                ++_index;
                 if (_source.CharCodeAt(_index) != 0x75)
                 {
                     ThrowUnexpectedToken();
                 }
 
                 ++_index;
-                if (_index < _source.Length && _source[_index] == '{')
+                if (_source.CharCodeAt(_index) == '{')
                 {
                     ++_index;
-                    ch = TryScanUnicodeCodePointEscape(out chcp);
-                    if (ch is null
-                        || (ch.Length == 1
-                            ? char.IsLowSurrogate(ch[0]) || !Character.IsIdentifierPart(ch[0])
-                            : !Character.IsIdentifierPart(chcp)))
+                    if (!TryScanUnicodeCodePointEscape(out chcp))
                     {
-                        ThrowUnexpectedToken();
+                        ThrowUnexpectedToken(chcp > Character.UnicodeLastCodePoint
+                            ? Messages.UndefinedUnicodeCodePoint
+                            : Messages.InvalidUnicodeEscapeSequence);
+                    }
+
+                    if (chcp > 0xFFFF)
+                    {
+                        ch = ParserExtensions.CodePointToString(chcp);
+                        if (!Character.IsIdentifierPart(ch, 0))
+                        {
+                            ThrowUnexpectedToken();
+                        }
+                        sb.Append(ch);
+                    }
+                    else
+                    {
+                        if (char.IsSurrogate((char) chcp) || !Character.IsIdentifierPart((char) chcp))
+                        {
+                            ThrowUnexpectedToken();
+                        }
+                        sb.Append((char) chcp);
                     }
                 }
                 else
                 {
-                    if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || char.IsLowSurrogate(ch1) || !Character.IsIdentifierPart(ch1))
+                    if (!ScanHexEscape('u', out var ch1) || ch1 == '\\' || !Character.IsIdentifierPart(ch1) || char.IsSurrogate(ch1))
                     {
                         ThrowUnexpectedToken();
                     }
-
-                    ch = ParserExtensions.CharToString(ch1);
+                    sb.Append(ch1);
                 }
-
-                id += ch;
             }
         }
 
-        return id;
+        return sb.ToString().AsSpan().ToInternedString(ref _stringPool);
     }
 
     private OctalValue OctalToDecimal(char ch)
@@ -780,7 +827,9 @@ public sealed partial class Scanner
         var start = _index;
 
         // Backslash (U+005C) starts an escaped character.
-        var id = _source[_index] == 0x5C ? GetComplexIdentifier() : GetIdentifier();
+        var id = (ushort) _source[_index] is 0x5C or (>= 0xD800 and <= 0xDFFF)
+            ? GetComplexIdentifier()
+            : GetIdentifier();
 
         // There is no keyword or literal with only one character.
         // Thus, it must be an identifier.
@@ -1385,7 +1434,7 @@ public sealed partial class Scanner
                             if (_index < _source.Length && _source[_index] == '{')
                             {
                                 ++_index;
-                                str.Append(ScanUnicodeCodePointEscape());
+                                str.Append(ParserExtensions.CodePointOrSurrogateToString(ScanUnicodeCodePointEscape()));
                             }
                             else
                             {
@@ -1548,14 +1597,13 @@ public sealed partial class Scanner
                             if (_source[_index] == '{')
                             {
                                 ++_index;
-                                var unicodeCodePointEscape = TryScanUnicodeCodePointEscape(out _);
-                                if (unicodeCodePointEscape is null)
+                                if (!TryScanUnicodeCodePointEscape(out var cp))
                                 {
-                                    notEscapeSequenceHead = 'u';
+                                    notEscapeSequenceHead = cp > Character.UnicodeLastCodePoint ? 'v' : 'u';
                                 }
                                 else
                                 {
-                                    cooked.Append(unicodeCodePointEscape);
+                                    cooked.Append(ParserExtensions.CodePointOrSurrogateToString(cp));
                                 }
                             }
                             else
@@ -2525,6 +2573,7 @@ public sealed partial class Scanner
 
         var cp = _source[_index];
 
+        // IsIdentifierStart also matches the surrogate range (U+D800..U+DFFF) currently.
         if (Character.IsIdentifierStart(cp))
         {
             return ScanIdentifier(options.AllowIdentifierEscape);
@@ -2564,15 +2613,6 @@ public sealed partial class Scanner
         if (cp == 0x60 || cp == 0x7D && _curlyStack.Count > 0 && _curlyStack[_curlyStack.Count - 1] == "${")
         {
             return ScanTemplate();
-        }
-
-        // Possible identifier start in a surrogate pair.
-        if (cp >= 0xD800 && cp < 0xDFFF)
-        {
-            if (char.IsLetter(_source, _index)) // Character.IsIdentifierStart(CodePointAt(Index))
-            {
-                return ScanIdentifier(options.AllowIdentifierEscape);
-            }
         }
 
         return ScanPunctuator();
