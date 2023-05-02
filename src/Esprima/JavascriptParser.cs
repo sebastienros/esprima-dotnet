@@ -862,6 +862,9 @@ public partial class JavaScriptParser
             case 'u':
                 ThrowUnexpectedToken(token, Messages.InvalidUnicodeEscapeSequence);
                 break;
+            case 'v':
+                ThrowUnexpectedToken(token, Messages.UndefinedUnicodeCodePoint);
+                break;
             case 'x':
                 ThrowUnexpectedToken(token, Messages.InvalidHexEscapeSequence);
                 break;

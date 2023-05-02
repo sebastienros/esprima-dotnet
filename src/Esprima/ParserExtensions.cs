@@ -68,6 +68,25 @@ internal static partial class ParserExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string CodePointToString(int cp)
+    {
+        var temp = s_charToString;
+        if ((uint) cp < temp.Length)
+        {
+            return temp[cp];
+        }
+        return char.ConvertFromUtf32(cp);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string CodePointOrSurrogateToString(int cp)
+    {
+        return cp is not (>= 0xD800 and <= 0xDFFF)
+            ? CodePointToString(cp)
+            : ((char) cp).ToString();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static char CharCodeAt(this string source, int index)
     {
         if ((uint) index < source.Length)
