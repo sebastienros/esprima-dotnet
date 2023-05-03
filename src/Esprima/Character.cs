@@ -43,7 +43,10 @@ public static partial class Character
 
     internal static bool IsIdentifierStart(string s, int index)
     {
-        return IsIdentifierStartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
+        var ch = s[index];
+        return !char.IsHighSurrogate(ch)
+            ? IsIdentifierStart(ch)
+            : IsIdentifierStartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
     }
 
     internal static bool IsIdentifierPart(char ch)
@@ -53,7 +56,10 @@ public static partial class Character
 
     internal static bool IsIdentifierPart(string s, int index)
     {
-        return IsIdentifierPartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
+        var ch = s[index];
+        return !char.IsHighSurrogate(ch)
+            ? IsIdentifierPart(ch)
+            : IsIdentifierPartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
