@@ -18,7 +18,4 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\..\test\Esprima.Tests\CharMaskGeneratorTest.cs" Link="CharMaskGeneratorTest.cs" />
-  </ItemGroup>
 </Project>

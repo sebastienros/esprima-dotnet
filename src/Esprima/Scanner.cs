@@ -620,15 +620,10 @@ public sealed partial class Scanner
         while (!Eof())
         {
             var ch = _source[_index];
-            if (ch == 0x5C)
+            if ((ushort) ch is
+                0x5C // Blackslash (U+005C) marks Unicode escape sequence.
+                or >= 0xD800 and <= 0xDFFF) // Need to handle surrogate pairs. 
             {
-                // Blackslash (U+005C) marks Unicode escape sequence.
-                _index = start;
-                return GetComplexIdentifier();
-            }
-            else if ((ushort) ch is >= 0xD800 and <= 0xDFFF)
-            {
-                // Need to handle surrogate pairs.
                 _index = start;
                 return GetComplexIdentifier();
             }
@@ -661,13 +656,27 @@ public sealed partial class Scanner
 
         if (cp != 0x5C)
         {
-            ch = ParserExtensions.CodePointOrSurrogateToString(cp);
-            if (ch.Length == 1 && char.IsSurrogate(ch[0]))
+            if (cp <= char.MaxValue)
             {
-                ThrowUnexpectedToken();
+                if (char.IsSurrogate((char) cp))
+                {
+                    ThrowUnexpectedToken();
+                }
+
+                sb.Append((char) cp);
+                _index++;
             }
-            sb.Append(ch);
-            _index += ch.Length;
+            else
+            {
+                if (!Character.IsIdentifierStartAstral(cp))
+                {
+                    ThrowUnexpectedToken();
+                }
+
+                ch = ParserExtensions.CodePointToString(cp);
+                sb.Append(ch);
+                _index += ch.Length;
+            }
         }
         // '\u' (U+005C, U+0075) denotes an escaped character.
         else
@@ -689,14 +698,13 @@ public sealed partial class Scanner
                         : Messages.InvalidUnicodeEscapeSequence);
                 }
 
-                if (chcp > 0xFFFF)
+                if (chcp > char.MaxValue)
                 {
-                    ch = ParserExtensions.CodePointToString(chcp);
-                    if (!Character.IsIdentifierStart(ch, 0))
+                    if (!Character.IsIdentifierStartAstral(chcp))
                     {
                         ThrowUnexpectedToken();
                     }
-                    sb.Append(ch);
+                    sb.Append(ParserExtensions.CodePointToString(chcp));
                 }
                 else
                 {
@@ -723,27 +731,32 @@ public sealed partial class Scanner
 
             if (cp != 0x5C)
             {
-                ch = ParserExtensions.CodePointOrSurrogateToString(cp);
-
-                if (ch.Length == 1)
+                if (cp <= char.MaxValue)
                 {
-                    // IsIdentifierPart also matches the surrogate range (U+D800..U+DFFF) currently.
-                    if (!Character.IsIdentifierPart(ch[0]))
+                    // IsIdentifierPart also matches the surrogate range (U+D800..U+DFFF).
+                    if (!Character.IsIdentifierPart((char) cp))
                     {
                         break;
                     }
-                    else if (char.IsSurrogate(ch[0]))
+                    else if (char.IsSurrogate((char) cp))
                     {
                         ThrowUnexpectedToken();
                     }
-                }
-                else if (!Character.IsIdentifierPart(ch, 0))
-                {
-                    break;
-                }
 
-                sb.Append(ch);
-                _index += ch.Length;
+                    sb.Append((char) cp);
+                    _index++;
+                }
+                else
+                {
+                    if (!Character.IsIdentifierPartAstral(cp))
+                    {
+                        break;
+                    }
+
+                    ch = ParserExtensions.CodePointToString(cp);
+                    sb.Append(ch);
+                    _index += ch.Length;
+                }
             }
             // '\u' (U+005C, U+0075) denotes an escaped character.
             else
@@ -765,14 +778,13 @@ public sealed partial class Scanner
                             : Messages.InvalidUnicodeEscapeSequence);
                     }
 
-                    if (chcp > 0xFFFF)
+                    if (chcp > char.MaxValue)
                     {
-                        ch = ParserExtensions.CodePointToString(chcp);
-                        if (!Character.IsIdentifierPart(ch, 0))
+                        if (!Character.IsIdentifierPartAstral(chcp))
                         {
                             ThrowUnexpectedToken();
                         }
-                        sb.Append(ch);
+                        sb.Append(ParserExtensions.CodePointToString(chcp));
                     }
                     else
                     {
@@ -2576,7 +2588,7 @@ public sealed partial class Scanner
 
         var cp = _source[_index];
 
-        // IsIdentifierStart also matches the surrogate range (U+D800..U+DFFF) currently.
+        // IsIdentifierStart also matches backslash and the surrogate range (U+D800..U+DFFF).
         if (Character.IsIdentifierStart(cp))
         {
             return ScanIdentifier(options.AllowIdentifierEscape);

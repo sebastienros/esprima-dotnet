@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Esprima;
@@ -41,12 +41,10 @@ public static partial class Character
         return (_characterData[ch] & (byte) CharacterMask.IdentifierStart) != 0;
     }
 
-    internal static bool IsIdentifierStart(string s, int index)
+    internal static bool IsIdentifierStartAstral(int cp)
     {
-        var ch = s[index];
-        return !char.IsHighSurrogate(ch)
-            ? IsIdentifierStart(ch)
-            : IsIdentifierStartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
+        Debug.Assert(cp > char.MaxValue);
+        return CharRange.CharSetContains(cp, s_identifierStartAstralRanges, s_rangeLengthLookup);
     }
 
     internal static bool IsIdentifierPart(char ch)
@@ -54,12 +52,10 @@ public static partial class Character
         return (_characterData[ch] & (byte) CharacterMask.IdentifierPart) != 0;
     }
 
-    internal static bool IsIdentifierPart(string s, int index)
+    internal static bool IsIdentifierPartAstral(int cp)
     {
-        var ch = s[index];
-        return !char.IsHighSurrogate(ch)
-            ? IsIdentifierPart(ch)
-            : IsIdentifierPartUnicodeCategory(CharUnicodeInfo.GetUnicodeCategory(s, index));
+        Debug.Assert(cp > char.MaxValue);
+        return CharRange.CharSetContains(cp, s_identifierPartAstralRanges, s_rangeLengthLookup);
     }
 
     // https://tc39.github.io/ecma262/#sec-literals-numeric-literals
@@ -78,65 +74,4 @@ public static partial class Character
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsInRange(char c, char min, char max) => c - (uint) min <= max - (uint) min;
-
-    internal static bool IsIdentifierStartUnicodeCategory(UnicodeCategory cat)
-    {
-        return IsLetterChar(cat) || cat is UnicodeCategory.ModifierLetter or UnicodeCategory.NonSpacingMark;
-    }
-
-    internal static bool IsIdentifierPartUnicodeCategory(UnicodeCategory cat)
-    {
-        return IsLetterChar(cat)
-               || IsDecimalDigitChar(cat)
-               || IsConnectingChar(cat)
-               || IsCombiningChar(cat)
-               || IsFormattingChar(cat);
-    }
-
-    internal static bool IsLetterChar(UnicodeCategory cat)
-    {
-        return cat switch
-        {
-            UnicodeCategory.UppercaseLetter => true,
-            UnicodeCategory.LowercaseLetter => true,
-            UnicodeCategory.TitlecaseLetter => true,
-            UnicodeCategory.OtherLetter => true,
-            UnicodeCategory.LetterNumber => true,
-            UnicodeCategory.Surrogate => true,
-            UnicodeCategory.OtherNotAssigned => true,
-            UnicodeCategory.OtherNumber => true,
-
-            UnicodeCategory.MathSymbol => true,
-            UnicodeCategory.OtherSymbol => true,
-            UnicodeCategory.ModifierSymbol => true,
-
-            _ => false
-        };
-    }
-
-    private static bool IsCombiningChar(UnicodeCategory cat)
-    {
-        return cat is UnicodeCategory.NonSpacingMark or UnicodeCategory.SpacingCombiningMark;
-    }
-
-    private static bool IsDecimalDigitChar(UnicodeCategory cat)
-    {
-        return cat == UnicodeCategory.DecimalDigitNumber;
-    }
-
-    private static bool IsConnectingChar(UnicodeCategory cat)
-    {
-        return cat is UnicodeCategory.ConnectorPunctuation or UnicodeCategory.OtherPunctuation;
-    }
-
-    internal static bool IsFormattingChar(char ch)
-    {
-        // There are no FormattingChars in ASCII range
-        return ch > 127 && IsFormattingChar(CharUnicodeInfo.GetUnicodeCategory(ch));
-    }
-
-    internal static bool IsFormattingChar(UnicodeCategory cat)
-    {
-        return cat == UnicodeCategory.Format;
-    }
 }
