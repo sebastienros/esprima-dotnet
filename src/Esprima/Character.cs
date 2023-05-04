@@ -16,6 +16,12 @@ public static partial class Character
 {
     internal const int UnicodeLastCodePoint = 0x10FFFF;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool HasCharacterFlag(char ch, CharacterMask flag)
+    {
+        return (s_characterData[ch >> 1] & ((byte) flag << ((ch & 1) << 2))) != 0;
+    }
+
     // https://tc39.github.io/ecma262/#sec-line-terminators
 
     internal static bool IsLineTerminator(char ch)
@@ -31,14 +37,14 @@ public static partial class Character
 
     internal static bool IsWhiteSpace(char ch)
     {
-        return (_characterData[ch] & (byte) CharacterMask.WhiteSpace) != 0;
+        return HasCharacterFlag(ch, CharacterMask.WhiteSpace);
     }
 
     // https://tc39.github.io/ecma262/#sec-names-and-keywords
 
     internal static bool IsIdentifierStart(char ch)
     {
-        return (_characterData[ch] & (byte) CharacterMask.IdentifierStart) != 0;
+        return HasCharacterFlag(ch, CharacterMask.IdentifierStart);
     }
 
     internal static bool IsIdentifierStartAstral(int cp)
@@ -49,7 +55,7 @@ public static partial class Character
 
     internal static bool IsIdentifierPart(char ch)
     {
-        return (_characterData[ch] & (byte) CharacterMask.IdentifierPart) != 0;
+        return HasCharacterFlag(ch, CharacterMask.IdentifierPart);
     }
 
     internal static bool IsIdentifierPartAstral(int cp)

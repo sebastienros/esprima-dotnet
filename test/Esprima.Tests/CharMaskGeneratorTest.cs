@@ -78,6 +78,7 @@ public class CharMaskGeneratorTest
         sb.AppendLine("namespace Esprima;");
         sb.AppendLine();
 
+        sb.AppendLine($"// Generated using {nameof(CharMaskGeneratorTest)}.{nameof(CanGenerateMasks)}");
         sb.AppendLine("partial class Character");
         sb.AppendLine("{");
 
@@ -95,7 +96,7 @@ public class CharMaskGeneratorTest
 
     private static void GenerateBmpMasks(StringBuilder sb)
     {
-        var masks = new List<CharacterMask>(char.MaxValue);
+        var masks = new byte[(char.MaxValue + 1) / 2];
         for (int c = char.MinValue; c <= char.MaxValue; ++c)
         {
             var mask = CharacterMask.None;
@@ -112,17 +113,17 @@ public class CharMaskGeneratorTest
                 mask |= CharacterMask.IdentifierPart;
             }
 
-            masks.Add(mask);
+            masks[c >> 1] |= (byte) ((byte) mask << ((c & 1) << 2));
         }
 
-        sb.AppendLine("    private static ReadOnlySpan<byte> _characterData => new byte[]");
+        sb.AppendLine("    private static ReadOnlySpan<byte> s_characterData => new byte[]");
         sb.AppendLine("    {");
-        foreach (var chunk in masks.Chunk(40))
+        foreach (var chunk in masks.Chunk(32))
         {
             sb.Append("        ");
             foreach (var value in chunk)
             {
-                sb.Append((int) value);
+                sb.Append("0x").Append(value.ToString("X2"));
                 sb.Append(", ");
             }
 
