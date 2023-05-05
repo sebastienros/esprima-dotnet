@@ -9,7 +9,7 @@ public class AstRewriterTests
 {
     private static Module ParseExpression(string code, bool jsx = false)
     {
-        return new JsxParser(new JsxParserOptions()).ParseModule(code);
+        return new JsxParser(JsxParserOptions.Default with { AllowReturnOutsideFunction = true }).ParseModule(code);
     }
 
     private static object? FindNearTypeOfDescendTyped(Type type, Node node)
@@ -21,7 +21,7 @@ public class AstRewriterTests
     public void CanUpdateScript()
     {
         // Arrange
-        var parser = new JavaScriptParser();
+        var parser = new JavaScriptParser(ParserOptions.Default with { AllowReturnOutsideFunction = true });
         var program = parser.ParseScript("return true;");
         var visitor = new TestRewriter(typeof(Script));
 
@@ -36,7 +36,7 @@ public class AstRewriterTests
     public void CanUpdateModule()
     {
         // Arrange
-        var parser = new JavaScriptParser();
+        var parser = new JavaScriptParser(ParserOptions.Default with { AllowReturnOutsideFunction = true });
         var program = parser.ParseModule("return true;");
         var visitor = new TestRewriter(typeof(Module));
 
@@ -49,8 +49,6 @@ public class AstRewriterTests
 
     [Theory]
     [InlineData(typeof(CatchClause), "try {} catch {}")]
-    [InlineData(typeof(WithStatement), "with(a){ }")]
-    [InlineData(typeof(WithStatement), "{ { with(a){ } } }")]
     [InlineData(typeof(WhileStatement), "while(true){ }")]
     [InlineData(typeof(VariableDeclaration), "var t = 0")]
     [InlineData(typeof(VariableDeclaration), "let t = 1")]
@@ -77,14 +75,13 @@ public class AstRewriterTests
     [InlineData(typeof(NewExpression), "new Type();")]
     [InlineData(typeof(Literal), "'0'")]
     [InlineData(typeof(Identifier), "var a = '0'")]
-    [InlineData(typeof(FunctionExpression), "(function () { 'use strict'; with (i); }())")]
     [InlineData(typeof(ChainExpression), "a?.['b'].c")]
     [InlineData(typeof(ClassExpression), "(class A {})")]
     [InlineData(typeof(ForOfStatement), "for(let b of a) {}")]
     [InlineData(typeof(ClassDeclaration), "class A {}")]
     [InlineData(typeof(YieldExpression), "function* a() { yield a; }")]
     [InlineData(typeof(TaggedTemplateExpression), "a`template`")]
-    [InlineData(typeof(Super), "function constractor(){ super(); }")]
+    [InlineData(typeof(Super), "function constructor(){ super(); }")]
     [InlineData(typeof(MetaProperty), "import.meta.url")]
     [InlineData(typeof(ObjectPattern), "for (const {x, y} of z);")]
     [InlineData(typeof(SpreadElement), "var b = {...a}")]

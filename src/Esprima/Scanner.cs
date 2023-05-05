@@ -1308,9 +1308,12 @@ public sealed partial class Scanner
                 }
 
                 nonOctal = char.IsNumber(ch);
-                if (nonOctal && strict)
+                if (nonOctal)
                 {
-                    TolerateUnexpectedToken(Messages.StrictDecimalWithLeadingZero);
+                    if (strict)
+                    {
+                        ThrowUnexpectedToken(Messages.StrictDecimalWithLeadingZero);
+                    }
                 }
 
                 if (ch > 0 && Character.IsOctalDigit(ch))

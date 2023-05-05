@@ -45,6 +45,7 @@ internal static class Messages
     public const string MissingFromClause = "Unexpected token";
     public const string MultipleDefaultsInSwitch = "More than one default clause in switch statement";
     public const string NewlineAfterThrow = "Illegal newline after throw";
+    public const string NewTargetNotAllowedHere = "new.target expression is not allowed here";
     public const string NoAsAfterImportNamespace = "Unexpected token";
     public const string NoCatchOrFinally = "Missing catch or finally after try";
     public const string NumericSeparatorAfterLeadingZero = "Numeric separator can not be used after leading 0";
