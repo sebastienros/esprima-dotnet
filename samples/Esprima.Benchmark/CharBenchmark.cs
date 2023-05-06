@@ -26,7 +26,7 @@ public class CharBenchmark
         var source = FullRange ? _fullRange : _asciiRange;
         foreach (var i in source)
         {
-            CharMaskGeneratorTest.IsHexDigit(i);
+            CharacterOld.IsHexDigit(i);
         }
     }
 
@@ -46,7 +46,7 @@ public class CharBenchmark
         var source = FullRange ? _fullRange : _asciiRange;
         foreach (var i in source)
         {
-            CharMaskGeneratorTest.IsDecimalDigit(i);
+            CharacterOld.IsDecimalDigit(i);
         }
     }
 
@@ -66,7 +66,7 @@ public class CharBenchmark
         var source = FullRange ? _fullRange : _asciiRange;
         foreach (var i in source)
         {
-            CharMaskGeneratorTest.IsWhiteSpace(i);
+            CharacterOld.IsWhiteSpace(i);
         }
     }
 
@@ -86,7 +86,7 @@ public class CharBenchmark
         var source = FullRange ? _fullRange : _asciiRange;
         foreach (var i in source)
         {
-            CharMaskGeneratorTest.IsIdentifierStart(i);
+            CharacterOld.IsIdentifierStart(i);
         }
     }
 
@@ -106,7 +106,7 @@ public class CharBenchmark
         var source = FullRange ? _fullRange : _asciiRange;
         foreach (var i in source)
         {
-            CharMaskGeneratorTest.IsIdentifierPart(i);
+            CharacterOld.IsIdentifierPart(i);
         }
     }
 
