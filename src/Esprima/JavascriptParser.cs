@@ -112,6 +112,7 @@ public partial class JavaScriptParser
 
     private protected readonly ErrorHandler _errorHandler;
     private protected readonly bool _tolerant;
+    private protected readonly bool _allowReturnOutsideFunction;
     private protected readonly int _maxAssignmentDepth;
     private readonly Action<Node>? _onNodeCreated;
 
@@ -142,6 +143,7 @@ public partial class JavaScriptParser
 
         _errorHandler = options.ErrorHandler;
         _tolerant = options.Tolerant;
+        _allowReturnOutsideFunction = options.AllowReturnOutsideFunction;
         _tokens = options.Tokens ? new List<SyntaxToken>() : null;
         _comments = options.Comments ? new List<SyntaxComment>() : null;
         _maxAssignmentDepth = options.MaxAssignmentDepth;
@@ -823,7 +825,7 @@ public partial class JavaScriptParser
                     {
                         if (!_context.IsModule)
                         {
-                            TolerateUnexpectedToken(_lookahead, Messages.CannotUseImportMetaOutsideAModule);
+                            ThrowUnexpectedToken(_lookahead, Messages.CannotUseImportMetaOutsideAModule);
                         }
 
                         expr = ParseImportMeta();
@@ -1081,7 +1083,7 @@ public partial class JavaScriptParser
         return false;
     }
 
-    private Property ParseObjectProperty(ref bool hasProto)
+    private Property ParseObjectProperty(ref int protoCount)
     {
         var node = CreateNode();
         var token = _lookahead;
@@ -1166,12 +1168,7 @@ public partial class JavaScriptParser
             {
                 if (!computed && IsPropertyKey(key, "__proto__"))
                 {
-                    if (hasProto)
-                    {
-                        TolerateError(Messages.DuplicateProtoProperty);
-                    }
-
-                    hasProto = true;
+                    protoCount++;
                 }
 
                 NextToken();
@@ -1213,13 +1210,13 @@ public partial class JavaScriptParser
         var node = CreateNode();
 
         var properties = new ArrayList<Node>();
-        var hasProto = false;
+        var protoCount = 0;
 
         Expect("{");
 
         while (!Match("}"))
         {
-            var property = Match("...") ? (Node) ParseSpreadElement() : ParseObjectProperty(ref hasProto);
+            var property = Match("...") ? (Node) ParseSpreadElement() : ParseObjectProperty(ref protoCount);
             properties.Add(property);
 
             if (!Match("}") && (property is not Property { Method: true } || Match(",")))
@@ -1229,6 +1226,16 @@ public partial class JavaScriptParser
         }
 
         Expect("}");
+
+        if (protoCount > 1)
+        {
+            //  Annex B defines an early error for duplicate PropertyName of `__proto__`,
+            // in object initializers, but this does not apply to Object Assignment patterns
+            if (!MatchAssign())
+            {
+                ThrowError(Messages.DuplicateProtoProperty);
+            }
+        }
 
         return Finalize(node, new ObjectExpression(NodeList.From(ref properties)));
     }
@@ -1599,7 +1606,7 @@ public partial class JavaScriptParser
             var privateIdentifier = ParsePrivateIdentifier(node);
             if (!_context.InClassBody)
             {
-                ThrowError(Messages.PrivateFieldOutsideClass, "#" + privateIdentifier.Name);
+                TolerateError(Messages.PrivateFieldOutsideClass, "#" + privateIdentifier.Name);
             }
             return privateIdentifier;
         }
@@ -1625,8 +1632,13 @@ public partial class JavaScriptParser
         if (Match("."))
         {
             NextToken();
-            if (_lookahead.Type == TokenType.Identifier && (_context.InFunctionBody || _context.InClassBody) && "target".Equals(_lookahead.Value))
+            if (_lookahead is { Type: TokenType.Identifier, Value: "target" })
             {
+                if (!_context.InFunctionBody && !_context.InClassBody)
+                {
+                    TolerateError(Messages.NewTargetNotAllowedHere);
+                }
+
                 var property = ParseIdentifierName();
                 expr = new MetaProperty(id, property);
             }
@@ -2626,12 +2638,12 @@ public partial class JavaScriptParser
                         var id = expr.As<Identifier>();
                         if (Scanner.IsRestrictedWord(id.Name))
                         {
-                            TolerateUnexpectedToken(token, Messages.StrictLHSAssignment);
+                            ThrowUnexpectedToken(token, Messages.StrictLHSAssignment);
                         }
 
                         if (Scanner.IsStrictModeReservedWord(id.Name))
                         {
-                            TolerateUnexpectedToken(token, Messages.StrictReservedWord);
+                            ThrowUnexpectedToken(token, Messages.StrictReservedWord);
                         }
                     }
 
@@ -2722,7 +2734,7 @@ public partial class JavaScriptParser
                 case "export":
                     if (!_context.IsModule)
                     {
-                        TolerateUnexpectedToken(_lookahead, Messages.IllegalExportDeclaration);
+                        ThrowUnexpectedToken(_lookahead, Messages.IllegalExportDeclaration);
                     }
 
                     statement = ParseExportDeclaration();
@@ -2741,7 +2753,7 @@ public partial class JavaScriptParser
                     {
                         if (!_context.IsModule)
                         {
-                            TolerateUnexpectedToken(_lookahead, Messages.IllegalImportDeclaration);
+                            ThrowUnexpectedToken(_lookahead, Messages.IllegalImportDeclaration);
                         }
 
                         statement = ParseImportDeclaration();
@@ -3098,7 +3110,7 @@ public partial class JavaScriptParser
         {
             if (_context.Strict && token.Type == TokenType.Keyword && Scanner.IsStrictModeReservedWord((string) token.Value!))
             {
-                TolerateUnexpectedToken(token, Messages.StrictReservedWord);
+                ThrowUnexpectedToken(token, Messages.StrictReservedWord);
             }
             else
             {
@@ -3130,9 +3142,10 @@ public partial class JavaScriptParser
 
         if (_context.Strict && id.Type == Nodes.Identifier)
         {
-            if (Scanner.IsRestrictedWord(id.As<Identifier>().Name))
+            var name = id.As<Identifier>().Name;
+            if (Scanner.IsRestrictedWord(name))
             {
-                TolerateError(Messages.StrictVarName);
+                ThrowError(Messages.StrictVarName);
             }
         }
 
@@ -3611,9 +3624,9 @@ public partial class JavaScriptParser
 
     private ReturnStatement ParseReturnStatement()
     {
-        if (!_context.InFunctionBody)
+        if (!_context.InFunctionBody && !_allowReturnOutsideFunction)
         {
-            TolerateError(Messages.IllegalReturn);
+            ThrowError(Messages.IllegalReturn);
         }
 
         var node = CreateNode();
@@ -3636,7 +3649,7 @@ public partial class JavaScriptParser
     {
         if (_context.Strict)
         {
-            TolerateError(Messages.StrictModeWith);
+            ThrowError(Messages.StrictModeWith);
         }
 
         var node = CreateNode();
@@ -3858,7 +3871,7 @@ public partial class JavaScriptParser
             {
                 if (Scanner.IsRestrictedWord(param.As<Identifier>().Name))
                 {
-                    TolerateError(Messages.StrictCatchVariable);
+                    ThrowError(Messages.StrictCatchVariable);
                 }
             }
 
@@ -4263,7 +4276,7 @@ public partial class JavaScriptParser
             {
                 if (tokenValue is not null && Scanner.IsRestrictedWord(tokenValue))
                 {
-                    TolerateUnexpectedToken(token, Messages.StrictFunctionName);
+                    ThrowUnexpectedToken(token, Messages.StrictFunctionName);
                 }
             }
             else
@@ -4308,7 +4321,7 @@ public partial class JavaScriptParser
 
         if (_context.Strict && stricted != null)
         {
-            TolerateUnexpectedToken(stricted.Value, message);
+            ThrowUnexpectedToken(stricted.Value, message);
         }
 
         var hasStrictDirective = _context.Strict;
@@ -4362,7 +4375,7 @@ public partial class JavaScriptParser
             {
                 if (token.Value is not null && Scanner.IsRestrictedWord((string) token.Value))
                 {
-                    TolerateUnexpectedToken(token, Messages.StrictFunctionName);
+                    ThrowUnexpectedToken(token, Messages.StrictFunctionName);
                 }
             }
             else
@@ -4400,7 +4413,7 @@ public partial class JavaScriptParser
 
         if (_context.Strict && stricted != null)
         {
-            TolerateUnexpectedToken(stricted.Value, message);
+            ThrowUnexpectedToken(stricted.Value, message);
         }
 
         var hasStrictDirective = _context.Strict;
@@ -5287,8 +5300,10 @@ ParseValue:
                 // export default {};
                 // export default [];
                 // export default (1 + 2);
-                var declaration = Match("{") ? ParseObjectInitializer() :
-                    Match("[") ? ParseArrayInitializer() : ParseAssignmentExpression();
+                var declaration = Match("{")
+                    ? ParseObjectInitializer()
+                    : Match("[") ? ParseArrayInitializer() : ParseAssignmentExpression();
+
                 ConsumeSemicolon();
                 exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));
             }

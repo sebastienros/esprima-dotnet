@@ -27,6 +27,11 @@ public record class ParserOptions
     public bool Tolerant { get => ScannerOptions._tolerant; init => ScannerOptions._tolerant = value; }
 
     /// <summary>
+    /// Gets or sets whether the parser allows return statement to be used outside of functions, defaults to <see langword="false"/>.
+    /// </summary>
+    public bool AllowReturnOutsideFunction { get; set; }
+
+    /// <summary>
     /// Gets or sets the <see cref="ErrorHandler"/> to use, defaults to <see cref="ErrorHandler.Default"/>.
     /// </summary>
     public ErrorHandler ErrorHandler { get => ScannerOptions._errorHandler; init => ScannerOptions._errorHandler = value; }
@@ -54,7 +59,7 @@ public record class ParserOptions
     /// E.g. you can use it to store a reference to the parent node for later use:
     /// <code>
     /// options.OnNodeCreated = node =>
-    /// { 
+    /// {
     ///     foreach (var child in node.ChildNodes)
     ///     {
     ///         child.AssociatedData = node;

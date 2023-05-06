@@ -87,7 +87,7 @@ public class Fixtures
     public void ExecuteTestCase(string fixture)
     {
         static T CreateParserOptions<T>(bool tolerant, bool adaptRegex) where T : ParserOptions, new() =>
-            new T { Tokens = true, Tolerant = tolerant, AdaptRegexp = adaptRegex };
+            new T { Tokens = true, Tolerant = tolerant, AdaptRegexp = adaptRegex, AllowReturnOutsideFunction = tolerant };
 
         var (parserOptionsFactory, parserFactory, conversionDefaultOptions) = fixture.StartsWith("JSX", StringComparison.Ordinal)
             ? (CreateParserOptions<JsxParserOptions>,

@@ -100,7 +100,7 @@ for (var elem of list) { }
     public void ToJavaScriptTest3()
     {
         var parser = new JavaScriptParser();
-        var program = parser.ParseScript(@"export class aa extends HTMLElement{
+        var program = parser.ParseModule(@"export class aa extends HTMLElement{
     constructor(a, b)
     {
         super(a);
@@ -173,7 +173,7 @@ export function checkSecurityAnswerCodeDirect(result) {
 }";
         source = Regex.Replace(source, @"\r\n|\n\r|\n|\r", Environment.NewLine);
         var parser = new JavaScriptParser();
-        var program = parser.ParseScript(source);
+        var program = parser.ParseModule(source);
         var code = AstToJavaScript.ToJavaScriptString(program, s_formattingOptions);
 
         var expected = @"import { MccDialog } from '../mccDialogHandler';
@@ -459,7 +459,7 @@ input.onchange = async (e) => {
     public void ToJavaScriptTest17()
     {
         var parser = new JavaScriptParser();
-        var program = parser.ParseScript(@"
+        var program = parser.ParseModule(@"
 export const Base = LegacyElementMixin(HTMLElement).prototype;
 ");
         var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
@@ -481,7 +481,7 @@ let {is} = getIsExtends(element);
     public void ToJavaScriptTest19()
     {
         var parser = new JavaScriptParser();
-        var program = parser.ParseScript(@"
+        var program = parser.ParseModule(@"
 export const wrap =
   (window['ShadyDOM'] && window['ShadyDOM']['wrap']) || (node => node);
 ");
@@ -493,7 +493,7 @@ export const wrap =
     public void ToJavaScriptTest20()
     {
         var parser = new JavaScriptParser();
-        var program = parser.ParseScript(@"
+        var program = parser.ParseModule(@"
 export {}");
         var code = program.ToJavaScriptString(s_customCompactWriterOptions, AstToJavaScriptOptions.Default);
         Assert.Equal("export{};", code);
