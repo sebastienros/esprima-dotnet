@@ -265,18 +265,19 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         AssertUnchanged();
 
-        if (index < 0 || index >= _count)
+        if ((uint) index >= (uint) _count)
         {
             throw new ArgumentOutOfRangeException(nameof(index), index, null);
         }
 
-        _items![index] = default!;
         _count--;
 
-        if (index < _count - 1)
+        if (index < _count)
         {
             Array.Copy(_items, index + 1, _items, index, Count - index);
         }
+
+        _items![_count] = default!;
 
         OnChanged();
     }
