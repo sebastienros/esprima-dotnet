@@ -1,0 +1,2731 @@
+﻿# This file defines test cases for regular expression conversion testing (see RegExpTests.ExecuteTestCase).
+# Each uncommented, non-whitespace line specifies a test case in a tab-delimited format, with the following fields:
+# JS regexp pattern | JS regexp flags | expected .NET regexp pattern (*) | a string to test the regexp | expected matches in JSON format (*) | hints (optional)
+# (*) These fields are not specified in the template file but generated using the Generator tool.
+# Fields can be specified either unescaped or escaped (between double quotes). Escaped strings are interpreted as JS string literals.
+
+# Unbalanced brackets
+
+(		(
+(	u	(
+)		)
+)	u	)
+
+[(]		(
+[(]	u	(
+[)]		)
+[)]	u	)
+
+{		{
+{	u	{
+}		}
+}	u	}
+
+[{]		{
+[{]	u	{
+[}]		}
+[}]	u	}
+[{|}]		{}
+[{|}]	u	{}
+
+[		[
+[	u	[
+]		]
+]	u	]
+
+[[]		[
+[[]	u	[
+[]]		]
+[]]	u	]
+
+\2(x))		x
+\2(x))	u	x	!ignore-error-message
+\2(x))()		x
+\2(x))()	u	x
+
+# Empty pattern
+
+		"x\ud83d💩\udca9X"
+	u	"x\ud83d💩\udca9X"
+
+# Literal characters
+
+x		"x\ud83d💩\udca9X"
+x	u	"x\ud83d💩\udca9X"
+x	i	"x\ud83d💩\udca9X"
+x	ui	"x\ud83d💩\udca9X"
+
+X		"x\ud83d💩\udca9X"
+X	u	"x\ud83d💩\udca9X"
+X	i	"x\ud83d💩\udca9X"
+X	ui	"x\ud83d💩\udca9X"
+
+\x		"x\ud83d💩\udca9X"
+\x	u	"x\ud83d💩\udca9X"
+\x	i	"x\ud83d💩\udca9X"
+\x	ui	"x\ud83d💩\udca9X"
+
+\X		"x\ud83d💩\udca9X"
+\X	u	"x\ud83d💩\udca9X"
+\X	i	"x\ud83d💩\udca9X"
+\X	ui	"x\ud83d💩\udca9X"
+
+x*		"x\ud83d💩\udca9X"
+x*	u	"x\ud83d💩\udca9X"
+x*	i	"x\ud83d💩\udca9X"
+x*	ui	"x\ud83d💩\udca9X"
+
+X*		"x\ud83d💩\udca9X"
+X*	u	"x\ud83d💩\udca9X"
+X*	i	"x\ud83d💩\udca9X"
+X*	ui	"x\ud83d💩\udca9X"
+
+\x*		"x\ud83d💩\udca9X"
+\x*	u	"x\ud83d💩\udca9X"
+\x*	i	"x\ud83d💩\udca9X"
+\x*	ui	"x\ud83d💩\udca9X"
+
+\X*		"x\ud83d💩\udca9X"
+\X*	u	"x\ud83d💩\udca9X"
+\X*	i	"x\ud83d💩\udca9X"
+\X*	ui	"x\ud83d💩\udca9X"
+
+[x]		"x\ud83d💩\udca9X"
+[x]	u	"x\ud83d💩\udca9X"
+[x]	i	"x\ud83d💩\udca9X"
+[x]	ui	"x\ud83d💩\udca9X"
+
+[X]		"x\ud83d💩\udca9X"
+[X]	u	"x\ud83d💩\udca9X"
+[X]	i	"x\ud83d💩\udca9X"
+[X]	ui	"x\ud83d💩\udca9X"
+
+[\x]		"x\ud83d💩\udca9X"
+[\x]	u	"x\ud83d💩\udca9X"
+[\x]	i	"x\ud83d💩\udca9X"
+[\x]	ui	"x\ud83d💩\udca9X"
+
+[\X]		"x\ud83d💩\udca9X"
+[\X]	u	"x\ud83d💩\udca9X"
+[\X]	i	"x\ud83d💩\udca9X"
+[\X]	ui	"x\ud83d💩\udca9X"
+
+[^x]		"x\ud83d💩\udca9X"
+[^x]	u	"x\ud83d💩\udca9X"
+[^x]	i	"x\ud83d💩\udca9X"
+[^x]	ui	"x\ud83d💩\udca9X"
+
+[^X]		"x\ud83d💩\udca9X"
+[^X]	u	"x\ud83d💩\udca9X"
+[^X]	i	"x\ud83d💩\udca9X"
+[^X]	ui	"x\ud83d💩\udca9X"
+
+[^\x]		"x\ud83d💩\udca9X"
+[^\x]	u	"x\ud83d💩\udca9X"
+[^\x]	i	"x\ud83d💩\udca9X"
+[^\x]	ui	"x\ud83d💩\udca9X"
+
+[^\X]		"x\ud83d💩\udca9X"
+[^\X]	u	"x\ud83d💩\udca9X"
+[^\X]	i	"x\ud83d💩\udca9X"
+[^\X]	ui	"x\ud83d💩\udca9X"
+
+<.+?>		<div></div>
+<.+?>	u	<div></div>
+
+victor jagt zwölf boxkämpfer quer über den großen sylter deich	i	VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH
+victor jagt zwölf boxkämpfer quer über den großen sylter deich	ui	VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH
+VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH	i	victor jagt zwölf boxkämpfer quer über den großen sylter deich
+VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH	ui	victor jagt zwölf boxkämpfer quer über den großen sylter deich
+
+høj bly gom vandt fræk sexquiz på wc	i	HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC
+høj bly gom vandt fræk sexquiz på wc	ui	HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC
+HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC	i	høj bly gom vandt fræk sexquiz på wc
+HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC	ui	høj bly gom vandt fræk sexquiz på wc
+
+törkylempijävongahdus	i	TÖRKYLEMPIJÄVONGAHDUS
+törkylempijävongahdus	ui	TÖRKYLEMPIJÄVONGAHDUS
+TÖRKYLEMPIJÄVONGAHDUS	i	törkylempijävongahdus
+TÖRKYLEMPIJÄVONGAHDUS	ui	törkylempijävongahdus
+
+kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa	i	KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA
+kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa	ui	KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA
+KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA	i	kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa
+KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA	ui	kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa
+
+flygande bäckasiner söka hwila på mjuka tuvor	i	FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR
+flygande bäckasiner söka hwila på mjuka tuvor	ui	FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR
+FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR	i	flygande bäckasiner söka hwila på mjuka tuvor
+FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR	ui	flygande bäckasiner söka hwila på mjuka tuvor
+
+à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz	i	À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ
+à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz	ui	À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ
+À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ	i	à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz
+À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ	ui	à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz
+
+benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú	i	BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ
+benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú	ui	BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ
+BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ	i	benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú
+BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ	ui	benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú
+
+příliš žluťoučký kůň úpěl ďábelské ódy	i	PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY
+příliš žluťoučký kůň úpěl ďábelské ódy	ui	PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY
+PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY	i	příliš žluťoučký kůň úpěl ďábelské ódy
+PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY	ui	příliš žluťoučký kůň úpěl ďábelské ódy
+
+kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso	i	KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO
+kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso	ui	KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO
+KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO	i	kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso
+KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO	ui	kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso
+
+stróż pchnął kość w quiz gędźb vel fax myjń	i	STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ
+stróż pchnął kość w quiz gędźb vel fax myjń	ui	STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ
+STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ	i	stróż pchnął kość w quiz gędźb vel fax myjń
+STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ	ui	stróż pchnął kość w quiz gędźb vel fax myjń
+
+árvíztűrő tükörfúrógép	i	ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP
+árvíztűrő tükörfúrógép	ui	ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP
+ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP	i	árvíztűrő tükörfúrógép
+ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP	ui	árvíztűrő tükörfúrógép
+
+zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq	i	ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ
+zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq	ui	ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ
+ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ	i	zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq
+ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ	ui	zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq
+
+cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn	i	CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN
+cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn	ui	CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN
+CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN	i	cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn
+CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN	ui	cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn
+
+pijamalı hasta yağız şoföre çabucak güvendi	i	PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI
+pijamalı hasta yağız şoföre çabucak güvendi	ui	PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI
+PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	i	pijamalı hasta yağız şoföre çabucak güvendi
+PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	pijamalı hasta yağız şoföre çabucak güvendi
+
+[victor jagt zwölf boxkämpfer quer über den großen sylter deich]	i	VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH
+[victor jagt zwölf boxkämpfer quer über den großen sylter deich]	ui	VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH
+[VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH]	i	victor jagt zwölf boxkämpfer quer über den großen sylter deich
+[VICTOR JAGT ZWÖLF BOXKÄMPFER QUER ÜBER DEN GROßEN SYLTER DEICH]	ui	victor jagt zwölf boxkämpfer quer über den großen sylter deich
+
+[høj bly gom vandt fræk sexquiz på wc]	i	HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC
+[høj bly gom vandt fræk sexquiz på wc]	ui	HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC
+[HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC]	i	høj bly gom vandt fræk sexquiz på wc
+[HØJ BLY GOM VANDT FRÆK SEXQUIZ PÅ WC]	ui	høj bly gom vandt fræk sexquiz på wc
+
+[törkylempijävongahdus]	i	TÖRKYLEMPIJÄVONGAHDUS
+[törkylempijävongahdus]	ui	TÖRKYLEMPIJÄVONGAHDUS
+[TÖRKYLEMPIJÄVONGAHDUS]	i	törkylempijävongahdus
+[TÖRKYLEMPIJÄVONGAHDUS]	ui	törkylempijävongahdus
+
+[kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa]	i	KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA
+[kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa]	ui	KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA
+[KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA]	i	kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa
+[KÆMI NÝ ÖXI HÉR, YKIST ÞJÓFUM NÚ BÆÐI VÍL OG ÁDREPA]	ui	kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa
+
+[flygande bäckasiner söka hwila på mjuka tuvor]	i	FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR
+[flygande bäckasiner söka hwila på mjuka tuvor]	ui	FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR
+[FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR]	i	flygande bäckasiner söka hwila på mjuka tuvor
+[FLYGANDE BÄCKASINER SÖKA HWILA PÅ MJUKA TUVOR]	ui	flygande bäckasiner söka hwila på mjuka tuvor
+
+[à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz]	i	À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ
+[à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz]	ui	À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ
+[À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ]	i	à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz
+[À NOITE, VOVÔ KOWALSKY VÊ O ÍMÃ CAIR NO PÉ DO PINGÜIM QUEIXOSO E VOVÓ PÕE AÇÚCAR NO CHÁ DE TÂMARAS DO JABUTI FELIZ]	ui	à noite, vovô kowalsky vê o ímã cair no pé do pingüim queixoso e vovó põe açúcar no chá de tâmaras do jabuti feliz
+
+[benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú]	i	BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ
+[benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú]	ui	BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ
+[BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ]	i	benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú
+[BENJAMÍN PIDIÓ UNA BEBIDA DE KIWI Y FRESA NOÉ, SIN VERGÜENZA, LA MÁS EXQUISITA CHAMPAÑA DEL MENÚ]	ui	benjamín pidió una bebida de kiwi y fresa noé, sin vergüenza, la más exquisita champaña del menú
+
+[příliš žluťoučký kůň úpěl ďábelské ódy]	i	PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY
+[příliš žluťoučký kůň úpěl ďábelské ódy]	ui	PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY
+[PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY]	i	příliš žluťoučký kůň úpěl ďábelské ódy
+[PŘÍLIŠ ŽLUŤOUČKÝ KŮŇ ÚPĚL ĎÁBELSKÉ ÓDY]	ui	příliš žluťoučký kůň úpěl ďábelské ódy
+
+[kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso]	i	KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO
+[kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso]	ui	KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO
+[KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO]	i	kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso
+[KŔDEĽ ŠŤASTNÝCH ĎATĽOV UČÍ PRI ÚSTÍ VÁHU MĹKVEHO KOŇA OBHRÝZAŤ KÔRU A ŽRAŤ ČERSTVÉ MÄSO]	ui	kŕdeľ šťastných ďatľov učí pri ústí váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso
+
+[stróż pchnął kość w quiz gędźb vel fax myjń]	i	STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ
+[stróż pchnął kość w quiz gędźb vel fax myjń]	ui	STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ
+[STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ]	i	stróż pchnął kość w quiz gędźb vel fax myjń
+[STRÓŻ PCHNĄŁ KOŚĆ W QUIZ GĘDŹB VEL FAX MYJŃ]	ui	stróż pchnął kość w quiz gędźb vel fax myjń
+
+[árvíztűrő tükörfúrógép]	i	ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP
+[árvíztűrő tükörfúrógép]	ui	ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP
+[ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP]	i	árvíztűrő tükörfúrógép
+[ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP]	ui	árvíztűrő tükörfúrógép
+
+[zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq]	i	ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ
+[zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq]	ui	ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ
+[ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ]	i	zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq
+[ZƏFƏR, JAKETINI DƏ PAPAĞıNı DA GÖTÜR, BU AXŞAM HAVA ÇOX SOYUQ OLACAQ]	ui	zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq
+
+[cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn]	i	CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN
+[cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn]	ui	CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN
+[CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN]	i	cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn
+[CEM VÎ FEQOYÊ PÎS ZÊDETIR JI ÇAR GULÊN XWEŞIK HEBÛN]	ui	cem vî feqoyê pîs zêdetir ji çar gulên xweşik hebûn
+
+[pijamalı hasta yağız şoföre çabucak güvendi]	i	PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI
+[pijamalı hasta yağız şoföre çabucak güvendi]	ui	PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI
+[PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI]	i	pijamalı hasta yağız şoföre çabucak güvendi
+[PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI]	ui	pijamalı hasta yağız şoföre çabucak güvendi
+
+# Escaped syntax characters
+
+\/\^\$\\\.\*\+\?\(\)\[\]\{\}\|		x/^$\.*+?()[]{}|-X
+\/\^\$\\\.\*\+\?\(\)\[\]\{\}\|	u	x/^$\.*+?()[]{}|-X
+
+\/?\^?\$?\\?\.?\**?\++?\???\(?\)?\[?\]?\{{1}?\}{1}?\|?		x/^$\.*+?()[]{}|-X
+\/?\^?\$?\\?\.?\**?\++?\???\(?\)?\[?\]?\{{1}?\}{1}?\|?	u	x/^$\.*+?()[]{}|-X
+
+[\/\^\$\\\.\*\+\?\(\)\[\]\{\}\|-]		x/^$\.*+?()[]{}|-X
+[\/\^\$\\\.\*\+\?\(\)\[\]\{\}\|-]	u	x/^$\.*+?()[]{}|-X
+[/^$\\.*+?()[\]{}|-]		x/^$\.*+?()[]{}|-X
+[/^$\\.*+?()[\]{}|-]	u	x/^$\.*+?()[]{}|-X
+[/^$\\.*+?()[\]{}|\-]		x/^$\.*+?()[]{}|-X
+[/^$\\.*+?()[\]{}|\-]	u	x/^$\.*+?()[]{}|-X
+
+[^\/\^\$\\\.\*\+\?\(\)\[\]\{\}\|-]		x/^$\.*+?()[]{}|-X
+[^\/\^\$\\\.\*\+\?\(\)\[\]\{\}\|-]	u	x/^$\.*+?()[]{}|-X
+[^/^$\\.*+?()[\]{}|-]		x/^$\.*+?()[]{}|-X
+[^/^$\\.*+?()[\]{}|-]	u	x/^$\.*+?()[]{}|-X
+[^/^$\\.*+?()[\]{}|\-]		x/^$\.*+?()[]{}|-X
+[^/^$\\.*+?()[\]{}|\-]	u	x/^$\.*+?()[]{}|-X
+
+# Surrogate pairs
+
+.		"\ud83d💩💫💩\udca9"
+.	u	"\ud83d💩💫💩\udca9"
+
+💩		"\ud83d💩💫💩\udca9"
+💩	u	"\ud83d💩💫💩\udca9"
+
+💩?		"\ud83d💩💫💩\udca9"
+💩?	u	"\ud83d💩💫💩\udca9"
+
+(💩|💫)+		"\ud83d💩💫💩\udca9"
+(💩|💫)+	u	"\ud83d💩💫💩\udca9"
+
+\ud83d\udca9?		"\ud83d💩💫💩\udca9"
+\ud83d\udca9?	u	"\ud83d💩💫💩\udca9"
+\u{1F4A9}?	u	"\ud83d💩💫💩\udca9"
+
+"\\ud83d\udca9"		"\ud83d💩💫💩\udca9"
+"\\ud83d\udca9"	u	"\ud83d💩💫💩\udca9"
+"\\u{d83d}\udca9"	u	"\ud83d💩💫💩\udca9"
+"\\u{d83d}\\udca9"	u	"\ud83d💩💫💩\udca9"
+
+"\ud83d\\udca9"		"\ud83d💩💫💩\udca9"
+"\ud83d\\udca9"	u	"\ud83d💩💫💩\udca9"
+"\ud83d\\u{dca9}"	u	"\ud83d💩💫💩\udca9"
+"\\ud83d\\u{dca9}"	u	"\ud83d💩💫💩\udca9"
+
+[💩]		"\ud83d💩💫💩\udca9"
+[💩]	u	"\ud83d💩💫💩\udca9"
+
+[\ud83d\udca9]		"\ud83d💩💫💩\udca9"
+[\ud83d\udca9]	u	"\ud83d💩💫💩\udca9"
+[\u{1F4A9}]	u	"\ud83d💩💫💩\udca9"
+
+"[\\ud83d\udca9]"		"\ud83d💩💫💩\udca9"
+"[\\ud83d\udca9]"	u	"\ud83d💩💫💩\udca9"
+"[\\u{d83d}\udca9]"	u	"\ud83d💩💫💩\udca9"
+"[\\u{d83d}\\udca9]"	u	"\ud83d💩💫💩\udca9"
+
+"[\ud83d\\udca9]"		"\ud83d💩💫💩\udca9"
+"[\ud83d\\udca9]"	u	"\ud83d💩💫💩\udca9"
+"[\ud83d\\u{dca9}]"	u	"\ud83d💩💫💩\udca9"
+"[\\ud83d\\u{dca9}]"	u	"\ud83d💩💫💩\udca9"
+
+[💩-💫]		"\ud83d💩💫💩\udca9"
+[💩-💫]	u	"\ud83d💩💫💩\udca9"
+
+[\ud83d\udca9-💫]		"\ud83d💩💫💩\udca9"
+[\ud83d\udca9-💫]	u	"\ud83d💩💫💩\udca9"
+[\u{1F4A9}-💫]		"\ud83d💩💫💩\udca9"
+[\u{1F4A9}-💫]	u	"\ud83d💩💫💩\udca9"
+
+"[\\ud83d\udca9-💫]"		"\ud83d💩💫💩\udca9"
+"[\\ud83d\udca9-💫]"	u	"\ud83d💩💫💩\udca9"
+"[\\u{d83d}\udca9-💫]"	u	"\ud83d💩💫💩\udca9"
+"[\\u{d83d}\\udca9-💫]"	u	"\ud83d💩💫💩\udca9"
+
+"[\ud83d\\udca9-💫]"		"\ud83d💩💫💩\udca9"
+"[\ud83d\\udca9-💫]"	u	"\ud83d💩💫💩\udca9"
+"[\ud83d\\u{dca9}-💫]"	u	"\ud83d💩💫💩\udca9"
+"[\\ud83d\\u{dca9}-💫]"	u	"\ud83d💩💫💩\udca9"
+
+[💩-\ud83d\udcab]		"\ud83d💩💫💩\udcab"
+[💩-\ud83d\udcab]	u	"\ud83d💩💫💩\udcab"
+[💩-\u{1F4AB}]	u	"\ud83d💩💫💩\udcab"
+
+"[💩-\\ud83d\udcab]"		"\ud83d💩💫💩\udcab"
+"[💩-\\ud83d\udcab]"	u	"\ud83d💩💫💩\udcab"
+"[💩-\\u{d83d}\udcab]"	u	"\ud83d💩💫💩\udcab"
+"[💩-\\u{d83d}\\udcab]"	u	"\ud83d💩💫💩\udcab"
+
+"[💩-\ud83d\\udcab]"		"\ud83d💩💫💩\udcab"
+"[💩-\ud83d\\udcab]"	u	"\ud83d💩💫💩\udcab"
+"[💩-\ud83d\\u{dcab}]"	u	"\ud83d💩💫💩\udcab"
+"[💩-\\ud83d\\u{dcab}]"	u	"\ud83d💩💫💩\udcab"
+
+[\ud83d\udca9-\ud83d\udcab]		"\ud83d💩💫💩\udcab"
+[\ud83d\udca9-\ud83d\udcab]	u	"\ud83d💩💫💩\udcab"
+[\u{1F4A9}-\ud83d\udcab]	u	"\ud83d💩💫💩\udcab"
+[\ud83d\udca9-\u{1F4AB}]	u	"\ud83d💩💫💩\udcab"
+[\u{1F4A9}-\u{1F4AB}]	u	"\ud83d💩💫💩\udcab"
+
+[💫-💩]		"\ud83d💩💫💩\udca9"
+[💫-💩]	u	"\ud83d💩💫💩\udca9"
+
+[\ud83c\udc00-\ud83c\udfff]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc00-\ud83d\udfff]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc00-\ud83e\udfff]	u	"\ud83d💩💫💩\udca9"
+
+[\ud83c\udc01-\ud83c\udfff]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc01-\ud83d\udfff]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc01-\ud83e\udfff]	u	"\ud83d💩💫💩\udca9"
+
+[\ud83c\udc00-\ud83c\udffe]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc00-\ud83d\udffe]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc00-\ud83e\udffe]	u	"\ud83d💩💫💩\udca9"
+
+[\ud83c\udc01-\ud83c\udffe]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc01-\ud83d\udffe]	u	"\ud83d💩💫💩\udca9"
+[\ud83c\udc01-\ud83e\udffe]	u	"\ud83d💩💫💩\udca9"
+
+[\uFFFE-\u{10001}]	u	"\uFFFD\uFFFE\uFFFF\u{10000}\u{10001}\u{10002}\udcab\ud83d"
+[^\uFFFE-\u{10001}]	u	"\uFFFD\uFFFE\uFFFF\u{10000}\u{10001}\u{10002}\udcab\ud83d"
+
+# Lone surrogates
+
+"\ud83d"		"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+"\ud83d"	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+\ud83d		"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+\ud83d	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+\u{d83d}	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+
+"\ud83d?"		"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+"\ud83d?"	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+
+"[\ud83d]"		"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+"[\ud83d]"	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+[\ud83d]		"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+[\ud83d]	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+[\u{d83d}]	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+
+"\udca9"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\udca9"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+\udca9		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+\udca9	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+\u{dca9}	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+"\udca9?"		"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+"\udca9?"	u	"\ud83d \ud83d\udca9 \udca9\ud83d \ud83d"
+
+"[\udca9]"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\udca9]"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[\udca9]		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[\udca9]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[\u{dca9}]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+"\\ud83d\udca9"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\\ud83d\udca9"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\ud83d\\udca9"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\ud83d\\udca9"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+"\\u{d83d}\udca9"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\\u{d83d}\udca9"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\ud83d\\u{dca9}"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\ud83d\\u{dca9}"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+"\\u{d83d}\\udca9"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\\u{d83d}\\udca9"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\\ud83d\\u{dca9}"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"\\ud83d\\u{dca9}"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+"[\\ud83d\udca9]"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\\ud83d\udca9]"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\ud83d\\udca9]"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\ud83d\\udca9]"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+"[\\u{d83d}\udca9]"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\\u{d83d}\udca9]"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\ud83d\\u{dca9}]"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\ud83d\\u{dca9}]"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+"[\\u{d83d}\\udca9]"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\\u{d83d}\\udca9]"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\\ud83d\\u{dca9}]"		"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+"[\\ud83d\\u{dca9}]"	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+\u{d83d}\u{dca9}	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+\u{d83d}|\u{dca9}	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[\u{d83d}\u{dca9}]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+.	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+.	us	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+[]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[^]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+\D	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+\S	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+\W	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[\D]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[\S]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[\W]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[^\d]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[^\s]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+[^\w]	u	"\udca9 \ud83d\udca9 \udca9\ud83d \udca9"
+
+[\u{d7fd}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{d802}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{d800}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7fd}-\u{d7ff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{d7ff}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{d802}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d7ff}-\u{d800}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{d800}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d800}-\u{d802}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{d802}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d802}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d802}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d802}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d802}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d802}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d802}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{d802}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{dbfd}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbfd}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbfd}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbfd}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbfd}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbfd}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbfd}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{dbff}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbff}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbff}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbff}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbff}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dbff}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{dc00}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dc00}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dc00}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dc00}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dc00}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{dc02}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dc02}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dc02}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dc02}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{dffd}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dffd}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dffd}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{dfff}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[\u{dfff}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[\u{e000}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{d7fd}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{d802}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{d800}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7fd}-\u{d7ff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{d7ff}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{d802}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d7ff}-\u{d800}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{d800}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d800}-\u{d802}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{d802}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d802}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d802}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d802}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d802}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d802}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d802}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{d802}-\u{dbfd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{dbfd}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbfd}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbfd}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbfd}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbfd}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbfd}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbfd}-\u{dbff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{dbff}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbff}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbff}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbff}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbff}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dbff}-\u{dc00}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{dc00}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dc00}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dc00}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dc00}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dc00}-\u{dc02}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{dc02}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dc02}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dc02}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dc02}-\u{dffd}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{dffd}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dffd}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dffd}-\u{dfff}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+[^\u{dfff}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+[^\u{dfff}-\u{e000}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"^
+
+[^\u{e000}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
+
+# Common character escape sequences
+
+\t\r\n\v\f		"\0\t\r\n\v\f\b"
+\t\r\n\v\f	u	"\0\t\r\n\v\f\b"
+
+"\t\r\n\v\f"		"\0\t\r\n\v\f\b"
+"\t\r\n\v\f"	u	"\0\t\r\n\v\f\b"
+
+\t?\r*\n+\v{1}\f{0,}		"\0\t\r\n\v\f\b"
+\t?\r*\n+\v{1}\f{0,}	u	"\0\t\r\n\v\f\b"
+
+[\t\r\n\v\f\b]		"\0\t\r\n\v\f\b"
+[\t\r\n\v\f\b]	u	"\0\t\r\n\v\f\b"
+
+"[\t\r\n\v\f\b]"		"\0\t\r\n\v\f\b"
+"[\t\r\n\v\f\b]"	u	"\0\t\r\n\v\f\b"
+
+[^\t\r\n\v\f\b]		"\0\t\r\n\v\f\b"
+[^\t\r\n\v\f\b]	u	"\0\t\r\n\v\f\b"
+
+"[^\t\r\n\v\f\b]"		"\0\t\r\n\v\f\b"
+"[^\t\r\n\v\f\b]"	u	"\0\t\r\n\v\f\b"
+
+"[\\b-\t\n\-\\r]"		"\0\t\r\n\v\f\b"
+"[\\b-\t\n\-\\r]"	u	"\0\t\r\n\v\f\b"
+
+# Caret notation character escape sequences
+
+\c		\c
+\c	u	\c
+\c\cA		"\\c\x01"
+\c\cA	u	"\\c\x01"
+
+\c$		\c
+\c$	u	\c
+\c(		\c(
+\c(	u	\c(	!ignore-error-message
+\c)		\c)
+\c)	u	\c)	!ignore-error-message
+\c*		\c
+\c*	u	\c
+\c+		\c
+\c+	u	\c
+\c.		\cx
+\c.	u	\cx
+\c0		\c0
+\c0	u	\c0
+\c9		\c9
+\c9	u	\c9
+\c<		\c<
+\c<	u	\c<
+\c>		\c>
+\c>	u	\c>
+\c?		\c
+\c?	u	\c
+\c@		\c@
+\c@	u	\c@
+\cA		"\x01"
+\cA	u	"\x01"
+\cZ		"\x1A"
+\cZ	u	"\x1A"
+\c[		\c[
+\c[	u	\c[	!ignore-error-message
+\c/		\c/
+\c/	u	\c/
+\c]		\c]
+\c]	u	\c]	!ignore-error-message
+\c_		\c_
+\c_	u	\c_
+\c^		\c^
+\c^	u	\c^
+\ca		"\x01"
+\ca	u	"\x01"
+\cz		"\x1A"
+\cz	u	"\x1A"
+\c{		\c{
+\c{	u	\c{	!ignore-error-message
+\c|		\c
+\c|	u	\c
+\c}		\c}
+\c}	u	\c}	!ignore-error-message
+
+\c(x)		\cx
+\c(x)	u	\cx
+\c<x>		\c<x>
+\c<x>	u	\c<x>
+\c[x]		\cx
+\c[x]	u	\cx
+\c{2}		\cc
+\c{2}	u	\cc
+
+\cI\cM\cJ\cK\cL\cH		"\0\t\r\n\v\f\b"
+\cI\cM\cJ\cK\cL\cH	u	"\0\t\r\n\v\f\b"
+
+\cI?\cM*\cJ+\cK{1}\cL{0,}\cH{1,2}		"\0\t\r\n\v\f\b"
+\cI?\cM*\cJ+\cK{1}\cL{0,}\cH{1,2}	u	"\0\t\r\n\v\f\b"
+
+[\c]		\c
+[\c]	u	\c
+[\c\cA]		"\\c\x01"
+[\c\cA]	u	"\\c\x01"
+
+[\c-d]		[ac\dc]
+[\c-d]	u	[ac\dc]
+[\c-b]		[ac\dc]
+[\c-b]	u	[ac\dc]
+[[-\c]		[ac\dc]
+[[-\c]	u	[ac\dc]
+[b-\c]		[ac\dc]
+[b-\c]	u	[ac\dc]
+[[-\c-d]		[ac\dc]
+[[-\c-d]	u	[ac\dc]
+
+[\c$]		\c$
+[\c$]	u	\c$
+[\c(]		\c(
+[\c(]	u	\c(
+[\c)]		\c)
+[\c)]	u	\c)
+[\c*]		\c*
+[\c*]	u	\c*
+[\c+]		\c+
+[\c+]	u	\c+
+[\c.]		\c.
+[\c.]	u	\c.
+[\c0]		"\\c0\x10"
+[\c0]	u	"\\c0\x10"
+[\c9]		"\\c9\x19"
+[\c9]	u	"\\c9\x19"
+[\c<]		\c<
+[\c<]	u	\c<
+[\c>]		\c>
+[\c>]	u	\c>
+[\c?]		\c?
+[\c?]	u	\c?
+[\c@]		\c@
+[\c@]	u	\c@
+[\cA]		"\\cA\x01"
+[\cA]	u	"\\cA\x01"
+[\cZ]		"\\cZ\x1A"
+[\cZ]	u	"\\cZ\x1A"
+[\c[]		\c[
+[\c[]	u	\c[
+[\c_]		"\\c_\x1F"
+[\c_]	u	"\\c_\x1F"
+[\c/]		\c/
+[\c/]	u	\c/
+[\c]]		\c]
+[\c]]	u	\c]	!ignore-error-message
+[\c^]		\c^
+[\c^]	u	\c^
+[\ca]		"\\ca\x01"
+[\ca]	u	"\\ca\x01"
+[\cz]		"\\cz\x1A"
+[\cz]	u	"\\cz\x1A"
+[\c{]		\c{
+[\c{]	u	\c{
+[\c|]		\c|
+[\c|]	u	\c|
+[\c}]		\c}
+[\c}]	u	\c}
+
+[\cI\cM\cJ\cK\cL\cH]		"\0\t\r\n\v\f\b"
+[\cI\cM\cJ\cK\cL\cH]	u	"\0\t\r\n\v\f\b"
+
+[^\cI\cM\cJ\cK\cL\cH]		"\0\t\r\n\v\f\b"
+[^\cI\cM\cJ\cK\cL\cH]	u	"\0\t\r\n\v\f\b"
+
+"[\\cH-\t\n\-\\cM]"		"\0\t\r\n\v\f\b"
+"[\\cH-\t\n\-\\cM]"	u	"\0\t\r\n\v\f\b"
+
+# Octal character escape sequences
+
+\0		"\0\t\r\n\v\f\b 0123456789"
+\0	u	"\0\t\r\n\v\f\b 0123456789"
+\00		"\0\t\r\n\v\f\b 0123456789"
+\00	u	"\0\t\r\n\v\f\b 0123456789"
+\000		"\0\t\r\n\v\f\b 0123456789"
+\0000		"\0\t\r\n\v\f\b 0123456789"
+
+\1		"\0\t\r\n\v\f\b 0123456789"
+\1	u	"\0\t\r\n\v\f\b 0123456789"
+\01		"\0\t\r\n\v\f\b 0123456789"
+\01	u	"\0\t\r\n\v\f\b 0123456789"
+\001		"\0\t\r\n\v\f\b 0123456789"
+\0001		"\0\t\r\n\v\f\b 0123456789"
+
+\7		"\0\t\r\n\v\f\b 0123456789"
+\7	u	"\0\t\r\n\v\f\b 0123456789"
+\07		"\0\t\r\n\v\f\b 0123456789"
+\07	u	"\0\t\r\n\v\f\b 0123456789"
+\007		"\0\t\r\n\v\f\b 0123456789"
+\0007		"\0\t\r\n\v\f\b 0123456789"
+
+\8		"\0\t\r\n\v\f\b 0123456789"
+\8	u	"\0\t\r\n\v\f\b 0123456789"
+\08		"\0\t\r\n\v\f\b 0123456789"
+\08	u	"\0\t\r\n\v\f\b 0123456789"
+\008		"\0\t\r\n\v\f\b 0123456789"
+\0008		"\0\t\r\n\v\f\b 0123456789"
+
+\9		"\0\t\r\n\v\f\b 0123456789"
+\9	u	"\0\t\r\n\v\f\b 0123456789"
+\09		"\0\t\r\n\v\f\b 0123456789"
+\09	u	"\0\t\r\n\v\f\b 0123456789"
+\009		"\0\t\r\n\v\f\b 0123456789"
+\0009		"\0\t\r\n\v\f\b 0123456789"
+
+\77		"\0\x077\x1f\x3f\x7f\xff 0123456789"
+\077		"\0\x077\x1f\x3f\x7f\xff 0123456789"
+\0077		"\0\x077\x1f\x3f\x7f\xff 0123456789"
+
+\377		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+\0377		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+\400		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+\0400		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+\0\11\15\12\13\14\010		"\0\t\r\n\v\f\b"
+
+\0\11?\15*\12+\13{1}\14{0,}\010{1,2}		"\0\t\r\n\v\f\b"
+\0{1,2}		"\0\t\r\n\v\f\b"
+
+[\0]		"\0\t\r\n\v\f\b 0123456789"
+[\0]	u	"\0\t\r\n\v\f\b 0123456789"
+[\00]		"\0\t\r\n\v\f\b 0123456789"
+[\00]	u	"\0\t\r\n\v\f\b 0123456789"
+[\000]		"\0\t\r\n\v\f\b 0123456789"
+[\0000]		"\0\t\r\n\v\f\b 0123456789"
+
+[\1]		"\0\t\r\n\v\f\b 0123456789"
+[\1]	u	"\0\t\r\n\v\f\b 0123456789"
+[\01]		"\0\t\r\n\v\f\b 0123456789"
+[\01]	u	"\0\t\r\n\v\f\b 0123456789"
+[\001]		"\0\t\r\n\v\f\b 0123456789"
+[\0001]		"\0\t\r\n\v\f\b 0123456789"
+
+[\7]		"\0\t\r\n\v\f\b 0123456789"
+[\7]	u	"\0\t\r\n\v\f\b 0123456789"
+[\07]		"\0\t\r\n\v\f\b 0123456789"
+[\07]	u	"\0\t\r\n\v\f\b 0123456789"
+[\007]		"\0\t\r\n\v\f\b 0123456789"
+[\0007]		"\0\t\r\n\v\f\b 0123456789"
+
+[\8]		"\0\t\r\n\v\f\b 0123456789"
+[\8]	u	"\0\t\r\n\v\f\b 0123456789"
+[\08]		"\0\t\r\n\v\f\b 0123456789"
+[\08]	u	"\0\t\r\n\v\f\b 0123456789"
+[\008]		"\0\t\r\n\v\f\b 0123456789"
+[\0008]		"\0\t\r\n\v\f\b 0123456789"
+
+[\9]		"\0\t\r\n\v\f\b 0123456789"
+[\9]	u	"\0\t\r\n\v\f\b 0123456789"
+[\09]		"\0\t\r\n\v\f\b 0123456789"
+[\09]	u	"\0\t\r\n\v\f\b 0123456789"
+[\009]		"\0\t\r\n\v\f\b 0123456789"
+[\0009]		"\0\t\r\n\v\f\b 0123456789"
+
+[\77]		"\0\x077\x1f\x3f\x7f\xff 0123456789"
+[\077]		"\0\x077\x1f\x3f\x7f\xff 0123456789"
+[\0077]		"\0\x077\x1f\x3f\x7f\xff 0123456789"
+
+[\377]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\0377]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+[\400]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\0400]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+[\0\11\15\12\13\14\010]		"\0\t\r\n\v\f\b"
+[^\0\11\15\12\13\14\010]		"\0\t\r\n\v\f\b"
+
+[\0-\b]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\0-\b]	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\000-\b]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\0000-\b]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+"[\\0-\b]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\\0-\b]"	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\\000-\b]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\\0000-\b]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+[\7-\b]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\7-\b]	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\007-\b]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\0007-\b]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+"[\\7-\b]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\\7-\b]"	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\\007-\b]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\\0007-\b]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+[6-\71]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[6-\71]	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[6-\071]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[6-\0071]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+"[\x36-\\71]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\x36-\\71]"	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\x36-\\071]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+"[\x36-\\0071]"		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+[6-\8]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[6-\8]	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[6-\08]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+[6-\9]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[6-\9]	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[6-\09]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+[\0-\00]		"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+[\0-\00]	u	"\0\x077\x1f7\x3f\x7f\xff 0123456789"
+
+\0(x)\1\x02		"\0xx\x02"
+\0(x)\1\x02	u	"\0xx\x02"
+
+\0(?<X>x)\1\x02		"\0xx\x02"
+\0(?<X>x)\1\x02	u	"\0xx\x02"
+
+\0(?:x)\1\x02		"\0x\x01\x02"
+\0(?:x)\1\x02	u	"\0x\x01\x02"
+
+(?=x)\1?\x02		"\0x\x01\x02"
+(?=x)\1?\x02	u	"\0x\x01\x02"
+
+(?!x)\1?\x02		"\0x\x01\x02"
+(?!x)\1?\x02	u	"\0x\x01\x02"
+
+(?<=x)\1\x02		"\0x\x01\x02"
+(?<=x)\1\x02	u	"\0x\x01\x02"
+
+(?<!x)\1\x02		"\0x\x01\x02"
+(?<!x)\1\x02	u	"\0x\x01\x02"
+
+\0()()()()()()()(x)\8\x02		"\0xx\x02"
+\0()()()()()()()(x)\8\x02	u	"\0xx\x02"
+
+\0(?:)()()()()()()(x)\8\x02		"\0x8\x02"
+\0(?:)()()()()()()(x)\8\x02	u	"\0x8\x02"
+
+\0()()()()()()()()()(x)\10\x02		"\0xx\x02"
+\0()()()()()()()()()(x)\10\x02	u	"\0xx\x02"
+
+\0(?:)()()()()()()()()(x)\10\x02		"\0x\b\x02"
+\0(?:)()()()()()()()()(x)\10\x02	u	"\0x\b\x02"
+
+()\1\0		"\0\x07\x01818"
+()\1\0	u	"\0\x07\x01818"
+()\1\7		"\0\x07\x01818"
+()\1\8		"\0\x07\x01818"
+
+# Hexadecimal character escape sequences (2 digits)
+
+\x		x
+\x	u	x
+
+\x*		x
+\x*	u	x
+\x0		x0
+\x0	u	x0
+\xA		xA
+\xA	u	xA
+\xf		xf
+\xf	u	xf
+
+\x0$		x0
+\x0$	u	x0
+\x0(		x0(
+\x0(	u	x0(	!ignore-error-message
+\x0)		x0)
+\x0)	u	x0)	!ignore-error-message
+\x0*		x0
+\x0*	u	x0
+\x0+		x0
+\x0+	u	x0
+\x0.		x0y
+\x0.	u	x0y
+\x00		"\x00"
+\x00	u	"\x00"
+\x09		"\x09"
+\x09	u	"\x09"
+\x0<		x0<
+\x0<	u	x0<
+\x0>		x0>
+\x0>	u	x0>
+\x0?		x0
+\x0?	u	x0
+\x0A		"\x0A"
+\x0A	u	"\x0A"
+\x0F		"\x0F"
+\x0F	u	"\x0F"
+\x0G		x0G
+\x0G	u	x0G
+\x0[		x0[
+\x0[	u	x0[	!ignore-error-message
+\x0]		x0]
+\x0]	u	x0]	!ignore-error-message
+\x0^		x0
+\x0^	u	x0
+\x0a		"\x0a"
+\x0a	u	"\x0a"
+\x0f		"\x0f"
+\x0f	u	"\x0f"
+\x0g		x0g
+\x0g	u	x0g
+\x0{		x0{
+\x0{	u	x0{	!ignore-error-message
+\x0|		x0
+\x0|	u	x0
+\x0}		x0}
+\x0}	u	x0}	!ignore-error-message
+
+\xff		"\xff"
+\xff	u	"\xff"
+\xgf		xgf
+\xgf	u	xgf
+
+\x3f0		?0
+\x3f0	u	?0
+
+\x00\x09\x0d\x0a\x0b\x0C\x08		"\0\t\r\n\v\f\b"
+\x00\x09\x0d\x0a\x0b\x0C\x08	u	"\0\t\r\n\v\f\b"
+
+\x00\x09?\x0d*\x0a+\x0b{1}\x0C{0,}\x08{1,2}		"\0\t\r\n\v\f\b"
+\x00\x09?\x0d*\x0a+\x0b{1}\x0C{0,}\x08{1,2}	u	"\0\t\r\n\v\f\b"
+
+[\x]		\x
+[\x]	u	\x
+
+[\x*]		\x*
+[\x*]	u	\x*
+[\x0]		\x0
+[\x0]	u	\x0
+[\xA]		\xA
+[\xA]	u	\xA
+[\xf]		\xf
+[\xf]	u	\xf
+
+[\x0$]		\x0$
+[\x0$]	u	\x0$
+[\x0(]		\x0(
+[\x0(]	u	\x0(
+[\x0)]		\x0)
+[\x0)]	u	\x0)
+[\x0*]		\x0*
+[\x0*]	u	\x0*
+[\x0+]		\x0+
+[\x0+]	u	\x0+
+[\x0.]		\x0.
+[\x0.]	u	\x0.
+[\x00]		"\\x00\x00"
+[\x00]	u	"\\x00\x00"
+[\x09]		"\\x09\x09"
+[\x09]	u	"\\x09\x09"
+[\x0<]		\x0<
+[\x0<]	u	\x0<
+[\x0>]		\x0>
+[\x0>]	u	\x0>
+[\x0?]		\x0?
+[\x0?]	u	\x0?
+[\x0A]		"\\x0A\x0A"
+[\x0A]	u	"\\x0A\x0A"
+[\x0F]		"\\x0F\x0F"
+[\x0F]	u	"\\x0F\x0F"
+[\x0G]		\x0G
+[\x0G]	u	\x0G
+[\x0[]		\x0[
+[\x0[]	u	\x0[
+[\x0]]		\x0]
+[\x0]]	u	\x0]	!ignore-error-message
+[\x0^]		\x0^
+[\x0^]	u	\x0^
+[\x0a]		"\\x0a\x0a"
+[\x0a]	u	"\\x0a\x0a"
+[\x0f]		"\\x0f\x0f"
+[\x0f]	u	"\\x0f\x0f"
+[\x0g]		\x0g
+[\x0g]	u	\x0g
+[\x0{]		\x0{
+[\x0{]	u	\x0{
+[\x0|]		\x0|
+[\x0|]	u	\x0|
+[\x0}]		\x0}
+[\x0}]	u	\x0}
+
+[\xff]		"\\xff\xff"
+[\xff]	u	"\\xff\xff"
+[\xgf]		\xgf
+[\xgf]	u	\xgf
+
+[\x3f0]		?0
+[\x3f0]	u	?0
+
+[\x00\x09\x0d\x0a\x0b\x0C\x08]		"\0\t\r\n\v\f\b"
+[\x00\x09\x0d\x0a\x0b\x0C\x08]	u	"\0\t\r\n\v\f\b"
+
+[^\x00\x09\x0d\x0a\x0b\x0C\x08]		"\0\t\r\n\v\f\b"
+[^\x00\x09\x0d\x0a\x0b\x0C\x08]	u	"\0\t\r\n\v\f\b"
+
+"[\\x08-\t\n\-\\x0D]"		"\0\t\r\n\v\f\b"
+"[\\x08-\t\n\-\\x0D]"	u	"\0\t\r\n\v\f\b"
+
+# Hexadecimal character escape sequences (4 digits)
+
+\u		u
+\u	u	u
+
+\u*		u
+\u*	u	u
+\u0		u0
+\u0	u	u0
+\uA		uA
+\uA	u	uA
+\uf		uf
+\uf	u	uf
+
+\u00		u00
+\u00	u	u00
+\u0A		u0A
+\u0A	u	u0A
+\u0f		u0f
+\u0f	u	u0f
+
+\u000		u000
+\u000	u	u000
+\u00A		u00A
+\u00A	u	u00A
+\u00f		u00f
+\u00f	u	u00f
+
+\u000$		u000
+\u000$	u	u000
+\u000(		u000(
+\u000(	u	u000(	!ignore-error-message
+\u000)		u000)
+\u000)	u	u000)	!ignore-error-message
+\u000*		u000
+\u000*	u	u000
+\u000+		u000
+\u000+	u	u000
+\u000.		u000y
+\u000.	u	u000y
+\u0000		"\u0000"
+\u0000	u	"\u0000"
+\u0009		"\u0009"
+\u0009	u	"\u0009"
+\u000<		u000<
+\u000<	u	u000<
+\u000>		u000>
+\u000>	u	u000>
+\u000?		u000
+\u000?	u	u000
+\u000A		"\u000A"
+\u000A	u	"\u000A"
+\u000F		"\u000F"
+\u000F	u	"\u000F"
+\u000G		u000G
+\u000G	u	u000G
+\u000[		u000[
+\u000[	u	u000[	!ignore-error-message
+\u000]		u000]
+\u000]	u	u000]	!ignore-error-message
+\u000^		u000
+\u000^	u	u000
+\u000a		"\u000a"
+\u000a	u	"\u000a"
+\u000f		"\u000f"
+\u000f	u	"\u000f"
+\u000g		u000g
+\u000g	u	u000g
+\u000{		u000{
+\u000{	u	u000{	!ignore-error-message
+\u000|		u000
+\u000|	u	u000
+\u000}		u000}
+\u000}	u	u000}	!ignore-error-message
+
+\uffff		"\uffff"
+\uffff	u	"\uffff"
+\uffgf		uffgf
+\uffgf	u	uffgf
+
+\u003f0		?0
+\u003f0	u	?0
+
+\u0000\u0009\u000d\u000a\u000b\u000C\u0008		"\0\t\r\n\v\f\b"
+\u0000\u0009\u000d\u000a\u000b\u000C\u0008	u	"\0\t\r\n\v\f\b"
+
+\u0000\u0009?\u000d*\u000a+\u000b{1}\u000C{0,}\u0008{1,2}		"\0\t\r\n\v\f\b"
+\u0000\u0009?\u000d*\u000a+\u000b{1}\u000C{0,}\u0008{1,2}	u	"\0\t\r\n\v\f\b"
+
+[\u]		\u
+[\u]	u	\u
+
+[\u*]		\u*
+[\u*]	u	\u*
+[\u0]		\u0
+[\u0]	u	\u0
+[\uA]		\uA
+[\uA]	u	\uA
+[\uf]		\uf
+[\uf]	u	\uf
+
+[\u00]		\u00
+[\u00]	u	\u00
+[\u0A]		\u0A
+[\u0A]	u	\u0A
+[\u0f]		\u0f
+[\u0f]	u	\u0f
+
+[\u000]		\u000
+[\u000]	u	\u000
+[\u00A]		\u00A
+[\u00A]	u	\u00A
+[\u00f]		\u00f
+[\u00f]	u	\u00f
+
+[\u000$]		\u000$
+[\u000$]	u	\u000$
+[\u000(]		\u000(
+[\u000(]	u	\u000(
+[\u000)]		\u000)
+[\u000)]	u	\u000)
+[\u000*]		\u000*
+[\u000*]	u	\u000*
+[\u000+]		\u000+
+[\u000+]	u	\u000+
+[\u000.]		\u000.
+[\u000.]	u	\u000.
+[\u0000]		"\\u0000\u0000"
+[\u0000]	u	"\\u0000\u0000"
+[\u0009]		"\\u0009\u0009"
+[\u0009]	u	"\\u0009\u0009"
+[\u000<]		\u000<
+[\u000<]	u	\u000<
+[\u000>]		\u000>
+[\u000>]	u	\u000>
+[\u000?]		\u000?
+[\u000?]	u	\u000?
+[\u000A]		"\\u000A\u000A"
+[\u000A]	u	"\\u000A\u000A"
+[\u000F]		"\\u000F\u000F"
+[\u000F]	u	"\\u000F\u000F"
+[\u000G]		\u000G
+[\u000G]	u	\u000G
+[\u000[]		\u000[
+[\u000[]	u	\u000[
+[\u000]]		\u000]
+[\u000]]	u	\u000]	!ignore-error-message
+[\u000^]		\u000^
+[\u000^]	u	\u000^
+[\u000a]		"\\u000a\u000a"
+[\u000a]	u	"\\u000a\u000a"
+[\u000f]		"\\u000f\u000f"
+[\u000f]	u	"\\u000f\u000f"
+[\u000g]		\u000g
+[\u000g]	u	\u000g
+[\u000{]		\u000{
+[\u000{]	u	\u000{
+[\u000|]		\u000|
+[\u000|]	u	\u000|
+[\u000}]		\u000}
+[\u000}]	u	\u000}
+
+[\uffff]		"\\uffff\uffff"
+[\uffff]	u	"\\uffff\uffff"
+[\uffgf]		\uffgf
+[\uffgf]	u	\uffgf
+
+[\u003f0]		?0
+[\u003f0]	u	?0
+
+[\u0000\u0009\u000d\u000a\u000b\u000C\u0008]		"\0\t\r\n\v\f\b"
+[\u0000\u0009\u000d\u000a\u000b\u000C\u0008]	u	"\0\t\r\n\v\f\b"
+
+[^\u0000\u0009\u000d\u000a\u000b\u000C\u0008]		"\0\t\r\n\v\f\b"
+[^\u0000\u0009\u000d\u000a\u000b\u000C\u0008]	u	"\0\t\r\n\v\f\b"
+
+"[\\u0008-\t\n\-\\u000D]"		"\0\t\r\n\v\f\b"
+"[\\u0008-\t\n\-\\u000D]"	u	"\0\t\r\n\v\f\b"
+
+# Hexadecimal character escape sequences (Unicode code points)
+
+\u{		u{
+\u{	u	u{	!ignore-error-message
+\u{}		u{}
+\u{}	u	u{}
+\u{?}		u{}
+\u{?}	u	u{}
+\u{-1}		u{-1}
+\u{-1}	u	u{-1}
+\u{-0}		u{-0}
+\u{-0}	u	u{-0}
+\u{0}		
+\u{0}	u	"\0"
+\u{1}		u
+\u{1}	u	"\x01"
+\u{10FFFF}		u{10FFFF}
+\u{10FFFF}	u	"\udbff\udfff"
+\u{110000}		u{110000}	!skip-on-netframework	# (the adapted pattern is correct but makes the Regex ctor hang on .NET Framework)
+\u{110000}	u	u{110000}
+\u{80000000}		u{80000000}	!skip-on-netframework	# (the adapted pattern is correct but makes the Regex ctor hang on .NET Framework)
+\u{80000000}	u	u{80000000}
+\u{1,}		uu
+\u{1,}	u	uu
+\u{a}		u{a}
+\u{a}	u	"\n"
+\u{f}		u{f}
+\u{f}	u	"\x0f"
+\u{g}		u{g}
+\u{g}	u	u{g}
+
+\u{7F}	u	"\x7F"
+\u{d7ff}	u	"\ud7ff"
+\u{d800}	u	"\ud800"
+\u{dfff}	u	"\udfff"
+\u{e000}	u	"\ue000"
+\u{1F4A9}	u	"\uD83D\uDCA9"
+
+\u{0}\u{9}\u{d}\u{a}\u{b}\u{C}\u{00000000000000008}	u	"\0\t\r\n\v\f\b"
+
+\u{0}\u{9}?\u{d}*\u{a}+\u{b}{1}\u{C}{0,}\u{00000000000000008}{1,2}	u	"\0\t\r\n\v\f\b"
+
+[\u{]		\u{
+[\u{]	u	\u{
+[\u{}]		\u{}
+[\u{}]	u	\u{}
+[\u{?}]		\u{?}
+[\u{?}]	u	\u{?}
+[\u{-1}]		\u{-1}
+[\u{-1}]	u	\u{-1}
+[\u{-0}]		\u{-0}
+[\u{-0}]	u	\u{-0}
+[\u{0}]		"\\u{0}\0"
+[\u{0}]	u	"\\u{0}\0"
+[\u{1}]		"\\u{1}\x01"
+[\u{1}]	u	"\\u{1}\x01"
+[\u{10FFFF}]		"\\u{10FFFF}\udbff\udfff"
+[\u{10FFFF}]	u	"\\u{10FFFF}\udbff\udfff"
+[\u{110000}]		\u{110000}
+[\u{110000}]	u	\u{110000}
+[\u{80000000}]		\u{80000000}
+[\u{80000000}]	u	\u{80000000}
+[\u{1,}]		\u{1,}
+[\u{1,}]	u	\u{1,}
+[\u{a}]		"\\u{a}\n"
+[\u{a}]	u	"\\u{a}\n"
+[\u{f}]		"\\u{f}\x0f"
+[\u{f}]	u	"\\u{f}\x0f"
+[\u{g}]		\u{g}
+[\u{g}]	u	\u{g}
+
+[\u{7F}]	u	"\x7F"
+[\u{d7ff}]	u	"\ud7ff"
+[\u{d800}]	u	"\ud800"
+[\u{dfff}]	u	"\udfff"
+[\u{e000}]	u	"\ue000"
+[\u{1F4A9}]	u	"\uD83D\uDCA9"
+
+[^\u{7F}]	u	"\x7F"
+[^\u{d7ff}]	u	"\ud7ff"
+[^\u{d800}]	u	"\ud800"
+[^\u{dfff}]	u	"\udfff"
+[^\u{e000}]	u	"\ue000"
+[^\u{1F4A9}]	u	"\uD83D\uDCA9"
+
+[\u{0}\u{9}\u{d}\u{a}\u{b}\u{C}\u{00000000000000008}]	u	"\0\t\r\n\v\f\b"
+
+[^\u{0}\u{9}\u{d}\u{a}\u{b}\u{C}\u{00000000000000008}]	u	"\0\t\r\n\v\f\b"
+
+"[\\u{8}-\t\n\-\\u{D}]"	u	"\0\t\r\n\v\f\b"
+
+# Identity character escape sequences (.NET-specific edge cases)
+
+\<\A\Z\z\G\a\e\>		<AZzGae>
+\<\A\Z\z\G\a\e\>	u	<AZzGae>
+
+\<?\A*\Z+\z{1}\G{0,}\a{1,2}\e*\>{1}		<AZzGae>
+\<?\A*\Z+\z{1}\G{0,}\a{1,2}\e*\>{1}	u	<AZzGae>
+
+[\<\A\Z\z\G\a\e\>]		<AZzGae>
+[\<\A\Z\z\G\a\e\>]	u	<AZzGae>
+
+# Dot
+
+.		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.	s	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.	us	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+.*		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.*	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.*	s	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.*	us	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+^.	m	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+^.	um	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+^.	sm	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+^.	usm	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+.$	m	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.$	um	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.$	sm	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+.$	usm	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+^.$	m	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+^.$	um	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+^.$	sm	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+^.$	usm	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+.	m	\na\n\n\na\n
+.	um	\na\n\n\na\n
+.	sm	\na\n\n\na\n
+.	usm	\na\n\n\na\n
+
+.*	m	\na\n\n\na\n
+.*	um	\na\n\n\na\n
+.*	sm	\na\n\n\na\n
+.*	usm	\na\n\n\na\n
+
+[.]		"abc.123"
+[.]	u	"abc.123"
+
+[^.]		"abc.123"
+[^.]	u	"abc.123"
+
+# Standard character classes
+
+\d		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\d	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\d	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\d	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\D		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\D	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\D	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\D	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+\s		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\s	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\s	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\s	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\S		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\S	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\S	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\S	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+\w		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\w	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\w	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\w	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\W		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\W	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\W	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\W	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+\d*		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\s*		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\w*		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\D*		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\S*		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+\W*		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+[\d]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\d]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\d]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\d]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\D]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\D]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\D]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\D]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+[\s]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\s]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\s]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\s]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\S]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\S]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\S]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\S]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+[\w]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\w]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\w]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\w]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\W]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\W]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\W]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[\W]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+[^\d]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\d]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\d]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\d]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\D]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\D]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\D]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\D]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+[^\s]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\s]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\s]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\s]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\S]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\S]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\S]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\S]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+[^\w]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\w]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\w]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\w]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\W]		"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\W]	u	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\W]	i	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+[^\W]	ui	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"
+
+# Unicode property escapes
+
+\p		p
+\p	u	p
+\p{		p{
+\p{	u	p{	!ignore-error-message
+\p{}		p{}
+\p{}	u	p{}
+\p{ }		p{ }
+\p{ }	u	p{ }
+\p{?}		p{}
+\p{?}	u	p{}	!ignore-error-message
+\p{1}		p
+\p{1}	u	p	!ignore-error-message
+\p{1,}		pp
+\p{1,}	u	pp	!ignore-error-message
+\p{Script=Latn}		p{Script=Latn}
+\p{Script=Latn}	u	p{Script=Latn}	!ignore-error-message
+\p{General_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\P		P
+\P	u	P
+\P{		P{
+\P{	u	P{	!ignore-error-message
+\P{}		P{}
+\P{}	u	P{}
+\P{ }		P{ }
+\P{ }	u	P{ }
+\P{?}		P{}
+\P{?}	u	P{}	!ignore-error-message
+\P{1}		P
+\P{1}	u	P	!ignore-error-message
+\P{1,}		PP
+\P{1,}	u	PP	!ignore-error-message
+\P{Script=Latn}		P{Script=Latn}
+\P{Script=Latn}	u	P{Script=Latn}	!ignore-error-message
+\P{General_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+[\p]		\p
+[\p]	u	\p
+[\p{]		\p{
+[\p{]	u	\p{
+[\p{}]		\p{}
+[\p{}]	u	\p{}
+[\p{ }]		\p{ }
+[\p{ }]	u	\p{ }
+[\p{?}]		\p{?}
+[\p{?}]	u	\p{?}	!ignore-error-message
+[\p{1}]		\p{1}
+[\p{1}]	u	\p{1}	!ignore-error-message
+[\p{1,}]		\p{1,}
+[\p{1,}]	u	\p{1,}	!ignore-error-message
+[\p{Script=Latn}]		\p{Script=Latn}
+[\p{Script=Latn}]	u	\p{Script=Latn}	!ignore-error-message
+[\p{General_Category=Currency_Symbol}]	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+[\P]		\P
+[\P]	u	\P
+[\P{]		\P{
+[\P{]	u	\P{
+[\P{}]		\P{}
+[\P{}]	u	\P{}
+[\P{ }]		\P{ }
+[\P{ }]	u	\P{ }
+[\P{?}]		\P{?}
+[\P{?}]	u	\P{?}	!ignore-error-message
+[\P{1}]		\P{1}
+[\P{1}]	u	\P{1}	!ignore-error-message
+[\P{1,}]		\P{1,}
+[\P{1,}]	u	\P{1,}	!ignore-error-message
+[\P{Script=Latn}]		\P{Script=Latn}
+[\P{Script=Latn}]	u	\P{Script=Latn}	!ignore-error-message
+[\P{General_Category=Currency_Symbol}]	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{General_Category=Sc}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{gc=Currency_Symbol}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{gc=Sc}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Currency_Symbol}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Sc}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{General_Category}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{General_Category=}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{ General_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{General_Category=Currency_Symbol }	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{General_Category =Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{General_Category= Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{General_Category=CurrencySymbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{General_Category=currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{GeneralCategory=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{general_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+
+\p{L}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{LC}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Cased_Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Lu}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Uppercase_Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Ll}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Lowercase_Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Lt}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Titlecase_Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Lm}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Modifier_Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Lo}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Other_Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{M}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Mark}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Combining_Mark}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Mn}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Nonspacing_Mark}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Mc}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Spacing_Mark}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Me}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Enclosing_Mark}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{N}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Number}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Nd}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Decimal_Number}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{digit}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Nl}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Letter_Number}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{No}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Other_Number}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{P}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{punct}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Pc}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Connector_Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Pd}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Dash_Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Ps}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Open_Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Pe}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Close_Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Pi}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Initial_Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Pf}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Final_Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Po}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Other_Punctuation}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{S}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Symbol}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Sm}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Math_Symbol}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Sc}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Currency_Symbol}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Sk}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Modifier_Symbol}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{So}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Other_Symbol}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{Z}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Separator}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Zs}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Space_Separator}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Zl}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Line_Separator}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Zp}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Paragraph_Separator}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{C}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Other}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Cc}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Control}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{cntrl}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Cf}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Format}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Cs}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Surrogate}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Co}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Private_Use}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Cn}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\p{Unassigned}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{Ll}	ui	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\P{Ll}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\P{Ll}	ui	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+\p{Ll}*	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\P{Ll}*	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+[\p{Ll}]	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+[\p{Ll}]	ui	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+[\P{Ll}]	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+[\P{Ll}]	ui	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+[^\p{Ll}]	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+[^\p{Ll}]	ui	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+[^\P{Ll}]	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+[^\P{Ll}]	ui	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+
+# Character sets (basic cases)
+
+[]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^^]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^^]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+
+[]*		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[]*	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^]*		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^]*	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^^]*		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^^]*	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+
+[\s\S]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[\s\S]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^\s\S]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^\s\S]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+
+[\s\S]*		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[\s\S]*	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^\s\S]*		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^\s\S]*	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+
+[abcd]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[abcd]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^abcd]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^abcd]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+
+[abcd]*		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[abcd]*	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^abcd]*		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^abcd]*	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+
+[a-d]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[a-d]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[a-b]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^a-d]		"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^a-d]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+[^a-b]	u	"\udca9💩\ud83dbeard\udcab💫\ud83d"
+
+[A-Za-z0-9_-]		$_Foo-Bar.12
+[A-Za-z0-9_-]	u	$_Foo-Bar.12
+[^A-Za-z0-9_-]		$_Foo-Bar.12
+[^A-Za-z0-9_-]	u	$_Foo-Bar.12
+
+[A-Za-z0-9_-.]		$_Foo-Bar.12
+[A-Za-z0-9_-.]	u	$_Foo-Bar.12
+[^A-Za-z0-9_-.]		$_Foo-Bar.12
+[^A-Za-z0-9_-.]	u	$_Foo-Bar.12
+
+[A-Za-z0-9_\-.]		$_Foo-Bar.12
+[A-Za-z0-9_\-.]	u	$_Foo-Bar.12
+[^A-Za-z0-9_\-.]		$_Foo-Bar.12
+[^A-Za-z0-9_\-.]	u	$_Foo-Bar.12
+
+[a-z0-9_-]	i	$_Foo-Bar.12
+[a-z0-9_-]	ui	$_Foo-Bar.12
+[^a-z0-9_-]	i	$_Foo-Bar.12
+[^a-z0-9_-]	ui	$_Foo-Bar.12
+
+# Character sets (special escapes)
+
+[/]		/[+-]\
+[/]	u	/[+-]\
+
+[\/]		/[+-]\
+[\/]	u	/[+-]\
+
+[\]]		/[+-]\
+[\]]	u	/[+-]\
+
+[\\]		/[+-]\
+[\\]	u	/[+-]\
+
+[\-]		/[+-]\
+[\-]	u	/[+-]\
+
+[\\-\]]		/[+-]\
+[\\-\]]	u	/[+-]\
+
+[\\\-\]]		/[+-]\
+[\\\-\]]	u	/[+-]\
+
+[\]-\\]		/[+-]\
+[\]-\\]	u	/[+-]\
+
+[\]\-\\]		/[+-]\
+[\]\-\\]	u	/[+-]\
+
+[\b]		"\bABCD\b"
+[\b]	u	"\bABCD\b"
+
+[\b-C]		"\bABCD\b"
+[\b-C]	u	"\bABCD\b"
+
+[A-\b]		"\bABCD\b"
+[A-\b]	u	"\bABCD\b"
+
+[\B]		"\bABCD\b"
+[\B]	u	"\bABCD\b"
+
+[\B-C]		"\bABCD\b"
+[\B-C]	u	"\bABCD\b"
+
+[A-\B]		"\bABCD\b"
+[A-\B]	u	"\bABCD\b"
+
+# Character sets (range edge cases)
+
+[-]		+,-./ aZ0
+[-]	u	+,-./ aZ0
+[--]		+,-./ aZ0
+[--]	u	+,-./ aZ0
+[---]		+,-./ aZ0
+[---]	u	+,-./ aZ0
+
+[^-]		+,-./ aZ0
+[^-]	u	+,-./ aZ0
+[^--]		+,-./ aZ0
+[^--]	u	+,-./ aZ0
+[^---]		+,-./ aZ0
+[^---]	u	+,-./ aZ0
+
+[+-]		+,-./ aZ0
+[+-]	u	+,-./ aZ0
+[+--]		+,-./ aZ0
+[+--]	u	+,-./ aZ0
+[+---]		+,-./ aZ0
+[+---]	u	+,-./ aZ0
+
+[-+]		+,-./ aZ0
+[-+]	u	+,-./ aZ0
+[--+]		+,-./ aZ0
+[--+]	u	+,-./ aZ0
+[---+]		+,-./ aZ0
+[---+]	u	+,-./ aZ0
+
+[a-z-]		+,-./ aZ0
+[a-z-]	u	+,-./ aZ0
+[a-z--]		+,-./ aZ0
+[a-z--]	u	+,-./ aZ0
+[a-z---]		+,-./ aZ0
+[a-z---]	u	+,-./ aZ0
+
+[a-z+-]		+,-./ aZ0
+[a-z+-]	u	+,-./ aZ0
+[a-z+--]		+,-./ aZ0
+[a-z+--]	u	+,-./ aZ0
+[a-z+---]		+,-./ aZ0
+[a-z+---]	u	+,-./ aZ0
+
+[a-z-+]		+,-./ aZ0
+[a-z-+]	u	+,-./ aZ0
+[a-z--+]		+,-./ aZ0
+[a-z--+]	u	+,-./ aZ0
+[a-z---+]		+,-./ aZ0
+[a-z---+]	u	+,-./ aZ0
+
+[a-+]		+,-./ aZ0
+[a-+]	u	+,-./ aZ0
+[a--+]		+,-./ aZ0
+[a--+]	u	+,-./ aZ0
+
+[\--+]		+,-./ aZ0
+[\--+]	u	+,-./ aZ0
+[\---+]		+,-./ aZ0
+[\---+]	u	+,-./ aZ0
+
+[\--\/]		+,-./ aZ0
+[\--\/]	u	+,-./ aZ0
+[\---\/]		+,-./ aZ0
+[\---\/]	u	+,-./ aZ0
+
+[\d-]		+,-./ aZ0
+[\d-]	u	+,-./ aZ0
+[\d--]		+,-./ aZ0
+[\d--]	u	+,-./ aZ0
+[\d---]		+,-./ aZ0
+[\d---]	u	+,-./ aZ0
+
+[\d+-]		+,-./ aZ0
+[\d+-]	u	+,-./ aZ0
+[\d+--]		+,-./ aZ0
+[\d+--]	u	+,-./ aZ0
+[\d+---]		+,-./ aZ0
+[\d+---]	u	+,-./ aZ0
+
+[\d-+]		+,-./ aZ0
+[\d-+]	u	+,-./ aZ0
+[\d--+]		+,-./ aZ0
+[\d--+]	u	+,-./ aZ0
+[\d---+]		+,-./ aZ0
+[\d---+]	u	+,-./ aZ0
+
+[\d-\/]		+,-./ aZ0
+[\d-\/]	u	+,-./ aZ0
+[\d--\/]		+,-./ aZ0
+[\d--\/]	u	+,-./ aZ0
+[\d---\/]		+,-./ aZ0
+[\d---\/]	u	+,-./ aZ0
+[\d----\/]		+,-./ aZ0
+[\d----\/]	u	+,-./ aZ0
+
+[\S-]		+,-./ aZ0
+[\S--]		+,-./ aZ0
+[\S---]		+,-./ aZ0
+[-\S-]		+,-./ aZ0
+[-\S--]		+,-./ aZ0
+[-\S---]		+,-./ aZ0
+[--\S-]		+,-./ aZ0
+[--\S--]		+,-./ aZ0
+[--\S---]		+,-./ aZ0
+[--\S--\/]		+,-./ aZ0
+
+[\p{Zs}-]	u	+,-./ aZ0
+[\p{Zs}--]	u	+,-./ aZ0
+[\p{Zs}---]	u	+,-./ aZ0
+[-\p{Zs}-]	u	+,-./ aZ0
+[-\p{Zs}--]	u	+,-./ aZ0
+[-\p{Zs}---]	u	+,-./ aZ0
+[--\p{Zs}-]	u	+,-./ aZ0
+[--\p{Zs}--]	u	+,-./ aZ0
+[--\p{Zs}---]	u	+,-./ aZ0
+[--\p{Zs}--\/]	u	+,-./ aZ0
+
+[\P{Zs}-]	u	+,-./ aZ0
+[\P{Zs}--]	u	+,-./ aZ0
+[\P{Zs}---]	u	+,-./ aZ0
+[-\P{Zs}-]	u	+,-./ aZ0
+[-\P{Zs}--]	u	+,-./ aZ0
+[-\P{Zs}---]	u	+,-./ aZ0
+[--\P{Zs}-]	u	+,-./ aZ0
+[--\P{Zs}--]	u	+,-./ aZ0
+[--\P{Zs}---]	u	+,-./ aZ0
+[--\P{Zs}--\/]	u	+,-./ aZ0
+
+[e-f]	i	defg_DEFG
+[e-f]	ui	defg_DEFG
+[e-F]	i	defg_DEFG
+[e-F]	ui	defg_DEFG
+[F-e]	i	defg_DEFG
+[F-e]	ui	defg_DEFG
+[E-F]	i	defg_DEFG
+[E-F]	ui	defg_DEFG
+
+# Character sets (backrefence edge cases)
+
+(a)[\1]		"a\x01a"
+(a)[\1]	u	"a\x01a"
+(?:a)[\1]		"a\x01a"
+(?:a)[\1]	u	"a\x01a"
+
+[(a)\1]		"a\x01a"
+[(a)\1]	u	"a\x01a"
+[(?:a)\1]		"a\x01a"
+[(?:a)\1]	u	"a\x01a"
+
+[\1(a)]		"a\x01a"
+[\1(a)]	u	"a\x01a"
+[\1(?:a)]		"a\x01a"
+[\1(?:a)]	u	"a\x01a"
+
+[\1](a)		"a\x01a"
+[\1](a)	u	"a\x01a"
+[\1](?:a)		"a\x01a"
+[\1](?:a)	u	"a\x01a"
+
+# Character sets (.NET-specific edge cases)
+
+[A-[B]]		A-[B]
+[A-[B]]	u	A-[B]
+[--[B]]		A-[B]
+[--[B]]	u	A-[B]
+[\D-[B]]		A-[B]
+[\D-[B]]	u	A-[B]	!ignore-error-message
+[A-\[B\]]		A-[B]
+[A-\[B\]]	u	A-[B]
+
+# Disjunctions
+
+a|ab		abc
+a|ab	u	abc
+
+(?:(a)|(ab))(?:(c)|(bc))		abc
+(?:(a)|(ab))(?:(c)|(bc))	u	abc
+
+\.(?:png|jpe?g|webp|avif|gif)$	i	image.jpg
+\.(?:png|jpe?g|webp|avif|gif)$	ui	image.jpg
+
+\bgr(a|e)y\b		The gray wolf blended in among the grey rocks.
+\bgr(a|e)y\b	u	The gray wolf blended in among the grey rocks.
+
+\b(\d{2}-\d{7}|\d{3}-\d{2}-\d{4})\b		01-9999999 020-333333 777-88-9999
+\b(\d{2}-\d{7}|\d{3}-\d{2}-\d{4})\b	u	01-9999999 020-333333 777-88-9999
+
+?x		xxyx
+?x	u	xxyx
+{1}x		xxyx
+{1}x	u	xxyx
+
+?x|y		xxyx
+?x|y	u	xxyx
+{1}x|y		xxyx
+{1}x|y	u	xxyx
+
+y|+x		xxyx
+y|+x	u	xxyx
+y|{1,2}x		xxyx
+y|{1,2}x	u	xxyx
+
+# Invalid groups
+
+(?i		i
+(?i)		i
+(?m		m
+(?m)		m
+(?n		n
+(?n)		n
+(?s		s
+(?s)		s
+(?x		x
+(?x)		x
+(??x		x
+(??x)		x
+(?>x		x
+(?>x)		x
+(?'group'		'group'
+(?'group')		'group'
+(?(x)		x
+(?(x))		x
+(?(a)ab|b)		x
+(?<n>a)?(?(n)a|b)		x
+
+# Invalid group names
+
+(?<x		x
+(?<x)		x
+(?<>x		x
+(?<>x)		x
+(?<1>x		x
+(?<1>x)		x
+(?<#>x)		x
+(?<a#>x)		x
+(?<a-b>x)		x
+
+"(?<\uD804\uDC00>x)"		x
+(?<\uD804\uDC00>x)		x
+(?<\u{11000}>x)		x
+"(?<\uD800>x)"		x
+(?<\uD800>x)		x
+(?<\u{D800}>x)		x
+"(?<\uDC00>x)"		x
+(?<\uDC00>x)		x
+(?<\u{DC00}>x)		x
+
+(?<a\uD804 \uDC00>x)		x
+"(?<a\uD800>x)"		x
+(?<a\uD800>x)		x
+(?<a\u{D800}>x)		x
+"(?<a\uDC00>x)"		x
+(?<a\uDC00>x)		x
+(?<a\u{DC00}>x)		x
+
+"(?<\\uD800\uDC00>x)"		x
+"(?<\uD800\\uDC00>x)"		x
+"(?<\\u{D800}\uDC00>x)"		x
+"(?<\uD800\\u{DC00}>x)"		x
+"(?<\\u{D800}\\uDC00>x)"		x
+"(?<\\uD800\\u{DC00}>x)"		x
+
+# Numbered capturing groups 
+
+(ab)|(cd)		cd
+(ab)|(cd)	u	cd
+
+([ab])+		abc
+([ab])+	u	abc
+
+c(?=(ab))		cab
+c(?=(ab))	u	cab
+
+(?<=(a)(b))c		abc
+(?<=(a)(b))c	u	abc
+
+(?<=([ab])+)c		abc
+(?<=([ab])+)c	u	abc
+
+((a+)?(b+)?(c))*		aacbbbcac	!ignore-undefined-captures
+((a+)?(b+)?(c))*	u	aacbbbcac	!ignore-undefined-captures
+
+^(\d{4})-(\d{2})-(\d{2})$		2019-01-01
+^(\d{4})-(\d{2})-(\d{2})$	u	2019-01-01
+
+(\w+)\s(\1)\W	i	He said that that was the the correct answer.
+(\w+)\s(\1)\W	ui	He said that that was the the correct answer.
+
+(*x)		xxyx
+(*x)	u	xxyx
+({1,}x)		xxyx
+({1,}x)	u	xxyx
+
+(y|+x)		xxyx
+(y|+x)	u	xxyx
+(y|{1,2}x)		xxyx
+(y|{1,2}x)	u	xxyx
+
+# Named capturing groups
+
+(?<ab>ab)|(?<cd>cd)		cd
+(?<ab>ab)|(?<cd>cd)	u	cd
+
+(?<g>[ab])+		abc
+(?<g>[ab])+	u	abc
+
+c(?=(?<$ab>ab))		cab
+c(?=(?<$ab>ab))	u	cab
+
+c(?=(?<$ab>ab)(?<__utf8_246162>))		cab
+c(?=(?<$ab>ab)(?<__utf8_246162>))	u	cab
+
+(?<=(?<α>a)(?<β>b))c		abc
+(?<=(?<α>a)(?<β>b))c	u	abc
+
+(?<=(?<_1>[ab])+)c		abc
+(?<=(?<_1>[ab])+)c	u	abc
+
+((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*		aacbbbcac	!ignore-undefined-captures
+((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*	u	aacbbbcac	!ignore-undefined-captures
+
+^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$		2019-01-01
+^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$	u	2019-01-01
+
+(?<timestamp>\d+),(?<author>.+)		1560979912,Caroline
+(?<timestamp>\d+),(?<author>.+)	u	1560979912,Caroline
+
+(?<name>x)(?<name>y)		xy
+(?<name>x)(?<name>y)	u	xy
+
+((?<name>x))(?<name>y)		xy
+((?<name>x))(?<name>y)	u	xy
+(x|(?<name>x))(?<name>y)		xy
+(x|(?<name>x))(?<name>y)	u	xy
+(((?<name>x)))(?<name>y)		xy
+(((?<name>x)))(?<name>y)	u	xy
+(?:((?<name>x)))(?<name>y)		xy
+(?:((?<name>x)))(?<name>y)	u	xy
+((?:(?<name>x)))(?<name>y)		xy
+((?:(?<name>x)))(?<name>y)	u	xy
+(?<!(?:(?<name>x)))(?<name>y)		xy
+(?<!(?:(?<name>x)))(?<name>y)	u	xy
+
+(?<name>x)((?<name>y))		xy
+(?<name>x)((?<name>y))	u	xy
+(?<name>x)(y|(?<name>y))		xy
+(?<name>x)(y|(?<name>y))	u	xy
+(?<name>x)(((?<name>y)))		xy
+(?<name>x)(((?<name>y)))	u	xy
+(?<name>x)(?:((?<name>y)))		xy
+(?<name>x)(?:((?<name>y)))	u	xy
+(?<name>x)((?:(?<name>y)))		xy
+(?<name>x)((?:(?<name>y)))	u	xy
+(?<name>x)(?!(?:(?<name>y)))		xy
+(?<name>x)(?!(?:(?<name>y)))	u	xy
+
+(?<duplicateWord>\w+)\s\k<duplicateWord>\W(?<nextWord>\w+)	i	He said that that was the the correct answer.
+(?<duplicateWord>\w+)\s\k<duplicateWord>\W(?<nextWord>\w+)	ui	He said that that was the the correct answer.
+
+(?<name>*x)		xxyx
+(?<name>*x)	u	xxyx
+(?<name>{1,}x)		xxyx
+(?<name>{1,}x)	u	xxyx
+
+# Non-capturing groups
+
+styles(?:\.[\da-f]+)?		styles.css
+styles(?:\.[\da-f]+)?	u	styles.css
+styles(?:\.[\da-f]+)?		styles.1234.css
+styles(?:\.[\da-f]+)?	u	styles.1234.css
+styles(?:\.[\da-f]+)?		styles.cafe.css
+styles(?:\.[\da-f]+)?	u	styles.cafe.css
+styles(?:\.[\da-f]+)?		styles.1234.min.css
+styles(?:\.[\da-f]+)?	u	styles.1234.min.css
+
+\.(?:png|jpe?g|webp|avif|gif)$	i	image.png
+\.(?:png|jpe?g|webp|avif|gif)$	ui	image.png
+\.(?:png|jpe?g|webp|avif|gif)$	i	image.pdf
+\.(?:png|jpe?g|webp|avif|gif)$	ui	image.pdf
+
+(?:title|name)=(["'])(.*?)\1		name="foo"
+(?:title|name)=(["'])(.*?)\1	u	name="foo"
+
+(?:\b(?:\w+)\W*)+\.		This is a short sentence.
+(?:\b(?:\w+)\W*)+\.	u	This is a short sentence.
+
+(?:*x)		xxyx
+(?:*x)	u	xxyx
+(?:{1,}x)		xxyx
+(?:{1,}x)	u	xxyx
+
+# Invalid group name references
+
+\kx		kx
+\kx	u	kx
+(?<a>)\kx		kx
+\kx(?<a>)		kx
+\k<x		k<x
+\k<x	u	k<x
+(\k<x)>		k<x>
+(\k<x)>	u	k<x>
+\k<>x		k<>x
+\k<>x	u	k<>x
+(?<a>)\k<b>		x
+(?<a>)\k<b>	u	x
+\k<b>(?<a>)		x
+\k<b>(?<a>)	u	x
+
+# Backreferences
+
+title=(["'])(.*?)\1		title="Named capturing groups' advantages"
+title=(["'])(.*?)\1	u	title="Named capturing groups' advantages"
+title=(?<quote>["'])(?<content>.*?)\1		title="Named capturing groups' advantages"
+title=(?<quote>["'])(?<content>.*?)\1	u	title="Named capturing groups' advantages"
+title=(?<quote>["'])(?<content>.*?)\k<quote>		title="Named capturing groups' advantages"
+title=(?<quote>["'])(?<content>.*?)\k<quote>	u	title="Named capturing groups' advantages"
+
+(b)\1	i	bB
+(b)\1	ui	bB
+(?<g>b)\1	i	bB
+(?<g>b)\1	ui	bB
+(?<g>b)\k<g>	i	bB
+(?<g>b)\k<g>	ui	bB
+
+(b)\1+	i	bBbB
+(b)\1+	ui	bBbB
+(?<g>b)\1+	i	bB
+(?<g>b)\1+	ui	bB
+(?<g>b)\k<g>+	i	bB
+(?<g>b)\k<g>+	ui	bB
+
+\1(a)		aa
+\1(a)	u	aa
+\1(?<g>a)		aa
+\1(?<g>a)	u	aa
+\k<g>(?<g>a)		aa
+\k<g>(?<g>a)	u	aa
+
+(\1a)		aa
+(\1a)	u	aa
+(?<g>\1a)		aa
+(?<g>\1a)	u	aa
+(?<g>\k<g>a)		aa
+(?<g>\k<g>a)	u	aa
+
+(a\1)		aa
+(a\1)	u	aa
+(?<g>a\1)		aa
+(?<g>a\1)	u	aa
+(?<g>a\k<g>)		aa
+(?<g>a\k<g>)	u	aa
+
+(?:a|(b))\1c		ac
+(?:a|(b))\1c	u	ac
+(?:a|(?<g>b))\1c		ac
+(?:a|(?<g>b))\1c	u	ac
+(?:a|(?<g>b))\k<g>c		ac
+(?:a|(?<g>b))\k<g>c	u	ac
+
+(a)\2		a\x02
+(a)\2	u	a\x02
+(?<g>a)\2		a\x02
+(?<g>a)\2	u	a\x02
+
+\b(\w+)\s+\1\b	i	Hello hello
+\b(\w+)\s+\1\b	ui	Hello hello
+
+\b(\w+)\s+\1\b	i	Hello hellos
+\b(\w+)\s+\1\b	ui	Hello hellos
+
+((a+)(\1) ?)+		"aa aaaa aaaaaa "	!ignore-group-captures
+((a+)(\1) ?)+	u	"aa aaaa aaaaaa "	!ignore-group-captures
+
+(.)(?<=(\1\1))		"abb"
+(.)(?<=(\1\1))	i	"abB"
+((\w)\w)(?<=\1\2\1)	i	"aabAaBa"
+(\w(\w))(?<=\1\2\1)	i	"aabAaBa"
+(?=(\w))(?<=(\1)).	i	"abaBbAa"
+(?<=(.))(\w+)(?=\1)		"  'foo'  "
+(?<=(.))(\w+)(?=\1)		"  \"foo\"  "
+(.)(?<=\1\1\1)		"abbb"
+(..)(?<=\1\1\1)		"fababab"
+
+(?<=(.))(\w+)(?=\1)		"  .foo\"  "
+(.)(?<=\1\1\1)		"ab"
+(.)(?<=\1\1\1)		"abb"
+(..)(?<=\1\1\1)		"ab"
+(..)(?<=\1\1\1)		"abb"
+(..)(?<=\1\1\1)		"aabb"
+(..)(?<=\1\1\1)		"abab"
+(..)(?<=\1\1\1)		"fabxbab"
+(..)(?<=\1\1\1)		"faxabab"
+
+(?<=\1(\w))d	i	"abcCd"	!skip
+(?<=\1([abx]))d		"abxxd"	!skip
+(?<=\1(\w+))c		"ababc"	!skip
+(?<=\1(\w+))c		"ababbc"	!skip
+(?<=\1(\w+))c		"ababdc"	!skip
+(?<=(\w+)\1)c		"ababc"
+
+# Quantifiers
+
+x?		xxyx
+x?	u	xxyx
+x*		xxyx
+x*	u	xxyx
+x+		xxyx
+x+	u	xxyx
+x{1}		xxyx
+x{1}	u	xxyx
+x{1,}		xxyx
+x{1,}	u	xxyx
+x{1,2}		xxyx
+x{1,2}	u	xxyx
+
+x??		xxyx
+x??	u	xxyx
+x?*		xxyx
+x?*	u	xxyx
+x?+		xxyx
+x?+	u	xxyx
+x?{1}		xxyx
+x?{1}	u	xxyx
+
+x*?		xxyx
+x*?	u	xxyx
+x**		xxyx
+x**	u	xxyx
+x*+		xxyx
+x*+	u	xxyx
+x*{1}		xxyx
+x*{1}	u	xxyx
+
+x+?		xxyx
+x+?	u	xxyx
+x+*		xxyx
+x+*	u	xxyx
+x++		xxyx
+x++	u	xxyx
+x+{1}		xxyx
+x+{1}	u	xxyx
+
+x{1}?		xxyx
+x{1}?	u	xxyx
+x{1}*		xxyx
+x{1}*	u	xxyx
+x{1}+		xxyx
+x{1}+	u	xxyx
+x{1}{1}		xxyx
+x{1}{1}	u	xxyx
+
+x{		xxyx{
+x{	u	xxyx{	!ignore-error-message
+x{}		xxyx{}
+x{}	u	xxyx{}
+x{ }		xxyx{ }
+x{ }	u	xxyx{ }
+
+x\{1}		xxyx{1}
+x\{1}	u	xxyx{1}
+x{1\}		xxyx{1}
+x{1\}	u	xxyx{1}	!ignore-error-message
+
+x{1		xxyx{1
+x{1	u	xxyx{1	!ignore-error-message
+x{1 }		xxyx{1 }
+x{1 }	u	xxyx{1 }
+x{ 1}		xxyx{1 }
+x{ 1}	u	xxyx{1 }
+x{,}		xxyx{,}
+x{,}	u	xxyx{,}
+x{a}		xxyx{a}
+x{a}	u	xxyx{a}
+x{-1}		xxyx{-1}
+x{-1}	u	xxyx{-1}
+
+x{1,		xxyx{1,
+x{1,	u	xxyx{1,	!ignore-error-message
+x{1, }		xxyx{1, }
+x{1, }	u	xxyx{1, }
+x{a,}		xxyx{a,}
+x{a,}	u	xxyx{a,}
+x{-1,}		xxyx{-1,}
+x{-1,}	u	xxyx{-1,}
+
+x{1,2		xxyx{1,2
+x{1,2	u	xxyx{1,2	!ignore-error-message
+x{1,a}		xxyx{1,a}
+x{1,a}	u	xxyx{1,a}
+x{1,-1}		xxyx{1,-1}
+x{1,-1}	u	xxyx{1,-1}
+x{a,1}		xxyx{a,1}
+x{a,1}	u	xxyx{a,1}
+x{-1,1}		xxyx{-1,1}
+x{-1,1}	u	xxyx{-1,1}
+
+x{,1		xxyx{,1
+x{,1	u	xxyx{,1	!ignore-error-message
+x{,1}		xxyx{,1}
+x{,1}	u	xxyx{,1}
+
+x{ 1,2}		xxyx{ 1,2}
+x{ 1,2}	u	xxyx{ 1,2}
+x{1,2 }		xxyx{1,2 }
+x{1,2 }	u	xxyx{1,2 }
+x{1 ,2}		xxyx{1 ,2}
+x{1 ,2}	u	xxyx{1 ,2}
+x{1, 2}		xxyx{1, 2}
+x{1, 2}	u	xxyx{1, 2}
+
+x{2,1}		xxyx{2,1}
+x{2,1}	u	xxyx{2,1}
+x{2,02}		xxyx{2,02}
+x{2,02}	u	xxyx{2,02}
+x{02,2}		xxyx{02,2}
+x{02,2}	u	xxyx{02,2}
+
+x{1,2147483647}		xxyx{2,1}	!skip-on-netframework	# (the adapted pattern is correct but makes the Regex ctor hang on .NET Framework)
+x{1,2147483647}	u	xxyx{2,1}	!skip-on-netframework	# (the adapted pattern is correct but makes the Regex ctor hang on .NET Framework)
+x{2147483647,}		xxyx{2,1}	!skip-on-netframework	# (the adapted pattern is correct but makes the Regex ctor hang on .NET Framework)
+x{2147483647,}	u	xxyx{2,1}	!skip-on-netframework	# (the adapted pattern is correct but makes the Regex ctor hang on .NET Framework)
+
+x{1,2147483648}		xxyx{2,1}
+x{1,2147483648}	u	xxyx{2,1}
+x{2147483648,}		xxyx{2,1}
+x{2147483648,}	u	xxyx{2,1}
+
+x{2147483647,2147483646}		xxyx{2,1}
+x{2147483647,2147483646}	u	xxyx{2,1}
+x{2147483648,2147483647}		xxyx{2,1}
+x{2147483648,2147483647}	u	xxyx{2,1}
+
+\b.*([0-9]{4})\b		1112223333 3992991999
+\b.*([0-9]{4})\b	u	1112223333 3992991999
+
+\b.*?([0-9]{4})\b		1112223333 3992991999
+\b.*?([0-9]{4})\b	u	1112223333 3992991999
+
+# Input boundary assertions
+
+^??x		xxyx
+^??x	u	xxyx
+^{1}?x		xxyx
+^{1}?x	u	xxyx
+
+$*?x		xxyx
+$*?x	u	xxyx
+${1,}?x		xxyx
+${1,}?x	u	xxyx
+
+^(a|b|c)*$		"aabbbcc"
+^(a|b|c)*$	u	"aabbbcc"
+^(a|b|c)*$	m	"aabbbcc"
+^(a|b|c)*$	um	"aabbbcc"
+
+^(a|b|c)*$		"aabb\rbcc"
+^(a|b|c)*$	u	"aabb\rbcc"
+^(a|b|c)*$	m	"aabb\rbcc"
+^(a|b|c)*$	um	"aabb\rbcc"
+
+^(a|b|c)*$		"aabb\nbcc"
+^(a|b|c)*$	u	"aabb\nbcc"
+^(a|b|c)*$	m	"aabb\nbcc"
+^(a|b|c)*$	um	"aabb\nbcc"
+
+^(a|b|c)*$		"aabb\u2028bcc"
+^(a|b|c)*$	u	"aabb\u2028bcc"
+^(a|b|c)*$	m	"aabb\u2028bcc"
+^(a|b|c)*$	um	"aabb\u2028bcc"
+
+^(a|b|c)*$		"aabb\u2029bcc"
+^(a|b|c)*$	u	"aabb\u2029bcc"
+^(a|b|c)*$	m	"aabb\u2029bcc"
+^(a|b|c)*$	um	"aabb\u2029bcc"
+
+^(a|b|c)*$		"aabb\u202abcc"
+^(a|b|c)*$	u	"aabb\u202abcc"
+^(a|b|c)*$	m	"aabb\u202abcc"
+^(a|b|c)*$	um	"aabb\u202abcc"
+
+^(a|b|c)*$		"aabb\u2028\u2029bcc"
+^(a|b|c)*$	u	"aabb\u2028\u2029bcc"
+^(a|b|c)*$	m	"aabb\u2028\u2029bcc"
+^(a|b|c)*$	um	"aabb\u2028\u2029bcc"
+
+^(a|b|c)*		"aabb\u2028\u2029bcc"
+^(a|b|c)*	u	"aabb\u2028\u2029bcc"
+^(a|b|c)*	m	"aabb\u2028\u2029bcc"
+^(a|b|c)*	um	"aabb\u2028\u2029bcc"
+
+(a|b|c)*^		"aabb\u2028\u2029bcc"
+(a|b|c)*^	u	"aabb\u2028\u2029bcc"
+(a|b|c)*^	m	"aabb\u2028\u2029bcc"
+(a|b|c)*^	um	"aabb\u2028\u2029bcc"
+
+(a|b|c)*$		"aabb\u2028\u2029bcc"
+(a|b|c)*$	u	"aabb\u2028\u2029bcc"
+(a|b|c)*$	m	"aabb\u2028\u2029bcc"
+(a|b|c)*$	um	"aabb\u2028\u2029bcc"
+
+$(a|b|c)*		"aabb\u2028\u2029bcc"
+$(a|b|c)*	u	"aabb\u2028\u2029bcc"
+$(a|b|c)*	m	"aabb\u2028\u2029bcc"
+$(a|b|c)*	um	"aabb\u2028\u2029bcc"
+
+(?<=^[^a-c]{3})def		"abcdef"
+
+(?<=^abc)def		"abcdef"
+(?<=^[a-c]{3})def		"abcdef"
+(?<=^[a-c]{3})def	m	"xyz\nabcdef"
+(?<=^)\w+	m	"ab\ncd\nefg"
+\w+(?<=$)	m	"ab\ncd\nefg"
+(?<=^)\w+(?<=$)	m	"ab\ncd\nefg"
+
+^foo(?<=^fo+)$		"foo"
+^foooo(?<=^fo*)		"foooo"
+^(f)oo(?<=^\1o+)$		"foo"
+^(f)oo(?<=^\1o+)$	i	"foo"
+^(f)oo(?<=^\1o+).$	i	"foo\u1234"
+(?<=^\w+)def		"abcdefdef"
+
+# Word boundary assertions
+
+\ba		abc
+c\b	u	abc
+
+\B 		 abc
+ \B	u	abc 
+
+\b(thanks|thank you)\b	i	Thanks! You helped me a lot.
+\b(thanks|thank you)\b	ui	Thanks! You helped me a lot.
+\b(thanks|thank you)\b	i	Just want to say thank you for all your work.
+\b(thanks|thank you)\b	ui	Just want to say thank you for all your work.
+\b(thanks|thank you)\b	i	Thanksgiving is around the corner.
+\b(thanks|thank you)\b	ui	Thanksgiving is around the corner.
+
+\b(thanks|thank you)\b	mi	\rThanks!\rYou helped me a lot.
+\b(thanks|thank you)\b	umi	\rThanks!\rYou helped me a lot.
+\b(thanks|thank you)\b	mi	Just want to say\rthank\ryou for all your work.
+\b(thanks|thank you)\b	umi	Just want to say\rthank\ryou for all your work.
+\b(thanks|thank you)\b	mi	\rThanksgiving\r is around the corner.
+\b(thanks|thank you)\b	umi	\rThanksgiving\r is around the corner.
+
+\bare\w*\b		area bare arena mare
+\bare\w*\b	u	area bare arena mare
+
+\bare\w*\b		área bare arena mare
+\bare\w*\b	u	área bare arena mare
+
+\Bqu\w+		equity queen equip acquaint quiet
+\Bqu\w+	u	equity queen equip acquaint quiet
+
+\b+?x		xxyx
+\b+?x	u	xxyx
+\b{1,2}?x		xxyx
+\b{1,2}?x	u	xxyx
+
+\B?x		xxyx
+\B?x	u	xxyx
+\B{1}x		xxyx
+\B{1}x	u	xxyx
+
+# Lookahead assertions
+
+(?=(a+))a*b\1		baabac
+(?=(a+))a*b\1	u	baabac
+
+\b\w+(?=\sis\b)		The dog is a Malamute.
+\b\w+(?=\sis\b)	u	The dog is a Malamute.
+\b\w+(?=\sis\b)		The island has beautiful birds.
+\b\w+(?=\sis\b)	u	The island has beautiful birds.
+
+(.*?)a(?!(a+)b\2c)\2(.*)		baabac
+(.*?)a(?!(a+)b\2c)\2(.*)	u	baabac
+
+^.*?(?=[,.])		Hello, world!
+^.*?(?=[,.])	u	Hello, world!
+^.*?(?=[,.])		Thank you.
+^.*?(?=[,.])	u	Thank you.
+
+\b(?!un)\w+\b	i	unite one unethical ethics use untie ultimate
+\b(?!un)\w+\b	ui	unite one unethical ethics use untie ultimate
+
+\b\w+\b(?!\p{P})		Disconnected, disjointed thoughts in a sentence fragment.	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
+\b\w+\b(?!\p{P})	u	Disconnected, disjointed thoughts in a sentence fragment.	!skip-on-netframework	# (the adapted pattern is correct but makes the Regex ctor hang on .NET Framework)
+
+(?=)?x		xxyx
+(?=)*x		xxyx
+(?=)+x		xxyx
+(?=){1}x		xxyx
+(?=){1,}x		xxyx
+(?=){1,2}x		xxyx
+(?=)??x		xxyx
+(?=)*?x		xxyx
+(?=)+?x		xxyx
+(?=){1}?x		xxyx
+(?=){1,}?x		xxyx
+(?=){1,2}?x		xxyx
+(?=)*x	u	xxyx
+(?=){1,}x	u	xxyx
+
+(?!)?x		xxyx
+(?!)*x		xxyx
+(?!)+x		xxyx
+(?!){1}x		xxyx
+(?!){1,}x		xxyx
+(?!){1,2}x		xxyx
+(?!)??x		xxyx
+(?!)*?x		xxyx
+(?!)+?x		xxyx
+(?!){1}?x		xxyx
+(?!){1,}?x		xxyx
+(?!){1,2}?x		xxyx
+(?!)+x	u	xxyx
+(?!){1,2}x	u	xxyx
+
+# Lookbehind assertions
+
+(?<=([ab]+)([bc]+))$		abc
+(?<=([ab]+)([bc]+))$	u	abc
+
+(?<=\$)\d+(?:\.\d*)?		$10.53
+(?<=\$)\d+(?:\.\d*)?	u	$10.53
+(?<=\$)\d+(?:\.\d*)?		10.53
+(?<=\$)\d+(?:\.\d*)?	u	10.53
+
+(?<=\b20)\d{2}\b		2010 1999 1861 2140 2009
+(?<=\b20)\d{2}\b	u	2010 1999 1861 2140 2009
+
+(?<!(Saturday|Sunday) )\b\w+ \d{1,2}, \d{4}\b		Monday February 1, 2010
+(?<!(Saturday|Sunday) )\b\w+ \d{1,2}, \d{4}\b	u	Monday February 1, 2010
+(?<!(Saturday|Sunday) )\b\w+ \d{1,2}, \d{4}\b		Saturday February 6, 2010
+(?<!(Saturday|Sunday) )\b\w+ \d{1,2}, \d{4}\b	u	Saturday February 6, 2010
+(?<!(Saturday|Sunday) )\b\w+ \d{1,2}, \d{4}\b		Sunday February 7, 2010
+(?<!(Saturday|Sunday) )\b\w+ \d{1,2}, \d{4}\b	u	Sunday February 7, 2010
+
+(?<=)??x		xxyx
+(?<=)??x	u	xxyx
+(?<=){1}?x		xxyx
+(?<=){1}?x	u	xxyx
+
+(?<!)*?x		xxyx
+(?<!)*?x	u	xxyx
+(?<!){1}?x		xxyx
+(?<!){1}?x	u	xxyx
+
+# Issues
+
+# https://github.com/sebastienros/esprima-dotnet/issues/358
+
+^[\\d--\\d]+$		012abc
+^[\\d--\\d]+$	u	012abc
+
+^[\d--\d]+$		012abc
+^[\d--\d]+$	u	012abc
+
+# https://github.com/sebastienros/esprima-dotnet/issues/371
+
+\<sub>		
+\<sub>	u	
+
+\<sub>		<a><sub></sub></a>
+\<sub>	u	<a><sub></sub></a>
+
+# https://github.com/sebastienros/jint/issues/506
+
+[^]?(:[rp][el]a[\w-]+)[^]		:reagent-
+[^]?(:[rp][el]a[\w-]+)[^]	u	:reagent-
+
+[^]?(:[rp][el]a[\w-]+)[^]		xx:reagent-1/y
+[^]?(:[rp][el]a[\w-]+)[^]	u	xx:reagent-1/y
