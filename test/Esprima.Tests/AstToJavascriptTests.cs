@@ -694,7 +694,7 @@ if (b == 2) {
     public void OriginalAndReparsedASTsShouldMatch(string fixture)
     {
         static T CreateParserOptions<T>() where T : ParserOptions, new() =>
-            new T { Tokens = false, Tolerant = false, AdaptRegexp = false };
+            new T { Tokens = false, Tolerant = false, RegExpParseMode = RegExpParseMode.Skip };
 
         var (parserOptionsFactory, parserFactory, convertToCode) = fixture.StartsWith("JSX", StringComparison.Ordinal)
             ? (CreateParserOptions<JsxParserOptions>,

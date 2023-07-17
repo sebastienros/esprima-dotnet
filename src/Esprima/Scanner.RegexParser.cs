@@ -145,8 +145,17 @@ partial class Scanner
         {
             if ((_flags & RegexFlags.UnicodeSets) != 0)
             {
+                const string UnicodeSetsModeNotSupported = "Unicode sets mode (flag v) is not supported currently";
+                if (_scanner._regExpParseMode is RegExpParseMode.AdaptToInterpreted or RegExpParseMode.AdaptToCompiled)
+                {
+                    HandleConversionFailure(0, UnicodeSetsModeNotSupported);
+                }
+                else
+                {
+                    MoveScannerTo(0).ThrowUnexpectedToken(UnicodeSetsModeNotSupported);
+                }
+
                 adaptedPattern = null;
-                HandleConversionFailure(0, "Unicode sets mode (flag v) is not supported currently");
                 return null;
             }
 
@@ -157,6 +166,10 @@ partial class Scanner
             }
 
             var options = FlagsToOptions(_flags);
+            if (_scanner._regExpParseMode == RegExpParseMode.AdaptToCompiled)
+            {
+                options |= RegexOptions.Compiled;
+            }
             var matchTimeout = _scanner._regexTimeout;
 
             try
@@ -176,12 +189,12 @@ partial class Scanner
             CheckBracesBalance(out var capturingGroups, out var capturingGroupNames);
 
             return (_flags & RegexFlags.Unicode) != 0
-                ? AdjustPattern(UnicodeMode.Instance, ref capturingGroups, capturingGroupNames)
-                : AdjustPattern(LegacyMode.Instance, ref capturingGroups, capturingGroupNames);
+                ? ParsePattern(UnicodeMode.Instance, ref capturingGroups, capturingGroupNames)
+                : ParsePattern(LegacyMode.Instance, ref capturingGroups, capturingGroupNames);
         }
 
         /// <summary>
-        /// Ensures the braces are balanced in a unicode Regex.
+        /// Ensures the braces are balanced in the regular expression pattern.
         /// </summary>
         private void CheckBracesBalance(out ArrayList<RegexCapturingGroup> capturingGroups, out Dictionary<string, string?>? capturingGroupNames)
         {
@@ -349,17 +362,32 @@ partial class Scanner
         }
 
         /// <summary>
-        /// Makes some checks and adjustments to JS regex patterns to ensure that they work as
-        /// expected in .NET on top of the <see cref="RegexOptions.ECMAScript"/> compatibility mode.
+        /// Check the regular expression pattern for additional syntax errors and optionally build an adjusted pattern which
+        /// implements the equivalent behavior in .NET, on top of the <see cref="RegexOptions.ECMAScript"/> compatibility mode.
         /// </summary>
         /// <returns>
-        /// The adjusted pattern or, when the parser is configured to be tolerant, <see langword="null"/> if
-        /// the pattern is syntactically correct but a .NET equivalent could not be constructed.
+        /// <see langword="null"/> if the scanner is configured to validate the regular expression pattern but not adapt it to .NET.
+        /// Otherwise, the adapted pattern or <see langword="null"/> if the pattern is syntactically correct but a .NET equivalent could not be constructed
+        /// and the scanner is configured to tolerant mode.
         /// </returns>
-        private string? AdjustPattern<TMode>(TMode mode, ref ArrayList<RegexCapturingGroup> capturingGroups, Dictionary<string, string?>? capturingGroupNames)
+        private string? ParsePattern<TMode>(TMode mode, ref ArrayList<RegexCapturingGroup> capturingGroups, Dictionary<string, string?>? capturingGroupNames)
             where TMode : IMode
         {
-            var context = new AdjustPatternContext(_scanner.GetStringBuilder(), capturingGroups.AsSpan(), capturingGroupNames)
+            StringBuilder? sb;
+            if (_scanner._regExpParseMode is RegExpParseMode.AdaptToInterpreted or RegExpParseMode.AdaptToCompiled)
+            {
+                sb = _scanner.GetStringBuilder();
+                if (sb.Capacity < _pattern.Length)
+                {
+                    sb.Capacity = _pattern.Length;
+                }
+            }
+            else
+            {
+                sb = null;
+            }
+
+            var context = new ParsePatternContext(sb, capturingGroups.AsSpan(), capturingGroupNames)
             {
                 CapturingGroupCounter = 0,
                 GroupStack = capturingGroupNames is not null
@@ -368,12 +396,6 @@ partial class Scanner
                 SetStartIndex = -1,
                 FollowingQuantifierError = Messages.RegexNothingToRepeat,
             };
-
-            ref readonly var sb = ref context.StringBuilder;
-            if (sb.Capacity < _pattern.Length)
-            {
-                sb.Capacity = _pattern.Length;
-            }
 
             ref var i = ref context.Index;
             for (i = 0; i < _pattern.Length; i++)
@@ -404,7 +426,7 @@ partial class Scanner
                         else
                         {
                             // We encountered a case like /[-]/, /[0-9-]/, /[0-/d-]/, /[/d-0-]/ or /[\0--]/
-                            mode.ProcessSetChar(ref context, ch, s_appendCharSafe, ref this, startIndex: i);
+                            mode.ProcessSetChar(ref context, ch, context.AppendCharSafe, ref this, startIndex: i);
                         }
                         break;
 
@@ -444,24 +466,28 @@ partial class Scanner
                                 MoveScannerTo(i + 3).ThrowUnexpectedToken(Messages.RegexDuplicateCaptureGroupName);
                             }
 
-                            groupName = AdjustCapturingGroupName(groupName!, capturingGroupNames!);
-                            if (groupName is null)
+                            if (sb is not null)
                             {
-                                HandleConversionFailure(i + 3, $"Cannot map group name '{groupName}' to a unique group name in the adapted regex.");
-                                return null;
+                                groupName = AdjustCapturingGroupName(groupName!, capturingGroupNames!);
+                                if (groupName is null)
+                                {
+                                    HandleConversionFailure(i + 3, $"Cannot map group name '{groupName}' to a unique group name in the adapted regex.");
+                                    return null;
+                                }
+
+                                sb.Append(_pattern, i, 3).Append(groupName);
                             }
 
-                            sb.Append(_pattern, i, 3).Append(groupName);
                             i = _pattern.IndexOf('>', i + 3);
                             Debug.Assert(i >= 0);
-                            sb.Append(_pattern[i]);
+                            sb?.Append(_pattern[i]);
 
                             context.GroupStack.Push(new RegexGroup(groupType, currentGroupAlternate));
                             context.FollowingQuantifierError = Messages.RegexNothingToRepeat;
                             break;
                         }
 
-                        sb.Append(_pattern, i, 1 + ((int) groupType >> 2));
+                        sb?.Append(_pattern, i, 1 + ((int) groupType >> 2));
                         i += (int) groupType >> 2;
 
                         context.GroupStack.Push(currentGroupAlternate is not null
@@ -471,7 +497,7 @@ partial class Scanner
                         break;
 
                     case '|' when !context.WithinSet:
-                        sb.Append(ch);
+                        sb?.Append(ch);
 
                         if (capturingGroupNames is not null)
                         {
@@ -490,7 +516,7 @@ partial class Scanner
 
                         groupType = context.GroupStack.Pop().Type;
 
-                        sb.Append(ch);
+                        sb?.Append(ch);
 
                         context.FollowingQuantifierError = mode.AllowsQuantifierAfterGroup(groupType) ? null : Messages.RegexInvalidQuantifier;
                         break;
@@ -500,17 +526,23 @@ partial class Scanner
                     // We can simulate this using RegexOptions.ECMAScript (without RegexOptions.Multiline) + positive lookbehind/lookahead.
 
                     case '^' when !context.WithinSet:
-                        _ = (_flags & RegexFlags.Multiline) != 0
-                            ? sb.Append("(?<=").Append(MatchNewLineRegex).Append('|').Append(ch).Append(')')
-                            : sb.Append(ch);
+                        if (sb is not null)
+                        {
+                            _ = (_flags & RegexFlags.Multiline) != 0
+                                ? sb.Append("(?<=").Append(MatchNewLineRegex).Append('|').Append(ch).Append(')')
+                                : sb.Append(ch);
+                        }
 
                         context.FollowingQuantifierError = Messages.RegexNothingToRepeat;
                         break;
 
                     case '$' when !context.WithinSet:
-                        _ = (_flags & RegexFlags.Multiline) != 0
-                            ? sb.Append("(?=").Append(MatchNewLineRegex).Append('|').Append(ch).Append(')')
-                            : sb.Append(ch);
+                        if (sb is not null)
+                        {
+                            _ = (_flags & RegexFlags.Multiline) != 0
+                                ? sb.Append("(?=").Append(MatchNewLineRegex).Append('|').Append(ch).Append(')')
+                                : sb.Append(ch);
+                        }
 
                         context.FollowingQuantifierError = Messages.RegexNothingToRepeat;
                         break;
@@ -532,11 +564,11 @@ partial class Scanner
                             MoveScannerTo(i).ThrowUnexpectedToken(context.FollowingQuantifierError);
                         }
 
-                        sb.Append(ch);
+                        sb?.Append(ch);
 
                         if ((ch = _pattern.CharCodeAt(i + 1)) == '?')
                         {
-                            sb.Append(ch);
+                            sb?.Append(ch);
                             i++;
                         }
 
@@ -556,7 +588,7 @@ partial class Scanner
 
                         if ((ch = _pattern.CharCodeAt(i + 1)) == '?')
                         {
-                            sb.Append(ch);
+                            sb?.Append(ch);
                             i++;
                         }
 
@@ -574,20 +606,20 @@ partial class Scanner
                     default:
                         if (!context.WithinSet)
                         {
-                            mode.ProcessChar(ref context, ch, s_appendChar, ref this);
+                            mode.ProcessChar(ref context, ch, context.AppendChar, ref this);
                             context.FollowingQuantifierError = null;
                         }
                         else
                         {
                             mode.ProcessSetChar(ref context, ch,
-                                !(ch == '[' && context.SetRangeStart < 0) ? s_appendChar : s_appendCharSafe,
+                                !(ch == '[' && context.SetRangeStart < 0) ? context.AppendChar : context.AppendCharSafe,
                                 ref this, startIndex: i);
                         }
                         break;
                 }
             }
 
-            return sb.ToString();
+            return sb?.ToString();
         }
 
         private static readonly Action<StringBuilder, char> s_appendChar = static (sb, ch) => sb.Append(ch);
@@ -661,7 +693,7 @@ partial class Scanner
             return false;
         }
 
-        private bool TryAdjustRangeQuantifier(ref AdjustPatternContext context)
+        private bool TryAdjustRangeQuantifier(ref ParsePatternContext context)
         {
             ref readonly var sb = ref context.StringBuilder;
             ref var i = ref context.Index;
@@ -723,10 +755,9 @@ partial class Scanner
                     MoveScannerTo(i).ThrowUnexpectedToken(context.FollowingQuantifierError);
                 }
 
-                sb.Append(_pattern, i, endIndex + 1 - i);
-                i = endIndex;
+                sb?.Append(_pattern, i, endIndex + 1 - i);
             }
-            else
+            else if (sb is not null)
             {
                 // According to the spec (https://262.ecma-international.org/13.0/#sec-patterns-static-semantics-early-errors),
                 // number of occurrences can be an arbitrarily big number, however implementations (incl. V8) seems to ignore numbers greater than int.MaxValue.
@@ -734,8 +765,10 @@ partial class Scanner
                 // We report failure in this case because .NET regex engine doesn't allow numbers greater than int.MaxValue.
                 HandleConversionFailure(i, "Inconvertible {} quantifier");
                 i = -1;
+                return true;
             }
 
+            i = endIndex;
             return true;
         }
 
@@ -901,7 +934,7 @@ partial class Scanner
             return "__utf8_" + BitConverter.ToString(Encoding.UTF8.GetBytes(groupName)).Replace("-", "");
         }
 
-        private bool TryAdjustBackreference(ref AdjustPatternContext context, int startIndex)
+        private bool TryAdjustBackreference(ref ParsePatternContext context, int startIndex)
         {
             ref readonly var sb = ref context.StringBuilder;
             ref var i = ref context.Index;
@@ -921,21 +954,22 @@ partial class Scanner
 
             if (startIndex > context.CapturingGroups[number - 1].StartIndex)
             {
-                sb.Append(_pattern, startIndex, endIndex - startIndex);
-                i = endIndex - 1;
+                sb?.Append(_pattern, startIndex, endIndex - startIndex);
             }
-            else
+            else if (sb is not null)
             {
                 // RegexOptions.ECMAScript treats forward references like /\1(A)/ differently than JS,
                 // so we don't make an attempt at rewriting them.
                 HandleConversionFailure(startIndex, "Inconvertible forward reference");
                 i = -1;
+                return true;
             }
 
+            i = endIndex - 1;
             return true;
         }
 
-        private void AdjustNamedBackreference(ref AdjustPatternContext context, int startIndex)
+        private void AdjustNamedBackreference(ref ParsePatternContext context, int startIndex)
         {
             ref readonly var sb = ref context.StringBuilder;
             ref var i = ref context.Index;
@@ -945,16 +979,19 @@ partial class Scanner
             {
                 if (context.CapturingGroupNames?.TryGetValue(groupName, out var adjustedGroupName) is true)
                 {
-                    if (IsDefinedCapturingGroupName(groupName, startIndex, context.CapturingGroups))
+                    if (sb is not null)
                     {
-                        sb.Append(_pattern, startIndex, 3).Append(adjustedGroupName).Append(_pattern[i]);
-                    }
-                    else
-                    {
-                        // RegexOptions.ECMAScript treats forward references like /\k<a>(?<a>A)/ differently than JS,
-                        // so we don't make an attempt at rewriting them.
-                        HandleConversionFailure(startIndex, "Inconvertible named forward reference");
-                        i = -1;
+                        if (IsDefinedCapturingGroupName(groupName, startIndex, context.CapturingGroups))
+                        {
+                            sb.Append(_pattern, startIndex, 3).Append(adjustedGroupName).Append(_pattern[i]);
+                        }
+                        else
+                        {
+                            // RegexOptions.ECMAScript treats forward references like /\k<a>(?<a>A)/ differently than JS,
+                            // so we don't make an attempt at rewriting them.
+                            HandleConversionFailure(startIndex, "Inconvertible named forward reference");
+                            i = -1;
+                        }
                     }
                 }
                 else
@@ -990,18 +1027,26 @@ partial class Scanner
             return _scanner._codePointRangeCache ??= new CodePointRange.Cache();
         }
 
-        private ref struct AdjustPatternContext
+        private ref struct ParsePatternContext
         {
-            public AdjustPatternContext(StringBuilder sb, ReadOnlySpan<RegexCapturingGroup> capturingGroups, Dictionary<string, string?>? capturingGroupNames)
+            public ParsePatternContext(StringBuilder? sb, ReadOnlySpan<RegexCapturingGroup> capturingGroups, Dictionary<string, string?>? capturingGroupNames)
             {
                 StringBuilder = sb;
+                if (sb is not null)
+                {
+                    AppendChar = s_appendChar;
+                    AppendCharSafe = s_appendCharSafe;
+                }
+
                 CapturingGroups = capturingGroups;
                 CapturingGroupNames = capturingGroupNames;
             }
 
             public int Index;
 
-            public readonly StringBuilder StringBuilder;
+            public readonly StringBuilder? StringBuilder;
+            public readonly Action<StringBuilder, char>? AppendChar;
+            public readonly Action<StringBuilder, char>? AppendCharSafe;
 
             public readonly ReadOnlySpan<RegexCapturingGroup> CapturingGroups;
 
@@ -1054,21 +1099,21 @@ partial class Scanner
 
         private interface IMode
         {
-            void ProcessChar(ref AdjustPatternContext context, char ch, Action<StringBuilder, char> appender, ref RegexParser parser);
+            void ProcessChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser);
 
-            void ProcessSetSpecialChar(ref AdjustPatternContext context, char ch);
+            void ProcessSetSpecialChar(ref ParsePatternContext context, char ch);
 
-            void ProcessSetChar(ref AdjustPatternContext context, char ch, Action<StringBuilder, char> appender, ref RegexParser parser, int startIndex);
+            void ProcessSetChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser, int startIndex);
 
-            bool RewriteSet(ref AdjustPatternContext context, ref RegexParser parser);
+            bool RewriteSet(ref ParsePatternContext context, ref RegexParser parser);
 
-            void RewriteDot(ref AdjustPatternContext context, bool dotAll);
+            void RewriteDot(ref ParsePatternContext context, bool dotAll);
 
             bool AllowsQuantifierAfterGroup(RegexGroupType groupType);
 
-            void HandleInvalidRangeQuantifier(ref AdjustPatternContext context, ref RegexParser parser, int startIndex);
+            void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegexParser parser, int startIndex);
 
-            bool AdjustEscapeSequence(ref AdjustPatternContext context, ref RegexParser parser);
+            bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegexParser parser);
         }
     }
 

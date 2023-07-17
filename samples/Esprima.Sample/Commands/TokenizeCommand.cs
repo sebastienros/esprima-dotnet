@@ -33,7 +33,7 @@ internal sealed class TokenizeCommand
 
         var scanner = new Scanner(code, new ScannerOptions
         {
-            AdaptRegexp = false,
+            RegExpParseMode = RegExpParseMode.Validate,
             Comments = Comments,
             Tolerant = Tolerant,
         });

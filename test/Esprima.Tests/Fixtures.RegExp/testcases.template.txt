@@ -1562,13 +1562,13 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	pijamalı hasta yağız ş
 \p{ }		p{ }
 \p{ }	u	p{ }
 \p{?}		p{}
-\p{?}	u	p{}	!ignore-error-message
+\p{?}	u	p{}	!ignore-error-message !skip-validation
 \p{1}		p
-\p{1}	u	p	!ignore-error-message
+\p{1}	u	p	!ignore-error-message !skip-validation
 \p{1,}		pp
-\p{1,}	u	pp	!ignore-error-message
+\p{1,}	u	pp	!ignore-error-message !skip-validation
 \p{Script=Latn}		p{Script=Latn}
-\p{Script=Latn}	u	p{Script=Latn}	!ignore-error-message
+\p{Script=Latn}	u	p{Script=Latn}	!ignore-error-message !skip-validation
 \p{General_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
 
 \P		P
@@ -1580,13 +1580,13 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	pijamalı hasta yağız ş
 \P{ }		P{ }
 \P{ }	u	P{ }
 \P{?}		P{}
-\P{?}	u	P{}	!ignore-error-message
+\P{?}	u	P{}	!ignore-error-message !skip-validation
 \P{1}		P
-\P{1}	u	P	!ignore-error-message
+\P{1}	u	P	!ignore-error-message !skip-validation
 \P{1,}		PP
-\P{1,}	u	PP	!ignore-error-message
+\P{1,}	u	PP	!ignore-error-message !skip-validation
 \P{Script=Latn}		P{Script=Latn}
-\P{Script=Latn}	u	P{Script=Latn}	!ignore-error-message
+\P{Script=Latn}	u	P{Script=Latn}	!ignore-error-message !skip-validation
 \P{General_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
 
 [\p]		\p
@@ -1598,13 +1598,13 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	pijamalı hasta yağız ş
 [\p{ }]		\p{ }
 [\p{ }]	u	\p{ }
 [\p{?}]		\p{?}
-[\p{?}]	u	\p{?}	!ignore-error-message
+[\p{?}]	u	\p{?}	!ignore-error-message !skip-validation
 [\p{1}]		\p{1}
-[\p{1}]	u	\p{1}	!ignore-error-message
+[\p{1}]	u	\p{1}	!ignore-error-message !skip-validation
 [\p{1,}]		\p{1,}
-[\p{1,}]	u	\p{1,}	!ignore-error-message
+[\p{1,}]	u	\p{1,}	!ignore-error-message !skip-validation
 [\p{Script=Latn}]		\p{Script=Latn}
-[\p{Script=Latn}]	u	\p{Script=Latn}	!ignore-error-message
+[\p{Script=Latn}]	u	\p{Script=Latn}	!ignore-error-message !skip-validation
 [\p{General_Category=Currency_Symbol}]	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
 
 [\P]		\P
@@ -1616,13 +1616,13 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	pijamalı hasta yağız ş
 [\P{ }]		\P{ }
 [\P{ }]	u	\P{ }
 [\P{?}]		\P{?}
-[\P{?}]	u	\P{?}	!ignore-error-message
+[\P{?}]	u	\P{?}	!ignore-error-message !skip-validation
 [\P{1}]		\P{1}
-[\P{1}]	u	\P{1}	!ignore-error-message
+[\P{1}]	u	\P{1}	!ignore-error-message !skip-validation
 [\P{1,}]		\P{1,}
-[\P{1,}]	u	\P{1,}	!ignore-error-message
+[\P{1,}]	u	\P{1,}	!ignore-error-message !skip-validation
 [\P{Script=Latn}]		\P{Script=Latn}
-[\P{Script=Latn}]	u	\P{Script=Latn}	!ignore-error-message
+[\P{Script=Latn}]	u	\P{Script=Latn}	!ignore-error-message !skip-validation
 [\P{General_Category=Currency_Symbol}]	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
 
 \p{General_Category=Sc}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
@@ -1631,17 +1631,17 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	pijamalı hasta yağız ş
 \p{Currency_Symbol}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
 \p{Sc}	u	$€£𑿝¥ a0?	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
 
-\p{General_Category}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{General_Category=}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{ General_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{General_Category=Currency_Symbol }	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{General_Category =Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{General_Category= Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{General_Category=CurrencySymbol}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{General_Category=currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{GeneralCategory=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
-\p{general_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message
+\p{General_Category}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{General_Category=}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{ General_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{General_Category=Currency_Symbol }	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{General_Category =Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{General_Category= Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{General_Category=CurrencySymbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{General_Category=currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{GeneralCategory=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
+\p{general_Category=Currency_Symbol}	u	$€£𑿝¥ a0?	!ignore-error-message !skip-validation
 
 \p{L}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)
 \p{Letter}	u	"DϠeⱬǅǈʷჼªఎ͎︁ःඃ҉꙰7᱐ᛮ〩³㉒ 　\u2028\u2029\u000f­᠎\udf39\uda29_︳-⸺(﹝)⸥«‟»⸡!︓+⟶$؋^꜄¦⎗͹゘"	!skip-on-netframework	# (the adapted pattern depends on the Unicode version included in the .NET runtime)

@@ -5,7 +5,7 @@ namespace Esprima.Tests.Helpers;
 
 public class JavaScriptStringHelper
 {
-    private static readonly ParserOptions s_parserOptions = new() { AdaptRegexp = false, Tolerant = false };
+    private static readonly ParserOptions s_parserOptions = new() { RegExpParseMode = RegExpParseMode.Skip, Tolerant = false };
 
     public static bool IsStringLiteral(string value) => value.Length > 2
         && (value.StartsWith("\"", StringComparison.Ordinal) && value.EndsWith("\"", StringComparison.Ordinal)

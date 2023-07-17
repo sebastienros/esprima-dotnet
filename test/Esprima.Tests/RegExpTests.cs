@@ -17,7 +17,7 @@ public class RegExpTests
 
     private static Regex CreateRegex(string code)
     {
-        var options = new ScannerOptions { AdaptRegexp = true };
+        var options = new ScannerOptions { RegExpParseMode = RegExpParseMode.AdaptToInterpreted };
         var token = new Scanner(code, options).ScanRegExp();
         return (Regex) token.Value!;
     }
@@ -172,7 +172,7 @@ public class RegExpTests
     [Fact]
     public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
     {
-        var regex = Scanner.ParseRegex("\\$", "gm", TimeSpan.FromSeconds(10));
+        var regex = Scanner.AdaptRegExp("\\$", "gm", matchTimeout: TimeSpan.FromSeconds(10));
         Assert.NotNull(regex);
     }
 
@@ -183,8 +183,117 @@ public class RegExpTests
 
         var path = Path.Combine(Fixtures.GetFixturesPath(), "Fixtures", "3rdparty", "bundle.js");
         var source = File.ReadAllText(path);
-        var parser = new JavaScriptParser(new ParserOptions { AdaptRegexp = true });
+        var parser = new JavaScriptParser(new ParserOptions { RegExpParseMode = RegExpParseMode.AdaptToInterpreted });
         parser.ParseScript(source);
+    }
+
+    [InlineData("/ab?c/u", RegExpParseMode.Skip, false, false, null)]
+    [InlineData("/ab?c/u", RegExpParseMode.Skip, true, false, null)]
+    [InlineData("/ab?c/u", RegExpParseMode.Validate, false, false, null)]
+    [InlineData("/ab?c/u", RegExpParseMode.Validate, true, false, null)]
+    [InlineData("/ab?c/u", RegExpParseMode.AdaptToInterpreted, false, false, false)]
+    [InlineData("/ab?c/u", RegExpParseMode.AdaptToInterpreted, true, false, false)]
+    [InlineData("/ab?c/u", RegExpParseMode.AdaptToCompiled, false, false, true)]
+    [InlineData("/ab?c/u", RegExpParseMode.AdaptToCompiled, true, false, true)]
+    [InlineData("/ab|?c/u", RegExpParseMode.Skip, false, false, null)]
+    [InlineData("/ab|?c/u", RegExpParseMode.Skip, true, false, null)]
+    [InlineData("/ab|?c/u", RegExpParseMode.Validate, false, true, null)]
+    [InlineData("/ab|?c/u", RegExpParseMode.Validate, true, true, null)]
+    [InlineData("/ab|?c/u", RegExpParseMode.AdaptToInterpreted, false, true, null)]
+    [InlineData("/ab|?c/u", RegExpParseMode.AdaptToInterpreted, true, true, null)]
+    [InlineData("/ab|?c/u", RegExpParseMode.AdaptToCompiled, false, true, null)]
+    [InlineData("/ab|?c/u", RegExpParseMode.AdaptToCompiled, true, true, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.Skip, false, false, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.Skip, true, false, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.Validate, false, false, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.Validate, true, false, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.AdaptToInterpreted, false, true, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.AdaptToInterpreted, true, false, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.AdaptToCompiled, false, true, null)]
+    [InlineData("/\\1a(b?)c/u", RegExpParseMode.AdaptToCompiled, true, false, null)]
+    [Theory]
+    public void ShouldRespectParserOptions(string expression, RegExpParseMode parseMode, bool tolerant, bool expectError, bool? expectCompiled)
+    {
+        var matchTimeout = TimeSpan.FromMilliseconds(1234);
+
+        var parser = new JavaScriptParser(new ParserOptions { RegExpParseMode = parseMode, RegexTimeout = matchTimeout, Tolerant = tolerant });
+
+        if (!expectError)
+        {
+            var expr = parser.ParseExpression(expression);
+
+            Assert.IsType<RegExpLiteral>(expr);
+
+            var regex = expr.As<RegExpLiteral>().RegexValue;
+            if (expectCompiled is not null)
+            {
+                Assert.NotNull(regex);
+                Assert.Equal(expectCompiled.Value, regex.Options.HasFlag(RegexOptions.Compiled));
+                Assert.Equal(matchTimeout, regex.MatchTimeout);
+            }
+            else
+            {
+                Assert.Null(regex);
+            }
+        }
+        else
+        {
+            Assert.Throws<ParserException>(() => parser.ParseExpression(expression));
+        }
+    }
+
+    [InlineData("ab?c", "u", false, false, false, false)]
+    [InlineData("ab?c", "u", false, true, false, false)]
+    [InlineData("ab?c", "u", true, false, false, true)]
+    [InlineData("ab?c", "u", true, true, false, true)]
+    [InlineData("ab|?c", "u", false, false, true, null)]
+    [InlineData("ab|?c", "u", false, true, true, null)]
+    [InlineData("ab|?c", "u", true, false, true, null)]
+    [InlineData("ab|?c", "u", true, true, true, null)]
+    [InlineData("\\1a(b?)c", "u", false, false, false, null)]
+    [InlineData("\\1a(b?)c", "u", false, true, true, null)]
+    [InlineData("\\1a(b?)c", "u", true, false, false, null)]
+    [InlineData("\\1a(b?)c", "u", true, true, true, null)]
+    [Theory]
+    public void AdaptRegExpShouldRespectParameters(string pattern, string flags, bool compiled, bool throwIfNotAdaptable, bool expectError, bool? expectCompiled)
+    {
+        var matchTimeout = TimeSpan.FromMilliseconds(1234);
+
+        if (!expectError)
+        {
+            var regex = Scanner.AdaptRegExp(pattern, flags, compiled, matchTimeout, throwIfNotAdaptable);
+            if (expectCompiled is not null)
+            {
+                Assert.NotNull(regex);
+                Assert.Equal(expectCompiled.Value, regex.Options.HasFlag(RegexOptions.Compiled));
+                Assert.Equal(matchTimeout, regex.MatchTimeout);
+            }
+            else
+            {
+                Assert.Null(regex);
+            }
+        }
+        else
+        {
+            Assert.Throws<ParserException>(() => Scanner.AdaptRegExp(pattern, flags, compiled, matchTimeout, throwIfNotAdaptable));
+        }
+    }
+
+    [InlineData("ab?c", "u", true)]
+    [InlineData("ab|?c", "u", false)]
+    [InlineData("\\1a(b?)c", "u", true)]
+    [Theory]
+    public void ValidateRegExpShouldWork(string pattern, string flags, bool expectedResult)
+    {
+        Assert.Equal(expectedResult, Scanner.ValidateRegExp(pattern, flags, out var error));
+        if (expectedResult)
+        {
+            Assert.Null(error);
+        }
+        else
+        {
+            Assert.NotNull(error);
+        }
     }
 
     [InlineData("(?<a>x)|(?<a>y)", "u", "(?<a>x)|(?<a>y)")]
@@ -279,11 +388,15 @@ public class RegExpTests
         // so we need to parse the JSON containing the matches "manually"...
         var (expectedMatches, syntaxError) = RegExpMatch.MatchesFrom(JavaScriptStringHelper.ParseAsExpression(expectedMatchesJson));
 
-        var regexParser = new Scanner.RegexParser(pattern, flags, new ScannerOptions { Tolerant = expectedMatches is not null });
+        var regexValidator = new Scanner.RegexParser(pattern, flags, new ScannerOptions { RegExpParseMode = RegExpParseMode.Validate, Tolerant = false });
+        var regexConverter = new Scanner.RegexParser(pattern, flags, new ScannerOptions { RegExpParseMode = RegExpParseMode.AdaptToInterpreted, Tolerant = expectedMatches is not null });
 
         if (expectedMatches is not null)
         {
-            var adaptedRegex = regexParser.Parse(out var actualAdaptedPattern);
+            Assert.Null(regexValidator.Parse(out var actualAdaptedPattern));
+            Assert.Null(actualAdaptedPattern);
+
+            var adaptedRegex = regexConverter.Parse(out actualAdaptedPattern);
             if (expectedAdaptedPattern != ")inconvertible(")
             {
                 Assert.NotNull(adaptedRegex);
@@ -354,11 +467,30 @@ public class RegExpTests
         }
         else
         {
-            var ex = Assert.Throws<ParserException>(() => regexParser.Parse(out var _));
+            Exception ex;
 
-            if (!hintArray.Contains("!ignore-error-message"))
+            if (!hintArray.Contains("!skip-validation"))
             {
-                Assert.Contains("Invalid regular expression: " + syntaxError, ex.Message, StringComparison.Ordinal);
+                ex = Assert.Throws<ParserException>(() => regexValidator.Parse(out var _));
+
+                if (!hintArray.Contains("!ignore-error-message"))
+                {
+                    Assert.Contains("Invalid regular expression: " + syntaxError, ex.Message, StringComparison.Ordinal);
+                }
+            }
+
+            ex = Assert.Throws<ParserException>(() => regexConverter.Parse(out var _));
+
+            if (expectedAdaptedPattern != ")inconvertible(")
+            {
+                if (!hintArray.Contains("!ignore-error-message"))
+                {
+                    Assert.Contains("Invalid regular expression: " + syntaxError, ex.Message, StringComparison.Ordinal);
+                }
+            }
+            else
+            {
+                Assert.Contains("Cannot convert regular expression", ex.Message, StringComparison.Ordinal);
             }
         }
     }

@@ -38,7 +38,7 @@ public sealed partial class Scanner
     private readonly ErrorHandler _errorHandler;
     private readonly bool _tolerant;
     private readonly bool _trackComment;
-    private readonly bool _adaptRegexp;
+    private readonly RegExpParseMode _regExpParseMode;
     private readonly TimeSpan _regexTimeout;
 
     private int _length;
@@ -69,7 +69,7 @@ public sealed partial class Scanner
             throw new ArgumentNullException(nameof(options));
         }
 
-        _adaptRegexp = options.AdaptRegexp;
+        _regExpParseMode = options.RegExpParseMode;
         _regexTimeout = options.RegexTimeout;
         _errorHandler = options.ErrorHandler;
         _tolerant = options.Tolerant;
@@ -1773,17 +1773,57 @@ ParseIdentifierPart:
     }
 
     /// <summary>
-    /// Converts an ECMAScript regular expression to a <see cref="Regex"/> instance and tries to adapt regex
-    /// to work in .NET when possible.
+    /// Checks whether an ECMAScript regular expression is syntactically correct.
     /// </summary>
+    /// <remarks>
+    /// Expressions within Unicode property escape sequences (\p{...} and \P{...}) are not validated currently.
+    /// </remarks>
+    /// <returns><see langword="true"/> if the regular expression is syntactically correct, otherwise <see langword="false"/>.</returns>
+    public static bool ValidateRegExp(string pattern, string flags, out ParseError? error)
+    {
+        if (pattern is null)
+        {
+            throw new ArgumentNullException(nameof(pattern));
+        }
+
+        if (flags is null)
+        {
+            throw new ArgumentNullException(nameof(flags));
+        }
+
+        var scannerOptions = new ScannerOptions { RegExpParseMode = RegExpParseMode.Validate, Tolerant = false };
+
+        try
+        {
+            new RegexParser(pattern, flags, scannerOptions).Parse(out _);
+        }
+        catch (ParserException ex)
+        {
+            error = ex.Error;
+            return false;
+        }
+
+        error = default;
+        return true;
+    }
+
+    /// <summary>
+    /// Parses an ECMAScript regular expression and tries to construct a <see cref="Regex"/> instance with the equivalent behavior.
+    /// </summary>
+    /// <remarks>
+    /// Please note that, because of some fundamental differences between the ECMAScript and .NET regular expression engines,
+    /// not every ECMAScript regular expression can be converted to an equivalent <see cref="Regex"/> (or can be converted with compromises only).
+    /// You can read more about the known issues of the conversion <see href="https://github.com/sebastienros/esprima-dotnet/pull/364#issuecomment-1606045259">here</see>.
+    /// </remarks>
     /// <returns>
-    /// The equivalent <see cref="Regex"/> if the conversion was possible, otherwise <see langword="null"/>.
+    /// The equivalent <see cref="Regex"/> if the conversion was possible,
+    /// otherwise <see langword="null"/> (unless <paramref name="throwIfNotAdaptable"/> is <see langword="true"/>).
     /// </returns>
     /// <exception cref="ParserException">
-    /// <paramref name="pattern"/> is an invalid regex pattern or, when <paramref name="tolerant"/> is <see langword="false"/>,
-    /// cannot be converted to an equivalent <see cref="Regex"/>.
+    /// <paramref name="pattern"/> is an invalid regex pattern or cannot be converted
+    /// to an equivalent <see cref="Regex"/> (if <paramref name="throwIfNotAdaptable"/> is <see langword="true"/>).
     /// </exception>
-    public static Regex? ParseRegex(string pattern, string flags, TimeSpan? matchTimeout = null, bool tolerant = true, ErrorHandler? errorHandler = null)
+    public static Regex? AdaptRegExp(string pattern, string flags, bool compiled = false, TimeSpan? matchTimeout = null, bool throwIfNotAdaptable = false)
     {
         if (pattern is null)
         {
@@ -1797,11 +1837,12 @@ ParseIdentifierPart:
 
         var defaultOptions = ScannerOptions.Default;
         matchTimeout ??= defaultOptions.RegexTimeout;
-        errorHandler ??= defaultOptions.ErrorHandler;
+        var parseMode = !compiled ? RegExpParseMode.AdaptToInterpreted : RegExpParseMode.AdaptToCompiled;
+        var tolerant = !throwIfNotAdaptable;
 
-        var scannerOptions = matchTimeout.Value == defaultOptions.RegexTimeout && tolerant == defaultOptions.Tolerant && errorHandler == defaultOptions.ErrorHandler
+        var scannerOptions = parseMode == defaultOptions.RegExpParseMode && matchTimeout.Value == defaultOptions.RegexTimeout && tolerant == defaultOptions.Tolerant
             ? ScannerOptions.Default
-            : new ScannerOptions { RegexTimeout = matchTimeout.Value, Tolerant = tolerant, ErrorHandler = errorHandler };
+            : new ScannerOptions { RegExpParseMode = parseMode, RegexTimeout = matchTimeout.Value, Tolerant = tolerant };
 
         return new RegexParser(pattern, flags, scannerOptions).Parse(out _);
     }
@@ -1919,7 +1960,7 @@ ParseIdentifierPart:
         var flagsStart = _index;
         var flags = ScanRegExpFlags();
 
-        var value = _adaptRegexp
+        var value = _regExpParseMode != RegExpParseMode.Skip
             ? new RegexParser(body, bodyStart + 1, flags, flagsStart, this).Parse(out _)
             : null;
 

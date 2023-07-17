@@ -18,7 +18,7 @@ partial class Scanner
 
             private UnicodeMode() { }
 
-            public void ProcessChar(ref AdjustPatternContext context, char ch, Action<StringBuilder, char> appender, ref RegexParser parser)
+            public void ProcessChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser)
             {
                 ref readonly var sb = ref context.StringBuilder;
                 ref readonly var pattern = ref parser._pattern;
@@ -26,17 +26,20 @@ partial class Scanner
 
                 if (!char.IsSurrogate(ch))
                 {
-                    appender(sb, ch);
+                    appender?.Invoke(sb!, ch);
                 }
                 else if (char.IsHighSurrogate(ch) && char.IsLowSurrogate(pattern.CharCodeAt(i + 1)))
                 {
                     // Surrogate pairs should be surrounded by a non-capturing group to act as one character (because of cases like /💩+/u).
-                    sb.Append("(?:").Append(ch).Append(pattern[i + 1]).Append(')');
+                    sb?.Append("(?:").Append(ch).Append(pattern[i + 1]).Append(')');
                     i++;
                 }
                 else
                 {
-                    AppendLoneSurrogate(sb, ch);
+                    if (sb is not null)
+                    {
+                        AppendLoneSurrogate(sb, ch);
+                    }
                 }
             }
 
@@ -69,20 +72,23 @@ partial class Scanner
 
             private static void AppendLoneSurrogate(StringBuilder sb, char ch)
             {
-                // Lone surrogates must not match parts of surrogate pairs
-                // (see https://exploringjs.com/es6/ch_regexp.html#_consequence-lone-surrogates-in-the-regular-expression-only-match-lone-surrogates).
-                // We can simulate this using negative lookbehind/lookahead.
+                if (sb is not null)
+                {
+                    // Lone surrogates must not match parts of surrogate pairs
+                    // (see https://exploringjs.com/es6/ch_regexp.html#_consequence-lone-surrogates-in-the-regular-expression-only-match-lone-surrogates).
+                    // We can simulate this using negative lookbehind/lookahead.
 
-                sb.Append("(?:");
-                _ = char.IsHighSurrogate(ch)
-                    ? sb.Append(ch).Append("(?![\uDC00-\uDFFF])")
-                    : sb.Append("(?<![\uD800-\uDBFF])").Append(ch);
-                sb.Append(')');
+                    sb.Append("(?:");
+                    _ = char.IsHighSurrogate(ch)
+                        ? sb.Append(ch).Append("(?![\uDC00-\uDFFF])")
+                        : sb.Append("(?<![\uD800-\uDBFF])").Append(ch);
+                    sb.Append(')');
+                }
             }
 
-            public void ProcessSetSpecialChar(ref AdjustPatternContext context, char ch) { }
+            public void ProcessSetSpecialChar(ref ParsePatternContext context, char ch) { }
 
-            public void ProcessSetChar(ref AdjustPatternContext context, char ch, Action<StringBuilder, char> appender, ref RegexParser parser, int startIndex)
+            public void ProcessSetChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser, int startIndex)
             {
                 ref readonly var pattern = ref parser._pattern;
                 ref var i = ref context.Index;
@@ -99,13 +105,19 @@ partial class Scanner
                 }
             }
 
-            private static void AddSetCodePoint(ref AdjustPatternContext context, int cp, ref RegexParser parser, int startIndex)
+            private static void AddSetCodePoint(ref ParsePatternContext context, int cp, ref RegexParser parser, int startIndex)
             {
                 Debug.Assert(cp is >= 0 and <= Character.UnicodeLastCodePoint, "Invalid end code point.");
 
+                var sb = context.StringBuilder;
+
                 if (context.SetRangeStart >= 0)
                 {
-                    context.UnicodeSet.Add(new CodePointRange(cp));
+                    if (sb is not null)
+                    {
+                        context.UnicodeSet.Add(new CodePointRange(cp));
+                    }
+
                     context.SetRangeStart = cp;
                 }
                 else
@@ -120,26 +132,33 @@ partial class Scanner
                             : Messages.RegexInvalidCharacterClass);
                     }
 
-                    context.UnicodeSet.AsSpan().Last() = new CodePointRange(context.SetRangeStart, cp);
+                    if (sb is not null)
+                    {
+                        context.UnicodeSet.AsSpan().Last() = new CodePointRange(context.SetRangeStart, cp);
+                    }
+
                     context.SetRangeStart = SetRangeNotStarted;
                 }
             }
 
-            public bool RewriteSet(ref AdjustPatternContext context, ref RegexParser parser)
+            public bool RewriteSet(ref ParsePatternContext context, ref RegexParser parser)
             {
                 ref readonly var sb = ref context.StringBuilder;
                 ref readonly var pattern = ref parser._pattern;
 
-                if (context.SetRangeStart < 0)
+                if (sb is not null)
                 {
-                    context.UnicodeSet.Add(new CodePointRange('-'));
+                    if (context.SetRangeStart < 0)
+                    {
+                        context.UnicodeSet.Add(new CodePointRange('-'));
+                    }
+
+                    CodePointRange.NormalizeRanges(ref context.UnicodeSet);
+
+                    AppendSet(sb, context.UnicodeSet.AsSpan(), isInverted: pattern.CharCodeAt(context.SetStartIndex + 1) == '^');
+
+                    context.UnicodeSet = default;
                 }
-
-                CodePointRange.NormalizeRanges(ref context.UnicodeSet);
-
-                AppendSet(sb, context.UnicodeSet.AsSpan(), isInverted: pattern.CharCodeAt(context.SetStartIndex + 1) == '^');
-
-                context.UnicodeSet = default;
 
                 return true;
             }
@@ -563,18 +582,20 @@ partial class Scanner
                 };
             }
 
-            public void RewriteDot(ref AdjustPatternContext context, bool dotAll)
+            public void RewriteDot(ref ParsePatternContext context, bool dotAll)
             {
                 ref readonly var sb = ref context.StringBuilder;
+                if (sb is not null)
+                {
+                    // '.' has to be adjusted to also match all surrogate pairs.
 
-                // '.' has to be adjusted to also match all surrogate pairs.
+                    // NOTE: It's important to match surrogate pairs with the first alternate to prevent matching the high and low surrogates separately
+                    // (see also https://stackoverflow.com/a/18017758).
 
-                // NOTE: It's important to match surrogate pairs with the first alternate to prevent matching the high and low surrogates separately
-                // (see also https://stackoverflow.com/a/18017758).
-
-                sb.Append("(?:").Append(MatchSurrogatePairRegex).Append('|');
-                _ = dotAll ? sb.Append(MatchAnyCharRegex) : sb.Append(MatchNoNewLineRegex);
-                sb.Append(')');
+                    sb.Append("(?:").Append(MatchSurrogatePairRegex).Append('|');
+                    _ = dotAll ? sb.Append(MatchAnyCharRegex) : sb.Append(MatchNoNewLineRegex);
+                    sb.Append(')');
+                }
             }
 
             public bool AllowsQuantifierAfterGroup(RegexGroupType groupType)
@@ -589,12 +610,12 @@ partial class Scanner
                 );
             }
 
-            public void HandleInvalidRangeQuantifier(ref AdjustPatternContext context, ref RegexParser parser, int startIndex)
+            public void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegexParser parser, int startIndex)
             {
                 parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexIncompleteQuantifier);
             }
 
-            public bool AdjustEscapeSequence(ref AdjustPatternContext context, ref RegexParser parser)
+            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegexParser parser)
             {
                 // https://262.ecma-international.org/13.0/#prod-AtomEscape
 
@@ -632,7 +653,11 @@ partial class Scanner
 
                         if (!context.WithinSet)
                         {
-                            AppendCodePointSafe(sb, codePoint);
+                            if (sb is not null)
+                            {
+                                AppendCodePointSafe(sb, codePoint);
+                            }
+
                             context.FollowingQuantifierError = null;
                         }
                         else
@@ -657,7 +682,11 @@ partial class Scanner
                                     codePoint = char.ConvertToUtf32((char) charCode, (char) charCode2);
                                     if (!context.WithinSet)
                                     {
-                                        AppendCodePointSafe(sb, codePoint);
+                                        if (sb is not null)
+                                        {
+                                            AppendCodePointSafe(sb, codePoint);
+                                        }
+
                                         context.FollowingQuantifierError = null;
                                     }
                                     else
@@ -672,7 +701,11 @@ partial class Scanner
 
                             if (!context.WithinSet)
                             {
-                                AppendUnicodeCharSafe(sb, (char) charCode);
+                                if (sb is not null)
+                                {
+                                    AppendUnicodeCharSafe(sb, (char) charCode);
+                                }
+
                                 context.FollowingQuantifierError = null;
                             }
                             else
@@ -696,7 +729,7 @@ partial class Scanner
 
                                 if (!context.WithinSet)
                                 {
-                                    AppendCharSafe(sb, (char) charCode);
+                                    context.AppendCharSafe?.Invoke(sb!, (char) charCode);
                                     context.FollowingQuantifierError = null;
                                 }
                                 else
@@ -716,7 +749,7 @@ partial class Scanner
                         {
                             if (!context.WithinSet)
                             {
-                                AppendCharSafe(sb, '\0');
+                                context.AppendCharSafe?.Invoke(sb!, '\0');
                                 context.FollowingQuantifierError = null;
                             }
                             else
@@ -733,7 +766,7 @@ partial class Scanner
                         break;
 
                     // DecimalEscape
-                    case '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9':
+                    case >= '1' and <= '9':
                         if (!context.WithinSet)
                         {
                             // Outside character sets, numbers may be backreferences (in this case the number is interpreted as decimal).
@@ -782,25 +815,29 @@ partial class Scanner
                             // which defines \s as [\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]. We need to adjust both \s and \S.
                             // \D and \W also have to be adjusted outside character sets.
 
-                            if (ch is 'D' or 'S' or 'W')
+                            if (sb is not null)
                             {
-                                const string InvertedDigitPattern = "\0-\\x2F\\x3A-\uFFFF";
-                                const string InvertedWordCharPattern = "\0-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-\uFFFF";
+                                if (ch is 'D' or 'S' or 'W')
+                                {
+                                    const string InvertedDigitPattern = "\0-\\x2F\\x3A-\uFFFF";
+                                    const string InvertedWordCharPattern = "\0-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-\uFFFF";
 
-                                // NOTE: It's important to match surrogate pairs with the first alternate to prevent matching the high and low surrogates separately
-                                // (see also https://stackoverflow.com/a/18017758).
+                                    // NOTE: It's important to match surrogate pairs with the first alternate to prevent matching the high and low surrogates separately
+                                    // (see also https://stackoverflow.com/a/18017758).
 
-                                sb.Append("(?:");
-                                sb.Append(MatchSurrogatePairRegex);
-                                sb.Append('|').Append('[').Append(ch switch { 'D' => InvertedDigitPattern, 'S' => InvertedWhiteSpacePattern, _ => InvertedWordCharPattern }).Append(']');
-                                sb.Append(')');
+                                    sb.Append("(?:");
+                                    sb.Append(MatchSurrogatePairRegex);
+                                    sb.Append('|').Append('[').Append(ch switch { 'D' => InvertedDigitPattern, 'S' => InvertedWhiteSpacePattern, _ => InvertedWordCharPattern }).Append(']');
+                                    sb.Append(')');
+                                }
+                                else
+                                {
+                                    _ = ch == 's'
+                                        ? sb.Append('[').Append('\\').Append(ch).Append(AdditionalWhiteSpacePattern).Append(']')
+                                        : sb.Append(pattern, startIndex, 2);
+                                }
                             }
-                            else
-                            {
-                                _ = ch == 's'
-                                    ? sb.Append('[').Append('\\').Append(ch).Append(AdditionalWhiteSpacePattern).Append(']')
-                                    : sb.Append(pattern, startIndex, 2);
-                            }
+
                             context.FollowingQuantifierError = null;
                         }
                         else
@@ -809,7 +846,12 @@ partial class Scanner
                             {
                                 parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidCharacterClass);
                             }
-                            AddStandardCharClass(ref context.UnicodeSet, ch);
+
+                            if (sb is not null)
+                            {
+                                AddStandardCharClass(ref context.UnicodeSet, ch);
+                            }
+
                             context.SetRangeStart = SetRangeStartedWithCharClass;
                         }
                         break;
@@ -838,19 +880,33 @@ partial class Scanner
                             // So, the best effort we can make ATM is to cook from what .NET provides out of the box,
                             // which is practically General Categories. There's no easy way to support other expressions for now.
 
-                            if (!TryTranslateUnicodePropertyToRanges(slice, parser.GetCodePointRangeCache(), out var categoryRanges))
+                            ArrayList<CodePointRange> categoryRangeList;
+                            if (sb is not null)
                             {
-                                parser.HandleConversionFailure(startIndex, "Inconvertible Unicode property escape");
-                                return false;
-                            }
+                                if (!TryTranslateUnicodePropertyToRanges(slice, parser.GetCodePointRangeCache(), out var categoryRanges))
+                                {
+                                    parser.HandleConversionFailure(startIndex, "Inconvertible Unicode property escape");
+                                    return false;
+                                }
 
-                            var categoryRangeList = ch == 'P'
-                                ? CodePointRange.InvertRanges(categoryRanges)
-                                : new ArrayList<CodePointRange>(categoryRanges);
+                                categoryRangeList = ch == 'P'
+                                    ? CodePointRange.InvertRanges(categoryRanges)
+                                    : new ArrayList<CodePointRange>(categoryRanges);
+                            }
+                            else
+                            {
+                                // NOTE: We skip validating Unicode property expressions because for that we'd need to include a lot of data in the library.
+
+                                categoryRangeList = default;
+                            }
 
                             if (!context.WithinSet)
                             {
-                                AppendSet(sb, categoryRangeList.AsSpan(), isInverted: false);
+                                if (sb is not null)
+                                {
+                                    AppendSet(sb, categoryRangeList.AsSpan(), isInverted: false);
+                                }
+
                                 context.FollowingQuantifierError = null;
                             }
                             else
@@ -860,7 +916,11 @@ partial class Scanner
                                     parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidCharacterClass);
                                 }
 
-                                context.UnicodeSet.AddRange(categoryRangeList);
+                                if (sb is not null)
+                                {
+                                    context.UnicodeSet.AddRange(categoryRangeList);
+                                }
+
                                 context.SetRangeStart = SetRangeStartedWithCharClass;
                             }
 
@@ -882,7 +942,7 @@ partial class Scanner
 
                         if (!context.WithinSet)
                         {
-                            sb.Append(pattern, startIndex, 2);
+                            sb?.Append(pattern, startIndex, 2);
                             context.FollowingQuantifierError = ch is 'b' or 'B' ? Messages.RegexNothingToRepeat : null;
                         }
                         else
