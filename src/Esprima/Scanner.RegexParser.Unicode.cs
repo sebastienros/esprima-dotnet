@@ -127,7 +127,7 @@ partial class Scanner
                     // Cases like /[z-a]/u or /[\d-a]/u are syntax error.
                     if (context.SetRangeStart > cp)
                     {
-                        parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(context.SetRangeStart <= Character.UnicodeLastCodePoint
+                        parser.ReportSyntaxError(startIndex, context.SetRangeStart <= Character.UnicodeLastCodePoint
                             ? Messages.RegexRangeOutOfOrderInCharacterClass
                             : Messages.RegexInvalidCharacterClass);
                     }
@@ -612,7 +612,7 @@ partial class Scanner
 
             public void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegexParser parser, int startIndex)
             {
-                parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexIncompleteQuantifier);
+                parser.ReportSyntaxError(startIndex, Messages.RegexIncompleteQuantifier);
             }
 
             public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegexParser parser)
@@ -640,7 +640,7 @@ partial class Scanner
                         endIndex = pattern.IndexOf('}', i + 2);
                         if (endIndex < 0)
                         {
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidUnicodeEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidUnicodeEscape);
                         }
 
                         var slice = pattern.AsSpan(i + 2, endIndex - (i + 2));
@@ -648,7 +648,7 @@ partial class Scanner
                             // NOTE: int.TryParse with NumberStyles.AllowHexSpecifier may return a negative number (e.g. '8000000' -> -2147483648)!
                             || codePoint is < 0 or > Character.UnicodeLastCodePoint)
                         {
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidUnicodeEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidUnicodeEscape);
                         }
 
                         if (!context.WithinSet)
@@ -715,7 +715,7 @@ partial class Scanner
                         }
                         else
                         {
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(ch == 'u' ? Messages.RegexInvalidUnicodeEscape : Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, ch == 'u' ? Messages.RegexInvalidUnicodeEscape : Messages.RegexInvalidEscape);
                         }
                         break;
 
@@ -740,7 +740,7 @@ partial class Scanner
                             }
                         }
 
-                        parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidUnicodeEscape);
+                        parser.ReportSyntaxError(startIndex, Messages.RegexInvalidUnicodeEscape);
                         break;
 
                     // CharacterEscape -> 0 [lookahead ∉ DecimalDigit] 
@@ -759,7 +759,7 @@ partial class Scanner
                         }
                         else
                         {
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(!context.WithinSet
+                            parser.ReportSyntaxError(startIndex, !context.WithinSet
                                 ? Messages.RegexInvalidDecimalEscape
                                 : Messages.RegexInvalidClassEscape);
                         }
@@ -783,9 +783,9 @@ partial class Scanner
                         }
 
                         // When the number is not a backreference, it's a syntax error.
-                        parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(!context.WithinSet ?
-                            Messages.RegexInvalidEscape :
-                            (ch < '8' ? Messages.RegexInvalidClassEscape : Messages.RegexInvalidEscape));
+                        parser.ReportSyntaxError(startIndex, !context.WithinSet || ch >= '8'
+                            ? Messages.RegexInvalidEscape
+                            : Messages.RegexInvalidClassEscape);
                         break;
 
                     // 'k' GroupName
@@ -803,7 +803,7 @@ partial class Scanner
                         else
                         {
                             // \k escape sequence within character sets is not allowed.
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidEscape);
                         }
                         break;
 
@@ -844,7 +844,7 @@ partial class Scanner
                         {
                             if (context.SetRangeStart < 0)
                             {
-                                parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidCharacterClass);
+                                parser.ReportSyntaxError(startIndex, Messages.RegexInvalidCharacterClass);
                             }
 
                             if (sb is not null)
@@ -865,9 +865,10 @@ partial class Scanner
                             if (endIndex < 0
                                 || (slice = pattern.AsSpan(i + 2, endIndex - (i + 2))).IsWhiteSpace())
                             {
-                                return parser.MoveScannerTo(startIndex).ThrowUnexpectedToken<bool>(!context.WithinSet
+                                parser.ReportSyntaxError(startIndex, !context.WithinSet
                                     ? Messages.RegexInvalidPropertyName
                                     : Messages.RegexInvalidPropertyNameInCharacterClass);
+                                slice = default; // keeps the compiler happy
                             }
 
                             // Unicode property escape support are pretty limited in .NET and we can't even use that little bit
@@ -885,7 +886,7 @@ partial class Scanner
                             {
                                 if (!TryTranslateUnicodePropertyToRanges(slice, parser.GetCodePointRangeCache(), out var categoryRanges))
                                 {
-                                    parser.HandleConversionFailure(startIndex, "Inconvertible Unicode property escape");
+                                    parser.ReportConversionFailure(startIndex, "Inconvertible Unicode property escape");
                                     return false;
                                 }
 
@@ -913,7 +914,7 @@ partial class Scanner
                             {
                                 if (context.SetRangeStart < 0)
                                 {
-                                    parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidCharacterClass);
+                                    parser.ReportSyntaxError(startIndex, Messages.RegexInvalidCharacterClass);
                                 }
 
                                 if (sb is not null)
@@ -928,7 +929,7 @@ partial class Scanner
                         }
                         else
                         {
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(!context.WithinSet
+                            parser.ReportSyntaxError(startIndex, !context.WithinSet
                                 ? Messages.RegexInvalidPropertyName
                                 : Messages.RegexInvalidPropertyNameInCharacterClass);
                         }
@@ -937,7 +938,7 @@ partial class Scanner
                     default:
                         if (!TryGetSimpleEscapeCharCode(ch, context.WithinSet, out charCode))
                         {
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidEscape);
                         }
 
                         if (!context.WithinSet)

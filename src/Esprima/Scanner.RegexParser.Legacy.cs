@@ -49,7 +49,7 @@ partial class Scanner
                         if (context.SetRangeStart <= Character.UnicodeLastCodePoint)
                         {
                             // Cases like /[z-a]/ are syntax error.
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexRangeOutOfOrderInCharacterClass);
+                            parser.ReportSyntaxError(startIndex, Messages.RegexRangeOutOfOrderInCharacterClass);
                         }
                         else
                         {
@@ -328,7 +328,7 @@ partial class Scanner
                         {
                             // \k escape sequence within character sets is not allowed
                             // (except when there are no named capturing groups; see above).
-                            parser.MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidEscape);
                         }
                         break;
 

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -107,6 +108,7 @@ partial class Scanner
         private readonly string _pattern;
         private readonly int _patternStartIndex;
         private readonly RegexFlags _flags;
+        private readonly string _flagsOriginal;
         private readonly Scanner _scanner;
         private StringBuilder? _tempStringBuilder;
 
@@ -115,6 +117,7 @@ partial class Scanner
             _pattern = pattern;
             _patternStartIndex = patternStartIndex;
             _flags = ParseFlags(flags, flagsStartIndex, scanner);
+            _flagsOriginal = flags;
             _scanner = scanner;
         }
 
@@ -134,11 +137,18 @@ partial class Scanner
 
         private Scanner MoveScannerTo(int index) => MoveScannerTo(index, out _);
 
-        private void HandleConversionFailure(int index, string reason)
+        private void ReportConversionFailure(int index, string reason)
         {
-            MoveScannerTo(index, out var originalIndex);
-            _scanner.TolerateUnexpectedToken($"Cannot convert regular expression to an equivalent {typeof(Regex)}: {reason}");
+            MoveScannerTo(index, out var originalIndex)
+                .TolerateUnexpectedToken($"Cannot convert regular expression to an equivalent {typeof(Regex)}: {reason}");
             _scanner._index = originalIndex;
+        }
+
+        [DoesNotReturn]
+        private void ReportSyntaxError(int index, string message)
+        {
+            MoveScannerTo(index)
+                .ThrowUnexpectedToken(string.Format(CultureInfo.InvariantCulture, message, _pattern, _flagsOriginal));
         }
 
         public Regex? Parse(out string? adaptedPattern)
@@ -148,7 +158,7 @@ partial class Scanner
                 const string UnicodeSetsModeNotSupported = "Unicode sets mode (flag v) is not supported currently";
                 if (_scanner._regExpParseMode is RegExpParseMode.AdaptToInterpreted or RegExpParseMode.AdaptToCompiled)
                 {
-                    HandleConversionFailure(0, UnicodeSetsModeNotSupported);
+                    ReportConversionFailure(0, UnicodeSetsModeNotSupported);
                 }
                 else
                 {
@@ -178,7 +188,7 @@ partial class Scanner
             }
             catch
             {
-                HandleConversionFailure(0, "Failed to adapt regular expression");
+                ReportConversionFailure(0, "Failed to adapt regular expression");
                 return null;
             }
         }
@@ -252,12 +262,12 @@ partial class Scanner
                             }
                             else
                             {
-                                MoveScannerTo(startIndex + 3).ThrowUnexpectedToken(Messages.RegexInvalidCaptureGroupName);
+                                ReportSyntaxError(startIndex + 3, Messages.RegexInvalidCaptureGroupName);
                             }
                         }
                         else if (groupType == RegexGroupType.Unknown)
                         {
-                            MoveScannerTo(i).ThrowUnexpectedToken(Messages.RegexInvalidGroup);
+                            ReportSyntaxError(i, Messages.RegexInvalidGroup);
                         }
 
                         break;
@@ -271,7 +281,7 @@ partial class Scanner
 
                         if (inGroup == 0)
                         {
-                            MoveScannerTo(i).ThrowUnexpectedToken(Messages.RegexUnmatchedOpenParen);
+                            ReportSyntaxError(i, Messages.RegexUnmatchedOpenParen);
                         }
 
                         inGroup--;
@@ -291,7 +301,7 @@ partial class Scanner
                         }
                         else if (isUnicode)
                         {
-                            MoveScannerTo(i).ThrowUnexpectedToken(Messages.RegexIncompleteQuantifier);
+                            ReportSyntaxError(i, Messages.RegexIncompleteQuantifier);
                         }
 
                         break;
@@ -309,7 +319,7 @@ partial class Scanner
                         }
                         else if (isUnicode)
                         {
-                            MoveScannerTo(i).ThrowUnexpectedToken(Messages.RegexLoneQuantifierBrackets);
+                            ReportSyntaxError(i, Messages.RegexLoneQuantifierBrackets);
                         }
 
                         break;
@@ -333,7 +343,7 @@ partial class Scanner
                         }
                         else if (isUnicode)
                         {
-                            MoveScannerTo(i).ThrowUnexpectedToken(Messages.RegexLoneQuantifierBrackets);
+                            ReportSyntaxError(i, Messages.RegexLoneQuantifierBrackets);
                         }
 
                         break;
@@ -344,19 +354,19 @@ partial class Scanner
 
             if (inGroup > 0)
             {
-                MoveScannerTo(_pattern.Length).ThrowUnexpectedToken(Messages.RegexUnterminatedGroup);
+                ReportSyntaxError(_pattern.Length, Messages.RegexUnterminatedGroup);
             }
 
             if (inSet)
             {
-                MoveScannerTo(_pattern.Length).ThrowUnexpectedToken(Messages.RegexUnterminatedCharacterClass);
+                ReportSyntaxError(_pattern.Length, Messages.RegexUnterminatedCharacterClass);
             }
 
             if (isUnicode)
             {
                 if (inQuantifier)
                 {
-                    MoveScannerTo(_pattern.Length).ThrowUnexpectedToken(Messages.RegexLoneQuantifierBrackets);
+                    ReportSyntaxError(_pattern.Length, Messages.RegexLoneQuantifierBrackets);
                 }
             }
         }
@@ -463,7 +473,7 @@ partial class Scanner
 
                             if (!currentGroupAlternate!.TryAddGroupName(groupName!))
                             {
-                                MoveScannerTo(i + 3).ThrowUnexpectedToken(Messages.RegexDuplicateCaptureGroupName);
+                                ReportSyntaxError(i + 3, Messages.RegexDuplicateCaptureGroupName);
                             }
 
                             if (sb is not null)
@@ -471,7 +481,7 @@ partial class Scanner
                                 groupName = AdjustCapturingGroupName(groupName!, capturingGroupNames!);
                                 if (groupName is null)
                                 {
-                                    HandleConversionFailure(i + 3, $"Cannot map group name '{groupName}' to a unique group name in the adapted regex.");
+                                    ReportConversionFailure(i + 3, $"Cannot map group name '{groupName}' to a unique group name in the adapted regex.");
                                     return null;
                                 }
 
@@ -561,7 +571,7 @@ partial class Scanner
                     case '*' or '+' or '?' when !context.WithinSet:
                         if (context.FollowingQuantifierError is not null)
                         {
-                            MoveScannerTo(i).ThrowUnexpectedToken(context.FollowingQuantifierError);
+                            ReportSyntaxError(i, context.FollowingQuantifierError);
                         }
 
                         sb?.Append(ch);
@@ -747,12 +757,12 @@ partial class Scanner
             {
                 if (min > max)
                 {
-                    MoveScannerTo(i).ThrowUnexpectedToken(Messages.RegexNumbersOutOfOrderInQuantifier);
+                    ReportSyntaxError(i, Messages.RegexNumbersOutOfOrderInQuantifier);
                 }
 
                 if (context.FollowingQuantifierError is not null)
                 {
-                    MoveScannerTo(i).ThrowUnexpectedToken(context.FollowingQuantifierError);
+                    ReportSyntaxError(i, context.FollowingQuantifierError);
                 }
 
                 sb?.Append(_pattern, i, endIndex + 1 - i);
@@ -763,7 +773,7 @@ partial class Scanner
                 // number of occurrences can be an arbitrarily big number, however implementations (incl. V8) seems to ignore numbers greater than int.MaxValue.
                 // (e.g. /x{2147483647,2147483646}/ is syntax error while /x{2147483648,2147483647}/ is not!)
                 // We report failure in this case because .NET regex engine doesn't allow numbers greater than int.MaxValue.
-                HandleConversionFailure(i, "Inconvertible {} quantifier");
+                ReportConversionFailure(i, "Inconvertible {} quantifier");
                 i = -1;
                 return true;
             }
@@ -960,7 +970,7 @@ partial class Scanner
             {
                 // RegexOptions.ECMAScript treats forward references like /\1(A)/ differently than JS,
                 // so we don't make an attempt at rewriting them.
-                HandleConversionFailure(startIndex, "Inconvertible forward reference");
+                ReportConversionFailure(startIndex, "Inconvertible forward reference");
                 i = -1;
                 return true;
             }
@@ -989,23 +999,23 @@ partial class Scanner
                         {
                             // RegexOptions.ECMAScript treats forward references like /\k<a>(?<a>A)/ differently than JS,
                             // so we don't make an attempt at rewriting them.
-                            HandleConversionFailure(startIndex, "Inconvertible named forward reference");
+                            ReportConversionFailure(startIndex, "Inconvertible named forward reference");
                             i = -1;
                         }
                     }
                 }
                 else
                 {
-                    MoveScannerTo(startIndex).ThrowUnexpectedToken(Messages.RegexInvalidNamedCaptureReferenced);
+                    ReportSyntaxError(startIndex, Messages.RegexInvalidNamedCaptureReferenced);
                 }
             }
             else if (_pattern.CharCodeAt(i + 1) == '<')
             {
-                MoveScannerTo(startIndex + 3).ThrowUnexpectedToken(Messages.RegexInvalidCaptureGroupName);
+                ReportSyntaxError(startIndex + 3, Messages.RegexInvalidCaptureGroupName);
             }
             else
             {
-                MoveScannerTo(startIndex + 2).ThrowUnexpectedToken(Messages.RegexInvalidNamedReference);
+                ReportSyntaxError(startIndex + 2, Messages.RegexInvalidNamedReference);
             }
         }
 

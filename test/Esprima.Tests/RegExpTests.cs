@@ -467,7 +467,7 @@ public class RegExpTests
         }
         else
         {
-            Exception ex;
+            ParserException ex;
 
             if (!hintArray.Contains("!skip-validation"))
             {
@@ -475,7 +475,7 @@ public class RegExpTests
 
                 if (!hintArray.Contains("!ignore-error-message"))
                 {
-                    Assert.Contains("Invalid regular expression: " + syntaxError, ex.Message, StringComparison.Ordinal);
+                    Assert.Equal($"Invalid regular expression: /{pattern}/{flags}: {syntaxError}", ex.Error?.Description);
                 }
             }
 
@@ -485,12 +485,12 @@ public class RegExpTests
             {
                 if (!hintArray.Contains("!ignore-error-message"))
                 {
-                    Assert.Contains("Invalid regular expression: " + syntaxError, ex.Message, StringComparison.Ordinal);
+                    Assert.Equal($"Invalid regular expression: /{pattern}/{flags}: {syntaxError}", ex.Error?.Description);
                 }
             }
             else
             {
-                Assert.Contains("Cannot convert regular expression", ex.Message, StringComparison.Ordinal);
+                Assert.StartsWith("Cannot convert regular expression", ex.Error?.Description, StringComparison.Ordinal);
             }
         }
     }
