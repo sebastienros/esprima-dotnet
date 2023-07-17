@@ -83,7 +83,7 @@ public class RegExpTests
 
         string? SerializeSet(string expression)
         {
-            var parser = new Scanner.RegexParser($"[{expression}]", "u", ScannerOptions.Default);
+            var parser = new Scanner.RegExpParser($"[{expression}]", "u", ScannerOptions.Default);
             return parser.ParseCore();
         }
     }
@@ -97,7 +97,7 @@ public class RegExpTests
 
         string? SerializeSet(string expression)
         {
-            var parser = new Scanner.RegexParser($"[{expression}]", "u", ScannerOptions.Default);
+            var parser = new Scanner.RegExpParser($"[{expression}]", "u", ScannerOptions.Default);
             return parser.ParseCore();
         }
     }
@@ -312,7 +312,7 @@ public class RegExpTests
     {
         // TODO: Generate these tests when Duplicate named capturing groups (https://github.com/tc39/proposal-duplicate-named-capturing-groups) gets implemented in V8.
 
-        var parser = new Scanner.RegexParser(pattern, flags, new ScannerOptions { Tolerant = false });
+        var parser = new Scanner.RegExpParser(pattern, flags, new ScannerOptions { Tolerant = false });
         var actualAdaptedPattern = parser.ParseCore();
 
         Assert.Equal(expectedAdaptedPattern, actualAdaptedPattern);
@@ -388,8 +388,8 @@ public class RegExpTests
         // so we need to parse the JSON containing the matches "manually"...
         var (expectedMatches, syntaxError) = RegExpMatch.MatchesFrom(JavaScriptStringHelper.ParseAsExpression(expectedMatchesJson));
 
-        var regexValidator = new Scanner.RegexParser(pattern, flags, new ScannerOptions { RegExpParseMode = RegExpParseMode.Validate, Tolerant = false });
-        var regexConverter = new Scanner.RegexParser(pattern, flags, new ScannerOptions { RegExpParseMode = RegExpParseMode.AdaptToInterpreted, Tolerant = expectedMatches is not null });
+        var regexValidator = new Scanner.RegExpParser(pattern, flags, new ScannerOptions { RegExpParseMode = RegExpParseMode.Validate, Tolerant = false });
+        var regexConverter = new Scanner.RegExpParser(pattern, flags, new ScannerOptions { RegExpParseMode = RegExpParseMode.AdaptToInterpreted, Tolerant = expectedMatches is not null });
 
         if (expectedMatches is not null)
         {
@@ -450,7 +450,7 @@ public class RegExpTests
                             var actualGroup = actualMatch.Groups[kvp.Key];
                             if (!actualGroup.Success)
                             {
-                                actualGroup = actualMatch.Groups[Scanner.RegexParser.EncodeGroupName(kvp.Key)];
+                                actualGroup = actualMatch.Groups[Scanner.RegExpParser.EncodeGroupName(kvp.Key)];
                             }
 
                             Assert.True(actualGroup.Success);

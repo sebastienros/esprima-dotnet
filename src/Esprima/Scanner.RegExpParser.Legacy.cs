@@ -5,7 +5,7 @@ namespace Esprima;
 
 partial class Scanner
 {
-    partial struct RegexParser
+    partial struct RegExpParser
     {
         private sealed class LegacyMode : IMode
         {
@@ -13,7 +13,7 @@ partial class Scanner
 
             private LegacyMode() { }
 
-            public void ProcessChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser)
+            public void ProcessChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegExpParser parser)
             {
                 ref readonly var sb = ref context.StringBuilder;
                 appender?.Invoke(sb!, ch);
@@ -26,12 +26,12 @@ partial class Scanner
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void ProcessSetChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser, int startIndex)
+            public void ProcessSetChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegExpParser parser, int startIndex)
             {
                 ProcessSetChar(ref context, ch, ch, appender, ref parser, startIndex);
             }
 
-            private static void ProcessSetChar(ref ParsePatternContext context, char ch, int charCode, Action<StringBuilder, char>? appender, ref RegexParser parser, int startIndex)
+            private static void ProcessSetChar(ref ParsePatternContext context, char ch, int charCode, Action<StringBuilder, char>? appender, ref RegExpParser parser, int startIndex)
             {
                 ref readonly var sb = ref context.StringBuilder;
 
@@ -49,7 +49,7 @@ partial class Scanner
                         if (context.SetRangeStart <= Character.UnicodeLastCodePoint)
                         {
                             // Cases like /[z-a]/ are syntax error.
-                            parser.ReportSyntaxError(startIndex, Messages.RegexRangeOutOfOrderInCharacterClass);
+                            parser.ReportSyntaxError(startIndex, Messages.RegExpRangeOutOfOrderInCharacterClass);
                         }
                         else
                         {
@@ -67,7 +67,7 @@ partial class Scanner
                 }
             }
 
-            public bool RewriteSet(ref ParsePatternContext context, ref RegexParser parser)
+            public bool RewriteSet(ref ParsePatternContext context, ref RegExpParser parser)
             {
                 ref readonly var sb = ref context.StringBuilder;
 
@@ -123,18 +123,18 @@ partial class Scanner
                 i--;
             }
 
-            public bool AllowsQuantifierAfterGroup(RegexGroupType groupType)
+            public bool AllowsQuantifierAfterGroup(RegExpGroupType groupType)
             {
                 // Lookbehind assertion groups may not be followed by quantifiers.
                 // However, lookahead assertion groups may be. RegexOptions.ECMAScript seems to handle such cases in the same way as JS.
                 return groupType is not
                 (
-                    RegexGroupType.LookbehindAssertion or
-                    RegexGroupType.NegativeLookbehindAssertion
+                    RegExpGroupType.LookbehindAssertion or
+                    RegExpGroupType.NegativeLookbehindAssertion
                 );
             }
 
-            public void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegexParser parser, int startIndex)
+            public void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegExpParser parser, int startIndex)
             {
                 // Invalid {} quantifiers like /.{/, /.{}/, /.{-1}/, etc. are ignored. RegexOptions.ECMAScript behaves in the same way,
                 // so we don't need to do anything about such cases.
@@ -147,7 +147,7 @@ partial class Scanner
                 context.FollowingQuantifierError = null;
             }
 
-            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegexParser parser)
+            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser)
             {
                 // https://262.ecma-international.org/13.0/#prod-AtomEscape
 
@@ -328,7 +328,7 @@ partial class Scanner
                         {
                             // \k escape sequence within character sets is not allowed
                             // (except when there are no named capturing groups; see above).
-                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidEscape);
                         }
                         break;
 
@@ -414,7 +414,7 @@ partial class Scanner
                             else
                             {
                                 sb?.Append(pattern, startIndex, 2);
-                                context.FollowingQuantifierError = ch is 'b' or 'B' ? Messages.RegexNothingToRepeat : null;
+                                context.FollowingQuantifierError = ch is 'b' or 'B' ? Messages.RegExpNothingToRepeat : null;
                             }
                         }
                         else

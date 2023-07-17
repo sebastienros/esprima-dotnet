@@ -1795,7 +1795,7 @@ ParseIdentifierPart:
 
         try
         {
-            new RegexParser(pattern, flags, scannerOptions).Parse(out _);
+            new RegExpParser(pattern, flags, scannerOptions).Parse(out _);
         }
         catch (ParserException ex)
         {
@@ -1820,7 +1820,7 @@ ParseIdentifierPart:
     /// otherwise <see langword="null"/> (unless <paramref name="throwIfNotAdaptable"/> is <see langword="true"/>).
     /// </returns>
     /// <exception cref="ParserException">
-    /// <paramref name="pattern"/> is an invalid regex pattern or cannot be converted
+    /// <paramref name="pattern"/> is an invalid regular expression pattern or cannot be converted
     /// to an equivalent <see cref="Regex"/> (if <paramref name="throwIfNotAdaptable"/> is <see langword="true"/>).
     /// </exception>
     public static Regex? AdaptRegExp(string pattern, string flags, bool compiled = false, TimeSpan? matchTimeout = null, bool throwIfNotAdaptable = false)
@@ -1844,7 +1844,7 @@ ParseIdentifierPart:
             ? ScannerOptions.Default
             : new ScannerOptions { RegExpParseMode = parseMode, RegexTimeout = matchTimeout.Value, Tolerant = tolerant };
 
-        return new RegexParser(pattern, flags, scannerOptions).Parse(out _);
+        return new RegExpParser(pattern, flags, scannerOptions).Parse(out _);
     }
 
     private string ScanRegExpBody()
@@ -1961,10 +1961,10 @@ ParseIdentifierPart:
         var flags = ScanRegExpFlags();
 
         var value = _regExpParseMode != RegExpParseMode.Skip
-            ? new RegexParser(body, bodyStart + 1, flags, flagsStart, this).Parse(out _)
+            ? new RegExpParser(body, bodyStart + 1, flags, flagsStart, this).Parse(out _)
             : null;
 
-        return Token.CreateRegexLiteral(value, new RegexValue(body, flags), bodyStart, end: _index, _lineNumber, _lineStart);
+        return Token.CreateRegExpLiteral(value, new RegexValue(body, flags), bodyStart, end: _index, _lineNumber, _lineStart);
     }
 
     public Token Lex() => Lex(new LexOptions());

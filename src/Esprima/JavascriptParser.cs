@@ -372,7 +372,7 @@ public partial class JavaScriptParser
         return token;
     }
 
-    private Token NextRegexToken()
+    private Token NextRegExpToken()
     {
         CollectComments();
 
@@ -765,7 +765,7 @@ public partial class JavaScriptParser
                         _context.IsAssignmentTarget = false;
                         _context.IsBindingElement = false;
                         _scanner._index = _startMarker.Index;
-                        token = NextRegexToken();
+                        token = NextRegExpToken();
                         raw = GetTokenRaw(token);
                         expr = Finalize(node, new RegExpLiteral(token.RegexValue!, token.Value, raw));
                         break;

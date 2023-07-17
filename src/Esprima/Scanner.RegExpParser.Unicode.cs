@@ -8,7 +8,7 @@ namespace Esprima;
 
 partial class Scanner
 {
-    partial struct RegexParser
+    partial struct RegExpParser
     {
         private const string MatchSurrogatePairRegex = "[\uD800-\uDBFF][\uDC00-\uDFFF]";
 
@@ -18,7 +18,7 @@ partial class Scanner
 
             private UnicodeMode() { }
 
-            public void ProcessChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser)
+            public void ProcessChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegExpParser parser)
             {
                 ref readonly var sb = ref context.StringBuilder;
                 ref readonly var pattern = ref parser._pattern;
@@ -88,7 +88,7 @@ partial class Scanner
 
             public void ProcessSetSpecialChar(ref ParsePatternContext context, char ch) { }
 
-            public void ProcessSetChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegexParser parser, int startIndex)
+            public void ProcessSetChar(ref ParsePatternContext context, char ch, Action<StringBuilder, char>? appender, ref RegExpParser parser, int startIndex)
             {
                 ref readonly var pattern = ref parser._pattern;
                 ref var i = ref context.Index;
@@ -105,7 +105,7 @@ partial class Scanner
                 }
             }
 
-            private static void AddSetCodePoint(ref ParsePatternContext context, int cp, ref RegexParser parser, int startIndex)
+            private static void AddSetCodePoint(ref ParsePatternContext context, int cp, ref RegExpParser parser, int startIndex)
             {
                 Debug.Assert(cp is >= 0 and <= Character.UnicodeLastCodePoint, "Invalid end code point.");
 
@@ -128,8 +128,8 @@ partial class Scanner
                     if (context.SetRangeStart > cp)
                     {
                         parser.ReportSyntaxError(startIndex, context.SetRangeStart <= Character.UnicodeLastCodePoint
-                            ? Messages.RegexRangeOutOfOrderInCharacterClass
-                            : Messages.RegexInvalidCharacterClass);
+                            ? Messages.RegExpRangeOutOfOrderInCharacterClass
+                            : Messages.RegExpInvalidCharacterClass);
                     }
 
                     if (sb is not null)
@@ -141,7 +141,7 @@ partial class Scanner
                 }
             }
 
-            public bool RewriteSet(ref ParsePatternContext context, ref RegexParser parser)
+            public bool RewriteSet(ref ParsePatternContext context, ref RegExpParser parser)
             {
                 ref readonly var sb = ref context.StringBuilder;
                 ref readonly var pattern = ref parser._pattern;
@@ -598,24 +598,24 @@ partial class Scanner
                 }
             }
 
-            public bool AllowsQuantifierAfterGroup(RegexGroupType groupType)
+            public bool AllowsQuantifierAfterGroup(RegExpGroupType groupType)
             {
                 // Assertion groups may not be followed by quantifiers.
                 return groupType is not
                 (
-                    RegexGroupType.LookaheadAssertion or
-                    RegexGroupType.NegativeLookaheadAssertion or
-                    RegexGroupType.LookbehindAssertion or
-                    RegexGroupType.NegativeLookbehindAssertion
+                    RegExpGroupType.LookaheadAssertion or
+                    RegExpGroupType.NegativeLookaheadAssertion or
+                    RegExpGroupType.LookbehindAssertion or
+                    RegExpGroupType.NegativeLookbehindAssertion
                 );
             }
 
-            public void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegexParser parser, int startIndex)
+            public void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegExpParser parser, int startIndex)
             {
-                parser.ReportSyntaxError(startIndex, Messages.RegexIncompleteQuantifier);
+                parser.ReportSyntaxError(startIndex, Messages.RegExpIncompleteQuantifier);
             }
 
-            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegexParser parser)
+            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser)
             {
                 // https://262.ecma-international.org/13.0/#prod-AtomEscape
 
@@ -640,7 +640,7 @@ partial class Scanner
                         endIndex = pattern.IndexOf('}', i + 2);
                         if (endIndex < 0)
                         {
-                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidUnicodeEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidUnicodeEscape);
                         }
 
                         var slice = pattern.AsSpan(i + 2, endIndex - (i + 2));
@@ -648,7 +648,7 @@ partial class Scanner
                             // NOTE: int.TryParse with NumberStyles.AllowHexSpecifier may return a negative number (e.g. '8000000' -> -2147483648)!
                             || codePoint is < 0 or > Character.UnicodeLastCodePoint)
                         {
-                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidUnicodeEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidUnicodeEscape);
                         }
 
                         if (!context.WithinSet)
@@ -715,7 +715,7 @@ partial class Scanner
                         }
                         else
                         {
-                            parser.ReportSyntaxError(startIndex, ch == 'u' ? Messages.RegexInvalidUnicodeEscape : Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, ch == 'u' ? Messages.RegExpInvalidUnicodeEscape : Messages.RegExpInvalidEscape);
                         }
                         break;
 
@@ -740,7 +740,7 @@ partial class Scanner
                             }
                         }
 
-                        parser.ReportSyntaxError(startIndex, Messages.RegexInvalidUnicodeEscape);
+                        parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidUnicodeEscape);
                         break;
 
                     // CharacterEscape -> 0 [lookahead ∉ DecimalDigit] 
@@ -760,8 +760,8 @@ partial class Scanner
                         else
                         {
                             parser.ReportSyntaxError(startIndex, !context.WithinSet
-                                ? Messages.RegexInvalidDecimalEscape
-                                : Messages.RegexInvalidClassEscape);
+                                ? Messages.RegExpInvalidDecimalEscape
+                                : Messages.RegExpInvalidClassEscape);
                         }
                         break;
 
@@ -784,8 +784,8 @@ partial class Scanner
 
                         // When the number is not a backreference, it's a syntax error.
                         parser.ReportSyntaxError(startIndex, !context.WithinSet || ch >= '8'
-                            ? Messages.RegexInvalidEscape
-                            : Messages.RegexInvalidClassEscape);
+                            ? Messages.RegExpInvalidEscape
+                            : Messages.RegExpInvalidClassEscape);
                         break;
 
                     // 'k' GroupName
@@ -803,7 +803,7 @@ partial class Scanner
                         else
                         {
                             // \k escape sequence within character sets is not allowed.
-                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidEscape);
                         }
                         break;
 
@@ -844,7 +844,7 @@ partial class Scanner
                         {
                             if (context.SetRangeStart < 0)
                             {
-                                parser.ReportSyntaxError(startIndex, Messages.RegexInvalidCharacterClass);
+                                parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidCharacterClass);
                             }
 
                             if (sb is not null)
@@ -866,8 +866,8 @@ partial class Scanner
                                 || (slice = pattern.AsSpan(i + 2, endIndex - (i + 2))).IsWhiteSpace())
                             {
                                 parser.ReportSyntaxError(startIndex, !context.WithinSet
-                                    ? Messages.RegexInvalidPropertyName
-                                    : Messages.RegexInvalidPropertyNameInCharacterClass);
+                                    ? Messages.RegExpInvalidPropertyName
+                                    : Messages.RegExpInvalidPropertyNameInCharacterClass);
                                 slice = default; // keeps the compiler happy
                             }
 
@@ -914,7 +914,7 @@ partial class Scanner
                             {
                                 if (context.SetRangeStart < 0)
                                 {
-                                    parser.ReportSyntaxError(startIndex, Messages.RegexInvalidCharacterClass);
+                                    parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidCharacterClass);
                                 }
 
                                 if (sb is not null)
@@ -930,21 +930,21 @@ partial class Scanner
                         else
                         {
                             parser.ReportSyntaxError(startIndex, !context.WithinSet
-                                ? Messages.RegexInvalidPropertyName
-                                : Messages.RegexInvalidPropertyNameInCharacterClass);
+                                ? Messages.RegExpInvalidPropertyName
+                                : Messages.RegExpInvalidPropertyNameInCharacterClass);
                         }
                         break;
 
                     default:
                         if (!TryGetSimpleEscapeCharCode(ch, context.WithinSet, out charCode))
                         {
-                            parser.ReportSyntaxError(startIndex, Messages.RegexInvalidEscape);
+                            parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidEscape);
                         }
 
                         if (!context.WithinSet)
                         {
                             sb?.Append(pattern, startIndex, 2);
-                            context.FollowingQuantifierError = ch is 'b' or 'B' ? Messages.RegexNothingToRepeat : null;
+                            context.FollowingQuantifierError = ch is 'b' or 'B' ? Messages.RegExpNothingToRepeat : null;
                         }
                         else
                         {
