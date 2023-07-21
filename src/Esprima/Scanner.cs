@@ -417,7 +417,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(2);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment);
+                        comments.AddRange(comment.AsSpan());
                     }
 
                     start = true;
@@ -429,7 +429,7 @@ public sealed partial class Scanner
                     var comment = SkipMultiLineComment();
                     if (_trackComment)
                     {
-                        comments.AddRange(comment);
+                        comments.AddRange(comment.AsSpan());
                     }
                 }
                 else
@@ -448,7 +448,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(3);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment);
+                        comments.AddRange(comment.AsSpan());
                     }
                 }
                 else
@@ -472,7 +472,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(4);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment);
+                        comments.AddRange(comment.AsSpan());
                     }
                 }
                 else

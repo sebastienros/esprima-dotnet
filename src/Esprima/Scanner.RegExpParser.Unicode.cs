@@ -453,56 +453,69 @@ partial class Scanner
             {
                 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Character_classes#types
 
-                switch (ch)
+                ReadOnlySpan<CodePointRange> ranges = ch switch
                 {
-                    case 'd': // [0-9]
-                        set.Add(new CodePointRange(0x0030, 0x0039));
-                        break;
-                    case 'D': // [^0-9]
-                        set.Add(new CodePointRange(0x0000, 0x002F));
-                        set.Add(new CodePointRange(0x003A, Character.UnicodeLastCodePoint));
-                        break;
-                    case 's': // [\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]
-                        set.Add(new CodePointRange(0x0009, 0x000D));
-                        set.Add(new CodePointRange(0x0020));
-                        set.Add(new CodePointRange(0x00A0));
-                        set.Add(new CodePointRange(0x1680));
-                        set.Add(new CodePointRange(0x2000, 0x200A));
-                        set.Add(new CodePointRange(0x2028, 0x2029));
-                        set.Add(new CodePointRange(0x202F));
-                        set.Add(new CodePointRange(0x205F));
-                        set.Add(new CodePointRange(0x3000));
-                        set.Add(new CodePointRange(0xFEFF));
-                        break;
-                    case 'S': // [^\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]
-                        set.Add(new CodePointRange(0x0000, 0x0008));
-                        set.Add(new CodePointRange(0x000E, 0x001F));
-                        set.Add(new CodePointRange(0x0021, 0x009F));
-                        set.Add(new CodePointRange(0x00A1, 0x167F));
-                        set.Add(new CodePointRange(0x1681, 0x1FFF));
-                        set.Add(new CodePointRange(0x200B, 0x2027));
-                        set.Add(new CodePointRange(0x202A, 0x202E));
-                        set.Add(new CodePointRange(0x2030, 0x205E));
-                        set.Add(new CodePointRange(0x2060, 0x2FFF));
-                        set.Add(new CodePointRange(0x3001, 0xFEFE));
-                        set.Add(new CodePointRange(0xFF00, Character.UnicodeLastCodePoint));
-                        break;
-                    case 'w': // [A-Za-z0-9_]
-                        set.Add(new CodePointRange(0x0030, 0x0039));
-                        set.Add(new CodePointRange(0x0041, 0x005A));
-                        set.Add(new CodePointRange(0x005F));
-                        set.Add(new CodePointRange(0x0061, 0x007A));
-                        break;
-                    case 'W': // [^A-Za-z0-9_]
-                        set.Add(new CodePointRange(0x0000, 0x002F));
-                        set.Add(new CodePointRange(0x003A, 0x0040));
-                        set.Add(new CodePointRange(0x005B, 0x005E));
-                        set.Add(new CodePointRange(0x0060));
-                        set.Add(new CodePointRange(0x007B, Character.UnicodeLastCodePoint));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(ch), ch, null);
-                }
+                    // [0-9]
+                    'd' => stackalloc CodePointRange[]
+                    {
+                        new CodePointRange(0x0030, 0x0039)
+                    },
+                    // [^0-9]
+                    'D' => stackalloc CodePointRange[]
+                    {
+                        new CodePointRange(0x0000, 0x002F),
+                        new CodePointRange(0x003A, Character.UnicodeLastCodePoint),
+                    },
+                    // [\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]
+                    's' => stackalloc CodePointRange[]
+                    {
+                        new CodePointRange(0x0009, 0x000D),
+                        new CodePointRange(0x0020),
+                        new CodePointRange(0x00A0),
+                        new CodePointRange(0x1680),
+                        new CodePointRange(0x2000, 0x200A),
+                        new CodePointRange(0x2028, 0x2029),
+                        new CodePointRange(0x202F),
+                        new CodePointRange(0x205F),
+                        new CodePointRange(0x3000),
+                        new CodePointRange(0xFEFF),
+                    },
+                    // [^\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]
+                    'S' => stackalloc CodePointRange[]
+                    {
+                        new CodePointRange(0x0000, 0x0008),
+                        new CodePointRange(0x000E, 0x001F),
+                        new CodePointRange(0x0021, 0x009F),
+                        new CodePointRange(0x00A1, 0x167F),
+                        new CodePointRange(0x1681, 0x1FFF),
+                        new CodePointRange(0x200B, 0x2027),
+                        new CodePointRange(0x202A, 0x202E),
+                        new CodePointRange(0x2030, 0x205E),
+                        new CodePointRange(0x2060, 0x2FFF),
+                        new CodePointRange(0x3001, 0xFEFE),
+                        new CodePointRange(0xFF00, Character.UnicodeLastCodePoint),
+                    },
+                    // [A-Za-z0-9_]
+                    'w' => stackalloc CodePointRange[]
+                    {
+                        new CodePointRange(0x0030, 0x0039),
+                        new CodePointRange(0x0041, 0x005A),
+                        new CodePointRange(0x005F),
+                        new CodePointRange(0x0061, 0x007A),
+                    },
+                    // [^A-Za-z0-9_]
+                    'W' => stackalloc CodePointRange[]
+                    {
+                        new CodePointRange(0x0000, 0x002F),
+                        new CodePointRange(0x003A, 0x0040),
+                        new CodePointRange(0x005B, 0x005E),
+                        new CodePointRange(0x0060),
+                        new CodePointRange(0x007B, Character.UnicodeLastCodePoint),
+                    },
+                    _ => throw new ArgumentOutOfRangeException(nameof(ch), ch, null)
+                };
+
+                set.AddRange(ranges);
             }
 
             private static bool TryTranslateUnicodePropertyToRanges(ReadOnlySpan<char> expression, CodePointRange.Cache cache, [MaybeNullWhen(false)] out CodePointRange[] ranges)
@@ -512,7 +525,7 @@ partial class Scanner
                 {
                     var propertyName = expression.Slice(0, index);
 
-                    // https://262.ecma-international.org/13.0/#table-nonbinary-unicode-properties
+                    // https://tc39.es/ecma262/#table-nonbinary-unicode-properties
                     if (!(propertyName.Equals("gc".AsSpan(), StringComparison.Ordinal)
                           || propertyName.Equals("General_Category".AsSpan(), StringComparison.Ordinal)))
                     {
@@ -528,8 +541,8 @@ partial class Scanner
 
             private static CodePointRange[]? GetUnicodeCategoryRanges(ReadOnlySpan<char> name, CodePointRange.Cache cache)
             {
-                // https://262.ecma-international.org/13.0/#table-unicode-general-category-values
-                // https://unicode.org/reports/tr18/#General_Category_Property
+                // https://tc39.es/ecma262/#sec-runtime-semantics-unicodematchpropertyvalue-p-v
+                // https://unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
 
                 return name switch
                 {
@@ -617,7 +630,7 @@ partial class Scanner
 
             public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser)
             {
-                // https://262.ecma-international.org/13.0/#prod-AtomEscape
+                // https://tc39.es/ecma262/#prod-AtomEscape
 
                 ref readonly var sb = ref context.StringBuilder;
                 ref readonly var pattern = ref parser._pattern;
@@ -633,7 +646,7 @@ partial class Scanner
                     // CharacterEscape -> RegExpUnicodeEscapeSequence -> u{ CodePoint }
                     case 'u' when pattern.CharCodeAt(i + 1) == '{':
                         // Rewrite \u{...} escape sequences as follows:
-                        // * /\u{7F}/u --> @"\x7F"
+                        // * /\u{3F}/u --> @"\x3F"
                         // * /\u{FFFF}/u --> "\uFFFF" (+ negative lookahead/lookbehind in the case of lone surrogates)
                         // * /\u{1F4A9}/u --> "\uD83D\uDCA9"
 
@@ -881,7 +894,7 @@ partial class Scanner
                             // So, the best effort we can make ATM is to cook from what .NET provides out of the box,
                             // which is practically General Categories. There's no easy way to support other expressions for now.
 
-                            ArrayList<CodePointRange> categoryRangeList;
+                            ReadOnlySpan<CodePointRange> categoryRangeSpan;
                             if (sb is not null)
                             {
                                 if (!TryTranslateUnicodePropertyToRanges(slice, parser.GetCodePointRangeCache(), out var categoryRanges))
@@ -890,22 +903,23 @@ partial class Scanner
                                     return false;
                                 }
 
-                                categoryRangeList = ch == 'P'
-                                    ? CodePointRange.InvertRanges(categoryRanges)
-                                    : new ArrayList<CodePointRange>(categoryRanges);
+                                categoryRangeSpan = ch == 'P'
+                                    ? CodePointRange.InvertRanges(categoryRanges).AsSpan()
+                                    : categoryRanges;
                             }
                             else
                             {
-                                // NOTE: We skip validating Unicode property expressions because for that we'd need to include a lot of data in the library.
+                                // NOTE: We skip validating Unicode property expressions because for that we'd need to include a lot of data in the library
+                                // (see https://tc39.es/ecma262/#sec-runtime-semantics-unicodematchpropertyvalue-p-v)
 
-                                categoryRangeList = default;
+                                categoryRangeSpan = default;
                             }
 
                             if (!context.WithinSet)
                             {
                                 if (sb is not null)
                                 {
-                                    AppendSet(sb, categoryRangeList.AsSpan(), isInverted: false);
+                                    AppendSet(sb, categoryRangeSpan, isInverted: false);
                                 }
 
                                 context.FollowingQuantifierError = null;
@@ -919,7 +933,7 @@ partial class Scanner
 
                                 if (sb is not null)
                                 {
-                                    context.UnicodeSet.AddRange(categoryRangeList);
+                                    context.UnicodeSet.AddRange(categoryRangeSpan);
                                 }
 
                                 context.SetRangeStart = SetRangeStartedWithCharClass;

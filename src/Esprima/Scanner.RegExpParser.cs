@@ -769,7 +769,7 @@ partial class Scanner
             }
             else if (sb is not null)
             {
-                // According to the spec (https://262.ecma-international.org/13.0/#sec-patterns-static-semantics-early-errors),
+                // According to the spec (https://tc39.es/ecma262/#sec-patterns-static-semantics-early-errors),
                 // number of occurrences can be an arbitrarily big number, however implementations (incl. V8) seems to ignore numbers greater than int.MaxValue.
                 // (e.g. /x{2147483647,2147483646}/ is syntax error while /x{2147483648,2147483647}/ is not!)
                 // We report failure in this case because .NET regex engine doesn't allow numbers greater than int.MaxValue.

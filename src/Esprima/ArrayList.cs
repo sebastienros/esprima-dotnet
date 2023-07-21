@@ -80,7 +80,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         if (initialCapacity < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(initialCapacity), initialCapacity, null);
+            ThrowArgumentOutOfRangeException<T>(nameof(initialCapacity), initialCapacity, null);
         }
 
         _items = initialCapacity > 0 ? new T[initialCapacity] : null;
@@ -119,7 +119,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
             if (value < _count)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), value, null);
+                ThrowArgumentOutOfRangeException<T>(nameof(value), value, null);
             }
             else if (value == (_items?.Length ?? 0))
             {
@@ -191,7 +191,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #if DEBUG
         if (_localVersion != (_sharedVersion?[0] ?? 0))
         {
-            throw new InvalidOperationException();
+            ThrowInvalidOperationException<T>();
         }
 #endif
     }
@@ -208,18 +208,18 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #endif
     }
 
-    public void AddRange<TSource>(ArrayList<TSource> list) where TSource : T
+    public void AddRange(ReadOnlySpan<T> items)
     {
         AssertUnchanged();
 
-        var listCount = list.Count;
-        if (listCount == 0)
+        var itemCount = items.Length;
+        if (itemCount == 0)
         {
             return;
         }
 
         var oldCount = _count;
-        var newCount = oldCount + listCount;
+        var newCount = oldCount + itemCount;
 
         if (Capacity < newCount)
         {
@@ -227,10 +227,15 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         }
 
         Debug.Assert(_items is not null);
-        Array.Copy(list._items, 0, _items, oldCount, listCount);
+        items.CopyTo(_items.AsSpan(oldCount, itemCount));
         _count = newCount;
 
         OnChanged();
+    }
+
+    public void AddRange<TSource>(ArrayList<TSource> list) where TSource : class, T
+    {
+        AddRange(new ReadOnlySpan<T>(list._items, 0, list._count));
     }
 
     public void Add(T item)
@@ -270,7 +275,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
         if ((uint) index > (uint) _count)
         {
-            throw new ArgumentOutOfRangeException(nameof(index), index, null);
+            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
 
         var capacity = Capacity;
@@ -294,7 +299,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
         if ((uint) index >= (uint) _count)
         {
-            throw new ArgumentOutOfRangeException(nameof(index), index, null);
+            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
 
         _count--;
@@ -440,7 +445,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
             {
                 if (_index == 0 || _index == _count + 1)
                 {
-                    throw new InvalidOperationException();
+                    ThrowInvalidOperationException<T>();
                 }
 
                 return Current;

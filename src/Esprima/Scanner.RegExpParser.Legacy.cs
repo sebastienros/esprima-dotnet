@@ -149,7 +149,7 @@ partial class Scanner
 
             public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser)
             {
-                // https://262.ecma-international.org/13.0/#prod-AtomEscape
+                // https://tc39.es/ecma262/#prod-AtomEscape
 
                 ref readonly var sb = ref context.StringBuilder;
                 ref readonly var pattern = ref parser._pattern;
