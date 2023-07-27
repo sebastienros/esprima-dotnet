@@ -24,6 +24,81 @@ internal static partial class ParserExtensions
         return s.AsSpan(start, end - start);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ref readonly T Last<T>(this ReadOnlySpan<T> span) => ref span[span.Length - 1];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ref T Last<T>(this Span<T> span) => ref span[span.Length - 1];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static
+#if NETSTANDARD2_1_OR_GREATER
+        ReadOnlySpan<char>
+#else
+        string
+#endif
+        ToParsable(this ReadOnlySpan<char> s)
+    {
+#if NETSTANDARD2_1_OR_GREATER
+        return s;
+#else
+        return s.ToString();
+#endif
+    }
+
+    internal static int FindIndex<T>(this ReadOnlySpan<T> s, Predicate<T> match, int startIndex = 0)
+    {
+        for (; startIndex < s.Length; startIndex++)
+        {
+            if (match(s[startIndex]))
+            {
+                return startIndex;
+            }
+        }
+        return -1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int FindIndex(this string s, Predicate<char> match, int startIndex = 0)
+    {
+        return s.AsSpan().FindIndex(match, startIndex);
+    }
+
+    internal static string Replace(this string s, Predicate<char> match, char c)
+    {
+        var i = s.FindIndex(match);
+        if (i < 0)
+        {
+            return s;
+        }
+
+#if !NETSTANDARD2_1_OR_GREATER
+        var chars = s.ToCharArray();
+#else
+        return string.Create(s.Length, (s, i, match, c), static (chars, state) =>
+        {
+            var (s, i, match, c) = state;
+            s.AsSpan().CopyTo(chars);
+#endif
+
+#pragma warning disable format
+            chars[i++] = c;
+            for (; i < chars.Length; i++)
+            {
+                if (match(chars[i]))
+                {
+                    chars[i] = c;
+                }
+            }
+#pragma warning restore format
+
+#if NETSTANDARD2_1_OR_GREATER
+        });
+#else
+        return new string(chars);
+#endif
+    }
+
     [StringMatcher(
         // basic keywords (should include all keywords defined in Scanner.IsKeyword)
         "if", "in", "do", "var", "for", "new", "try", "let", "this", "else", "case", "void", "with", "enum",

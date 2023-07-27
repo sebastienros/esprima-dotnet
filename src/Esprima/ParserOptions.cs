@@ -1,4 +1,5 @@
-﻿using Esprima.Ast;
+﻿using System.Text.RegularExpressions;
+using Esprima.Ast;
 
 namespace Esprima;
 
@@ -9,7 +10,9 @@ public record class ParserOptions
 {
     public static readonly ParserOptions Default = new();
 
-    public ScannerOptions ScannerOptions { get; } = new();
+    private readonly ScannerOptions _scannerOptions = new();
+
+    public ScannerOptions GetScannerOptions() => _scannerOptions;
 
     /// <summary>
     /// Gets or sets whether the tokens are included in the parsed tree, defaults to <see langword="false"/>.
@@ -19,12 +22,12 @@ public record class ParserOptions
     /// <summary>
     /// Gets or sets whether the comments are included in the parsed tree, defaults to <see langword="false"/>.
     /// </summary>
-    public bool Comments { get => ScannerOptions._comments; init => ScannerOptions._comments = value; }
+    public bool Comments { get => _scannerOptions._comments; init => _scannerOptions._comments = value; }
 
     /// <summary>
     /// Gets or sets whether the parser is tolerant to errors, defaults to <see langword="true"/>.
     /// </summary>
-    public bool Tolerant { get => ScannerOptions._tolerant; init => ScannerOptions._tolerant = value; }
+    public bool Tolerant { get => _scannerOptions._tolerant; init => _scannerOptions._tolerant = value; }
 
     /// <summary>
     /// Gets or sets whether the parser allows return statement to be used outside of functions, defaults to <see langword="false"/>.
@@ -34,17 +37,27 @@ public record class ParserOptions
     /// <summary>
     /// Gets or sets the <see cref="ErrorHandler"/> to use, defaults to <see cref="ErrorHandler.Default"/>.
     /// </summary>
-    public ErrorHandler ErrorHandler { get => ScannerOptions._errorHandler; init => ScannerOptions._errorHandler = value; }
+    public ErrorHandler ErrorHandler { get => _scannerOptions._errorHandler; init => _scannerOptions._errorHandler = value; }
 
     /// <summary>
     /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one, defaults to <see langword="true"/>.
     /// </summary>
-    public bool AdaptRegexp { get => ScannerOptions._adaptRegexp; init => ScannerOptions._adaptRegexp = value; }
+    [Obsolete($"This property is planned to be removed from the next stable version. Please use the {nameof(RegExpParseMode)} property instead.")]
+    public bool AdaptRegexp
+    {
+        get => _scannerOptions.AdaptRegexp;
+        init => _scannerOptions._regExpParseMode = value ? RegExpParseMode.AdaptToInterpreted : RegExpParseMode.Skip;
+    }
 
     /// <summary>
-    /// Default timeout for created regexes, defaults to 10 seconds.
+    /// Gets or sets how regular expressions should be parsed, defaults to <see cref="RegExpParseMode.AdaptToInterpreted"/>.
     /// </summary>
-    public TimeSpan RegexTimeout { get => ScannerOptions._regexTimeout; init => ScannerOptions._regexTimeout = value; }
+    public RegExpParseMode RegExpParseMode { get => _scannerOptions._regExpParseMode; init => _scannerOptions._regExpParseMode = value; }
+
+    /// <summary>
+    /// Default timeout for created <see cref="Regex"/> instances, defaults to 10 seconds.
+    /// </summary>
+    public TimeSpan RegexTimeout { get => _scannerOptions._regexTimeout; init => _scannerOptions._regexTimeout = value; }
 
     /// <summary>
     /// The maximum depth of assignments allowed, defaults to 200.

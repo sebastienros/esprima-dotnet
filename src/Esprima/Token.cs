@@ -65,7 +65,7 @@ public readonly record struct Token
     private sealed record RegexHolder(object? Value, RegexValue RegexValue) : ValueHolder(Value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Token CreateRegexLiteral(Regex? value, RegexValue regexValue, int start, int end, int lineNumber, int lineStart)
+    internal static Token CreateRegExpLiteral(Regex? value, RegexValue regexValue, int start, int end, int lineNumber, int lineStart)
     {
         return new Token(TokenType.RegularExpression, new RegexHolder(value, regexValue), start, end, lineNumber, lineStart);
     }

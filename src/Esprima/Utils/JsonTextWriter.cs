@@ -319,7 +319,9 @@ internal sealed class JsonTextWriter : JsonWriter
         writer.Write('"');
     }
 
+#if DEBUG
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
+#endif
     private struct Stack<T> : IEnumerable<T> where T : struct
     {
         private T[] _items;

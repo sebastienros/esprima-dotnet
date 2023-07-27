@@ -11,7 +11,10 @@ namespace Esprima;
 // An empty list, however causes no heap allocation; that is, the array is
 // allocated on first addition.
 
+#if DEBUG
 [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}, Version = {_localVersion}")]
+[DebuggerTypeProxy(typeof(ArrayList<>.DebugView))]
+#endif
 internal struct ArrayList<T> : IReadOnlyList<T>
 {
     private const int MinAllocatedCount = 4;
@@ -77,7 +80,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         if (initialCapacity < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(initialCapacity), initialCapacity, null);
+            ThrowArgumentOutOfRangeException<T>(nameof(initialCapacity), initialCapacity, null);
         }
 
         _items = initialCapacity > 0 ? new T[initialCapacity] : null;
@@ -116,7 +119,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
             if (value < _count)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), value, null);
+                ThrowArgumentOutOfRangeException<T>(nameof(value), value, null);
             }
             else if (value == (_items?.Length ?? 0))
             {
@@ -188,7 +191,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #if DEBUG
         if (_localVersion != (_sharedVersion?[0] ?? 0))
         {
-            throw new InvalidOperationException();
+            ThrowInvalidOperationException<T>();
         }
 #endif
     }
@@ -205,18 +208,18 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 #endif
     }
 
-    public void AddRange<TSource>(ArrayList<TSource> list) where TSource : T
+    public void AddRange(ReadOnlySpan<T> items)
     {
         AssertUnchanged();
 
-        var listCount = list.Count;
-        if (listCount == 0)
+        var itemCount = items.Length;
+        if (itemCount == 0)
         {
             return;
         }
 
         var oldCount = _count;
-        var newCount = oldCount + listCount;
+        var newCount = oldCount + itemCount;
 
         if (Capacity < newCount)
         {
@@ -224,10 +227,15 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         }
 
         Debug.Assert(_items is not null);
-        Array.Copy(list._items, 0, _items, oldCount, listCount);
+        items.CopyTo(_items.AsSpan(oldCount, itemCount));
         _count = newCount;
 
         OnChanged();
+    }
+
+    public void AddRange<TSource>(ArrayList<TSource> list) where TSource : class, T
+    {
+        AddRange(new ReadOnlySpan<T>(list._items, 0, list._count));
     }
 
     public void Add(T item)
@@ -261,13 +269,37 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         OnChanged();
     }
 
+    public void Insert(int index, T item)
+    {
+        AssertUnchanged();
+
+        if ((uint) index > (uint) _count)
+        {
+            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+        }
+
+        var capacity = Capacity;
+
+        if (_count == capacity)
+        {
+            Array.Resize(ref _items, Math.Max(capacity * 2, MinAllocatedCount));
+        }
+
+        Debug.Assert(_items is not null);
+        Array.Copy(_items, index, _items, index + 1, Count - index);
+        _items![index] = item;
+        _count++;
+
+        OnChanged();
+    }
+
     public void RemoveAt(int index)
     {
         AssertUnchanged();
 
         if ((uint) index >= (uint) _count)
         {
-            throw new ArgumentOutOfRangeException(nameof(index), index, null);
+            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
         }
 
         _count--;
@@ -278,6 +310,18 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         }
 
         _items![_count] = default!;
+
+        OnChanged();
+    }
+
+    public void Sort(IComparer<T>? comparer = null)
+    {
+        AssertUnchanged();
+
+        if (_count > 1)
+        {
+            Array.Sort(_items, 0, _count, comparer);
+        }
 
         OnChanged();
     }
@@ -401,13 +445,43 @@ internal struct ArrayList<T> : IReadOnlyList<T>
             {
                 if (_index == 0 || _index == _count + 1)
                 {
-                    throw new InvalidOperationException();
+                    ThrowInvalidOperationException<T>();
                 }
 
                 return Current;
             }
         }
     }
+
+#if DEBUG
+    [DebuggerNonUserCode]
+    private sealed class DebugView
+    {
+        readonly ArrayList<T> _list;
+
+        public DebugView(ArrayList<T> list)
+        {
+            _list = list;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public T[] Items
+        {
+            get
+            {
+                // NOTE: We can't simply call ToArray() because it breaks VS debugger for some reason
+                // (probably it's related to the span-based implementation)
+                if (_list._count == 0)
+                {
+                    return Array.Empty<T>();
+                }
+                var array = new T[_list._count];
+                Array.Copy(_list._items, array, _list._count);
+                return array;
+            }
+        }
+    }
+#endif
 }
 
 internal static class ArrayList

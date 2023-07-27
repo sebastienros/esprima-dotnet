@@ -37,7 +37,6 @@ internal static class Messages
     public const string InvalidLHSInForIn = "Invalid left-hand side in for-in";
     public const string InvalidLHSInForLoop = "Invalid left-hand side in for-loop";
     public const string InvalidModuleSpecifier = "Unexpected token";
-    public const string InvalidRegExp = "Invalid regular expression";
     public const string InvalidRegExpFlags = "Invalid regular expression flags";
     public const string InvalidTaggedTemplateOnOptionalChain = "Invalid tagged template on optional chain";
     public const string InvalidUnicodeEscapeSequence = "Invalid Unicode escape sequence";
@@ -56,11 +55,27 @@ internal static class Messages
     public const string PrivateFieldOutsideClass = "Private field '{0}' must be declared in an enclosing class";
     public const string PropertyAfterRestProperty = "Unexpected token";
     public const string Redeclaration = "{0} \"{1}\" has already been declared";
-    public const string RegexIncompleteQuantifier = "Invalid regular expression: Incomplete quantifier";
-    public const string RegexLoneQuantifierBrackets = "Invalid regular expression: Lone quantifier brackets";
-    public const string RegexUnmatchedOpenParen = "Invalid regular expression: Unmatched ')'";
-    public const string RegexUnterminatedCharacterClass = "Invalid regular expression: Unterminated character class";
-    public const string RegexUnterminatedGroup = "Invalid regular expression: Unterminated group";
+    public const string RegExpDuplicateCaptureGroupName = "Invalid regular expression: /{0}/{1}: Duplicate capture group name";
+    public const string RegExpIncompleteQuantifier = "Invalid regular expression: /{0}/{1}: Incomplete quantifier";
+    public const string RegExpInvalidCaptureGroupName = "Invalid regular expression: /{0}/{1}: Invalid capture group name";
+    public const string RegExpInvalidEscape = "Invalid regular expression: /{0}/{1}: Invalid escape";
+    public const string RegExpInvalidDecimalEscape = "Invalid regular expression: /{0}/{1}: Invalid decimal escape";
+    public const string RegExpInvalidCharacterClass = "Invalid regular expression: /{0}/{1}: Invalid character class";
+    public const string RegExpInvalidClassEscape = "Invalid regular expression: /{0}/{1}: Invalid class escape";
+    public const string RegExpInvalidGroup = "Invalid regular expression: /{0}/{1}: Invalid group";
+    public const string RegExpInvalidPropertyName = "Invalid regular expression: /{0}/{1}: Invalid property name";
+    public const string RegExpInvalidPropertyNameInCharacterClass = "Invalid regular expression: /{0}/{1}: Invalid property name in character class";
+    public const string RegExpInvalidNamedCaptureReferenced = "Invalid regular expression: /{0}/{1}: Invalid named capture referenced";
+    public const string RegExpInvalidNamedReference = "Invalid regular expression: /{0}/{1}: Invalid named reference";
+    public const string RegExpInvalidQuantifier = "Invalid regular expression: /{0}/{1}: Invalid quantifier";
+    public const string RegExpInvalidUnicodeEscape = "Invalid regular expression: /{0}/{1}: Invalid Unicode escape";
+    public const string RegExpLoneQuantifierBrackets = "Invalid regular expression: /{0}/{1}: Lone quantifier brackets";
+    public const string RegExpNothingToRepeat = "Invalid regular expression: /{0}/{1}: Nothing to repeat";
+    public const string RegExpNumbersOutOfOrderInQuantifier = "Invalid regular expression: /{0}/{1}: numbers out of order in {{}} quantifier";
+    public const string RegExpRangeOutOfOrderInCharacterClass = "Invalid regular expression: /{0}/{1}: Range out of order in character class";
+    public const string RegExpUnmatchedOpenParen = "Invalid regular expression: /{0}/{1}: Unmatched ')'";
+    public const string RegExpUnterminatedCharacterClass = "Invalid regular expression: /{0}/{1}: Unterminated character class";
+    public const string RegExpUnterminatedGroup = "Invalid regular expression: /{0}/{1}: Unterminated group";
     public const string StaticPrototype = "Classes may not have static property named prototype";
     public const string StrictCatchVariable = "Catch variable may not be eval or arguments in strict mode";
     public const string StrictDecimalWithLeadingZero = "Decimals with leading zeros are not allowed in strict mode.";
@@ -90,6 +105,6 @@ internal static class Messages
     public const string UnexpectedToken = "Unexpected token {0}";
     public const string UnexpectedTokenIllegal = "Unexpected token ILLEGAL";
     public const string UnknownLabel = "Undefined label \"{0}\"";
-    public const string UnterminatedRegExp = "Invalid regular expression= missing /";
+    public const string UnterminatedRegExp = "Invalid regular expression: missing /";
     public const string InvalidUnicodeKeyword = "The `{0}` contextual keyword must not contain Unicode escape sequences.";
 }

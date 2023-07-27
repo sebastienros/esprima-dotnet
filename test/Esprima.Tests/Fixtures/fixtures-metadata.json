@@ -1022,7 +1022,6 @@
       "expression/primary/literal/regular-expression/migrated_0000.js",
       "expression/primary/literal/regular-expression/migrated_0001.js",
       "expression/primary/literal/regular-expression/migrated_0002.js",
-      "expression/primary/literal/regular-expression/migrated_0006.source.js",
       "expression/primary/literal/regular-expression/migrated_0009.js",
       "expression/primary/literal/regular-expression/migrated_0010.js",
       "expression/primary/literal/regular-expression/migrated_0011.js",
@@ -1713,7 +1712,8 @@
     "flags": [ "EsprimaOrgFixture", "Skip" ],
     "files": [
       "ES6/identifier/invalid_expression_await.module.js",
-      "ES6/identifier/module_await.js"
+      "ES6/identifier/module_await.js",
+      "expression/primary/literal/regular-expression/migrated_0006.source.js" // false negative
     ]
   }
 ]

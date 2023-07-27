@@ -38,6 +38,9 @@ internal sealed class ParseCommand
     [Option("--tokens", Description = "Also include tokens.")]
     public bool Tokens { get; set; }
 
+    [Option("--skip-regexp", Description = "Skip parsing of regular expressions.")]
+    public bool SkipRegExp { get; set; }
+
     [Option("-t|--tolerant", Description = "Tolerate noncritical syntax errors.")]
     public bool Tolerant { get; set; }
 
@@ -52,7 +55,7 @@ internal sealed class ParseCommand
 
     private T CreateParserOptions<T>() where T : ParserOptions, new() => new T
     {
-        AdaptRegexp = false,
+        RegExpParseMode = !SkipRegExp ? RegExpParseMode.Validate : RegExpParseMode.Skip,
         Comments = Comments,
         Tokens = Tokens,
         Tolerant = Tolerant,
