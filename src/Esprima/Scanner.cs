@@ -513,26 +513,6 @@ public sealed partial class Scanner
         return comments.AsSpan();
     }
 
-    public static int CodePointAt(string text, int i)
-    {
-        int cp = text.CharCodeAt(i);
-
-        if (cp >= 0xD800 && cp <= 0xDBFF)
-        {
-            var second = text.CharCodeAt(i + 1);
-            if (second >= 0xDC00 && second <= 0xDFFF)
-            {
-                var first = cp;
-                cp = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
-            }
-        }
-
-        return cp;
-
-        // There seems to be a bug with "\ud800" when using char.ConvertToUtf32(text, i);
-        // Test: /[\\uD800-\\uFA6D]/u
-    }
-
     private bool ScanHexEscape(char prefix, out char result)
     {
         var len = prefix == 'u' ? 4 : 2;
@@ -648,8 +628,7 @@ public sealed partial class Scanner
     {
         var sb = GetStringBuilder();
 
-        var cp = CodePointAt(_source, _index);
-        string ch;
+        var cp = _source.CodePointAt(_index);
         int chcp;
 
         if (cp != 0x5C)
@@ -662,7 +641,6 @@ public sealed partial class Scanner
                 }
 
                 sb.Append((char) cp);
-                _index++;
             }
             else
             {
@@ -671,10 +649,10 @@ public sealed partial class Scanner
                     ThrowUnexpectedToken();
                 }
 
-                ch = ParserExtensions.CodePointToString(cp);
-                sb.Append(ch);
-                _index += ch.Length;
+                sb.AppendCodePoint(cp);
+                _index++;
             }
+            _index++;
         }
         else
         {
@@ -726,7 +704,7 @@ public sealed partial class Scanner
                 {
                     ThrowUnexpectedToken();
                 }
-                sb.Append(ParserExtensions.CodePointToString(chcp));
+                sb.AppendCodePoint(chcp);
             }
             else
             {
@@ -741,7 +719,7 @@ public sealed partial class Scanner
 ParseIdentifierPart:
         while (!Eof())
         {
-            cp = CodePointAt(_source, _index);
+            cp = _source.CodePointAt(_index);
 
             if (cp != 0x5C)
             {
@@ -758,7 +736,6 @@ ParseIdentifierPart:
                     }
 
                     sb.Append((char) cp);
-                    _index++;
                 }
                 else
                 {
@@ -767,10 +744,10 @@ ParseIdentifierPart:
                         break;
                     }
 
-                    ch = ParserExtensions.CodePointToString(cp);
-                    sb.Append(ch);
-                    _index += ch.Length;
+                    sb.AppendCodePoint(cp);
+                    _index++;
                 }
+                _index++;
             }
             else
             {
@@ -822,7 +799,7 @@ ParseIdentifierPart:
                     {
                         ThrowUnexpectedToken();
                     }
-                    sb.Append(ParserExtensions.CodePointToString(chcp));
+                    sb.AppendCodePoint(chcp);
                 }
                 else
                 {
@@ -1494,7 +1471,7 @@ ParseIdentifierPart:
                             if (_index < _source.Length && _source[_index] == '{')
                             {
                                 ++_index;
-                                str.Append(ParserExtensions.CodePointOrSurrogateToString(ScanUnicodeCodePointEscape()));
+                                str.AppendCodePoint(ScanUnicodeCodePointEscape());
                             }
                             else
                             {
@@ -1663,7 +1640,7 @@ ParseIdentifierPart:
                                 }
                                 else
                                 {
-                                    cooked.Append(ParserExtensions.CodePointOrSurrogateToString(cp));
+                                    cooked.AppendCodePoint(cp);
                                 }
                             }
                             else
