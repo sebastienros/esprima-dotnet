@@ -34,14 +34,14 @@ internal static partial class ParserExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static
-#if NETSTANDARD2_1_OR_GREATER
+#if HAS_SPAN_PARSE
         ReadOnlySpan<char>
 #else
         string
 #endif
         ToParsable(this ReadOnlySpan<char> s)
     {
-#if NETSTANDARD2_1_OR_GREATER
+#if HAS_SPAN_PARSE
         return s;
 #else
         return s.ToString();

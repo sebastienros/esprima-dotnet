@@ -1,4 +1,5 @@
-﻿using Esprima.Ast;
+﻿using System.Globalization;
+using Esprima.Ast;
 using Esprima.Ast.Jsx;
 
 namespace Esprima;
@@ -389,12 +390,12 @@ public class JsxParser : JavaScriptParser
             var str = result.Substring(1, result.Length - 2);
             if (numeric && str.Length > 1)
             {
-                result = ((char) int.Parse(str.Substring(1))).ToString();
+                result = ((char) int.Parse(str.AsSpan(1).ToParsable(), NumberStyles.None, CultureInfo.InvariantCulture)).ToString();
             }
             else if (hex && str.Length > 2)
             {
                 result =
-                    ((char) int.Parse(str.Substring(2), System.Globalization.NumberStyles.AllowHexSpecifier)).ToString();
+                    ((char) int.Parse(str.AsSpan(2).ToParsable(), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture)).ToString();
             }
             else if (!numeric && !hex && XHTMLEntities.TryGetValue(str, out var entity))
             {

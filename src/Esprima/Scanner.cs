@@ -1052,11 +1052,7 @@ ParseIdentifierPart:
 
         if (number.Length < 16)
         {
-#if !HAS_SPAN_PARSE
-            value = Convert.ToInt64(number.ToString(), 16);
-#else
-            value = long.Parse(number, NumberStyles.AllowHexSpecifier, null);
-#endif
+            value = long.Parse(number.ToParsable(), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
         }
         else if (number.Length > 255)
         {
@@ -1109,6 +1105,8 @@ ParseIdentifierPart:
         }
         else
         {
+            NumberStyles parseStyle;
+
             if (style == JavaScriptNumberStyle.Hex)
             {
                 var c = number[0];
@@ -1117,19 +1115,15 @@ ParseIdentifierPart:
                     // ensure we get positive number
                     number = ("0" + number.ToString()).AsSpan();
                 }
+
+                parseStyle = NumberStyles.AllowHexSpecifier;
+            }
+            else
+            {
+                parseStyle = NumberStyles.None;
             }
 
-            var parseStyle = style switch
-            {
-                JavaScriptNumberStyle.Integer => NumberStyles.None,
-                JavaScriptNumberStyle.Hex => NumberStyles.AllowHexSpecifier,
-                _ => NumberStyles.None
-            };
-#if HAS_SPAN_PARSE
-            bigInt = BigInteger.Parse(number, parseStyle);
-#else
-            bigInt = BigInteger.Parse(number.ToString(), parseStyle);
-#endif
+            bigInt = BigInteger.Parse(number.ToParsable(), parseStyle, CultureInfo.InvariantCulture);
         }
 
         return Token.CreateBigIntLiteral(bigInt, start, end: _index, _lineNumber, _lineStart);
