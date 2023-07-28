@@ -880,14 +880,6 @@ public partial class JavaScriptParser
         }
     }
 
-    /// <summary>
-    /// Return true if provided expression is LeftHandSideExpression
-    /// </summary>
-    private bool IsLeftHandSide(Expression expr)
-    {
-        return expr.Type == Nodes.Identifier || expr.Type == Nodes.MemberExpression;
-    }
-
     // https://tc39.github.io/ecma262/#sec-array-initializer
 
     private SpreadElement ParseSpreadElement()
