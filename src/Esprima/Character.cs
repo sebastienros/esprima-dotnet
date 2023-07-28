@@ -80,4 +80,23 @@ public static partial class Character
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsInRange(char c, char min, char max) => c - (uint) min <= max - (uint) min;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GetSurrogatePair(uint cp, out char highSurrogate, out char lowSurrogate)
+    {
+        // Based on: https://github.com/dotnet/runtime/blob/v6.0.16/src/libraries/System.Private.CoreLib/src/System/Text/UnicodeUtility.cs#L58
+
+        Debug.Assert(cp is > char.MaxValue and <= Character.UnicodeLastCodePoint);
+
+        highSurrogate = (char) ((cp + ((0xD800u - 0x40u) << 10)) >> 10);
+        lowSurrogate = (char) ((cp & 0x3FFu) + 0xDC00u);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static uint GetCodePoint(char highSurrogate, char lowSurrogate)
+    {
+        // Based on: https://github.com/dotnet/runtime/blob/v6.0.16/src/libraries/System.Private.CoreLib/src/System/Text/UnicodeUtility.cs#L28
+
+        return ((uint) highSurrogate << 10) + lowSurrogate - ((0xD800U << 10) + 0xDC00U - (1 << 16));
+    }
 }

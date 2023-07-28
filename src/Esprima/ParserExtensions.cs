@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Esprima;
 
@@ -32,14 +34,14 @@ internal static partial class ParserExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static
-#if NETSTANDARD2_1_OR_GREATER
+#if HAS_SPAN_PARSE
         ReadOnlySpan<char>
 #else
         string
 #endif
         ToParsable(this ReadOnlySpan<char> s)
     {
-#if NETSTANDARD2_1_OR_GREATER
+#if HAS_SPAN_PARSE
         return s;
 #else
         return s.ToString();
@@ -142,23 +144,33 @@ internal static partial class ParserExtensions
         return c.ToString();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string CodePointToString(int cp)
+    internal static StringBuilder AppendCodePoint(this StringBuilder sb, int cp)
     {
-        var temp = s_charToString;
-        if ((uint) cp < temp.Length)
+        Debug.Assert(cp is >= 0 and <= Character.UnicodeLastCodePoint);
+
+        if (cp > char.MaxValue)
         {
-            return temp[cp];
+            Character.GetSurrogatePair((uint) cp, out var highSurrogate, out var lowSurrogate);
+            return sb.Append(highSurrogate).Append(lowSurrogate);
         }
-        return char.ConvertFromUtf32(cp);
+
+        return sb.Append((char) cp);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string CodePointOrSurrogateToString(int cp)
+    public static int CodePointAt(this string text, int i)
     {
-        return cp is not (>= 0xD800 and <= 0xDFFF)
-            ? CodePointToString(cp)
-            : ((char) cp).ToString();
+        var ch = text.CharCodeAt(i);
+
+        if (ch >= 0xD800 && ch <= 0xDBFF)
+        {
+            var ch2 = text.CharCodeAt(i + 1);
+            if (ch2 >= 0xDC00 && ch2 <= 0xDFFF)
+            {
+                return (int) Character.GetCodePoint(ch, ch2);
+            }
+        }
+
+        return ch;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

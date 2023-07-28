@@ -47,9 +47,8 @@ partial class Scanner
             {
                 if (cp > char.MaxValue)
                 {
-                    var s = char.ConvertFromUtf32(cp);
                     // Surrogate pairs should be surrounded by a non-capturing group to act as one character (because of cases like /\ud83d\udca9+/u).
-                    sb.Append("(?:").Append(s[0]).Append(s[1]).Append(')');
+                    sb.Append("(?:").AppendCodePoint(cp).Append(')');
                 }
                 else
                 {
@@ -316,6 +315,9 @@ partial class Scanner
                 if (astralRanges.Count > 0)
                 {
                     rangeSpan = astralRanges.AsSpan();
+                    Span<char> start = stackalloc char[2];
+                    Span<char> end = stackalloc char[2];
+
                     for (i = 0; i < rangeSpan.Length; i++)
                     {
                         sb.Append(separator);
@@ -325,14 +327,14 @@ partial class Scanner
 
                         if (range.Start == range.End)
                         {
-                            sb.Append(char.ConvertFromUtf32(range.Start));
+                            sb.AppendCodePoint(range.Start);
                         }
                         else
                         {
                             Debug.Assert(range.Start <= range.End);
 
-                            var start = char.ConvertFromUtf32(range.Start);
-                            var end = char.ConvertFromUtf32(range.End);
+                            Character.GetSurrogatePair((uint) range.Start, out start[0], out start[1]);
+                            Character.GetSurrogatePair((uint) range.End, out end[0], out end[1]);
 
                             if (start[0] == end[0])
                             {
