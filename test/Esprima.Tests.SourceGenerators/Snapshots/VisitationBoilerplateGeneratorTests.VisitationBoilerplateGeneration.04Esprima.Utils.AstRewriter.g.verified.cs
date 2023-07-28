@@ -185,7 +185,9 @@ partial class AstRewriter
 
         var source = VisitAndConvert(exportAllDeclaration.Source);
 
-        return exportAllDeclaration.UpdateWith(exported, source);
+        VisitAndConvert(exportAllDeclaration.Attributes, out var attributes);
+
+        return exportAllDeclaration.UpdateWith(exported, source, attributes);
     }
 
     protected internal override object? VisitExportDefaultDeclaration(Esprima.Ast.ExportDefaultDeclaration exportDefaultDeclaration)
@@ -203,7 +205,9 @@ partial class AstRewriter
 
         var source = VisitAndConvert(exportNamedDeclaration.Source, allowNull: true);
 
-        return exportNamedDeclaration.UpdateWith(declaration, specifiers, source);
+        VisitAndConvert(exportNamedDeclaration.Attributes, out var attributes);
+
+        return exportNamedDeclaration.UpdateWith(declaration, specifiers, source, attributes);
     }
 
     protected internal override object? VisitExpressionStatement(Esprima.Ast.ExpressionStatement expressionStatement)
@@ -281,13 +285,24 @@ partial class AstRewriter
         return ifStatement.UpdateWith(test, consequent, alternate);
     }
 
+    protected internal override object? VisitImportAttribute(Esprima.Ast.ImportAttribute importAttribute)
+    {
+        var key = VisitAndConvert(importAttribute.Key);
+
+        var value = VisitAndConvert(importAttribute.Value);
+
+        return importAttribute.UpdateWith(key, value);
+    }
+
     protected internal override object? VisitImportDeclaration(Esprima.Ast.ImportDeclaration importDeclaration)
     {
         VisitAndConvert(importDeclaration.Specifiers, out var specifiers);
 
         var source = VisitAndConvert(importDeclaration.Source);
 
-        return importDeclaration.UpdateWith(specifiers, source);
+        VisitAndConvert(importDeclaration.Attributes, out var attributes);
+
+        return importDeclaration.UpdateWith(specifiers, source, attributes);
     }
 
     protected internal override object? VisitImportDefaultSpecifier(Esprima.Ast.ImportDefaultSpecifier importDefaultSpecifier)
@@ -301,7 +316,9 @@ partial class AstRewriter
     {
         var source = VisitAndConvert(importExpression.Source);
 
-        return importExpression.UpdateWith(source);
+        var options = VisitAndConvert(importExpression.Options, allowNull: true);
+
+        return importExpression.UpdateWith(source, options);
     }
 
     protected internal override object? VisitImportNamespaceSpecifier(Esprima.Ast.ImportNamespaceSpecifier importNamespaceSpecifier)

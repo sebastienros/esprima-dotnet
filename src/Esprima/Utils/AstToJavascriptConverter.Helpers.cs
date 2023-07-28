@@ -221,6 +221,19 @@ partial class AstToJavaScriptConverter
         _currentExpressionFlags = originalExpressionFlags;
     }
 
+    private void VisitImportAttributes(in NodeList<ImportAttribute> attributes)
+    {
+        // https://github.com/tc39/proposal-import-attributes#import-statements
+
+        Writer.WriteKeyword("with", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+
+        Writer.StartObject(attributes.Count, ref _writeContext);
+
+        VisitAuxiliaryNodeList(in attributes, separator: ",");
+
+        Writer.EndObject(attributes.Count, ref _writeContext);
+    }
+
     private void VisitExportOrImportSpecifierIdentifier(Expression identifierExpression)
     {
         if (identifierExpression is Identifier { Name: "default" } identifier)

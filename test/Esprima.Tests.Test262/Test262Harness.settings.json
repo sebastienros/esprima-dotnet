@@ -5,8 +5,8 @@
   "Namespace": "Esprima.Tests.Test262",
   "Parallel": true,
   "ExcludedFeatures": [
-    "regexp-v-flag",
-    "import-assertions"
+    "import-assertions",
+    "regexp-v-flag"
   ],
   "ExcludedFlags": [],
   "ExcludedDirectories": [],

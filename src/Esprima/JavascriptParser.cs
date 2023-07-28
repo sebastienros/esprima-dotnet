@@ -1725,6 +1725,15 @@ public partial class JavaScriptParser
 
         var source = ParseAssignmentExpression();
 
+        Expression? attributes = null;
+        if (Match(","))
+        {
+            NextToken();
+
+            if (!Match(")"))
+                attributes = ParseAssignmentExpression();
+        }
+
         _context.IsAssignmentTarget = previousIsAssignmentTarget;
 
         if (!this.Match(")") && _tolerant)
@@ -1738,7 +1747,7 @@ public partial class JavaScriptParser
             this.Expect(")");
         }
 
-        return Finalize(node, new ImportExpression(source));
+        return Finalize(node, new ImportExpression(source, attributes));
     }
 
     private bool MatchImportMeta()
@@ -5057,6 +5066,66 @@ ParseValue:
         return Finalize(node, new Literal((string) token.Value!, raw));
     }
 
+    private ArrayList<ImportAttribute> ParseImportAttributes()
+    {
+        var attributes = new ArrayList<ImportAttribute>();
+        if (!MatchKeyword("with"))
+        {
+            return attributes;
+        }
+
+        NextToken();
+        Expect("{");
+
+        var parameterSet = new HashSet<string?>();
+        while (!Match("}"))
+        {
+            var importAttribute = ParseImportAttribute();
+
+            string? key = string.Empty;
+            switch (importAttribute.Key)
+            {
+                case Identifier identifier:
+                    key = identifier.Name;
+                    break;
+                case Literal literal:
+                    key = literal.StringValue;
+                    break;
+            }
+
+            if (!parameterSet.Add(key))
+            {
+                ThrowError(Messages.DuplicateKeyInImportAttributes, key);
+            }
+
+            attributes.Add(importAttribute);
+            if (!Match("}"))
+            {
+                ExpectCommaSeparator();
+            }
+        }
+        Expect("}");
+        return attributes;
+    }
+
+    private ImportAttribute ParseImportAttribute()
+    {
+        var node = CreateNode();
+
+        Expression key = ParseObjectPropertyKey();
+        if (!Match(":"))
+        {
+            ThrowUnexpectedToken(NextToken());
+        }
+
+        NextToken();
+        var literalToken = NextToken();
+        var raw = GetTokenRaw(literalToken);
+        Literal value = Finalize(node, new Literal((string) literalToken.Value!, raw));
+
+        return Finalize(node, new ImportAttribute(key, value));
+    }
+
     // import {<foo as bar>} ...;
     private ImportSpecifier ParseImportSpecifier()
     {
@@ -5207,9 +5276,10 @@ ParseValue:
             src = ParseModuleSpecifier();
         }
 
+        var attributes = ParseImportAttributes();
         ConsumeSemicolon();
 
-        return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src));
+        return Finalize(node, new ImportDeclaration(NodeList.From(ref specifiers), src, NodeList.From(ref attributes)));
     }
 
     // https://tc39.github.io/ecma262/#sec-exports
@@ -5331,8 +5401,9 @@ ParseValue:
 
             NextToken();
             var src = ParseModuleSpecifier();
+            var attributes = ParseImportAttributes();
             ConsumeSemicolon();
-            exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported));
+            exportDeclaration = Finalize(node, new ExportAllDeclaration(src, exported, NodeList.From(ref attributes)));
         }
         else if (_lookahead.Type == TokenType.Keyword)
         {
@@ -5354,18 +5425,19 @@ ParseValue:
                     break;
             }
 
-            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration.As<Declaration>(), new NodeList<ExportSpecifier>(), null));
+            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration.As<Declaration>(), new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
         }
         else if (MatchAsyncFunction())
         {
             var declaration = ParseFunctionDeclaration();
-            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null));
+            exportDeclaration = Finalize(node, new ExportNamedDeclaration(declaration, new NodeList<ExportSpecifier>(), null, new NodeList<ImportAttribute>()));
         }
         else
         {
             var specifiers = new ArrayList<ExportSpecifier>();
             Literal? source = null;
             var isExportFromIdentifier = false;
+            ArrayList<ImportAttribute> attributes = new();
 
             Expect("{");
             while (!Match("}"))
@@ -5386,6 +5458,7 @@ ParseValue:
                 // export {foo} from 'foo';
                 NextToken();
                 source = ParseModuleSpecifier();
+                attributes = ParseImportAttributes();
                 ConsumeSemicolon();
             }
             else if (isExportFromIdentifier)
@@ -5400,7 +5473,7 @@ ParseValue:
                 ConsumeSemicolon();
             }
 
-            exportDeclaration = Finalize(node, new ExportNamedDeclaration(null, NodeList.From(ref specifiers), source));
+            exportDeclaration = Finalize(node, new ExportNamedDeclaration(null, NodeList.From(ref specifiers), source, NodeList.From(ref attributes)));
         }
 
         return exportDeclaration;
