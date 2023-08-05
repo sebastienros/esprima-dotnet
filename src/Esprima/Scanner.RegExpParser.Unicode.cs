@@ -630,7 +630,7 @@ partial class Scanner
                 parser.ReportSyntaxError(startIndex, Messages.RegExpIncompleteQuantifier);
             }
 
-            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser)
+            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser, out ParseError? conversionError)
             {
                 // https://tc39.es/ecma262/#prod-AtomEscape
 
@@ -785,9 +785,9 @@ partial class Scanner
                         if (!context.WithinSet)
                         {
                             // Outside character sets, numbers may be backreferences (in this case the number is interpreted as decimal).
-                            if (parser.TryAdjustBackreference(ref context, startIndex))
+                            if (parser.TryAdjustBackreference(ref context, startIndex, out conversionError))
                             {
-                                if (i < 0) // conversion is impossible
+                                if (conversionError is not null)
                                 {
                                     return false;
                                 }
@@ -807,8 +807,8 @@ partial class Scanner
                     case 'k':
                         if (!context.WithinSet)
                         {
-                            parser.AdjustNamedBackreference(ref context, startIndex);
-                            if (i < 0) // conversion is impossible
+                            parser.AdjustNamedBackreference(ref context, startIndex, out conversionError);
+                            if (conversionError is not null)
                             {
                                 return false;
                             }
@@ -901,7 +901,7 @@ partial class Scanner
                             {
                                 if (!TryTranslateUnicodePropertyToRanges(slice, parser.GetCodePointRangeCache(), out var categoryRanges))
                                 {
-                                    parser.ReportConversionFailure(startIndex, "Inconvertible Unicode property escape");
+                                    conversionError = parser.ReportConversionFailure(startIndex, "Inconvertible Unicode property escape");
                                     return false;
                                 }
 
@@ -969,6 +969,7 @@ partial class Scanner
                         break;
                 }
 
+                conversionError = null;
                 return true;
             }
         }

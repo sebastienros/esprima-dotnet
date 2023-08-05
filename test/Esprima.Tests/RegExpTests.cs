@@ -84,7 +84,7 @@ public class RegExpTests
         string? SerializeSet(string expression)
         {
             var parser = new Scanner.RegExpParser($"[{expression}]", "u", ScannerOptions.Default);
-            return parser.ParseCore();
+            return parser.ParseCore(out _);
         }
     }
 
@@ -98,7 +98,7 @@ public class RegExpTests
         string? SerializeSet(string expression)
         {
             var parser = new Scanner.RegExpParser($"[{expression}]", "u", ScannerOptions.Default);
-            return parser.ParseCore();
+            return parser.ParseCore(out _);
         }
     }
 
@@ -172,7 +172,7 @@ public class RegExpTests
     [Fact]
     public void ShouldPreventInfiniteLoopWhenAdaptingMultiLine()
     {
-        var regex = Scanner.AdaptRegExp("\\$", "gm", matchTimeout: TimeSpan.FromSeconds(10));
+        var regex = Scanner.AdaptRegExp("\\$", "gm", matchTimeout: TimeSpan.FromSeconds(10)).Regex;
         Assert.NotNull(regex);
     }
 
@@ -261,7 +261,7 @@ public class RegExpTests
 
         if (!expectError)
         {
-            var regex = Scanner.AdaptRegExp(pattern, flags, compiled, matchTimeout, throwIfNotAdaptable);
+            var regex = Scanner.AdaptRegExp(pattern, flags, compiled, matchTimeout, throwIfNotAdaptable).Regex;
             if (expectCompiled is not null)
             {
                 Assert.NotNull(regex);
@@ -313,7 +313,7 @@ public class RegExpTests
         // TODO: Generate these tests when Duplicate named capturing groups (https://github.com/tc39/proposal-duplicate-named-capturing-groups) gets implemented in V8.
 
         var parser = new Scanner.RegExpParser(pattern, flags, new ScannerOptions { Tolerant = false });
-        var actualAdaptedPattern = parser.ParseCore();
+        var actualAdaptedPattern = parser.ParseCore(out _);
 
         Assert.Equal(expectedAdaptedPattern, actualAdaptedPattern);
     }
@@ -393,16 +393,21 @@ public class RegExpTests
 
         if (expectedMatches is not null)
         {
-            Assert.Null(regexValidator.Parse(out var actualAdaptedPattern));
-            Assert.Null(actualAdaptedPattern);
+            var parseResult = regexValidator.Parse();
+            Assert.True(parseResult.Success);
+            Assert.Null(parseResult.Regex);
+            Assert.Null(parseResult.ConversionError);
 
-            var adaptedRegex = regexConverter.Parse(out actualAdaptedPattern);
+            parseResult = regexConverter.Parse();
             if (expectedAdaptedPattern != ")inconvertible(")
             {
-                Assert.NotNull(adaptedRegex);
+                Assert.True(parseResult.Success);
+                Assert.NotNull(parseResult.Regex);
+
+                var actualAdaptedPattern = parseResult.Regex.ToString();
                 Assert.Equal(expectedAdaptedPattern, actualAdaptedPattern);
 
-                var actualMatchEnumerable = adaptedRegex.Matches(testString).Cast<Match>();
+                var actualMatchEnumerable = parseResult.Regex.Matches(testString).Cast<Match>();
 
                 // In unicode mode, we can't prevent empty matches within surrogate pairs currently,
                 // so we need to remove such matches from the match collection to make assertions pass.
@@ -461,8 +466,9 @@ public class RegExpTests
             }
             else
             {
-                Assert.Null(adaptedRegex);
-                Assert.Null(actualAdaptedPattern);
+                Assert.False(parseResult.Success);
+                Assert.Null(parseResult.Regex);
+                Assert.NotNull(parseResult.ConversionError);
             }
         }
         else
@@ -471,7 +477,7 @@ public class RegExpTests
 
             if (!hintArray.Contains("!skip-validation"))
             {
-                ex = Assert.Throws<ParserException>(() => regexValidator.Parse(out var _));
+                ex = Assert.Throws<ParserException>(() => regexValidator.Parse());
 
                 if (!hintArray.Contains("!ignore-error-message"))
                 {
@@ -479,7 +485,7 @@ public class RegExpTests
                 }
             }
 
-            ex = Assert.Throws<ParserException>(() => regexConverter.Parse(out var _));
+            ex = Assert.Throws<ParserException>(() => regexConverter.Parse());
 
             if (expectedAdaptedPattern != ")inconvertible(")
             {

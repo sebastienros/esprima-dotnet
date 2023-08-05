@@ -767,7 +767,7 @@ public partial class JavaScriptParser
                         _scanner._index = _startMarker.Index;
                         token = NextRegExpToken();
                         raw = GetTokenRaw(token);
-                        expr = Finalize(node, new RegExpLiteral(token.RegexValue!, token.Value, raw));
+                        expr = Finalize(node, new RegExpLiteral(token.RegexValue!, token.RegExpParseResult, raw));
                         break;
                     case "#":
                         expr = ParsePrivateIdentifier(node);
