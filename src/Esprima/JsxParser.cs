@@ -559,7 +559,7 @@ public class JsxParser : JavaScriptParser
     private Token PeekJsxToken()
     {
         var state = _scanner.SaveState();
-        _scanner.ScanComments();
+        _scanner.ScanCommentsInternal();
         var next = LexJsx();
         _scanner.RestoreState(state);
         return next;

@@ -383,7 +383,7 @@ public sealed partial class Scanner
         return comments;
     }
 
-    public ReadOnlySpan<Comment> ScanComments()
+    internal ArrayList<Comment> ScanCommentsInternal()
     {
         var comments = new ArrayList<Comment>();
 
@@ -511,6 +511,13 @@ public sealed partial class Scanner
             }
         }
 
+        return comments;
+    }
+
+    public ReadOnlySpan<Comment> ScanComments()
+    {
+        var comments = ScanCommentsInternal();
+        comments.TrimExcess();
         return comments.AsSpan();
     }
 

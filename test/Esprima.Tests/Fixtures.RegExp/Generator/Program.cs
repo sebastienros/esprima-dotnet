@@ -69,8 +69,8 @@ while ((line = reader.ReadLine()) is not null)
         var pattern = DecodeStringIfEscaped(parts[0]);
         var flags = DecodeStringIfEscaped(parts[1]);
 
-        var regexParser = new Scanner.RegexParser(pattern, flags, scannerOptions);
-        try { adaptedPattern = regexParser.ParseCore() ?? ")inconvertible("; }
+        var regexParser = new Scanner.RegExpParser(pattern, flags, scannerOptions);
+        try { adaptedPattern = regexParser.ParseCore(out _, out _) ?? ")inconvertible("; }
         catch (ParserException) { adaptedPattern = ")syntax-error("; }
         var encodedDotnetPattern = JavaScriptStringHelper.Encode(adaptedPattern, addDoubleQuotes: false);
         if (adaptedPattern != encodedDotnetPattern)

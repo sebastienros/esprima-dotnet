@@ -348,6 +348,16 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         this = default;
     }
 
+    public void TrimExcess(int threshold = MinAllocatedCount)
+    {
+        AssertUnchanged();
+
+        if (Capacity - _count > threshold)
+        {
+            Capacity = _count;
+        }
+    }
+
     /// <remarks>
     /// Items should not be added or removed from the <see cref="ArrayList{T}"/> while the returned <see cref="Span{T}"/> is in use!
     /// </remarks>

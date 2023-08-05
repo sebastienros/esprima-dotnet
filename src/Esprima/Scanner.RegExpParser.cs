@@ -175,7 +175,7 @@ partial class Scanner
                 }
             }
 
-            var adaptedPattern = ParseCore(out conversionError);
+            var adaptedPattern = ParseCore(out var capturingGroups, out conversionError);
             if (adaptedPattern is null)
             {
                 // NOTE: ParseCore should return null
@@ -184,17 +184,16 @@ partial class Scanner
                 Debug.Assert(conversionError is not null ^ _scanner._regExpParseMode == RegExpParseMode.Validate);
                 return new RegExpParseResult(conversionError);
             }
-            else
-            {
-                Debug.Assert(conversionError is null);
-            }
+
+            Debug.Assert(conversionError is null);
+            capturingGroups.TrimExcess();
 
             var options = FlagsToOptions(_flags, compiled: _scanner._regExpParseMode == RegExpParseMode.AdaptToCompiled);
             var matchTimeout = _scanner._regexTimeout;
 
             try
             {
-                return new RegExpParseResult(new Regex(adaptedPattern, options, matchTimeout));
+                return new RegExpParseResult(new Regex(adaptedPattern, options, matchTimeout), capturingGroups);
             }
             catch
             {
@@ -204,9 +203,9 @@ partial class Scanner
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string? ParseCore(out ParseError? conversionError)
+        internal string? ParseCore(out ArrayList<RegExpCapturingGroup> capturingGroups, out ParseError? conversionError)
         {
-            CheckBracesBalance(out var capturingGroups, out var capturingGroupNames);
+            CheckBracesBalance(out capturingGroups, out var capturingGroupNames);
 
             return (_flags & RegExpFlags.Unicode) != 0
                 ? ParsePattern(UnicodeMode.Instance, ref capturingGroups, capturingGroupNames, out conversionError)
@@ -495,7 +494,17 @@ partial class Scanner
                                     return null;
                                 }
 
-                                sb.Append(_pattern, i, 3).Append(groupName);
+                                // The JS regex engine assigns numbers to capturing groups sequentially (regardless of the group being named or not named)
+                                // but .NET uses a different, weird approach:
+                                // "[...] Captures that use parentheses are numbered automatically from left to right
+                                // based on the order of the opening parentheses in the regular expression, starting from 1.
+                                // However, named capture groups are always ordered last, after non-named capture groups. [...]"
+                                // (See also: https://learn.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions#grouping-constructs-and-regular-expression-objects)
+                                // This could totally mess up numbered backreferences and replace pattern references. So, as a workaround, we wrap all named capturing groups
+                                // in a plain (numbered) capturing group to force .NET to include all capturing groups in the resulting match in the expected order.
+                                // (Named groups will also be listed after these but we can't do anything about that.)
+
+                                sb.Append('(').Append(_pattern, i, 3).Append(groupName);
                             }
 
                             i = _pattern.IndexOf('>', i + 3);
@@ -536,7 +545,15 @@ partial class Scanner
 
                         groupType = context.GroupStack.Pop().Type;
 
-                        sb?.Append(ch);
+                        if (sb is not null)
+                        {
+                            sb.Append(ch);
+
+                            if (groupType == RegExpGroupType.NamedCapturing)
+                            {
+                                sb.Append(')');
+                            }
+                        }
 
                         context.FollowingQuantifierError = mode.AllowsQuantifierAfterGroup(groupType) ? null : Messages.RegExpInvalidQuantifier;
                         break;
@@ -1261,25 +1278,26 @@ partial class Scanner
         }
     }
 
-    private readonly record struct RegExpCapturingGroup(int StartIndex, string? Name);
+    internal readonly record struct RegExpCapturingGroup(int StartIndex, string? Name);
 }
 
 public readonly struct RegExpParseResult
 {
     private readonly object? _regexOrConversionError;
+    private readonly ArrayList<Scanner.RegExpCapturingGroup> _capturingGroups;
 
-    internal RegExpParseResult(Regex regex)
+    internal RegExpParseResult(Regex regex, ArrayList<Scanner.RegExpCapturingGroup> capturingGroups)
     {
         _regexOrConversionError = regex;
+        _capturingGroups = capturingGroups;
     }
 
     internal RegExpParseResult(ParseError? conversionError)
     {
-        _regexOrConversionError = conversionError
-            // NOTE: We can't use null to represent the success case of validation-only parsing (RegExpParseMode.Validation)
-            // because in that case default(RegExpParseResult) would indicate success.
-            // However, we can do that by using an instance of whatever type except for Regex and ParseError.
-            ?? (object) nameof(Success);
+        // NOTE: We can't use null to represent success for validation-only parsing (RegExpParseMode.Validation)
+        // because in that case default(RegExpParseResult) would indicate success.
+        // However, we can do that by using an instance of whatever type except for Regex and ParseError.
+        _regexOrConversionError = conversionError ?? (object) nameof(Success);
     }
 
     public bool Success => _regexOrConversionError is not (null or ParseError);
@@ -1287,4 +1305,13 @@ public readonly struct RegExpParseResult
     public ParseError? ConversionError => _regexOrConversionError as ParseError;
 
     public Regex? Regex => _regexOrConversionError as Regex;
+
+    public int ActualRegexGroupCount => _capturingGroups.Count + 1;
+
+    public string? GetRegexGroupName(int number)
+    {
+        return (uint) --number < (uint) _capturingGroups.Count
+            ? _capturingGroups[number].Name
+            : null;
+    }
 }

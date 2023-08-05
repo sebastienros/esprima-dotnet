@@ -2358,6 +2358,9 @@ title=(?<quote>["'])(?<content>.*?)\k<quote>	u	title="Named capturing groups' ad
 (?<=\1(\w+))c		"ababdc"	!skip
 (?<=(\w+)\1)c		"ababc"
 
+.(?<a>a)(.)		bab
+(?:(?<x>a|b)(x)){3}\1		axbxaxa
+
 # Quantifiers
 
 x?		xxyx

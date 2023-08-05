@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using Esprima.Ast;
 using Esprima.Test;
@@ -84,7 +85,7 @@ public class RegExpTests
         string? SerializeSet(string expression)
         {
             var parser = new Scanner.RegExpParser($"[{expression}]", "u", ScannerOptions.Default);
-            return parser.ParseCore(out _);
+            return parser.ParseCore(out _, out _);
         }
     }
 
@@ -98,7 +99,7 @@ public class RegExpTests
         string? SerializeSet(string expression)
         {
             var parser = new Scanner.RegExpParser($"[{expression}]", "u", ScannerOptions.Default);
-            return parser.ParseCore(out _);
+            return parser.ParseCore(out _, out _);
         }
     }
 
@@ -296,24 +297,24 @@ public class RegExpTests
         }
     }
 
-    [InlineData("(?<a>x)|(?<a>y)", "u", "(?<a>x)|(?<a>y)")]
-    [InlineData("((?<a>x))|(?<a>y)", "u", "((?<a>x))|(?<a>y)")]
-    [InlineData("(?:(?<a>x))|(?<a>y)", "u", "(?:(?<a>x))|(?<a>y)")]
-    [InlineData("(?<!(?<a>x))|(?<a>y)", "u", "(?<!(?<a>x))|(?<a>y)")]
-    [InlineData("(?<a>x)|((?<a>y))", "u", "(?<a>x)|((?<a>y))")]
-    [InlineData("(?<a>x)|(?:(?<a>y))", "u", "(?<a>x)|(?:(?<a>y))")]
-    [InlineData("(?<a>x)|(?!(?<a>y))", "u", "(?<a>x)|(?!(?<a>y))")]
-    [InlineData("(?<a>x)|(?<a>y)|(?<a>z)", "u", "(?<a>x)|(?<a>y)|(?<a>z)")]
-    [InlineData("((?<a>x)|(?<a>y))|(?<a>z)", "u", "((?<a>x)|(?<a>y))|(?<a>z)")]
-    [InlineData("(?<a>x)|((?<a>y)|(?<a>z))", "u", "(?<a>x)|((?<a>y)|(?<a>z))")]
-    [InlineData("(?<a>x)|(((?<a>y)))|(?<a>z)", "u", "(?<a>x)|(((?<a>y)))|(?<a>z)")]
+    [InlineData("(?<a>x)|(?<a>y)", "u", "((?<a>x))|((?<a>y))")]
+    [InlineData("((?<a>x))|(?<a>y)", "u", "(((?<a>x)))|((?<a>y))")]
+    [InlineData("(?:(?<a>x))|(?<a>y)", "u", "(?:((?<a>x)))|((?<a>y))")]
+    [InlineData("(?<!(?<a>x))|(?<a>y)", "u", "(?<!((?<a>x)))|((?<a>y))")]
+    [InlineData("(?<a>x)|((?<a>y))", "u", "((?<a>x))|(((?<a>y)))")]
+    [InlineData("(?<a>x)|(?:(?<a>y))", "u", "((?<a>x))|(?:((?<a>y)))")]
+    [InlineData("(?<a>x)|(?!(?<a>y))", "u", "((?<a>x))|(?!((?<a>y)))")]
+    [InlineData("(?<a>x)|(?<a>y)|(?<a>z)", "u", "((?<a>x))|((?<a>y))|((?<a>z))")]
+    [InlineData("((?<a>x)|(?<a>y))|(?<a>z)", "u", "(((?<a>x))|((?<a>y)))|((?<a>z))")]
+    [InlineData("(?<a>x)|((?<a>y)|(?<a>z))", "u", "((?<a>x))|(((?<a>y))|((?<a>z)))")]
+    [InlineData("(?<a>x)|(((?<a>y)))|(?<a>z)", "u", "((?<a>x))|((((?<a>y))))|((?<a>z))")]
     [Theory]
     public void ShouldAllowDuplicateGroupNamesInAlternates(string pattern, string flags, string expectedAdaptedPattern)
     {
         // TODO: Generate these tests when Duplicate named capturing groups (https://github.com/tc39/proposal-duplicate-named-capturing-groups) gets implemented in V8.
 
         var parser = new Scanner.RegExpParser(pattern, flags, new ScannerOptions { Tolerant = false });
-        var actualAdaptedPattern = parser.ParseCore(out _);
+        var actualAdaptedPattern = parser.ParseCore(out _, out _);
 
         Assert.Equal(expectedAdaptedPattern, actualAdaptedPattern);
     }
@@ -428,7 +429,8 @@ public class RegExpTests
                     var expectedMatch = expectedMatches[i];
 
                     Assert.Equal(expectedMatch.Index, actualMatch.Index);
-                    Assert.Equal(expectedMatch.Captures.Length, actualMatch.Groups.Count);
+                    Assert.Equal(expectedMatch.Captures.Length, parseResult.ActualRegexGroupCount);
+                    Assert.True(expectedMatch.Captures.Length <= actualMatch.Groups.Count);
 
                     var ignoreGroupCaptures = hintArray.Contains("!ignore-group-captures");
                     var captureCount = !ignoreGroupCaptures ? expectedMatch.Captures.Length : 1;
@@ -437,6 +439,16 @@ public class RegExpTests
                     {
                         var actualGroup = actualMatch.Groups[j];
                         var expectedCapture = expectedMatch.Captures[j];
+
+
+#if NET6_0_OR_GREATER
+                        var actualGroupName = actualGroup.Name;
+#else
+                        var actualGroupName = parseResult.Regex.GetGroupNames()[j];
+#endif
+                        Assert.True(int.TryParse(actualGroupName, NumberStyles.None, CultureInfo.InvariantCulture, out var actualGroupIndex));
+                        Assert.Equal(j, actualGroupIndex);
+
                         if (expectedCapture is not null)
                         {
                             Assert.True(actualGroup.Success);

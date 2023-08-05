@@ -1,4 +1,4 @@
-﻿# Generated from testcases.template.txt at 2023-07-17T18:22:24
+﻿# Generated from testcases.template.txt at 2023-08-05T16:01:33
 
 # This file defines test cases for regular expression conversion testing (see RegExpTests.ExecuteTestCase).
 # Each uncommented, non-whitespace line specifies a test case in a tab-delimited format, with the following fields:
@@ -953,8 +953,8 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	PIJAMALı HASTA YAĞıZ Ş
 \0(x)\1\x02		"\x00(x)\\1\x02"	"\0xx\x02"	[{"captures":["\u0000xx\u0002","x"],"index":0}]
 \0(x)\1\x02	u	"\x00(x)\\1\x02"	"\0xx\x02"	[{"captures":["\u0000xx\u0002","x"],"index":0}]
 
-\0(?<X>x)\1\x02		"\x00(?<X>x)\\1\x02"	"\0xx\x02"	[{"captures":["\u0000xx\u0002","x"],"index":0,"groups":{"X":"x"}}]
-\0(?<X>x)\1\x02	u	"\x00(?<X>x)\\1\x02"	"\0xx\x02"	[{"captures":["\u0000xx\u0002","x"],"index":0,"groups":{"X":"x"}}]
+\0(?<X>x)\1\x02		"\x00((?<X>x))\\1\x02"	"\0xx\x02"	[{"captures":["\u0000xx\u0002","x"],"index":0,"groups":{"X":"x"}}]
+\0(?<X>x)\1\x02	u	"\x00((?<X>x))\\1\x02"	"\0xx\x02"	[{"captures":["\u0000xx\u0002","x"],"index":0,"groups":{"X":"x"}}]
 
 \0(?:x)\1\x02		"\x00(?:x)\x01\x02"	"\0x\x01\x02"	[{"captures":["\u0000x\u0001\u0002"],"index":0}]
 \0(?:x)\1\x02	u	)syntax-error(	"\0x\x01\x02"	"Invalid escape"
@@ -2160,32 +2160,32 @@ c(?=(ab))	u	c(?=(ab))	cab	[{"captures":["c","ab"],"index":0}]
 
 # Named capturing groups
 
-(?<ab>ab)|(?<cd>cd)		(?<ab>ab)|(?<cd>cd)	cd	[{"captures":["cd",null,"cd"],"index":0,"groups":{"cd":"cd"}}]
-(?<ab>ab)|(?<cd>cd)	u	(?<ab>ab)|(?<cd>cd)	cd	[{"captures":["cd",null,"cd"],"index":0,"groups":{"cd":"cd"}}]
+(?<ab>ab)|(?<cd>cd)		((?<ab>ab))|((?<cd>cd))	cd	[{"captures":["cd",null,"cd"],"index":0,"groups":{"cd":"cd"}}]
+(?<ab>ab)|(?<cd>cd)	u	((?<ab>ab))|((?<cd>cd))	cd	[{"captures":["cd",null,"cd"],"index":0,"groups":{"cd":"cd"}}]
 
-(?<g>[ab])+		(?<g>[ab])+	abc	[{"captures":["ab","b"],"index":0,"groups":{"g":"b"}}]
-(?<g>[ab])+	u	"(?<g>(?:[\\x61\\x62]))+"	abc	[{"captures":["ab","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>[ab])+		((?<g>[ab]))+	abc	[{"captures":["ab","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>[ab])+	u	"((?<g>(?:[\\x61\\x62])))+"	abc	[{"captures":["ab","b"],"index":0,"groups":{"g":"b"}}]
 
-c(?=(?<$ab>ab))		c(?=(?<__utf8_246162>ab))	cab	[{"captures":["c","ab"],"index":0,"groups":{"$ab":"ab"}}]
-c(?=(?<$ab>ab))	u	c(?=(?<__utf8_246162>ab))	cab	[{"captures":["c","ab"],"index":0,"groups":{"$ab":"ab"}}]
+c(?=(?<$ab>ab))		c(?=((?<__utf8_246162>ab)))	cab	[{"captures":["c","ab"],"index":0,"groups":{"$ab":"ab"}}]
+c(?=(?<$ab>ab))	u	c(?=((?<__utf8_246162>ab)))	cab	[{"captures":["c","ab"],"index":0,"groups":{"$ab":"ab"}}]
 
 c(?=(?<$ab>ab)(?<__utf8_246162>))		)inconvertible(	cab	[{"captures":["c","ab",""],"index":0,"groups":{"$ab":"ab","__utf8_246162":""}}]
 c(?=(?<$ab>ab)(?<__utf8_246162>))	u	)inconvertible(	cab	[{"captures":["c","ab",""],"index":0,"groups":{"$ab":"ab","__utf8_246162":""}}]
 
-(?<=(?<α>a)(?<β>b))c		(?<=(?<α>a)(?<β>b))c	abc	[{"captures":["c","a","b"],"index":2,"groups":{"α":"a","β":"b"}}]
-(?<=(?<α>a)(?<β>b))c	u	(?<=(?<α>a)(?<β>b))c	abc	[{"captures":["c","a","b"],"index":2,"groups":{"α":"a","β":"b"}}]
+(?<=(?<α>a)(?<β>b))c		(?<=((?<α>a))((?<β>b)))c	abc	[{"captures":["c","a","b"],"index":2,"groups":{"α":"a","β":"b"}}]
+(?<=(?<α>a)(?<β>b))c	u	(?<=((?<α>a))((?<β>b)))c	abc	[{"captures":["c","a","b"],"index":2,"groups":{"α":"a","β":"b"}}]
 
-(?<=(?<_1>[ab])+)c		(?<=(?<_1>[ab])+)c	abc	[{"captures":["c","a"],"index":2,"groups":{"_1":"a"}}]
-(?<=(?<_1>[ab])+)c	u	"(?<=(?<_1>(?:[\\x61\\x62]))+)c"	abc	[{"captures":["c","a"],"index":2,"groups":{"_1":"a"}}]
+(?<=(?<_1>[ab])+)c		(?<=((?<_1>[ab]))+)c	abc	[{"captures":["c","a"],"index":2,"groups":{"_1":"a"}}]
+(?<=(?<_1>[ab])+)c	u	"(?<=((?<_1>(?:[\\x61\\x62])))+)c"	abc	[{"captures":["c","a"],"index":2,"groups":{"_1":"a"}}]
 
-((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*		((?<__utf8_F0938080>a+)?(?<__utf8_F0938081>b+)?(?<__utf8_F0938082>c))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0,"groups":{"𓀀":"a","𓀂":"c"}},{"captures":["",null,null,null,null],"index":9,"groups":{}}]	!ignore-undefined-captures
-((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*	u	((?<__utf8_F0938080>a+)?(?<__utf8_F0938081>b+)?(?<__utf8_F0938082>c))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0,"groups":{"𓀀":"a","𓀂":"c"}},{"captures":["",null,null,null,null],"index":9,"groups":{}}]	!ignore-undefined-captures
+((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*		(((?<__utf8_F0938080>a+))?((?<__utf8_F0938081>b+))?((?<__utf8_F0938082>c)))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0,"groups":{"𓀀":"a","𓀂":"c"}},{"captures":["",null,null,null,null],"index":9,"groups":{}}]	!ignore-undefined-captures
+((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*	u	(((?<__utf8_F0938080>a+))?((?<__utf8_F0938081>b+))?((?<__utf8_F0938082>c)))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0,"groups":{"𓀀":"a","𓀂":"c"}},{"captures":["",null,null,null,null],"index":9,"groups":{}}]	!ignore-undefined-captures
 
-^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$		"^(?<Year>\\d{4})-(?<Month>\\d{2})-(?<Day>\\d{2})$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
-^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$	u	"^(?<Year>\\d{4})-(?<Month>\\d{2})-(?<Day>\\d{2})$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
+^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$		"^((?<Year>\\d{4}))-((?<Month>\\d{2}))-((?<Day>\\d{2}))$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
+^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$	u	"^((?<Year>\\d{4}))-((?<Month>\\d{2}))-((?<Day>\\d{2}))$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
 
-(?<timestamp>\d+),(?<author>.+)		"(?<timestamp>\\d+),(?<author>[^\n\r\u2028\u2029]+)"	1560979912,Caroline	[{"captures":["1560979912,Caroline","1560979912","Caroline"],"index":0,"groups":{"timestamp":"1560979912","author":"Caroline"}}]
-(?<timestamp>\d+),(?<author>.+)	u	"(?<timestamp>\\d+),(?<author>(?:[\ud800-\udbff][\udc00-\udfff]|[^\n\r\u2028\u2029])+)"	1560979912,Caroline	[{"captures":["1560979912,Caroline","1560979912","Caroline"],"index":0,"groups":{"timestamp":"1560979912","author":"Caroline"}}]
+(?<timestamp>\d+),(?<author>.+)		"((?<timestamp>\\d+)),((?<author>[^\n\r\u2028\u2029]+))"	1560979912,Caroline	[{"captures":["1560979912,Caroline","1560979912","Caroline"],"index":0,"groups":{"timestamp":"1560979912","author":"Caroline"}}]
+(?<timestamp>\d+),(?<author>.+)	u	"((?<timestamp>\\d+)),((?<author>(?:[\ud800-\udbff][\udc00-\udfff]|[^\n\r\u2028\u2029])+))"	1560979912,Caroline	[{"captures":["1560979912,Caroline","1560979912","Caroline"],"index":0,"groups":{"timestamp":"1560979912","author":"Caroline"}}]
 
 (?<name>x)(?<name>y)		)syntax-error(	xy	"Duplicate capture group name"
 (?<name>x)(?<name>y)	u	)syntax-error(	xy	"Duplicate capture group name"
@@ -2216,8 +2216,8 @@ c(?=(?<$ab>ab)(?<__utf8_246162>))	u	)inconvertible(	cab	[{"captures":["c","ab","
 (?<name>x)(?!(?:(?<name>y)))		)syntax-error(	xy	"Duplicate capture group name"
 (?<name>x)(?!(?:(?<name>y)))	u	)syntax-error(	xy	"Duplicate capture group name"
 
-(?<duplicateWord>\w+)\s\k<duplicateWord>\W(?<nextWord>\w+)	i	"(?<duplicateWord>\\w+)[\\s   - \u2028\u2029  　﻿]\\k<duplicateWord>\\W(?<nextWord>\\w+)"	He said that that was the the correct answer.	[{"captures":["that that was","that","was"],"index":8,"groups":{"duplicateWord":"that","nextWord":"was"}},{"captures":["the the correct","the","correct"],"index":22,"groups":{"duplicateWord":"the","nextWord":"correct"}}]
-(?<duplicateWord>\w+)\s\k<duplicateWord>\W(?<nextWord>\w+)	ui	"(?<duplicateWord>\\w+)[\\s   - \u2028\u2029  　﻿]\\k<duplicateWord>(?:[\ud800-\udbff][\udc00-\udfff]|[\x00-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-￿])(?<nextWord>\\w+)"	He said that that was the the correct answer.	[{"captures":["that that was","that","was"],"index":8,"groups":{"duplicateWord":"that","nextWord":"was"}},{"captures":["the the correct","the","correct"],"index":22,"groups":{"duplicateWord":"the","nextWord":"correct"}}]
+(?<duplicateWord>\w+)\s\k<duplicateWord>\W(?<nextWord>\w+)	i	"((?<duplicateWord>\\w+))[\\s   - \u2028\u2029  　﻿]\\k<duplicateWord>\\W((?<nextWord>\\w+))"	He said that that was the the correct answer.	[{"captures":["that that was","that","was"],"index":8,"groups":{"duplicateWord":"that","nextWord":"was"}},{"captures":["the the correct","the","correct"],"index":22,"groups":{"duplicateWord":"the","nextWord":"correct"}}]
+(?<duplicateWord>\w+)\s\k<duplicateWord>\W(?<nextWord>\w+)	ui	"((?<duplicateWord>\\w+))[\\s   - \u2028\u2029  　﻿]\\k<duplicateWord>(?:[\ud800-\udbff][\udc00-\udfff]|[\x00-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-￿])((?<nextWord>\\w+))"	He said that that was the the correct answer.	[{"captures":["that that was","that","was"],"index":8,"groups":{"duplicateWord":"that","nextWord":"was"}},{"captures":["the the correct","the","correct"],"index":22,"groups":{"duplicateWord":"the","nextWord":"correct"}}]
 
 (?<name>*x)		)syntax-error(	xxyx	"Nothing to repeat"
 (?<name>*x)	u	)syntax-error(	xxyx	"Nothing to repeat"
@@ -2272,24 +2272,24 @@ styles(?:\.[\da-f]+)?	u	"styles(?:\\.(?:[\\x30-\\x39\\x61-\\x66])+)?"	styles.123
 
 title=(["'])(.*?)\1		"title=([\"'])([^\n\r\u2028\u2029]*?)\\1"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0}]
 title=(["'])(.*?)\1	u	"title=((?:[\\x22\\x27]))((?:[\ud800-\udbff][\udc00-\udfff]|[^\n\r\u2028\u2029])*?)\\1"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0}]
-title=(?<quote>["'])(?<content>.*?)\1		"title=(?<quote>[\"'])(?<content>[^\n\r\u2028\u2029]*?)\\1"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
-title=(?<quote>["'])(?<content>.*?)\1	u	"title=(?<quote>(?:[\\x22\\x27]))(?<content>(?:[\ud800-\udbff][\udc00-\udfff]|[^\n\r\u2028\u2029])*?)\\1"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
-title=(?<quote>["'])(?<content>.*?)\k<quote>		"title=(?<quote>[\"'])(?<content>[^\n\r\u2028\u2029]*?)\\k<quote>"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
-title=(?<quote>["'])(?<content>.*?)\k<quote>	u	"title=(?<quote>(?:[\\x22\\x27]))(?<content>(?:[\ud800-\udbff][\udc00-\udfff]|[^\n\r\u2028\u2029])*?)\\k<quote>"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
+title=(?<quote>["'])(?<content>.*?)\1		"title=((?<quote>[\"']))((?<content>[^\n\r\u2028\u2029]*?))\\1"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
+title=(?<quote>["'])(?<content>.*?)\1	u	"title=((?<quote>(?:[\\x22\\x27])))((?<content>(?:[\ud800-\udbff][\udc00-\udfff]|[^\n\r\u2028\u2029])*?))\\1"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
+title=(?<quote>["'])(?<content>.*?)\k<quote>		"title=((?<quote>[\"']))((?<content>[^\n\r\u2028\u2029]*?))\\k<quote>"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
+title=(?<quote>["'])(?<content>.*?)\k<quote>	u	"title=((?<quote>(?:[\\x22\\x27])))((?<content>(?:[\ud800-\udbff][\udc00-\udfff]|[^\n\r\u2028\u2029])*?))\\k<quote>"	title="Named capturing groups' advantages"	[{"captures":["title=\"Named capturing groups' advantages\"","\"","Named capturing groups' advantages"],"index":0,"groups":{"quote":"\"","content":"Named capturing groups' advantages"}}]
 
 (b)\1	i	"(b)\\1"	bB	[{"captures":["bB","b"],"index":0}]
 (b)\1	ui	"(b)\\1"	bB	[{"captures":["bB","b"],"index":0}]
-(?<g>b)\1	i	"(?<g>b)\\1"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
-(?<g>b)\1	ui	"(?<g>b)\\1"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
-(?<g>b)\k<g>	i	"(?<g>b)\\k<g>"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
-(?<g>b)\k<g>	ui	"(?<g>b)\\k<g>"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\1	i	"((?<g>b))\\1"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\1	ui	"((?<g>b))\\1"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\k<g>	i	"((?<g>b))\\k<g>"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\k<g>	ui	"((?<g>b))\\k<g>"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
 
 (b)\1+	i	"(b)\\1+"	bBbB	[{"captures":["bBbB","b"],"index":0}]
 (b)\1+	ui	"(b)\\1+"	bBbB	[{"captures":["bBbB","b"],"index":0}]
-(?<g>b)\1+	i	"(?<g>b)\\1+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
-(?<g>b)\1+	ui	"(?<g>b)\\1+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
-(?<g>b)\k<g>+	i	"(?<g>b)\\k<g>+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
-(?<g>b)\k<g>+	ui	"(?<g>b)\\k<g>+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\1+	i	"((?<g>b))\\1+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\1+	ui	"((?<g>b))\\1+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\k<g>+	i	"((?<g>b))\\k<g>+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
+(?<g>b)\k<g>+	ui	"((?<g>b))\\k<g>+"	bB	[{"captures":["bB","b"],"index":0,"groups":{"g":"b"}}]
 
 \1(a)		)inconvertible(	aa	[{"captures":["a","a"],"index":0},{"captures":["a","a"],"index":1}]
 \1(a)	u	)inconvertible(	aa	[{"captures":["a","a"],"index":0},{"captures":["a","a"],"index":1}]
@@ -2300,28 +2300,28 @@ title=(?<quote>["'])(?<content>.*?)\k<quote>	u	"title=(?<quote>(?:[\\x22\\x27]))
 
 (\1a)		"(\\1a)"	aa	[{"captures":["a","a"],"index":0},{"captures":["a","a"],"index":1}]
 (\1a)	u	"(\\1a)"	aa	[{"captures":["a","a"],"index":0},{"captures":["a","a"],"index":1}]
-(?<g>\1a)		"(?<g>\\1a)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
-(?<g>\1a)	u	"(?<g>\\1a)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
-(?<g>\k<g>a)		"(?<g>\\k<g>a)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
-(?<g>\k<g>a)	u	"(?<g>\\k<g>a)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>\1a)		"((?<g>\\1a))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>\1a)	u	"((?<g>\\1a))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>\k<g>a)		"((?<g>\\k<g>a))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>\k<g>a)	u	"((?<g>\\k<g>a))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
 
 (a\1)		"(a\\1)"	aa	[{"captures":["a","a"],"index":0},{"captures":["a","a"],"index":1}]
 (a\1)	u	"(a\\1)"	aa	[{"captures":["a","a"],"index":0},{"captures":["a","a"],"index":1}]
-(?<g>a\1)		"(?<g>a\\1)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
-(?<g>a\1)	u	"(?<g>a\\1)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
-(?<g>a\k<g>)		"(?<g>a\\k<g>)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
-(?<g>a\k<g>)	u	"(?<g>a\\k<g>)"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>a\1)		"((?<g>a\\1))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>a\1)	u	"((?<g>a\\1))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>a\k<g>)		"((?<g>a\\k<g>))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
+(?<g>a\k<g>)	u	"((?<g>a\\k<g>))"	aa	[{"captures":["a","a"],"index":0,"groups":{"g":"a"}},{"captures":["a","a"],"index":1,"groups":{"g":"a"}}]
 
 (?:a|(b))\1c		"(?:a|(b))\\1c"	ac	[{"captures":["ac",null],"index":0}]
 (?:a|(b))\1c	u	"(?:a|(b))\\1c"	ac	[{"captures":["ac",null],"index":0}]
-(?:a|(?<g>b))\1c		"(?:a|(?<g>b))\\1c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
-(?:a|(?<g>b))\1c	u	"(?:a|(?<g>b))\\1c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
-(?:a|(?<g>b))\k<g>c		"(?:a|(?<g>b))\\k<g>c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
-(?:a|(?<g>b))\k<g>c	u	"(?:a|(?<g>b))\\k<g>c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
+(?:a|(?<g>b))\1c		"(?:a|((?<g>b)))\\1c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
+(?:a|(?<g>b))\1c	u	"(?:a|((?<g>b)))\\1c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
+(?:a|(?<g>b))\k<g>c		"(?:a|((?<g>b)))\\k<g>c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
+(?:a|(?<g>b))\k<g>c	u	"(?:a|((?<g>b)))\\k<g>c"	ac	[{"captures":["ac",null],"index":0,"groups":{}}]
 
 (a)\2		"(a)\x02"	a\x02	[]
 (a)\2	u	)syntax-error(	a\x02	"Invalid escape"
-(?<g>a)\2		"(?<g>a)\x02"	a\x02	[]
+(?<g>a)\2		"((?<g>a))\x02"	a\x02	[]
 (?<g>a)\2	u	)syntax-error(	a\x02	"Invalid escape"
 
 \b(\w+)\s+\1\b	i	"\\b(\\w+)[\\s   - \u2028\u2029  　﻿]+\\1\\b"	Hello hello	[{"captures":["Hello hello","Hello"],"index":0}]
@@ -2359,6 +2359,9 @@ title=(?<quote>["'])(?<content>.*?)\k<quote>	u	"title=(?<quote>(?:[\\x22\\x27]))
 (?<=\1(\w+))c		)inconvertible(	"ababbc"	[{"captures":["c","b"],"index":5}]	!skip
 (?<=\1(\w+))c		)inconvertible(	"ababdc"	[]	!skip
 (?<=(\w+)\1)c		"(?<=(\\w+)\\1)c"	"ababc"	[{"captures":["c","abab"],"index":4}]
+
+.(?<a>a)(.)		"[^\n\r\u2028\u2029]((?<a>a))([^\n\r\u2028\u2029])"	bab	[{"captures":["bab","a","b"],"index":0,"groups":{"a":"a"}}]
+(?:(?<x>a|b)(x)){3}\1		"(?:((?<x>a|b))(x)){3}\\1"	axbxaxa	[{"captures":["axbxaxa","a","x"],"index":0,"groups":{"x":"a"}}]
 
 # Quantifiers
 

@@ -261,11 +261,11 @@ public partial class JavaScriptParser
     {
         if (_comments is null)
         {
-            _scanner.ScanComments();
+            _scanner.ScanCommentsInternal();
         }
         else
         {
-            var comments = _scanner.ScanComments();
+            var comments = _scanner.ScanCommentsInternal().AsSpan();
 
             for (var i = 0; i < comments.Length; ++i)
             {
@@ -1697,7 +1697,7 @@ public partial class JavaScriptParser
         if (match)
         {
             var state = _scanner.SaveState();
-            _scanner.ScanComments();
+            _scanner.ScanCommentsInternal();
             var next = _scanner.Lex(new LexOptions(_context));
             _scanner.RestoreState(state);
             match = next.Type == TokenType.Punctuator && (string?) next.Value == "(";
@@ -1748,12 +1748,12 @@ public partial class JavaScriptParser
         if (match)
         {
             var state = _scanner.SaveState();
-            _scanner.ScanComments();
+            _scanner.ScanCommentsInternal();
             var lexOptions = new LexOptions(_context);
             var dot = _scanner.Lex(lexOptions);
             if (dot.Type == TokenType.Punctuator && Equals(dot.Value, "."))
             {
-                _scanner.ScanComments();
+                _scanner.ScanCommentsInternal();
                 var meta = _scanner.Lex(lexOptions);
                 match = meta.Type == TokenType.Identifier && Equals(meta.Value, "meta");
                 if (match)
@@ -2872,7 +2872,7 @@ public partial class JavaScriptParser
     private bool IsLexicalDeclaration()
     {
         var state = _scanner.SaveState();
-        _scanner.ScanComments();
+        _scanner.ScanCommentsInternal();
         var next = _scanner.Lex(new LexOptions(_context));
         _scanner.RestoreState(state);
 
@@ -4231,7 +4231,7 @@ public partial class JavaScriptParser
         static bool ValidateMatch(Scanner scanner, Context context)
         {
             var state = scanner.SaveState();
-            scanner.ScanComments();
+            scanner.ScanCommentsInternal();
             var next = scanner.Lex(new LexOptions(context));
             scanner.RestoreState(state);
 
