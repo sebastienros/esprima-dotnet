@@ -26,17 +26,16 @@ partial class Scanner
 
     internal partial struct RegExpParser
     {
-        private const string MatchAnyCharRegex = @"[\s\S]"; // .NET equivalent of /[^]/
-        private const string MatchNothingRegex = @"[^\s\S]"; // .NET equivalent of /[]/
+        private const string MatchAnyRegex = @"[\s\S]"; // .NET equivalent of /[^]/
+        private const string MatchNoneRegex = @"[^\s\S]"; // .NET equivalent of /[]/
 
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/dotAll#description
         private const string MatchNewLineRegex = "[\n\r\u2028\u2029]";
-        private const string MatchNoNewLineRegex = "[^\n\r\u2028\u2029]";
+        private const string MatchAnyButNewLineRegex = "[^\n\r\u2028\u2029]";
 
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Character_classes#types
         // https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-classes-in-regular-expressions#whitespace-character-s
-        private const string AdditionalWhiteSpacePattern = "\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff";
-        private const string InvertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uFEFE\uFF00-\uFFFF";
+        private const string AdditionalWhiteSpacePattern = "\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
 
         private const int SetRangeNotStarted = int.MaxValue;
         private const int SetRangeStartedWithCharClass = int.MaxValue - 1;

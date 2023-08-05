@@ -636,6 +636,9 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	pijamalı hasta yağız ş
 
 [^\u{e000}-\u{e002}]	u	"\ud7fd \ud7ff \ud800 \ud802 \udbfd \udbff \udc00 \udc02 \udffd \udfff \ue000 \ue002"
 
+(.+).*\1	u	"\ud800\udc00\ud800"
+(.+).*\1	u	"\ud800\udc00\ud800\udc00"
+
 # Common character escape sequences
 
 \t\r\n\v\f		"\0\t\r\n\v\f\b"
