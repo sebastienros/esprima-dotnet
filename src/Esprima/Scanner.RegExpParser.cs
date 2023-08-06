@@ -26,17 +26,16 @@ partial class Scanner
 
     internal partial struct RegExpParser
     {
-        private const string MatchAnyCharRegex = @"[\s\S]"; // .NET equivalent of /[^]/
-        private const string MatchNothingRegex = @"[^\s\S]"; // .NET equivalent of /[]/
+        private const string MatchAnyRegex = @"[\s\S]"; // .NET equivalent of /[^]/
+        private const string MatchNoneRegex = @"[^\s\S]"; // .NET equivalent of /[]/
 
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/dotAll#description
         private const string MatchNewLineRegex = "[\n\r\u2028\u2029]";
-        private const string MatchNoNewLineRegex = "[^\n\r\u2028\u2029]";
+        private const string MatchAnyButNewLineRegex = "[^\n\r\u2028\u2029]";
 
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Character_classes#types
         // https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-classes-in-regular-expressions#whitespace-character-s
-        private const string AdditionalWhiteSpacePattern = "\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff";
-        private const string InvertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uFEFE\uFF00-\uFFFF";
+        private const string AdditionalWhiteSpacePattern = "\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
 
         private const int SetRangeNotStarted = int.MaxValue;
         private const int SetRangeStartedWithCharClass = int.MaxValue - 1;
@@ -79,11 +78,16 @@ partial class Scanner
             return flags;
         }
 
-        private static RegexOptions FlagsToOptions(RegExpFlags flags)
+        private static RegexOptions FlagsToOptions(RegExpFlags flags, bool compiled)
         {
             // https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-options#ecmascript-matching-behavior
             // https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-options#compare-using-the-invariant-culture
             var options = RegexOptions.ECMAScript | RegexOptions.CultureInvariant;
+
+            if (compiled)
+            {
+                options |= RegexOptions.Compiled;
+            }
 
             // Flags 's' and 'm' need special care as the equivalent RegexOptions flags have different behavior.
 
@@ -137,11 +141,12 @@ partial class Scanner
 
         private Scanner MoveScannerTo(int index) => MoveScannerTo(index, out _);
 
-        private void ReportConversionFailure(int index, string reason)
+        private ParseError ReportConversionFailure(int index, string reason)
         {
-            MoveScannerTo(index, out var originalIndex)
-                .TolerateUnexpectedToken($"Cannot convert regular expression to an equivalent {typeof(Regex)}: {reason}");
+            var error = MoveScannerTo(index, out var originalIndex)
+                .TolerateUnexpectedToken($"Cannot convert regular expression to an equivalent {typeof(Regex).ToString()}: /{_pattern}/{_flagsOriginal}: {reason}");
             _scanner._index = originalIndex;
+            return error;
         }
 
         [DoesNotReturn]
@@ -151,56 +156,59 @@ partial class Scanner
                 .ThrowUnexpectedToken(string.Format(CultureInfo.InvariantCulture, message, _pattern, _flagsOriginal));
         }
 
-        public Regex? Parse(out string? adaptedPattern)
+        public RegExpParseResult Parse()
         {
+            ParseError? conversionError;
+
             if ((_flags & RegExpFlags.UnicodeSets) != 0)
             {
                 const string UnicodeSetsModeNotSupported = "Unicode sets mode (flag v) is not supported currently";
-                if (_scanner._regExpParseMode is RegExpParseMode.AdaptToInterpreted or RegExpParseMode.AdaptToCompiled)
+                if (_scanner._regExpParseMode != RegExpParseMode.Validate)
                 {
-                    ReportConversionFailure(0, UnicodeSetsModeNotSupported);
+                    conversionError = ReportConversionFailure(0, UnicodeSetsModeNotSupported);
+                    return new RegExpParseResult(conversionError);
                 }
                 else
                 {
                     MoveScannerTo(0).ThrowUnexpectedToken(UnicodeSetsModeNotSupported);
                 }
-
-                adaptedPattern = null;
-                return null;
             }
 
-            adaptedPattern = ParseCore();
+            var adaptedPattern = ParseCore(out var capturingGroups, out conversionError);
             if (adaptedPattern is null)
             {
-                return null;
+                // NOTE: ParseCore should return null
+                // * in validation-only mode (RegExpParseMode.Validation) or
+                // * in conversion mode (RegExpParseMode.AdaptTo*), when it fails to construct an equivalent Regex.
+                Debug.Assert(conversionError is not null ^ _scanner._regExpParseMode == RegExpParseMode.Validate);
+                return new RegExpParseResult(conversionError);
             }
 
-            var options = FlagsToOptions(_flags);
-            if (_scanner._regExpParseMode == RegExpParseMode.AdaptToCompiled)
-            {
-                options |= RegexOptions.Compiled;
-            }
+            Debug.Assert(conversionError is null);
+            capturingGroups.TrimExcess();
+
+            var options = FlagsToOptions(_flags, compiled: _scanner._regExpParseMode == RegExpParseMode.AdaptToCompiled);
             var matchTimeout = _scanner._regexTimeout;
 
             try
             {
-                return new Regex(adaptedPattern, options, matchTimeout);
+                return new RegExpParseResult(new Regex(adaptedPattern, options, matchTimeout), capturingGroups);
             }
             catch
             {
-                ReportConversionFailure(0, "Failed to adapt regular expression");
-                return null;
+                conversionError = ReportConversionFailure(0, "Failed to adapt regular expression");
+                return new RegExpParseResult(conversionError);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string? ParseCore()
+        internal string? ParseCore(out ArrayList<RegExpCapturingGroup> capturingGroups, out ParseError? conversionError)
         {
-            CheckBracesBalance(out var capturingGroups, out var capturingGroupNames);
+            CheckBracesBalance(out capturingGroups, out var capturingGroupNames);
 
             return (_flags & RegExpFlags.Unicode) != 0
-                ? ParsePattern(UnicodeMode.Instance, ref capturingGroups, capturingGroupNames)
-                : ParsePattern(LegacyMode.Instance, ref capturingGroups, capturingGroupNames);
+                ? ParsePattern(UnicodeMode.Instance, ref capturingGroups, capturingGroupNames, out conversionError)
+                : ParsePattern(LegacyMode.Instance, ref capturingGroups, capturingGroupNames, out conversionError);
         }
 
         /// <summary>
@@ -380,11 +388,11 @@ partial class Scanner
         /// Otherwise, the adapted pattern or <see langword="null"/> if the pattern is syntactically correct but a .NET equivalent could not be constructed
         /// and the scanner is configured to tolerant mode.
         /// </returns>
-        private string? ParsePattern<TMode>(TMode mode, ref ArrayList<RegExpCapturingGroup> capturingGroups, Dictionary<string, string?>? capturingGroupNames)
+        private string? ParsePattern<TMode>(TMode mode, ref ArrayList<RegExpCapturingGroup> capturingGroups, Dictionary<string, string?>? capturingGroupNames, out ParseError? conversionError)
             where TMode : IMode
         {
             StringBuilder? sb;
-            if (_scanner._regExpParseMode is RegExpParseMode.AdaptToInterpreted or RegExpParseMode.AdaptToCompiled)
+            if (_scanner._regExpParseMode != RegExpParseMode.Validate)
             {
                 sb = _scanner.GetStringBuilder();
                 if (sb.Capacity < _pattern.Length)
@@ -481,11 +489,21 @@ partial class Scanner
                                 groupName = AdjustCapturingGroupName(groupName!, capturingGroupNames!);
                                 if (groupName is null)
                                 {
-                                    ReportConversionFailure(i + 3, $"Cannot map group name '{groupName}' to a unique group name in the adapted regex.");
+                                    conversionError = ReportConversionFailure(i + 3, $"Cannot map group name '{groupName}' to a unique group name in the adapted regex.");
                                     return null;
                                 }
 
-                                sb.Append(_pattern, i, 3).Append(groupName);
+                                // The JS regex engine assigns numbers to capturing groups sequentially (regardless of the group being named or not named)
+                                // but .NET uses a different, weird approach:
+                                // "[...] Captures that use parentheses are numbered automatically from left to right
+                                // based on the order of the opening parentheses in the regular expression, starting from 1.
+                                // However, named capture groups are always ordered last, after non-named capture groups. [...]"
+                                // (See also: https://learn.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions#grouping-constructs-and-regular-expression-objects)
+                                // This could totally mess up numbered backreferences and replace pattern references. So, as a workaround, we wrap all named capturing groups
+                                // in a plain (numbered) capturing group to force .NET to include all capturing groups in the resulting match in the expected order.
+                                // (Named groups will also be listed after these but we can't do anything about that.)
+
+                                sb.Append('(').Append(_pattern, i, 3).Append(groupName);
                             }
 
                             i = _pattern.IndexOf('>', i + 3);
@@ -526,7 +544,15 @@ partial class Scanner
 
                         groupType = context.GroupStack.Pop().Type;
 
-                        sb?.Append(ch);
+                        if (sb is not null)
+                        {
+                            sb.Append(ch);
+
+                            if (groupType == RegExpGroupType.NamedCapturing)
+                            {
+                                sb.Append(')');
+                            }
+                        }
 
                         context.FollowingQuantifierError = mode.AllowsQuantifierAfterGroup(groupType) ? null : Messages.RegExpInvalidQuantifier;
                         break;
@@ -586,12 +612,12 @@ partial class Scanner
                         break;
 
                     case '{' when !context.WithinSet:
-                        if (!TryAdjustRangeQuantifier(ref context))
+                        if (!TryAdjustRangeQuantifier(ref context, out conversionError))
                         {
                             mode.HandleInvalidRangeQuantifier(ref context, ref this, i);
                             break;
                         }
-                        else if (i < 0) // conversion is impossible
+                        else if (conversionError is not null)
                         {
                             return null;
                         }
@@ -607,7 +633,7 @@ partial class Scanner
 
                     case '\\':
                         Debug.Assert(i + 1 < _pattern.Length, "Unexpected end of escape sequence in regular expression.");
-                        if (!mode.AdjustEscapeSequence(ref context, ref this))
+                        if (!mode.AdjustEscapeSequence(ref context, ref this, out conversionError))
                         {
                             return null;
                         }
@@ -629,6 +655,7 @@ partial class Scanner
                 }
             }
 
+            conversionError = null;
             return sb?.ToString();
         }
 
@@ -703,8 +730,10 @@ partial class Scanner
             return false;
         }
 
-        private bool TryAdjustRangeQuantifier(ref ParsePatternContext context)
+        private bool TryAdjustRangeQuantifier(ref ParsePatternContext context, out ParseError? conversionError)
         {
+            conversionError = null;
+
             ref readonly var sb = ref context.StringBuilder;
             ref var i = ref context.Index;
 
@@ -773,8 +802,7 @@ partial class Scanner
                 // number of occurrences can be an arbitrarily big number, however implementations (incl. V8) seems to ignore numbers greater than int.MaxValue.
                 // (e.g. /x{2147483647,2147483646}/ is syntax error while /x{2147483648,2147483647}/ is not!)
                 // We report failure in this case because .NET regex engine doesn't allow numbers greater than int.MaxValue.
-                ReportConversionFailure(i, "Inconvertible {} quantifier");
-                i = -1;
+                conversionError = ReportConversionFailure(i, "Inconvertible {} quantifier");
                 return true;
             }
 
@@ -944,8 +972,10 @@ partial class Scanner
             return "__utf8_" + BitConverter.ToString(Encoding.UTF8.GetBytes(groupName)).Replace("-", "");
         }
 
-        private bool TryAdjustBackreference(ref ParsePatternContext context, int startIndex)
+        private bool TryAdjustBackreference(ref ParsePatternContext context, int startIndex, out ParseError? conversionError)
         {
+            conversionError = null;
+
             ref readonly var sb = ref context.StringBuilder;
             ref var i = ref context.Index;
 
@@ -970,8 +1000,7 @@ partial class Scanner
             {
                 // RegexOptions.ECMAScript treats forward references like /\1(A)/ differently than JS,
                 // so we don't make an attempt at rewriting them.
-                ReportConversionFailure(startIndex, "Inconvertible forward reference");
-                i = -1;
+                conversionError = ReportConversionFailure(startIndex, "Inconvertible forward reference");
                 return true;
             }
 
@@ -979,8 +1008,10 @@ partial class Scanner
             return true;
         }
 
-        private void AdjustNamedBackreference(ref ParsePatternContext context, int startIndex)
+        private void AdjustNamedBackreference(ref ParsePatternContext context, int startIndex, out ParseError? conversionError)
         {
+            conversionError = null;
+
             ref readonly var sb = ref context.StringBuilder;
             ref var i = ref context.Index;
 
@@ -999,8 +1030,7 @@ partial class Scanner
                         {
                             // RegexOptions.ECMAScript treats forward references like /\k<a>(?<a>A)/ differently than JS,
                             // so we don't make an attempt at rewriting them.
-                            ReportConversionFailure(startIndex, "Inconvertible named forward reference");
-                            i = -1;
+                            conversionError = ReportConversionFailure(startIndex, "Inconvertible named forward reference");
                         }
                     }
                 }
@@ -1123,7 +1153,7 @@ partial class Scanner
 
             void HandleInvalidRangeQuantifier(ref ParsePatternContext context, ref RegExpParser parser, int startIndex);
 
-            bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser);
+            bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser, out ParseError? conversionError);
         }
     }
 
@@ -1247,5 +1277,40 @@ partial class Scanner
         }
     }
 
-    private readonly record struct RegExpCapturingGroup(int StartIndex, string? Name);
+    internal readonly record struct RegExpCapturingGroup(int StartIndex, string? Name);
+}
+
+public readonly struct RegExpParseResult
+{
+    private readonly object? _regexOrConversionError;
+    private readonly ArrayList<Scanner.RegExpCapturingGroup> _capturingGroups;
+
+    internal RegExpParseResult(Regex regex, ArrayList<Scanner.RegExpCapturingGroup> capturingGroups)
+    {
+        _regexOrConversionError = regex;
+        _capturingGroups = capturingGroups;
+    }
+
+    internal RegExpParseResult(ParseError? conversionError)
+    {
+        // NOTE: We can't use null to represent success for validation-only parsing (RegExpParseMode.Validation)
+        // because in that case default(RegExpParseResult) would indicate success.
+        // However, we can do that by using an instance of whatever type except for Regex and ParseError.
+        _regexOrConversionError = conversionError ?? (object) nameof(Success);
+    }
+
+    public bool Success => _regexOrConversionError is not (null or ParseError);
+
+    public ParseError? ConversionError => _regexOrConversionError as ParseError;
+
+    public Regex? Regex => _regexOrConversionError as Regex;
+
+    public int ActualRegexGroupCount => _capturingGroups.Count + 1;
+
+    public string? GetRegexGroupName(int number)
+    {
+        return (uint) --number < (uint) _capturingGroups.Count
+            ? _capturingGroups[number].Name
+            : null;
+    }
 }

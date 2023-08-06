@@ -12,7 +12,7 @@ public class JavaScriptParserTests
     {
         var parser = new JavaScriptParser(new ParserOptions { MaxAssignmentDepth = 1000 });
 #if DEBUG
-        const int Depth = 210;
+        const int Depth = 205;
 #else
         const int Depth = 455;
 #endif

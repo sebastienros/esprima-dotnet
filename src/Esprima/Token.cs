@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using Esprima.Ast;
 
 namespace Esprima;
@@ -62,12 +61,12 @@ public readonly record struct Token
         return new Token(TokenType.StringLiteral, str, start, end, lineNumber, lineStart, octal);
     }
 
-    private sealed record RegexHolder(object? Value, RegexValue RegexValue) : ValueHolder(Value);
+    private sealed record RegexHolder(RegExpParseResult ParseResult, RegexValue RegexValue) : ValueHolder(ParseResult.Regex);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Token CreateRegExpLiteral(Regex? value, RegexValue regexValue, int start, int end, int lineNumber, int lineStart)
+    internal static Token CreateRegExpLiteral(RegExpParseResult parseResult, RegexValue regexValue, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.RegularExpression, new RegexHolder(value, regexValue), start, end, lineNumber, lineStart);
+        return new Token(TokenType.RegularExpression, new RegexHolder(parseResult, regexValue), start, end, lineNumber, lineStart);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,6 +140,12 @@ public readonly record struct Token
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Type == TokenType.Template ? ((TemplateHolder) _value!).RawTemplate : null;
+    }
+
+    public RegExpParseResult RegExpParseResult
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => Type == TokenType.RegularExpression ? ((RegexHolder) _value!).ParseResult : default;
     }
 
     public RegexValue? RegexValue

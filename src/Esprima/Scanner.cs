@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -193,9 +194,9 @@ public sealed partial class Scanner
         throw _errorHandler.CreateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message).ToException();
     }
 
-    private void TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
+    private ParseError TolerateUnexpectedToken(string message = Messages.UnexpectedTokenIllegal)
     {
-        _errorHandler.TolerateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message, _tolerant);
+        return _errorHandler.TolerateError(_sourceLocation, _index, _lineNumber, _index - _lineStart, message, _tolerant);
     }
 
     private StringBuilder GetStringBuilder()
@@ -382,7 +383,7 @@ public sealed partial class Scanner
         return comments;
     }
 
-    public ReadOnlySpan<Comment> ScanComments()
+    internal ArrayList<Comment> ScanCommentsInternal()
     {
         var comments = new ArrayList<Comment>();
 
@@ -510,6 +511,13 @@ public sealed partial class Scanner
             }
         }
 
+        return comments;
+    }
+
+    public ReadOnlySpan<Comment> ScanComments()
+    {
+        var comments = ScanCommentsInternal();
+        comments.TrimExcess();
         return comments.AsSpan();
     }
 
@@ -1747,7 +1755,8 @@ ParseIdentifierPart:
     /// Checks whether an ECMAScript regular expression is syntactically correct.
     /// </summary>
     /// <remarks>
-    /// Expressions within Unicode property escape sequences (\p{...} and \P{...}) are not validated currently.
+    /// Unicode sets mode (flag v) is not supported currently, for such patterns the method returns <see langword="false"/>.
+    /// Expressions within Unicode property escape sequences (\p{...} and \P{...}) are not validated (ignored) currently.
     /// </remarks>
     /// <returns><see langword="true"/> if the regular expression is syntactically correct, otherwise <see langword="false"/>.</returns>
     public static bool ValidateRegExp(string pattern, string flags, out ParseError? error)
@@ -1766,7 +1775,8 @@ ParseIdentifierPart:
 
         try
         {
-            new RegExpParser(pattern, flags, scannerOptions).Parse(out _);
+            var parseResult = new RegExpParser(pattern, flags, scannerOptions).Parse();
+            Debug.Assert(parseResult.Success);
         }
         catch (ParserException ex)
         {
@@ -1787,14 +1797,14 @@ ParseIdentifierPart:
     /// You can read more about the known issues of the conversion <see href="https://github.com/sebastienros/esprima-dotnet/pull/364#issuecomment-1606045259">here</see>.
     /// </remarks>
     /// <returns>
-    /// The equivalent <see cref="Regex"/> if the conversion was possible,
+    /// An instance of <see cref="RegExpParseResult"/>, whose <see cref="RegExpParseResult.Regex"/> property contains the equivalent <see cref="Regex"/> if the conversion was possible,
     /// otherwise <see langword="null"/> (unless <paramref name="throwIfNotAdaptable"/> is <see langword="true"/>).
     /// </returns>
     /// <exception cref="ParserException">
     /// <paramref name="pattern"/> is an invalid regular expression pattern or cannot be converted
     /// to an equivalent <see cref="Regex"/> (if <paramref name="throwIfNotAdaptable"/> is <see langword="true"/>).
     /// </exception>
-    public static Regex? AdaptRegExp(string pattern, string flags, bool compiled = false, TimeSpan? matchTimeout = null, bool throwIfNotAdaptable = false)
+    public static RegExpParseResult AdaptRegExp(string pattern, string flags, bool compiled = false, TimeSpan? matchTimeout = null, bool throwIfNotAdaptable = false)
     {
         if (pattern is null)
         {
@@ -1815,7 +1825,7 @@ ParseIdentifierPart:
             ? ScannerOptions.Default
             : new ScannerOptions { RegExpParseMode = parseMode, RegexTimeout = matchTimeout.Value, Tolerant = tolerant };
 
-        return new RegExpParser(pattern, flags, scannerOptions).Parse(out _);
+        return new RegExpParser(pattern, flags, scannerOptions).Parse();
     }
 
     private string ScanRegExpBody()
@@ -1932,8 +1942,8 @@ ParseIdentifierPart:
         var flags = ScanRegExpFlags();
 
         var value = _regExpParseMode != RegExpParseMode.Skip
-            ? new RegExpParser(body, bodyStart + 1, flags, flagsStart, this).Parse(out _)
-            : null;
+            ? new RegExpParser(body, bodyStart + 1, flags, flagsStart, this).Parse()
+            : default;
 
         return Token.CreateRegExpLiteral(value, new RegexValue(body, flags), bodyStart, end: _index, _lineNumber, _lineStart);
     }

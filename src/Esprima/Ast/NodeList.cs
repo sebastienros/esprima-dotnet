@@ -181,7 +181,6 @@ public static class NodeList
     internal static NodeList<T> From<T>(ref ArrayList<T> arrayList) where T : Node?
     {
         arrayList.Yield(out var items, out var count);
-        arrayList = default;
         return new NodeList<T>(items, count);
     }
 

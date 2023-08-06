@@ -79,14 +79,14 @@ partial class Scanner
                     // [] should not match any characters.
                     if (context.SetStartIndex == i - 1)
                     {
-                        sb.Remove(sb.Length - 1, 1).Append(MatchNothingRegex);
+                        sb.Remove(sb.Length - 1, 1).Append(MatchNoneRegex);
                         return true;
                     }
 
                     // [^] should match any character including newline.
                     if (context.SetStartIndex == i - 2 && pattern[i - 1] == '^')
                     {
-                        sb.Remove(sb.Length - 2, 2).Append(MatchAnyCharRegex);
+                        sb.Remove(sb.Length - 2, 2).Append(MatchAnyRegex);
                         return true;
                     }
 
@@ -101,7 +101,7 @@ partial class Scanner
                 ref readonly var sb = ref context.StringBuilder;
                 if (sb is not null)
                 {
-                    _ = dotAll ? sb.Append(MatchAnyCharRegex) : sb.Append(MatchNoNewLineRegex);
+                    _ = dotAll ? sb.Append(MatchAnyRegex) : sb.Append(MatchAnyButNewLineRegex);
                 }
             }
 
@@ -147,7 +147,7 @@ partial class Scanner
                 context.FollowingQuantifierError = null;
             }
 
-            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser)
+            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser, out ParseError? conversionError)
             {
                 // https://tc39.es/ecma262/#prod-AtomEscape
 
@@ -269,9 +269,9 @@ partial class Scanner
                         if (!context.WithinSet)
                         {
                             // Outside character sets, numbers may be backreferences (in this case the number is interpreted as decimal).
-                            if (parser.TryAdjustBackreference(ref context, startIndex))
+                            if (parser.TryAdjustBackreference(ref context, startIndex, out conversionError))
                             {
-                                if (i < 0) // conversion is impossible
+                                if (conversionError is not null)
                                 {
                                     return false;
                                 }
@@ -316,8 +316,8 @@ partial class Scanner
 
                         if (!context.WithinSet)
                         {
-                            parser.AdjustNamedBackreference(ref context, startIndex);
-                            if (i < 0) // conversion is impossible
+                            parser.AdjustNamedBackreference(ref context, startIndex, out conversionError);
+                            if (conversionError is not null)
                             {
                                 return false;
                             }
@@ -336,6 +336,8 @@ partial class Scanner
                     case 'd' or 'D' or 's' or 'S' or 'w' or 'W':
                         // RegexOptions.ECMAScript incorrectly interprets \s as [\f\n\r\t\v\u0020]. This doesn't align with the JS specification,
                         // which defines \s as [\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]. We need to adjust both \s and \S.
+
+                        const string InvertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uFEFE\uFF00-\uFFFF";
 
                         if (!context.WithinSet)
                         {
@@ -439,6 +441,7 @@ partial class Scanner
                         break;
                 }
 
+                conversionError = null;
                 return true;
             }
         }

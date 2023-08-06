@@ -11,6 +11,9 @@ partial class Scanner
     partial struct RegExpParser
     {
         private const string MatchSurrogatePairRegex = "[\uD800-\uDBFF][\uDC00-\uDFFF]";
+        private const string MatchLoneSurrogateRegex = "[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]";
+        private const string MatchAnyButSurrogateRegex = "[^\uD800-\uDFFF]";
+        private const string MatchAnyButNewLineAndSurrogateRegex = "[^\n\r\u2028\u2029\uD800-\uDFFF]";
 
         private sealed class UnicodeMode : IMode
         {
@@ -172,10 +175,13 @@ partial class Scanner
                     (bool?) null)
                 {
                     case false:
-                        sb.Append(MatchNothingRegex);
+                        sb.Append(MatchNoneRegex);
                         return;
                     case true:
-                        sb.Append("(?:").Append(MatchSurrogatePairRegex).Append('|').Append(MatchAnyCharRegex).Append(')');
+                        sb.Append("(?:").Append(MatchSurrogatePairRegex)
+                            .Append('|').Append(MatchLoneSurrogateRegex)
+                            .Append('|').Append(MatchAnyButSurrogateRegex)
+                            .Append(')');
                         return;
                 }
 
@@ -604,12 +610,13 @@ partial class Scanner
                 {
                     // '.' has to be adjusted to also match all surrogate pairs.
 
-                    // NOTE: It's important to match surrogate pairs with the first alternate to prevent matching the high and low surrogates separately
-                    // (see also https://stackoverflow.com/a/18017758).
-
-                    sb.Append("(?:").Append(MatchSurrogatePairRegex).Append('|');
-                    _ = dotAll ? sb.Append(MatchAnyCharRegex) : sb.Append(MatchNoNewLineRegex);
-                    sb.Append(')');
+                    sb.Append("(?:").Append(MatchSurrogatePairRegex)
+                        .Append('|').Append(MatchLoneSurrogateRegex)
+                        .Append('|');
+                    (dotAll
+                        ? sb.Append(MatchAnyButSurrogateRegex)
+                        : sb.Append(MatchAnyButNewLineAndSurrogateRegex))
+                        .Append(')');
                 }
             }
 
@@ -630,7 +637,7 @@ partial class Scanner
                 parser.ReportSyntaxError(startIndex, Messages.RegExpIncompleteQuantifier);
             }
 
-            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser)
+            public bool AdjustEscapeSequence(ref ParsePatternContext context, ref RegExpParser parser, out ParseError? conversionError)
             {
                 // https://tc39.es/ecma262/#prod-AtomEscape
 
@@ -785,9 +792,9 @@ partial class Scanner
                         if (!context.WithinSet)
                         {
                             // Outside character sets, numbers may be backreferences (in this case the number is interpreted as decimal).
-                            if (parser.TryAdjustBackreference(ref context, startIndex))
+                            if (parser.TryAdjustBackreference(ref context, startIndex, out conversionError))
                             {
-                                if (i < 0) // conversion is impossible
+                                if (conversionError is not null)
                                 {
                                     return false;
                                 }
@@ -807,8 +814,8 @@ partial class Scanner
                     case 'k':
                         if (!context.WithinSet)
                         {
-                            parser.AdjustNamedBackreference(ref context, startIndex);
-                            if (i < 0) // conversion is impossible
+                            parser.AdjustNamedBackreference(ref context, startIndex, out conversionError);
+                            if (conversionError is not null)
                             {
                                 return false;
                             }
@@ -834,16 +841,14 @@ partial class Scanner
                             {
                                 if (ch is 'D' or 'S' or 'W')
                                 {
-                                    const string InvertedDigitPattern = "\0-\\x2F\\x3A-\uFFFF";
-                                    const string InvertedWordCharPattern = "\0-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-\uFFFF";
+                                    const string InvertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uD7FF\uE000-\uFEFE\uFF00-\uFFFF";
+                                    const string InvertedDigitPattern = "\0-\\x2F\\x3A-\uD7FF\uE000-\uFFFF";
+                                    const string InvertedWordCharPattern = "\0-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-\uD7FF\uE000-\uFFFF";
 
-                                    // NOTE: It's important to match surrogate pairs with the first alternate to prevent matching the high and low surrogates separately
-                                    // (see also https://stackoverflow.com/a/18017758).
-
-                                    sb.Append("(?:");
-                                    sb.Append(MatchSurrogatePairRegex);
-                                    sb.Append('|').Append('[').Append(ch switch { 'D' => InvertedDigitPattern, 'S' => InvertedWhiteSpacePattern, _ => InvertedWordCharPattern }).Append(']');
-                                    sb.Append(')');
+                                    sb.Append("(?:").Append(MatchSurrogatePairRegex)
+                                        .Append('|').Append(MatchLoneSurrogateRegex)
+                                        .Append('|').Append('[').Append(ch switch { 'D' => InvertedDigitPattern, 'S' => InvertedWhiteSpacePattern, _ => InvertedWordCharPattern }).Append(']')
+                                        .Append(')');
                                 }
                                 else
                                 {
@@ -901,7 +906,7 @@ partial class Scanner
                             {
                                 if (!TryTranslateUnicodePropertyToRanges(slice, parser.GetCodePointRangeCache(), out var categoryRanges))
                                 {
-                                    parser.ReportConversionFailure(startIndex, "Inconvertible Unicode property escape");
+                                    conversionError = parser.ReportConversionFailure(startIndex, "Inconvertible Unicode property escape");
                                     return false;
                                 }
 
@@ -969,6 +974,7 @@ partial class Scanner
                         break;
                 }
 
+                conversionError = null;
                 return true;
             }
         }

@@ -30,9 +30,10 @@ public class ErrorHandler
         return new ParseError(description, source, index, new Position(line, col));
     }
 
-    internal void TolerateError(string? source, int index, int line, int col, string description, bool tolerant)
+    internal ParseError TolerateError(string? source, int index, int line, int col, string description, bool tolerant)
     {
         var error = CreateError(source, index, line, col, description);
         Tolerate(error, tolerant);
+        return error;
     }
 }
