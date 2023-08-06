@@ -41,6 +41,7 @@ internal static class Messages
     public const string InvalidModuleSpecifier = "Unexpected token";
     public const string InvalidRegExpFlags = "Invalid regular expression flags";
     public const string InvalidTaggedTemplateOnOptionalChain = "Invalid tagged template on optional chain";
+    public const string InvalidOptionalChainFromNewExpression = "Invalid optional chain from new expression";
     public const string InvalidUnicodeEscapeSequence = "Invalid Unicode escape sequence";
     public const string LetInLexicalBinding = "let is disallowed as a lexically bound name";
     public const string MissingFromClause = "Unexpected token";

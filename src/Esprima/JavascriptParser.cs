@@ -104,6 +104,7 @@ public partial class JavaScriptParser
     private readonly Func<BlockStatement> _parseFunctionSourceElements;
     private readonly Func<Expression> _parseAsyncArgument;
 
+    private protected Token _currentToken;
     private protected Token _lookahead;
     private protected readonly Context _context;
 
@@ -174,6 +175,7 @@ public partial class JavaScriptParser
     {
         _assignmentDepth = 0;
         _hasLineTerminator = false;
+        _currentToken = default;
         _lookahead = default;
 
         _markersStack = null;
@@ -339,7 +341,8 @@ public partial class JavaScriptParser
 
     private protected Token NextToken(bool allowIdentifierEscape = false)
     {
-        var token = _lookahead;
+        ref var token = ref _currentToken;
+        token = _lookahead;
 
         _lastMarker = _scanner.GetMarker();
 
@@ -1646,6 +1649,10 @@ public partial class JavaScriptParser
         else
         {
             var callee = IsolateCoverGrammar(_parseLeftHandSideExpression);
+            if (callee.Type == Nodes.ChainExpression && !(_currentToken.Type == TokenType.Punctuator && (string) _currentToken.Value! == ")"))
+            {
+                ThrowError(Messages.InvalidOptionalChainFromNewExpression);
+            }
             var args = Match("(") ? ParseArguments() : new NodeList<Expression>();
             expr = new NewExpression(callee, args);
             _context.IsAssignmentTarget = false;
