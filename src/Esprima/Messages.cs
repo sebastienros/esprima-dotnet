@@ -32,16 +32,17 @@ internal static class Messages
     public const string IllegalImportDeclaration = "Unexpected token";
     public const string IllegalLanguageModeDirective = "Illegal 'use strict' directive in function with non-simple parameter list";
     public const string IllegalReturn = "Illegal return statement";
+    // TODO: Replace this with the actual V8 message once it becomes available (see https://github.com/v8/v8/blob/main/src/common/message-template.h).
+    public const string InvalidDecoratorMemberExpression = "Invalid decorator member expression";
     public const string InvalidEscapedReservedWord = "Keyword must not contain escaped characters";
-    public const string NoSemicolonAfterDecorator = "Decorators must not be followed by a semicolon.";
     public const string InvalidHexEscapeSequence = "Invalid hexadecimal escape sequence";
     public const string InvalidLHSInAssignment = "Invalid left-hand side in assignment";
     public const string InvalidLHSInForIn = "Invalid left-hand side in for-in";
     public const string InvalidLHSInForLoop = "Invalid left-hand side in for-loop";
     public const string InvalidModuleSpecifier = "Unexpected token";
+    public const string InvalidOptionalChainFromNewExpression = "Invalid optional chain from new expression";
     public const string InvalidRegExpFlags = "Invalid regular expression flags";
     public const string InvalidTaggedTemplateOnOptionalChain = "Invalid tagged template on optional chain";
-    public const string InvalidOptionalChainFromNewExpression = "Invalid optional chain from new expression";
     public const string InvalidUnicodeEscapeSequence = "Invalid Unicode escape sequence";
     public const string LetInLexicalBinding = "let is disallowed as a lexically bound name";
     public const string MissingFromClause = "Unexpected token";
@@ -50,6 +51,7 @@ internal static class Messages
     public const string NewTargetNotAllowedHere = "new.target expression is not allowed here";
     public const string NoAsAfterImportNamespace = "Unexpected token";
     public const string NoCatchOrFinally = "Missing catch or finally after try";
+    public const string NoSemicolonAfterDecorator = "Decorators must not be followed by a semicolon.";
     public const string NumericSeparatorAfterLeadingZero = "Numeric separator can not be used after leading 0";
     public const string NumericSeparatorNotAllowedHere = "Numeric separator is not allowed here";
     public const string NumericSeparatorOneUnderscore = "Numeric separator must be exactly one underscore";
