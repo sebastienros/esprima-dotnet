@@ -94,13 +94,7 @@ partial class AstToJavaScriptConverter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private protected static ExpressionFlags RootExpressionFlags(bool needsBrackets)
     {
-        return ExpressionFlags.IsLeftMost | needsBrackets.ToFlag(ExpressionFlags.NeedsBrackets);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private protected static ExpressionFlags LeftHandSideRootExpressionFlags(bool needsBrackets)
-    {
-        return ExpressionFlags.IsInsideLeftHandSideExpression | ExpressionFlags.IsLeftMostInLeftHandSideExpression | RootExpressionFlags(needsBrackets);
+        return ExpressionFlags.IsRootExpression | ExpressionFlags.IsLeftMost | needsBrackets.ToFlag(ExpressionFlags.NeedsBrackets);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,7 +121,7 @@ partial class AstToJavaScriptConverter
             flags = flags & ~isLeftMostFlags | _currentExpressionFlags & isLeftMostFlags;
         }
 
-        // Propagates IsInsideStatementExpression, IsInsideArrowFunctionBody and IsInsideLeftHandSideExpression to current expression.
+        // Propagates IsInAmbiguousInOperatorContext and IsInside* flags to current expression.
         flags |= _currentExpressionFlags & ExpressionFlags.IsInPotentiallyAmbiguousContext;
 
         return flags;
@@ -144,9 +138,10 @@ partial class AstToJavaScriptConverter
         if ((flags & ExpressionFlags.IsInPotentiallyAmbiguousContext) != 0)
         {
             if (flags.HasFlagFast(ExpressionFlags.IsInsideStatementExpression | ExpressionFlags.IsLeftMost) && ExpressionIsAmbiguousAsStatementExpression(expression) ||
-                flags.HasFlagFast(ExpressionFlags.IsInsideLeftHandSideExpression | ExpressionFlags.IsLeftMostInLeftHandSideExpression) && LeftHandSideExpressionIsParenthesized(expression) ||
                 flags.HasFlagFast(ExpressionFlags.IsInsideArrowFunctionBody | ExpressionFlags.IsLeftMostInArrowFunctionBody) && ExpressionIsAmbiguousAsArrowFunctionBody(expression) ||
-                flags.HasFlagFast(ExpressionFlags.IsInsideNewCallee | ExpressionFlags.IsLeftMostInNewCallee) && ExpressionIsAmbiguousAsNewCallee(expression))
+                flags.HasFlagFast(ExpressionFlags.IsInsideNewCallee | ExpressionFlags.IsLeftMostInNewCallee) && ExpressionIsAmbiguousAsNewCallee(expression) ||
+                flags.HasFlagFast(ExpressionFlags.IsInsideLeftHandSideExpression | ExpressionFlags.IsLeftMostInLeftHandSideExpression) && LeftHandSideExpressionIsParenthesized(expression) ||
+                flags.HasFlagFast(ExpressionFlags.IsInsideDecorator | ExpressionFlags.IsLeftMost) && DecoratorLeftMostExpressionIsParenthesized(expression, isRoot: flags.HasFlagFast(ExpressionFlags.IsRootExpression)))
             {
                 return (flags | ExpressionFlags.NeedsBrackets) & ~ExpressionFlags.IsInAmbiguousInOperatorContext;
             }
@@ -325,6 +320,22 @@ partial class AstToJavaScriptConverter
         }
 
         return false;
+    }
+
+    protected virtual bool DecoratorLeftMostExpressionIsParenthesized(Expression expression, bool isRoot)
+    {
+        // https://tc39.es/proposal-decorators/
+
+        switch (expression.Type)
+        {
+            case Nodes.Identifier:
+            case Nodes.MemberExpression when expression.As<MemberExpression>() is { Computed: false }:
+                return false;
+            case Nodes.CallExpression:
+                return !isRoot;
+        }
+
+        return true;
     }
 
     protected virtual bool ExpressionNeedsBracketsInList(Expression expression)

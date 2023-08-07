@@ -36,7 +36,11 @@ partial class AstToJavaScriptConverter
         SpaceAfterBracketsRecommended = JavaScriptTextWriter.ExpressionFlags.SpaceAfterBracketsRecommended,
         SpaceAroundBracketsRecommended = JavaScriptTextWriter.ExpressionFlags.SpaceAroundBracketsRecommended,
 
-        IsMethod = 1 << 16,
+        IsRootExpression = 1 << 16,
+
+        IsMethod = 1 << 17,
+
+        IsInsideDecorator = 1 << 22, // automatically propagated to sub-expressions
 
         IsInAmbiguousInOperatorContext = 1 << 24, // automatically propagated to sub-expressions
 
@@ -52,6 +56,6 @@ partial class AstToJavaScriptConverter
 
         IsInsideStatementExpression = 1 << 31, // automatically propagated to sub-expressions
 
-        IsInPotentiallyAmbiguousContext = IsInAmbiguousInOperatorContext | IsInsideArrowFunctionBody | IsInsideNewCallee | IsInsideLeftHandSideExpression | IsInsideStatementExpression,
+        IsInPotentiallyAmbiguousContext = IsInAmbiguousInOperatorContext | IsInsideArrowFunctionBody | IsInsideDecorator | IsInsideNewCallee | IsInsideLeftHandSideExpression | IsInsideStatementExpression,
     }
 }
