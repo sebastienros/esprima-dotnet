@@ -2170,7 +2170,7 @@ public partial class JavaScriptParser
         {
             TolerateError(Messages.StrictDelete);
         }
-        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument is MemberExpression m && m.Property is PrivateIdentifier)
+        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument is MemberExpression { Property: PrivateIdentifier })
         {
             TolerateError(Messages.PrivateFieldNoDelete);
         }
@@ -2616,7 +2616,7 @@ public partial class JavaScriptParser
                 _context.IsAssignmentTarget = false;
                 _context.IsBindingElement = false;
 
-                var isAsync = expr is ArrowParameterPlaceHolder arrow && arrow.Async;
+                var isAsync = expr is ArrowParameterPlaceHolder { Async: true };
                 var result = ReinterpretAsCoverFormalsList(expr);
 
                 if (result != null)

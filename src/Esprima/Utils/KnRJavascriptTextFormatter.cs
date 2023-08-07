@@ -18,7 +18,7 @@ public record class KnRJavaScriptTextFormatterOptions : JavaScriptTextFormatterO
 }
 
 /// <summary>
-/// JavaScript code formatter which implements the most common <see href="https://en.wikipedia.org/wiki/Indentation_style#K&amp;R_style">K&amp;R style</see>.
+/// JavaScript code formatter which implements the most commonly used <see href="https://en.wikipedia.org/wiki/Indentation_style#K&amp;R_style">K&amp;R style</see>.
 /// </summary>
 public class KnRJavaScriptTextFormatter : JavaScriptTextFormatter
 {
@@ -55,7 +55,7 @@ public class KnRJavaScriptTextFormatter : JavaScriptTextFormatter
     protected virtual bool CanUseEgyptianBraces(ref WriteContext context)
     {
         return KeepEmptyBlockBodyInLine
-            ? RetrieveStatementBodyFromContext(ref context) is BlockStatement blockStatement && blockStatement.Body.Count > 0
+            ? RetrieveStatementBodyFromContext(ref context) is BlockStatement { Body.Count: > 0 }
             : RetrieveStatementBodyFromContext(ref context).Type == Nodes.BlockStatement;
     }
 }
