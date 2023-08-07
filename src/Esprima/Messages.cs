@@ -1,6 +1,7 @@
 ﻿namespace Esprima;
 
 // Error messages should be identical to V8.
+// TODO: Replace the messages marked with "temporary" with the actual V8 messages once they become available (see https://github.com/v8/v8/blob/main/src/common/message-template.h).
 internal static class Messages
 {
     public const string ArgumentsNotAllowedInClassField = "'arguments' is not allowed in class field initializer or static initialization block";
@@ -22,8 +23,7 @@ internal static class Messages
     public const string DuplicateConstructor = "A class may only have one constructor";
     public const string DuplicateParameter = "Duplicate parameter name not allowed in this context";
     public const string DuplicateProtoProperty = "Duplicate __proto__ fields are not allowed in object literals";
-    // TODO: Replace this with the actual V8 message once it becomes available (see https://github.com/v8/v8/blob/main/src/common/message-template.h).
-    public const string DuplicateKeyInImportAttributes = "Import attributes has duplicate key '{0}'";
+    public const string DuplicateKeyInImportAttributes = "Import attributes has duplicate key '{0}'"; // temporary
     public const string ForInOfLoopInitializer = "'{0} loop variable declaration may not have an initializer";
     public const string GeneratorInLegacyContext = "Generator declarations are not allowed in legacy contexts";
     public const string IllegalBreak = "Illegal break statement";
@@ -32,13 +32,14 @@ internal static class Messages
     public const string IllegalImportDeclaration = "Unexpected token";
     public const string IllegalLanguageModeDirective = "Illegal 'use strict' directive in function with non-simple parameter list";
     public const string IllegalReturn = "Illegal return statement";
+    public const string InvalidDecoratorMemberExpression = "Invalid decorator member expression"; // temporary
     public const string InvalidEscapedReservedWord = "Keyword must not contain escaped characters";
-    public const string NoSemicolonAfterDecorator = "Decorators must not be followed by a semicolon.";
     public const string InvalidHexEscapeSequence = "Invalid hexadecimal escape sequence";
     public const string InvalidLHSInAssignment = "Invalid left-hand side in assignment";
     public const string InvalidLHSInForIn = "Invalid left-hand side in for-in";
     public const string InvalidLHSInForLoop = "Invalid left-hand side in for-loop";
     public const string InvalidModuleSpecifier = "Unexpected token";
+    public const string InvalidOptionalChainFromNewExpression = "Invalid optional chain from new expression";
     public const string InvalidRegExpFlags = "Invalid regular expression flags";
     public const string InvalidTaggedTemplateOnOptionalChain = "Invalid tagged template on optional chain";
     public const string InvalidUnicodeEscapeSequence = "Invalid Unicode escape sequence";
@@ -49,6 +50,7 @@ internal static class Messages
     public const string NewTargetNotAllowedHere = "new.target expression is not allowed here";
     public const string NoAsAfterImportNamespace = "Unexpected token";
     public const string NoCatchOrFinally = "Missing catch or finally after try";
+    public const string NoSemicolonAfterDecorator = "Decorators must not be followed by a semicolon.";
     public const string NumericSeparatorAfterLeadingZero = "Numeric separator can not be used after leading 0";
     public const string NumericSeparatorNotAllowedHere = "Numeric separator is not allowed here";
     public const string NumericSeparatorOneUnderscore = "Numeric separator must be exactly one underscore";

@@ -456,7 +456,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
             Writer.WriteKeyword("extends", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
 
             _writeContext.SetNodeProperty(nameof(classDeclaration.SuperClass), static node => node.As<ClassDeclaration>().SuperClass);
-            VisitRootExpression(classDeclaration.SuperClass, LeftHandSideRootExpressionFlags(needsBrackets: false));
+            VisitRootExpression(classDeclaration.SuperClass, ExpressionFlags.IsInsideLeftHandSideExpression | ExpressionFlags.IsLeftMostInLeftHandSideExpression | RootExpressionFlags(needsBrackets: false));
         }
 
         _writeContext.SetNodeProperty(nameof(classDeclaration.Body), static node => node.As<ClassDeclaration>().Body);
@@ -489,7 +489,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
             Writer.WriteKeyword("extends", TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
 
             _writeContext.SetNodeProperty(nameof(classExpression.SuperClass), static node => node.As<ClassExpression>().SuperClass);
-            VisitRootExpression(classExpression.SuperClass, LeftHandSideRootExpressionFlags(needsBrackets: false));
+            VisitRootExpression(classExpression.SuperClass, ExpressionFlags.IsInsideLeftHandSideExpression | ExpressionFlags.IsLeftMostInLeftHandSideExpression | RootExpressionFlags(needsBrackets: false));
         }
 
         _writeContext.SetNodeProperty(nameof(classExpression.Body), static node => node.As<ClassExpression>().Body);
@@ -558,7 +558,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
         Writer.WritePunctuator("@", TokenFlags.Leading | (ParentNode is not Expression).ToFlag(TokenFlags.LeadingSpaceRecommended), ref _writeContext);
 
         _writeContext.SetNodeProperty(nameof(decorator.Expression), static node => node.As<Decorator>().Expression);
-        VisitRootExpression(decorator.Expression, LeftHandSideRootExpressionFlags(needsBrackets: false));
+        VisitRootExpression(decorator.Expression, ExpressionFlags.IsInsideDecorator | RootExpressionFlags(needsBrackets: false));
 
         Writer.SpaceRecommendedAfterLastToken();
 

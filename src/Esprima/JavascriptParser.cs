@@ -39,6 +39,7 @@ public partial class JavaScriptParser
             InSwitch = false;
             Strict = false;
             AllowIdentifierEscape = false;
+            MemberAccessContext = MemberAccessContext.Unknown;
 
             Decorators.Clear();
             LabelSet.Clear();
@@ -75,12 +76,20 @@ public partial class JavaScriptParser
         public bool InClassBody;
         public bool Strict;
         public bool AllowIdentifierEscape;
+        public MemberAccessContext MemberAccessContext;
 
         public ArrayList<Decorator> Decorators;
 
         public HashSet<string?> LabelSet;
 
         public StrongBox<Token>? FirstCoverInitializedNameError;
+    }
+
+    internal enum MemberAccessContext : byte
+    {
+        Unknown = 0,
+        NewExpressionCallee = 1,
+        Decorator = 2,
     }
 
     [StringMatcher("=", "*=", "**=", "/=", "%=", "+=", "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "&&=", "||=", "??=")]
@@ -1645,7 +1654,11 @@ public partial class JavaScriptParser
         }
         else
         {
+            var previousMemberAccessContext = _context.MemberAccessContext;
+            _context.MemberAccessContext = MemberAccessContext.NewExpressionCallee;
             var callee = IsolateCoverGrammar(_parseLeftHandSideExpression);
+            _context.MemberAccessContext = previousMemberAccessContext;
+
             var args = Match("(") ? ParseArguments() : new NodeList<Expression>();
             expr = new NewExpression(callee, args);
             _context.IsAssignmentTarget = false;
@@ -1827,11 +1840,17 @@ public partial class JavaScriptParser
         }
 
         var hasOptional = false;
+        var hasCall = false;
         while (true)
         {
             var optional = false;
             if (Match("?."))
             {
+                if (_context.MemberAccessContext == MemberAccessContext.Decorator)
+                {
+                    ThrowError(Messages.InvalidDecoratorMemberExpression);
+                }
+
                 optional = true;
                 hasOptional = true;
                 Expect("?.");
@@ -1839,10 +1858,22 @@ public partial class JavaScriptParser
 
             if (Match("("))
             {
+                if (hasCall && _context.MemberAccessContext == MemberAccessContext.Decorator)
+                {
+                    ThrowError(Messages.InvalidDecoratorMemberExpression);
+                }
+
+                hasCall = true;
+
                 expr = ParseCallExpression(maybeAsync, startMarker, expr, optional);
             }
             else if (Match("["))
             {
+                if (_context.MemberAccessContext == MemberAccessContext.Decorator)
+                {
+                    ThrowError(Messages.InvalidDecoratorMemberExpression);
+                }
+
                 _context.IsBindingElement = false;
                 _context.IsAssignmentTarget = !optional;
                 Expect("[");
@@ -1852,6 +1883,11 @@ public partial class JavaScriptParser
             }
             else if (_lookahead.Type == TokenType.Template && _lookahead.Head)
             {
+                if (_context.MemberAccessContext == MemberAccessContext.Decorator)
+                {
+                    ThrowError(Messages.InvalidDecoratorMemberExpression);
+                }
+
                 // Optional template literal is not included in the spec.
                 // https://github.com/tc39/proposal-optional-chaining/issues/54
                 if (optional)
@@ -1869,6 +1905,11 @@ public partial class JavaScriptParser
             }
             else if (Match(".") || optional)
             {
+                if (hasCall && _context.MemberAccessContext == MemberAccessContext.Decorator)
+                {
+                    ThrowError(Messages.InvalidDecoratorMemberExpression);
+                }
+
                 var previousAllowIdentifierEscape = _context.AllowIdentifierEscape;
 
                 _context.IsBindingElement = false;
@@ -1957,6 +1998,11 @@ public partial class JavaScriptParser
             var optional = false;
             if (Match("?."))
             {
+                if (_context.MemberAccessContext == MemberAccessContext.NewExpressionCallee)
+                {
+                    ThrowError(Messages.InvalidOptionalChainFromNewExpression);
+                }
+
                 optional = true;
                 hasOptional = true;
                 Expect("?.");
@@ -2028,7 +2074,11 @@ public partial class JavaScriptParser
         }
         else
         {
+            var previousMemberAccessContext = _context.MemberAccessContext;
+            _context.MemberAccessContext = MemberAccessContext.Unknown;
             expr = InheritCoverGrammar(_parseLeftHandSideExpressionAllowCall);
+            _context.MemberAccessContext = previousMemberAccessContext;
+
             if (!_hasLineTerminator && _lookahead.Type == TokenType.Punctuator && (Match("++") || Match("--")))
             {
                 expr = ParsePostfixUnaryExpression(expr, startMarker);
@@ -2120,7 +2170,7 @@ public partial class JavaScriptParser
         {
             TolerateError(Messages.StrictDelete);
         }
-        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument is MemberExpression m && m.Property is PrivateIdentifier)
+        if (_context.Strict && unaryExpr.Operator == UnaryOperator.Delete && unaryExpr.Argument is MemberExpression { Property: PrivateIdentifier })
         {
             TolerateError(Messages.PrivateFieldNoDelete);
         }
@@ -2566,7 +2616,7 @@ public partial class JavaScriptParser
                 _context.IsAssignmentTarget = false;
                 _context.IsBindingElement = false;
 
-                var isAsync = expr is ArrowParameterPlaceHolder arrow && arrow.Async;
+                var isAsync = expr is ArrowParameterPlaceHolder { Async: true };
                 var result = ReinterpretAsCoverFormalsList(expr);
 
                 if (result != null)
@@ -4678,7 +4728,11 @@ public partial class JavaScriptParser
         _context.AllowYield = true;
         _context.IsAsync = false;
 
+        var previousMemberAccessContext = _context.MemberAccessContext;
+        _context.MemberAccessContext = MemberAccessContext.Decorator;
         var expression = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
+        _context.MemberAccessContext = previousMemberAccessContext;
+
         _context.Strict = previousStrict;
         _context.AllowYield = previousAllowYield;
         _context.IsAsync = previousIsAsync;
@@ -4991,7 +5045,10 @@ ParseValue:
         if (MatchKeyword("extends"))
         {
             NextToken();
+            var previousMemberAccessContext = _context.MemberAccessContext;
+            _context.MemberAccessContext = MemberAccessContext.Unknown;
             superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
+            _context.MemberAccessContext = previousMemberAccessContext;
         }
 
         var classBody = ParseClassBody(hasSuperClass: superClass is not null);
@@ -5033,7 +5090,10 @@ ParseValue:
         if (MatchKeyword("extends"))
         {
             NextToken();
+            var previousMemberAccessContext = _context.MemberAccessContext;
+            _context.MemberAccessContext = MemberAccessContext.Unknown;
             superClass = IsolateCoverGrammar(_parseLeftHandSideExpressionAllowCall);
+            _context.MemberAccessContext = previousMemberAccessContext;
         }
 
         var classBody = ParseClassBody(hasSuperClass: superClass is not null);

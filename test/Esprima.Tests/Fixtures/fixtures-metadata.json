@@ -378,8 +378,6 @@
       "es2020/optional-chaining/invalid-optional-chaining-new-template-string.js",
       "es2020/optional-chaining/invalid-optional-chaining-template-string.js",
       "es2020/optional-chaining/optional-chaining-call.js",
-      "es2020/optional-chaining/optional-chaining-computed-property.js",
-      "es2020/optional-chaining/optional-chaining-static-property.js",
 
       "ES6/arrow-function/arrow-rest-forgetting-comma.js",
       "ES6/arrow-function/arrow-with-multiple-arg-and-rest.js",
@@ -1714,6 +1712,13 @@
       "ES6/identifier/invalid_expression_await.module.js",
       "ES6/identifier/module_await.js",
       "expression/primary/literal/regular-expression/migrated_0006.source.js" // false negative
+    ]
+  },
+  {
+    "flags": [ "IncludesLocation", "IncludesRange", "IncludesTokens" ],
+    "files": [
+      "es2020/optional-chaining/optional-chaining-computed-property.js",
+      "es2020/optional-chaining/optional-chaining-static-property.js"
     ]
   }
 ]

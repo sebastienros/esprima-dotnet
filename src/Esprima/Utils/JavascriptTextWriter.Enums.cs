@@ -115,7 +115,7 @@ partial class JavaScriptTextWriter
         /// The statement comes last in the current statement list (more precisely, it is the right-most part in the textual representation of the current statement list).
         /// </summary>
         /// <remarks>
-        /// In the the visitation handlers of <see cref="AstToJavaScriptConverter"/> the flag is interpreted differently: it indicates that the statement comes last in the parent statement.
+        /// In the visitation handlers of <see cref="AstToJavaScriptConverter"/> the flag is interpreted differently: it indicates that the statement comes last in the parent statement.
         /// (Upon visiting a statement, this flag of the parent and child statement gets combined to determine its effective value for the current statement list.)
         /// </remarks>
         IsRightMost = 1 << 2,
@@ -140,7 +140,7 @@ partial class JavaScriptTextWriter
         /// The expression comes first in the current expression tree, more precisely, it is the left-most part in the textual representation of the currently visited expression tree (incl. brackets).
         /// </summary>
         /// <remarks>
-        /// In the the visitation handlers of <see cref="AstToJavaScriptConverter"/> the flag is interpreted differently: it indicates that the expression comes first in the parent expression.
+        /// In the visitation handlers of <see cref="AstToJavaScriptConverter"/> the flag is interpreted differently: it indicates that the expression comes first in the parent expression.
         /// (Upon visiting an expression, this flag of the parent and child expression gets combined to determine its effective value for the expression tree.)
         /// </remarks>
         IsLeftMost = 1 << 1,

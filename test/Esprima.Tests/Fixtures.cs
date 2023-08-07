@@ -31,7 +31,10 @@ public class Fixtures
     private static bool CompareTreesInternal(JObject actualJObject, JObject expectedJObject, FixtureMetadata metadata)
     {
         // Don't compare the tokens array as it's not in the generated AST
-        expectedJObject.Remove("tokens");
+        if (!metadata.IncludesTokens)
+        {
+            expectedJObject.Remove("tokens");
+        }
         expectedJObject.Remove("comments");
         expectedJObject.Remove("errors");
 
@@ -186,9 +189,27 @@ public class Fixtures
             expected = File.ReadAllText(failureFilePath);
             if (WriteBackExpectedTree && conversionOptions.TestCompatibilityMode == AstToJsonTestCompatibilityMode.None)
             {
-                var actual = ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
-                if (!CompareTrees(actual, expected, metadata))
-                    File.WriteAllText(failureFilePath, actual);
+                try
+                {
+                    ParseAndFormat(sourceType, script, parserOptions, parserFactory, conversionOptions);
+                }
+                catch (ParserException ex)
+                {
+                    var expectedJsonObject = JObject.Parse(expected);
+
+                    var parseError = ex.Error!;
+                    var actualJsonObject = new JObject
+                    {
+                        ["index"] = parseError.Index,
+                        ["lineNumber"] = parseError.LineNumber,
+                        ["column"] = parseError.Column,
+                        ["message"] = ex.Message,
+                        ["description"] = parseError.Description,
+                    };
+
+                    if (!JToken.DeepEquals(expectedJsonObject, actualJsonObject))
+                        File.WriteAllText(failureFilePath, actualJsonObject.ToString(Formatting.None));
+                }
             }
         }
         else
@@ -292,6 +313,7 @@ public class Fixtures
                 IncludesLocation = flags.Contains("IncludesLocation"),
                 IncludesRange = flags.Contains("IncludesRange"),
                 IncludesLocationSource = flags.Contains("IncludesLocationSource"),
+                IncludesTokens = flags.Contains("IncludesTokens"),
                 IgnoresRegex = flags.Contains("IgnoresRegex"),
                 Skip = flags.Contains("Skip"),
             };
@@ -303,6 +325,7 @@ public class Fixtures
         public bool IncludesLocation { get; init; }
         public bool IncludesRange { get; init; }
         public bool IncludesLocationSource { get; init; }
+        public bool IncludesTokens { get; init; }
         public bool IgnoresRegex { get; init; }
         public bool Skip { get; init; }
 
@@ -311,6 +334,7 @@ public class Fixtures
             TestCompatibilityMode = TestCompatibilityMode,
             IncludeLineColumn = IncludesLocation,
             IncludeRange = IncludesRange,
+            IncludeTokens = IncludesTokens,
         };
     }
 }
