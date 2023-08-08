@@ -14,14 +14,19 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
     {
         if (collection is null)
         {
-            throw new ArgumentNullException(nameof(collection));
+            ThrowArgumentNullException();
         }
 
-        _count = collection.Count;
+        _count = collection!.Count;
         if (_count > 0)
         {
             _items = new T[_count];
             collection.CopyTo(_items, 0);
+        }
+
+        static void ThrowArgumentNullException()
+        {
+            ThrowArgumentNullException<T>(nameof(collection));
         }
     }
 
@@ -53,7 +58,7 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
                 return _items![index];
             }
 
-            return ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            return ThrowIndexOutOfRangeException<T>();
         }
     }
 

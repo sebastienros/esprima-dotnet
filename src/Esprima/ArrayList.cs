@@ -80,7 +80,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         if (initialCapacity < 0)
         {
-            ThrowArgumentOutOfRangeException<T>(nameof(initialCapacity), initialCapacity, null);
+            ThrowInvalidInitialCapacity();
         }
 
         _items = initialCapacity > 0 ? new T[initialCapacity] : null;
@@ -90,6 +90,12 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         _localVersion = 0;
         _sharedVersion = null;
 #endif
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static void ThrowInvalidInitialCapacity()
+        {
+            ThrowArgumentException("Invalid initial capacity", nameof(initialCapacity));
+        }
     }
 
     /// <remarks>
@@ -108,6 +114,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
     public int Capacity
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             AssertUnchanged();
@@ -117,27 +124,12 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         {
             AssertUnchanged();
 
-            if (value < _count)
+            if (value < (_items?.Length ?? 0))
             {
-                ThrowArgumentOutOfRangeException<T>(nameof(value), value, null);
+                ThrowArgumentOutOfRangeException(nameof(value), value, null);
             }
-            else if (value == (_items?.Length ?? 0))
-            {
-                return;
-            }
-            else if (value > 0)
-            {
-                T[] array = new T[value];
-                if (_count > 0)
-                {
-                    Array.Copy(_items, 0, array, 0, _count);
-                }
-                _items = array;
-            }
-            else
-            {
-                _items = null;
-            }
+
+            EnsureCapacity(value);
 
             OnChanged();
         }
@@ -166,7 +158,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
                 return _items![index];
             }
 
-            return ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            return ThrowIndexOutOfRangeException<T>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -181,7 +173,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
                 return;
             }
 
-            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            ThrowIndexOutOfRangeException<T>();
         }
     }
 
@@ -221,10 +213,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         var oldCount = _count;
         var newCount = oldCount + itemCount;
 
-        if (Capacity < newCount)
-        {
-            Array.Resize(ref _items, Math.Max(newCount, MinAllocatedCount));
-        }
+        EnsureCapacity(newCount);
 
         Debug.Assert(_items is not null);
         items.CopyTo(_items.AsSpan(oldCount, itemCount));
@@ -242,12 +231,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         AssertUnchanged();
 
-        var capacity = Capacity;
-
-        if (_count == capacity)
-        {
-            Array.Resize(ref _items, Math.Max(capacity * 2, MinAllocatedCount));
-        }
+        EnsureCapacity(_count + 1);
 
         Debug.Assert(_items is not null);
         _items![_count] = item;
@@ -275,15 +259,10 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
         if ((uint) index > (uint) _count)
         {
-            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            ThrowIndexOutOfRangeException<T>();
         }
 
-        var capacity = Capacity;
-
-        if (_count == capacity)
-        {
-            Array.Resize(ref _items, Math.Max(capacity * 2, MinAllocatedCount));
-        }
+        EnsureCapacity(_count + 1);
 
         Debug.Assert(_items is not null);
         Array.Copy(_items, index, _items, index + 1, Count - index);
@@ -299,7 +278,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
         if ((uint) index >= (uint) _count)
         {
-            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            ThrowIndexOutOfRangeException<T>();
         }
 
         _count--;
@@ -348,16 +327,6 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         this = default;
     }
 
-    public void TrimExcess(int threshold = MinAllocatedCount)
-    {
-        AssertUnchanged();
-
-        if (Capacity - _count > threshold)
-        {
-            Capacity = _count;
-        }
-    }
-
     /// <remarks>
     /// Items should not be added or removed from the <see cref="ArrayList{T}"/> while the returned <see cref="Span{T}"/> is in use!
     /// </remarks>
@@ -396,6 +365,18 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EnsureCapacity(int capacity)
+    {
+        var temp = _items;
+        if (temp is null || temp.Length < capacity)
+        {
+            var minAllocatedCount = temp is null || temp.Length < MinAllocatedCount ? MinAllocatedCount : temp.Length * 2;
+            var newSize = Math.Max(capacity, minAllocatedCount);
+            Array.Resize(ref _items, newSize);
+        }
     }
 
     /// <remarks>

@@ -50,7 +50,7 @@ public partial class JavaScriptParser
             Decorators.Clear();
             if (Decorators.Capacity > 64)
             {
-                Decorators.Capacity = 64;
+                Decorators = new ArrayList<Decorator>(64);
             }
 
             if (LabelSet.Count > 64)
