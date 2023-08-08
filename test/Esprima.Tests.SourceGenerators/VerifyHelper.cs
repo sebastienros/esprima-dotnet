@@ -36,7 +36,7 @@ global using global::System.Threading.Tasks;
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out _);
+        driver = driver.RunGenerators(compilation);
 
         return Verifier
             .Verify(driver.GetRunResult())

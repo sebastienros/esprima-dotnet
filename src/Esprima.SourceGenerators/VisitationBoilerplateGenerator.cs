@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Data;
 using System.Globalization;
 using System.Text;
 using Esprima.SourceGenerators.Helpers;
