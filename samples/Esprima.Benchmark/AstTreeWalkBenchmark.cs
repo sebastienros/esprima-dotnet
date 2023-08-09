@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using Esprima.Ast;
 
 namespace Esprima.Benchmark;

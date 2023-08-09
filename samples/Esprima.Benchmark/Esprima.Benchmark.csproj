@@ -16,6 +16,6 @@
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.7" />
   </ItemGroup>
 </Project>

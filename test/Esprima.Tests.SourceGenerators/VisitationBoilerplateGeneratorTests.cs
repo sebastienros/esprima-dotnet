@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Runtime.CompilerServices;
-using Esprima.SourceGenerators;
+﻿using Esprima.SourceGenerators;
 using Microsoft.CodeAnalysis;
 using static Esprima.Tests.SourceGenerators.VerifyHelper;
 

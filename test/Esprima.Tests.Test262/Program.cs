@@ -111,7 +111,7 @@ public static class Program
     private static void Report(TestExecutionSummary testExecutionSummary)
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Rule("[green]Summary:[/]") { Alignment = Justify.Left });
+        AnsiConsole.Write(new Rule("[green]Summary:[/]") { Justification = Justify.Left });
 
         AnsiConsole.MarkupLine(" [green]:check_mark: {0,5}[/] valid programs parsed without error", testExecutionSummary.Allowed.Success.Count);
         AnsiConsole.MarkupLine(" [green]:check_mark: {0,5}[/] invalid programs produced a parsing error", testExecutionSummary.Allowed.Failure.Count);
@@ -153,7 +153,7 @@ public static class Program
     private static void WriteProblemHeading(string title)
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Rule($"[red]{title}[/]") { Alignment = Justify.Left });
+        AnsiConsole.Write(new Rule($"[red]{title}[/]") { Justification = Justify.Left });
     }
 
     private static void PrintDetails<T>(IReadOnlyCollection<T> items, int maxCount = 5)
