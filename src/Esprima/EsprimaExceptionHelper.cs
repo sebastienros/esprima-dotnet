@@ -8,15 +8,27 @@ namespace Esprima;
 internal static class EsprimaExceptionHelper
 {
     [DoesNotReturn]
-    public static T ThrowArgumentNullException<T>(string message)
+    public static T ThrowArgumentNullException<T>(string paramName)
     {
-        throw new ArgumentNullException(message);
+        throw new ArgumentNullException(paramName);
     }
 
     [DoesNotReturn]
-    public static T ThrowArgumentOutOfRangeException<T>(string paramName, object actualValue, string? message = null)
+    public static void ThrowArgumentOutOfRangeException<T>(string paramName, T actualValue, string? message = null)
     {
         throw new ArgumentOutOfRangeException(paramName, actualValue, message);
+    }
+
+    [DoesNotReturn]
+    public static void ThrowArgumentException(string message, string paramName)
+    {
+        throw new ArgumentException(message, paramName);
+    }
+
+    [DoesNotReturn]
+    public static T ThrowIndexOutOfRangeException<T>()
+    {
+        throw new ArgumentOutOfRangeException("index");
     }
 
     [DoesNotReturn]

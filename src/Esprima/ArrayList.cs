@@ -80,7 +80,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     {
         if (initialCapacity < 0)
         {
-            ThrowArgumentOutOfRangeException<T>(nameof(initialCapacity), initialCapacity, null);
+            ThrowInvalidInitialCapacity();
         }
 
         _items = initialCapacity > 0 ? new T[initialCapacity] : null;
@@ -90,6 +90,12 @@ internal struct ArrayList<T> : IReadOnlyList<T>
         _localVersion = 0;
         _sharedVersion = null;
 #endif
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static void ThrowInvalidInitialCapacity()
+        {
+            ThrowArgumentException("Invalid initial capacity", nameof(initialCapacity));
+        }
     }
 
     /// <remarks>
@@ -108,6 +114,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
     public int Capacity
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             AssertUnchanged();
@@ -119,7 +126,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
             if (value < _count)
             {
-                ThrowArgumentOutOfRangeException<T>(nameof(value), value, null);
+                ThrowArgumentOutOfRangeException(nameof(value), value, null);
             }
             else if (value == (_items?.Length ?? 0))
             {
@@ -166,7 +173,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
                 return _items![index];
             }
 
-            return ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            return ThrowIndexOutOfRangeException<T>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -181,7 +188,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
                 return;
             }
 
-            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            ThrowIndexOutOfRangeException<T>();
         }
     }
 
@@ -275,7 +282,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
         if ((uint) index > (uint) _count)
         {
-            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            ThrowIndexOutOfRangeException<T>();
         }
 
         var capacity = Capacity;
@@ -299,7 +306,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
 
         if ((uint) index >= (uint) _count)
         {
-            ThrowArgumentOutOfRangeException<T>(nameof(index), index, null);
+            ThrowIndexOutOfRangeException<T>();
         }
 
         _count--;

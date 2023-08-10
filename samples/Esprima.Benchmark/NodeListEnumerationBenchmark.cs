@@ -3,10 +3,8 @@ using Esprima.Ast;
 
 namespace Esprima.Benchmark;
 
-[MemoryDiagnoser]
 [RankColumn]
-[CsvExporter]
-[MarkdownExporterAttribute.GitHub]
+[MemoryDiagnoser]
 public class NodeListEnumerationBenchmark
 {
     private const string FileName = "bundle";
@@ -30,7 +28,7 @@ public class NodeListEnumerationBenchmark
     }
 
     [Benchmark]
-    public object For_DirectIndexing()
+    public int For_DirectIndexing()
     {
         var nodeList = _nodeLists[NodeListIndex];
 
@@ -43,7 +41,7 @@ public class NodeListEnumerationBenchmark
     }
 
     [Benchmark]
-    public object For_SpanIndexing()
+    public int For_SpanIndexing()
     {
         var nodeList = _nodeLists[NodeListIndex].AsSpan();
 
@@ -56,7 +54,7 @@ public class NodeListEnumerationBenchmark
     }
 
     [Benchmark]
-    public object ForEach_Span()
+    public int ForEach_Span()
     {
         var nodeList = _nodeLists[NodeListIndex].AsSpan();
 
