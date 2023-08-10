@@ -144,7 +144,7 @@ public sealed partial class Scanner
         _curlyStack.Clear();
         if (_curlyStack.Capacity > 16)
         {
-            _curlyStack = new ArrayList<string>(16);
+            _curlyStack.Capacity = 16;
         }
 
         _sb.Clear();
@@ -517,6 +517,7 @@ public sealed partial class Scanner
     public ReadOnlySpan<Comment> ScanComments()
     {
         var comments = ScanCommentsInternal();
+        comments.TrimExcess();
         return comments.AsSpan();
     }
 

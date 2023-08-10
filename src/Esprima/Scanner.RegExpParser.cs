@@ -185,6 +185,7 @@ partial class Scanner
             }
 
             Debug.Assert(conversionError is null);
+            capturingGroups.TrimExcess();
 
             var options = FlagsToOptions(_flags, compiled: _scanner._regExpParseMode == RegExpParseMode.AdaptToCompiled);
             var matchTimeout = _scanner._regexTimeout;
