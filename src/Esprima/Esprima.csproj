@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="all" />
+    <PackageReference Include="PolySharp" Version="1.13.2" PrivateAssets="all" />
     <PackageReference Include="System.Memory" Version="4.5.4" Condition=" '$(TargetFramework)' != 'netstandard2.1'" />
   </ItemGroup>
 
@@ -34,12 +35,6 @@
 
   <ItemGroup>
     <Using Remove="System.Net.Http" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\Shared\Compatibility\IsExternalInit.cs" Link="Compatibility\IsExternalInit.cs" />
-    <Compile Include="..\Shared\Compatibility\NullableAttributes.cs" Link="Compatibility\NullableAttributes.cs" />
-    <Compile Include="..\Shared\Compatibility\SkipLocalsInitAttribute.cs" Link="Compatibility\SkipLocalsInitAttribute.cs" />
   </ItemGroup>
 
   <!-- For checking generated output-->
@@ -54,5 +49,20 @@
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
     <None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
   </ItemGroup>
+
+  <!-- Configure polyfills -->
+
+  <PropertyGroup>
+    <PolySharpIncludeGeneratedTypes Condition="'$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'">
+      System.Runtime.CompilerServices.IsExternalInit;
+      System.Runtime.CompilerServices.SkipLocalsInitAttribute
+    </PolySharpIncludeGeneratedTypes>
+
+    <PolySharpIncludeGeneratedTypes Condition="'$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'netstandard2.0'">
+      $(PolySharpIncludeGeneratedTypes);
+      System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
+      System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute
+    </PolySharpIncludeGeneratedTypes>
+  </PropertyGroup>
 
 </Project>
