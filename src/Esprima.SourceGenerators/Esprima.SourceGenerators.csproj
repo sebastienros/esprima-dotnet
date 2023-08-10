@@ -13,4 +13,12 @@
     <PackageReference Include="PolySharp" Version="1.13.2" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Configure polyfills -->
+
+  <PropertyGroup>
+    <PolySharpIncludeGeneratedTypes>
+      System.Runtime.CompilerServices.IsExternalInit
+    </PolySharpIncludeGeneratedTypes>
+  </PropertyGroup>
+  
 </Project>
