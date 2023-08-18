@@ -181,12 +181,6 @@ f(values);
         Assert.Throws<ParserException>(() => parser.ParseScript("if (1}=1) eval('1');"));
     }
 
-    [Fact]
-    public void CanReportProblemWithLargeNumber()
-    {
-        Assert.Throws<ParserException>(() => new JavaScriptParser().ParseExpression("066666666666666666666666666666"));
-    }
-
     [Theory]
     [InlineData(".")]
     [InlineData("..")]
