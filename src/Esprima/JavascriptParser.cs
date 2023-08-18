@@ -274,7 +274,7 @@ public partial class JavaScriptParser
         }
         else
         {
-            var comments = _scanner.ScanCommentsInternal().AsSpan();
+            var comments = _scanner.ScanCommentsInternal().AsReadOnlySpan();
 
             for (var i = 0; i < comments.Length; ++i)
             {

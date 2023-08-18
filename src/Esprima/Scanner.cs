@@ -418,7 +418,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(2);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
 
                     start = true;
@@ -430,7 +430,7 @@ public sealed partial class Scanner
                     var comment = SkipMultiLineComment();
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
                 }
                 else
@@ -449,7 +449,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(3);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
                 }
                 else
@@ -473,7 +473,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(4);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
                 }
                 else
@@ -518,7 +518,7 @@ public sealed partial class Scanner
     {
         var comments = ScanCommentsInternal();
         comments.TrimExcess();
-        return comments.AsSpan();
+        return comments.AsReadOnlySpan();
     }
 
     private bool ScanHexEscape(char prefix, out char result)

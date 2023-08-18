@@ -405,7 +405,7 @@ partial class Scanner
                 sb = null;
             }
 
-            var context = new ParsePatternContext(sb, capturingGroups.AsSpan(), capturingGroupNames)
+            var context = new ParsePatternContext(sb, capturingGroups.AsReadOnlySpan(), capturingGroupNames)
             {
                 CapturingGroupCounter = 0,
                 GroupStack = capturingGroupNames is not null
@@ -466,7 +466,7 @@ partial class Scanner
 
                     case '(' when !context.WithinSet:
                         var currentGroupAlternate = capturingGroupNames is not null
-                            ? context.GroupStack.AsSpan().Last().LastAlternate
+                            ? context.GroupStack.AsReadOnlySpan().Last().LastAlternate
                             : null;
 
                         var groupType = DetermineGroupType(i);
@@ -1226,11 +1226,11 @@ partial class Scanner
 
         public readonly RegExpGroupAlternate? Parent;
 
-        public bool IsDefinedGroupName(string value) => _groupNames.AsSpan().BinarySearch(value) >= 0;
+        public bool IsDefinedGroupName(string value) => _groupNames.AsReadOnlySpan().BinarySearch(value) >= 0;
 
         public bool TryAddGroupName(string value)
         {
-            var index = _groupNames.AsSpan().BinarySearch(value);
+            var index = _groupNames.AsReadOnlySpan().BinarySearch(value);
 
             var isDefined = index >= 0;
             var scope = this;
@@ -1265,7 +1265,7 @@ partial class Scanner
                 {
                     foreach (var groupName in _groupNames)
                     {
-                        var index = other._groupNames.AsSpan().BinarySearch(groupName);
+                        var index = other._groupNames.AsReadOnlySpan().BinarySearch(groupName);
                         if (index < 0)
                         {
                             other._groupNames.Insert(~index, groupName);
