@@ -368,7 +368,14 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     /// <remarks>
     /// Items should not be added or removed from the <see cref="ArrayList{T}"/> while the returned <see cref="Span{T}"/> is in use!
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Span<T> AsSpan() => new Span<T>(_items, 0, _count);
+
+    /// <remarks>
+    /// Items should not be added or removed from the <see cref="ArrayList{T}"/> while the returned <see cref="ReadOnlySpan{T}"/> is in use!
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ReadOnlySpan<T> AsReadOnlySpan() => new ReadOnlySpan<T>(_items, 0, _count);
 
 #if NETSTANDARD2_1_OR_GREATER
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -376,7 +383,7 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     public T[] ToArray()
     {
 #if NETSTANDARD2_1_OR_GREATER
-        return AsSpan().ToArray();
+        return AsReadOnlySpan().ToArray();
 #else
         if (_count == 0)
         {

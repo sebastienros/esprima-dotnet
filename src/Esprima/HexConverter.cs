@@ -5,6 +5,8 @@
 
 using System.Runtime.CompilerServices;
 
+namespace System;
+
 internal static class HexConverter
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

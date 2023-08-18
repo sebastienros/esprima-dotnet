@@ -813,25 +813,31 @@ public class AstToJsonConverter : AstVisitor
         using (StartNodeObject(literal))
         {
             _writer.Member("value");
-            var value = literal.Value;
 
-            switch (value)
+            switch (literal.TokenType)
             {
-                case null:
+                case TokenType.NullLiteral:
+                case TokenType.RegularExpression when literal.Value is null:
                     _writer.Null();
                     break;
-                case bool b:
-                    _writer.Boolean(b);
+
+                case TokenType.BooleanLiteral:
+                    _writer.Boolean((bool) literal.Value!);
                     break;
-                case Regex _:
+
+                case TokenType.RegularExpression:
                     _writer.StartObject();
                     _writer.EndObject();
                     break;
-                case double d:
-                    _writer.Number(d);
+
+                case TokenType.NumericLiteral when (double) literal.Value! is var doubleValue
+                    && !double.IsPositiveInfinity(doubleValue):
+
+                    _writer.Number(doubleValue);
                     break;
+
                 default:
-                    _writer.String(System.Convert.ToString(value, CultureInfo.InvariantCulture));
+                    _writer.String(System.Convert.ToString(literal.Value, CultureInfo.InvariantCulture));
                     break;
             }
 

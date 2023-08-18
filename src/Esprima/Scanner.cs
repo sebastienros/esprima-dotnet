@@ -418,7 +418,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(2);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
 
                     start = true;
@@ -430,7 +430,7 @@ public sealed partial class Scanner
                     var comment = SkipMultiLineComment();
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
                 }
                 else
@@ -449,7 +449,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(3);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
                 }
                 else
@@ -473,7 +473,7 @@ public sealed partial class Scanner
                     var comment = SkipSingleLineComment(4);
                     if (_trackComment)
                     {
-                        comments.AddRange(comment.AsSpan());
+                        comments.AddRange(comment.AsReadOnlySpan());
                     }
                 }
                 else
@@ -518,7 +518,7 @@ public sealed partial class Scanner
     {
         var comments = ScanCommentsInternal();
         comments.TrimExcess();
-        return comments.AsSpan();
+        return comments.AsReadOnlySpan();
     }
 
     private bool ScanHexEscape(char prefix, out char result)
@@ -1038,7 +1038,7 @@ ParseIdentifierPart:
 
     private Token ScanHexLiteral(int start)
     {
-        var number = this.ScanLiteralPart(Character.IsHexDigitFunc, allowNumericSeparator: true, out var hasUpperCase);
+        var number = this.ScanLiteralPart(Character.IsHexDigitFunc, allowNumericSeparator: true);
 
         if (number.Length == 0)
         {
@@ -1056,39 +1056,57 @@ ParseIdentifierPart:
             ThrowUnexpectedToken();
         }
 
-        double value = 0;
+        double value;
 
-        if (number.Length < 16)
+        if (number.Length <= 16)
         {
-            value = long.Parse(number.ToParsable(), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
-        }
-        else if (number.Length > 255)
-        {
-            value = double.PositiveInfinity;
+            value = ulong.Parse(number.ToParsable(), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
         }
         else
         {
-            double modulo = 1;
-            var literal = hasUpperCase ? number.ToString().ToLowerInvariant().AsSpan() : number;
-            var length = literal.Length - 1;
-            for (var i = length; i >= 0; i--)
-            {
-                var c = literal[i];
-
-                if (c <= '9')
-                {
-                    value += modulo * (c - '0');
-                }
-                else
-                {
-                    value += modulo * (c - 'a' + 10);
-                }
-
-                modulo *= 16;
-            }
+            value = ParseIntAsDouble(number, fromBase: 16);
         }
 
         return Token.CreateNumericLiteral(value, octal: false, start, end: _index, _lineNumber, _lineStart);
+    }
+
+    private static double ParseIntAsDouble(ReadOnlySpan<char> number, byte fromBase)
+    {
+        double value = 0;
+        double modulo = 1;
+        int i;
+        for (i = number.Length; i > 0;)
+        {
+            var code = number[--i];
+            ushort digitValue;
+
+            if (code >= 'a')
+            {
+                digitValue = (ushort) (code - ('a' - 10));
+            }
+            else if (code >= 'A')
+            {
+                digitValue = (ushort) (code - ('A' - 10));
+            }
+            else if (code is >= '0' and <= '9') // TODO: <= 9 needed?
+            {
+                digitValue = (ushort) (code - '0');
+            }
+            else
+            {
+                Debug.Assert(false, $"Invalid digit in number: U+{(ushort) code:X4}");
+                break;
+            }
+
+            Debug.Assert(digitValue < fromBase, $"Invalid digit in number: U+{(ushort) code:X4}");
+
+            value += modulo * digitValue;
+            modulo *= fromBase;
+        }
+
+        Debug.Assert(i == 0, $"Invalid number: {number.ToString()}");
+
+        return value;
     }
 
     private enum JavaScriptNumberStyle
@@ -1102,13 +1120,13 @@ ParseIdentifierPart:
     private Token ScanBigIntLiteral(int start, ReadOnlySpan<char> number, JavaScriptNumberStyle style)
     {
         BigInteger bigInt = 0;
-        if (style == JavaScriptNumberStyle.Binary)
+        if (style is JavaScriptNumberStyle.Binary or JavaScriptNumberStyle.Octal)
         {
-            // binary
+            var shift = style is JavaScriptNumberStyle.Binary ? 1 : 3;
             foreach (var c in number)
             {
-                bigInt <<= 1;
-                bigInt += c == '1' ? BigInteger.One : BigInteger.Zero;
+                bigInt <<= shift;
+                bigInt += c - '0';
             }
         }
         else
@@ -1139,7 +1157,7 @@ ParseIdentifierPart:
 
     private Token ScanBinaryLiteral(int start)
     {
-        var number = this.ScanLiteralPart(static c => c is '0' or '1', allowNumericSeparator: true, out _);
+        var number = this.ScanLiteralPart(static c => c is '0' or '1', allowNumericSeparator: true);
 
         if (number.Length == 0)
         {
@@ -1162,8 +1180,17 @@ ParseIdentifierPart:
             }
         }
 
-        var numberString = number.ToString();
-        var value = Convert.ToUInt32(numberString, 2);
+        double value;
+
+        if (number.Length <= 64)
+        {
+            value = Convert.ToUInt64(number.ToString(), fromBase: 2);
+        }
+        else
+        {
+            value = ParseIntAsDouble(number, fromBase: 2);
+        }
+
         return Token.CreateNumericLiteral(value, octal: false, start, end: _index, _lineNumber, _lineStart);
     }
 
@@ -1182,7 +1209,7 @@ ParseIdentifierPart:
             ++_index;
         }
 
-        sb.Append(this.ScanLiteralPart(Character.IsOctalDigitFunc, allowNumericSeparator: true, out _));
+        sb.Append(this.ScanLiteralPart(Character.IsOctalDigitFunc, allowNumericSeparator: !isLegacyOctalDigital));
         var number = sb.ToString();
 
         if (!octal && number.Length == 0)
@@ -1209,17 +1236,18 @@ ParseIdentifierPart:
             ThrowUnexpectedToken();
         }
 
-        ulong numericValue;
-        try
+        double value;
+
+        if (number.Length <= 21) // = Floor(Log8(Pow(2, 64))
         {
-            numericValue = Convert.ToUInt64(number, 8);
+            value = Convert.ToUInt64(number.ToString(), fromBase: 8);
         }
-        catch (OverflowException)
+        else
         {
-            return ThrowUnexpectedToken<Token>($"Value {number} was either too large or too small for a UInt64.");
+            value = ParseIntAsDouble(number.AsSpan(), fromBase: 8);
         }
 
-        return Token.CreateNumericLiteral(numericValue, octal, start, end: _index, _lineNumber, _lineStart);
+        return Token.CreateNumericLiteral(value, octal, start, end: _index, _lineNumber, _lineStart);
     }
 
     private bool IsImplicitOctalLiteral()
@@ -1243,9 +1271,8 @@ ParseIdentifierPart:
         return true;
     }
 
-    private ReadOnlySpan<char> ScanLiteralPart(Func<char, bool> check, bool allowNumericSeparator, out bool hasUpperCase)
+    private ReadOnlySpan<char> ScanLiteralPart(Func<char, bool> check, bool allowNumericSeparator)
     {
-        hasUpperCase = false;
         var start = _index;
 
         var charCode = _source.CharCodeAt(_index);
@@ -1265,8 +1292,6 @@ ParseIdentifierPart:
                 }
                 needsCleanup = true;
             }
-
-            hasUpperCase |= char.IsUpper(charCode);
 
             _index++;
             var newCharCode = _source.CharCodeAt(_index);
@@ -1310,7 +1335,8 @@ ParseIdentifierPart:
         //    'Numeric literal must start with a decimal digit or a decimal point');
 
         var nonOctal = false;
-        if (ch != '.')
+        var startsWithDot = ch == '.';
+        if (!startsWithDot)
         {
             var first = _source[_index++];
             ch = _source.CharCodeAt(_index);
@@ -1362,14 +1388,14 @@ ParseIdentifierPart:
             }
 
             --_index;
-            sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal, out _));
+            sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal));
             ch = _source.CharCodeAt(_index);
         }
 
         if (ch == '.')
         {
             sb.Append(_source[_index++]);
-            sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal, out _));
+            sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: !nonOctal));
             ch = _source.CharCodeAt(_index);
         }
 
@@ -1385,7 +1411,7 @@ ParseIdentifierPart:
 
             if (Character.IsDecimalDigit(_source.CharCodeAt(_index)))
             {
-                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: true, out _));
+                sb.Append(this.ScanLiteralPart(Character.IsDecimalDigitFunc, allowNumericSeparator: true));
             }
             else
             {
@@ -1394,7 +1420,7 @@ ParseIdentifierPart:
         }
         else if (ch == 'n')
         {
-            if (nonOctal)
+            if (nonOctal || startsWithDot)
             {
                 ThrowUnexpectedToken();
             }

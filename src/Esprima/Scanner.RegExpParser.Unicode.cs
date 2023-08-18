@@ -157,7 +157,7 @@ partial class Scanner
 
                     CodePointRange.NormalizeRanges(ref context.UnicodeSet);
 
-                    AppendSet(sb, context.UnicodeSet.AsSpan(), isInverted: pattern.CharCodeAt(context.SetStartIndex + 1) == '^');
+                    AppendSet(sb, context.UnicodeSet.AsReadOnlySpan(), isInverted: pattern.CharCodeAt(context.SetStartIndex + 1) == '^');
 
                     context.UnicodeSet = default;
                 }
@@ -242,7 +242,7 @@ partial class Scanner
 
                 if (isInverted)
                 {
-                    astralRanges = CodePointRange.InvertRanges(astralRanges.AsSpan(), start: char.MaxValue + 1);
+                    astralRanges = CodePointRange.InvertRanges(astralRanges.AsReadOnlySpan(), start: char.MaxValue + 1);
                 }
 
                 // 3. Lone surrogates need special care: we need to handle ranges which contains surrogates separately
@@ -308,8 +308,8 @@ partial class Scanner
                 if (isInverted)
                 {
                     bmpRanges.Add(new CodePointRange(0xD800, 0xDFFF));
-                    loneHighSurrogateRanges = CodePointRange.InvertRanges(loneHighSurrogateRanges.AsSpan(), start: 0xD800, end: 0xDBFF);
-                    loneLowSurrogateRanges = CodePointRange.InvertRanges(loneLowSurrogateRanges.AsSpan(), start: 0xDC00, end: 0xDFFF);
+                    loneHighSurrogateRanges = CodePointRange.InvertRanges(loneHighSurrogateRanges.AsReadOnlySpan(), start: 0xD800, end: 0xDBFF);
+                    loneLowSurrogateRanges = CodePointRange.InvertRanges(loneLowSurrogateRanges.AsReadOnlySpan(), start: 0xDC00, end: 0xDFFF);
                 }
 
                 // 4. Append ranges
@@ -911,7 +911,7 @@ partial class Scanner
                                 }
 
                                 categoryRangeSpan = ch == 'P'
-                                    ? CodePointRange.InvertRanges(categoryRanges).AsSpan()
+                                    ? CodePointRange.InvertRanges(categoryRanges).AsReadOnlySpan()
                                     : categoryRanges;
                             }
                             else
