@@ -274,12 +274,8 @@ public partial class JavaScriptParser
         }
         else
         {
-            var comments = _scanner.ScanCommentsInternal().AsReadOnlySpan();
-
-            for (var i = 0; i < comments.Length; ++i)
+            foreach (var e in _scanner.ScanCommentsInternal().AsReadOnlySpan())
             {
-                var e = comments[i];
-
                 var value = _scanner._source.AsSpan(e.Slice.Start, e.Slice.Length)
                     .ToInternedString(ref _scanner._stringPool, Scanner.NonIdentifierInterningThreshold);
 

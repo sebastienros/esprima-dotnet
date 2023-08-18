@@ -77,8 +77,10 @@ public readonly struct NodeList<T> : IReadOnlyList<T> where T : Node?
         return new NodeList<TTo>((TTo[]?) (object?) _items, _count);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<T> AsSpan() => new ReadOnlySpan<T>(_items, 0, _count);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(_items, 0, _count);
 
 #if NETSTANDARD2_1_OR_GREATER
