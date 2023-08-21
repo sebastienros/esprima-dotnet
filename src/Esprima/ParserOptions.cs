@@ -40,16 +40,6 @@ public record class ParserOptions
     public ErrorHandler ErrorHandler { get => _scannerOptions._errorHandler; init => _scannerOptions._errorHandler = value; }
 
     /// <summary>
-    /// Gets or sets whether the Regular Expression syntax should be converted to a .NET compatible one, defaults to <see langword="true"/>.
-    /// </summary>
-    [Obsolete($"This property is planned to be removed from the next stable version. Please use the {nameof(RegExpParseMode)} property instead.")]
-    public bool AdaptRegexp
-    {
-        get => _scannerOptions.AdaptRegexp;
-        init => _scannerOptions._regExpParseMode = value ? RegExpParseMode.AdaptToInterpreted : RegExpParseMode.Skip;
-    }
-
-    /// <summary>
     /// Gets or sets how regular expressions should be parsed, defaults to <see cref="RegExpParseMode.AdaptToInterpreted"/>.
     /// </summary>
     public RegExpParseMode RegExpParseMode { get => _scannerOptions._regExpParseMode; init => _scannerOptions._regExpParseMode = value; }
