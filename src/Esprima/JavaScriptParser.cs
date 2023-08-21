@@ -2099,7 +2099,7 @@ public partial class JavaScriptParser
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
         var op = NextToken().Value;
-        expr = Finalize(marker, new UpdateExpression((string)op!, expr, prefix: false));
+        expr = Finalize(marker, new UpdateExpression((string) op!, expr, prefix: false));
         return expr;
     }
 
@@ -2117,7 +2117,7 @@ public partial class JavaScriptParser
             TolerateError(Messages.InvalidLHSInAssignment);
         }
 
-        expr = Finalize(marker, new UpdateExpression((string)token.Value!, expr, prefix: true));
+        expr = Finalize(marker, new UpdateExpression((string) token.Value!, expr, prefix: true));
         _context.IsAssignmentTarget = false;
         _context.IsBindingElement = false;
         return expr;

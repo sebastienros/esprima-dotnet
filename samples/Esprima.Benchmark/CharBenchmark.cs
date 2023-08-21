@@ -8,8 +8,8 @@ namespace Esprima.Benchmark;
 [MemoryDiagnoser]
 public class CharBenchmark
 {
-    private static char[] _asciiRange;
-    private static char[] _fullRange;
+    private static readonly char[] _asciiRange;
+    private static readonly char[] _fullRange;
 
     static CharBenchmark()
     {
