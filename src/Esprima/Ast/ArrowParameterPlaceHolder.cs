@@ -8,6 +8,8 @@ namespace Esprima.Ast;
 /// </remarks>
 internal sealed class ArrowParameterPlaceHolder : Expression
 {
+    public const Nodes NodeType = (Nodes) int.MinValue;
+
     public static readonly ArrowParameterPlaceHolder Empty = new(new NodeList<Node>(), false);
 
     private readonly NodeList<Node> _params;
@@ -15,7 +17,7 @@ internal sealed class ArrowParameterPlaceHolder : Expression
     public ArrowParameterPlaceHolder(
         in NodeList<Node> parameters,
         bool async) :
-        base(Nodes.ArrowParameterPlaceHolder)
+        base(NodeType)
     {
         Async = async;
         _params = parameters;
