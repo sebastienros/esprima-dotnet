@@ -620,24 +620,91 @@ class X {
         const string code = "await import('x')";
 
         var parser = new JavaScriptParser();
-        Func<JavaScriptParser, Node> parseAction = sourceType switch
-        {
-            "script" => parser => parser.ParseScript(code),
-            "module" => parser => parser.ParseModule(code),
-            "expression" => parser => parser.ParseExpression(code),
-            _ => throw new InvalidOperationException()
-        };
+        var parseAction = GetParseActionFor(sourceType);
 
         if (!shouldThrow)
         {
-            var node = parseAction(parser);
+            var node = parseAction(parser, code);
             var awaitExpression = node.DescendantNodesAndSelf().OfType<AwaitExpression>().FirstOrDefault();
             Assert.NotNull(awaitExpression);
             Assert.IsType<ImportExpression>(awaitExpression.Argument);
         }
         else
         {
-            Assert.Throws<ParserException>(() => parseAction(parser));
+            Assert.Throws<ParserException>(() => parseAction(parser, code));
         }
+    }
+
+    [Theory]
+    [InlineData("script", false)]
+    [InlineData("module", true)]
+    [InlineData("expression", false)]
+    public void ShouldAllowLetKeywordInYieldExpression(string sourceType, bool shouldThrow)
+    {
+        // See also: https://github.com/sebastienros/esprima-dotnet/issues/403
+
+        const string code = "function* f(x) { yield let }";
+
+        var parser = new JavaScriptParser();
+        var parseAction = GetParseActionFor(sourceType);
+
+        if (!shouldThrow)
+        {
+            var node = parseAction(parser, code);
+            var yieldExpression = node.DescendantNodesAndSelf().OfType<YieldExpression>().FirstOrDefault();
+            Assert.NotNull(yieldExpression);
+            Assert.IsType<Identifier>(yieldExpression.Argument);
+            Assert.Equal("let", yieldExpression.Argument.As<Identifier>().Name);
+        }
+        else
+        {
+            Assert.Throws<ParserException>(() => parseAction(parser, code));
+        }
+    }
+
+    [Theory]
+    [InlineData("script")]
+    [InlineData("module")]
+    [InlineData("expression")]
+    public void ShouldAllowImportExpressionInYieldExpression(string sourceType)
+    {
+        // See also: https://github.com/sebastienros/esprima-dotnet/issues/403
+
+        const string code = "function* f(x) { yield import(x) }";
+
+        var parser = new JavaScriptParser();
+        var parseAction = GetParseActionFor(sourceType);
+
+        var node = parseAction(parser, code);
+        var yieldExpression = node.DescendantNodesAndSelf().OfType<YieldExpression>().FirstOrDefault();
+        Assert.NotNull(yieldExpression);
+        Assert.IsType<ImportExpression>(yieldExpression.Argument);
+    }
+
+    [Theory]
+    [InlineData("script")]
+    [InlineData("module")]
+    [InlineData("expression")]
+    public void ShouldDisallowImportKeywordInYieldExpression(string sourceType)
+    {
+        // See also: https://github.com/sebastienros/esprima-dotnet/issues/403
+
+        const string code = "function* f(x) { yield import }";
+
+        var parser = new JavaScriptParser();
+        var parseAction = GetParseActionFor(sourceType);
+
+        Assert.Throws<ParserException>(() => parseAction(parser, code));
+    }
+
+    private static Func<JavaScriptParser, string, Node> GetParseActionFor(string sourceType)
+    {
+        return sourceType switch
+        {
+            "script" => (parser, code) => parser.ParseScript(code),
+            "module" => (parser, code) => parser.ParseModule(code),
+            "expression" => (parser, code) => parser.ParseExpression(code),
+            _ => throw new InvalidOperationException()
+        };
     }
 }
