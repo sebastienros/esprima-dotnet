@@ -268,6 +268,7 @@ public class ScannerTests
     [InlineData("17n", true, "17")]
     [InlineData("17.", true, "17")]
     [InlineData("17.1", true, "17.1")]
+    [InlineData("17.1n", true, null)]
     [InlineData("17e", false, null)]
     [InlineData("17.e", false, null)]
     [InlineData("17e2", true, "1700")]
