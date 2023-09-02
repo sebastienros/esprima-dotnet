@@ -1335,8 +1335,8 @@ ParseIdentifierPart:
         //    'Numeric literal must start with a decimal digit or a decimal point');
 
         var nonOctal = false;
-        var startsWithDot = ch == '.';
-        if (!startsWithDot)
+        string number;
+        if (ch != '.')
         {
             var first = _source[_index++];
             ch = _source.CharCodeAt(_index);
@@ -1420,13 +1420,14 @@ ParseIdentifierPart:
         }
         else if (ch == 'n')
         {
-            if (nonOctal || startsWithDot)
+            number = sb.ToString();
+            if (nonOctal || number.IndexOf('.') >= 0)
             {
                 ThrowUnexpectedToken();
             }
 
             _index++;
-            return ScanBigIntLiteral(start, sb.ToString().AsSpan(), JavaScriptNumberStyle.Integer);
+            return ScanBigIntLiteral(start, number.AsSpan(), JavaScriptNumberStyle.Integer);
         }
 
         if (Character.IsIdentifierStart(_source.CharCodeAt(_index)))
@@ -1434,7 +1435,7 @@ ParseIdentifierPart:
             ThrowUnexpectedToken();
         }
 
-        var number = sb.ToString();
+        number = sb.ToString();
 
         double value;
         if (long.TryParse(
