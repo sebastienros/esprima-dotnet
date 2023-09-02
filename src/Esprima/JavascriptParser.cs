@@ -4625,7 +4625,7 @@ public partial class JavaScriptParser
     [StringMatcher("[", "(", "{", "+", "-", "!", "~", "++", "--", "/", "/=")]
     private static partial bool IsPunctuatorExpressionStart(string input);
 
-    [StringMatcher("class", "delete", "function", "let", "new", "super", "this", "typeof", "void", "yield")]
+    [StringMatcher("class", "delete", "function", "import", "new", "super", "this", "typeof", "void", "yield")]
     private static partial bool IsKeywordExpressionStart(string input);
 
     private protected virtual bool IsStartOfExpression()
@@ -4643,7 +4643,7 @@ public partial class JavaScriptParser
         }
         else if (_lookahead.Type == TokenType.Keyword)
         {
-            start = IsKeywordExpressionStart(value);
+            start = IsKeywordExpressionStart(value) || !_context.IsModule && value == "let";
         }
 
         return start;
