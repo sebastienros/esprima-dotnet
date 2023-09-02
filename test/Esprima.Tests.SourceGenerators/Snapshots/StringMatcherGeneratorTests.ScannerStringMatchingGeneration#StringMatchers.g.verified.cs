@@ -112,12 +112,7 @@ public partial class JavaScriptParser
         {
             case 3:
             {
-                return input[0] switch
-                {
-                    'l' => input == "let",
-                    'n' => input == "new",
-                    _ => false
-                };
+                return input == "new";
             }
             case 4:
             {
@@ -143,6 +138,7 @@ public partial class JavaScriptParser
                 return input[0] switch
                 {
                     'd' => input == "delete",
+                    'i' => input == "import",
                     't' => input == "typeof",
                     _ => false
                 };
