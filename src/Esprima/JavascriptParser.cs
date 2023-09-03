@@ -2504,7 +2504,7 @@ public partial class JavaScriptParser
             case Nodes.Identifier:
                 parameters = new ArrayList<Node>(new Node[] { expr });
                 break;
-            case Nodes.ArrowParameterPlaceHolder:
+            case ArrowParameterPlaceHolder.NodeType:
                 // TODO clean-up
                 var arrowParameterPlaceHolder = expr.As<ArrowParameterPlaceHolder>();
                 parameters = ArrayList.Create(arrowParameterPlaceHolder.Params);
@@ -2606,7 +2606,7 @@ public partial class JavaScriptParser
                 }
             }
 
-            if (expr.Type == Nodes.ArrowParameterPlaceHolder || Match("=>"))
+            if (expr.Type == ArrowParameterPlaceHolder.NodeType || Match("=>"))
             {
                 // https://tc39.github.io/ecma262/#sec-arrow-function-definitions
                 _context.IsAssignmentTarget = false;

@@ -81,7 +81,7 @@ public class AstTreeWalkBenchmark
                     if (type == Nodes.FunctionDeclaration
                         || type == Nodes.FunctionExpression
                         || type == Nodes.ArrowFunctionExpression
-                        || type == Nodes.ArrowParameterPlaceHolder)
+                        || type == ArrowParameterPlaceHolder.NodeType)
                     {
                         _functionCount++;
                     }

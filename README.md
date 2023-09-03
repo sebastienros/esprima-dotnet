@@ -13,10 +13,14 @@ parser (also popularly known as
 
 ### Features
 
-- Full support for ECMAScript 2019 ([ECMA-262 10th Edition](http://www.ecma-international.org/publications/standards/Ecma-262.htm))
-- Sensible [syntax tree format](https://github.com/estree/estree/blob/master/es5.md) which follows the standard established by the [ESTree project](https://github.com/estree/estree)
+- Full support for ECMAScript 2022 ([ECMA-262 13th Edition](http://www.ecma-international.org/publications/standards/Ecma-262.htm))
+- Support for a few upcoming (stage 3+ proposal) ECMAScript features:
+  - [Decorators](https://github.com/tc39/proposal-decorators),
+  - [Import attributes](https://github.com/tc39/proposal-import-attributes),
+  - [Duplicate named capturing groups in regular expressions](https://github.com/tc39/proposal-duplicate-named-capturing-groups).
 - Experimental support for [JSX](https://facebook.github.io/jsx/), a syntax extension for [React](https://facebook.github.io/react/)
-- Optional tracking of syntax node location (index-based and line-column)
+- Sensible [syntax tree format](https://github.com/estree/estree/blob/master/es5.md), which is based on the standard established by the [ESTree project](https://github.com/estree/estree)
+- Tracking of syntax node location (index-based and line-column)
 - Heavily tested
 
 ### API
@@ -30,7 +34,7 @@ var parser = new JavaScriptParser();
 var program = parser.ParseScript("const answer = 42");
 ```
 
-You can control the behavior of the parser by initializing and passing a `ParserOptions` to the parser's constructor. (For the available options, see the XML comments of the `ParserOptions` class.)
+You can control the behavior of the parser by initializing and passing a `ParserOptions` to the parser's constructor. (For the available options, see the XML documentation of the `ParserOptions` class.)
 
 Instead of `ParseScript`, you may use `ParseModule` or `ParseExpression` to make the parser treat the input as an ES6 module or as a plain JavaScript expression respectively.
 
@@ -85,12 +89,12 @@ Considering the example above this call will return the following JSON:
 Here is a list of common JavaScript libraries and the time it takes to parse them, 
 compared to the time it took for the same script using the original Esprima in Chrome.
 
-| Script | Size | Esprima .NET | Esprima (Chrome) |
-| --- | --- | --- | --- |
-| underscore-1.5.2 | 43 KB | 2.4 ms | 3.1 ms |
-| backbone-1.1.0 | 60 KB | 2.9 ms | 3.5 ms |
-| mootools-1.4.5 | 163 KB | 18.7 ms | 16.2 ms | 
-| jquery-1.9.1 | 271 KB | 22.8 ms | 19.0 ms |
-| yui-3.12.0| 341 KB | 17.2 ms | 16.2 ms |
-| jquery.mobile-1.4.2 | 456 K | 43.3 ms | 46.9 ms | 
-| angular-1.2.5 | 721 KB | 29.3 ms | 37.2 ms |
+| Script              | Size   | Esprima .NET (.NET 6) | Esprima (Chrome 116) |
+| ------------------- | ------ | ----------------------| -------------------- |
+| underscore-1.5.2    | 43 KB  | 1.0 ms                | 1.4 ms               |
+| backbone-1.1.0      | 59 KB  | 1.2 ms                | 1.6 ms               |
+| mootools-1.4.5      | 157 KB | 5.2 ms                | 7.1 ms               | 
+| jquery-1.9.1        | 262 KB | 6.6 ms                | 7.9 ms               |
+| yui-3.12.0          | 330 KB | 4.6 ms                | 6.9 ms               |
+| jquery.mobile-1.4.2 | 442 KB | 10.0 ms               | 17.7 ms              | 
+| angular-1.2.5       | 702 KB | 8.5 ms                | 15.1 ms              |
