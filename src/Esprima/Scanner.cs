@@ -1470,6 +1470,9 @@ ParseIdentifierPart:
     private Token ScanStringLiteral(bool strict)
     {
         var start = _index;
+        var startLineNumber = _lineNumber;
+        var startLineStart = _lineStart;
+
         var quote = _source[start];
         //assert((quote == '\'' || quote == '"'),
         //    'String literal must starts with a quote');
@@ -1575,7 +1578,7 @@ ParseIdentifierPart:
                 else
                 {
                     ++_lineNumber;
-                    if (ch == '\r' && _source[_index] == '\n')
+                    if (ch == '\r' && _source.CharCodeAt(_index) == '\n')
                     {
                         ++_index;
                     }
@@ -1585,7 +1588,17 @@ ParseIdentifierPart:
             }
             else if (Character.IsLineTerminator(ch))
             {
-                break;
+                // Since ES2019, line and paragraph separators are allowed in string literals.
+                if (ch is '\u2028' or '\u2029')
+                {
+                    ++_lineNumber;
+                    _lineStart = _index;
+                    str.Append(ch);
+                }
+                else
+                {
+                    break;
+                }
             }
             else
             {
@@ -1596,6 +1609,8 @@ ParseIdentifierPart:
         if (quote != char.MinValue)
         {
             _index = start;
+            _lineNumber = startLineNumber;
+            _lineStart = startLineStart;
             ThrowUnexpectedToken();
         }
 
@@ -1606,7 +1621,7 @@ ParseIdentifierPart:
 
     private Token ScanTemplate()
     {
-        var cooked = GetStringBuilder();
+        var sb = GetStringBuilder();
         var terminated = false;
         var start = _index;
 
@@ -1615,11 +1630,14 @@ ParseIdentifierPart:
         char notEscapeSequenceHead = default;
         var rawOffset = 2;
 
+        var containsCR = false;
+
         ++_index;
 
+        char ch;
         while (!Eof())
         {
-            var ch = _source[_index++];
+            ch = _source[_index++];
             if (ch == '`')
             {
                 rawOffset = 1;
@@ -1637,7 +1655,7 @@ ParseIdentifierPart:
                     break;
                 }
 
-                cooked.Append(ch);
+                sb.Append(ch);
             }
             else if (notEscapeSequenceHead != default)
             {
@@ -1651,13 +1669,13 @@ ParseIdentifierPart:
                     switch (ch)
                     {
                         case 'n':
-                            cooked.Append("\n");
+                            sb.Append("\n");
                             break;
                         case 'r':
-                            cooked.Append("\r");
+                            sb.Append("\r");
                             break;
                         case 't':
-                            cooked.Append("\t");
+                            sb.Append("\t");
                             break;
                         case 'u':
                             if (_source[_index] == '{')
@@ -1669,7 +1687,7 @@ ParseIdentifierPart:
                                 }
                                 else
                                 {
-                                    cooked.AppendCodePoint(cp);
+                                    sb.AppendCodePoint(cp);
                                 }
                             }
                             else
@@ -1680,7 +1698,7 @@ ParseIdentifierPart:
                                 }
                                 else
                                 {
-                                    cooked.Append(unescapedChar);
+                                    sb.Append(unescapedChar);
                                 }
                             }
 
@@ -1692,18 +1710,18 @@ ParseIdentifierPart:
                             }
                             else
                             {
-                                cooked.Append(unescaped2);
+                                sb.Append(unescaped2);
                             }
 
                             break;
                         case 'b':
-                            cooked.Append("\b");
+                            sb.Append("\b");
                             break;
                         case 'f':
-                            cooked.Append("\f");
+                            sb.Append("\f");
                             break;
                         case 'v':
-                            cooked.Append("\v");
+                            sb.Append("\v");
                             break;
 
                         default:
@@ -1716,7 +1734,7 @@ ParseIdentifierPart:
                                 }
                                 else
                                 {
-                                    cooked.Append("\0");
+                                    sb.Append("\0");
                                 }
                             }
                             else if (Character.IsDecimalDigit(ch))
@@ -1726,7 +1744,7 @@ ParseIdentifierPart:
                             }
                             else
                             {
-                                cooked.Append(ch);
+                                sb.Append(ch);
                             }
 
                             break;
@@ -1735,9 +1753,13 @@ ParseIdentifierPart:
                 else
                 {
                     ++_lineNumber;
-                    if (ch == '\r' && _source[_index] == '\n')
+                    if (ch == '\r')
                     {
-                        ++_index;
+                        containsCR = true;
+                        if (_source.CharCodeAt(_index) == '\n')
+                        {
+                            ++_index;
+                        }
                     }
 
                     _lineStart = _index;
@@ -1746,17 +1768,24 @@ ParseIdentifierPart:
             else if (Character.IsLineTerminator(ch))
             {
                 ++_lineNumber;
-                if (ch == '\r' && _source[_index] == '\n')
+
+                if (ch == '\r')
                 {
-                    ++_index;
+                    containsCR = true;
+                    if (_source.CharCodeAt(_index) == '\n')
+                    {
+                        ++_index;
+                    }
+                    ch = '\n';
                 }
+                // U+2028 and U+2029 are not normalized to \n.
 
                 _lineStart = _index;
-                cooked.Append("\n");
+                sb.Append(ch);
             }
             else
             {
-                cooked.Append(ch);
+                sb.Append(ch);
             }
         }
 
@@ -1770,12 +1799,40 @@ ParseIdentifierPart:
             _curlyStack.RemoveAt(_curlyStack.Count - 1);
         }
 
+        var value = notEscapeSequenceHead == default ? sb.ToString() : null;
+
         var startRaw = start + 1;
         var endRaw = _index - rawOffset;
-        var rawTemplate = _source.AsSpan(startRaw, endRaw - startRaw).ToInternedString(ref _stringPool, NonIdentifierInterningThreshold);
-        var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
+        var rawTemplate = _source.AsSpan(startRaw, endRaw - startRaw);
+        if (containsCR)
+        {
+            // \r and \r\n are normalized to \n in raw strings as well.
 
-        return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: _index, _lineNumber, _lineStart);
+            sb.Clear();
+            if (sb.Capacity < rawTemplate.Length)
+            {
+                sb.Capacity = rawTemplate.Length;
+            }
+
+            for (var i = 0; i < rawTemplate.Length; i++)
+            {
+                ch = rawTemplate[i];
+                if (ch == '\r')
+                {
+                    if (i + 1 < rawTemplate.Length && rawTemplate[i + 1] == '\n')
+                    {
+                        i++;
+                    }
+                    ch = '\n';
+                }
+                sb.Append(ch);
+            }
+
+            rawTemplate = sb.ToString().AsSpan();
+        }
+
+        return Token.CreateTemplate(cooked: value, rawTemplate.ToInternedString(ref _stringPool, NonIdentifierInterningThreshold),
+            head, tail, notEscapeSequenceHead, start, end: _index, _lineNumber, _lineStart);
     }
 
     /// <summary>

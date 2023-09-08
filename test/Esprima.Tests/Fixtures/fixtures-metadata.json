@@ -776,10 +776,8 @@
       "ES6/super-property/super_member.js",
       "ES6/template-literals/after-switch.js",
       "ES6/template-literals/dollar-sign.js",
-      "ES6/template-literals/escape-sequences.source.js",
       "ES6/template-literals/invalid-escape.js",
       "ES6/template-literals/invalid-hex-escape-sequence.js",
-      "ES6/template-literals/line-terminators.source.js",
       "ES6/template-literals/literal-escape-sequences.source.js",
       "ES6/template-literals/nested-function-with-object-pattern.js",
       "ES6/template-literals/new-expression.js",
@@ -1711,6 +1709,8 @@
     "files": [
       "ES6/identifier/invalid_expression_await.module.js",
       "ES6/identifier/module_await.js",
+      "ES6/template-literals/escape-sequences.source.js",
+      "ES6/template-literals/line-terminators.source.js",
       "expression/primary/literal/regular-expression/migrated_0006.source.js" // false negative
     ]
   },
