@@ -460,9 +460,9 @@ public sealed partial class Scanner
             else if (ch == 0x3C)
             {
                 // U+003C is '<'
-                if (_source[_index + 1] == '!'
-                    && _source[_index + 2] == '-'
-                    && _source[_index + 3] == '-')
+                if (_source.CharCodeAt(_index + 1) == '!'
+                    && _source.CharCodeAt(_index + 2) == '-'
+                    && _source.CharCodeAt(_index + 3) == '-')
                 {
                     if (_isModule)
                     {
@@ -483,7 +483,7 @@ public sealed partial class Scanner
             }
             else if (_index == 0 && ch == '#')
             {
-                if (_source[_index + 1] != '!')
+                if (_source.CharCodeAt(_index + 1) != '!')
                 {
                     ThrowUnexpectedToken();
                 }
@@ -825,7 +825,7 @@ ParseIdentifierPart:
 
     private bool TryGetEscapedSurrogate(char highSurrogate, out int cp)
     {
-        if (_source[_index] == '\\' && _source.CharCodeAt(_index + 1) == 'u')
+        if (_index + 1 < _source.Length && _source[_index] == '\\' && _source[_index + 1] == 'u')
         {
             _index += 2;
             if (ScanHexEscape('u', out var lowSurrogate) && char.IsLowSurrogate(lowSurrogate))
@@ -851,7 +851,7 @@ ParseIdentifierPart:
 
             // 3 digits are only allowed when string starts
             // with 0, 1, 2, 3
-            if (ch >= '0' && ch <= '3' && !Eof() && Character.IsOctalDigit(_source.CharCodeAt(_index)))
+            if (ch >= '0' && ch <= '3' && !Eof() && Character.IsOctalDigit(_source[_index]))
             {
                 code = code * 8 + OctalValue(_source[_index++]);
                 length++;
@@ -953,10 +953,10 @@ ParseIdentifierPart:
 
             case '?':
                 ++_index;
-                if (_source[_index] == '?')
+                if (_source.CharCodeAt(_index) == '?')
                 {
                     ++_index;
-                    if (_source[_index] == '=')
+                    if (_source.CharCodeAt(_index) == '=')
                     {
                         ++_index;
                         str = "??=";
@@ -967,7 +967,7 @@ ParseIdentifierPart:
                     }
                 }
 
-                if (_source[_index] == '.' && !char.IsDigit(_source[_index + 1]))
+                if (_source.CharCodeAt(_index) == '.' && !char.IsDigit(_source.CharCodeAt(_index + 1)))
                 {
                     // "?." in "foo?.3:0" should not be treated as optional chaining.
                     // See https://github.com/tc39/proposal-optional-chaining#notes
@@ -979,7 +979,7 @@ ParseIdentifierPart:
 
             case '#':
                 ++_index;
-                if (_source.Length >= _index + 1 && _source[_index] == '!')
+                if (_source.CharCodeAt(_index) == '!')
                 {
                     _index += 1;
                     str = "#!";
@@ -1483,7 +1483,7 @@ ParseIdentifierPart:
 
         while (!Eof())
         {
-            var ch = _index < _source.Length ? _source[_index] : char.MinValue;
+            var ch = _source[_index];
             _index++;
 
             if (ch == quote)
@@ -1493,14 +1493,18 @@ ParseIdentifierPart:
             }
             else if (ch == '\\')
             {
-                ch = _index < _source.Length ? _source[_index] : char.MinValue;
+                if (_index >= _source.Length)
+                {
+                    break;
+                }
+                ch = _source[_index];
                 _index++;
-                if (ch == char.MinValue || !Character.IsLineTerminator(ch))
+                if (!Character.IsLineTerminator(ch))
                 {
                     switch (ch)
                     {
                         case 'u':
-                            if (_index < _source.Length && _source[_index] == '{')
+                            if (_source.CharCodeAt(_index) == '{')
                             {
                                 ++_index;
                                 str.AppendCodePoint(ScanUnicodeCodePointEscape());
@@ -1553,7 +1557,7 @@ ParseIdentifierPart:
                             break;
 
                         default:
-                            if (ch != char.MinValue && Character.IsOctalDigit(ch))
+                            if (Character.IsOctalDigit(ch))
                             {
                                 var octToDec = OctalToDecimal(ch, out var length);
 
@@ -1648,7 +1652,7 @@ ParseIdentifierPart:
             }
             else if (ch == '$')
             {
-                if (_source[_index] == '{')
+                if (_source.CharCodeAt(_index) == '{')
                 {
                     _curlyStack.Add("${");
                     ++_index;
@@ -1664,6 +1668,10 @@ ParseIdentifierPart:
             }
             else if (ch == '\\')
             {
+                if (_index >= _source.Length)
+                {
+                    break;
+                }
                 ch = _source[_index++];
                 if (!Character.IsLineTerminator(ch))
                 {
@@ -1679,7 +1687,7 @@ ParseIdentifierPart:
                             sb.Append("\t");
                             break;
                         case 'u':
-                            if (_source[_index] == '{')
+                            if (_source.CharCodeAt(_index) == '{')
                             {
                                 ++_index;
                                 if (!TryScanUnicodeCodePointEscape(out var cp))
@@ -1728,7 +1736,7 @@ ParseIdentifierPart:
                         default:
                             if (ch == '0')
                             {
-                                if (Character.IsDecimalDigit(_source[_index]))
+                                if (Character.IsDecimalDigit(_source.CharCodeAt(_index)))
                                 {
                                     // NotEscapeSequence: \01 \02 and so on
                                     notEscapeSequenceHead = '0';
@@ -1915,7 +1923,7 @@ ParseIdentifierPart:
 
     private string ScanRegExpBody()
     {
-        var ch = _source[_index];
+        //var ch = _source[_index];
         //assert(ch == '/', 'Regular expression literal must start with a slash');
 
         var str = GetStringBuilder();
@@ -1925,10 +1933,14 @@ ParseIdentifierPart:
 
         while (!Eof())
         {
-            ch = _source[_index++];
+            var ch = _source[_index++];
             str.Append(ch);
             if (ch == '\\')
             {
+                if (_index >= _source.Length)
+                {
+                    break;
+                }
                 ch = _source[_index++];
                 // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
                 if (Character.IsLineTerminator(ch))
