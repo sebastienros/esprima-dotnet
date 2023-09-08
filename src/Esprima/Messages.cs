@@ -84,6 +84,7 @@ internal static class Messages
     public const string StrictCatchVariable = "Catch variable may not be eval or arguments in strict mode";
     public const string StrictDecimalWithLeadingZero = "Decimals with leading zeros are not allowed in strict mode.";
     public const string StrictDelete = "Delete of an unqualified identifier in strict mode.";
+    public const string StrictEscape89 = "\\8 and \\9 are not allowed in strict mode.";
     public const string StrictFunction = "In strict mode code, functions can only be declared at top level or inside a block";
     public const string StrictFunctionName = "Function name may not be eval or arguments in strict mode";
     public const string StrictLHSAssignment = "Assignment to eval or arguments is not allowed in strict mode";

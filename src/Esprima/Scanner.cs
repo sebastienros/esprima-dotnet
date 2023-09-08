@@ -839,26 +839,26 @@ ParseIdentifierPart:
         return false;
     }
 
-    private OctalValue OctalToDecimal(char ch)
+    private int OctalToDecimal(char ch, out int length)
     {
-        // \0 is not octal escape sequence
-        var octal = ch != '0';
         var code = OctalValue(ch);
+        length = 1;
 
         if (!Eof() && Character.IsOctalDigit(_source[_index]))
         {
-            octal = true;
             code = code * 8 + OctalValue(_source[_index++]);
+            length++;
 
             // 3 digits are only allowed when string starts
             // with 0, 1, 2, 3
             if (ch >= '0' && ch <= '3' && !Eof() && Character.IsOctalDigit(_source.CharCodeAt(_index)))
             {
                 code = code * 8 + OctalValue(_source[_index++]);
+                length++;
             }
         }
 
-        return new OctalValue(code, octal);
+        return code;
     }
 
     // https://tc39.github.io/ecma262/#sec-names-and-keywords
@@ -1478,7 +1478,7 @@ ParseIdentifierPart:
         //    'String literal must starts with a quote');
 
         ++_index;
-        var octal = false;
+        var octal = LegacyOctalKind.None;
         var str = GetStringBuilder();
 
         while (!Eof())
@@ -1545,27 +1545,28 @@ ParseIdentifierPart:
                         case '8':
                         case '9':
                             str.Append(ch);
+                            octal = LegacyOctalKind.Escaped8or9;
                             if (strict)
                             {
-                                TolerateUnexpectedToken();
+                                TolerateUnexpectedToken(Messages.StrictEscape89);
                             }
                             break;
 
                         default:
                             if (ch != char.MinValue && Character.IsOctalDigit(ch))
                             {
-                                var octToDec = OctalToDecimal(ch);
+                                var octToDec = OctalToDecimal(ch, out var length);
 
-                                if (octToDec.Octal)
+                                if (octToDec != 0 || length > 1 || _source.CharCodeAt(_index) is '8' or '9')
                                 {
-                                    octal = true;
+                                    octal = LegacyOctalKind.Octal;
                                     if (strict)
                                     {
                                         TolerateUnexpectedToken(Messages.StrictOctalLiteral);
                                     }
                                 }
 
-                                str.Append((char) octToDec.Code);
+                                str.Append((char) octToDec);
                             }
                             else
                             {
@@ -2092,5 +2093,3 @@ ParseIdentifierPart:
 
     internal Marker GetMarker() => new(_index, _lineNumber, Column: _index - _lineStart);
 }
-
-internal readonly record struct OctalValue(int Code, bool Octal);

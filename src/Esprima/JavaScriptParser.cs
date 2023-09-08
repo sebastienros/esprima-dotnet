@@ -4501,7 +4501,7 @@ public partial class JavaScriptParser
         {
             var token = _lookahead;
 
-            if (firstRestricted == null && token.Octal)
+            if (firstRestricted == null && token.OctalKind != LegacyOctalKind.None)
             {
                 firstRestricted = token;
             }
@@ -4533,7 +4533,9 @@ public partial class JavaScriptParser
 
         if (_context.Strict && firstRestricted != null)
         {
-            TolerateUnexpectedToken(firstRestricted.Value, Messages.StrictOctalLiteral);
+            TolerateUnexpectedToken(firstRestricted.Value, firstRestricted.Value.OctalKind == LegacyOctalKind.Escaped8or9
+                ? Messages.StrictEscape89
+                : Messages.StrictOctalLiteral);
         }
 
         return body;
