@@ -23,6 +23,13 @@ public enum TokenType : byte
     Extension = byte.MaxValue
 }
 
+internal enum LegacyOctalKind : byte
+{
+    None,
+    Octal,
+    Escaped8or9,
+}
+
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct Token
 {
@@ -37,12 +44,12 @@ public readonly record struct Token
         int end,
         int lineNumber,
         int lineStart,
-        bool octal = false)
+        LegacyOctalKind octalKind = LegacyOctalKind.None)
     {
         Type = type;
         _value = value;
 
-        Octal = octal;
+        OctalKind = octalKind;
         Start = start;
         End = end;
         LineNumber = lineNumber;
@@ -56,9 +63,9 @@ public readonly record struct Token
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Token CreateStringLiteral(string str, bool octal, int start, int end, int lineNumber, int lineStart)
+    internal static Token CreateStringLiteral(string str, LegacyOctalKind octalKind, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.StringLiteral, str, start, end, lineNumber, lineStart, octal);
+        return new Token(TokenType.StringLiteral, str, start, end, lineNumber, lineStart, octalKind);
     }
 
     private sealed record RegexHolder(RegExpParseResult ParseResult, RegexValue RegexValue) : ValueHolder(ParseResult.Regex);
@@ -72,7 +79,7 @@ public readonly record struct Token
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Token CreateNumericLiteral(double value, bool octal, int start, int end, int lineNumber, int lineStart)
     {
-        return new Token(TokenType.NumericLiteral, value, start, end, lineNumber, lineStart, octal: octal);
+        return new Token(TokenType.NumericLiteral, value, start, end, lineNumber, lineStart, octal ? LegacyOctalKind.Octal : LegacyOctalKind.None);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,7 +117,9 @@ public readonly record struct Token
     }
 
     public readonly TokenType Type;
-    public readonly bool Octal;
+
+    internal readonly LegacyOctalKind OctalKind;
+    public readonly bool Octal => OctalKind == LegacyOctalKind.Octal;
 
     public readonly int Start; // Range[0]
     public readonly int End; // Range[1]
@@ -156,7 +165,7 @@ public readonly record struct Token
 
     internal Token ChangeType(TokenType newType)
     {
-        return new Token(newType, _value, Start, End, LineNumber, LineStart, Octal);
+        return new Token(newType, _value, Start, End, LineNumber, LineStart, OctalKind);
     }
 
     internal bool IsEscaped(string value) => value.Length != End - Start;

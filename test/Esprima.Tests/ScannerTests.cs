@@ -355,4 +355,63 @@ public class ScannerTests
             Assert.Throws<ParserException>(() => scanner.Lex(lexOptions));
         }
     }
+
+    [Theory]
+    [InlineData("'a\rb'", null)]
+    [InlineData("'a\r\nb'", null)]
+    [InlineData("'a\nb'", null)]
+    [InlineData("'a\u2028b'", "a\u2028b")]
+    [InlineData("'a\u2029b'", "a\u2029b")]
+    [InlineData("'a\\\rb'", "ab")]
+    [InlineData("'a\\\r\nb'", "ab")]
+    [InlineData("'a\\\nb'", "ab")]
+    [InlineData("'a\\\u2028b'", "ab")]
+    [InlineData("'a\\\u2029b'", "ab")]
+    [InlineData("'a\r", null)]
+    [InlineData("'a\\\r", null)]
+    public void ShouldCorrectlyParseNewLinesInStringLiterals(string input, string? expectedValue)
+    {
+        var scanner = new Scanner(input);
+        var lexOptions = new LexOptions(Strict: true, false);
+
+        if (expectedValue is not null)
+        {
+            var token = scanner.Lex(lexOptions);
+            Assert.Equal(expectedValue, token.Value);
+        }
+        else
+        {
+            Assert.Throws<ParserException>(() => scanner.Lex(lexOptions));
+        }
+    }
+
+    [Theory]
+    [InlineData("`a\rb`", "a\nb", "a\nb")]
+    [InlineData("`a\r\nb`", "a\nb", "a\nb")]
+    [InlineData("`a\nb`", "a\nb", "a\nb")]
+    [InlineData("`a\u2028b`", "a\u2028b", "a\u2028b")]
+    [InlineData("`a\u2029b`", "a\u2029b", "a\u2029b")]
+    [InlineData("`a\\\rb`", "ab", "a\\\nb")]
+    [InlineData("`a\\\r\nb`", "ab", "a\\\nb")]
+    [InlineData("`a\\\nb`", "ab", "a\\\nb")]
+    [InlineData("`a\\\u2028b`", "ab", "a\\\u2028b")]
+    [InlineData("`a\\\u2029b`", "ab", "a\\\u2029b")]
+    [InlineData("`a\r", null, null)]
+    [InlineData("`a\\\r", null, null)]
+    public void ShouldCorrectlyParseNewLinesInTemplates(string input, string? expectedCookedValue, string? expectedRawValue)
+    {
+        var scanner = new Scanner(input);
+        var lexOptions = new LexOptions(Strict: true, false);
+
+        if (expectedCookedValue is not null)
+        {
+            var token = scanner.Lex(lexOptions);
+            Assert.Equal(expectedCookedValue, token.Value);
+            Assert.Equal(expectedRawValue, token.RawTemplate);
+        }
+        else
+        {
+            Assert.Throws<ParserException>(() => scanner.Lex(lexOptions));
+        }
+    }
 }

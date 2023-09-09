@@ -441,7 +441,7 @@ public class JsxParser : JavaScriptParser
                 }
             }
 
-            return Token.CreateStringLiteral(str, octal: false, start, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
+            return Token.CreateStringLiteral(str, LegacyOctalKind.None, start, end: _scanner._index, _scanner._lineNumber, _scanner._lineStart);
         }
 
         if (cp == 46)

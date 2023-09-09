@@ -460,9 +460,9 @@ public sealed partial class Scanner
             else if (ch == 0x3C)
             {
                 // U+003C is '<'
-                if (_source[_index + 1] == '!'
-                    && _source[_index + 2] == '-'
-                    && _source[_index + 3] == '-')
+                if (_source.CharCodeAt(_index + 1) == '!'
+                    && _source.CharCodeAt(_index + 2) == '-'
+                    && _source.CharCodeAt(_index + 3) == '-')
                 {
                     if (_isModule)
                     {
@@ -483,7 +483,7 @@ public sealed partial class Scanner
             }
             else if (_index == 0 && ch == '#')
             {
-                if (_source[_index + 1] != '!')
+                if (_source.CharCodeAt(_index + 1) != '!')
                 {
                     ThrowUnexpectedToken();
                 }
@@ -825,7 +825,7 @@ ParseIdentifierPart:
 
     private bool TryGetEscapedSurrogate(char highSurrogate, out int cp)
     {
-        if (_source[_index] == '\\' && _source.CharCodeAt(_index + 1) == 'u')
+        if (_index + 1 < _source.Length && _source[_index] == '\\' && _source[_index + 1] == 'u')
         {
             _index += 2;
             if (ScanHexEscape('u', out var lowSurrogate) && char.IsLowSurrogate(lowSurrogate))
@@ -839,26 +839,26 @@ ParseIdentifierPart:
         return false;
     }
 
-    private OctalValue OctalToDecimal(char ch)
+    private int OctalToDecimal(char ch, out int length)
     {
-        // \0 is not octal escape sequence
-        var octal = ch != '0';
         var code = OctalValue(ch);
+        length = 1;
 
         if (!Eof() && Character.IsOctalDigit(_source[_index]))
         {
-            octal = true;
             code = code * 8 + OctalValue(_source[_index++]);
+            length++;
 
             // 3 digits are only allowed when string starts
             // with 0, 1, 2, 3
-            if (ch >= '0' && ch <= '3' && !Eof() && Character.IsOctalDigit(_source.CharCodeAt(_index)))
+            if (ch >= '0' && ch <= '3' && !Eof() && Character.IsOctalDigit(_source[_index]))
             {
                 code = code * 8 + OctalValue(_source[_index++]);
+                length++;
             }
         }
 
-        return new OctalValue(code, octal);
+        return code;
     }
 
     // https://tc39.github.io/ecma262/#sec-names-and-keywords
@@ -953,10 +953,10 @@ ParseIdentifierPart:
 
             case '?':
                 ++_index;
-                if (_source[_index] == '?')
+                if (_source.CharCodeAt(_index) == '?')
                 {
                     ++_index;
-                    if (_source[_index] == '=')
+                    if (_source.CharCodeAt(_index) == '=')
                     {
                         ++_index;
                         str = "??=";
@@ -967,7 +967,7 @@ ParseIdentifierPart:
                     }
                 }
 
-                if (_source[_index] == '.' && !char.IsDigit(_source[_index + 1]))
+                if (_source.CharCodeAt(_index) == '.' && !char.IsDigit(_source.CharCodeAt(_index + 1)))
                 {
                     // "?." in "foo?.3:0" should not be treated as optional chaining.
                     // See https://github.com/tc39/proposal-optional-chaining#notes
@@ -979,7 +979,7 @@ ParseIdentifierPart:
 
             case '#':
                 ++_index;
-                if (_source.Length >= _index + 1 && _source[_index] == '!')
+                if (_source.CharCodeAt(_index) == '!')
                 {
                     _index += 1;
                     str = "#!";
@@ -1470,17 +1470,20 @@ ParseIdentifierPart:
     private Token ScanStringLiteral(bool strict)
     {
         var start = _index;
+        var startLineNumber = _lineNumber;
+        var startLineStart = _lineStart;
+
         var quote = _source[start];
         //assert((quote == '\'' || quote == '"'),
         //    'String literal must starts with a quote');
 
         ++_index;
-        var octal = false;
+        var octal = LegacyOctalKind.None;
         var str = GetStringBuilder();
 
         while (!Eof())
         {
-            var ch = _index < _source.Length ? _source[_index] : char.MinValue;
+            var ch = _source[_index];
             _index++;
 
             if (ch == quote)
@@ -1490,14 +1493,18 @@ ParseIdentifierPart:
             }
             else if (ch == '\\')
             {
-                ch = _index < _source.Length ? _source[_index] : char.MinValue;
+                if (_index >= _source.Length)
+                {
+                    break;
+                }
+                ch = _source[_index];
                 _index++;
-                if (ch == char.MinValue || !Character.IsLineTerminator(ch))
+                if (!Character.IsLineTerminator(ch))
                 {
                     switch (ch)
                     {
                         case 'u':
-                            if (_index < _source.Length && _source[_index] == '{')
+                            if (_source.CharCodeAt(_index) == '{')
                             {
                                 ++_index;
                                 str.AppendCodePoint(ScanUnicodeCodePointEscape());
@@ -1542,27 +1549,28 @@ ParseIdentifierPart:
                         case '8':
                         case '9':
                             str.Append(ch);
+                            octal = LegacyOctalKind.Escaped8or9;
                             if (strict)
                             {
-                                TolerateUnexpectedToken();
+                                TolerateUnexpectedToken(Messages.StrictEscape89);
                             }
                             break;
 
                         default:
-                            if (ch != char.MinValue && Character.IsOctalDigit(ch))
+                            if (Character.IsOctalDigit(ch))
                             {
-                                var octToDec = OctalToDecimal(ch);
+                                var octToDec = OctalToDecimal(ch, out var length);
 
-                                if (octToDec.Octal)
+                                if (octToDec != 0 || length > 1 || _source.CharCodeAt(_index) is '8' or '9')
                                 {
-                                    octal = true;
+                                    octal = LegacyOctalKind.Octal;
                                     if (strict)
                                     {
                                         TolerateUnexpectedToken(Messages.StrictOctalLiteral);
                                     }
                                 }
 
-                                str.Append((char) octToDec.Code);
+                                str.Append((char) octToDec);
                             }
                             else
                             {
@@ -1575,7 +1583,7 @@ ParseIdentifierPart:
                 else
                 {
                     ++_lineNumber;
-                    if (ch == '\r' && _source[_index] == '\n')
+                    if (ch == '\r' && _source.CharCodeAt(_index) == '\n')
                     {
                         ++_index;
                     }
@@ -1585,7 +1593,17 @@ ParseIdentifierPart:
             }
             else if (Character.IsLineTerminator(ch))
             {
-                break;
+                // Since ES2019, line and paragraph separators are allowed in string literals.
+                if (ch is '\u2028' or '\u2029')
+                {
+                    ++_lineNumber;
+                    _lineStart = _index;
+                    str.Append(ch);
+                }
+                else
+                {
+                    break;
+                }
             }
             else
             {
@@ -1596,6 +1614,8 @@ ParseIdentifierPart:
         if (quote != char.MinValue)
         {
             _index = start;
+            _lineNumber = startLineNumber;
+            _lineStart = startLineStart;
             ThrowUnexpectedToken();
         }
 
@@ -1606,7 +1626,7 @@ ParseIdentifierPart:
 
     private Token ScanTemplate()
     {
-        var cooked = GetStringBuilder();
+        var sb = GetStringBuilder();
         var terminated = false;
         var start = _index;
 
@@ -1615,11 +1635,14 @@ ParseIdentifierPart:
         char notEscapeSequenceHead = default;
         var rawOffset = 2;
 
+        var containsCR = false;
+
         ++_index;
 
+        char ch;
         while (!Eof())
         {
-            var ch = _source[_index++];
+            ch = _source[_index++];
             if (ch == '`')
             {
                 rawOffset = 1;
@@ -1629,7 +1652,7 @@ ParseIdentifierPart:
             }
             else if (ch == '$')
             {
-                if (_source[_index] == '{')
+                if (_source.CharCodeAt(_index) == '{')
                 {
                     _curlyStack.Add("${");
                     ++_index;
@@ -1637,7 +1660,7 @@ ParseIdentifierPart:
                     break;
                 }
 
-                cooked.Append(ch);
+                sb.Append(ch);
             }
             else if (notEscapeSequenceHead != default)
             {
@@ -1645,22 +1668,26 @@ ParseIdentifierPart:
             }
             else if (ch == '\\')
             {
+                if (_index >= _source.Length)
+                {
+                    break;
+                }
                 ch = _source[_index++];
                 if (!Character.IsLineTerminator(ch))
                 {
                     switch (ch)
                     {
                         case 'n':
-                            cooked.Append("\n");
+                            sb.Append("\n");
                             break;
                         case 'r':
-                            cooked.Append("\r");
+                            sb.Append("\r");
                             break;
                         case 't':
-                            cooked.Append("\t");
+                            sb.Append("\t");
                             break;
                         case 'u':
-                            if (_source[_index] == '{')
+                            if (_source.CharCodeAt(_index) == '{')
                             {
                                 ++_index;
                                 if (!TryScanUnicodeCodePointEscape(out var cp))
@@ -1669,7 +1696,7 @@ ParseIdentifierPart:
                                 }
                                 else
                                 {
-                                    cooked.AppendCodePoint(cp);
+                                    sb.AppendCodePoint(cp);
                                 }
                             }
                             else
@@ -1680,7 +1707,7 @@ ParseIdentifierPart:
                                 }
                                 else
                                 {
-                                    cooked.Append(unescapedChar);
+                                    sb.Append(unescapedChar);
                                 }
                             }
 
@@ -1692,31 +1719,31 @@ ParseIdentifierPart:
                             }
                             else
                             {
-                                cooked.Append(unescaped2);
+                                sb.Append(unescaped2);
                             }
 
                             break;
                         case 'b':
-                            cooked.Append("\b");
+                            sb.Append("\b");
                             break;
                         case 'f':
-                            cooked.Append("\f");
+                            sb.Append("\f");
                             break;
                         case 'v':
-                            cooked.Append("\v");
+                            sb.Append("\v");
                             break;
 
                         default:
                             if (ch == '0')
                             {
-                                if (Character.IsDecimalDigit(_source[_index]))
+                                if (Character.IsDecimalDigit(_source.CharCodeAt(_index)))
                                 {
                                     // NotEscapeSequence: \01 \02 and so on
                                     notEscapeSequenceHead = '0';
                                 }
                                 else
                                 {
-                                    cooked.Append("\0");
+                                    sb.Append("\0");
                                 }
                             }
                             else if (Character.IsDecimalDigit(ch))
@@ -1726,7 +1753,7 @@ ParseIdentifierPart:
                             }
                             else
                             {
-                                cooked.Append(ch);
+                                sb.Append(ch);
                             }
 
                             break;
@@ -1735,9 +1762,13 @@ ParseIdentifierPart:
                 else
                 {
                     ++_lineNumber;
-                    if (ch == '\r' && _source[_index] == '\n')
+                    if (ch == '\r')
                     {
-                        ++_index;
+                        containsCR = true;
+                        if (_source.CharCodeAt(_index) == '\n')
+                        {
+                            ++_index;
+                        }
                     }
 
                     _lineStart = _index;
@@ -1746,17 +1777,24 @@ ParseIdentifierPart:
             else if (Character.IsLineTerminator(ch))
             {
                 ++_lineNumber;
-                if (ch == '\r' && _source[_index] == '\n')
+
+                if (ch == '\r')
                 {
-                    ++_index;
+                    containsCR = true;
+                    if (_source.CharCodeAt(_index) == '\n')
+                    {
+                        ++_index;
+                    }
+                    ch = '\n';
                 }
+                // U+2028 and U+2029 are not normalized to \n.
 
                 _lineStart = _index;
-                cooked.Append("\n");
+                sb.Append(ch);
             }
             else
             {
-                cooked.Append(ch);
+                sb.Append(ch);
             }
         }
 
@@ -1770,12 +1808,40 @@ ParseIdentifierPart:
             _curlyStack.RemoveAt(_curlyStack.Count - 1);
         }
 
+        var value = notEscapeSequenceHead == default ? sb.ToString() : null;
+
         var startRaw = start + 1;
         var endRaw = _index - rawOffset;
-        var rawTemplate = _source.AsSpan(startRaw, endRaw - startRaw).ToInternedString(ref _stringPool, NonIdentifierInterningThreshold);
-        var value = notEscapeSequenceHead == default ? cooked.ToString() : null;
+        var rawTemplate = _source.AsSpan(startRaw, endRaw - startRaw);
+        if (containsCR)
+        {
+            // \r and \r\n are normalized to \n in raw strings as well.
 
-        return Token.CreateTemplate(cooked: value, rawTemplate, head, tail, notEscapeSequenceHead, start, end: _index, _lineNumber, _lineStart);
+            sb.Clear();
+            if (sb.Capacity < rawTemplate.Length)
+            {
+                sb.Capacity = rawTemplate.Length;
+            }
+
+            for (var i = 0; i < rawTemplate.Length; i++)
+            {
+                ch = rawTemplate[i];
+                if (ch == '\r')
+                {
+                    if (i + 1 < rawTemplate.Length && rawTemplate[i + 1] == '\n')
+                    {
+                        i++;
+                    }
+                    ch = '\n';
+                }
+                sb.Append(ch);
+            }
+
+            rawTemplate = sb.ToString().AsSpan();
+        }
+
+        return Token.CreateTemplate(cooked: value, rawTemplate.ToInternedString(ref _stringPool, NonIdentifierInterningThreshold),
+            head, tail, notEscapeSequenceHead, start, end: _index, _lineNumber, _lineStart);
     }
 
     /// <summary>
@@ -1857,7 +1923,7 @@ ParseIdentifierPart:
 
     private string ScanRegExpBody()
     {
-        var ch = _source[_index];
+        //var ch = _source[_index];
         //assert(ch == '/', 'Regular expression literal must start with a slash');
 
         var str = GetStringBuilder();
@@ -1867,10 +1933,14 @@ ParseIdentifierPart:
 
         while (!Eof())
         {
-            ch = _source[_index++];
+            var ch = _source[_index++];
             str.Append(ch);
             if (ch == '\\')
             {
+                if (_index >= _source.Length)
+                {
+                    break;
+                }
                 ch = _source[_index++];
                 // https://tc39.github.io/ecma262/#sec-literals-regular-expression-literals
                 if (Character.IsLineTerminator(ch))
@@ -2035,5 +2105,3 @@ ParseIdentifierPart:
 
     internal Marker GetMarker() => new(_index, _lineNumber, Column: _index - _lineStart);
 }
-
-internal readonly record struct OctalValue(int Code, bool Octal);
