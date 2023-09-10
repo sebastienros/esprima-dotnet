@@ -8,7 +8,7 @@ namespace Esprima;
 /// Provides JavaScript parsing capabilities.
 /// </summary>
 /// <remarks>
-/// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression(string)" /> methods to parse the JavaScript code.
+/// Use the <see cref="ParseScript" />, <see cref="ParseModule" /> or <see cref="ParseExpression(string, bool)" /> methods to parse the JavaScript code.
 /// </remarks>
 public partial class JavaScriptParser
 {
@@ -2751,11 +2751,12 @@ public partial class JavaScriptParser
     /// <summary>
     /// Parses the code as a JavaScript expression.
     /// </summary>
-    public Expression ParseExpression(string code)
+    public Expression ParseExpression(string code, bool strict = false)
     {
         Reset(code, source: null);
         try
         {
+            _context.Strict = strict;
             _context.IsAsync = true;
             return FinalizeRoot(ParseExpression());
         }
