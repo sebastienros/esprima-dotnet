@@ -9,7 +9,7 @@ namespace Esprima;
 /// </summary>
 /// <remarks>
 /// Use the <see cref="JavaScriptParser.ParseScript" />, <see cref="JavaScriptParser.ParseModule" /> or
-/// <see cref="JavaScriptParser.ParseExpression(string)" /> methods to parse the JSX code.
+/// <see cref="JavaScriptParser.ParseExpression(string, bool)" /> methods to parse the JSX code.
 /// </remarks>
 public class JsxParser : JavaScriptParser
 {
