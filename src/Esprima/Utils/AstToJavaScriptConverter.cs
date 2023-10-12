@@ -7,7 +7,7 @@ namespace Esprima.Utils;
 public partial class AstToJavaScriptConverter : AstVisitor
 {
     // Notes for maintainers:
-    // Don't visit nodes directly (by calling Visit) unless it's necessary for some special reason (but in that case you'll need to setup the context of the visitation manually!)
+    // Don't visit nodes by directly calling Visit unless it's necessary for some special reason (but in that case you'll need to setup the context of the visitation manually!)
     // For examples of special reason, see VisitArrayExpression, VisitObjectExpression, VisitImport, etc. In usual cases just use the following predefined visitation helper methods:
     // * Visit statements using VisitStatement / VisitStatementList.
     // * Visit expressions using VisitRootExpression and sub-expressions (expressions inside another expression) using VisitSubExpression / VisitSubExpressionList.
@@ -307,14 +307,19 @@ public partial class AstToJavaScriptConverter : AstVisitor
     protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
     {
         var operationFlags = BinaryOperandsNeedBrackets(binaryExpression, binaryExpression.Left, binaryExpression.Right);
-
-        // The operand of unary operators cannot be an exponentiation without grouping.
-        // E.g. -1 ** 2 is syntactically unambiguous but the language requires (-1) ** 2 instead.
-        if (!operationFlags.HasFlagFast(BinaryOperationFlags.LeftOperandNeedsBrackets) &&
-            binaryExpression.Operator == BinaryOperator.Exponentiation &&
-            binaryExpression.Left is UnaryExpression leftUnaryExpression)
+        if (!operationFlags.HasFlagFast(BinaryOperationFlags.LeftOperandNeedsBrackets))
         {
-            operationFlags |= BinaryOperationFlags.LeftOperandNeedsBrackets;
+            if (
+                // The operand of unary operators cannot be an exponentiation without grouping.
+                // E.g. -1 ** 2 is syntactically unambiguous but the language requires (-1) ** 2 instead.
+                binaryExpression.Operator == BinaryOperator.Exponentiation && binaryExpression.Left.Type == Nodes.UnaryExpression ||
+                // Logical expressions which mix nullish coalescing and logical AND/OR operators (e.g. (a ?? b) || c or (a && b) ?? c)
+                // needs to be parenthesized despite the operator of the parenthesized sub-expression having the same or higher precedence.
+                binaryExpression.Operator == BinaryOperator.NullishCoalescing && binaryExpression.Left is LogicalExpression { Operator: BinaryOperator.LogicalAnd or BinaryOperator.LogicalOr } ||
+                binaryExpression.Operator is BinaryOperator.LogicalAnd or BinaryOperator.LogicalOr && binaryExpression.Left is LogicalExpression { Operator: BinaryOperator.NullishCoalescing })
+            {
+                operationFlags |= BinaryOperationFlags.LeftOperandNeedsBrackets;
+            }
         }
 
         _writeContext.SetNodeProperty(nameof(binaryExpression.Left), static node => node.As<BinaryExpression>().Left);
@@ -331,14 +336,21 @@ public partial class AstToJavaScriptConverter : AstVisitor
         {
             Writer.WritePunctuator(op, TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
 
-            // Cases like 1 + (+x) must be disambiguated with brackets.
-            if (!operationFlags.HasFlagFast(BinaryOperationFlags.RightOperandNeedsBrackets) &&
-                binaryExpression.Right is UnaryExpression rightUnaryExpression &&
-                rightUnaryExpression.Prefix &&
-                op[op.Length - 1] is '+' or '-' &&
-                op[op.Length - 1] == UnaryExpression.GetUnaryOperatorToken(rightUnaryExpression.Operator)[0])
+
+            if (!operationFlags.HasFlagFast(BinaryOperationFlags.RightOperandNeedsBrackets))
             {
-                operationFlags |= BinaryOperationFlags.RightOperandNeedsBrackets;
+                if (
+                    // Cases like 1 + (+x) must be disambiguated with brackets.
+                    binaryExpression.Right is UnaryExpression rightUnaryExpression &&
+                    rightUnaryExpression.Prefix &&
+                    op[op.Length - 1] is '+' or '-' &&
+                    op[op.Length - 1] == UnaryExpression.GetUnaryOperatorToken(rightUnaryExpression.Operator)[0] ||
+                    // Logical expressions which mix nullish coalescing and logical AND operators (e.g. a ?? (b && c))
+                    // needs to be parenthesized despite the operator of the parenthesized sub-expression having higher precedence.
+                    binaryExpression.Operator == BinaryOperator.NullishCoalescing && binaryExpression.Right is LogicalExpression { Operator: BinaryOperator.LogicalAnd })
+                {
+                    operationFlags |= BinaryOperationFlags.RightOperandNeedsBrackets;
+                }
             }
         }
 
