@@ -334,17 +334,18 @@ public partial class AstToJavaScriptConverter : AstVisitor
         }
         else
         {
-            Writer.WritePunctuator(op, TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+            var tokenFlags = binaryExpression.Operator switch
+            {
+                BinaryOperator.Plus => TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended | TokenFlags.IsPotentialAmbiguousPlusOperator,
+                BinaryOperator.Minus => TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended | TokenFlags.IsPotentialAmbiguousMinusOperator,
+                _ => TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended
+            };
 
+            Writer.WritePunctuator(op, tokenFlags, ref _writeContext);
 
             if (!operationFlags.HasFlagFast(BinaryOperationFlags.RightOperandNeedsBrackets))
             {
                 if (
-                    // Cases like 1 + (+x) must be disambiguated with brackets.
-                    binaryExpression.Right is UnaryExpression rightUnaryExpression &&
-                    rightUnaryExpression.Prefix &&
-                    op[op.Length - 1] is '+' or '-' &&
-                    op[op.Length - 1] == UnaryExpression.GetUnaryOperatorToken(rightUnaryExpression.Operator)[0] ||
                     // Logical expressions which mix nullish coalescing and logical AND operators (e.g. a ?? (b && c))
                     // needs to be parenthesized despite the operator of the parenthesized sub-expression having higher precedence.
                     binaryExpression.Operator == BinaryOperator.NullishCoalescing && binaryExpression.Right is LogicalExpression { Operator: BinaryOperator.LogicalAnd })

@@ -632,6 +632,65 @@ if (b == 2) {
     }
 
     [Theory]
+    [InlineData("a + -b", false, "a+-b")]
+    [InlineData("a + +b", false, "a+ +b")]
+    [InlineData("a + +b", true, null)]
+    [InlineData("a + --b", false, "a+--b")]
+    [InlineData("a + ++b", false, "a+ ++b")]
+    [InlineData("a + ++b", true, null)]
+    [InlineData("a + -b * 2", false, "a+-b*2")]
+    [InlineData("a + +b * 2", false, "a+ +b*2")]
+    [InlineData("a + +b * 2", true, null)]
+    [InlineData("a + --b * 2", false, "a+--b*2")]
+    [InlineData("a + ++b * 2", false, "a+ ++b*2")]
+    [InlineData("a + ++b * 2", true, null)]
+    [InlineData("a + (+b) ** 2", false, "a+(+b)**2")]
+    [InlineData("a + (+b) ** 2", true, null)]
+    [InlineData("a + ++b ** 2", false, "a+ ++b**2")]
+    [InlineData("a + ++b ** 2", true, null)]
+    [InlineData("a++ - b", false, "a++-b")]
+    [InlineData("a++ + b", false, "a+++b")]
+    [InlineData("a++ + b", true, null)]
+    [InlineData("a++ + +b", false, "a+++ +b")]
+    [InlineData("a++ + +b", true, null)]
+    [InlineData("a++ + ++b", false, "a+++ ++b")]
+    [InlineData("a++ + ++b", true, null)]
+
+    [InlineData("a - +b", false, "a-+b")]
+    [InlineData("a - -b", false, "a- -b")]
+    [InlineData("a - -b", true, null)]
+    [InlineData("a - ++b", false, "a-++b")]
+    [InlineData("a - --b", false, "a- --b")]
+    [InlineData("a - --b", true, null)]
+    [InlineData("a - +b * 2", false, "a-+b*2")]
+    [InlineData("a - -b * 2", false, "a- -b*2")]
+    [InlineData("a - -b * 2", true, null)]
+    [InlineData("a - ++b * 2", false, "a-++b*2")]
+    [InlineData("a - --b * 2", false, "a- --b*2")]
+    [InlineData("a - --b * 2", true, null)]
+    [InlineData("a - (-b) ** 2", false, "a-(-b)**2")]
+    [InlineData("a - (-b) ** 2", true, null)]
+    [InlineData("a - --b ** 2", false, "a- --b**2")]
+    [InlineData("a - --b ** 2", true, null)]
+    [InlineData("a-- + b", false, "a--+b")]
+    [InlineData("a-- - b", false, "a---b")]
+    [InlineData("a-- - b", true, null)]
+    [InlineData("a-- - -b", false, "a--- -b")]
+    [InlineData("a-- - -b", true, null)]
+    [InlineData("a-- - --b", false, "a--- --b")]
+    [InlineData("a-- - --b", true, null)]
+    public void ToJavaScriptTest_AmbiguousBinaryOperators_ShouldBeDisambiguatedWithWhiteSpace(string source, bool format, string? expectedCode)
+    {
+        var parser = new JavaScriptParser();
+        var program = parser.ParseExpression(source);
+        var code = AstToJavaScript.ToJavaScriptString(program, format);
+        Assert.Equal(expectedCode ?? source, code);
+
+        var programReparsed = parser.ParseExpression(code);
+        Assert.Equal(program.DescendantNodesAndSelf(), programReparsed.DescendantNodesAndSelf(), NodeTypeEqualityComparer.Default);
+    }
+
+    [Theory]
     [InlineData("a && b ?? c", true)]
     [InlineData("(a && b) ?? c", false)]
     [InlineData("a && (b ?? c)", false)]

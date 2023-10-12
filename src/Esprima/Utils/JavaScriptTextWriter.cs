@@ -304,7 +304,25 @@ public partial class JavaScriptTextWriter
 
     protected virtual void EndLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartPunctuator(string value, TokenFlags flags, ref WriteContext context) { }
+    protected void WriteRequiredSpaceBetweenTokenAndPunctuator(string value)
+    {
+        if ((LastTokenFlags & TokenFlags.IsPotentialAmbiguousBinaryOperator) != 0)
+        {
+            if ((LastTokenFlags & TokenFlags.IsPotentialAmbiguousPlusOperator) != 0 && value[0] == '+' ||
+                (LastTokenFlags & TokenFlags.IsPotentialAmbiguousMinusOperator) != 0 && value[0] == '-')
+            {
+                WriteSpace();
+            }
+        }
+    }
+
+    protected virtual void StartPunctuator(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (LastTriviaType == TriviaType.None)
+        {
+            WriteRequiredSpaceBetweenTokenAndPunctuator(value);
+        }
+    }
 
     public void WritePunctuator(string value, TokenFlags flags, ref WriteContext context)
     {

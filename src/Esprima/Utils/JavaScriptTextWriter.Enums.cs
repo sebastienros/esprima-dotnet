@@ -66,6 +66,12 @@ partial class JavaScriptTextWriter
         /// </summary>
         FollowsStatementBody = StatementFlags.IsStatementBody,
 
+        // Whitespace hints for punctuators
+
+        IsPotentialAmbiguousPlusOperator = 1 << 6,
+        IsPotentialAmbiguousMinusOperator = 1 << 7,
+        IsPotentialAmbiguousBinaryOperator = IsPotentialAmbiguousPlusOperator | IsPotentialAmbiguousMinusOperator,
+
         // General whitespace hints
 
         /// <summary>
