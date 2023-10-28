@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Esprima.Benchmark</AssemblyName>
     <OutputType>Exe</OutputType>
@@ -16,6 +16,6 @@
     <ProjectReference Include="..\..\src\Esprima\Esprima.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.7" />
+    <PackageReference Include="BenchmarkDotNet" />
   </ItemGroup>
 </Project>
