@@ -183,6 +183,10 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         {
             WriteSpace();
         }
+        else
+        {
+            WriteRequiredSpaceBetweenTokenAndPunctuator(value, flags, ref context);
+        }
     }
 
     protected override void StartPunctuator(string value, TokenFlags flags, ref WriteContext context)
@@ -439,6 +443,38 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         };
     }
 
+    public override void StartExpression(ExpressionFlags flags, ref WriteContext context)
+    {
+        if (!flags.HasFlagFast(ExpressionFlags.NeedsBrackets))
+        {
+            var expression = !context.NodePropertyHasListValue
+                ? context.GetNodePropertyValue<Expression>()
+                : context.GetNodePropertyListItem<Expression>();
+            var forceBrackets = ShouldWrapExpressionInBracketsAnyway(expression, flags, ref context);
+            context._additionalDataSlot.PrimaryData = forceBrackets.AsCachedObject();
+            if (forceBrackets)
+            {
+                flags |= ExpressionFlags.NeedsBrackets;
+            }
+        }
+
+        base.StartExpression(flags, ref context);
+    }
+
+    public override void EndExpression(ExpressionFlags flags, ref WriteContext context)
+    {
+        if (!flags.HasFlagFast(ExpressionFlags.NeedsBrackets))
+        {
+            var forceBrackets = (bool) context._additionalDataSlot.PrimaryData!;
+            if (forceBrackets)
+            {
+                flags |= ExpressionFlags.NeedsBrackets;
+            }
+        }
+
+        base.EndExpression(flags, ref context);
+    }
+
     public override void StartExpressionListItem(int index, int count, ExpressionFlags flags, ref WriteContext context)
     {
         if (context.Node.Type == Nodes.ArrayExpression && count >= MultiLineArrayLiteralThreshold)
@@ -457,6 +493,15 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         {
             WriteEndOfLine();
         }
+    }
+
+    protected virtual bool ShouldWrapExpressionInBracketsAnyway(Expression expression, ExpressionFlags flags, ref WriteContext context)
+    {
+        return
+            LastTokenType == TokenType.Punctuator &&
+            LastTokenFlags.HasFlagFast(TokenFlags.IsUnaryOperator) &&
+            expression is UnaryExpression { Prefix: true } unaryExpression &&
+            !char.IsLetter(UnaryExpression.GetUnaryOperatorToken(unaryExpression.Operator)[0]);
     }
 
     public override void StartAuxiliaryNodeListItem<T>(int index, int count, string separator, object? nodeContext, ref WriteContext context)

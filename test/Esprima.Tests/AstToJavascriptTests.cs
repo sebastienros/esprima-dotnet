@@ -679,8 +679,61 @@ if (b == 2) {
     [InlineData("a-- - -b", true, null)]
     [InlineData("a-- - --b", false, "a--- --b")]
     [InlineData("a-- - --b", true, null)]
-    public void ToJavaScriptTest_AmbiguousBinaryOperators_ShouldBeDisambiguatedWithWhiteSpace(string source, bool format, string? expectedCode)
+
+    [InlineData("a + +(+b)", false, "a+ + +b")]
+    [InlineData("a + +(+b)", true, null)]
+    [InlineData("a + +(-b)", false, "a+ +-b")]
+    [InlineData("a + +(-b)", true, null)]
+    [InlineData("a + -(+b)", false, "a+-+b")]
+    [InlineData("a + -(+b)", true, null)]
+    [InlineData("a + -(-b)", false, "a+- -b")]
+    [InlineData("a + -(-b)", true, null)]
+    [InlineData("a + +(++b)", false, "a+ + ++b")]
+    [InlineData("a + +(++b)", true, null)]
+    [InlineData("a + -(++b)", false, "a+-++b")]
+    [InlineData("a + -(++b)", true, null)]
+    [InlineData("a + -(~b)", false, "a+-~b")]
+    [InlineData("a + -(~b)", true, null)]
+
+    [InlineData("a - -(-b)", false, "a- - -b")]
+    [InlineData("a - -(-b)", true, null)]
+    [InlineData("a - -(+b)", false, "a- -+b")]
+    [InlineData("a - -(+b)", true, null)]
+    [InlineData("a - +(-b)", false, "a-+-b")]
+    [InlineData("a - +(-b)", true, null)]
+    [InlineData("a - +(+b)", false, "a-+ +b")]
+    [InlineData("a - +(+b)", true, null)]
+    [InlineData("a - -(--b)", false, "a- - --b")]
+    [InlineData("a - -(--b)", true, null)]
+    [InlineData("a - +(--b)", false, "a-+--b")]
+    [InlineData("a - +(--b)", true, null)]
+    [InlineData("a - +(~b)", false, "a-+~b")]
+    [InlineData("a - +(~b)", true, null)]
+
+    [InlineData("a / (/x/, b)", false, "a/(/x/,b)")]
+    [InlineData("a / (/x/, b)", true, null)]
+    [InlineData("a / /x/", false, "a/ /x/")]
+    [InlineData("a / /x/", true, null)]
+
+    [InlineData("a < --b", false, "a<--b")]
+    [InlineData("a < --b", true, null)]
+    [InlineData("a < !(--b, c)", false, "a<!(--b,c)")]
+    [InlineData("a < !(--b, c)", true, null)]
+    [InlineData("a < !(--b)", false, "a<! --b")]
+    [InlineData("a < !(--b)", true, null)]
+    [InlineData("(a, b--) > c", false, "(a,b--)>c")]
+    [InlineData("(a, b--) > c", true, null)]
+    [InlineData("b-- > c", false, "b-- >c")]
+    [InlineData("b-- > c", true, null)]
+
+    [InlineData("+(-(~(!x++))), -(-x)", false, "+-~!x++,- -x")]
+    [InlineData("+(-(~(!x++))), -(-x)", true, null)]
+    [InlineData("(() => {\n  if (true)\n    +(-(~(!x++))), -(-x);\n})()", false, "(()=>{if(true)+-~!x++,- -x})()")]
+    [InlineData("(() => {\n  if (true)\n    +(-(~(!x++))), -(-x);\n})()", true, null)]
+    public void ToJavaScriptTest_AmbiguousOperatorSequence_ShouldBeDisambiguated(string source, bool format, string? expectedCode)
     {
+        source = source.Replace("\n", Environment.NewLine);
+
         var parser = new JavaScriptParser();
         var program = parser.ParseExpression(source);
         var code = AstToJavaScript.ToJavaScriptString(program, format);
@@ -718,6 +771,7 @@ if (b == 2) {
     [InlineData("function* f() {\n  a ?? yield b && c;\n}", true)]
     [InlineData("function* f() {\n  a ?? (yield b && c);\n}", false)]
     [InlineData("function* f() {\n  a ?? yield (b && c);\n}", true)]
+    [InlineData("n || o === \"back\" ? (n ?? \"\") || \"back\" : \"\"", false)]
     public void ToJavaScriptTest_NullishCoalescingMixedWithLogicalAndOr_ShouldBeParenthesized(string source, bool expectParseError)
     {
         source = source.Replace("\n", Environment.NewLine);

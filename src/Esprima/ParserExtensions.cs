@@ -9,6 +9,11 @@ internal static partial class ParserExtensions
     // old framework doesn't know this flag
     private const int MethodImplOptionsAggressiveOptimization = 512;
 
+    internal static readonly object s_boxedTrue = true;
+    internal static readonly object s_boxedFalse = false;
+
+    public static object AsCachedObject(this bool value) => value ? s_boxedTrue : s_boxedFalse;
+
     private static readonly string[] s_charToString = new string[256];
 
     static ParserExtensions()
