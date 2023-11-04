@@ -5421,9 +5421,7 @@ ParseValue:
                 // export default {};
                 // export default [];
                 // export default (1 + 2);
-                var declaration = Match("{")
-                    ? ParseObjectInitializer()
-                    : Match("[") ? ParseArrayInitializer() : ParseAssignmentExpression();
+                var declaration = ParseAssignmentExpression();
 
                 ConsumeSemicolon();
                 exportDeclaration = Finalize(node, new ExportDefaultDeclaration(declaration));

@@ -789,6 +789,27 @@ if (b == 2) {
     }
 
     [Theory]
+    [InlineData("[a = b, c] = [];\n", false)]
+    [InlineData("[a = (b, c)] = [];\n", false)]
+    [InlineData("export default a, b;\n", true)]
+    [InlineData("export default (a, b);\n", false)]
+    public void ToJavaScriptTest_AmbiguousSequenceExpression_ShouldBeParenthesized(string source, bool expectParseError)
+    {
+        source = source.Replace("\n", Environment.NewLine);
+        var parser = new JavaScriptParser();
+        if (!expectParseError)
+        {
+            var program = parser.ParseModule(source);
+            var code = AstToJavaScript.ToJavaScriptString(program, format: true);
+            Assert.Equal(source, code);
+        }
+        else
+        {
+            Assert.Throws<ParserException>(() => parser.ParseExpression(source));
+        }
+    }
+
+    [Theory]
     [InlineData(true,
 @"<>AAA <el attr1=""a"" attr2='b' attr3={x ? 'c' : 'd'} {...(x + 2, [y])}> &lt; {} &gt; </el> BBB <c.el {...[z]}>member</c.el> <ns:el>member</ns:el> DDD </>",
 @"<>AAA <el attr1=""a""attr2='b'attr3={x?'c':'d'}{...(x+2,[y])}> &lt; {} &gt; </el> BBB <c.el{...[z]}>member</c.el> <ns:el>member</ns:el> DDD </>")]

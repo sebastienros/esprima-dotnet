@@ -40,6 +40,8 @@ partial class AstToJavaScriptConverter
 
         IsMethod = 1 << 17,
 
+        IsInsideExportDefaultExpression = 1 << 21, // automatically propagated to sub-expressions
+
         IsInsideDecorator = 1 << 22, // automatically propagated to sub-expressions
 
         IsInAmbiguousInOperatorContext = 1 << 24, // automatically propagated to sub-expressions
@@ -56,6 +58,6 @@ partial class AstToJavaScriptConverter
 
         IsInsideStatementExpression = 1 << 31, // automatically propagated to sub-expressions
 
-        IsInPotentiallyAmbiguousContext = IsInAmbiguousInOperatorContext | IsInsideArrowFunctionBody | IsInsideDecorator | IsInsideNewCallee | IsInsideLeftHandSideExpression | IsInsideStatementExpression,
+        IsInPotentiallyAmbiguousContext = IsInAmbiguousInOperatorContext | IsInsideArrowFunctionBody | IsInsideDecorator | IsInsideNewCallee | IsInsideLeftHandSideExpression | IsInsideStatementExpression | IsInsideExportDefaultExpression,
     }
 }

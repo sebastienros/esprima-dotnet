@@ -138,16 +138,21 @@ partial class AstToJavaScriptConverter
         // Puts the left-most expression in brackets if necessary (in cases where it would be interpreted differently without brackets).
         if ((flags & ExpressionFlags.IsInPotentiallyAmbiguousContext) != 0)
         {
-            if (flags.HasFlagFast(ExpressionFlags.IsInsideStatementExpression | ExpressionFlags.IsLeftMost) && ExpressionIsAmbiguousAsStatementExpression(expression) ||
+            var isAmbiguousExpression = flags.HasFlag(ExpressionFlags.IsLeftMost) &&
+                (flags.HasFlagFast(ExpressionFlags.IsInsideStatementExpression) && ExpressionIsAmbiguousAsStatementExpression(expression) ||
+                 flags.HasFlagFast(ExpressionFlags.IsInsideExportDefaultExpression) && ExpressionIsAmbiguousAsExportDefaultExpression(expression) ||
+                 flags.HasFlagFast(ExpressionFlags.IsInsideDecorator) && DecoratorLeftMostExpressionIsParenthesized(expression, isRoot: flags.HasFlagFast(ExpressionFlags.IsRootExpression)));
+
+            isAmbiguousExpression = isAmbiguousExpression ||
                 flags.HasFlagFast(ExpressionFlags.IsInsideArrowFunctionBody | ExpressionFlags.IsLeftMostInArrowFunctionBody) && ExpressionIsAmbiguousAsArrowFunctionBody(expression) ||
                 flags.HasFlagFast(ExpressionFlags.IsInsideNewCallee | ExpressionFlags.IsLeftMostInNewCallee) && ExpressionIsAmbiguousAsNewCallee(expression) ||
-                flags.HasFlagFast(ExpressionFlags.IsInsideLeftHandSideExpression | ExpressionFlags.IsLeftMostInLeftHandSideExpression) && LeftHandSideExpressionIsParenthesized(expression) ||
-                flags.HasFlagFast(ExpressionFlags.IsInsideDecorator | ExpressionFlags.IsLeftMost) && DecoratorLeftMostExpressionIsParenthesized(expression, isRoot: flags.HasFlagFast(ExpressionFlags.IsRootExpression)))
-            {
-                return (flags | ExpressionFlags.NeedsBrackets) & ~ExpressionFlags.IsInAmbiguousInOperatorContext;
-            }
+                flags.HasFlagFast(ExpressionFlags.IsInsideLeftHandSideExpression | ExpressionFlags.IsLeftMostInLeftHandSideExpression) && LeftHandSideExpressionIsParenthesized(expression);
+
             // Edge case: for (var a = b = (c in d in e) in x);
-            else if (flags.HasFlagFast(ExpressionFlags.IsInAmbiguousInOperatorContext) && expression is BinaryExpression { Operator: BinaryOperator.In })
+            isAmbiguousExpression = isAmbiguousExpression ||
+                flags.HasFlagFast(ExpressionFlags.IsInAmbiguousInOperatorContext) && expression is BinaryExpression { Operator: BinaryOperator.In };
+
+            if (isAmbiguousExpression)
             {
                 return (flags | ExpressionFlags.NeedsBrackets) & ~ExpressionFlags.IsInAmbiguousInOperatorContext;
             }
@@ -270,6 +275,20 @@ partial class AstToJavaScriptConverter
             case Nodes.ObjectExpression:
             case Nodes.AssignmentExpression when expression.As<AssignmentExpression>() is { Left.Type: Nodes.ObjectPattern }:
             case Nodes.Identifier when Scanner.IsStrictModeReservedWord(expression.As<Identifier>().Name):
+                return true;
+        }
+
+        return false;
+    }
+
+    protected virtual bool ExpressionIsAmbiguousAsExportDefaultExpression(Expression expression)
+    {
+        switch (expression.Type)
+        {
+            case Nodes.ClassExpression:
+            case Nodes.FunctionExpression:
+            case Nodes.Identifier when Scanner.IsStrictModeReservedWord(expression.As<Identifier>().Name):
+            case Nodes.SequenceExpression:
                 return true;
         }
 
