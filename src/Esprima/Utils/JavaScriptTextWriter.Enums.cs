@@ -7,6 +7,23 @@ partial class JavaScriptTextWriter
     private protected const TriviaType WhiteSpaceTriviaFlag = (TriviaType) (1 << 1);
     private protected const TriviaType CommentTriviaFlag = (TriviaType) (1 << 2);
 
+    private enum TokenSequence : byte
+    {
+        None,
+
+        // State values for tracking problematic punctuator sequences which must be disambiguated
+        // by inserting a white-space or parenthesis
+
+        BinaryPlus, // for tracking cases like a+ ++b
+        BinaryMinus, // for tracking cases like a- --b
+        BinaryDivide, // for tracking cases like a/ /regex/
+        BinaryLess,
+        BinaryLessThenUnaryLogicalNot, // for tracking cases like a<! --b
+        UnaryPlus, // for tracking cases like + +a or + ++a
+        UnaryMinus, // for tracking cases like - -a or - --a
+        UnaryPostfixDecrement, // for tracking cases like a-- >b
+    }
+
     protected internal enum TriviaType
     {
         None = 0,
@@ -65,6 +82,12 @@ partial class JavaScriptTextWriter
         /// The keyword follows the body of a statement and precedes another body of the same statement (e.g. the else branch of an <see cref="IfStatement"/>).
         /// </summary>
         FollowsStatementBody = StatementFlags.IsStatementBody,
+
+        // Punctuator hints
+
+        IsAssignmentOperator = 1 << 8,
+        IsUnaryOperator = 1 << 9,
+        IsBinaryOperator = 1 << 10,
 
         // General whitespace hints
 

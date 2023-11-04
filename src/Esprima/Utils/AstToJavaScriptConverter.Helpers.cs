@@ -81,6 +81,7 @@ partial class AstToJavaScriptConverter
         var originalStatementFlags = _currentStatementFlags;
         _currentStatementFlags = getCombinedFlags(this, statement, index, count);
 
+        _writeContext.SetNodePropertyItemIndex(index);
         Writer.StartStatementListItem(index, count, (JavaScriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
         Visit(statement);
         Writer.EndStatementListItem(index, count, (JavaScriptTextWriter.StatementFlags) _currentStatementFlags, ref _writeContext);
@@ -209,6 +210,7 @@ partial class AstToJavaScriptConverter
         var originalExpressionFlags = _currentExpressionFlags;
         _currentExpressionFlags = getCombinedFlags(this, expression, index, count);
 
+        _writeContext.SetNodePropertyItemIndex(index);
         Writer.StartExpressionListItem(index, count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
         Visit(expression);
         Writer.EndExpressionListItem(index, count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
@@ -231,7 +233,7 @@ partial class AstToJavaScriptConverter
 
     private void VisitExportOrImportSpecifierIdentifier(Expression identifierExpression)
     {
-        if (identifierExpression is Identifier { Name: "default" } identifier)
+        if (identifierExpression is Identifier { Name: "default" })
         {
             Writer.WriteKeyword("default", ref _writeContext);
         }
@@ -429,6 +431,7 @@ partial class AstToJavaScriptConverter
         var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
         _currentAuxiliaryNodeContext = getNodeContext(this, node, index, count);
 
+        _writeContext.SetNodePropertyItemIndex(index);
         Writer.StartAuxiliaryNodeListItem<TNode>(index, count, separator, _currentAuxiliaryNodeContext, ref _writeContext);
         Visit(node);
         Writer.EndAuxiliaryNodeListItem<TNode>(index, count, separator, _currentAuxiliaryNodeContext, ref _writeContext);

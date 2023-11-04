@@ -7,7 +7,7 @@ namespace Esprima.Utils;
 public partial class AstToJavaScriptConverter : AstVisitor
 {
     // Notes for maintainers:
-    // Don't visit nodes directly (by calling Visit) unless it's necessary for some special reason (but in that case you'll need to setup the context of the visitation manually!)
+    // Don't visit nodes by directly calling Visit unless it's necessary for some special reason (but in that case you'll need to setup the context of the visitation manually!)
     // For examples of special reason, see VisitArrayExpression, VisitObjectExpression, VisitImport, etc. In usual cases just use the following predefined visitation helper methods:
     // * Visit statements using VisitStatement / VisitStatementList.
     // * Visit expressions using VisitRootExpression and sub-expressions (expressions inside another expression) using VisitSubExpression / VisitSubExpressionList.
@@ -124,7 +124,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
 
             if (element is not null)
             {
-                VisitExpressionListItem(element, i, arrayExpression.Elements.Count, static (@this, expression, index, _) =>
+                VisitExpressionListItem(element, i, arrayExpression.Elements.Count, static (@this, expression, _, _) =>
                     s_getCombinedSubExpressionFlags(@this, expression, SubExpressionFlags(@this.ExpressionNeedsBracketsInList(expression), isLeftMost: false)));
             }
             else
@@ -132,6 +132,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
                 var originalExpressionFlags = _currentExpressionFlags;
                 _currentExpressionFlags = PropagateExpressionFlags(SubExpressionFlags(needsBrackets: false, isLeftMost: false));
 
+                _writeContext.SetNodePropertyItemIndex(i);
                 Writer.StartExpressionListItem(i, arrayExpression.Elements.Count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
                 Writer.EndExpressionListItem(i, arrayExpression.Elements.Count, (JavaScriptTextWriter.ExpressionFlags) _currentExpressionFlags, ref _writeContext);
 
@@ -175,6 +176,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
                     var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
                     _currentAuxiliaryNodeContext = null;
 
+                    _writeContext.SetNodePropertyItemIndex(i);
                     Writer.StartAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
                     VisitRootExpression(expression, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(expression)));
                     Writer.EndAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
@@ -187,6 +189,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
                 var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
                 _currentAuxiliaryNodeContext = null;
 
+                _writeContext.SetNodePropertyItemIndex(i);
                 Writer.StartAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
                 Writer.EndAuxiliaryNodeListItem<Node?>(i, arrayPattern.Elements.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
 
@@ -256,7 +259,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
         var op = AssignmentExpression.GetAssignmentOperatorToken(assignmentExpression.Operator);
 
         _writeContext.SetNodeProperty(nameof(assignmentExpression.Operator), static node => node.As<AssignmentExpression>().Operator);
-        Writer.WritePunctuator(op, TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+        Writer.WritePunctuator(op, TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended | TokenFlags.IsAssignmentOperator, ref _writeContext);
 
         // AssignmentExpression is not a real binary operation because its left side is not an expression. 
         var rightNeedsBrackets = GetOperatorPrecedence(assignmentExpression, out _) > GetOperatorPrecedence(assignmentExpression.Right, out _);
@@ -307,14 +310,19 @@ public partial class AstToJavaScriptConverter : AstVisitor
     protected internal override object? VisitBinaryExpression(BinaryExpression binaryExpression)
     {
         var operationFlags = BinaryOperandsNeedBrackets(binaryExpression, binaryExpression.Left, binaryExpression.Right);
-
-        // The operand of unary operators cannot be an exponentiation without grouping.
-        // E.g. -1 ** 2 is syntactically unambiguous but the language requires (-1) ** 2 instead.
-        if (!operationFlags.HasFlagFast(BinaryOperationFlags.LeftOperandNeedsBrackets) &&
-            binaryExpression.Operator == BinaryOperator.Exponentiation &&
-            binaryExpression.Left is UnaryExpression leftUnaryExpression)
+        if (!operationFlags.HasFlagFast(BinaryOperationFlags.LeftOperandNeedsBrackets))
         {
-            operationFlags |= BinaryOperationFlags.LeftOperandNeedsBrackets;
+            if (
+                // The operand of unary operators cannot be an exponentiation without grouping.
+                // E.g. -1 ** 2 is syntactically unambiguous but the language requires (-1) ** 2 instead.
+                binaryExpression.Operator == BinaryOperator.Exponentiation && binaryExpression.Left.Type == Nodes.UnaryExpression ||
+                // Logical expressions which mix nullish coalescing and logical AND/OR operators (e.g. (a ?? b) || c or (a && b) ?? c)
+                // needs to be parenthesized despite the operator of the parenthesized sub-expression having the same or higher precedence.
+                binaryExpression.Operator == BinaryOperator.NullishCoalescing && binaryExpression.Left is LogicalExpression { Operator: BinaryOperator.LogicalAnd or BinaryOperator.LogicalOr } ||
+                binaryExpression.Operator is BinaryOperator.LogicalAnd or BinaryOperator.LogicalOr && binaryExpression.Left is LogicalExpression { Operator: BinaryOperator.NullishCoalescing })
+            {
+                operationFlags |= BinaryOperationFlags.LeftOperandNeedsBrackets;
+            }
         }
 
         _writeContext.SetNodeProperty(nameof(binaryExpression.Left), static node => node.As<BinaryExpression>().Left);
@@ -329,16 +337,17 @@ public partial class AstToJavaScriptConverter : AstVisitor
         }
         else
         {
-            Writer.WritePunctuator(op, TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
+            Writer.WritePunctuator(op, TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended | TokenFlags.IsBinaryOperator, ref _writeContext);
 
-            // Cases like 1 + (+x) must be disambiguated with brackets.
-            if (!operationFlags.HasFlagFast(BinaryOperationFlags.RightOperandNeedsBrackets) &&
-                binaryExpression.Right is UnaryExpression rightUnaryExpression &&
-                rightUnaryExpression.Prefix &&
-                op[op.Length - 1] is '+' or '-' &&
-                op[op.Length - 1] == UnaryExpression.GetUnaryOperatorToken(rightUnaryExpression.Operator)[0])
+            if (!operationFlags.HasFlagFast(BinaryOperationFlags.RightOperandNeedsBrackets))
             {
-                operationFlags |= BinaryOperationFlags.RightOperandNeedsBrackets;
+                if (
+                    // Logical expressions which mix nullish coalescing and logical AND operators (e.g. a ?? (b && c))
+                    // needs to be parenthesized despite the operator of the parenthesized sub-expression having higher precedence.
+                    binaryExpression.Operator == BinaryOperator.NullishCoalescing && binaryExpression.Right is LogicalExpression { Operator: BinaryOperator.LogicalAnd })
+                {
+                    operationFlags |= BinaryOperationFlags.RightOperandNeedsBrackets;
+                }
             }
         }
 
@@ -992,7 +1001,6 @@ public partial class AstToJavaScriptConverter : AstVisitor
         Writer.WritePunctuator(":", TokenFlags.Trailing | TokenFlags.TrailingSpaceRecommended, ref _writeContext);
 
         _writeContext.SetNodeProperty(nameof(importAttribute.Value), static node => node.As<ImportAttribute>().Value);
-
         VisitRootExpression(importAttribute.Value, RootExpressionFlags(needsBrackets: false));
 
         return importAttribute;
@@ -1287,6 +1295,7 @@ WriteSource:
                 var originalAuxiliaryNodeContext = _currentAuxiliaryNodeContext;
                 _currentAuxiliaryNodeContext = null;
 
+                _writeContext.SetNodePropertyItemIndex(i);
                 Writer.StartAuxiliaryNodeListItem<Node>(i, objectExpression.Properties.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
                 VisitRootExpression(spreadElement, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(spreadElement)));
                 Writer.EndAuxiliaryNodeListItem<Node>(i, objectExpression.Properties.Count, separator: ",", _currentAuxiliaryNodeContext, ref _writeContext);
@@ -1593,18 +1602,22 @@ WriteSource:
         Writer.WritePunctuator("`", TokenFlags.Leading, ref _writeContext);
 
         TemplateElement quasi;
-        for (var i = 0; !(quasi = templateLiteral.Quasis[i]).Tail; i++)
+        int i;
+        for (i = 0; !(quasi = templateLiteral.Quasis[i]).Tail; i++)
         {
             _writeContext.SetNodeProperty(nameof(templateLiteral.Quasis), static node => ref node.As<TemplateLiteral>().Quasis);
+            _writeContext.SetNodePropertyItemIndex(i);
             VisitAuxiliaryNode(quasi);
 
             _writeContext.SetNodeProperty(nameof(templateLiteral.Expressions), static node => ref node.As<TemplateLiteral>().Expressions);
+            _writeContext.SetNodePropertyItemIndex(i);
             Writer.WritePunctuator("${", TokenFlags.Leading, ref _writeContext);
             VisitRootExpression(templateLiteral.Expressions[i], RootExpressionFlags(needsBrackets: false));
             Writer.WritePunctuator("}", TokenFlags.Trailing, ref _writeContext);
         }
 
         _writeContext.SetNodeProperty(nameof(templateLiteral.Quasis), static node => ref node.As<TemplateLiteral>().Quasis);
+        _writeContext.SetNodePropertyItemIndex(i);
         VisitAuxiliaryNode(quasi);
 
         Writer.WritePunctuator("`", TokenFlags.Trailing, ref _writeContext);
@@ -1675,17 +1688,9 @@ WriteSource:
             }
             else
             {
-                Writer.WritePunctuator(op, TokenFlags.Leading, ref _writeContext);
-
-                // Cases like +(+x) or +(++x) must be disambiguated with brackets.
-                if (!argumentNeedsBrackets &&
-                    unaryExpression.Argument is UnaryExpression argumentUnaryExpression &&
-                    argumentUnaryExpression.Prefix &&
-                    op[op.Length - 1] is '+' or '-' &&
-                    op[op.Length - 1] == UnaryExpression.GetUnaryOperatorToken(argumentUnaryExpression.Operator)[0])
-                {
-                    argumentNeedsBrackets = true;
-                }
+                // Cases like +(+x) or +(++x) must be disambiguated. However, this can be done in multiple ways: e.g. + +x or +(+x).
+                // It depends on the formatting which way to choose, so disambiguation must be implemented by JavaScriptTextWriter.
+                Writer.WritePunctuator(op, TokenFlags.Leading | TokenFlags.IsUnaryOperator, ref _writeContext);
             }
 
             _writeContext.SetNodeProperty(nameof(unaryExpression.Argument), static node => node.As<UnaryExpression>().Argument);
@@ -1697,7 +1702,7 @@ WriteSource:
             VisitSubExpression(unaryExpression.Argument, SubExpressionFlags(argumentNeedsBrackets, isLeftMost: true));
 
             _writeContext.SetNodeProperty(nameof(unaryExpression.Operator), static node => node.As<UnaryExpression>().Operator);
-            Writer.WritePunctuator(op, TokenFlags.Trailing, ref _writeContext);
+            Writer.WritePunctuator(op, TokenFlags.Trailing | TokenFlags.IsUnaryOperator, ref _writeContext);
         }
 
         return unaryExpression;

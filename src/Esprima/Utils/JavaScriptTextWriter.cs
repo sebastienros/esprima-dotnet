@@ -16,6 +16,7 @@ public record class JavaScriptTextWriterOptions
 public partial class JavaScriptTextWriter
 {
     private readonly TextWriter _writer;
+    private TokenSequence _lookbehind;
 
     public JavaScriptTextWriter(TextWriter writer, JavaScriptTextWriterOptions options)
     {
@@ -54,6 +55,7 @@ public partial class JavaScriptTextWriter
     {
         _writer.Write(value);
         OnTriviaWritten(TriviaType.WhiteSpace, TriviaFlags.None);
+        _lookbehind = TokenSequence.None;
     }
 
     protected void WriteEndOfLine()
@@ -62,6 +64,7 @@ public partial class JavaScriptTextWriter
         OnTriviaWritten(TriviaType.EndOfLine, TriviaFlags.None);
         CurrentLineIsEmptyOrWhiteSpace = true;
         PendingRequiredNewLine = false;
+        _lookbehind = TokenSequence.None;
     }
 
     protected virtual void WriteLine()
@@ -86,6 +89,7 @@ public partial class JavaScriptTextWriter
         OnTriviaWritten(TriviaType.LineComment, flags);
         CurrentLineIsEmptyOrWhiteSpace = false;
         PendingRequiredNewLine = true; // New line after line comments is always required.
+        _lookbehind = TokenSequence.None;
     }
 
     protected virtual void WriteBlockCommentLine(TextWriter writer, string line, bool isFirst)
@@ -123,6 +127,7 @@ public partial class JavaScriptTextWriter
         OnTriviaWritten(TriviaType.BlockComment, flags);
         CurrentLineIsEmptyOrWhiteSpace = false;
         PendingRequiredNewLine = flags.HasFlagFast(TriviaFlags.TrailingNewLineRequired);
+        _lookbehind = TokenSequence.None;
     }
 
     protected virtual void OnTokenWritten(TokenType type, TokenFlags flags)
@@ -183,6 +188,7 @@ public partial class JavaScriptTextWriter
 
         OnTokenWritten(TokenType.Identifier, flags);
         CurrentLineIsEmptyOrWhiteSpace = false;
+        _lookbehind = TokenSequence.None;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -237,6 +243,7 @@ public partial class JavaScriptTextWriter
 
         OnTokenWritten(TokenType.Keyword, flags);
         CurrentLineIsEmptyOrWhiteSpace = false;
+        _lookbehind = TokenSequence.None;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -264,9 +271,14 @@ public partial class JavaScriptTextWriter
                 }
                 break;
             case TokenType.EOF:
-            case TokenType.Punctuator:
             case TokenType.StringLiteral:
             case TokenType.Template:
+                break;
+            case TokenType.Punctuator:
+                if (type == TokenType.RegularExpression && _lookbehind == TokenSequence.BinaryDivide)
+                {
+                    WriteSpace();
+                }
                 break;
             default:
                 throw new InvalidOperationException();
@@ -294,6 +306,7 @@ public partial class JavaScriptTextWriter
 
         OnTokenWritten(type, flags);
         CurrentLineIsEmptyOrWhiteSpace = false;
+        _lookbehind = TokenSequence.None;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -304,7 +317,38 @@ public partial class JavaScriptTextWriter
 
     protected virtual void EndLiteral(string value, TokenType type, TokenFlags flags, ref WriteContext context) { }
 
-    protected virtual void StartPunctuator(string value, TokenFlags flags, ref WriteContext context) { }
+    protected virtual bool ShouldDisambiguatePunctuator(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (_lookbehind != TokenSequence.None)
+        {
+            switch (_lookbehind)
+            {
+                case TokenSequence.BinaryPlus or TokenSequence.UnaryPlus when value[0] == '+':
+                case TokenSequence.BinaryMinus or TokenSequence.UnaryMinus when value[0] == '-':
+                case TokenSequence.BinaryLessThenUnaryLogicalNot when value[0] == '-' && value.CharCodeAt(1) == '-':
+                case TokenSequence.UnaryPostfixDecrement when value[0] == '>':
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected void WriteRequiredSpaceBetweenTokenAndPunctuator(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (ShouldDisambiguatePunctuator(value, flags, ref context))
+        {
+            WriteSpace();
+        }
+    }
+
+    protected virtual void StartPunctuator(string value, TokenFlags flags, ref WriteContext context)
+    {
+        if (LastTriviaType == TriviaType.None)
+        {
+            WriteRequiredSpaceBetweenTokenAndPunctuator(value, flags, ref context);
+        }
+    }
 
     public void WritePunctuator(string value, TokenFlags flags, ref WriteContext context)
     {
@@ -319,6 +363,32 @@ public partial class JavaScriptTextWriter
 
         OnTokenWritten(TokenType.Punctuator, flags);
         CurrentLineIsEmptyOrWhiteSpace = false;
+
+        if ((flags & (TokenFlags.IsBinaryOperator | TokenFlags.IsUnaryOperator)) != 0)
+        {
+            if (_lookbehind == TokenSequence.BinaryLess && context.Node is UnaryExpression { Operator: UnaryOperator.LogicalNot })
+            {
+                _lookbehind = TokenSequence.BinaryLessThenUnaryLogicalNot;
+            }
+            else
+            {
+                _lookbehind = context.Node switch
+                {
+                    BinaryExpression { Operator: BinaryOperator.Plus } => TokenSequence.BinaryPlus,
+                    BinaryExpression { Operator: BinaryOperator.Minus } => TokenSequence.BinaryMinus,
+                    BinaryExpression { Operator: BinaryOperator.Divide } => TokenSequence.BinaryDivide,
+                    BinaryExpression { Operator: BinaryOperator.Less } => TokenSequence.BinaryLess,
+                    UnaryExpression { Operator: UnaryOperator.Plus } => TokenSequence.UnaryPlus,
+                    UnaryExpression { Operator: UnaryOperator.Minus } => TokenSequence.UnaryMinus,
+                    UnaryExpression { Operator: UnaryOperator.Decrement, Prefix: false } => TokenSequence.UnaryPostfixDecrement,
+                    _ => TokenSequence.None
+                };
+            }
+        }
+        else
+        {
+            _lookbehind = TokenSequence.None;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -447,5 +517,6 @@ public partial class JavaScriptTextWriter
     public virtual void Finish()
     {
         OnTokenWritten(TokenType.EOF, TokenFlags.None);
+        _lookbehind = TokenSequence.None;
     }
 }
