@@ -290,7 +290,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
         Writer.WritePunctuator("=", TokenFlags.InBetween | TokenFlags.SurroundingSpaceRecommended, ref _writeContext);
 
         _writeContext.SetNodeProperty(nameof(assignmentPattern.Right), static node => node.As<AssignmentPattern>().Right);
-        VisitRootExpression(assignmentPattern.Right, RootExpressionFlags(needsBrackets: false));
+        VisitRootExpression(assignmentPattern.Right, RootExpressionFlags(needsBrackets: ExpressionNeedsBracketsInList(assignmentPattern.Right)));
 
         return assignmentPattern;
     }
@@ -640,7 +640,7 @@ public partial class AstToJavaScriptConverter : AstVisitor
         }
         else
         {
-            VisitRootExpression(exportDefaultDeclaration.Declaration.As<Expression>(), ExpressionFlags.IsInsideStatementExpression | RootExpressionFlags(needsBrackets: false));
+            VisitRootExpression(exportDefaultDeclaration.Declaration.As<Expression>(), ExpressionFlags.IsInsideExportDefaultExpression | RootExpressionFlags(needsBrackets: false));
 
             StatementNeedsSemicolon();
         }
