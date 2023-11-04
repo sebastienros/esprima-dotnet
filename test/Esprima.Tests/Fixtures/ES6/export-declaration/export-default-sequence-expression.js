@@ -1,0 +1,1 @@
+export default (window.x = { p: 1 }, window.x.p)
