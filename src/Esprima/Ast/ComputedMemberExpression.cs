@@ -7,8 +7,8 @@ public sealed class ComputedMemberExpression : MemberExpression
     {
     }
 
-    protected override MemberExpression Rewrite(Expression obj, Expression property)
+    protected override MemberExpression Rewrite(Expression @object, Expression property)
     {
-        return new ComputedMemberExpression(obj, property, Optional);
+        return new ComputedMemberExpression(@object, property, Optional);
     }
 }

@@ -18,7 +18,7 @@ public sealed partial class ObjectPattern : BindingPattern
     public ref readonly NodeList<Node> Properties { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _properties; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ObjectPattern Rewrite(in NodeList<Node> properties)
+    private static ObjectPattern Rewrite(in NodeList<Node> properties)
     {
         return new ObjectPattern(properties);
     }

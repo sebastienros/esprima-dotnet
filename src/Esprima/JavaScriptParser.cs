@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using Esprima.Ast;
 
@@ -460,7 +461,7 @@ public partial class JavaScriptParser
     private void Expect(string value)
     {
         var token = NextToken(allowIdentifierEscape: true);
-        if (token.Type != TokenType.Punctuator || !value.Equals((string) token.Value!))
+        if (token.Type != TokenType.Punctuator || !value.Equals((string) token.Value!, StringComparison.Ordinal))
         {
             ThrowUnexpectedToken(token);
         }
@@ -502,7 +503,7 @@ public partial class JavaScriptParser
     private void ExpectKeyword(string keyword)
     {
         var token = NextToken();
-        if (token.Type != TokenType.Keyword || !keyword.Equals((string) token.Value!))
+        if (token.Type != TokenType.Keyword || !keyword.Equals((string) token.Value!, StringComparison.Ordinal))
         {
             ThrowUnexpectedToken(token);
         }
@@ -516,7 +517,7 @@ public partial class JavaScriptParser
     {
         // ReSharper disable once InlineTemporaryVariable
         ref readonly var token = ref _lookahead;
-        return token.Type == TokenType.Punctuator && value.Equals((string) token.Value!);
+        return token.Type == TokenType.Punctuator && value.Equals((string) token.Value!, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -558,7 +559,7 @@ public partial class JavaScriptParser
     {
         // ReSharper disable once InlineTemporaryVariable
         ref readonly var token = ref _lookahead;
-        return token.Type == TokenType.Keyword && keyword.Equals((string) token.Value!);
+        return token.Type == TokenType.Keyword && keyword.Equals((string) token.Value!, StringComparison.Ordinal);
     }
 
     // Return true if the next token matches the specified contextual keyword
@@ -569,7 +570,7 @@ public partial class JavaScriptParser
     {
         // ReSharper disable once InlineTemporaryVariable
         ref readonly var token = ref _lookahead;
-        return token.Type == TokenType.Identifier && keyword.Equals((string) token.Value!);
+        return token.Type == TokenType.Identifier && keyword.Equals((string) token.Value!, StringComparison.Ordinal);
     }
 
     // Return true if the next token is an assignment operator
@@ -1070,11 +1071,11 @@ public partial class JavaScriptParser
     {
         if (key.Type == Nodes.Identifier)
         {
-            return value.Equals(key.As<Identifier>().Name);
+            return value.Equals(key.As<Identifier>().Name, StringComparison.Ordinal);
         }
         else if (key.Type == Nodes.Literal)
         {
-            return value.Equals(key.As<Literal>().StringValue);
+            return value.Equals(key.As<Literal>().StringValue, StringComparison.Ordinal);
         }
 
         return false;
@@ -1123,7 +1124,7 @@ public partial class JavaScriptParser
         var lookaheadPropertyKey = QualifiedPropertyName(_lookahead);
         if (token.Type == TokenType.Identifier && !isAsync && "get".Equals(token.Value) && lookaheadPropertyKey)
         {
-            if (!"get".Equals(GetTokenRaw(token)))
+            if (!"get".Equals(GetTokenRaw(token), StringComparison.Ordinal))
             {
                 TolerateError(Messages.InvalidUnicodeKeyword, "get");
             }
@@ -1135,7 +1136,7 @@ public partial class JavaScriptParser
         }
         else if (token.Type == TokenType.Identifier && !isAsync && "set".Equals(token.Value) && lookaheadPropertyKey)
         {
-            if (!"set".Equals(GetTokenRaw(token)))
+            if (!"set".Equals(GetTokenRaw(token), StringComparison.Ordinal))
             {
                 TolerateError(Messages.InvalidUnicodeKeyword, "set");
             }
@@ -2570,7 +2571,7 @@ public partial class JavaScriptParser
         };
     }
 
-    private int _assignmentDepth = 0;
+    private int _assignmentDepth;
 
     private protected Expression ParseAssignmentExpression()
     {
@@ -5542,7 +5543,7 @@ ParseValue:
 
     private ParseError CreateError(string messageFormat, params object?[] values)
     {
-        var msg = string.Format(messageFormat, values);
+        var msg = string.Format(CultureInfo.InvariantCulture, messageFormat, values);
 
         var index = _lastMarker.Index;
         var line = _lastMarker.Line;
@@ -5552,7 +5553,7 @@ ParseValue:
 
     private protected void TolerateError(string messageFormat, params object?[] values)
     {
-        var msg = string.Format(messageFormat, values);
+        var msg = string.Format(CultureInfo.InvariantCulture, messageFormat, values);
 
         var index = _lastMarker.Index;
         var line = _scanner._lineNumber;
@@ -5591,14 +5592,14 @@ ParseValue:
 
             value = token.Type == TokenType.Template
                 ? token.RawTemplate!
-                : Convert.ToString(token.Value);
+                : Convert.ToString(token.Value, CultureInfo.InvariantCulture);
         }
         else
         {
             value = "ILLEGAL";
         }
 
-        msg = string.Format(msg, value);
+        msg = string.Format(CultureInfo.InvariantCulture, msg, value);
 
         if (token.Type != TokenType.Unknown && token.LineNumber > 0)
         {

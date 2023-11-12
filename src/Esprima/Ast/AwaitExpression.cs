@@ -13,7 +13,7 @@ public sealed partial class AwaitExpression : Expression
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private AwaitExpression Rewrite(Expression argument)
+    private static AwaitExpression Rewrite(Expression argument)
     {
         return new AwaitExpression(argument);
     }

@@ -23,7 +23,7 @@ public sealed partial class ExportSpecifier : Node, IModuleSpecifier
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextExportSpecifier(Local, Exported);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ExportSpecifier Rewrite(Expression local, Expression exported)
+    private static ExportSpecifier Rewrite(Expression local, Expression exported)
     {
         return new ExportSpecifier(local, exported);
     }

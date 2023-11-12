@@ -16,7 +16,7 @@ public sealed partial class ChainExpression : Expression
     public Expression Expression { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ChainExpression Rewrite(Expression expression)
+    private static ChainExpression Rewrite(Expression expression)
     {
         return new ChainExpression(expression);
     }

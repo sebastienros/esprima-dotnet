@@ -32,7 +32,9 @@ partial class JavaScriptTextWriter
     public struct WriteContext
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable CA1822 // public API cannot be changed to static
         public WriteContext From(Node? parentNode, Node node) =>
+#pragma warning restore CA1822
             new WriteContext(parentNode, node ?? ThrowArgumentNullException<Node>(nameof(node)));
 
         private string? _nodePropertyName;

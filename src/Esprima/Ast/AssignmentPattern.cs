@@ -20,7 +20,7 @@ public sealed partial class AssignmentPattern : Node
     public Expression Right { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _right; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private AssignmentPattern Rewrite(Node left, Expression right)
+    private static AssignmentPattern Rewrite(Node left, Expression right)
     {
         return new AssignmentPattern(left, right);
     }

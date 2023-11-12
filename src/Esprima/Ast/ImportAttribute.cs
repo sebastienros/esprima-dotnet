@@ -18,7 +18,7 @@ public sealed partial class ImportAttribute : Node
     public Literal Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ImportAttribute Rewrite(Expression key, Literal value)
+    private static ImportAttribute Rewrite(Expression key, Literal value)
     {
         return new ImportAttribute(key, value);
     }

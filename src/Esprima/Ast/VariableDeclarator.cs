@@ -19,7 +19,7 @@ public sealed partial class VariableDeclarator : Node
     public Expression? Init { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private VariableDeclarator Rewrite(Node id, Expression? init)
+    private static VariableDeclarator Rewrite(Node id, Expression? init)
     {
         return new VariableDeclarator(id, init);
     }

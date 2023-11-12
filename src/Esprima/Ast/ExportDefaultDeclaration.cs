@@ -16,7 +16,7 @@ public sealed partial class ExportDefaultDeclaration : ExportDeclaration
     public StatementListItem Declaration { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ExportDefaultDeclaration Rewrite(StatementListItem declaration)
+    private static ExportDefaultDeclaration Rewrite(StatementListItem declaration)
     {
         return new ExportDefaultDeclaration(declaration);
     }

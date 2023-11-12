@@ -16,7 +16,7 @@ public sealed partial class JsxAttribute : JsxExpression
     public Expression? Value { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private JsxAttribute Rewrite(JsxExpression name, Expression? value)
+    private static JsxAttribute Rewrite(JsxExpression name, Expression? value)
     {
         return new JsxAttribute(name, value);
     }

@@ -7,8 +7,8 @@ public sealed class StaticMemberExpression : MemberExpression
     {
     }
 
-    protected override MemberExpression Rewrite(Expression obj, Expression property)
+    protected override MemberExpression Rewrite(Expression @object, Expression property)
     {
-        return new StaticMemberExpression(obj, property, Optional);
+        return new StaticMemberExpression(@object, property, Optional);
     }
 }

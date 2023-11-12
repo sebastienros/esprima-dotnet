@@ -13,7 +13,7 @@ public sealed partial class ReturnStatement : Statement
     public Expression? Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ReturnStatement Rewrite(Expression? argument)
+    private static ReturnStatement Rewrite(Expression? argument)
     {
         return new ReturnStatement(argument);
     }

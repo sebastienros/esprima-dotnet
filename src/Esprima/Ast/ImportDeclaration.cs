@@ -24,7 +24,7 @@ public sealed partial class ImportDeclaration : Declaration
     public ref readonly NodeList<ImportAttribute> Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _attributes; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ImportDeclaration Rewrite(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> attributes)
+    private static ImportDeclaration Rewrite(in NodeList<ImportDeclarationSpecifier> specifiers, Literal source, in NodeList<ImportAttribute> attributes)
     {
         return new ImportDeclaration(specifiers, source, attributes);
     }

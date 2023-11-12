@@ -14,7 +14,7 @@ public sealed partial class JsxSpreadAttribute : JsxExpression
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private JsxSpreadAttribute Rewrite(Expression argument)
+    private static JsxSpreadAttribute Rewrite(Expression argument)
     {
         return new JsxSpreadAttribute(argument);
     }

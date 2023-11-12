@@ -23,7 +23,7 @@ public sealed partial class TemplateLiteral : Expression
     internal override Node? NextChildNode(ref ChildNodes.Enumerator enumerator) => enumerator.MoveNextTemplateLiteral(Quasis, Expressions);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private TemplateLiteral Rewrite(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
+    private static TemplateLiteral Rewrite(in NodeList<TemplateElement> quasis, in NodeList<Expression> expressions)
     {
         return new TemplateLiteral(quasis, expressions);
     }

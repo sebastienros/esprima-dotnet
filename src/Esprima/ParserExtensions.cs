@@ -190,6 +190,14 @@ internal static partial class ParserExtensions
         return char.MinValue;
     }
 
+#if NETFRAMEWORK || NETSTANDARD2_0
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool Contains(this string source, char c)
+    {
+        return source.IndexOf(c) != -1;
+    }
+#endif
+
     internal static bool TryConsumeInt(this ref ReadOnlySpan<char> s, out int result)
     {
         result = 0;

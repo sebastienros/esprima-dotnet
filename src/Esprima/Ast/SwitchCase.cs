@@ -17,7 +17,7 @@ public sealed partial class SwitchCase : Node
     public ref readonly NodeList<Statement> Consequent { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _consequent; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SwitchCase Rewrite(Expression? test, in NodeList<Statement> consequent)
+    private static SwitchCase Rewrite(Expression? test, in NodeList<Statement> consequent)
     {
         return new SwitchCase(test, consequent);
     }

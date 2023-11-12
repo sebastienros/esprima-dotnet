@@ -13,7 +13,7 @@ public sealed partial class SpreadElement : Expression
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SpreadElement Rewrite(Expression argument)
+    private static SpreadElement Rewrite(Expression argument)
     {
         return new SpreadElement(argument);
     }

@@ -27,7 +27,7 @@ public sealed partial class ForStatement : Statement
     public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ForStatement Rewrite(StatementListItem? init, Expression? test, Expression? update, Statement body)
+    private static ForStatement Rewrite(StatementListItem? init, Expression? test, Expression? update, Statement body)
     {
         return new ForStatement(init, test, update, body);
     }

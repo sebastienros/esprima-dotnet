@@ -16,7 +16,7 @@ public sealed partial class JsxMemberExpression : JsxExpression
     public JsxIdentifier Property { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private JsxMemberExpression Rewrite(JsxExpression @object, JsxIdentifier property)
+    private static JsxMemberExpression Rewrite(JsxExpression @object, JsxIdentifier property)
     {
         return new JsxMemberExpression(@object, property);
     }
