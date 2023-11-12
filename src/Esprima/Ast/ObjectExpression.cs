@@ -18,7 +18,7 @@ public sealed partial class ObjectExpression : Expression
     public ref readonly NodeList<Node> Properties { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _properties; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ObjectExpression Rewrite(in NodeList<Node> properties)
+    private static ObjectExpression Rewrite(in NodeList<Node> properties)
     {
         return new ObjectExpression(properties);
     }

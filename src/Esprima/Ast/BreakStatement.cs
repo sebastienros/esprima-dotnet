@@ -13,7 +13,7 @@ public sealed partial class BreakStatement : Statement
     public Identifier? Label { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private BreakStatement Rewrite(Identifier? label)
+    private static BreakStatement Rewrite(Identifier? label)
     {
         return new BreakStatement(label);
     }

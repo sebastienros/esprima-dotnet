@@ -883,11 +883,11 @@ ParseIdentifierPart:
         {
             type = TokenType.Keyword;
         }
-        else if ("null".Equals(id))
+        else if ("null".Equals(id, StringComparison.Ordinal))
         {
             type = TokenType.NullLiteral;
         }
-        else if ("true".Equals(id) || "false".Equals(id))
+        else if ("true".Equals(id, StringComparison.Ordinal) || "false".Equals(id, StringComparison.Ordinal))
         {
             type = TokenType.BooleanLiteral;
         }
@@ -1017,7 +1017,7 @@ ParseIdentifierPart:
                 else
                 {
                     str = ParserExtensions.CharToString(c);
-                    if ("<>=!+-*%&|^/".IndexOf(c) >= 0)
+                    if ("<>=!+-*%&|^/".Contains(c))
                     {
                         ++_index;
                     }
@@ -1202,7 +1202,7 @@ ParseIdentifierPart:
         if (Character.IsOctalDigit(prefix))
         {
             octal = true;
-            sb.Append("0").Append(_source[_index++]);
+            sb.Append('0').Append(_source[_index++]);
         }
         else
         {
@@ -1421,7 +1421,7 @@ ParseIdentifierPart:
         else if (ch == 'n')
         {
             number = sb.ToString();
-            if (nonOctal || number.IndexOf('.') >= 0)
+            if (nonOctal || number.Contains('.'))
             {
                 ThrowUnexpectedToken();
             }
@@ -1529,22 +1529,22 @@ ParseIdentifierPart:
                             str.Append(unescaped2);
                             break;
                         case 'n':
-                            str.Append("\n");
+                            str.Append('\n');
                             break;
                         case 'r':
-                            str.Append("\r");
+                            str.Append('\r');
                             break;
                         case 't':
-                            str.Append("\t");
+                            str.Append('\t');
                             break;
                         case 'b':
-                            str.Append("\b");
+                            str.Append('\b');
                             break;
                         case 'f':
-                            str.Append("\f");
+                            str.Append('\f');
                             break;
                         case 'v':
-                            str.Append("\x0B");
+                            str.Append('\v');
                             break;
                         case '8':
                         case '9':
@@ -1678,13 +1678,13 @@ ParseIdentifierPart:
                     switch (ch)
                     {
                         case 'n':
-                            sb.Append("\n");
+                            sb.Append('\n');
                             break;
                         case 'r':
-                            sb.Append("\r");
+                            sb.Append('\r');
                             break;
                         case 't':
-                            sb.Append("\t");
+                            sb.Append('\t');
                             break;
                         case 'u':
                             if (_source.CharCodeAt(_index) == '{')
@@ -1724,13 +1724,13 @@ ParseIdentifierPart:
 
                             break;
                         case 'b':
-                            sb.Append("\b");
+                            sb.Append('\b');
                             break;
                         case 'f':
-                            sb.Append("\f");
+                            sb.Append('\f');
                             break;
                         case 'v':
-                            sb.Append("\v");
+                            sb.Append('\v');
                             break;
 
                         default:
@@ -1743,7 +1743,7 @@ ParseIdentifierPart:
                                 }
                                 else
                                 {
-                                    sb.Append("\0");
+                                    sb.Append('\0');
                                 }
                             }
                             else if (Character.IsDecimalDigit(ch))

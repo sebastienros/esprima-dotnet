@@ -30,7 +30,7 @@ public sealed partial class ExportNamedDeclaration : ExportDeclaration
     public ref readonly NodeList<ImportAttribute> Attributes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _attributes; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ExportNamedDeclaration Rewrite(Declaration? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> attributes)
+    private static ExportNamedDeclaration Rewrite(Declaration? declaration, in NodeList<ExportSpecifier> specifiers, Literal? source, in NodeList<ImportAttribute> attributes)
     {
         return new ExportNamedDeclaration(declaration, specifiers, source, attributes);
     }

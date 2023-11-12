@@ -10,7 +10,7 @@ public sealed partial class ImportDefaultSpecifier : ImportDeclarationSpecifier
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ImportDefaultSpecifier Rewrite(Identifier local)
+    private static ImportDefaultSpecifier Rewrite(Identifier local)
     {
         return new ImportDefaultSpecifier(local);
     }

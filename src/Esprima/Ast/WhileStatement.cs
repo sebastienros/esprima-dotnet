@@ -15,7 +15,7 @@ public sealed partial class WhileStatement : Statement
     public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private WhileStatement Rewrite(Expression test, Statement body)
+    private static WhileStatement Rewrite(Expression test, Statement body)
     {
         return new WhileStatement(test, body);
     }

@@ -13,7 +13,7 @@ public sealed partial class ThrowStatement : Statement
     public Expression Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ThrowStatement Rewrite(Expression argument)
+    private static ThrowStatement Rewrite(Expression argument)
     {
         return new ThrowStatement(argument);
     }

@@ -23,7 +23,7 @@ public sealed partial class ForInStatement : Statement
     public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ForInStatement Rewrite(Node left, Expression right, Statement body)
+    private static ForInStatement Rewrite(Node left, Expression right, Statement body)
     {
         return new ForInStatement(left, right, body);
     }

@@ -15,7 +15,7 @@ public sealed partial class StaticBlock : ClassElement
     public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private StaticBlock Rewrite(in NodeList<Statement> body)
+    private static StaticBlock Rewrite(in NodeList<Statement> body)
     {
         return new StaticBlock(body);
     }

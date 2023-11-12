@@ -20,7 +20,7 @@ public sealed partial class JsxElement : JsxExpression
     public ref readonly NodeList<JsxExpression> Children { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _children; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private JsxElement Rewrite(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
+    private static JsxElement Rewrite(Node openingElement, in NodeList<JsxExpression> children, Node? closingElement)
     {
         return new JsxElement(openingElement, children, closingElement);
     }

@@ -15,7 +15,7 @@ public sealed partial class BlockStatement : Statement
     public ref readonly NodeList<Statement> Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _body; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private BlockStatement Rewrite(in NodeList<Statement> body)
+    private static BlockStatement Rewrite(in NodeList<Statement> body)
     {
         return new BlockStatement(body);
     }

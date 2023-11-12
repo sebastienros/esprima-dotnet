@@ -21,7 +21,7 @@ public sealed partial class TryStatement : Statement
     public BlockStatement? Finalizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private TryStatement Rewrite(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
+    private static TryStatement Rewrite(BlockStatement block, CatchClause? handler, BlockStatement? finalizer)
     {
         return new TryStatement(block, handler, finalizer);
     }

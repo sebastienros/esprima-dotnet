@@ -282,12 +282,16 @@ public abstract class JavaScriptTextFormatter : JavaScriptTextWriter
         return statementCount == 0 && KeepEmptyBlockBodyInLine;
     }
 
+#pragma warning disable CA1822 // public API cannot be changed to static
     protected void StoreStatementBodyIntoContext(Statement statement, ref WriteContext context)
+#pragma warning restore CA1822
     {
         context._additionalDataSlot.PrimaryData = statement;
     }
 
+#pragma warning disable CA1822 // public API cannot be changed to static
     protected Statement RetrieveStatementBodyFromContext(ref WriteContext context)
+#pragma warning restore CA1822
     {
         return (Statement) (context._additionalDataSlot.PrimaryData ?? throw new InvalidOperationException());
     }

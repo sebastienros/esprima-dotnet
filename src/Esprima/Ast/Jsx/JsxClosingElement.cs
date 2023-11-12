@@ -14,7 +14,7 @@ public sealed partial class JsxClosingElement : JsxExpression
     public JsxExpression Name { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private JsxClosingElement Rewrite(JsxExpression name)
+    private static JsxClosingElement Rewrite(JsxExpression name)
     {
         return new JsxClosingElement(name);
     }

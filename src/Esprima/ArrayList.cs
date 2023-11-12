@@ -193,7 +193,9 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     }
 
     [Conditional("DEBUG")]
+#pragma warning disable CA1822
     private void AssertUnchanged()
+#pragma warning restore CA1822
     {
 #if DEBUG
         if (_localVersion != (_sharedVersion?[0] ?? 0))
@@ -204,7 +206,9 @@ internal struct ArrayList<T> : IReadOnlyList<T>
     }
 
     [Conditional("DEBUG")]
+#pragma warning disable CA1822
     private void OnChanged()
+#pragma warning restore CA1822
     {
 #if DEBUG
         _sharedVersion ??= new[] { 0 };

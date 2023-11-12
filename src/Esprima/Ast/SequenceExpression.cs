@@ -15,7 +15,7 @@ public sealed partial class SequenceExpression : Expression
     public ref readonly NodeList<Expression> Expressions { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _expressions; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SequenceExpression Rewrite(in NodeList<Expression> expressions)
+    private static SequenceExpression Rewrite(in NodeList<Expression> expressions)
     {
         return new SequenceExpression(expressions);
     }

@@ -20,7 +20,7 @@ public sealed partial class NewExpression : Expression
     public ref readonly NodeList<Expression> Arguments { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref _arguments; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private NewExpression Rewrite(Expression callee, in NodeList<Expression> arguments)
+    private static NewExpression Rewrite(Expression callee, in NodeList<Expression> arguments)
     {
         return new NewExpression(callee, arguments);
     }

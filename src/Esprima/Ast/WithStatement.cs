@@ -15,7 +15,7 @@ public sealed partial class WithStatement : Statement
     public Statement Body { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private WithStatement Rewrite(Expression @object, Statement body)
+    private static WithStatement Rewrite(Expression @object, Statement body)
     {
         return new WithStatement(@object, body);
     }

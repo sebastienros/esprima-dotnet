@@ -16,7 +16,7 @@ public sealed partial class RestElement : Node
     public Node Argument { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private RestElement Rewrite(Node argument)
+    private static RestElement Rewrite(Node argument)
     {
         return new RestElement(argument);
     }

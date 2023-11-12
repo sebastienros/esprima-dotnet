@@ -417,7 +417,7 @@ partial class Scanner
 
                     if (isInverted)
                     {
-                        sb.Append("^");
+                        sb.Append('^');
                     }
 
                     rangeSpan = bmpRanges.AsSpan();
