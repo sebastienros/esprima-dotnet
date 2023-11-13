@@ -1296,7 +1296,7 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-grouping-operator
 
-    private Node ReinterpretExpressionAsPattern(Node expr)
+    private static Node ReinterpretExpressionAsPattern(Node expr)
     {
         // In esprima this method mutates the expression that is passed as a parameter.
         // Because the type property is mutated we need to change the behavior to cloning

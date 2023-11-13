@@ -198,6 +198,14 @@ internal static partial class ParserExtensions
     }
 #endif
 
+#if NETFRAMEWORK || NETSTANDARD2_0
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool StartsWith(this string source, char c)
+    {
+        return source.Length > 0 && source[0] == c;
+    }
+#endif
+
     internal static bool TryConsumeInt(this ref ReadOnlySpan<char> s, out int result)
     {
         result = 0;

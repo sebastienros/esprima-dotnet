@@ -702,7 +702,7 @@ public class AstToJsonConverter : AstVisitor
         protected internal override object? Accept(AstVisitor visitor) => ((AstToJsonConverter) visitor).VisitImportCompat(this);
     }
 
-    private object? VisitImportCompat(ImportCompat import)
+    private ImportCompat VisitImportCompat(ImportCompat import)
     {
         OnStartSyntaxElementObject(import);
         Member("type", "Import");

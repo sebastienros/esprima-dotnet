@@ -1455,7 +1455,7 @@ ParseIdentifierPart:
         }
         else
         {
-            d = number.TrimStart().StartsWith("-", StringComparison.Ordinal)
+            d = number.TrimStart().StartsWith('-')
                 ? double.NegativeInfinity
                 : double.PositiveInfinity;
 
