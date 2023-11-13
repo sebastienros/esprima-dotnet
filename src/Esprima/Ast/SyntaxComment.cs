@@ -5,6 +5,8 @@ namespace Esprima.Ast;
 
 public class SyntaxComment : SyntaxElement
 {
+    private static readonly string[] s_blockSeparators = { "\r\n", "\r", "\n" };
+
     public SyntaxComment(CommentType type, string value)
     {
         Type = type;
@@ -26,7 +28,7 @@ public class SyntaxComment : SyntaxElement
                     writer.WriteLineComment(Value, JavaScriptTextWriter.TriviaFlags.None);
                     break;
                 case CommentType.Block:
-                    writer.WriteBlockComment(Value.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None), JavaScriptTextWriter.TriviaFlags.None);
+                    writer.WriteBlockComment(Value.Split(s_blockSeparators, StringSplitOptions.None), JavaScriptTextWriter.TriviaFlags.None);
                     break;
                 default:
                     throw new InvalidOperationException();
