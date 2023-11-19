@@ -18,12 +18,17 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
 
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
 
     <DefineConstants Condition=" '$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants);HAS_SPAN_PARSE</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="PolySharp" PrivateAssets="all" />
