@@ -8,6 +8,7 @@
     <AssemblyOriginatorKeyFile>../../src/Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\test\Esprima.Tests\Fixtures\3rdparty\**" CopyToOutputDirectory="PreserveNewest" LinkBase="3rdparty" />
