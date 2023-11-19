@@ -17,6 +17,8 @@
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+
   </PropertyGroup>
 
 </Project>
