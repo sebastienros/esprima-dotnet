@@ -258,8 +258,8 @@ public class Fixtures
         var assemblyPath = typeof(Fixtures).GetTypeInfo().Assembly.Location;
         var assemblyDirectory = new FileInfo(assemblyPath).Directory;
 #endif
-        var root = assemblyDirectory?.Parent?.Parent?.Parent?.FullName;
-        return root ?? "";
+        var root = assemblyDirectory?.Parent?.Parent?.Parent?.Parent?.FullName;
+        return Path.Combine(root ?? "", "test", "Esprima.Tests");
     }
 
     private sealed class FixtureMetadata

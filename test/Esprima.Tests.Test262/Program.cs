@@ -16,9 +16,9 @@ public static class Program
     public static async Task<int> Main(string[] args)
     {
         var rootDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
-        var projectRoot = Path.Combine(rootDirectory, "../../..");
+        var solutionRoot = Path.Combine(rootDirectory, "../../../..");
 
-        var allowListFile = Path.Combine(projectRoot, "allow-list.txt");
+        var allowListFile = new FileInfo(Path.Combine(solutionRoot, "test", "Esprima.Tests.Test262", "allow-list.txt")).FullName;
         var lines = File.Exists(allowListFile) ? await File.ReadAllLinesAsync(allowListFile) : Array.Empty<string>();
         var knownFailing = new HashSet<string>(lines
             .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("#", StringComparison.Ordinal))

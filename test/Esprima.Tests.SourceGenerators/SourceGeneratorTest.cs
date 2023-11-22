@@ -10,6 +10,6 @@ public class SourceGeneratorTest
 
     protected static string ToEsprimaSourcePath(string path)
     {
-        return Path.Combine("../../../../../src/Esprima/", path);
+        return Path.Combine("../../../../src/Esprima/", path);
     }
 }
