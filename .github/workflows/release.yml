@@ -19,10 +19,10 @@ jobs:
 
     - name: Generate test cases
       working-directory: ./test/Esprima.Tests.Test262
-      run: dotnet tool restore && dotnet test262 generate && dotnet run -c Release --framework net6.0
+      run: dotnet tool restore && dotnet test262 generate && dotnet run -c Release
 
     - name: Test
-      run: dotnet test --configuration Release --framework net6.0 --logger GitHubActions
+      run: dotnet test --configuration Release --logger GitHubActions
 
     - name: Pack with dotnet
       run: |
