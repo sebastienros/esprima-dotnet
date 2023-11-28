@@ -371,6 +371,9 @@ public class RegExpTests
     [MemberData(nameof(TestCases), "Fixtures.RegExp")]
     public void ExecuteTestCase(string pattern, string flags, string expectedAdaptedPattern, string testString, string expectedMatchesJson, string hints)
     {
+        // When upgrading .NET runtime version, it's expected that some of the tests may fail because the regexp rewriting logic
+        // uses some Unicode-related APIs provided by .NET and the underlying Unicode datasets may be updated between .NET versions.
+        // So, in the case of failing tests, try to re-generate the test cases first.
         // To re-generate test cases, execute `dotnet run --project Fixtures.RegExp\Generator -c Release`
 
         static string DecodeStringIfEscaped(string value) => JavaScriptStringHelper.IsStringLiteral(value)
