@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Esprima.Tests</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyOriginatorKeyFile>..\..\..\..\src\Esprima.snk</AssemblyOriginatorKeyFile>
