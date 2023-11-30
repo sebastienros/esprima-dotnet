@@ -638,7 +638,7 @@ public partial class JavaScriptParser
         return result;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining | (MethodImplOptions) 512)]
     private T InheritCoverGrammar<T>(Func<T> parseFunction) where T : Node
     {
         var previousIsBindingElement = _context.IsBindingElement;
@@ -677,6 +677,7 @@ public partial class JavaScriptParser
 
     // https://tc39.github.io/ecma262/#sec-primary-expression
 
+    [MethodImpl((MethodImplOptions) 512)]
     private protected virtual Expression ParsePrimaryExpression()
     {
         var node = CreateNode();
@@ -2318,6 +2319,7 @@ public partial class JavaScriptParser
     private Stack<int>? _precedencesStack;
     private ArrayList<object>? _sharedStack;
 
+    [MethodImpl((MethodImplOptions) 512)]
     private Expression ParseBinaryExpression()
     {
         var startToken = _lookahead;
