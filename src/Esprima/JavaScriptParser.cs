@@ -4874,7 +4874,7 @@ public partial class JavaScriptParser
                 token = _lookahead;
                 key = ParseObjectPropertyKey();
 
-                if (!QualifiedPropertyName(_lookahead))
+                if (!QualifiedPropertyName(_lookahead) || _hasLineTerminator)
                 {
                     goto ParseValue;
                 }

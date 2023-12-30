@@ -611,6 +611,45 @@ class X {
         Assert.Equal(expected, json);
     }
 
+    [Fact]
+    public void CanParseClassElementsWithNewLinesInsteadOfSemicolon()
+    {
+        // field-definition-accessor-no-line-terminator.js
+        var parser = new JavaScriptParser();
+        var program = parser.ParseScript("""
+         var C = class {
+           accessor
+           $;
+           static accessor
+           $;
+         }
+         """);
+
+        var declaration = (VariableDeclaration) Assert.Single(program.Body);
+        var variableDeclarator = Assert.Single(declaration.Declarations);
+        var classExpression = Assert.IsType<ClassExpression>(variableDeclarator.Init);
+
+        var classElements = classExpression.Body.Body;
+        Assert.Equal(4, classElements.Count);
+
+        var first = Assert.IsType<PropertyDefinition>(classElements[0]);
+        Assert.Equal("accessor", ((Identifier) first.Key).Name);
+        Assert.Null(first.Value);
+
+        var second = Assert.IsType<PropertyDefinition>(classElements[1]);
+        Assert.Equal("$", ((Identifier) second.Key).Name);
+        Assert.Null(second.Value);
+
+        var third = Assert.IsType<PropertyDefinition>(classElements[2]);
+        Assert.Equal("accessor", ((Identifier) third.Key).Name);
+        Assert.True(third.Static);
+        Assert.Null(third.Value);
+
+        var fourth = Assert.IsType<PropertyDefinition>(classElements[3]);
+        Assert.Equal("$", ((Identifier) fourth.Key).Name);
+        Assert.Null(fourth.Value);
+    }
+
     [Theory]
     [InlineData("script", true)]
     [InlineData("module", false)]
