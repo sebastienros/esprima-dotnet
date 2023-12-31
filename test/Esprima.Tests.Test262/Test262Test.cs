@@ -6,10 +6,7 @@ public abstract partial class Test262Test
 {
     private JavaScriptParser BuildTestExecutor(Test262File file)
     {
-        var options = new ParserOptions()
-        {
-            Tolerant = false
-        };
+        var options = new ParserOptions() { Tolerant = false };
         return new JavaScriptParser(options);
     }
 
@@ -27,6 +24,15 @@ public abstract partial class Test262Test
 
     private partial bool ShouldThrow(Test262File testCase, bool strict)
     {
-        return testCase.NegativeTestCase?.Type == ExpectedErrorType.SyntaxError || testCase.NegativeTestCase?.Phase == TestingPhase.Parse;
+        var negativeTestCase = testCase.NegativeTestCase;
+
+        if (negativeTestCase is null)
+        {
+            return false;
+        }
+
+        return negativeTestCase.Type == ExpectedErrorType.SyntaxError
+               && negativeTestCase.Phase != TestingPhase.Resolution
+               && negativeTestCase.Phase != TestingPhase.Runtime;
     }
 }
