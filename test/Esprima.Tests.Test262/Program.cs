@@ -82,7 +82,18 @@ public static class Program
                     },
                     IsIgnored = file => file.Features.IndexOfAny(excludedFeatures.AsSpan()) != -1 || knownFailing.Contains(file.ToString()),
                     IsParseError = exception => exception is ParserException,
-                    ShouldThrow = file => file.NegativeTestCase?.Type == ExpectedErrorType.SyntaxError || file.NegativeTestCase?.Phase == TestingPhase.Parse,
+                    ShouldThrow = file =>
+                    {
+                        var negativeTestCase = file.NegativeTestCase;
+                        if (negativeTestCase is null)
+                        {
+                            return false;
+                        }
+
+                        return negativeTestCase.Type == ExpectedErrorType.SyntaxError
+                               && negativeTestCase.Phase != TestingPhase.Resolution
+                               && negativeTestCase.Phase != TestingPhase.Runtime;
+                    },
                     OnTestExecuted = _ => testTask.Increment(1)
                 };
 

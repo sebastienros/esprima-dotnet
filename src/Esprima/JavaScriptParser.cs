@@ -1739,15 +1739,17 @@ public partial class JavaScriptParser
 
         _context.IsAssignmentTarget = previousIsAssignmentTarget;
 
-        if (!this.Match(")") && _tolerant)
+        if (!this.Match(")"))
         {
-            this.TolerateUnexpectedToken(this.NextToken());
+            if (Match(","))
+            {
+                NextToken();
+            }
+            this.Expect(")");
         }
         else
         {
-            if (Match(","))
-                NextToken();
-            this.Expect(")");
+            NextToken();
         }
 
         return Finalize(node, new ImportExpression(source, attributes));
