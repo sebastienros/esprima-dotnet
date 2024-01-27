@@ -4,7 +4,6 @@
     <AssemblyName>Esprima</AssemblyName>
     <AssemblyTitle>Esprima .NET</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
     <TargetFrameworks>net462;netstandard2.0;netstandard2.1</TargetFrameworks>
     <AssemblyOriginatorKeyFile>../Esprima.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -12,7 +11,11 @@
     <PackageTags>javascript, parser, ecmascript</PackageTags>
     <PackageProjectUrl>https://github.com/sebastienros/esprima-dotnet</PackageProjectUrl>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
-    <Version>3.0.0-beta-$(BuildNumber)</Version>
+
+    <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
+    <VersionPrefix>3.0.5</VersionPrefix>
+    <VersionSuffix>beta-$(BuildNumber)</VersionSuffix>
+    <FileVersion>$(VersionPrefix).$(BuildNumber)</FileVersion>
 
     <!-- SkipLocalsInit -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
