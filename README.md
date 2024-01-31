@@ -2,7 +2,7 @@
 |--------------|
 |If you are upgrading from an older version, please note that version 3 ships with numerous breaking changes to the public API because virtually all areas of the library have been revised.<br />Documentation of the previous major version is available [here](https://github.com/sebastienros/esprima-dotnet/tree/v2.1.3). |
 
-[![Build](https://github.com/sebastienros/esprima-dotnet/actions/workflows/staging.yml/badge.svg)](https://github.com/sebastienros/esprima-dotnet/actions/workflows/staging.yml)
+[![Build](https://github.com/sebastienros/esprima-dotnet/actions/workflows/build.yml/badge.svg)](https://github.com/sebastienros/esprima-dotnet/actions/workflows/build.yml)
 [![NuGet](https://img.shields.io/nuget/v/esprima.svg)](https://www.nuget.org/packages/esprima)
 [![MyGet](https://img.shields.io/myget/esprimadotnet/v/esprima?label=MyGet)](https://www.myget.org/feed/esprimadotnet/package/nuget/Esprima)
 
