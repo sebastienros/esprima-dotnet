@@ -14,6 +14,15 @@ public record class ParserOptions
 
     public ScannerOptions GetScannerOptions() => _scannerOptions;
 
+    protected ParserOptions(ParserOptions original)
+    {
+        _scannerOptions = original._scannerOptions with { };
+        Tokens = original.Tokens;
+        AllowReturnOutsideFunction = original.AllowReturnOutsideFunction;
+        MaxAssignmentDepth = original.MaxAssignmentDepth;
+        OnNodeCreated = original.OnNodeCreated;
+    }
+
     /// <summary>
     /// Gets or sets whether the tokens are included in the parsed tree, defaults to <see langword="false"/>.
     /// </summary>
