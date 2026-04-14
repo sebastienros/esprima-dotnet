@@ -632,7 +632,11 @@ partial class Scanner
                         break;
 
                     case '\\':
-                        Debug.Assert(i + 1 < _pattern.Length, "Unexpected end of escape sequence in regular expression.");
+                        if (i + 1 >= _pattern.Length)
+                        {
+                            ReportSyntaxError(i, Messages.RegExpEscapeAtEndOfPattern);
+                        }
+
                         if (!mode.AdjustEscapeSequence(ref context, ref this, out conversionError))
                         {
                             return null;

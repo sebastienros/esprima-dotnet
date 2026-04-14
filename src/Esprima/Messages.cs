@@ -60,6 +60,7 @@ internal static class Messages
     public const string PropertyAfterRestProperty = "Unexpected token";
     public const string Redeclaration = "{0} \"{1}\" has already been declared";
     public const string RegExpDuplicateCaptureGroupName = "Invalid regular expression: /{0}/{1}: Duplicate capture group name";
+    public const string RegExpEscapeAtEndOfPattern = "Invalid regular expression: /{0}/{1}: \\ at end of pattern";
     public const string RegExpIncompleteQuantifier = "Invalid regular expression: /{0}/{1}: Incomplete quantifier";
     public const string RegExpInvalidCaptureGroupName = "Invalid regular expression: /{0}/{1}: Invalid capture group name";
     public const string RegExpInvalidEscape = "Invalid regular expression: /{0}/{1}: Invalid escape";
