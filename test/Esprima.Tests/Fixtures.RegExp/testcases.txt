@@ -1,4 +1,4 @@
-﻿# Generated from testcases.template.txt at 2026-04-14T09:08:51
+﻿# Generated from testcases.template.txt at 2026-04-14T09:17:30
 
 # This file defines test cases for regular expression conversion testing (see RegExpTests.ExecuteTestCase).
 # Each uncommented, non-whitespace line specifies a test case in a tab-delimited format, with the following fields:
@@ -674,7 +674,7 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	PIJAMALı HASTA YAĞıZ Ş
 \c\cA		"\\\\c\x01"	"\\c\x01"	[{"captures":["\\c\u0001"],"index":0}]
 \c\cA	u	)syntax-error(	"\\c\x01"	"Invalid Unicode escape"
 
-\c$		"\\\\c$"	\c	[{"captures":["\\c"],"index":0}]
+\c$		"\\\\c\\z"	\c	[{"captures":["\\c"],"index":0}]
 \c$	u	)syntax-error(	\c	"Invalid Unicode escape"
 \c(		)syntax-error(	\c(	"Unterminated group"
 \c(	u	)syntax-error(	\c(	"Invalid Unicode escape"	!ignore-error-message
@@ -739,69 +739,69 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	PIJAMALı HASTA YAĞıZ Ş
 \cI?\cM*\cJ+\cK{1}\cL{0,}\cH{1,2}	u	"\t?\r*\n+\v{1}\f{0,}\b{1,2}"	"\0\t\r\n\v\f\b"	[{"captures":["\t\r\n\u000b\f\b"],"index":1}]
 
 [\c]		"[\\\\c]"	\c	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1}]
-[\c]	u	)syntax-error(	\c	"Invalid class escape"
+[\c]	u	)syntax-error(	\c	"Invalid Unicode escape"
 [\c\cA]		"[\\\\c\x01]"	"\\c\x01"	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["\u0001"],"index":2}]
-[\c\cA]	u	)syntax-error(	"\\c\x01"	"Invalid class escape"
+[\c\cA]	u	)syntax-error(	"\\c\x01"	"Invalid Unicode escape"
 
 [\c-d]		"[\\\\c-d]"	[ac\dc]	[{"captures":["c"],"index":2},{"captures":["\\"],"index":3},{"captures":["d"],"index":4},{"captures":["c"],"index":5}]
-[\c-d]	u	)syntax-error(	[ac\dc]	"Invalid class escape"
+[\c-d]	u	)syntax-error(	[ac\dc]	"Invalid Unicode escape"
 [\c-b]		)syntax-error(	[ac\dc]	"Range out of order in character class"
-[\c-b]	u	)syntax-error(	[ac\dc]	"Invalid class escape"
+[\c-b]	u	)syntax-error(	[ac\dc]	"Invalid Unicode escape"
 [[-\c]		"[[-\\\\c]"	[ac\dc]	[{"captures":["["],"index":0},{"captures":["c"],"index":2},{"captures":["\\"],"index":3},{"captures":["c"],"index":5}]
-[[-\c]	u	)syntax-error(	[ac\dc]	"Invalid class escape"
+[[-\c]	u	)syntax-error(	[ac\dc]	"Invalid Unicode escape"
 [b-\c]		)syntax-error(	[ac\dc]	"Range out of order in character class"
-[b-\c]	u	)syntax-error(	[ac\dc]	"Invalid class escape"
+[b-\c]	u	)syntax-error(	[ac\dc]	"Invalid Unicode escape"
 [[-\c-d]		"[[-\\\\c-d]"	[ac\dc]	[{"captures":["["],"index":0},{"captures":["c"],"index":2},{"captures":["\\"],"index":3},{"captures":["d"],"index":4},{"captures":["c"],"index":5}]
-[[-\c-d]	u	)syntax-error(	[ac\dc]	"Invalid class escape"
+[[-\c-d]	u	)syntax-error(	[ac\dc]	"Invalid Unicode escape"
 
 [\c$]		"[\\\\c$]"	\c$	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["$"],"index":2}]
-[\c$]	u	)syntax-error(	\c$	"Invalid class escape"
+[\c$]	u	)syntax-error(	\c$	"Invalid Unicode escape"
 [\c(]		"[\\\\c(]"	\c(	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["("],"index":2}]
-[\c(]	u	)syntax-error(	\c(	"Invalid class escape"
+[\c(]	u	)syntax-error(	\c(	"Invalid Unicode escape"
 [\c)]		"[\\\\c)]"	\c)	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":[")"],"index":2}]
-[\c)]	u	)syntax-error(	\c)	"Invalid class escape"
+[\c)]	u	)syntax-error(	\c)	"Invalid Unicode escape"
 [\c*]		"[\\\\c*]"	\c*	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["*"],"index":2}]
-[\c*]	u	)syntax-error(	\c*	"Invalid class escape"
+[\c*]	u	)syntax-error(	\c*	"Invalid Unicode escape"
 [\c+]		"[\\\\c+]"	\c+	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["+"],"index":2}]
-[\c+]	u	)syntax-error(	\c+	"Invalid class escape"
+[\c+]	u	)syntax-error(	\c+	"Invalid Unicode escape"
 [\c.]		"[\\\\c.]"	\c.	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["."],"index":2}]
-[\c.]	u	)syntax-error(	\c.	"Invalid class escape"
+[\c.]	u	)syntax-error(	\c.	"Invalid Unicode escape"
 [\c0]		"[\x10]"	"\\c0\x10"	[{"captures":["\u0010"],"index":3}]
-[\c0]	u	)syntax-error(	"\\c0\x10"	"Invalid class escape"
+[\c0]	u	)syntax-error(	"\\c0\x10"	"Invalid Unicode escape"
 [\c9]		"[\x19]"	"\\c9\x19"	[{"captures":["\u0019"],"index":3}]
-[\c9]	u	)syntax-error(	"\\c9\x19"	"Invalid class escape"
+[\c9]	u	)syntax-error(	"\\c9\x19"	"Invalid Unicode escape"
 [\c<]		"[\\\\c<]"	\c<	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["<"],"index":2}]
-[\c<]	u	)syntax-error(	\c<	"Invalid class escape"
+[\c<]	u	)syntax-error(	\c<	"Invalid Unicode escape"
 [\c>]		"[\\\\c>]"	\c>	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":[">"],"index":2}]
-[\c>]	u	)syntax-error(	\c>	"Invalid class escape"
+[\c>]	u	)syntax-error(	\c>	"Invalid Unicode escape"
 [\c?]		"[\\\\c?]"	\c?	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["?"],"index":2}]
-[\c?]	u	)syntax-error(	\c?	"Invalid class escape"
+[\c?]	u	)syntax-error(	\c?	"Invalid Unicode escape"
 [\c@]		"[\\\\c@]"	\c@	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["@"],"index":2}]
-[\c@]	u	)syntax-error(	\c@	"Invalid class escape"
+[\c@]	u	)syntax-error(	\c@	"Invalid Unicode escape"
 [\cA]		"[\x01]"	"\\cA\x01"	[{"captures":["\u0001"],"index":3}]
 [\cA]	u	"(?:[\x01])"	"\\cA\x01"	[{"captures":["\u0001"],"index":3}]
 [\cZ]		"[\x1a]"	"\\cZ\x1A"	[{"captures":["\u001a"],"index":3}]
 [\cZ]	u	"(?:[\x1a])"	"\\cZ\x1A"	[{"captures":["\u001a"],"index":3}]
 [\c[]		"[\\\\c[]"	\c[	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["["],"index":2}]
-[\c[]	u	)syntax-error(	\c[	"Invalid class escape"
+[\c[]	u	)syntax-error(	\c[	"Invalid Unicode escape"
 [\c_]		"[\x1f]"	"\\c_\x1F"	[{"captures":["\u001f"],"index":3}]
-[\c_]	u	)syntax-error(	"\\c_\x1F"	"Invalid class escape"
+[\c_]	u	)syntax-error(	"\\c_\x1F"	"Invalid Unicode escape"
 [\c/]		"[\\\\c/]"	\c/	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["/"],"index":2}]
-[\c/]	u	)syntax-error(	\c/	"Invalid class escape"
+[\c/]	u	)syntax-error(	\c/	"Invalid Unicode escape"
 [\c]]		"[\\\\c]]"	\c]	[{"captures":["c]"],"index":1}]
-[\c]]	u	)syntax-error(	\c]	"Invalid class escape"	!ignore-error-message
+[\c]]	u	)syntax-error(	\c]	"Invalid Unicode escape"	!ignore-error-message
 [\c^]		"[\\\\c^]"	\c^	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["^"],"index":2}]
-[\c^]	u	)syntax-error(	\c^	"Invalid class escape"
+[\c^]	u	)syntax-error(	\c^	"Invalid Unicode escape"
 [\ca]		"[\x01]"	"\\ca\x01"	[{"captures":["\u0001"],"index":3}]
 [\ca]	u	"(?:[\x01])"	"\\ca\x01"	[{"captures":["\u0001"],"index":3}]
 [\cz]		"[\x1a]"	"\\cz\x1A"	[{"captures":["\u001a"],"index":3}]
 [\cz]	u	"(?:[\x1a])"	"\\cz\x1A"	[{"captures":["\u001a"],"index":3}]
 [\c{]		"[\\\\c{]"	\c{	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["{"],"index":2}]
-[\c{]	u	)syntax-error(	\c{	"Invalid class escape"
+[\c{]	u	)syntax-error(	\c{	"Invalid Unicode escape"
 [\c|]		"[\\\\c|]"	\c|	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["|"],"index":2}]
-[\c|]	u	)syntax-error(	\c|	"Invalid class escape"
+[\c|]	u	)syntax-error(	\c|	"Invalid Unicode escape"
 [\c}]		"[\\\\c}]"	\c}	[{"captures":["\\"],"index":0},{"captures":["c"],"index":1},{"captures":["}"],"index":2}]
-[\c}]	u	)syntax-error(	\c}	"Invalid class escape"
+[\c}]	u	)syntax-error(	\c}	"Invalid Unicode escape"
 
 [\cI\cM\cJ\cK\cL\cH]		"[\t\r\n\v\f\b]"	"\0\t\r\n\v\f\b"	[{"captures":["\t"],"index":1},{"captures":["\r"],"index":2},{"captures":["\n"],"index":3},{"captures":["\u000b"],"index":4},{"captures":["\f"],"index":5},{"captures":["\b"],"index":6}]
 [\cI\cM\cJ\cK\cL\cH]	u	"(?:[\b-\r])"	"\0\t\r\n\v\f\b"	[{"captures":["\t"],"index":1},{"captures":["\r"],"index":2},{"captures":["\n"],"index":3},{"captures":["\u000b"],"index":4},{"captures":["\f"],"index":5},{"captures":["\b"],"index":6}]
@@ -1005,7 +1005,7 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	PIJAMALı HASTA YAĞıZ Ş
 \xf		xf	xf	[{"captures":["xf"],"index":0}]
 \xf	u	)syntax-error(	xf	"Invalid escape"
 
-\x0$		x0$	x0	[{"captures":["x0"],"index":0}]
+\x0$		"x0\\z"	x0	[{"captures":["x0"],"index":0}]
 \x0$	u	)syntax-error(	x0	"Invalid escape"
 \x0(		)syntax-error(	x0(	"Unterminated group"
 \x0(	u	)syntax-error(	x0(	"Invalid escape"	!ignore-error-message
@@ -1170,7 +1170,7 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	PIJAMALı HASTA YAĞıZ Ş
 \u00f		u00f	u00f	[{"captures":["u00f"],"index":0}]
 \u00f	u	)syntax-error(	u00f	"Invalid Unicode escape"
 
-\u000$		u000$	u000	[{"captures":["u000"],"index":0}]
+\u000$		"u000\\z"	u000	[{"captures":["u000"],"index":0}]
 \u000$	u	)syntax-error(	u000	"Invalid Unicode escape"
 \u000(		)syntax-error(	u000(	"Unterminated group"
 \u000(	u	)syntax-error(	u000(	"Invalid Unicode escape"	!ignore-error-message
@@ -1440,15 +1440,15 @@ PIJAMALı HASTA YAĞıZ ŞOFÖRE ÇABUCAK GÜVENDI	ui	PIJAMALı HASTA YAĞıZ Ş
 ^.	sm	"(?<=[\n\r\u2028\u2029]|^)[\\s\\S]"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["0"],"index":0},{"captures":["a"],"index":3},{"captures":["A"],"index":6},{"captures":["\n"],"index":9},{"captures":["M"],"index":10},{"captures":["\u2029"],"index":39},{"captures":["\u0001"],"index":40}]
 ^.	usm	"(?<=[\n\r\u2028\u2029]|^)(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\ud800-\udfff])"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["0"],"index":0},{"captures":["a"],"index":3},{"captures":["A"],"index":6},{"captures":["\n"],"index":9},{"captures":["M"],"index":10},{"captures":["\u2029"],"index":39},{"captures":["\u0001"],"index":40}]
 
-.$	m	"[^\n\r\u2028\u2029](?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":[" "],"index":37},{"captures":["઱"],"index":76}]
-.$	um	"(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\n\r\u2028\u2029\ud800-\udfff])(?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":[" "],"index":37},{"captures":["઱"],"index":76}]
-.$	sm	"[\\s\\S](?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":["\r"],"index":8},{"captures":[" "],"index":37},{"captures":["\u2028"],"index":38},{"captures":["઱"],"index":76}]
-.$	usm	"(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\ud800-\udfff])(?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":["\r"],"index":8},{"captures":[" "],"index":37},{"captures":["\u2028"],"index":38},{"captures":["઱"],"index":76}]
+.$	m	"[^\n\r\u2028\u2029](?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":[" "],"index":37},{"captures":["઱"],"index":76}]
+.$	um	"(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\n\r\u2028\u2029\ud800-\udfff])(?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":[" "],"index":37},{"captures":["઱"],"index":76}]
+.$	sm	"[\\s\\S](?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":["\r"],"index":8},{"captures":[" "],"index":37},{"captures":["\u2028"],"index":38},{"captures":["઱"],"index":76}]
+.$	usm	"(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\ud800-\udfff])(?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[{"captures":["9"],"index":1},{"captures":["z"],"index":4},{"captures":["Z"],"index":7},{"captures":["\r"],"index":8},{"captures":[" "],"index":37},{"captures":["\u2028"],"index":38},{"captures":["઱"],"index":76}]
 
-^.$	m	"(?<=[\n\r\u2028\u2029]|^)[^\n\r\u2028\u2029](?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
-^.$	um	"(?<=[\n\r\u2028\u2029]|^)(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\n\r\u2028\u2029\ud800-\udfff])(?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
-^.$	sm	"(?<=[\n\r\u2028\u2029]|^)[\\s\\S](?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
-^.$	usm	"(?<=[\n\r\u2028\u2029]|^)(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\ud800-\udfff])(?=[\n\r\u2028\u2029]|$)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
+^.$	m	"(?<=[\n\r\u2028\u2029]|^)[^\n\r\u2028\u2029](?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
+^.$	um	"(?<=[\n\r\u2028\u2029]|^)(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\n\r\u2028\u2029\ud800-\udfff])(?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
+^.$	sm	"(?<=[\n\r\u2028\u2029]|^)[\\s\\S](?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
+^.$	usm	"(?<=[\n\r\u2028\u2029]|^)(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\ud800-\udfff])(?=[\n\r\u2028\u2029]|\\z)"	"09\naz\rAZ\r\nMṎbẏǅǋʱⱼªﹴ̒𛲝ःꨯ҈꙰9🯶ᛮ𐍁³𖭞  \u2028\u2029\u0001­𑂽\udc4f\udbc9􊭣_⁔-֊(﴿)₎«⸠»⸝#𐩒+﬩$𑿞^˨¦🫅͹઱"	[]
 
 .	m	"[^\n\r\u2028\u2029]"	\na\n\n\na\n	[{"captures":["\\"],"index":0},{"captures":["n"],"index":1},{"captures":["a"],"index":2},{"captures":["\\"],"index":3},{"captures":["n"],"index":4},{"captures":["\\"],"index":5},{"captures":["n"],"index":6},{"captures":["\\"],"index":7},{"captures":["n"],"index":8},{"captures":["a"],"index":9},{"captures":["\\"],"index":10},{"captures":["n"],"index":11}]
 .	um	"(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\n\r\u2028\u2029\ud800-\udfff])"	\na\n\n\na\n	[{"captures":["\\"],"index":0},{"captures":["n"],"index":1},{"captures":["a"],"index":2},{"captures":["\\"],"index":3},{"captures":["n"],"index":4},{"captures":["\\"],"index":5},{"captures":["n"],"index":6},{"captures":["\\"],"index":7},{"captures":["n"],"index":8},{"captures":["a"],"index":9},{"captures":["\\"],"index":10},{"captures":["n"],"index":11}]
@@ -2041,8 +2041,8 @@ a|ab	u	a|ab	abc	[{"captures":["a"],"index":0}]
 (?:(a)|(ab))(?:(c)|(bc))		(?:(a)|(ab))(?:(c)|(bc))	abc	[{"captures":["abc","a",null,null,"bc"],"index":0}]
 (?:(a)|(ab))(?:(c)|(bc))	u	(?:(a)|(ab))(?:(c)|(bc))	abc	[{"captures":["abc","a",null,null,"bc"],"index":0}]
 
-\.(?:png|jpe?g|webp|avif|gif)$	i	"\\.(?:png|jpe?g|webp|avif|gif)$"	image.jpg	[{"captures":[".jpg"],"index":5}]
-\.(?:png|jpe?g|webp|avif|gif)$	ui	"\\.(?:png|jpe?g|webp|avif|gif)$"	image.jpg	[{"captures":[".jpg"],"index":5}]
+\.(?:png|jpe?g|webp|avif|gif)$	i	"\\.(?:png|jpe?g|webp|avif|gif)\\z"	image.jpg	[{"captures":[".jpg"],"index":5}]
+\.(?:png|jpe?g|webp|avif|gif)$	ui	"\\.(?:png|jpe?g|webp|avif|gif)\\z"	image.jpg	[{"captures":[".jpg"],"index":5}]
 
 \bgr(a|e)y\b		"\\bgr(a|e)y\\b"	The gray wolf blended in among the grey rocks.	[{"captures":["gray","a"],"index":4},{"captures":["grey","e"],"index":35}]
 \bgr(a|e)y\b	u	"\\bgr(a|e)y\\b"	The gray wolf blended in among the grey rocks.	[{"captures":["gray","a"],"index":4},{"captures":["grey","e"],"index":35}]
@@ -2102,27 +2102,27 @@ y|{1,2}x	u	)syntax-error(	xxyx	"Nothing to repeat"
 
 "(?<\uD804\uDC00>x)"		)syntax-error(	x	"Invalid capture group name"
 (?<\uD804\uDC00>x)		)syntax-error(	x	"Invalid capture group name"
-(?<\u{11000}>x)		)syntax-error(	x	"Invalid Unicode escape"
+(?<\u{11000}>x)		)syntax-error(	x	"Invalid capture group name"
 "(?<\uD800>x)"		)syntax-error(	x	"Invalid capture group name"
 (?<\uD800>x)		)syntax-error(	x	"Invalid capture group name"
-(?<\u{D800}>x)		)syntax-error(	x	"Invalid Unicode escape"
+(?<\u{D800}>x)		)syntax-error(	x	"Invalid capture group name"
 "(?<\uDC00>x)"		)syntax-error(	x	"Invalid capture group name"
 (?<\uDC00>x)		)syntax-error(	x	"Invalid capture group name"
-(?<\u{DC00}>x)		)syntax-error(	x	"Invalid Unicode escape"
+(?<\u{DC00}>x)		)syntax-error(	x	"Invalid capture group name"
 
 (?<a\uD804 \uDC00>x)		)syntax-error(	x	"Invalid capture group name"
 "(?<a\uD800>x)"		)syntax-error(	x	"Invalid capture group name"
 (?<a\uD800>x)		)syntax-error(	x	"Invalid capture group name"
-(?<a\u{D800}>x)		)syntax-error(	x	"Invalid Unicode escape"
+(?<a\u{D800}>x)		)syntax-error(	x	"Invalid capture group name"
 "(?<a\uDC00>x)"		)syntax-error(	x	"Invalid capture group name"
 (?<a\uDC00>x)		)syntax-error(	x	"Invalid capture group name"
-(?<a\u{DC00}>x)		)syntax-error(	x	"Invalid Unicode escape"
+(?<a\u{DC00}>x)		)syntax-error(	x	"Invalid capture group name"
 
 "(?<\\uD800\uDC00>x)"		)syntax-error(	x	"Invalid capture group name"
 "(?<\uD800\\uDC00>x)"		)syntax-error(	x	"Invalid capture group name"
-"(?<\\u{D800}\uDC00>x)"		)syntax-error(	x	"Invalid Unicode escape"
+"(?<\\u{D800}\uDC00>x)"		)syntax-error(	x	"Invalid capture group name"
 "(?<\uD800\\u{DC00}>x)"		)syntax-error(	x	"Invalid capture group name"
-"(?<\\u{D800}\\uDC00>x)"		)syntax-error(	x	"Invalid Unicode escape"
+"(?<\\u{D800}\\uDC00>x)"		)syntax-error(	x	"Invalid capture group name"
 "(?<\\uD800\\u{DC00}>x)"		)syntax-error(	x	"Invalid capture group name"
 
 # Numbered capturing groups 
@@ -2145,8 +2145,8 @@ c(?=(ab))	u	c(?=(ab))	cab	[{"captures":["c","ab"],"index":0}]
 ((a+)?(b+)?(c))*		((a+)?(b+)?(c))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0},{"captures":["",null,null,null,null],"index":9}]	!ignore-undefined-captures
 ((a+)?(b+)?(c))*	u	((a+)?(b+)?(c))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0},{"captures":["",null,null,null,null],"index":9}]	!ignore-undefined-captures
 
-^(\d{4})-(\d{2})-(\d{2})$		"^(\\d{4})-(\\d{2})-(\\d{2})$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0}]
-^(\d{4})-(\d{2})-(\d{2})$	u	"^(\\d{4})-(\\d{2})-(\\d{2})$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0}]
+^(\d{4})-(\d{2})-(\d{2})$		"^(\\d{4})-(\\d{2})-(\\d{2})\\z"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0}]
+^(\d{4})-(\d{2})-(\d{2})$	u	"^(\\d{4})-(\\d{2})-(\\d{2})\\z"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0}]
 
 (\w+)\s(\1)\W	i	"([\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+)[\\s   - \u2028\u2029  　﻿](\\1)[\x00-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-￿]"	He said that that was the the correct answer.	[{"captures":["that that ","that","that"],"index":8},{"captures":["the the ","the","the"],"index":22}]
 (\w+)\s(\1)\W	ui	"([\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+)[\\s   - \u2028\u2029  　﻿](\\1)(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[\x00-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-퟿-￿])"	He said that that was the the correct answer.	[{"captures":["that that ","that","that"],"index":8},{"captures":["the the ","the","the"],"index":22}]
@@ -2181,11 +2181,11 @@ c(?=(?<$ab>ab)(?<__utf8_246162>))	u	)inconvertible(	cab	[{"captures":["c","ab","
 (?<=(?<_1>[ab])+)c		(?<=((?<_1>[ab]))+)c	abc	[{"captures":["c","a"],"index":2,"groups":{"_1":"a"}}]
 (?<=(?<_1>[ab])+)c	u	"(?<=((?<_1>(?:[\\x61\\x62])))+)c"	abc	[{"captures":["c","a"],"index":2,"groups":{"_1":"a"}}]
 
-((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*		(((?<__utf8_F0938080>a+))?((?<__utf8_F0938081>b+))?((?<__utf8_F0938082>c)))*	aacbbbcac	"Invalid Unicode escape"	!ignore-undefined-captures
+((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*		(((?<__utf8_F0938080>a+))?((?<__utf8_F0938081>b+))?((?<__utf8_F0938082>c)))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0,"groups":{"𓀀":"a","𓀂":"c"}},{"captures":["",null,null,null,null],"index":9,"groups":{}}]	!ignore-undefined-captures
 ((?<\u{13000}>a+)?(?<\u{13001}>b+)?(?<\u{13002}>c))*	u	(((?<__utf8_F0938080>a+))?((?<__utf8_F0938081>b+))?((?<__utf8_F0938082>c)))*	aacbbbcac	[{"captures":["aacbbbcac","ac","a",null,"c"],"index":0,"groups":{"𓀀":"a","𓀂":"c"}},{"captures":["",null,null,null,null],"index":9,"groups":{}}]	!ignore-undefined-captures
 
-^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$		"^((?<Year>\\d{4}))-((?<Month>\\d{2}))-((?<Day>\\d{2}))$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
-^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$	u	"^((?<Year>\\d{4}))-((?<Month>\\d{2}))-((?<Day>\\d{2}))$"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
+^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$		"^((?<Year>\\d{4}))-((?<Month>\\d{2}))-((?<Day>\\d{2}))\\z"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
+^(?<Year>\d{4})-(?<Month>\d{2})-(?<Day>\d{2})$	u	"^((?<Year>\\d{4}))-((?<Month>\\d{2}))-((?<Day>\\d{2}))\\z"	2019-01-01	[{"captures":["2019-01-01","2019","01","01"],"index":0,"groups":{"Year":"2019","Month":"01","Day":"01"}}]
 
 (?<timestamp>\d+),(?<author>.+)		"((?<timestamp>\\d+)),((?<author>[^\n\r\u2028\u2029]+))"	1560979912,Caroline	[{"captures":["1560979912,Caroline","1560979912","Caroline"],"index":0,"groups":{"timestamp":"1560979912","author":"Caroline"}}]
 (?<timestamp>\d+),(?<author>.+)	u	"((?<timestamp>\\d+)),((?<author>(?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\n\r\u2028\u2029\ud800-\udfff])+))"	1560979912,Caroline	[{"captures":["1560979912,Caroline","1560979912","Caroline"],"index":0,"groups":{"timestamp":"1560979912","author":"Caroline"}}]
@@ -2238,10 +2238,10 @@ styles(?:\.[\da-f]+)?	u	"styles(?:\\.(?:[\\x30-\\x39\\x61-\\x66])+)?"	styles.caf
 styles(?:\.[\da-f]+)?		"styles(?:\\.[\\da-f]+)?"	styles.1234.min.css	[{"captures":["styles.1234"],"index":0}]
 styles(?:\.[\da-f]+)?	u	"styles(?:\\.(?:[\\x30-\\x39\\x61-\\x66])+)?"	styles.1234.min.css	[{"captures":["styles.1234"],"index":0}]
 
-\.(?:png|jpe?g|webp|avif|gif)$	i	"\\.(?:png|jpe?g|webp|avif|gif)$"	image.png	[{"captures":[".png"],"index":5}]
-\.(?:png|jpe?g|webp|avif|gif)$	ui	"\\.(?:png|jpe?g|webp|avif|gif)$"	image.png	[{"captures":[".png"],"index":5}]
-\.(?:png|jpe?g|webp|avif|gif)$	i	"\\.(?:png|jpe?g|webp|avif|gif)$"	image.pdf	[]
-\.(?:png|jpe?g|webp|avif|gif)$	ui	"\\.(?:png|jpe?g|webp|avif|gif)$"	image.pdf	[]
+\.(?:png|jpe?g|webp|avif|gif)$	i	"\\.(?:png|jpe?g|webp|avif|gif)\\z"	image.png	[{"captures":[".png"],"index":5}]
+\.(?:png|jpe?g|webp|avif|gif)$	ui	"\\.(?:png|jpe?g|webp|avif|gif)\\z"	image.png	[{"captures":[".png"],"index":5}]
+\.(?:png|jpe?g|webp|avif|gif)$	i	"\\.(?:png|jpe?g|webp|avif|gif)\\z"	image.pdf	[]
+\.(?:png|jpe?g|webp|avif|gif)$	ui	"\\.(?:png|jpe?g|webp|avif|gif)\\z"	image.pdf	[]
 
 (?:title|name)=(["'])(.*?)\1		"(?:title|name)=([\"'])([^\n\r\u2028\u2029]*?)\\1"	name="foo"	[{"captures":["name=\"foo\"","\"","foo"],"index":0}]
 (?:title|name)=(["'])(.*?)\1	u	"(?:title|name)=((?:[\\x22\\x27]))((?:[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|[^\n\r\u2028\u2029\ud800-\udfff])*?)\\1"	name="foo"	[{"captures":["name=\"foo\"","\"","foo"],"index":0}]
@@ -2516,40 +2516,40 @@ $*?x	u	)syntax-error(	xxyx	"Nothing to repeat"
 ${1,}?x		)syntax-error(	xxyx	"Nothing to repeat"
 ${1,}?x	u	)syntax-error(	xxyx	"Nothing to repeat"
 
-^(a|b|c)*$		^(a|b|c)*$	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
-^(a|b|c)*$	u	^(a|b|c)*$	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
-^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
-^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
+^(a|b|c)*$		"^(a|b|c)*\\z"	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
+^(a|b|c)*$	u	"^(a|b|c)*\\z"	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
+^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
+^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabbbcc"	[{"captures":["aabbbcc","c"],"index":0}]
 
-^(a|b|c)*$		^(a|b|c)*$	"aabb\rbcc"	[]
-^(a|b|c)*$	u	^(a|b|c)*$	"aabb\rbcc"	[]
-^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\rbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
-^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\rbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$		"^(a|b|c)*\\z"	"aabb\rbcc"	[]
+^(a|b|c)*$	u	"^(a|b|c)*\\z"	"aabb\rbcc"	[]
+^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\rbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\rbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
 
-^(a|b|c)*$		^(a|b|c)*$	"aabb\nbcc"	[]
-^(a|b|c)*$	u	^(a|b|c)*$	"aabb\nbcc"	[]
-^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\nbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
-^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\nbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$		"^(a|b|c)*\\z"	"aabb\nbcc"	[]
+^(a|b|c)*$	u	"^(a|b|c)*\\z"	"aabb\nbcc"	[]
+^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\nbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\nbcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
 
-^(a|b|c)*$		^(a|b|c)*$	"aabb\u2028bcc"	[]
-^(a|b|c)*$	u	^(a|b|c)*$	"aabb\u2028bcc"	[]
-^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2028bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
-^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2028bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$		"^(a|b|c)*\\z"	"aabb\u2028bcc"	[]
+^(a|b|c)*$	u	"^(a|b|c)*\\z"	"aabb\u2028bcc"	[]
+^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2028bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2028bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
 
-^(a|b|c)*$		^(a|b|c)*$	"aabb\u2029bcc"	[]
-^(a|b|c)*$	u	^(a|b|c)*$	"aabb\u2029bcc"	[]
-^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
-^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$		"^(a|b|c)*\\z"	"aabb\u2029bcc"	[]
+^(a|b|c)*$	u	"^(a|b|c)*\\z"	"aabb\u2029bcc"	[]
+^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
+^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["bcc","c"],"index":5}]
 
-^(a|b|c)*$		^(a|b|c)*$	"aabb\u202abcc"	[]
-^(a|b|c)*$	u	^(a|b|c)*$	"aabb\u202abcc"	[]
-^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u202abcc"	[]
-^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u202abcc"	[]
+^(a|b|c)*$		"^(a|b|c)*\\z"	"aabb\u202abcc"	[]
+^(a|b|c)*$	u	"^(a|b|c)*\\z"	"aabb\u202abcc"	[]
+^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u202abcc"	[]
+^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u202abcc"	[]
 
-^(a|b|c)*$		^(a|b|c)*$	"aabb\u2028\u2029bcc"	[]
-^(a|b|c)*$	u	^(a|b|c)*$	"aabb\u2028\u2029bcc"	[]
-^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6}]
-^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6}]
+^(a|b|c)*$		"^(a|b|c)*\\z"	"aabb\u2028\u2029bcc"	[]
+^(a|b|c)*$	u	"^(a|b|c)*\\z"	"aabb\u2028\u2029bcc"	[]
+^(a|b|c)*$	m	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6}]
+^(a|b|c)*$	um	"(?<=[\n\r\u2028\u2029]|^)(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6}]
 
 ^(a|b|c)*		^(a|b|c)*	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0}]
 ^(a|b|c)*	u	^(a|b|c)*	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0}]
@@ -2561,15 +2561,30 @@ ${1,}?x	u	)syntax-error(	xxyx	"Nothing to repeat"
 (a|b|c)*^	m	"(a|b|c)*(?<=[\n\r\u2028\u2029]|^)"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":0},{"captures":["",null],"index":5},{"captures":["",null],"index":6}]
 (a|b|c)*^	um	"(a|b|c)*(?<=[\n\r\u2028\u2029]|^)"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":0},{"captures":["",null],"index":5},{"captures":["",null],"index":6}]
 
-(a|b|c)*$		(a|b|c)*$	"aabb\u2028\u2029bcc"	[{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
-(a|b|c)*$	u	(a|b|c)*$	"aabb\u2028\u2029bcc"	[{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
-(a|b|c)*$	m	"(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
-(a|b|c)*$	um	"(a|b|c)*(?=[\n\r\u2028\u2029]|$)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
+(a|b|c)*$		"(a|b|c)*\\z"	"aabb\u2028\u2029bcc"	[{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
+(a|b|c)*$	u	"(a|b|c)*\\z"	"aabb\u2028\u2029bcc"	[{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
+(a|b|c)*$	m	"(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
+(a|b|c)*$	um	"(a|b|c)*(?=[\n\r\u2028\u2029]|\\z)"	"aabb\u2028\u2029bcc"	[{"captures":["aabb","b"],"index":0},{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["bcc","c"],"index":6},{"captures":["",null],"index":9}]
 
-$(a|b|c)*		$(a|b|c)*	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":9}]
-$(a|b|c)*	u	$(a|b|c)*	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":9}]
-$(a|b|c)*	m	"(?=[\n\r\u2028\u2029]|$)(a|b|c)*"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["",null],"index":9}]
-$(a|b|c)*	um	"(?=[\n\r\u2028\u2029]|$)(a|b|c)*"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["",null],"index":9}]
+$(a|b|c)*		"\\z(a|b|c)*"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":9}]
+$(a|b|c)*	u	"\\z(a|b|c)*"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":9}]
+$(a|b|c)*	m	"(?=[\n\r\u2028\u2029]|\\z)(a|b|c)*"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["",null],"index":9}]
+$(a|b|c)*	um	"(?=[\n\r\u2028\u2029]|\\z)(a|b|c)*"	"aabb\u2028\u2029bcc"	[{"captures":["",null],"index":4},{"captures":["",null],"index":5},{"captures":["",null],"index":9}]
+
+^a\nb\nc$		"^a\\nb\\nc\\z"	"a\nb\nc"	[{"captures":["a\nb\nc"],"index":0}]
+^a\nb\nc$	u	"^a\\nb\\nc\\z"	"a\nb\nc"	[{"captures":["a\nb\nc"],"index":0}]
+^a\nb\nc$	m	"(?<=[\n\r\u2028\u2029]|^)a\\nb\\nc(?=[\n\r\u2028\u2029]|\\z)"	"a\nb\nc"	[{"captures":["a\nb\nc"],"index":0}]
+^a\nb\nc$	mu	"(?<=[\n\r\u2028\u2029]|^)a\\nb\\nc(?=[\n\r\u2028\u2029]|\\z)"	"a\nb\nc"	[{"captures":["a\nb\nc"],"index":0}]
+
+^a\nb\nc$		"^a\\nb\\nc\\z"	"\na\nb\nc\n"	[]
+^a\nb\nc$	u	"^a\\nb\\nc\\z"	"\na\nb\nc\n"	[]
+^a\nb\nc$	m	"(?<=[\n\r\u2028\u2029]|^)a\\nb\\nc(?=[\n\r\u2028\u2029]|\\z)"	"\na\nb\nc\n"	[{"captures":["a\nb\nc"],"index":1}]
+^a\nb\nc$	mu	"(?<=[\n\r\u2028\u2029]|^)a\\nb\\nc(?=[\n\r\u2028\u2029]|\\z)"	"\na\nb\nc\n"	[{"captures":["a\nb\nc"],"index":1}]
+
+^a\nb\nc$		"^a\\nb\\nc\\z"	"a\nb\nc\n"	[]
+^a\nb\nc$	u	"^a\\nb\\nc\\z"	"a\nb\nc\n"	[]
+^a\nb\nc$	m	"(?<=[\n\r\u2028\u2029]|^)a\\nb\\nc(?=[\n\r\u2028\u2029]|\\z)"	"a\nb\nc\n"	[{"captures":["a\nb\nc"],"index":0}]
+^a\nb\nc$	mu	"(?<=[\n\r\u2028\u2029]|^)a\\nb\\nc(?=[\n\r\u2028\u2029]|\\z)"	"a\nb\nc\n"	[{"captures":["a\nb\nc"],"index":0}]
 
 (?<=^[^a-c]{3})def		(?<=^[^a-c]{3})def	"abcdef"	[]
 
@@ -2577,14 +2592,14 @@ $(a|b|c)*	um	"(?=[\n\r\u2028\u2029]|$)(a|b|c)*"	"aabb\u2028\u2029bcc"	[{"capture
 (?<=^[a-c]{3})def		(?<=^[a-c]{3})def	"abcdef"	[{"captures":["def"],"index":3}]
 (?<=^[a-c]{3})def	m	"(?<=(?<=[\n\r\u2028\u2029]|^)[a-c]{3})def"	"xyz\nabcdef"	[{"captures":["def"],"index":7}]
 (?<=^)\w+	m	"(?<=(?<=[\n\r\u2028\u2029]|^))[\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+"	"ab\ncd\nefg"	[{"captures":["ab"],"index":0},{"captures":["cd"],"index":3},{"captures":["efg"],"index":6}]
-\w+(?<=$)	m	"[\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+(?<=(?=[\n\r\u2028\u2029]|$))"	"ab\ncd\nefg"	[{"captures":["ab"],"index":0},{"captures":["cd"],"index":3},{"captures":["efg"],"index":6}]
-(?<=^)\w+(?<=$)	m	"(?<=(?<=[\n\r\u2028\u2029]|^))[\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+(?<=(?=[\n\r\u2028\u2029]|$))"	"ab\ncd\nefg"	[{"captures":["ab"],"index":0},{"captures":["cd"],"index":3},{"captures":["efg"],"index":6}]
+\w+(?<=$)	m	"[\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+(?<=(?=[\n\r\u2028\u2029]|\\z))"	"ab\ncd\nefg"	[{"captures":["ab"],"index":0},{"captures":["cd"],"index":3},{"captures":["efg"],"index":6}]
+(?<=^)\w+(?<=$)	m	"(?<=(?<=[\n\r\u2028\u2029]|^))[\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+(?<=(?=[\n\r\u2028\u2029]|\\z))"	"ab\ncd\nefg"	[{"captures":["ab"],"index":0},{"captures":["cd"],"index":3},{"captures":["efg"],"index":6}]
 
-^foo(?<=^fo+)$		^foo(?<=^fo+)$	"foo"	[{"captures":["foo"],"index":0}]
+^foo(?<=^fo+)$		"^foo(?<=^fo+)\\z"	"foo"	[{"captures":["foo"],"index":0}]
 ^foooo(?<=^fo*)		^foooo(?<=^fo*)	"foooo"	[{"captures":["foooo"],"index":0}]
-^(f)oo(?<=^\1o+)$		"^(f)oo(?<=^\\1o+)$"	"foo"	[{"captures":["foo","f"],"index":0}]
-^(f)oo(?<=^\1o+)$	i	"^(f)oo(?<=^\\1o+)$"	"foo"	[{"captures":["foo","f"],"index":0}]
-^(f)oo(?<=^\1o+).$	i	"^(f)oo(?<=^\\1o+)[^\n\r\u2028\u2029]$"	"foo\u1234"	[{"captures":["fooሴ","f"],"index":0}]
+^(f)oo(?<=^\1o+)$		"^(f)oo(?<=^\\1o+)\\z"	"foo"	[{"captures":["foo","f"],"index":0}]
+^(f)oo(?<=^\1o+)$	i	"^(f)oo(?<=^\\1o+)\\z"	"foo"	[{"captures":["foo","f"],"index":0}]
+^(f)oo(?<=^\1o+).$	i	"^(f)oo(?<=^\\1o+)[^\n\r\u2028\u2029]\\z"	"foo\u1234"	[{"captures":["fooሴ","f"],"index":0}]
 (?<=^\w+)def		"(?<=^[\\d\\x41-\\x5A\\x5F\\x61-\\x7A]+)def"	"abcdefdef"	[{"captures":["def"],"index":3},{"captures":["def"],"index":6}]
 
 # Word boundary assertions
@@ -2684,8 +2699,8 @@ c\b	u	"c\\b"	abc	[{"captures":["c"],"index":2}]
 
 # Lookbehind assertions
 
-(?<=([ab]+)([bc]+))$		(?<=([ab]+)([bc]+))$	abc	[{"captures":["","a","bc"],"index":3}]
-(?<=([ab]+)([bc]+))$	u	"(?<=((?:[\\x61\\x62])+)((?:[\\x62\\x63])+))$"	abc	[{"captures":["","a","bc"],"index":3}]
+(?<=([ab]+)([bc]+))$		"(?<=([ab]+)([bc]+))\\z"	abc	[{"captures":["","a","bc"],"index":3}]
+(?<=([ab]+)([bc]+))$	u	"(?<=((?:[\\x61\\x62])+)((?:[\\x62\\x63])+))\\z"	abc	[{"captures":["","a","bc"],"index":3}]
 
 (?<=\$)\d+(?:\.\d*)?		"(?<=\\$)\\d+(?:\\.\\d*)?"	$10.53	[{"captures":["10.53"],"index":1}]
 (?<=\$)\d+(?:\.\d*)?	u	"(?<=\\$)\\d+(?:\\.\\d*)?"	$10.53	[{"captures":["10.53"],"index":1}]
@@ -2719,7 +2734,7 @@ c\b	u	"c\\b"	abc	[{"captures":["c"],"index":2}]
 ^[\\d--\\d]+$		)syntax-error(	012abc	"Range out of order in character class"
 ^[\\d--\\d]+$	u	)syntax-error(	012abc	"Range out of order in character class"
 
-^[\d--\d]+$		"^[\\d\\x2D\\x2D\\d]+$"	012abc	[]
+^[\d--\d]+$		"^[\\d\\x2D\\x2D\\d]+\\z"	012abc	[]
 ^[\d--\d]+$	u	)syntax-error(	012abc	"Invalid character class"
 
 # https://github.com/sebastienros/esprima-dotnet/issues/371
