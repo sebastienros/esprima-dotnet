@@ -16,7 +16,7 @@
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="Spectre.Console" Version="0.48.0" />
     <PackageVersion Include="System.Memory" Version="4.5.5" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.0" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.6" />
     <PackageVersion Include="Test262Harness" Version="0.0.23" />
     <PackageVersion Include="UnicodeInformation" Version="2.7.1" />
     <PackageVersion Include="Verify.SourceGenerators" Version="2.2.0" />
