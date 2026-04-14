@@ -334,26 +334,29 @@ partial class Scanner
 
                     // CharacterClassEscape
                     case 'd' or 'D' or 's' or 'S' or 'w' or 'W':
-                        // RegexOptions.ECMAScript incorrectly interprets \s as [\f\n\r\t\v\u0020]. This doesn't align with the JS specification,
-                        // which defines \s as [\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]. We need to adjust both \s and \S.
+                        // RegexOptions.ECMAScript incorrectly interprets
+                        // - \s as [\f\n\r\t\v\u0020], which doesn't include further whitespace characters.
+                        // - \w as [0-9a-zA-Z_\u0130], which additonally includes U+0130.
+                        // This doesn't align with the JS specification, so we need to adjust \s, \S and \w, \w.
 
-                        const string InvertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uFEFE\uFF00-\uFFFF";
+                        const string invertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uFEFE\uFF00-\uFFFF";
+                        const string invertedWordCharPattern = "\0-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-\uFFFF";
 
                         if (!context.WithinSet)
                         {
                             if (sb is not null)
                             {
-                                if (ch == 's')
+                                if (ch is 'd' or 'D')
                                 {
-                                    sb.Append('[').Append('\\').Append(ch).Append(AdditionalWhiteSpacePattern).Append(']');
-                                }
-                                else if (ch == 'S')
-                                {
-                                    sb.Append('[').Append(InvertedWhiteSpacePattern).Append(']');
+                                    sb.Append(pattern, startIndex, 2);
                                 }
                                 else
                                 {
-                                    sb.Append(pattern, startIndex, 2);
+                                    sb.Append('[')
+                                        .Append(ch >= 'a'
+                                            ? (ch == 's' ? WhiteSpacePattern : WordCharPattern)
+                                            : (ch == 'S' ? invertedWhiteSpacePattern : invertedWordCharPattern))
+                                        .Append(']');
                                 }
                             }
 
@@ -370,17 +373,15 @@ partial class Scanner
                                     AppendCharSafe(sb, '-');
                                 }
 
-                                if (ch == 's')
+                                if (ch is 'd' or 'D')
                                 {
-                                    sb.Append('\\').Append(ch).Append(AdditionalWhiteSpacePattern);
-                                }
-                                else if (ch == 'S')
-                                {
-                                    sb.Append(InvertedWhiteSpacePattern);
+                                    sb.Append(pattern, startIndex, 2);
                                 }
                                 else
                                 {
-                                    sb.Append(pattern, startIndex, 2);
+                                    sb.Append(ch >= 'a'
+                                        ? (ch == 's' ? WhiteSpacePattern : WordCharPattern)
+                                        : (ch == 'S' ? invertedWhiteSpacePattern : invertedWordCharPattern));
                                 }
                             }
 

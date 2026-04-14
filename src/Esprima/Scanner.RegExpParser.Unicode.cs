@@ -833,28 +833,30 @@ partial class Scanner
                     case 'd' or 'D' or 's' or 'S' or 'w' or 'W':
                         if (!context.WithinSet)
                         {
-                            // RegexOptions.ECMAScript incorrectly interprets \s as [\f\n\r\t\v\u0020]. This doesn't align with the JS specification,
-                            // which defines \s as [\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]. We need to adjust both \s and \S.
-                            // \D and \W also have to be adjusted outside character sets.
+                            // RegexOptions.ECMAScript incorrectly interprets
+                            // - \s as [\f\n\r\t\v\u0020], which doesn't include further whitespace characters.
+                            // - \w as [0-9a-zA-Z_\u0130], which additonally includes U+0130.
+                            // This doesn't align with the JS specification, so we need to adjust \s, \S and \w, \w.
+                            // \D also has to be adjusted outside character sets.
 
                             if (sb is not null)
                             {
-                                if (ch is 'D' or 'S' or 'W')
+                                if (ch >= 'a')
                                 {
-                                    const string InvertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uD7FF\uE000-\uFEFE\uFF00-\uFFFF";
-                                    const string InvertedDigitPattern = "\0-\\x2F\\x3A-\uD7FF\uE000-\uFFFF";
-                                    const string InvertedWordCharPattern = "\0-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-\uD7FF\uE000-\uFFFF";
-
-                                    sb.Append("(?:").Append(MatchSurrogatePairRegex)
-                                        .Append('|').Append(MatchLoneSurrogateRegex)
-                                        .Append('|').Append('[').Append(ch switch { 'D' => InvertedDigitPattern, 'S' => InvertedWhiteSpacePattern, _ => InvertedWordCharPattern }).Append(']')
-                                        .Append(')');
+                                    _ = ch == 'd'
+                                        ? sb.Append(pattern, startIndex, 2)
+                                        : sb.Append('[').Append(ch == 's' ? WhiteSpacePattern : WordCharPattern).Append(']');
                                 }
                                 else
                                 {
-                                    _ = ch == 's'
-                                        ? sb.Append('[').Append('\\').Append(ch).Append(AdditionalWhiteSpacePattern).Append(']')
-                                        : sb.Append(pattern, startIndex, 2);
+                                    const string invertedWhiteSpacePattern = "\0-\u0008\u000E-\u001F\\x21-\u009F\u00A1-\u167F\u1681-\u1FFF\u200B-\u2027\u202A-\u202E\u2030-\u205E\u2060-\u2FFF\u3001-\uD7FF\uE000-\uFEFE\uFF00-\uFFFF";
+                                    const string invertedDigitPattern = "\0-\\x2F\\x3A-\uD7FF\uE000-\uFFFF";
+                                    const string invertedWordCharPattern = "\0-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x60\\x7B-\uD7FF\uE000-\uFFFF";
+
+                                    sb.Append("(?:").Append(MatchSurrogatePairRegex)
+                                        .Append('|').Append(MatchLoneSurrogateRegex)
+                                        .Append('|').Append('[').Append(ch switch { 'D' => invertedDigitPattern, 'S' => invertedWhiteSpacePattern, _ => invertedWordCharPattern }).Append(']')
+                                        .Append(')');
                                 }
                             }
 

@@ -35,7 +35,9 @@ partial class Scanner
 
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Character_classes#types
         // https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-classes-in-regular-expressions#whitespace-character-s
-        private const string AdditionalWhiteSpacePattern = "\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
+        private const string WhiteSpacePattern = "\\s\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
+        // https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-classes-in-regular-expressions#word-character-w
+        private const string WordCharPattern = "\\d\\x41-\\x5A\\x5F\\x61-\\x7A";
 
         private const int SetRangeNotStarted = int.MaxValue;
         private const int SetRangeStartedWithCharClass = int.MaxValue - 1;
