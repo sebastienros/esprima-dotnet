@@ -824,7 +824,7 @@ partial class Scanner
                         }
                         else
                         {
-                            // \k escape sequence within character sets is not allowed.
+                            // \k escape sequences within character sets are not allowed.
                             parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidEscape);
                         }
                         break;

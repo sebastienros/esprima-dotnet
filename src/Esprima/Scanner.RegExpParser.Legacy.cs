@@ -242,7 +242,7 @@ partial class Scanner
                         }
                         else
                         {
-                            // Unterminated/invalid cases like \c is interpreted as \\c even in character sets:
+                            // Unterminated/invalid cases like \c are interpreted as \\c even in character sets:
                             // /[\c]/ is equivalent to @"[\\c]" (not a typo, this does match both '\' and 'c')
                             sb?.Append('\\');
                             ProcessSetChar(ref context, '\\', context.AppendChar, ref parser, startIndex);
@@ -310,7 +310,10 @@ partial class Scanner
                             // \k escapes are ignored - but not by the .NET regex engine,
                             // so they need to be rewritten (e.g. /\k<a>/ --> @"k<a>", /[\k<a>]/ --> @"[k<a>]").
                             sb?.Append(ch);
-                            context.FollowingQuantifierError = null;
+                            if (!context.WithinSet)
+                            {
+                                context.FollowingQuantifierError = null;
+                            }
                             break;
                         }
 
@@ -326,7 +329,7 @@ partial class Scanner
                         }
                         else
                         {
-                            // \k escape sequence within character sets is not allowed
+                            // \k escape sequences within character sets are not allowed
                             // (except when there are no named capturing groups; see above).
                             parser.ReportSyntaxError(startIndex, Messages.RegExpInvalidEscape);
                         }
