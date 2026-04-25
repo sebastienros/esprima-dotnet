@@ -2569,6 +2569,21 @@ $(a|b|c)*	u	"aabb\u2028\u2029bcc"
 $(a|b|c)*	m	"aabb\u2028\u2029bcc"
 $(a|b|c)*	um	"aabb\u2028\u2029bcc"
 
+^a\nb\nc$		"a\nb\nc"
+^a\nb\nc$	u	"a\nb\nc"
+^a\nb\nc$	m	"a\nb\nc"
+^a\nb\nc$	mu	"a\nb\nc"
+
+^a\nb\nc$		"\na\nb\nc\n"
+^a\nb\nc$	u	"\na\nb\nc\n"
+^a\nb\nc$	m	"\na\nb\nc\n"
+^a\nb\nc$	mu	"\na\nb\nc\n"
+
+^a\nb\nc$		"a\nb\nc\n"
+^a\nb\nc$	u	"a\nb\nc\n"
+^a\nb\nc$	m	"a\nb\nc\n"
+^a\nb\nc$	mu	"a\nb\nc\n"
+
 (?<=^[^a-c]{3})def		"abcdef"
 
 (?<=^abc)def		"abcdef"

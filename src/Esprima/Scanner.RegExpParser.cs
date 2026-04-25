@@ -35,7 +35,9 @@ partial class Scanner
 
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Character_classes#types
         // https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-classes-in-regular-expressions#whitespace-character-s
-        private const string AdditionalWhiteSpacePattern = "\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
+        private const string WhiteSpacePattern = "\\s\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
+        // https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-classes-in-regular-expressions#word-character-w
+        private const string WordCharPattern = "\\d\\x41-\\x5A\\x5F\\x61-\\x7A";
 
         private const int SetRangeNotStarted = int.MaxValue;
         private const int SetRangeStartedWithCharClass = int.MaxValue - 1;
@@ -237,6 +239,11 @@ partial class Scanner
 
                 if (ch == '\\')
                 {
+                    if (i + 1 >= _pattern.Length)
+                    {
+                        ReportSyntaxError(i, Messages.RegExpEscapeAtEndOfPattern);
+                    }
+
                     // Skip escape
 
                     i++;
@@ -575,9 +582,11 @@ partial class Scanner
                     case '$' when !context.WithinSet:
                         if (sb is not null)
                         {
+                            // NOTE: The semantics of $ is slightly different in .NET: it requires the match to occur at the end of the string
+                            // or before \n at the end of the input string. We need to use \z to match the JS behavior.
                             _ = (_flags & RegExpFlags.Multiline) != 0
-                                ? sb.Append("(?=").Append(MatchNewLineRegex).Append('|').Append(ch).Append(')')
-                                : sb.Append(ch);
+                                ? sb.Append("(?=").Append(MatchNewLineRegex).Append('|').Append(@"\z").Append(')')
+                                : sb.Append(@"\z");
                         }
 
                         context.FollowingQuantifierError = Messages.RegExpNothingToRepeat;
