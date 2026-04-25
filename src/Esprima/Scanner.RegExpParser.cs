@@ -239,6 +239,11 @@ partial class Scanner
 
                 if (ch == '\\')
                 {
+                    if (i + 1 >= _pattern.Length)
+                    {
+                        ReportSyntaxError(i, Messages.RegExpEscapeAtEndOfPattern);
+                    }
+
                     // Skip escape
 
                     i++;
@@ -636,11 +641,7 @@ partial class Scanner
                         break;
 
                     case '\\':
-                        if (i + 1 >= _pattern.Length)
-                        {
-                            ReportSyntaxError(i, Messages.RegExpEscapeAtEndOfPattern);
-                        }
-
+                        Debug.Assert(i + 1 < _pattern.Length, "Unexpected end of escape sequence in regular expression.");
                         if (!mode.AdjustEscapeSequence(ref context, ref this, out conversionError))
                         {
                             return null;
