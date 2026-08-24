@@ -1,6 +1,6 @@
 | :mega: Important notices |
 |--------------|
-|If you are upgrading from an older version, please note that version 3 ships with numerous breaking changes to the public API because virtually all areas of the library have been revised.<br />Documentation of the previous major version is available [here](https://github.com/sebastienros/esprima-dotnet/tree/v2.1.3). |
+|This project has been archived. If you need a fully managed .NET ECMAScript parser please use [Acornima](https://github.com/adams85/acornima). |
 
 [![Build](https://github.com/sebastienros/esprima-dotnet/actions/workflows/build.yml/badge.svg)](https://github.com/sebastienros/esprima-dotnet/actions/workflows/build.yml)
 [![NuGet](https://img.shields.io/nuget/v/esprima.svg)](https://www.nuget.org/packages/esprima)
